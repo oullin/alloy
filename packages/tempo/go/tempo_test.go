@@ -391,6 +391,18 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if got := base.Format("dddd, MMMM Do YYYY"); got != "Wednesday, May 15th 2024" {
 		t.Fatalf("Format() = %q, want long date output", got)
 	}
+	if got := base.MonthName(); got != "May" {
+		t.Fatalf("MonthName() = %q, want May", got)
+	}
+	if got := base.ShortMonthName(); got != "May" {
+		t.Fatalf("ShortMonthName() = %q, want May", got)
+	}
+	if got := base.DayName(); got != "Wednesday" {
+		t.Fatalf("DayName() = %q, want Wednesday", got)
+	}
+	if got := base.ShortDayName(); got != "Wed" {
+		t.Fatalf("ShortDayName() = %q, want Wed", got)
+	}
 }
 
 func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {

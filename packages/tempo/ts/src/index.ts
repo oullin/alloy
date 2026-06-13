@@ -1282,6 +1282,22 @@ export class TempoImmutable {
     return timeZoneName(this.value, this.zone, style, locale);
   }
 
+  monthName(locale = "en-US"): string {
+    return monthNames(locale, "long")[this.month - 1] ?? "";
+  }
+
+  shortMonthName(locale = "en-US"): string {
+    return monthNames(locale, "short")[this.month - 1] ?? "";
+  }
+
+  dayName(locale = "en-US"): string {
+    return weekdayNames(locale, "long")[this.dayOfWeek] ?? "";
+  }
+
+  shortDayName(locale = "en-US"): string {
+    return weekdayNames(locale, "short")[this.dayOfWeek] ?? "";
+  }
+
   isUtc(): boolean {
     return this.zone === defaultTimeZone && this.offsetMinutes === 0;
   }

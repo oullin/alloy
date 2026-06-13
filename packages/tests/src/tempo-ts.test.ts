@@ -236,6 +236,10 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.format("dddd, MMMM Do YYYY", { locale: "en-US" })).toBe(
       "Wednesday, May 15th 2024",
     );
+    expect(base.monthName()).toBe("May");
+    expect(base.shortMonthName()).toBe("May");
+    expect(base.dayName()).toBe("Wednesday");
+    expect(base.shortDayName()).toBe("Wed");
   });
 
   it("iterates periods and computes intervals", () => {

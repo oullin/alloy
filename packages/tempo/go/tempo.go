@@ -126,6 +126,10 @@ var (
 	durationPattern = regexp.MustCompile(`^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$`)
 	localPattern    = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2})(?::?(\d{2}))?(?::?(\d{2})(?:\.(\d{1,9}))?)?)?$`)
 	zonePattern     = regexp.MustCompile(`(?:Z|[+-]\d{2}:?\d{2})$`)
+	monthNames      = [...]string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
+	shortMonthNames = [...]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+	dayNames        = [...]string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
+	shortDayNames   = [...]string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 )
 
 func WithTimezone(name string) Option {
@@ -770,6 +774,22 @@ func (tempo Tempo) OffsetString(separator string) string {
 func (tempo Tempo) ZoneName() string {
 	name, _ := tempo.local().Zone()
 	return name
+}
+
+func (tempo Tempo) MonthName() string {
+	return monthNames[tempo.Month()-1]
+}
+
+func (tempo Tempo) ShortMonthName() string {
+	return shortMonthNames[tempo.Month()-1]
+}
+
+func (tempo Tempo) DayName() string {
+	return dayNames[int(tempo.local().Weekday())]
+}
+
+func (tempo Tempo) ShortDayName() string {
+	return shortDayNames[int(tempo.local().Weekday())]
 }
 
 func (tempo Tempo) IsUTC() bool {
@@ -2097,6 +2117,22 @@ func (mutable *MutableTempo) OffsetString(separator string) string {
 
 func (mutable *MutableTempo) ZoneName() string {
 	return mutable.Tempo().ZoneName()
+}
+
+func (mutable *MutableTempo) MonthName() string {
+	return mutable.Tempo().MonthName()
+}
+
+func (mutable *MutableTempo) ShortMonthName() string {
+	return mutable.Tempo().ShortMonthName()
+}
+
+func (mutable *MutableTempo) DayName() string {
+	return mutable.Tempo().DayName()
+}
+
+func (mutable *MutableTempo) ShortDayName() string {
+	return mutable.Tempo().ShortDayName()
 }
 
 func (mutable *MutableTempo) IsUTC() bool {
