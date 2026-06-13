@@ -1,5 +1,6 @@
 import {
   Tempo,
+  TempoDuration,
   TempoFactory,
   TempoImmutable,
   TempoInterval,
@@ -269,5 +270,57 @@ describe("Tempo TypeScript behavior", () => {
     expect(may.lastOfMonth("friday").toDateString()).toBe("2024-05-31");
     expect(birthday.age("2024-06-14T23:59:59Z")).toBe(23);
     expect(birthday.age("2024-06-15T00:00:00Z")).toBe(24);
+  });
+
+  it("parses, normalizes, serializes, and applies durations", () => {
+    const parsed = TempoDuration.parse("P1Y2M3DT4H5M6.007S");
+    const normalized = TempoDuration.parse("P1Y14M8DT25H61M61.250S");
+
+    expect(parsed.toObject()).toMatchObject({
+      days: 3,
+      hours: 4,
+      milliseconds: 7,
+      minutes: 5,
+      months: 2,
+      seconds: 6,
+      years: 1,
+    });
+    expect(parsed.toISOString()).toBe("P1Y2M3DT4H5M6.007S");
+    expect(normalized.toObject()).toMatchObject({
+      days: 9,
+      hours: 2,
+      milliseconds: 250,
+      minutes: 2,
+      months: 2,
+      seconds: 1,
+      years: 2,
+    });
+    expect(normalized.toISOString()).toBe("P2Y2M9DT2H2M1.250S");
+    expect(TempoDuration.parse("PT0S").isZero()).toBe(true);
+    expect(TempoDuration.parse("P2W").normalized().toISOString()).toBe("P14D");
+
+    expect(
+      Tempo.parse("2024-01-31T00:00:00Z").addDuration("P1M").toDateString(),
+    ).toBe("2024-03-02");
+    expect(
+      Tempo.parse("2024-01-31T00:00:00Z")
+        .subDuration(new TempoDuration({ days: 2, hours: 3 }))
+        .toISOString(),
+    ).toBe("2024-01-28T21:00:00.000Z");
+
+    const interval = new TempoInterval(
+      "2024-01-01T00:00:00Z",
+      "2024-01-03T12:00:00Z",
+    );
+    expect(interval.toDuration().toISOString()).toBe("P2DT12H");
+
+    const period = new TempoPeriod("2024-01-01", "2024-01-05", {
+      step: "P2D",
+    });
+    expect(period.toArray().map((item) => item.toDateString())).toEqual([
+      "2024-01-01",
+      "2024-01-03",
+      "2024-01-05",
+    ]);
   });
 });
