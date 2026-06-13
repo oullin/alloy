@@ -1684,6 +1684,10 @@ func (tempo Tempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 
 	return math.Trunc(value)
 }
 
+func (tempo Tempo) DiffAsDuration(other Tempo, options ...DiffOptions) Duration {
+	return Duration{Milliseconds: tempo.DiffInMilliseconds(other, options...)}.Normalize()
+}
+
 func (tempo Tempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Millisecond, options...))
 }
@@ -2774,6 +2778,10 @@ func (mutable *MutableTempo) IsEndOfYear() bool {
 
 func (mutable *MutableTempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
 	return mutable.Tempo().Diff(other, unit, options...)
+}
+
+func (mutable *MutableTempo) DiffAsDuration(other Tempo, options ...DiffOptions) Duration {
+	return mutable.Tempo().DiffAsDuration(other, options...)
 }
 
 func (mutable *MutableTempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {

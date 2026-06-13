@@ -2218,6 +2218,12 @@ export class TempoImmutable {
     return options?.float ? signed : Math.trunc(signed);
   }
 
+  diffAsDuration(other: TempoInput, options?: DiffOptions): TempoDuration {
+    return new TempoDuration({
+      milliseconds: this.diffInMilliseconds(other, options),
+    }).normalized();
+  }
+
   diffInMilliseconds(other: TempoInput, options?: DiffOptions): number {
     return this.diff(other, "millisecond", options);
   }

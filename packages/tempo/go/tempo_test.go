@@ -429,6 +429,12 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if got := base.DiffInMinutes(earlier); got != 1594 {
 		t.Fatalf("DiffInMinutes() = %d, want 1594", got)
 	}
+	if got := base.DiffAsDuration(earlier).ISOString(); got != "P1DT2H34M45.600S" {
+		t.Fatalf("DiffAsDuration().ISOString() = %q, want duration diff", got)
+	}
+	if got := base.DiffAsDuration(earlier, DiffOptions{Absolute: true}).ISOString(); got != "P1DT2H34M45.600S" {
+		t.Fatalf("DiffAsDuration(absolute).ISOString() = %q, want duration diff", got)
+	}
 	if got := base.Floor(Hour).ISOString(); got != "2024-05-15T10:00:00.000Z" {
 		t.Fatalf("Floor(Hour).ISOString() = %q, want hour floor", got)
 	}

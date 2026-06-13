@@ -273,6 +273,10 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.isBetween(earlier, "2024-05-16T00:00:00Z")).toBe(true);
     expect(base.diffInHours(earlier)).toBe(26);
     expect(base.diffInMinutes(earlier)).toBe(1594);
+    expect(base.diffAsDuration(earlier).toISOString()).toBe("P1DT2H34M45.600S");
+    expect(base.diffAsDuration(earlier, { absolute: true }).toISOString()).toBe(
+      "P1DT2H34M45.600S",
+    );
     expect(base.floor("hour").toISOString()).toBe("2024-05-15T10:00:00.000Z");
     expect(base.ceil("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
     expect(base.round("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
