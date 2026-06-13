@@ -1596,6 +1596,22 @@ func (tempo Tempo) Previous(weekday time.Weekday) Tempo {
 	return tempo.SubDays(delta)
 }
 
+func (tempo Tempo) NextOrSame(weekday time.Weekday) Tempo {
+	if tempo.local().Weekday() == weekday {
+		return tempo.Clone()
+	}
+
+	return tempo.Next(weekday)
+}
+
+func (tempo Tempo) PreviousOrSame(weekday time.Weekday) Tempo {
+	if tempo.local().Weekday() == weekday {
+		return tempo.Clone()
+	}
+
+	return tempo.Previous(weekday)
+}
+
 func (tempo Tempo) NextWeekday() Tempo {
 	next := tempo.AddDays(1)
 	for next.IsWeekend() {
@@ -2660,6 +2676,14 @@ func (mutable *MutableTempo) Next(weekday time.Weekday) *MutableTempo {
 
 func (mutable *MutableTempo) Previous(weekday time.Weekday) *MutableTempo {
 	return mutable.replace(mutable.Tempo().Previous(weekday))
+}
+
+func (mutable *MutableTempo) NextOrSame(weekday time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().NextOrSame(weekday))
+}
+
+func (mutable *MutableTempo) PreviousOrSame(weekday time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().PreviousOrSame(weekday))
 }
 
 func (mutable *MutableTempo) NextWeekday() *MutableTempo {

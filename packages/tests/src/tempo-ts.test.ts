@@ -465,6 +465,18 @@ describe("Tempo TypeScript behavior", () => {
     expect(monday.previous("friday").toDateTimeString()).toBe(
       "2023-12-29 12:30:00",
     );
+    expect(monday.nextOrSame("monday").toDateTimeString()).toBe(
+      "2024-01-01 12:30:00",
+    );
+    expect(monday.previousOrSame("monday").toDateTimeString()).toBe(
+      "2024-01-01 12:30:00",
+    );
+    expect(monday.nextOrSame("friday").toDateTimeString()).toBe(
+      "2024-01-05 12:30:00",
+    );
+    expect(monday.previousOrSame("friday").toDateTimeString()).toBe(
+      "2023-12-29 12:30:00",
+    );
     expect(friday.nextWeekday().toDateString()).toBe("2024-05-20");
     expect(monday.previousWeekday().toDateString()).toBe("2023-12-29");
   });

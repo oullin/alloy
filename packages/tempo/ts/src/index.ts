@@ -2122,6 +2122,18 @@ export class TempoImmutable {
     return this.subDays(delta);
   }
 
+  nextOrSame(weekday: WeekdayInput): this {
+    return this.dayOfWeek === resolveWeekday(weekday)
+      ? this.clone()
+      : this.next(weekday);
+  }
+
+  previousOrSame(weekday: WeekdayInput): this {
+    return this.dayOfWeek === resolveWeekday(weekday)
+      ? this.clone()
+      : this.previous(weekday);
+  }
+
   nextWeekday(): this {
     let next = this.addDays(1);
 

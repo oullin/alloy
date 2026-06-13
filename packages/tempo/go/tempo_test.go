@@ -862,6 +862,18 @@ func TestISOWeekMetadataWeekdayNavigationAndAge(t *testing.T) {
 	if got := monday.Previous(time.Friday).DateTimeString(); got != "2023-12-29 12:30:00" {
 		t.Fatalf("Previous(Friday).DateTimeString() = %q, want previous Friday", got)
 	}
+	if got := monday.NextOrSame(time.Monday).DateTimeString(); got != "2024-01-01 12:30:00" {
+		t.Fatalf("NextOrSame(Monday).DateTimeString() = %q, want same Monday", got)
+	}
+	if got := monday.PreviousOrSame(time.Monday).DateTimeString(); got != "2024-01-01 12:30:00" {
+		t.Fatalf("PreviousOrSame(Monday).DateTimeString() = %q, want same Monday", got)
+	}
+	if got := monday.NextOrSame(time.Friday).DateTimeString(); got != "2024-01-05 12:30:00" {
+		t.Fatalf("NextOrSame(Friday).DateTimeString() = %q, want next Friday", got)
+	}
+	if got := monday.PreviousOrSame(time.Friday).DateTimeString(); got != "2023-12-29 12:30:00" {
+		t.Fatalf("PreviousOrSame(Friday).DateTimeString() = %q, want previous Friday", got)
+	}
 	if got := friday.NextWeekday().DateString(); got != "2024-05-20" {
 		t.Fatalf("NextWeekday().DateString() = %q, want Monday", got)
 	}
