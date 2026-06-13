@@ -127,8 +127,18 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	if got := created.ISOString(); got != "2024-01-01T00:00:00.000Z" {
 		t.Fatalf("Factory.Create().ISOString() = %q, want scoped timezone instant", got)
 	}
+	fromObject, err := factory.FromObject(Components{Year: 2024, Month: 1, Day: 1, Hour: 9})
+	if err != nil {
+		t.Fatalf("factory from object: %v", err)
+	}
+	if got := fromObject.ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.FromObject().ISOString() = %q, want scoped timezone instant", got)
+	}
 	if got := factory.FromTimestamp(1704067200).DateTimeString(); got != "2024-01-01 09:00:00" {
 		t.Fatalf("Factory.FromTimestamp().DateTimeString() = %q, want scoped local time", got)
+	}
+	if got := factory.FromTimestampMs(1704067200000).DateTimeString(); got != "2024-01-01 09:00:00" {
+		t.Fatalf("Factory.FromTimestampMs().DateTimeString() = %q, want scoped local time", got)
 	}
 
 	frozen, err := NewFactoryWithTestNow(parsed)

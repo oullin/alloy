@@ -2779,8 +2779,18 @@ export class TempoFactory {
     return Tempo.create({ timeZone: this.zone, ...components });
   }
 
+  fromObject(components: TempoComponents): Tempo {
+    return this.create(components);
+  }
+
   fromTimestamp(timestamp: number, options?: TempoOptions): Tempo {
     return Tempo.fromTimestamp(timestamp, {
+      timeZone: options?.timeZone ?? this.zone,
+    });
+  }
+
+  fromTimestampMs(timestamp: number, options?: TempoOptions): Tempo {
+    return Tempo.fromTimestampMs(timestamp, {
       timeZone: options?.timeZone ?? this.zone,
     });
   }

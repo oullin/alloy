@@ -329,6 +329,10 @@ func (factory Factory) Create(components Components) (Tempo, error) {
 	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
 }
 
+func (factory Factory) FromObject(components Components) (Tempo, error) {
+	return factory.Create(components)
+}
+
 func (factory Factory) FromTimestamp(timestamp int64) Tempo {
 	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: factory.location}
 }

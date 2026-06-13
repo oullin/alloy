@@ -96,6 +96,12 @@ describe("Tempo TypeScript behavior", () => {
     ).toBe("2025-01-01T00:30:00.000Z");
     expect(tokyo.hasFormat("2025-01-01 09:30", "YYYY-MM-DD HH:mm")).toBe(true);
     expect(tokyo.hasFormat("2025/01/01", "YYYY-MM-DD")).toBe(false);
+    expect(
+      tokyo.fromObject({ day: 1, hour: 9, month: 1, year: 2025 }).toISOString(),
+    ).toBe("2025-01-01T00:00:00.000Z");
+    expect(tokyo.fromTimestampMs(1_735_689_600_000).toDateTimeString()).toBe(
+      "2025-01-01 09:00:00",
+    );
   });
 
   it("creates and renders timezone-aware local components", () => {
