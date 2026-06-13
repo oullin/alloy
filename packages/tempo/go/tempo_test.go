@@ -80,6 +80,54 @@ func TestDiffInDaysUsesUnixSeconds(t *testing.T) {
 	}
 }
 
+func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
+	factory, err := NewFactory(WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("new factory: %v", err)
+	}
+
+	parsed, err := factory.Parse("2024-01-01 09:00")
+	if err != nil {
+		t.Fatalf("factory parse: %v", err)
+	}
+	if got := parsed.ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.Parse().ISOString() = %q, want scoped timezone instant", got)
+	}
+
+	formatted, err := factory.FromFormat("2024-01-01 09:30", "YYYY-MM-DD HH:mm")
+	if err != nil {
+		t.Fatalf("factory from format: %v", err)
+	}
+	if got := formatted.ISOString(); got != "2024-01-01T00:30:00.000Z" {
+		t.Fatalf("Factory.FromFormat().ISOString() = %q, want scoped timezone instant", got)
+	}
+
+	created, err := factory.Create(Components{Year: 2024, Month: 1, Day: 1, Hour: 9})
+	if err != nil {
+		t.Fatalf("factory create: %v", err)
+	}
+	if got := created.ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.Create().ISOString() = %q, want scoped timezone instant", got)
+	}
+	if got := factory.FromTimestamp(1704067200).DateTimeString(); got != "2024-01-01 09:00:00" {
+		t.Fatalf("Factory.FromTimestamp().DateTimeString() = %q, want scoped local time", got)
+	}
+
+	frozen, err := NewFactoryWithTestNow(parsed)
+	if err != nil {
+		t.Fatalf("new frozen factory: %v", err)
+	}
+	if got := frozen.Now().ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.Now().ISOString() = %q, want frozen instant", got)
+	}
+	if got := frozen.ImmutableNow().ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.ImmutableNow().ISOString() = %q, want frozen instant", got)
+	}
+	if got := frozen.MutableNow().AddHours(1).ISOString(); got != "2024-01-01T01:00:00.000Z" {
+		t.Fatalf("Factory.MutableNow().AddHours().ISOString() = %q, want mutable frozen instant", got)
+	}
+}
+
 func TestISOStringFormatsUTC(t *testing.T) {
 	parsed, err := Parse("2024-01-01T01:00:00+01:00")
 	if err != nil {

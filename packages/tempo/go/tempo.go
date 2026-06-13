@@ -115,6 +115,11 @@ type Period struct {
 	IncludeEnd bool
 }
 
+type Factory struct {
+	now      *time.Time
+	location *time.Location
+}
+
 var (
 	defaultLocation = time.UTC
 	dateOnlyPattern = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})$`)
@@ -230,6 +235,86 @@ func FromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
 	}
 
 	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: cfg.location}, nil
+}
+
+func NewFactory(options ...Option) (Factory, error) {
+	cfg, err := applyOptions(options...)
+	if err != nil {
+		return Factory{}, err
+	}
+
+	return Factory{location: cfg.location}, nil
+}
+
+func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
+	cfg := config{location: input.location}
+	for _, option := range options {
+		if err := option(&cfg); err != nil {
+			return Factory{}, err
+		}
+	}
+
+	now := input.value
+	return Factory{now: &now, location: cfg.location}, nil
+}
+
+func (factory Factory) Now() Tempo {
+	if factory.now != nil {
+		return Tempo{value: factory.now.UTC(), location: factory.location}
+	}
+
+	return Tempo{value: time.Now().UTC(), location: factory.location}
+}
+
+func (factory Factory) ImmutableNow() Tempo {
+	return factory.Now()
+}
+
+func (factory Factory) MutableNow() *MutableTempo {
+	return NewMutable(factory.Now())
+}
+
+func (factory Factory) FromTime(value time.Time) Tempo {
+	return Tempo{value: value.UTC(), location: factory.location}
+}
+
+func (factory Factory) Parse(input string) (Tempo, error) {
+	parsed, err := parseInLocation(input, factory.location)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return Tempo{value: parsed.UTC(), location: factory.location}, nil
+}
+
+func (factory Factory) FromFormat(input string, pattern string) (Tempo, error) {
+	parsed, err := parseFromPattern(input, pattern, factory.location)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return Tempo{value: parsed.UTC(), location: factory.location}, nil
+}
+
+func (factory Factory) Create(components Components) (Tempo, error) {
+	location := factory.location
+	if components.Timezone != "" {
+		nextLocation, err := loadLocation(components.Timezone)
+		if err != nil {
+			return Tempo{}, err
+		}
+		location = nextLocation
+	}
+
+	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
+}
+
+func (factory Factory) FromTimestamp(timestamp int64) Tempo {
+	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: factory.location}
+}
+
+func (factory Factory) FromTimestampMs(timestamp int64) Tempo {
+	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: factory.location}
 }
 
 func ParseDuration(input string) (Duration, error) {
