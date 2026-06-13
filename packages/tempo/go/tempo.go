@@ -2816,6 +2816,45 @@ func (period Period) Contains(input Tempo) bool {
 	return afterStart && beforeEnd
 }
 
+func (period Period) Filter(predicate func(Tempo, int) bool) ([]Tempo, error) {
+	values, err := period.Values()
+	if err != nil {
+		return nil, err
+	}
+
+	filtered := make([]Tempo, 0, len(values))
+	for index, value := range values {
+		if predicate(value, index) {
+			filtered = append(filtered, value)
+		}
+	}
+
+	return filtered, nil
+}
+
+func (period Period) Map(mapper func(Tempo, int) Tempo) ([]Tempo, error) {
+	values, err := period.Values()
+	if err != nil {
+		return nil, err
+	}
+
+	mapped := make([]Tempo, 0, len(values))
+	for index, value := range values {
+		mapped = append(mapped, mapper(value, index))
+	}
+
+	return mapped, nil
+}
+
+func (period Period) Every(step Duration) Period {
+	period.Step = step
+	return period
+}
+
+func (period Period) ToDuration() Duration {
+	return period.Start.IntervalUntil(period.End).ToDuration()
+}
+
 func applyOptions(options ...Option) (config, error) {
 	cfg := config{location: defaultLocation}
 	for _, option := range options {

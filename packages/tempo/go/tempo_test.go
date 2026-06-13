@@ -483,6 +483,41 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 	if empty, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).IsEmpty(); err != nil || empty {
 		t.Fatalf("Period.IsEmpty() = %v, %v, want false, nil", empty, err)
 	}
+	filtered, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Filter(func(value Tempo, _ int) bool {
+		return value.Day() != 3
+	})
+	if err != nil {
+		t.Fatalf("Period.Filter(): %v", err)
+	}
+	filteredDates := make([]string, 0, len(filtered))
+	for _, item := range filtered {
+		filteredDates = append(filteredDates, item.DateString())
+	}
+	wantFilteredDates := []string{"2024-01-01", "2024-01-05"}
+	if strings.Join(filteredDates, ",") != strings.Join(wantFilteredDates, ",") {
+		t.Fatalf("Period.Filter() = %#v, want %#v", filteredDates, wantFilteredDates)
+	}
+	mapped, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Map(func(value Tempo, index int) Tempo {
+		return value.AddDays(index)
+	})
+	if err != nil {
+		t.Fatalf("Period.Map(): %v", err)
+	}
+	mappedDates := make([]string, 0, len(mapped))
+	for _, item := range mapped {
+		mappedDates = append(mappedDates, item.DateString())
+	}
+	wantMappedDates := []string{"2024-01-01", "2024-01-04", "2024-01-07"}
+	if strings.Join(mappedDates, ",") != strings.Join(wantMappedDates, ",") {
+		t.Fatalf("Period.Map() = %#v, want %#v", mappedDates, wantMappedDates)
+	}
+	everyCount, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Every(Duration{Days: 1}).Count()
+	if err != nil || everyCount != 5 {
+		t.Fatalf("Period.Every().Count() = %d, %v, want 5, nil", everyCount, err)
+	}
+	if got := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).ToDuration().ISOString(); got != "P4D" {
+		t.Fatalf("Period.ToDuration().ISOString() = %q, want P4D", got)
+	}
 
 	openPeriod := start.PeriodUntil(periodEnd, PeriodOptions{
 		Step:       Duration{Days: 2},

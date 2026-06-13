@@ -272,6 +272,18 @@ describe("Tempo TypeScript behavior", () => {
     expect(period.contains("2024-01-04")).toBe(true);
     expect(period.contains("2024-01-06")).toBe(false);
     expect(period.isEmpty()).toBe(false);
+    expect(
+      period
+        .filter((item) => item.day !== 3)
+        .map((item) => item.toDateString()),
+    ).toEqual(["2024-01-01", "2024-01-05"]);
+    expect(period.map((item, index) => `${index}:${item.day}`)).toEqual([
+      "0:1",
+      "1:3",
+      "2:5",
+    ]);
+    expect(period.every({ days: 1 }).count()).toBe(5);
+    expect(period.toDuration().toISOString()).toBe("P4D");
 
     const openPeriod = new TempoPeriod("2024-01-01", "2024-01-05", {
       includeEnd: false,

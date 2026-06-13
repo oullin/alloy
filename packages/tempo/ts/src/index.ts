@@ -2870,6 +2870,44 @@ export class TempoPeriod implements Iterable<Tempo> {
     return afterStart && beforeEnd;
   }
 
+  filter(predicate: (value: Tempo, index: number) => boolean): Tempo[] {
+    const values: Tempo[] = [];
+    let index = 0;
+
+    for (const value of this) {
+      if (predicate(value, index)) {
+        values.push(value);
+      }
+
+      index += 1;
+    }
+
+    return values;
+  }
+
+  map<T>(mapper: (value: Tempo, index: number) => T): T[] {
+    const values: T[] = [];
+    let index = 0;
+
+    for (const value of this) {
+      values.push(mapper(value, index));
+      index += 1;
+    }
+
+    return values;
+  }
+
+  every(step: DurationInput): TempoPeriod {
+    return new TempoPeriod(this.start, this.end, {
+      includeEnd: this.includeEnd,
+      step,
+    });
+  }
+
+  toDuration(): TempoDuration {
+    return this.start.intervalUntil(this.end).toDuration();
+  }
+
   toArray(): Tempo[] {
     return Array.from(this);
   }
