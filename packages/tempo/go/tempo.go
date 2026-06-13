@@ -1365,6 +1365,8 @@ func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 	local := tempo.local()
 
 	switch normalizeUnit(unit) {
+	case Millisecond:
+		return tempo.Clone()
 	case Second:
 		return tempo.fromLocal(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), local.Minute(), local.Second(), 0, tempo.location))
 	case Minute:
@@ -1394,6 +1396,8 @@ func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 
 func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 	switch normalizeUnit(unit) {
+	case Millisecond:
+		return tempo.Clone()
 	case Second:
 		return tempo.StartOf(Second).AddSeconds(1).SubMilliseconds(1)
 	case Minute:
@@ -1421,6 +1425,70 @@ func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
 
 func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.Same(tempo.EndOf(unit, options...))
+}
+
+func (tempo Tempo) IsStartOfMillisecond() bool {
+	return tempo.IsStartOf(Millisecond)
+}
+
+func (tempo Tempo) IsEndOfMillisecond() bool {
+	return tempo.IsEndOf(Millisecond)
+}
+
+func (tempo Tempo) IsStartOfSecond() bool {
+	return tempo.IsStartOf(Second)
+}
+
+func (tempo Tempo) IsEndOfSecond() bool {
+	return tempo.IsEndOf(Second)
+}
+
+func (tempo Tempo) IsStartOfMinute() bool {
+	return tempo.IsStartOf(Minute)
+}
+
+func (tempo Tempo) IsEndOfMinute() bool {
+	return tempo.IsEndOf(Minute)
+}
+
+func (tempo Tempo) IsStartOfHour() bool {
+	return tempo.IsStartOf(Hour)
+}
+
+func (tempo Tempo) IsEndOfHour() bool {
+	return tempo.IsEndOf(Hour)
+}
+
+func (tempo Tempo) StartOfMillisecond() Tempo {
+	return tempo.StartOf(Millisecond)
+}
+
+func (tempo Tempo) EndOfMillisecond() Tempo {
+	return tempo.EndOf(Millisecond)
+}
+
+func (tempo Tempo) StartOfSecond() Tempo {
+	return tempo.StartOf(Second)
+}
+
+func (tempo Tempo) EndOfSecond() Tempo {
+	return tempo.EndOf(Second)
+}
+
+func (tempo Tempo) StartOfMinute() Tempo {
+	return tempo.StartOf(Minute)
+}
+
+func (tempo Tempo) EndOfMinute() Tempo {
+	return tempo.EndOf(Minute)
+}
+
+func (tempo Tempo) StartOfHour() Tempo {
+	return tempo.StartOf(Hour)
+}
+
+func (tempo Tempo) EndOfHour() Tempo {
+	return tempo.EndOf(Hour)
 }
 
 func (tempo Tempo) IsStartOfDay() bool {
@@ -2715,6 +2783,38 @@ func (mutable *MutableTempo) EndOf(unit Unit, options ...StartOfWeekOptions) *Mu
 	return mutable.replace(mutable.Tempo().EndOf(unit, options...))
 }
 
+func (mutable *MutableTempo) StartOfMillisecond() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfMillisecond())
+}
+
+func (mutable *MutableTempo) EndOfMillisecond() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfMillisecond())
+}
+
+func (mutable *MutableTempo) StartOfSecond() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfSecond())
+}
+
+func (mutable *MutableTempo) EndOfSecond() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfSecond())
+}
+
+func (mutable *MutableTempo) StartOfMinute() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfMinute())
+}
+
+func (mutable *MutableTempo) EndOfMinute() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfMinute())
+}
+
+func (mutable *MutableTempo) StartOfHour() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfHour())
+}
+
+func (mutable *MutableTempo) EndOfHour() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfHour())
+}
+
 func (mutable *MutableTempo) StartOfDay() *MutableTempo {
 	return mutable.replace(mutable.Tempo().StartOfDay())
 }
@@ -2833,6 +2933,38 @@ func (mutable *MutableTempo) IsStartOf(unit Unit, options ...StartOfWeekOptions)
 
 func (mutable *MutableTempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return mutable.Tempo().IsEndOf(unit, options...)
+}
+
+func (mutable *MutableTempo) IsStartOfMillisecond() bool {
+	return mutable.Tempo().IsStartOfMillisecond()
+}
+
+func (mutable *MutableTempo) IsEndOfMillisecond() bool {
+	return mutable.Tempo().IsEndOfMillisecond()
+}
+
+func (mutable *MutableTempo) IsStartOfSecond() bool {
+	return mutable.Tempo().IsStartOfSecond()
+}
+
+func (mutable *MutableTempo) IsEndOfSecond() bool {
+	return mutable.Tempo().IsEndOfSecond()
+}
+
+func (mutable *MutableTempo) IsStartOfMinute() bool {
+	return mutable.Tempo().IsStartOfMinute()
+}
+
+func (mutable *MutableTempo) IsEndOfMinute() bool {
+	return mutable.Tempo().IsEndOfMinute()
+}
+
+func (mutable *MutableTempo) IsStartOfHour() bool {
+	return mutable.Tempo().IsStartOfHour()
+}
+
+func (mutable *MutableTempo) IsEndOfHour() bool {
+	return mutable.Tempo().IsEndOfHour()
 }
 
 func (mutable *MutableTempo) IsStartOfDay() bool {

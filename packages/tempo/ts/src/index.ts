@@ -27,6 +27,7 @@ export type TimeUnit =
   | "years";
 
 export type BoundaryUnit =
+  | "millisecond"
   | "second"
   | "minute"
   | "hour"
@@ -1874,6 +1875,8 @@ export class TempoImmutable {
     const parts = this.toObject();
 
     switch (unit) {
+      case "millisecond":
+        return this.clone();
       case "second":
         return this.set({ millisecond: 0 });
       case "minute":
@@ -1918,6 +1921,8 @@ export class TempoImmutable {
 
   endOf(unit: BoundaryUnit, options?: StartOfWeekOptions): this {
     switch (unit) {
+      case "millisecond":
+        return this.clone();
       case "second":
         return this.startOf("second").addSeconds(1).subMilliseconds(1);
       case "minute":
@@ -1943,6 +1948,70 @@ export class TempoImmutable {
 
   isEndOf(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
     return this.isSame(this.endOf(unit, options));
+  }
+
+  isStartOfMillisecond(): boolean {
+    return this.isStartOf("millisecond");
+  }
+
+  isEndOfMillisecond(): boolean {
+    return this.isEndOf("millisecond");
+  }
+
+  isStartOfSecond(): boolean {
+    return this.isStartOf("second");
+  }
+
+  isEndOfSecond(): boolean {
+    return this.isEndOf("second");
+  }
+
+  isStartOfMinute(): boolean {
+    return this.isStartOf("minute");
+  }
+
+  isEndOfMinute(): boolean {
+    return this.isEndOf("minute");
+  }
+
+  isStartOfHour(): boolean {
+    return this.isStartOf("hour");
+  }
+
+  isEndOfHour(): boolean {
+    return this.isEndOf("hour");
+  }
+
+  startOfMillisecond(): this {
+    return this.startOf("millisecond");
+  }
+
+  endOfMillisecond(): this {
+    return this.endOf("millisecond");
+  }
+
+  startOfSecond(): this {
+    return this.startOf("second");
+  }
+
+  endOfSecond(): this {
+    return this.endOf("second");
+  }
+
+  startOfMinute(): this {
+    return this.startOf("minute");
+  }
+
+  endOfMinute(): this {
+    return this.endOf("minute");
+  }
+
+  startOfHour(): this {
+    return this.startOf("hour");
+  }
+
+  endOfHour(): this {
+    return this.endOf("hour");
   }
 
   isStartOfDay(): boolean {

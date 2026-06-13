@@ -1327,6 +1327,47 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if notEndOfDay.IsEndOf(Day) {
 		t.Fatalf("IsEndOf(Day) = true, want false")
 	}
+	if got := base.StartOfMillisecond().ISOString(); got != "2024-05-15T12:00:00.000Z" {
+		t.Fatalf("StartOfMillisecond().ISOString() = %q, want current millisecond", got)
+	}
+	if got := base.EndOfMillisecond().ISOString(); got != "2024-05-15T12:00:00.000Z" {
+		t.Fatalf("EndOfMillisecond().ISOString() = %q, want current millisecond", got)
+	}
+	if !base.IsStartOfMillisecond() || !base.IsEndOfMillisecond() {
+		t.Fatalf("millisecond boundary helpers = false, want true")
+	}
+	secondBoundary, err := Parse("2024-05-15T12:34:56.789Z")
+	if err != nil {
+		t.Fatalf("parse second boundary: %v", err)
+	}
+	if got := secondBoundary.StartOfSecond().ISOString(); got != "2024-05-15T12:34:56.000Z" {
+		t.Fatalf("StartOfSecond().ISOString() = %q, want second start", got)
+	}
+	if got := secondBoundary.EndOfSecond().ISOString(); got != "2024-05-15T12:34:56.999Z" {
+		t.Fatalf("EndOfSecond().ISOString() = %q, want second end", got)
+	}
+	startOfMinute, err := Parse("2024-05-15T12:34:00Z")
+	if err != nil {
+		t.Fatalf("parse start of minute: %v", err)
+	}
+	endOfMinute, err := Parse("2024-05-15T12:34:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of minute: %v", err)
+	}
+	startOfHour, err := Parse("2024-05-15T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of hour: %v", err)
+	}
+	endOfHour, err := Parse("2024-05-15T12:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of hour: %v", err)
+	}
+	if !startOfMinute.IsStartOfMinute() || !endOfMinute.IsEndOfMinute() {
+		t.Fatalf("minute boundary helpers = false, want true")
+	}
+	if !startOfHour.IsStartOfHour() || !endOfHour.IsEndOfHour() {
+		t.Fatalf("hour boundary helpers = false, want true")
+	}
 	startOfWeek, err := Parse("2024-05-13T00:00:00Z")
 	if err != nil {
 		t.Fatalf("parse start of week: %v", err)

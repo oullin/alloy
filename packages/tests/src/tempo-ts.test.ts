@@ -699,6 +699,24 @@ describe("Tempo TypeScript behavior", () => {
     expect(Tempo.parse("2024-05-15T23:59:59.999Z").isEndOf("day")).toBe(true);
     expect(Tempo.parse("2024-05-15T23:59:59.999Z").isEndOfDay()).toBe(true);
     expect(Tempo.parse("2024-05-15T23:59:59.998Z").isEndOf("day")).toBe(false);
+    expect(base.startOfMillisecond().toISOString()).toBe(
+      "2024-05-15T12:00:00.000Z",
+    );
+    expect(base.endOfMillisecond().toISOString()).toBe(
+      "2024-05-15T12:00:00.000Z",
+    );
+    expect(base.isStartOfMillisecond()).toBe(true);
+    expect(base.isEndOfMillisecond()).toBe(true);
+    expect(
+      Tempo.parse("2024-05-15T12:34:56.789Z").startOfSecond().toISOString(),
+    ).toBe("2024-05-15T12:34:56.000Z");
+    expect(
+      Tempo.parse("2024-05-15T12:34:56.789Z").endOfSecond().toISOString(),
+    ).toBe("2024-05-15T12:34:56.999Z");
+    expect(Tempo.parse("2024-05-15T12:34:00Z").isStartOfMinute()).toBe(true);
+    expect(Tempo.parse("2024-05-15T12:34:59.999Z").isEndOfMinute()).toBe(true);
+    expect(Tempo.parse("2024-05-15T12:00:00Z").isStartOfHour()).toBe(true);
+    expect(Tempo.parse("2024-05-15T12:59:59.999Z").isEndOfHour()).toBe(true);
     expect(Tempo.parse("2024-05-13T00:00:00Z").isStartOfWeek()).toBe(true);
     expect(Tempo.parse("2024-05-19T23:59:59.999Z").isEndOfWeek()).toBe(true);
     expect(Tempo.parse("2024-05-01T00:00:00Z").isStartOfMonth()).toBe(true);
