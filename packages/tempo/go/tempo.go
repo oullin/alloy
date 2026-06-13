@@ -206,6 +206,10 @@ func Parse(input string, options ...Option) (Tempo, error) {
 	return Tempo{value: parsed.UTC(), location: cfg.location}, nil
 }
 
+func RawParse(input string, options ...Option) (Tempo, error) {
+	return Parse(input, options...)
+}
+
 func TryParse(input string, options ...Option) (Tempo, bool) {
 	tempo, err := Parse(input, options...)
 	return tempo, err == nil
@@ -231,6 +235,10 @@ func FromFormat(input string, pattern string, options ...Option) (Tempo, error) 
 }
 
 func CreateFromFormat(input string, pattern string, options ...Option) (Tempo, error) {
+	return FromFormat(input, pattern, options...)
+}
+
+func RawCreateFromFormat(input string, pattern string, options ...Option) (Tempo, error) {
 	return FromFormat(input, pattern, options...)
 }
 
@@ -1012,6 +1020,10 @@ func (tempo Tempo) IsLongYear() bool {
 	return tempo.WeeksInISOYear() == 53
 }
 
+func (tempo Tempo) IsLongISOYear() bool {
+	return tempo.IsLongYear()
+}
+
 func (tempo Tempo) IsLastOfMonth() bool {
 	return tempo.Day() == tempo.DaysInMonth()
 }
@@ -1196,6 +1208,27 @@ func (tempo Tempo) Set(components Components) (Tempo, error) {
 	return tempo.fromObject(object, location), nil
 }
 
+func (tempo Tempo) SetUnit(unit Unit, value int) (Tempo, error) {
+	switch normalizeUnit(unit) {
+	case Year:
+		return tempo.SetYear(value), nil
+	case Month:
+		return tempo.SetMonth(value), nil
+	case Day:
+		return tempo.SetDay(value), nil
+	case Hour:
+		return tempo.SetHour(value), nil
+	case Minute:
+		return tempo.SetMinute(value), nil
+	case Second:
+		return tempo.SetSecond(value), nil
+	case Millisecond:
+		return tempo.SetMillisecond(value), nil
+	default:
+		return Tempo{}, fmt.Errorf("tempo cannot set unit: %s", unit)
+	}
+}
+
 func (tempo Tempo) SetYear(year int) Tempo {
 	object := tempo.ToObject()
 	object.Year = year
@@ -1310,6 +1343,20 @@ func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
 	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: tempo.location}
 }
 
+func (tempo Tempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
+	next, err := tempo.SetUnit(valueUnit, value)
+	if err != nil {
+		return tempo
+	}
+
+	clamped, err := next.Clamp(tempo.StartOf(overflowUnit), tempo.EndOf(overflowUnit))
+	if err != nil {
+		return tempo
+	}
+
+	return clamped
+}
+
 func (tempo Tempo) Midday() Tempo {
 	return tempo.SetTime(12, 0, 0, 0)
 }
@@ -1351,6 +1398,15 @@ func (tempo Tempo) AddUnit(unit Unit, value int) Tempo {
 	return tempo.Add(value, unit)
 }
 
+func (tempo Tempo) AddUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
+	next, err := tempo.Add(value, valueUnit).Clamp(tempo.StartOf(overflowUnit), tempo.EndOf(overflowUnit))
+	if err != nil {
+		return tempo
+	}
+
+	return next
+}
+
 func (tempo Tempo) AddRealUnit(unit Unit, value int) Tempo {
 	return tempo.Add(value, unit)
 }
@@ -1365,6 +1421,10 @@ func (tempo Tempo) RawAdd(value int, unit Unit) Tempo {
 
 func (tempo Tempo) SubUnit(unit Unit, value int) Tempo {
 	return tempo.Sub(value, unit)
+}
+
+func (tempo Tempo) SubUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
+	return tempo.AddUnitNoOverflow(valueUnit, -value, overflowUnit)
 }
 
 func (tempo Tempo) SubRealUnit(unit Unit, value int) Tempo {
@@ -1629,8 +1689,20 @@ func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.Same(tempo.StartOf(unit, options...))
 }
 
+func (tempo Tempo) IsStartOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
+	return tempo.IsStartOf(unit, options...)
+}
+
 func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.Same(tempo.EndOf(unit, options...))
+}
+
+func (tempo Tempo) IsEndOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
+	return tempo.IsEndOf(unit, options...)
+}
+
+func (tempo Tempo) IsCurrentUnit(unit Unit, reference Tempo) bool {
+	return tempo.Same(reference, unit)
 }
 
 func (tempo Tempo) IsStartOfMillisecond() bool {
@@ -2572,6 +2644,55 @@ func (tempo Tempo) Format(pattern string) string {
 	return builder.String()
 }
 
+func (tempo Tempo) RawFormat(pattern string) string {
+	return tempo.Format(pattern)
+}
+
+func (tempo Tempo) Ordinal(unit Unit) string {
+	switch normalizeUnit(unit) {
+	case Year:
+		return ordinal(tempo.Year())
+	case Quarter:
+		return ordinal(tempo.Quarter())
+	case Month:
+		return ordinal(tempo.Month())
+	default:
+		return ordinal(tempo.Day())
+	}
+}
+
+func (tempo Tempo) Meridiem(lowercase bool) string {
+	value := "AM"
+	if tempo.Hour() >= 12 {
+		value = "PM"
+	}
+	if lowercase {
+		return strings.ToLower(value)
+	}
+
+	return value
+}
+
+func (tempo Tempo) Week() int {
+	return tempo.ISOWeekNumber()
+}
+
+func (tempo Tempo) WeekYear() int {
+	return tempo.ISOWeekYear()
+}
+
+func (tempo Tempo) WeeksInYear() int {
+	return tempo.WeeksInISOYear()
+}
+
+func (tempo Tempo) GetDaysFromStartOfWeek(weekStartsOn time.Weekday) int {
+	return (int(tempo.local().Weekday()) - int(weekStartsOn) + 7) % 7
+}
+
+func (tempo Tempo) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) Tempo {
+	return tempo.StartOfWeek(StartOfWeekOptions{WeekStartsOn: weekStartsOn}).AddDays(days)
+}
+
 func (tempo Tempo) DateString() string {
 	return tempo.Format("YYYY-MM-DD")
 }
@@ -2994,6 +3115,10 @@ func (mutable *MutableTempo) IsLongYear() bool {
 	return mutable.Tempo().IsLongYear()
 }
 
+func (mutable *MutableTempo) IsLongISOYear() bool {
+	return mutable.Tempo().IsLongISOYear()
+}
+
 func (mutable *MutableTempo) IsLastOfMonth() bool {
 	return mutable.Tempo().IsLastOfMonth()
 }
@@ -3209,6 +3334,38 @@ func (mutable *MutableTempo) Format(pattern string) string {
 	return mutable.Tempo().Format(pattern)
 }
 
+func (mutable *MutableTempo) RawFormat(pattern string) string {
+	return mutable.Tempo().RawFormat(pattern)
+}
+
+func (mutable *MutableTempo) Ordinal(unit Unit) string {
+	return mutable.Tempo().Ordinal(unit)
+}
+
+func (mutable *MutableTempo) Meridiem(lowercase bool) string {
+	return mutable.Tempo().Meridiem(lowercase)
+}
+
+func (mutable *MutableTempo) Week() int {
+	return mutable.Tempo().Week()
+}
+
+func (mutable *MutableTempo) WeekYear() int {
+	return mutable.Tempo().WeekYear()
+}
+
+func (mutable *MutableTempo) WeeksInYear() int {
+	return mutable.Tempo().WeeksInYear()
+}
+
+func (mutable *MutableTempo) GetDaysFromStartOfWeek(weekStartsOn time.Weekday) int {
+	return mutable.Tempo().GetDaysFromStartOfWeek(weekStartsOn)
+}
+
+func (mutable *MutableTempo) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDaysFromStartOfWeek(days, weekStartsOn))
+}
+
 func (mutable *MutableTempo) SetTimezone(name string) (*MutableTempo, error) {
 	next, err := mutable.Tempo().SetTimezone(name)
 	if err != nil {
@@ -3246,6 +3403,15 @@ func (mutable *MutableTempo) Local() *MutableTempo {
 
 func (mutable *MutableTempo) Set(components Components) (*MutableTempo, error) {
 	next, err := mutable.Tempo().Set(components)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) SetUnit(unit Unit, value int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetUnit(unit, value)
 	if err != nil {
 		return nil, err
 	}
@@ -3318,6 +3484,10 @@ func (mutable *MutableTempo) SetTimestamp(timestamp int64) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SetTimestamp(timestamp))
 }
 
+func (mutable *MutableTempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetUnitNoOverflow(valueUnit, value, overflowUnit))
+}
+
 func (mutable *MutableTempo) Midday() *MutableTempo {
 	return mutable.replace(mutable.Tempo().Midday())
 }
@@ -3338,6 +3508,10 @@ func (mutable *MutableTempo) AddUnit(unit Unit, value int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().AddUnit(unit, value))
 }
 
+func (mutable *MutableTempo) AddUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddUnitNoOverflow(valueUnit, value, overflowUnit))
+}
+
 func (mutable *MutableTempo) AddRealUnit(unit Unit, value int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().AddRealUnit(unit, value))
 }
@@ -3352,6 +3526,10 @@ func (mutable *MutableTempo) RawAdd(value int, unit Unit) *MutableTempo {
 
 func (mutable *MutableTempo) SubUnit(unit Unit, value int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SubUnit(unit, value))
+}
+
+func (mutable *MutableTempo) SubUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubUnitNoOverflow(valueUnit, value, overflowUnit))
 }
 
 func (mutable *MutableTempo) SubRealUnit(unit Unit, value int) *MutableTempo {
@@ -3690,8 +3868,20 @@ func (mutable *MutableTempo) IsStartOf(unit Unit, options ...StartOfWeekOptions)
 	return mutable.Tempo().IsStartOf(unit, options...)
 }
 
+func (mutable *MutableTempo) IsStartOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
+	return mutable.Tempo().IsStartOfUnit(unit, options...)
+}
+
 func (mutable *MutableTempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return mutable.Tempo().IsEndOf(unit, options...)
+}
+
+func (mutable *MutableTempo) IsEndOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
+	return mutable.Tempo().IsEndOfUnit(unit, options...)
+}
+
+func (mutable *MutableTempo) IsCurrentUnit(unit Unit, reference Tempo) bool {
+	return mutable.Tempo().IsCurrentUnit(unit, reference)
 }
 
 func (mutable *MutableTempo) IsStartOfMillisecond() bool {

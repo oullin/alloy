@@ -421,6 +421,9 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if !base.Same(sameDay, Day) {
 		t.Fatalf("Same(Day) = false, want true")
 	}
+	if !base.IsCurrentUnit(Day, sameDay) {
+		t.Fatalf("IsCurrentUnit(Day) = false, want true")
+	}
 	if !base.Between(earlier, end) {
 		t.Fatalf("Between() = false, want true")
 	}
@@ -475,8 +478,45 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if got := base.Format("YYYY-MM-DD HH:mm:ss.SSS ZZ [Q]M"); got != "2024-05-15 10:34:45.600 +0000 Q5" {
 		t.Fatalf("Format() = %q, want token output", got)
 	}
+	if got := base.RawFormat("YYYY-MM-DD"); got != "2024-05-15" {
+		t.Fatalf("RawFormat() = %q, want date output", got)
+	}
 	if got := base.Format("dddd, MMMM Do YYYY"); got != "Wednesday, May 15th 2024" {
 		t.Fatalf("Format() = %q, want long date output", got)
+	}
+	if got := base.Ordinal(Day); got != "15th" {
+		t.Fatalf("Ordinal(Day) = %q, want 15th", got)
+	}
+	if got := base.Ordinal(Month); got != "5th" {
+		t.Fatalf("Ordinal(Month) = %q, want 5th", got)
+	}
+	if got := base.Meridiem(false); got != "AM" {
+		t.Fatalf("Meridiem(false) = %q, want AM", got)
+	}
+	if got := base.AddHours(2).Meridiem(true); got != "pm" {
+		t.Fatalf("Meridiem(true) = %q, want pm", got)
+	}
+	if got := base.Week(); got != base.ISOWeekNumber() {
+		t.Fatalf("Week() = %d, want ISO week number", got)
+	}
+	if got := base.WeekYear(); got != base.ISOWeekYear() {
+		t.Fatalf("WeekYear() = %d, want ISO week year", got)
+	}
+	if got := base.WeeksInYear(); got != base.WeeksInISOYear() {
+		t.Fatalf("WeeksInYear() = %d, want ISO weeks in year", got)
+	}
+	if got := base.GetDaysFromStartOfWeek(time.Monday); got != 2 {
+		t.Fatalf("GetDaysFromStartOfWeek(Monday) = %d, want 2", got)
+	}
+	if got := base.SetDaysFromStartOfWeek(4, time.Monday).DateString(); got != "2024-05-17" {
+		t.Fatalf("SetDaysFromStartOfWeek().DateString() = %q, want Friday", got)
+	}
+	longYear, err := Parse("2015-06-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse long year: %v", err)
+	}
+	if !longYear.IsLongISOYear() {
+		t.Fatalf("IsLongISOYear() = false, want true")
 	}
 	if got := base.MonthName(); got != "May" {
 		t.Fatalf("MonthName() = %q, want May", got)
@@ -1612,6 +1652,9 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if !startOfDecade.IsStartOfDecade() || !endOfDecade.IsEndOfDecade() {
 		t.Fatalf("decade boundary helpers = false, want true")
 	}
+	if !startOfDecade.IsStartOfUnit(Decade) || !endOfDecade.IsEndOfUnit(Decade) {
+		t.Fatalf("decade unit boundary aliases = false, want true")
+	}
 	if !startOfCentury.IsStartOfCentury() || !endOfCentury.IsEndOfCentury() {
 		t.Fatalf("century boundary helpers = false, want true")
 	}
@@ -1722,6 +1765,11 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("SetMillisecond(0).Millisecond() = %d, want 0", got)
 	}
 	assertEqual(t, "SetDate().DateString()", tempo.SetDate(2025, 1, 2).DateString(), "2025-01-02")
+	setUnit, err := tempo.SetUnit(Day, 2)
+	if err != nil {
+		t.Fatalf("SetUnit(Day, 2): %v", err)
+	}
+	assertEqual(t, "SetUnit(Day, 2).DateString()", setUnit.DateString(), "2024-05-02")
 	assertEqual(t, "SetDateTime().ISOString()", tempo.SetDateTime(2025, 1, 2, 3, 4, 5, 6).ISOString(), "2025-01-02T03:04:05.006Z")
 
 	source, err := Parse("2025-01-02T03:04:05.006Z")
@@ -1743,10 +1791,13 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	assertEqual(t, "AddRealUnit(Day, 2).DateString()", tempo.AddRealUnit(Day, 2).DateString(), "2024-05-17")
 	assertEqual(t, "AddUTCUnit(Day, 2).DateString()", tempo.AddUTCUnit(Day, 2).DateString(), "2024-05-17")
 	assertEqual(t, "RawAdd(2, Day).DateString()", tempo.RawAdd(2, Day).DateString(), "2024-05-17")
+	assertEqual(t, "AddUnitNoOverflow(Day, 20, Month).DateString()", tempo.AddUnitNoOverflow(Day, 20, Month).DateString(), "2024-05-31")
 	assertEqual(t, "SubUnit(Day, 2).DateString()", tempo.SubUnit(Day, 2).DateString(), "2024-05-13")
 	assertEqual(t, "SubRealUnit(Day, 2).DateString()", tempo.SubRealUnit(Day, 2).DateString(), "2024-05-13")
 	assertEqual(t, "SubUTCUnit(Day, 2).DateString()", tempo.SubUTCUnit(Day, 2).DateString(), "2024-05-13")
 	assertEqual(t, "RawSub(2, Day).DateString()", tempo.RawSub(2, Day).DateString(), "2024-05-13")
+	assertEqual(t, "SubUnitNoOverflow(Day, 20, Month).DateString()", tempo.SubUnitNoOverflow(Day, 20, Month).DateString(), "2024-05-01")
+	assertEqual(t, "SetUnitNoOverflow(Day, 40, Month).DateString()", tempo.SetUnitNoOverflow(Day, 40, Month).DateString(), "2024-05-31")
 
 	friday, err := Parse("2024-05-17T12:00:00Z")
 	if err != nil {
@@ -1780,6 +1831,16 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("CreateFromFormat(): %v", err)
 	}
 	assertEqual(t, "CreateFromFormat().DateString()", createdFromFormat.DateString(), "2024-05-15")
+	rawCreatedFromFormat, err := RawCreateFromFormat("2024/05/15", "YYYY/MM/DD")
+	if err != nil {
+		t.Fatalf("RawCreateFromFormat(): %v", err)
+	}
+	assertEqual(t, "RawCreateFromFormat().DateString()", rawCreatedFromFormat.DateString(), "2024-05-15")
+	rawParsed, err := RawParse("2024-05-15")
+	if err != nil {
+		t.Fatalf("RawParse(): %v", err)
+	}
+	assertEqual(t, "RawParse().DateString()", rawParsed.DateString(), "2024-05-15")
 	if !CanBeCreatedFromFormat("2024/05/15", "YYYY/MM/DD") {
 		t.Fatalf("CanBeCreatedFromFormat() = false, want true")
 	}

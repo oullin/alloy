@@ -1148,6 +1148,10 @@ export class TempoImmutable {
     return new TempoImmutable(input, options);
   }
 
+  static rawParse(input: TempoInput, options?: TempoOptions): TempoImmutable {
+    return TempoImmutable.parse(input, options);
+  }
+
   static fromJSON(input: string, options?: TempoOptions): TempoImmutable {
     const value = JSON.parse(input) as unknown;
 
@@ -1185,6 +1189,14 @@ export class TempoImmutable {
   }
 
   static createFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromFormat(input, pattern, options);
+  }
+
+  static rawCreateFromFormat(
     input: string,
     pattern: string,
     options?: TempoOptions,
@@ -1535,6 +1547,10 @@ export class TempoImmutable {
     return this.weeksInISOYear === 53;
   }
 
+  isLongIsoYear(): boolean {
+    return this.isLongYear();
+  }
+
   isLastOfMonth(): boolean {
     return this.day === this.daysInMonth();
   }
@@ -1700,6 +1716,27 @@ export class TempoImmutable {
     );
   }
 
+  setUnit(unit: TimeUnit, value: number): this {
+    switch (normalizeUnit(unit)) {
+      case "year":
+        return this.setYear(value);
+      case "month":
+        return this.setMonth(value);
+      case "day":
+        return this.setDay(value);
+      case "hour":
+        return this.setHour(value);
+      case "minute":
+        return this.setMinute(value);
+      case "second":
+        return this.setSecond(value);
+      case "millisecond":
+        return this.setMillisecond(value);
+      default:
+        throw new RangeError(`Tempo cannot set unit: ${unit}`);
+    }
+  }
+
   yearTo(year: number): this {
     return this.set({ year });
   }
@@ -1828,6 +1865,17 @@ export class TempoImmutable {
     return this.setTimestamp(timestamp);
   }
 
+  setUnitNoOverflow(
+    valueUnit: TimeUnit,
+    value: number,
+    overflowUnit: BoundaryUnit,
+  ): this {
+    return this.setUnit(valueUnit, value).clamp(
+      this.startOf(overflowUnit),
+      this.endOf(overflowUnit),
+    );
+  }
+
   midday(): this {
     return this.setTime(12, 0, 0, 0);
   }
@@ -1865,6 +1913,17 @@ export class TempoImmutable {
     return this.add(value, unit);
   }
 
+  addUnitNoOverflow(
+    valueUnit: TimeUnit,
+    value: number,
+    overflowUnit: BoundaryUnit,
+  ): this {
+    return this.add(value, valueUnit).clamp(
+      this.startOf(overflowUnit),
+      this.endOf(overflowUnit),
+    );
+  }
+
   addRealUnit(unit: TimeUnit, value = 1): this {
     return this.add(value, unit);
   }
@@ -1879,6 +1938,14 @@ export class TempoImmutable {
 
   subUnit(unit: TimeUnit, value = 1): this {
     return this.sub(value, unit);
+  }
+
+  subUnitNoOverflow(
+    valueUnit: TimeUnit,
+    value: number,
+    overflowUnit: BoundaryUnit,
+  ): this {
+    return this.addUnitNoOverflow(valueUnit, -value, overflowUnit);
   }
 
   subRealUnit(unit: TimeUnit, value = 1): this {
@@ -2179,8 +2246,23 @@ export class TempoImmutable {
     return this.isSame(this.startOf(unit, options));
   }
 
+  isStartOfUnit(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
+    return this.isStartOf(unit, options);
+  }
+
   isEndOf(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
     return this.isSame(this.endOf(unit, options));
+  }
+
+  isEndOfUnit(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
+    return this.isEndOf(unit, options);
+  }
+
+  isCurrentUnit(
+    unit: ComparisonUnit,
+    reference: TempoInput = new Date(),
+  ): boolean {
+    return this.isSame(reference, unit);
   }
 
   isStartOfMillisecond(): boolean {
@@ -3136,6 +3218,49 @@ export class TempoImmutable {
     );
   }
 
+  rawFormat(pattern: string, options?: FormatOptions): string {
+    return this.format(pattern, options);
+  }
+
+  ordinal(unit: "day" | "month" | "quarter" | "year" = "day"): string {
+    const value =
+      unit === "year"
+        ? this.year
+        : unit === "quarter"
+          ? this.quarter
+          : unit === "month"
+            ? this.month
+            : this.day;
+
+    return ordinal(value);
+  }
+
+  meridiem(lowercase = false): string {
+    const value = this.hour < 12 ? "AM" : "PM";
+
+    return lowercase ? value.toLowerCase() : value;
+  }
+
+  week(): number {
+    return this.isoWeek;
+  }
+
+  weekYear(): number {
+    return this.isoWeekYear;
+  }
+
+  weeksInYear(): number {
+    return this.weeksInISOYear;
+  }
+
+  getDaysFromStartOfWeek(weekStartsOn = 1): number {
+    return (this.dayOfWeek - weekStartsOn + 7) % 7;
+  }
+
+  setDaysFromStartOfWeek(days: number, weekStartsOn = 1): this {
+    return this.startOfWeek({ weekStartsOn }).addDays(days);
+  }
+
   formatIntl(
     options?: Intl.DateTimeFormatOptions & { readonly locale?: string },
   ): string {
@@ -3405,6 +3530,10 @@ export class Tempo extends TempoImmutable {
     return new Tempo(input, options);
   }
 
+  static override rawParse(input: TempoInput, options?: TempoOptions): Tempo {
+    return Tempo.parse(input, options);
+  }
+
   static override fromJSON(input: string, options?: TempoOptions): Tempo {
     const value = JSON.parse(input) as unknown;
 
@@ -3435,6 +3564,14 @@ export class Tempo extends TempoImmutable {
   }
 
   static override createFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.fromFormat(input, pattern, options);
+  }
+
+  static override rawCreateFromFormat(
     input: string,
     pattern: string,
     options?: TempoOptions,
@@ -3578,6 +3715,13 @@ export class TempoMutable extends TempoImmutable {
     return new TempoMutable(input, options);
   }
 
+  static override rawParse(
+    input: TempoInput,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.parse(input, options);
+  }
+
   static override fromJSON(
     input: string,
     options?: TempoOptions,
@@ -3611,6 +3755,14 @@ export class TempoMutable extends TempoImmutable {
   }
 
   static override createFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.fromFormat(input, pattern, options);
+  }
+
+  static override rawCreateFromFormat(
     input: string,
     pattern: string,
     options?: TempoOptions,

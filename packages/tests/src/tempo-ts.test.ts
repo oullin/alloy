@@ -273,6 +273,7 @@ describe("Tempo TypeScript behavior", () => {
 
     expect(base.isAfter(earlier)).toBe(true);
     expect(base.isSame("2024-05-15T23:59:00Z", "day")).toBe(true);
+    expect(base.isCurrentUnit("day", "2024-05-15T23:59:00Z")).toBe(true);
     expect(base.isBetween(earlier, "2024-05-16T00:00:00Z")).toBe(true);
     expect(base.isBetween(base, "2024-05-16T00:00:00Z")).toBe(true);
     expect(base.between(earlier, "2024-05-16T00:00:00Z")).toBe(true);
@@ -315,9 +316,20 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.format("YYYY-MM-DD HH:mm:ss.SSS ZZ [Q]M")).toBe(
       "2024-05-15 10:34:45.600 +0000 Q5",
     );
+    expect(base.rawFormat("YYYY-MM-DD")).toBe("2024-05-15");
     expect(base.format("dddd, MMMM Do YYYY", { locale: "en-US" })).toBe(
       "Wednesday, May 15th 2024",
     );
+    expect(base.ordinal()).toBe("15th");
+    expect(base.ordinal("month")).toBe("5th");
+    expect(base.meridiem()).toBe("AM");
+    expect(base.addHours(2).meridiem(true)).toBe("pm");
+    expect(base.week()).toBe(base.isoWeek);
+    expect(base.weekYear()).toBe(base.isoWeekYear);
+    expect(base.weeksInYear()).toBe(base.weeksInISOYear);
+    expect(base.getDaysFromStartOfWeek()).toBe(2);
+    expect(base.setDaysFromStartOfWeek(4).toDateString()).toBe("2024-05-17");
+    expect(Tempo.parse("2015-06-01T00:00:00Z").isLongIsoYear()).toBe(true);
     expect(base.monthName()).toBe("May");
     expect(base.shortMonthName()).toBe("May");
     expect(base.dayName()).toBe("Wednesday");
@@ -805,7 +817,13 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.startOfDecade().toDateTimeString()).toBe("2020-01-01 00:00:00");
     expect(base.endOfDecade().toDateTimeString()).toBe("2029-12-31 23:59:59");
     expect(Tempo.parse("2020-01-01T00:00:00Z").isStartOfDecade()).toBe(true);
+    expect(Tempo.parse("2020-01-01T00:00:00Z").isStartOfUnit("decade")).toBe(
+      true,
+    );
     expect(Tempo.parse("2029-12-31T23:59:59.999Z").isEndOfDecade()).toBe(true);
+    expect(Tempo.parse("2029-12-31T23:59:59.999Z").isEndOfUnit("decade")).toBe(
+      true,
+    );
     expect(base.startOfCentury().toDateTimeString()).toBe(
       "2001-01-01 00:00:00",
     );
@@ -900,6 +918,7 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.setSecond(0).second).toBe(0);
     expect(tempo.setMillisecond(0).millisecond).toBe(0);
     expect(tempo.setDate(2025, 1, 2).toDateString()).toBe("2025-01-02");
+    expect(tempo.setUnit("day", 2).toDateString()).toBe("2024-05-02");
     expect(tempo.setDateTime(2025, 1, 2, 3, 4, 5, 6).toISOString()).toBe(
       "2025-01-02T03:04:05.006Z",
     );
@@ -924,10 +943,19 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.addRealUnit("day", 2).toDateString()).toBe("2024-05-17");
     expect(tempo.addUTCUnit("day", 2).toDateString()).toBe("2024-05-17");
     expect(tempo.rawAdd(2, "day").toDateString()).toBe("2024-05-17");
+    expect(tempo.addUnitNoOverflow("day", 20, "month").toDateString()).toBe(
+      "2024-05-31",
+    );
     expect(tempo.subUnit("day", 2).toDateString()).toBe("2024-05-13");
     expect(tempo.subRealUnit("day", 2).toDateString()).toBe("2024-05-13");
     expect(tempo.subUTCUnit("day", 2).toDateString()).toBe("2024-05-13");
     expect(tempo.rawSub(2, "day").toDateString()).toBe("2024-05-13");
+    expect(tempo.subUnitNoOverflow("day", 20, "month").toDateString()).toBe(
+      "2024-05-01",
+    );
+    expect(tempo.setUnitNoOverflow("day", 40, "month").toDateString()).toBe(
+      "2024-05-31",
+    );
     expect(Tempo.parse("2024-05-17T12:00:00Z").nextWeekendDay().dayOfWeek).toBe(
       6,
     );
@@ -944,6 +972,10 @@ describe("Tempo TypeScript behavior", () => {
     expect(
       Tempo.createFromFormat("2024/05/15", "YYYY/MM/DD").toDateString(),
     ).toBe("2024-05-15");
+    expect(
+      Tempo.rawCreateFromFormat("2024/05/15", "YYYY/MM/DD").toDateString(),
+    ).toBe("2024-05-15");
+    expect(Tempo.rawParse("2024-05-15").toDateString()).toBe("2024-05-15");
     expect(Tempo.canBeCreatedFromFormat("2024/05/15", "YYYY/MM/DD")).toBe(true);
     expect(Tempo.createFromTimestamp(0).toISOString()).toBe(
       "1970-01-01T00:00:00.000Z",
