@@ -6,6 +6,10 @@ import {
   TempoInterval,
   TempoMutable,
   TempoPeriod,
+  canParse,
+  hasFormat,
+  tryFromFormat,
+  tryParse,
 } from "@tempo/tempo";
 import { describe, expect, it } from "vitest";
 
@@ -239,6 +243,24 @@ describe("Tempo TypeScript behavior", () => {
         .fromFormat("2024-01-01 09:00", "YYYY-MM-DD HH:mm")
         .toISOString(),
     ).toBe("2024-01-01T00:00:00.000Z");
+
+    expect(Tempo.canParse("2024-05-15T10:34:45Z")).toBe(true);
+    expect(Tempo.canParse("not a date")).toBe(false);
+    expect(canParse("2024-05-15")).toBe(true);
+    expect(tryParse("not a date")).toBeNull();
+    expect(TempoImmutable.tryParse("2024-05-15")).toBeInstanceOf(
+      TempoImmutable,
+    );
+    expect(Tempo.tryParse("2024-05-15")).toBeInstanceOf(Tempo);
+    expect(TempoMutable.tryParse("2024-05-15")).toBeInstanceOf(TempoMutable);
+
+    expect(Tempo.hasFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm")).toBe(true);
+    expect(Tempo.hasFormat("2024-05-15", "YYYY/MM/DD")).toBe(false);
+    expect(hasFormat("2024-05-15", "YYYY-MM-DD")).toBe(true);
+    expect(
+      tryFromFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm")?.toISOString(),
+    ).toBe("2024-05-15T10:34:00.000Z");
+    expect(Tempo.tryFromFormat("2024-05-15", "YYYY/MM/DD")).toBeNull();
   });
 
   it("exposes calendar predicates and humanized diffs", () => {

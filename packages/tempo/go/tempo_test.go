@@ -455,6 +455,31 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 		t.Fatalf("FromFormat timezone ISOString() = %q, want local timezone instant", got)
 	}
 
+	if !CanParse("2024-05-15T10:34:45Z") {
+		t.Fatalf("CanParse(valid) = false, want true")
+	}
+	if CanParse("not a date") {
+		t.Fatalf("CanParse(invalid) = true, want false")
+	}
+	if parsed, ok := TryParse("2024-05-15"); !ok || parsed.DateString() != "2024-05-15" {
+		t.Fatalf("TryParse(valid) = %q, %v, want date, true", parsed.DateString(), ok)
+	}
+	if _, ok := TryParse("not a date"); ok {
+		t.Fatalf("TryParse(invalid) ok = true, want false")
+	}
+	if !HasFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm") {
+		t.Fatalf("HasFormat(valid) = false, want true")
+	}
+	if HasFormat("2024-05-15", "YYYY/MM/DD") {
+		t.Fatalf("HasFormat(invalid) = true, want false")
+	}
+	if parsed, ok := TryFromFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm"); !ok || parsed.ISOString() != "2024-05-15T10:34:00.000Z" {
+		t.Fatalf("TryFromFormat(valid) = %q, %v, want parsed instant, true", parsed.ISOString(), ok)
+	}
+	if _, ok := TryFromFormat("2024-05-15", "YYYY/MM/DD"); ok {
+		t.Fatalf("TryFromFormat(invalid) ok = true, want false")
+	}
+
 	base, err := Parse("2024-02-29T00:00:00Z")
 	if err != nil {
 		t.Fatalf("parse base: %v", err)

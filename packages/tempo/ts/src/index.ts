@@ -1005,6 +1005,21 @@ export class TempoImmutable {
     return new TempoImmutable(input, options);
   }
 
+  static tryParse(
+    input: TempoInput,
+    options?: TempoOptions,
+  ): TempoImmutable | null {
+    try {
+      return TempoImmutable.parse(input, options);
+    } catch {
+      return null;
+    }
+  }
+
+  static canParse(input: TempoInput, options?: TempoOptions): boolean {
+    return TempoImmutable.tryParse(input, options) !== null;
+  }
+
   static fromFormat(
     input: string,
     pattern: string,
@@ -1014,6 +1029,26 @@ export class TempoImmutable {
       parseFromPattern(input, pattern, options),
       options,
     );
+  }
+
+  static tryFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoImmutable | null {
+    try {
+      return TempoImmutable.fromFormat(input, pattern, options);
+    } catch {
+      return null;
+    }
+  }
+
+  static hasFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): boolean {
+    return TempoImmutable.tryFromFormat(input, pattern, options) !== null;
   }
 
   static create(components: TempoComponents): TempoImmutable {
@@ -2277,12 +2312,35 @@ export class Tempo extends TempoImmutable {
     return new Tempo(input, options);
   }
 
+  static override tryParse(
+    input: TempoInput,
+    options?: TempoOptions,
+  ): Tempo | null {
+    try {
+      return Tempo.parse(input, options);
+    } catch {
+      return null;
+    }
+  }
+
   static override fromFormat(
     input: string,
     pattern: string,
     options?: TempoOptions,
   ): Tempo {
     return new Tempo(parseFromPattern(input, pattern, options), options);
+  }
+
+  static override tryFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): Tempo | null {
+    try {
+      return Tempo.fromFormat(input, pattern, options);
+    } catch {
+      return null;
+    }
   }
 
   static override create(components: TempoComponents): Tempo {
@@ -2323,12 +2381,35 @@ export class TempoMutable extends TempoImmutable {
     return new TempoMutable(input, options);
   }
 
+  static override tryParse(
+    input: TempoInput,
+    options?: TempoOptions,
+  ): TempoMutable | null {
+    try {
+      return TempoMutable.parse(input, options);
+    } catch {
+      return null;
+    }
+  }
+
   static override fromFormat(
     input: string,
     pattern: string,
     options?: TempoOptions,
   ): TempoMutable {
     return new TempoMutable(parseFromPattern(input, pattern, options), options);
+  }
+
+  static override tryFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoMutable | null {
+    try {
+      return TempoMutable.fromFormat(input, pattern, options);
+    } catch {
+      return null;
+    }
   }
 
   static override create(components: TempoComponents): TempoMutable {
@@ -2587,7 +2668,11 @@ export class TempoFactory {
 
 export const now = Tempo.now;
 export const parse = Tempo.parse;
+export const tryParse = Tempo.tryParse;
+export const canParse = Tempo.canParse;
 export const fromFormat = Tempo.fromFormat;
+export const tryFromFormat = Tempo.tryFromFormat;
+export const hasFormat = Tempo.hasFormat;
 export const create = Tempo.create;
 export const fromObject = Tempo.fromObject;
 export const fromTimestamp = Tempo.fromTimestamp;

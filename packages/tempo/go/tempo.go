@@ -167,6 +167,16 @@ func Parse(input string, options ...Option) (Tempo, error) {
 	return Tempo{value: parsed.UTC(), location: cfg.location}, nil
 }
 
+func TryParse(input string, options ...Option) (Tempo, bool) {
+	tempo, err := Parse(input, options...)
+	return tempo, err == nil
+}
+
+func CanParse(input string, options ...Option) bool {
+	_, ok := TryParse(input, options...)
+	return ok
+}
+
 func FromFormat(input string, pattern string, options ...Option) (Tempo, error) {
 	cfg, err := applyOptions(options...)
 	if err != nil {
@@ -179,6 +189,16 @@ func FromFormat(input string, pattern string, options ...Option) (Tempo, error) 
 	}
 
 	return Tempo{value: parsed.UTC(), location: cfg.location}, nil
+}
+
+func TryFromFormat(input string, pattern string, options ...Option) (Tempo, bool) {
+	tempo, err := FromFormat(input, pattern, options...)
+	return tempo, err == nil
+}
+
+func HasFormat(input string, pattern string, options ...Option) bool {
+	_, ok := TryFromFormat(input, pattern, options...)
+	return ok
 }
 
 func Create(components Components) (Tempo, error) {
