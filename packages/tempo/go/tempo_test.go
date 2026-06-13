@@ -1358,6 +1358,13 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	}
 
 	assertEqual(t, "SetTime().ISOString()", tempo.SetTime(0, 0, 0, 0).ISOString(), "2024-05-15T00:00:00.000Z")
+	if !tempo.SetTime(0, 0, 0, 0).IsMidnight() {
+		t.Fatalf("SetTime(0,0,0,0).IsMidnight() = false, want true")
+	}
+	assertEqual(t, "Midday().ISOString()", tempo.Midday().ISOString(), "2024-05-15T12:00:00.000Z")
+	if !tempo.Midday().IsMidday() {
+		t.Fatalf("Midday().IsMidday() = false, want true")
+	}
 	if got := tempo.SetHour(0).Hour(); got != 0 {
 		t.Fatalf("SetHour(0).Hour() = %d, want 0", got)
 	}

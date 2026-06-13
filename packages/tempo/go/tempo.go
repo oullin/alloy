@@ -930,6 +930,20 @@ func (tempo Tempo) IsYesterday(reference Tempo) bool {
 	return tempo.Same(reference.SubDays(1), Day)
 }
 
+func (tempo Tempo) IsMidnight() bool {
+	return tempo.Hour() == 0 &&
+		tempo.Minute() == 0 &&
+		tempo.Second() == 0 &&
+		tempo.Millisecond() == 0
+}
+
+func (tempo Tempo) IsMidday() bool {
+	return tempo.Hour() == 12 &&
+		tempo.Minute() == 0 &&
+		tempo.Second() == 0 &&
+		tempo.Millisecond() == 0
+}
+
 func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
 	location, err := loadLocation(name)
 	if err != nil {
@@ -1085,6 +1099,10 @@ func (tempo Tempo) SetTime(hour int, minute int, second int, millisecond int) Te
 	object.Millisecond = millisecond
 
 	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) Midday() Tempo {
+	return tempo.SetTime(12, 0, 0, 0)
 }
 
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
@@ -2319,6 +2337,14 @@ func (mutable *MutableTempo) IsYesterday(reference Tempo) bool {
 	return mutable.Tempo().IsYesterday(reference)
 }
 
+func (mutable *MutableTempo) IsMidnight() bool {
+	return mutable.Tempo().IsMidnight()
+}
+
+func (mutable *MutableTempo) IsMidday() bool {
+	return mutable.Tempo().IsMidday()
+}
+
 func (mutable *MutableTempo) DateString() string {
 	return mutable.Tempo().DateString()
 }
@@ -2456,6 +2482,10 @@ func (mutable *MutableTempo) SetMillisecond(millisecond int) *MutableTempo {
 
 func (mutable *MutableTempo) SetTime(hour int, minute int, second int, millisecond int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SetTime(hour, minute, second, millisecond))
+}
+
+func (mutable *MutableTempo) Midday() *MutableTempo {
+	return mutable.replace(mutable.Tempo().Midday())
 }
 
 func (mutable *MutableTempo) Add(value int, unit Unit) *MutableTempo {

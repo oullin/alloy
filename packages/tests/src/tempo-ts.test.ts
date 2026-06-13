@@ -712,6 +712,9 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.setTime(0, 0, 0, 0).toISOString()).toBe(
       "2024-05-15T00:00:00.000Z",
     );
+    expect(tempo.setTime(0, 0, 0, 0).isMidnight()).toBe(true);
+    expect(tempo.midday().toISOString()).toBe("2024-05-15T12:00:00.000Z");
+    expect(tempo.midday().isMidday()).toBe(true);
     expect(tempo.setHour(0).hour).toBe(0);
     expect(tempo.setMinute(0).minute).toBe(0);
     expect(tempo.setSecond(0).second).toBe(0);

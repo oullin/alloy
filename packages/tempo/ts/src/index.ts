@@ -1450,6 +1450,24 @@ export class TempoImmutable {
     );
   }
 
+  isMidnight(): boolean {
+    return (
+      this.hour === 0 &&
+      this.minute === 0 &&
+      this.second === 0 &&
+      this.millisecond === 0
+    );
+  }
+
+  isMidday(): boolean {
+    return (
+      this.hour === 12 &&
+      this.minute === 0 &&
+      this.second === 0 &&
+      this.millisecond === 0
+    );
+  }
+
   clone(): this {
     return this.make(this.value);
   }
@@ -1574,6 +1592,10 @@ export class TempoImmutable {
     millisecond = this.millisecond,
   ): this {
     return this.set({ hour, millisecond, minute, second });
+  }
+
+  midday(): this {
+    return this.setTime(12, 0, 0, 0);
   }
 
   add(value: number, unit: TimeUnit): this {
