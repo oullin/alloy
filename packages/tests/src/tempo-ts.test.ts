@@ -12,6 +12,7 @@ import {
   createFromTime,
   createMidnightDate,
   createSafe,
+  fromJSON,
   hasFormat,
   max,
   min,
@@ -723,6 +724,17 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.toUnixString()).toBe("1715776496");
     expect(JSON.stringify(tempo)).toBe('"2024-05-15T12:34:56.789Z"');
     expect(JSON.stringify(TempoDuration.parse("P1DT2H"))).toBe('"P1DT2H"');
+    expect(fromJSON('"2024-05-15T12:34:56.789Z"').toISOString()).toBe(
+      "2024-05-15T12:34:56.789Z",
+    );
+    expect(
+      TempoImmutable.fromJSON('"2024-05-15T12:34:56.789Z"').toISOString(),
+    ).toBe("2024-05-15T12:34:56.789Z");
+    expect(
+      TempoMutable.fromJSON('"2024-05-15T12:34:56.789Z"').toISOString(),
+    ).toBe("2024-05-15T12:34:56.789Z");
+    expect(TempoDuration.fromJSON('"P1DT2H"').toISOString()).toBe("P1DT2H");
+    expect(() => Tempo.fromJSON("123")).toThrow("Tempo JSON must be a string");
 
     expect(tempo.toMap().get("timeZone")).toBe("Asia/Tokyo");
     expect(tempo.toMap().get("hour")).toBe(21);

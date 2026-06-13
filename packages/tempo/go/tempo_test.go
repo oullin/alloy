@@ -1385,6 +1385,21 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("marshal duration: %v", err)
 	}
 	assertEqual(t, "json.Marshal(Duration)", string(durationJSON), `"P1DT2H"`)
+	var decoded Tempo
+	if err := json.Unmarshal(tempoJSON, &decoded); err != nil {
+		t.Fatalf("unmarshal tempo: %v", err)
+	}
+	assertEqual(t, "json.Unmarshal(Tempo)", decoded.ISOString(), "2024-05-15T12:34:56.789Z")
+	var decodedMutable MutableTempo
+	if err := json.Unmarshal(tempoJSON, &decodedMutable); err != nil {
+		t.Fatalf("unmarshal mutable tempo: %v", err)
+	}
+	assertEqual(t, "json.Unmarshal(MutableTempo)", decodedMutable.ISOString(), "2024-05-15T12:34:56.789Z")
+	var decodedDuration Duration
+	if err := json.Unmarshal(durationJSON, &decodedDuration); err != nil {
+		t.Fatalf("unmarshal duration: %v", err)
+	}
+	assertEqual(t, "json.Unmarshal(Duration)", decodedDuration.ISOString(), "P1DT2H")
 
 	values := tempo.ToMap()
 	if values["timeZone"] != "Asia/Tokyo" {

@@ -881,6 +881,16 @@ export class TempoDuration {
     }).normalized();
   }
 
+  static fromJSON(input: string): TempoDuration {
+    const value = JSON.parse(input) as unknown;
+
+    if (typeof value !== "string") {
+      throw new RangeError("Tempo duration JSON must be a string");
+    }
+
+    return TempoDuration.parse(value);
+  }
+
   plus(input: DurationInput): TempoDuration {
     const other = durationFromInput(input);
 
@@ -1078,6 +1088,16 @@ export class TempoImmutable {
 
   static parse(input: TempoInput, options?: TempoOptions): TempoImmutable {
     return new TempoImmutable(input, options);
+  }
+
+  static fromJSON(input: string, options?: TempoOptions): TempoImmutable {
+    const value = JSON.parse(input) as unknown;
+
+    if (typeof value !== "string") {
+      throw new RangeError("Tempo JSON must be a string");
+    }
+
+    return TempoImmutable.parse(value, options);
   }
 
   static tryParse(
@@ -2688,6 +2708,16 @@ export class Tempo extends TempoImmutable {
     return new Tempo(input, options);
   }
 
+  static override fromJSON(input: string, options?: TempoOptions): Tempo {
+    const value = JSON.parse(input) as unknown;
+
+    if (typeof value !== "string") {
+      throw new RangeError("Tempo JSON must be a string");
+    }
+
+    return Tempo.parse(value, options);
+  }
+
   static override tryParse(
     input: TempoInput,
     options?: TempoOptions,
@@ -2804,6 +2834,19 @@ export class TempoMutable extends TempoImmutable {
     options?: TempoOptions,
   ): TempoMutable {
     return new TempoMutable(input, options);
+  }
+
+  static override fromJSON(
+    input: string,
+    options?: TempoOptions,
+  ): TempoMutable {
+    const value = JSON.parse(input) as unknown;
+
+    if (typeof value !== "string") {
+      throw new RangeError("Tempo JSON must be a string");
+    }
+
+    return TempoMutable.parse(value, options);
   }
 
   static override tryParse(
@@ -3265,6 +3308,7 @@ export const yesterday = Tempo.yesterday;
 export const parse = Tempo.parse;
 export const tryParse = Tempo.tryParse;
 export const canParse = Tempo.canParse;
+export const fromJSON = Tempo.fromJSON;
 export const min = Tempo.min;
 export const max = Tempo.max;
 export const average = Tempo.average;

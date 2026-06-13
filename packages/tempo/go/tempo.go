@@ -681,6 +681,21 @@ func (duration Duration) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(duration.ISOString())), nil
 }
 
+func (duration *Duration) UnmarshalJSON(data []byte) error {
+	input, err := strconv.Unquote(string(data))
+	if err != nil {
+		return err
+	}
+
+	parsed, err := ParseDuration(input)
+	if err != nil {
+		return err
+	}
+
+	*duration = parsed
+	return nil
+}
+
 func (duration Duration) totalMilliseconds() int64 {
 	return int64(duration.Weeks*7+duration.Days)*int64((24*time.Hour)/time.Millisecond) +
 		int64(duration.Hours)*int64(time.Hour/time.Millisecond) +
@@ -2029,6 +2044,27 @@ func (tempo Tempo) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(tempo.ISOString())), nil
 }
 
+func (tempo *Tempo) UnmarshalJSON(data []byte) error {
+	input, err := strconv.Unquote(string(data))
+	if err != nil {
+		return err
+	}
+
+	location := tempo.location
+	if location == nil {
+		location = defaultLocation
+	}
+
+	parsed, err := parseInLocation(input, location)
+	if err != nil {
+		return err
+	}
+
+	tempo.value = parsed.UTC()
+	tempo.location = location
+	return nil
+}
+
 func (tempo Tempo) ToObject() Object {
 	local := tempo.local()
 
@@ -2415,6 +2451,17 @@ func (mutable *MutableTempo) Time() time.Time {
 
 func (mutable *MutableTempo) MarshalJSON() ([]byte, error) {
 	return mutable.Tempo().MarshalJSON()
+}
+
+func (mutable *MutableTempo) UnmarshalJSON(data []byte) error {
+	tempo := mutable.Tempo()
+	if err := tempo.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	mutable.value = tempo.value
+	mutable.location = tempo.location
+	return nil
 }
 
 func (mutable *MutableTempo) ToObject() Object {
