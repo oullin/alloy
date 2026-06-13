@@ -87,6 +87,21 @@ export type FormatOptions = {
   readonly timeZone?: string;
 };
 
+export type HumanDiffOptions = {
+  readonly absolute?: boolean;
+  readonly locale?: string;
+  readonly numeric?: Intl.RelativeTimeFormatNumeric;
+  readonly style?: Intl.RelativeTimeFormatStyle;
+  readonly unit?:
+    | "second"
+    | "minute"
+    | "hour"
+    | "day"
+    | "week"
+    | "month"
+    | "year";
+};
+
 export type StartOfWeekOptions = {
   readonly weekStartsOn?: number;
 };
@@ -459,6 +474,191 @@ const ordinal = (value: number): string => {
   }
 };
 
+const escapePattern = (input: string): string =>
+  input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const parseOffsetMinutes = (input: string): number => {
+  if (input === "Z") {
+    return 0;
+  }
+
+  const match = /^([+-])(\d{2}):?(\d{2})$/.exec(input);
+  if (match === null) {
+    throw new RangeError(`Invalid Tempo offset: ${input}`);
+  }
+
+  const minutes = Number(match[2]) * 60 + Number(match[3]);
+  return match[1] === "-" ? -minutes : minutes;
+};
+
+const parseFromPattern = (
+  input: string,
+  pattern: string,
+  options?: TempoOptions,
+): Date => {
+  const tokens = [
+    "YYYY",
+    "SSS",
+    "YY",
+    "ZZ",
+    "MM",
+    "DD",
+    "HH",
+    "hh",
+    "mm",
+    "ss",
+    "Z",
+    "M",
+    "D",
+    "H",
+    "h",
+    "m",
+    "s",
+    "A",
+    "a",
+  ] as const;
+  const groups: string[] = [];
+  let expression = "^";
+
+  for (let index = 0; index < pattern.length; ) {
+    if (pattern[index] === "[") {
+      const end = pattern.indexOf("]", index);
+
+      if (end >= 0) {
+        expression += escapePattern(pattern.slice(index + 1, end));
+        index = end + 1;
+        continue;
+      }
+    }
+
+    const token = tokens.find((item) => pattern.slice(index).startsWith(item));
+
+    if (token === undefined) {
+      expression += escapePattern(pattern[index] ?? "");
+      index += 1;
+      continue;
+    }
+
+    groups.push(token);
+    expression +=
+      token === "A" || token === "a"
+        ? "(AM|PM|am|pm)"
+        : token === "Z"
+          ? "(Z|[+-]\\d{2}:\\d{2})"
+          : token === "ZZ"
+            ? "(Z|[+-]\\d{4})"
+            : "(\\d{1," +
+              (token.length === 1 ? "4" : String(token.length)) +
+              "})";
+    index += token.length;
+  }
+
+  expression += "$";
+  const match = new RegExp(expression).exec(input);
+
+  if (match === null) {
+    throw new RangeError(`Input does not match Tempo format: ${input}`);
+  }
+
+  const values = new Map<string, string>();
+  groups.forEach((token, index) => values.set(token, match[index + 1] ?? ""));
+
+  let year = values.has("YYYY")
+    ? Number(values.get("YYYY"))
+    : values.has("YY")
+      ? 2000 + Number(values.get("YY"))
+      : 1970;
+  const meridiem = values.get("A") ?? values.get("a");
+  let hour = Number(
+    values.get("HH") ??
+      values.get("H") ??
+      values.get("hh") ??
+      values.get("h") ??
+      0,
+  );
+
+  if (meridiem !== undefined) {
+    const lower = meridiem.toLowerCase();
+    if (lower === "pm" && hour < 12) {
+      hour += 12;
+    }
+    if (lower === "am" && hour === 12) {
+      hour = 0;
+    }
+  }
+
+  if (!Number.isFinite(year)) {
+    year = 1970;
+  }
+
+  const components: TempoComponents = {
+    day: Number(values.get("DD") ?? values.get("D") ?? 1),
+    hour,
+    millisecond: Number((values.get("SSS") ?? "0").slice(0, 3).padEnd(3, "0")),
+    minute: Number(values.get("mm") ?? values.get("m") ?? 0),
+    month: Number(values.get("MM") ?? values.get("M") ?? 1),
+    second: Number(values.get("ss") ?? values.get("s") ?? 0),
+    timeZone: options?.timeZone,
+    year,
+  };
+  const offset = values.get("Z") ?? values.get("ZZ");
+
+  if (offset !== undefined && offset !== "") {
+    const offsetMinutes = parseOffsetMinutes(offset);
+    return new Date(
+      dateFromPartsAsUTC(components) - offsetMinutes * millisecondsPerMinute,
+    );
+  }
+
+  return dateFromZonedComponents(components, options?.timeZone);
+};
+
+const bestRelativeUnit = (
+  milliseconds: number,
+): NonNullable<HumanDiffOptions["unit"]> => {
+  const absolute = Math.abs(milliseconds);
+
+  if (absolute < millisecondsPerMinute) {
+    return "second";
+  }
+  if (absolute < millisecondsPerHour) {
+    return "minute";
+  }
+  if (absolute < millisecondsPerDay) {
+    return "hour";
+  }
+  if (absolute < millisecondsPerWeek) {
+    return "day";
+  }
+  if (absolute < millisecondsPerDay * 30) {
+    return "week";
+  }
+  if (absolute < millisecondsPerDay * 365) {
+    return "month";
+  }
+
+  return "year";
+};
+
+const unitDivisor = (unit: NonNullable<HumanDiffOptions["unit"]>): number => {
+  switch (unit) {
+    case "second":
+      return millisecondsPerSecond;
+    case "minute":
+      return millisecondsPerMinute;
+    case "hour":
+      return millisecondsPerHour;
+    case "day":
+      return millisecondsPerDay;
+    case "week":
+      return millisecondsPerWeek;
+    case "month":
+      return millisecondsPerDay * 30;
+    case "year":
+      return millisecondsPerDay * 365;
+  }
+};
+
 export class TempoImmutable {
   protected value: Date;
   protected zone: string;
@@ -474,6 +674,17 @@ export class TempoImmutable {
 
   static parse(input: TempoInput, options?: TempoOptions): TempoImmutable {
     return new TempoImmutable(input, options);
+  }
+
+  static fromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return new TempoImmutable(
+      parseFromPattern(input, pattern, options),
+      options,
+    );
   }
 
   static create(components: TempoComponents): TempoImmutable {
@@ -588,6 +799,49 @@ export class TempoImmutable {
 
     return Math.trunc(
       (localAsUTC - this.value.getTime()) / millisecondsPerMinute,
+    );
+  }
+
+  isLeapYear(): boolean {
+    const year = this.year;
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  }
+
+  daysInMonth(): number {
+    return daysInMonth(this.year, this.month);
+  }
+
+  isWeekend(): boolean {
+    return this.dayOfWeek === 0 || this.dayOfWeek === 6;
+  }
+
+  isWeekday(): boolean {
+    return !this.isWeekend();
+  }
+
+  isPast(reference: TempoInput = new Date()): boolean {
+    return this.isBefore(reference);
+  }
+
+  isFuture(reference: TempoInput = new Date()): boolean {
+    return this.isAfter(reference);
+  }
+
+  isToday(reference: TempoInput = new Date()): boolean {
+    return this.isSame(reference, "day");
+  }
+
+  isTomorrow(reference: TempoInput = new Date()): boolean {
+    return this.isSame(
+      TempoImmutable.parse(reference, { timeZone: this.zone }).addDays(1),
+      "day",
+    );
+  }
+
+  isYesterday(reference: TempoInput = new Date()): boolean {
+    return this.isSame(
+      TempoImmutable.parse(reference, { timeZone: this.zone }).subDays(1),
+      "day",
     );
   }
 
@@ -1056,6 +1310,21 @@ export class TempoImmutable {
     return this.diff(other, "year", options);
   }
 
+  diffForHumans(
+    other: TempoInput = new Date(),
+    options?: HumanDiffOptions,
+  ): string {
+    const rawMilliseconds = this.timestampMs - asDate(other).getTime();
+    const unit = options?.unit ?? bestRelativeUnit(rawMilliseconds);
+    const value = Math.round(rawMilliseconds / unitDivisor(unit));
+    const formatter = new Intl.RelativeTimeFormat(options?.locale ?? "en-US", {
+      numeric: options?.numeric ?? "always",
+      style: options?.style ?? "long",
+    });
+
+    return formatter.format(options?.absolute ? Math.abs(value) : value, unit);
+  }
+
   isBefore(other: TempoInput, unit: ComparisonUnit = "millisecond"): boolean {
     return (
       this.comparableValue(unit) <
@@ -1268,6 +1537,14 @@ export class Tempo extends TempoImmutable {
     return new Tempo(input, options);
   }
 
+  static override fromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): Tempo {
+    return new Tempo(parseFromPattern(input, pattern, options), options);
+  }
+
   static override create(components: TempoComponents): Tempo {
     return new Tempo(dateFromZonedComponents(components), {
       timeZone: components.timeZone,
@@ -1304,6 +1581,14 @@ export class TempoMutable extends TempoImmutable {
     options?: TempoOptions,
   ): TempoMutable {
     return new TempoMutable(input, options);
+  }
+
+  static override fromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return new TempoMutable(parseFromPattern(input, pattern, options), options);
   }
 
   static override create(components: TempoComponents): TempoMutable {
@@ -1493,6 +1778,12 @@ export class TempoFactory {
     return Tempo.parse(input, { timeZone: options?.timeZone ?? this.zone });
   }
 
+  fromFormat(input: string, pattern: string, options?: TempoOptions): Tempo {
+    return Tempo.fromFormat(input, pattern, {
+      timeZone: options?.timeZone ?? this.zone,
+    });
+  }
+
   create(components: TempoComponents): Tempo {
     return Tempo.create({ timeZone: this.zone, ...components });
   }
@@ -1506,6 +1797,7 @@ export class TempoFactory {
 
 export const now = Tempo.now;
 export const parse = Tempo.parse;
+export const fromFormat = Tempo.fromFormat;
 export const create = Tempo.create;
 export const fromObject = Tempo.fromObject;
 export const fromTimestamp = Tempo.fromTimestamp;

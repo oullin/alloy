@@ -299,3 +299,71 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 		t.Fatalf("Mutable DateTimeString() = %q, want Tokyo local time", got)
 	}
 }
+
+func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
+	withOffset, err := FromFormat("2024/05/15 10:34:45.600 +0900", "YYYY/MM/DD HH:mm:ss.SSS ZZ")
+	if err != nil {
+		t.Fatalf("from format offset: %v", err)
+	}
+	if got := withOffset.ISOString(); got != "2024-05-15T01:34:45.600Z" {
+		t.Fatalf("FromFormat offset ISOString() = %q, want parsed offset instant", got)
+	}
+
+	meridiem, err := FromFormat("05-15-24 10:34 PM", "MM-DD-YY hh:mm A")
+	if err != nil {
+		t.Fatalf("from format meridiem: %v", err)
+	}
+	if got := meridiem.ISOString(); got != "2024-05-15T22:34:00.000Z" {
+		t.Fatalf("FromFormat meridiem ISOString() = %q, want parsed time", got)
+	}
+
+	tokyo, err := FromFormat("2024-01-01 09:00", "YYYY-MM-DD HH:mm", WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("from format tokyo: %v", err)
+	}
+	if got := tokyo.ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("FromFormat timezone ISOString() = %q, want local timezone instant", got)
+	}
+
+	base, err := Parse("2024-02-29T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse base: %v", err)
+	}
+	saturday, err := Parse("2024-03-02T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse saturday: %v", err)
+	}
+	referenceYesterday, err := Parse("2024-02-28T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse yesterday reference: %v", err)
+	}
+	referenceTomorrow, err := Parse("2024-03-01T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse tomorrow reference: %v", err)
+	}
+
+	if !base.IsLeapYear() {
+		t.Fatalf("IsLeapYear() = false, want true")
+	}
+	if got := base.DaysInMonth(); got != 29 {
+		t.Fatalf("DaysInMonth() = %d, want 29", got)
+	}
+	if !saturday.IsWeekend() {
+		t.Fatalf("IsWeekend() = false, want true")
+	}
+	if !base.IsWeekday() {
+		t.Fatalf("IsWeekday() = false, want true")
+	}
+	if !base.IsTomorrow(referenceYesterday) {
+		t.Fatalf("IsTomorrow() = false, want true")
+	}
+	if !base.IsYesterday(referenceTomorrow) {
+		t.Fatalf("IsYesterday() = false, want true")
+	}
+	if got := base.AddDays(2).DiffForHumans(base); got != "in 2 days" {
+		t.Fatalf("DiffForHumans() = %q, want future diff", got)
+	}
+	if got := base.DiffForHumans(base.AddHours(3)); got != "3 hours ago" {
+		t.Fatalf("DiffForHumans() = %q, want past diff", got)
+	}
+}

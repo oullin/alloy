@@ -190,4 +190,48 @@ describe("Tempo TypeScript behavior", () => {
     expect(mutable.setTimezone("Asia/Tokyo")).toBe(mutable);
     expect(mutable.toDateTimeString()).toBe("2024-01-01 09:00:00");
   });
+
+  it("parses known token formats and applies offsets", () => {
+    expect(
+      Tempo.fromFormat(
+        "2024/05/15 10:34:45.600 +0900",
+        "YYYY/MM/DD HH:mm:ss.SSS ZZ",
+      ).toISOString(),
+    ).toBe("2024-05-15T01:34:45.600Z");
+
+    expect(
+      Tempo.fromFormat("05-15-24 10:34 PM", "MM-DD-YY hh:mm A").toISOString(),
+    ).toBe("2024-05-15T22:34:00.000Z");
+
+    expect(
+      TempoFactory.create({ timeZone: "Asia/Tokyo" })
+        .fromFormat("2024-01-01 09:00", "YYYY-MM-DD HH:mm")
+        .toISOString(),
+    ).toBe("2024-01-01T00:00:00.000Z");
+  });
+
+  it("exposes calendar predicates and humanized diffs", () => {
+    const base = Tempo.parse("2024-02-29T00:00:00Z");
+    const saturday = Tempo.parse("2024-03-02T00:00:00Z");
+
+    expect(base.isLeapYear()).toBe(true);
+    expect(base.daysInMonth()).toBe(29);
+    expect(saturday.isWeekend()).toBe(true);
+    expect(base.isWeekday()).toBe(true);
+    expect(base.isToday("2024-02-29T12:00:00Z")).toBe(true);
+    expect(base.isTomorrow("2024-02-28T12:00:00Z")).toBe(true);
+    expect(base.isYesterday("2024-03-01T12:00:00Z")).toBe(true);
+    expect(
+      base.addDays(2).diffForHumans(base, {
+        locale: "en-US",
+        numeric: "always",
+      }),
+    ).toBe("in 2 days");
+    expect(
+      base.diffForHumans(base.addHours(3), {
+        locale: "en-US",
+        numeric: "always",
+      }),
+    ).toBe("3 hours ago");
+  });
 });

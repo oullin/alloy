@@ -65,6 +65,11 @@ type DiffOptions struct {
 	Float    bool
 }
 
+type HumanDiffOptions struct {
+	Absolute bool
+	Unit     Unit
+}
+
 type StartOfWeekOptions struct {
 	WeekStartsOn time.Weekday
 }
@@ -146,6 +151,20 @@ func Parse(input string, options ...Option) (Tempo, error) {
 	}
 
 	parsed, err := parseInLocation(input, cfg.location)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return Tempo{value: parsed.UTC(), location: cfg.location}, nil
+}
+
+func FromFormat(input string, pattern string, options ...Option) (Tempo, error) {
+	cfg, err := applyOptions(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	parsed, err := parseFromPattern(input, pattern, cfg.location)
 	if err != nil {
 		return Tempo{}, err
 	}
@@ -278,6 +297,44 @@ func (tempo Tempo) Millisecond() int {
 func (tempo Tempo) OffsetMinutes() int {
 	_, offset := tempo.local().Zone()
 	return offset / 60
+}
+
+func (tempo Tempo) IsLeapYear() bool {
+	year := tempo.Year()
+	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
+}
+
+func (tempo Tempo) DaysInMonth() int {
+	return daysInMonth(tempo.Year(), tempo.Month())
+}
+
+func (tempo Tempo) IsWeekend() bool {
+	weekday := tempo.local().Weekday()
+	return weekday == time.Saturday || weekday == time.Sunday
+}
+
+func (tempo Tempo) IsWeekday() bool {
+	return !tempo.IsWeekend()
+}
+
+func (tempo Tempo) IsPast(reference Tempo) bool {
+	return tempo.Before(reference)
+}
+
+func (tempo Tempo) IsFuture(reference Tempo) bool {
+	return tempo.After(reference)
+}
+
+func (tempo Tempo) IsToday(reference Tempo) bool {
+	return tempo.Same(reference, Day)
+}
+
+func (tempo Tempo) IsTomorrow(reference Tempo) bool {
+	return tempo.Same(reference.AddDays(1), Day)
+}
+
+func (tempo Tempo) IsYesterday(reference Tempo) bool {
+	return tempo.Same(reference.SubDays(1), Day)
 }
 
 func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
@@ -715,6 +772,37 @@ func (tempo Tempo) DiffInYears(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Year, options...))
 }
 
+func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
+	opts := HumanDiffOptions{}
+	if len(options) > 0 {
+		opts = options[0]
+	}
+
+	milliseconds := tempo.TimestampMs() - other.TimestampMs()
+	unit := opts.Unit
+	if unit == "" {
+		unit = bestRelativeUnit(milliseconds)
+	}
+
+	value := int(math.Round(float64(milliseconds) / float64(unitDuration(unit).Milliseconds())))
+	if opts.Absolute && value < 0 {
+		value = -value
+	}
+
+	unitName := string(normalizeUnit(unit))
+	if value == 1 || value == -1 {
+		unitName = strings.TrimSuffix(unitName, "s")
+	} else {
+		unitName += "s"
+	}
+
+	if value < 0 {
+		return fmt.Sprintf("%d %s ago", -value, unitName)
+	}
+
+	return fmt.Sprintf("in %d %s", value, unitName)
+}
+
 func (tempo Tempo) Before(other Tempo, units ...Unit) bool {
 	return tempo.compareValue(units...) < other.compareValue(units...)
 }
@@ -1104,6 +1192,121 @@ func parseInLocation(input string, location *time.Location) (time.Time, error) {
 	return parsed, nil
 }
 
+func parseFromPattern(input string, pattern string, location *time.Location) (time.Time, error) {
+	tokens := []string{"YYYY", "SSS", "YY", "ZZ", "MM", "DD", "HH", "hh", "mm", "ss", "Z", "M", "D", "H", "h", "m", "s", "A", "a"}
+	groups := make([]string, 0)
+	var expression strings.Builder
+	expression.WriteString("^")
+
+	for index := 0; index < len(pattern); {
+		if pattern[index] == '[' {
+			end := strings.IndexByte(pattern[index:], ']')
+			if end >= 0 {
+				expression.WriteString(regexp.QuoteMeta(pattern[index+1 : index+end]))
+				index += end + 1
+				continue
+			}
+		}
+
+		matched := ""
+		for _, token := range tokens {
+			if strings.HasPrefix(pattern[index:], token) {
+				matched = token
+				break
+			}
+		}
+
+		if matched == "" {
+			expression.WriteString(regexp.QuoteMeta(pattern[index : index+1]))
+			index++
+			continue
+		}
+
+		groups = append(groups, matched)
+		switch matched {
+		case "A", "a":
+			expression.WriteString(`(AM|PM|am|pm)`)
+		case "Z":
+			expression.WriteString(`(Z|[+-]\d{2}:\d{2})`)
+		case "ZZ":
+			expression.WriteString(`(Z|[+-]\d{4})`)
+		case "YYYY":
+			expression.WriteString(`(\d{4})`)
+		case "YY", "MM", "DD", "HH", "hh", "mm", "ss":
+			expression.WriteString(`(\d{2})`)
+		case "SSS":
+			expression.WriteString(`(\d{1,3})`)
+		default:
+			expression.WriteString(`(\d{1,2})`)
+		}
+		index += len(matched)
+	}
+
+	expression.WriteString("$")
+	match := regexp.MustCompile(expression.String()).FindStringSubmatch(input)
+	if match == nil {
+		return time.Time{}, fmt.Errorf("input does not match tempo format: %s", input)
+	}
+
+	values := make(map[string]string, len(groups))
+	for index, token := range groups {
+		values[token] = match[index+1]
+	}
+
+	year := 1970
+	if value := values["YYYY"]; value != "" {
+		year = mustInt(value)
+	} else if value := values["YY"]; value != "" {
+		year = 2000 + mustInt(value)
+	}
+
+	hour := mustInt(firstPresent(values, "HH", "H", "hh", "h"))
+	meridiem := firstPresent(values, "A", "a")
+	if meridiem != "" {
+		switch strings.ToLower(meridiem) {
+		case "pm":
+			if hour < 12 {
+				hour += 12
+			}
+		case "am":
+			if hour == 12 {
+				hour = 0
+			}
+		}
+	}
+
+	components := Components{
+		Year:        year,
+		Month:       mustInt(defaultString(firstPresent(values, "MM", "M"), "1")),
+		Day:         mustInt(defaultString(firstPresent(values, "DD", "D"), "1")),
+		Hour:        hour,
+		Minute:      mustInt(defaultString(firstPresent(values, "mm", "m"), "0")),
+		Second:      mustInt(defaultString(firstPresent(values, "ss", "s"), "0")),
+		Millisecond: mustInt(rightPad(defaultString(values["SSS"], "0"), 3)),
+	}
+
+	if offset := firstPresent(values, "Z", "ZZ"); offset != "" {
+		offsetMinutes, err := parseOffsetMinutes(offset)
+		if err != nil {
+			return time.Time{}, err
+		}
+		utc := time.Date(
+			components.Year,
+			time.Month(components.Month),
+			components.Day,
+			components.Hour,
+			components.Minute,
+			components.Second,
+			components.Millisecond*int(time.Millisecond),
+			time.UTC,
+		)
+
+		return utc.Add(-time.Duration(offsetMinutes) * time.Minute), nil
+	}
+
+	return timeFromComponents(components, location), nil
+}
+
 func timeFromComponents(components Components, location *time.Location) time.Time {
 	month := components.Month
 	if month == 0 {
@@ -1168,6 +1371,45 @@ func fixedUnitDuration(unit Unit) (time.Duration, bool) {
 		return 7 * 24 * time.Hour, true
 	default:
 		return 0, false
+	}
+}
+
+func unitDuration(unit Unit) time.Duration {
+	if duration, ok := fixedUnitDuration(unit); ok {
+		return duration
+	}
+
+	switch normalizeUnit(unit) {
+	case Month:
+		return 30 * 24 * time.Hour
+	case Year:
+		return 365 * 24 * time.Hour
+	default:
+		return time.Millisecond
+	}
+}
+
+func bestRelativeUnit(milliseconds int64) Unit {
+	absolute := milliseconds
+	if absolute < 0 {
+		absolute = -absolute
+	}
+
+	switch {
+	case absolute < int64(time.Minute/time.Millisecond):
+		return Second
+	case absolute < int64(time.Hour/time.Millisecond):
+		return Minute
+	case absolute < int64((24*time.Hour)/time.Millisecond):
+		return Hour
+	case absolute < int64((7*24*time.Hour)/time.Millisecond):
+		return Day
+	case absolute < int64((30*24*time.Hour)/time.Millisecond):
+		return Week
+	case absolute < int64((365*24*time.Hour)/time.Millisecond):
+		return Month
+	default:
+		return Year
 	}
 }
 
@@ -1242,6 +1484,45 @@ func formatOffset(offsetMinutes int, separator string) string {
 	}
 
 	return fmt.Sprintf("%s%s%s%s", sign, pad(offsetMinutes/60, 2), separator, pad(offsetMinutes%60, 2))
+}
+
+func parseOffsetMinutes(input string) (int, error) {
+	if input == "Z" {
+		return 0, nil
+	}
+
+	clean := strings.ReplaceAll(input, ":", "")
+	if len(clean) != 5 {
+		return 0, fmt.Errorf("invalid tempo offset: %s", input)
+	}
+
+	sign := 1
+	if clean[0] == '-' {
+		sign = -1
+	} else if clean[0] != '+' {
+		return 0, fmt.Errorf("invalid tempo offset: %s", input)
+	}
+
+	hours, err := strconv.Atoi(clean[1:3])
+	if err != nil {
+		return 0, fmt.Errorf("invalid tempo offset: %s", input)
+	}
+	minutes, err := strconv.Atoi(clean[3:5])
+	if err != nil {
+		return 0, fmt.Errorf("invalid tempo offset: %s", input)
+	}
+
+	return sign * (hours*60 + minutes), nil
+}
+
+func firstPresent(values map[string]string, keys ...string) string {
+	for _, key := range keys {
+		if value := values[key]; value != "" {
+			return value
+		}
+	}
+
+	return ""
 }
 
 func mustInt(input string) int {
