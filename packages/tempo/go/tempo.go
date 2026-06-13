@@ -1807,6 +1807,10 @@ func (tempo Tempo) SameYear(other Tempo) bool {
 	return tempo.Same(other, Year)
 }
 
+func (tempo Tempo) SameAs(pattern string, other Tempo) bool {
+	return tempo.Format(pattern) == other.Format(pattern)
+}
+
 func (tempo Tempo) Birthday(other Tempo) bool {
 	return tempo.Month() == other.Month() && tempo.Day() == other.Day()
 }
@@ -2870,6 +2874,10 @@ func (mutable *MutableTempo) SameQuarter(other Tempo) bool {
 
 func (mutable *MutableTempo) SameYear(other Tempo) bool {
 	return mutable.Tempo().SameYear(other)
+}
+
+func (mutable *MutableTempo) SameAs(pattern string, other Tempo) bool {
+	return mutable.Tempo().SameAs(pattern, other)
 }
 
 func (mutable *MutableTempo) Birthday(other Tempo) bool {

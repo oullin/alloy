@@ -2332,6 +2332,16 @@ export class TempoImmutable {
     return this.isSame(other, "year");
   }
 
+  isSameAs(
+    pattern: string,
+    other: TempoInput,
+    options?: FormatOptions,
+  ): boolean {
+    const compare = TempoImmutable.parse(other, { timeZone: this.zone });
+
+    return this.format(pattern, options) === compare.format(pattern, options);
+  }
+
   isBirthday(other: TempoInput = new Date()): boolean {
     const compare = TempoImmutable.parse(other, { timeZone: this.zone });
 

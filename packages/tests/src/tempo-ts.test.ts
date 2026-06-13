@@ -588,6 +588,10 @@ describe("Tempo TypeScript behavior", () => {
     expect(friday.isSameMonth("2024-05-01T00:00:00Z")).toBe(true);
     expect(friday.isSameQuarter("2024-04-01T00:00:00Z")).toBe(true);
     expect(friday.isSameYear("2024-12-31T23:59:59Z")).toBe(true);
+    expect(friday.isSameAs("YYYY-MM-DD", "2024-05-17T23:59:59Z")).toBe(true);
+    expect(friday.isSameAs("YYYY-MM-DD HH:mm", "2024-05-17T23:59:59Z")).toBe(
+      false,
+    );
     expect(friday.isBirthday("1990-05-17T00:00:00Z")).toBe(true);
     expect(friday.isBirthday("1990-05-18T00:00:00Z")).toBe(false);
   });

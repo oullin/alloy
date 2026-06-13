@@ -1100,6 +1100,12 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 	if !friday.SameSecond(sameSecond) || !friday.SameMinute(sameMinute) || !friday.SameHour(sameHour) || !friday.SameDay(sameDay) || !friday.SameWeek(sameWeek) || !friday.SameMonth(sameMonth) || !friday.SameQuarter(sameQuarter) || !friday.SameYear(sameYear) {
 		t.Fatalf("same-unit comparisons did not all match expected true values")
 	}
+	if !friday.SameAs("YYYY-MM-DD", sameDay) {
+		t.Fatalf("SameAs(date pattern) = false, want true")
+	}
+	if friday.SameAs("YYYY-MM-DD HH:mm", sameDay) {
+		t.Fatalf("SameAs(datetime pattern) = true, want false")
+	}
 	if !friday.Birthday(birthday) {
 		t.Fatalf("Birthday() = false, want true")
 	}
