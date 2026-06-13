@@ -447,6 +447,22 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 		t.Fatalf("FromFormat meridiem ISOString() = %q, want parsed time", got)
 	}
 
+	named, err := FromFormat("Wednesday, May 15th 2024 10:34 PM", "dddd, MMMM Do YYYY hh:mm A")
+	if err != nil {
+		t.Fatalf("from format named month: %v", err)
+	}
+	if got := named.ISOString(); got != "2024-05-15T22:34:00.000Z" {
+		t.Fatalf("FromFormat named month ISOString() = %q, want parsed time", got)
+	}
+
+	shortNamed, err := FromFormat("Wed, May 15 2024", "ddd, MMM D YYYY")
+	if err != nil {
+		t.Fatalf("from format short named month: %v", err)
+	}
+	if got := shortNamed.DateString(); got != "2024-05-15" {
+		t.Fatalf("FromFormat short named DateString() = %q, want parsed date", got)
+	}
+
 	tokyo, err := FromFormat("2024-01-01 09:00", "YYYY-MM-DD HH:mm", WithTimezone("Asia/Tokyo"))
 	if err != nil {
 		t.Fatalf("from format tokyo: %v", err)

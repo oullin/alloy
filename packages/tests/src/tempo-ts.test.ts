@@ -239,6 +239,17 @@ describe("Tempo TypeScript behavior", () => {
     ).toBe("2024-05-15T22:34:00.000Z");
 
     expect(
+      Tempo.fromFormat(
+        "Wednesday, May 15th 2024 10:34 PM",
+        "dddd, MMMM Do YYYY hh:mm A",
+      ).toISOString(),
+    ).toBe("2024-05-15T22:34:00.000Z");
+
+    expect(
+      Tempo.fromFormat("Wed, May 15 2024", "ddd, MMM D YYYY").toDateString(),
+    ).toBe("2024-05-15");
+
+    expect(
       TempoFactory.create({ timeZone: "Asia/Tokyo" })
         .fromFormat("2024-01-01 09:00", "YYYY-MM-DD HH:mm")
         .toISOString(),

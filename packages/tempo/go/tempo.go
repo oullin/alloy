@@ -2559,7 +2559,7 @@ func parseInLocation(input string, location *time.Location) (time.Time, error) {
 }
 
 func parseFromPattern(input string, pattern string, location *time.Location) (time.Time, error) {
-	tokens := []string{"YYYY", "SSS", "YY", "ZZ", "MM", "DD", "HH", "hh", "mm", "ss", "Z", "M", "D", "H", "h", "m", "s", "A", "a"}
+	tokens := []string{"YYYY", "MMMM", "dddd", "MMM", "ddd", "SSS", "Do", "YY", "ZZ", "MM", "DD", "HH", "hh", "mm", "ss", "Z", "M", "D", "H", "h", "m", "s", "A", "a"}
 	groups := make([]string, 0)
 	var expression strings.Builder
 	expression.WriteString("^")
@@ -2592,6 +2592,10 @@ func parseFromPattern(input string, pattern string, location *time.Location) (ti
 		switch matched {
 		case "A", "a":
 			expression.WriteString(`(AM|PM|am|pm)`)
+		case "MMM", "MMMM", "ddd", "dddd":
+			expression.WriteString(`([\p{L}.]+)`)
+		case "Do":
+			expression.WriteString(`(\d{1,2})(?:st|nd|rd|th)`)
 		case "Z":
 			expression.WriteString(`(Z|[+-]\d{2}:\d{2})`)
 		case "ZZ":
@@ -2644,11 +2648,14 @@ func parseFromPattern(input string, pattern string, location *time.Location) (ti
 	components := Components{
 		Year:        year,
 		Month:       mustInt(defaultString(firstPresent(values, "MM", "M"), "1")),
-		Day:         mustInt(defaultString(firstPresent(values, "DD", "D"), "1")),
+		Day:         mustInt(defaultString(firstPresent(values, "DD", "Do", "D"), "1")),
 		Hour:        hour,
 		Minute:      mustInt(defaultString(firstPresent(values, "mm", "m"), "0")),
 		Second:      mustInt(defaultString(firstPresent(values, "ss", "s"), "0")),
 		Millisecond: mustInt(rightPad(defaultString(values["SSS"], "0"), 3)),
+	}
+	if month, ok := monthNumberFromName(firstPresent(values, "MMMM", "MMM")); ok {
+		components.Month = month
 	}
 
 	if offset := firstPresent(values, "Z", "ZZ"); offset != "" {
@@ -2846,6 +2853,39 @@ func selectedPrecision(precision []TimeStringPrecision) TimeStringPrecision {
 	}
 
 	return SecondPrecision
+}
+
+func monthNumberFromName(input string) (int, bool) {
+	normalized := strings.TrimSuffix(strings.ToLower(input), ".")
+	names := map[string]int{
+		"jan":       1,
+		"january":   1,
+		"feb":       2,
+		"february":  2,
+		"mar":       3,
+		"march":     3,
+		"apr":       4,
+		"april":     4,
+		"may":       5,
+		"jun":       6,
+		"june":      6,
+		"jul":       7,
+		"july":      7,
+		"aug":       8,
+		"august":    8,
+		"sep":       9,
+		"sept":      9,
+		"september": 9,
+		"oct":       10,
+		"october":   10,
+		"nov":       11,
+		"november":  11,
+		"dec":       12,
+		"december":  12,
+	}
+	month, ok := names[normalized]
+
+	return month, ok
 }
 
 func ordinal(value int) string {

@@ -533,6 +533,23 @@ const weekdayNames = (
   return names;
 };
 
+const monthNumberFromName = (
+  input: string,
+  locale = "en-US",
+): number | null => {
+  const normalized = input.toLowerCase();
+  const names = [
+    ...monthNames(locale, "long"),
+    ...monthNames(locale, "short"),
+  ].map((name, index) => ({
+    name: name.toLowerCase(),
+    month: (index % 12) + 1,
+  }));
+  const match = names.find((item) => item.name === normalized);
+
+  return match?.month ?? null;
+};
+
 const timeZoneName = (
   date: Date,
   timeZone: string,
@@ -596,7 +613,12 @@ const parseFromPattern = (
 ): Date => {
   const tokens = [
     "YYYY",
+    "MMMM",
+    "dddd",
+    "MMM",
+    "ddd",
     "SSS",
+    "Do",
     "YY",
     "ZZ",
     "MM",
@@ -641,18 +663,24 @@ const parseFromPattern = (
     expression +=
       token === "A" || token === "a"
         ? "(AM|PM|am|pm)"
-        : token === "Z"
-          ? "(Z|[+-]\\d{2}:\\d{2})"
-          : token === "ZZ"
-            ? "(Z|[+-]\\d{4})"
-            : "(\\d{1," +
-              (token.length === 1 ? "4" : String(token.length)) +
-              "})";
+        : token === "MMM" || token === "MMMM"
+          ? "([\\p{L}.]+)"
+          : token === "ddd" || token === "dddd"
+            ? "([\\p{L}.]+)"
+            : token === "Do"
+              ? "(\\d{1,2})(?:st|nd|rd|th)"
+              : token === "Z"
+                ? "(Z|[+-]\\d{2}:\\d{2})"
+                : token === "ZZ"
+                  ? "(Z|[+-]\\d{4})"
+                  : "(\\d{1," +
+                    (token.length === 1 ? "4" : String(token.length)) +
+                    "})";
     index += token.length;
   }
 
   expression += "$";
-  const match = new RegExp(expression).exec(input);
+  const match = new RegExp(expression, "u").exec(input);
 
   if (match === null) {
     throw new RangeError(`Input does not match Tempo format: ${input}`);
@@ -690,11 +718,13 @@ const parseFromPattern = (
   }
 
   const components: TempoComponents = {
-    day: Number(values.get("DD") ?? values.get("D") ?? 1),
+    day: Number(values.get("DD") ?? values.get("Do") ?? values.get("D") ?? 1),
     hour,
     millisecond: Number((values.get("SSS") ?? "0").slice(0, 3).padEnd(3, "0")),
     minute: Number(values.get("mm") ?? values.get("m") ?? 0),
-    month: Number(values.get("MM") ?? values.get("M") ?? 1),
+    month:
+      monthNumberFromName(values.get("MMMM") ?? values.get("MMM") ?? "") ??
+      Number(values.get("MM") ?? values.get("M") ?? 1),
     second: Number(values.get("ss") ?? values.get("s") ?? 0),
     timeZone: options?.timeZone,
     year,
