@@ -1813,6 +1813,46 @@ export class TempoImmutable {
     return this.isSame(this.endOf(unit, options));
   }
 
+  isStartOfDay(): boolean {
+    return this.isStartOf("day");
+  }
+
+  isEndOfDay(): boolean {
+    return this.isEndOf("day");
+  }
+
+  isStartOfWeek(options?: StartOfWeekOptions): boolean {
+    return this.isStartOf("week", options);
+  }
+
+  isEndOfWeek(options?: StartOfWeekOptions): boolean {
+    return this.isEndOf("week", options);
+  }
+
+  isStartOfMonth(): boolean {
+    return this.isStartOf("month");
+  }
+
+  isEndOfMonth(): boolean {
+    return this.isEndOf("month");
+  }
+
+  isStartOfQuarter(): boolean {
+    return this.isStartOf("quarter");
+  }
+
+  isEndOfQuarter(): boolean {
+    return this.isEndOf("quarter");
+  }
+
+  isStartOfYear(): boolean {
+    return this.isStartOf("year");
+  }
+
+  isEndOfYear(): boolean {
+    return this.isEndOf("year");
+  }
+
   startOfDay(): this {
     return this.startOf("day");
   }

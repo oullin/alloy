@@ -607,9 +607,19 @@ describe("Tempo TypeScript behavior", () => {
     ).toBe("2024-05-22T00:00:00.000Z");
 
     expect(Tempo.parse("2024-05-15T00:00:00Z").isStartOf("day")).toBe(true);
+    expect(Tempo.parse("2024-05-15T00:00:00Z").isStartOfDay()).toBe(true);
     expect(Tempo.parse("2024-05-15T00:00:01Z").isStartOf("day")).toBe(false);
     expect(Tempo.parse("2024-05-15T23:59:59.999Z").isEndOf("day")).toBe(true);
+    expect(Tempo.parse("2024-05-15T23:59:59.999Z").isEndOfDay()).toBe(true);
     expect(Tempo.parse("2024-05-15T23:59:59.998Z").isEndOf("day")).toBe(false);
+    expect(Tempo.parse("2024-05-13T00:00:00Z").isStartOfWeek()).toBe(true);
+    expect(Tempo.parse("2024-05-19T23:59:59.999Z").isEndOfWeek()).toBe(true);
+    expect(Tempo.parse("2024-05-01T00:00:00Z").isStartOfMonth()).toBe(true);
+    expect(Tempo.parse("2024-05-31T23:59:59.999Z").isEndOfMonth()).toBe(true);
+    expect(Tempo.parse("2024-04-01T00:00:00Z").isStartOfQuarter()).toBe(true);
+    expect(Tempo.parse("2024-06-30T23:59:59.999Z").isEndOfQuarter()).toBe(true);
+    expect(Tempo.parse("2024-01-01T00:00:00Z").isStartOfYear()).toBe(true);
+    expect(Tempo.parse("2024-12-31T23:59:59.999Z").isEndOfYear()).toBe(true);
   });
 
   it("serializes named date formats and maps components", () => {

@@ -1199,14 +1199,64 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if !startOfDay.IsStartOf(Day) {
 		t.Fatalf("IsStartOf(Day) = false, want true")
 	}
+	if !startOfDay.IsStartOfDay() {
+		t.Fatalf("IsStartOfDay() = false, want true")
+	}
 	if notStartOfDay.IsStartOf(Day) {
 		t.Fatalf("IsStartOf(Day) = true, want false")
 	}
 	if !endOfDay.IsEndOf(Day) {
 		t.Fatalf("IsEndOf(Day) = false, want true")
 	}
+	if !endOfDay.IsEndOfDay() {
+		t.Fatalf("IsEndOfDay() = false, want true")
+	}
 	if notEndOfDay.IsEndOf(Day) {
 		t.Fatalf("IsEndOf(Day) = true, want false")
+	}
+	startOfWeek, err := Parse("2024-05-13T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of week: %v", err)
+	}
+	endOfWeek, err := Parse("2024-05-19T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of week: %v", err)
+	}
+	startOfMonth, err := Parse("2024-05-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of month: %v", err)
+	}
+	endOfMonth, err := Parse("2024-05-31T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of month: %v", err)
+	}
+	startOfQuarter, err := Parse("2024-04-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of quarter: %v", err)
+	}
+	endOfQuarter, err := Parse("2024-06-30T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of quarter: %v", err)
+	}
+	startOfYear, err := Parse("2024-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of year: %v", err)
+	}
+	endOfYear, err := Parse("2024-12-31T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of year: %v", err)
+	}
+	if !startOfWeek.IsStartOfWeek() || !endOfWeek.IsEndOfWeek() {
+		t.Fatalf("week boundary helpers = false, want true")
+	}
+	if !startOfMonth.IsStartOfMonth() || !endOfMonth.IsEndOfMonth() {
+		t.Fatalf("month boundary helpers = false, want true")
+	}
+	if !startOfQuarter.IsStartOfQuarter() || !endOfQuarter.IsEndOfQuarter() {
+		t.Fatalf("quarter boundary helpers = false, want true")
+	}
+	if !startOfYear.IsStartOfYear() || !endOfYear.IsEndOfYear() {
+		t.Fatalf("year boundary helpers = false, want true")
 	}
 }
 

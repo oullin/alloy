@@ -1310,6 +1310,46 @@ func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.Same(tempo.EndOf(unit, options...))
 }
 
+func (tempo Tempo) IsStartOfDay() bool {
+	return tempo.IsStartOf(Day)
+}
+
+func (tempo Tempo) IsEndOfDay() bool {
+	return tempo.IsEndOf(Day)
+}
+
+func (tempo Tempo) IsStartOfWeek(options ...StartOfWeekOptions) bool {
+	return tempo.IsStartOf(Week, options...)
+}
+
+func (tempo Tempo) IsEndOfWeek(options ...StartOfWeekOptions) bool {
+	return tempo.IsEndOf(Week, options...)
+}
+
+func (tempo Tempo) IsStartOfMonth() bool {
+	return tempo.IsStartOf(Month)
+}
+
+func (tempo Tempo) IsEndOfMonth() bool {
+	return tempo.IsEndOf(Month)
+}
+
+func (tempo Tempo) IsStartOfQuarter() bool {
+	return tempo.IsStartOf(Quarter)
+}
+
+func (tempo Tempo) IsEndOfQuarter() bool {
+	return tempo.IsEndOf(Quarter)
+}
+
+func (tempo Tempo) IsStartOfYear() bool {
+	return tempo.IsStartOf(Year)
+}
+
+func (tempo Tempo) IsEndOfYear() bool {
+	return tempo.IsEndOf(Year)
+}
+
 func (tempo Tempo) StartOfDay() Tempo {
 	return tempo.StartOf(Day)
 }
@@ -2592,6 +2632,46 @@ func (mutable *MutableTempo) IsStartOf(unit Unit, options ...StartOfWeekOptions)
 
 func (mutable *MutableTempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return mutable.Tempo().IsEndOf(unit, options...)
+}
+
+func (mutable *MutableTempo) IsStartOfDay() bool {
+	return mutable.Tempo().IsStartOfDay()
+}
+
+func (mutable *MutableTempo) IsEndOfDay() bool {
+	return mutable.Tempo().IsEndOfDay()
+}
+
+func (mutable *MutableTempo) IsStartOfWeek(options ...StartOfWeekOptions) bool {
+	return mutable.Tempo().IsStartOfWeek(options...)
+}
+
+func (mutable *MutableTempo) IsEndOfWeek(options ...StartOfWeekOptions) bool {
+	return mutable.Tempo().IsEndOfWeek(options...)
+}
+
+func (mutable *MutableTempo) IsStartOfMonth() bool {
+	return mutable.Tempo().IsStartOfMonth()
+}
+
+func (mutable *MutableTempo) IsEndOfMonth() bool {
+	return mutable.Tempo().IsEndOfMonth()
+}
+
+func (mutable *MutableTempo) IsStartOfQuarter() bool {
+	return mutable.Tempo().IsStartOfQuarter()
+}
+
+func (mutable *MutableTempo) IsEndOfQuarter() bool {
+	return mutable.Tempo().IsEndOfQuarter()
+}
+
+func (mutable *MutableTempo) IsStartOfYear() bool {
+	return mutable.Tempo().IsStartOfYear()
+}
+
+func (mutable *MutableTempo) IsEndOfYear() bool {
+	return mutable.Tempo().IsEndOfYear()
 }
 
 func (mutable *MutableTempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
