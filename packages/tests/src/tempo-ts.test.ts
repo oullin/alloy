@@ -73,6 +73,19 @@ describe("Tempo TypeScript behavior", () => {
     expect(next).not.toBe(immutable);
     expect(immutable.toISOString()).toBe("2024-02-29T00:00:00.000Z");
     expect(next.toISOString()).toBe("2024-03-01T00:00:00.000Z");
+
+    const convertedMutable = immutable.toMutable();
+    expect(convertedMutable).toBeInstanceOf(TempoMutable);
+    expect(convertedMutable.addDays(1).toISOString()).toBe(
+      "2024-03-01T00:00:00.000Z",
+    );
+    expect(immutable.toISOString()).toBe("2024-02-29T00:00:00.000Z");
+
+    const convertedImmutable = convertedMutable.toImmutable();
+    expect(convertedImmutable).toBeInstanceOf(TempoImmutable);
+    convertedMutable.addDays(1);
+    expect(convertedImmutable.toISOString()).toBe("2024-03-01T00:00:00.000Z");
+    expect(convertedMutable.toISOString()).toBe("2024-03-02T00:00:00.000Z");
   });
 
   it("accepts both second and millisecond numeric timestamps", () => {

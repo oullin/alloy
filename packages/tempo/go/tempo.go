@@ -713,6 +713,14 @@ func (tempo Tempo) Clone() Tempo {
 	return tempo
 }
 
+func (tempo Tempo) Immutable() Tempo {
+	return tempo.Clone()
+}
+
+func (tempo Tempo) Mutable() *MutableTempo {
+	return NewMutable(tempo)
+}
+
 func (tempo Tempo) Timezone() string {
 	return tempo.location.String()
 }
@@ -2105,6 +2113,10 @@ func (mutable *MutableTempo) Tempo() Tempo {
 
 func (mutable *MutableTempo) Clone() *MutableTempo {
 	return NewMutable(mutable.Tempo())
+}
+
+func (mutable *MutableTempo) Immutable() Tempo {
+	return mutable.Tempo()
 }
 
 func (mutable *MutableTempo) Timezone() string {

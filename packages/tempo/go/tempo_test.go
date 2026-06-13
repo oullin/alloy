@@ -80,6 +80,31 @@ func TestDiffInDaysUsesUnixSeconds(t *testing.T) {
 	}
 }
 
+func TestMutableAndImmutableConversions(t *testing.T) {
+	immutable, err := Parse("2024-02-29T00:00:00+00:00")
+	if err != nil {
+		t.Fatalf("parse immutable: %v", err)
+	}
+
+	mutable := immutable.Mutable()
+	mutable.AddDays(1)
+	if got := immutable.ISOString(); got != "2024-02-29T00:00:00.000Z" {
+		t.Fatalf("immutable after Mutable().AddDays() = %q, want unchanged", got)
+	}
+	if got := mutable.ISOString(); got != "2024-03-01T00:00:00.000Z" {
+		t.Fatalf("mutable after AddDays() = %q, want changed", got)
+	}
+
+	converted := mutable.Immutable()
+	mutable.AddDays(1)
+	if got := converted.ISOString(); got != "2024-03-01T00:00:00.000Z" {
+		t.Fatalf("converted immutable after mutable change = %q, want snapshot", got)
+	}
+	if got := mutable.ISOString(); got != "2024-03-02T00:00:00.000Z" {
+		t.Fatalf("mutable after second AddDays() = %q, want changed", got)
+	}
+}
+
 func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	factory, err := NewFactory(WithTimezone("Asia/Tokyo"))
 	if err != nil {

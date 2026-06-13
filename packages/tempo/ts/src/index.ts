@@ -1458,6 +1458,14 @@ export class TempoImmutable {
     return this.clone();
   }
 
+  toImmutable(): TempoImmutable {
+    return new TempoImmutable(this.value, { timeZone: this.zone });
+  }
+
+  toMutable(): TempoMutable {
+    return new TempoMutable(this.value, { timeZone: this.zone });
+  }
+
   timezone(timeZone: string): this {
     return this.setTimezone(timeZone);
   }
