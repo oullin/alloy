@@ -246,6 +246,20 @@ func Create(components Components) (Tempo, error) {
 	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
 }
 
+func CreateSafe(components Components) (Tempo, error) {
+	location, err := loadLocation(components.Timezone)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	value := timeFromComponents(components, location)
+	if !componentsMatchTime(components, value, location) {
+		return Tempo{}, errors.New("invalid Tempo local date/time components")
+	}
+
+	return Tempo{value: value.UTC(), location: location}, nil
+}
+
 func CreateFromDate(year int, month int, day int, options ...Option) (Tempo, error) {
 	cfg, err := applyOptions(options...)
 	if err != nil {
@@ -395,6 +409,24 @@ func (factory Factory) Create(components Components) (Tempo, error) {
 	}
 
 	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
+}
+
+func (factory Factory) CreateSafe(components Components) (Tempo, error) {
+	location := factory.location
+	if components.Timezone != "" {
+		nextLocation, err := loadLocation(components.Timezone)
+		if err != nil {
+			return Tempo{}, err
+		}
+		location = nextLocation
+	}
+
+	value := timeFromComponents(components, location)
+	if !componentsMatchTime(components, value, location) {
+		return Tempo{}, errors.New("invalid Tempo local date/time components")
+	}
+
+	return Tempo{value: value.UTC(), location: location}, nil
 }
 
 func (factory Factory) CreateFromDate(year int, month int, day int) Tempo {
@@ -3225,6 +3257,27 @@ func timeFromComponents(components Components, location *time.Location) time.Tim
 		components.Millisecond*int(time.Millisecond),
 		location,
 	)
+}
+
+func componentsMatchTime(components Components, value time.Time, location *time.Location) bool {
+	month := components.Month
+	if month == 0 {
+		month = 1
+	}
+
+	day := components.Day
+	if day == 0 {
+		day = 1
+	}
+
+	local := value.In(location)
+	return local.Year() == components.Year &&
+		int(local.Month()) == month &&
+		local.Day() == day &&
+		local.Hour() == components.Hour &&
+		local.Minute() == components.Minute &&
+		local.Second() == components.Second &&
+		local.Nanosecond()/int(time.Millisecond) == components.Millisecond
 }
 
 func normalizeUnit(unit Unit) Unit {

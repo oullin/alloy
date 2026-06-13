@@ -11,6 +11,7 @@ import {
   createFromDate,
   createFromTime,
   createMidnightDate,
+  createSafe,
   hasFormat,
   max,
   min,
@@ -176,6 +177,38 @@ describe("Tempo TypeScript behavior", () => {
       weekday: 1,
       year: 2024,
     });
+  });
+
+  it("rejects normalized component construction through safe constructors", () => {
+    expect(Tempo.create({ day: 31, month: 2, year: 2024 }).toDateString()).toBe(
+      "2024-03-02",
+    );
+    expect(() => Tempo.createSafe({ day: 31, month: 2, year: 2024 })).toThrow(
+      "Invalid Tempo local date/time components",
+    );
+    expect(
+      Tempo.createSafe({
+        day: 29,
+        month: 2,
+        timeZone: "Asia/Tokyo",
+        year: 2024,
+      }).toISOString(),
+    ).toBe("2024-02-28T15:00:00.000Z");
+    expect(
+      createSafe({
+        day: 29,
+        month: 2,
+        timeZone: "UTC",
+        year: 2024,
+      }).toDateString(),
+    ).toBe("2024-02-29");
+    expect(() =>
+      TempoFactory.create({ timeZone: "Asia/Tokyo" }).createSafe({
+        day: 31,
+        month: 2,
+        year: 2024,
+      }),
+    ).toThrow("Invalid Tempo local date/time components");
   });
 
   it("converts timezones with and without preserving local time", () => {

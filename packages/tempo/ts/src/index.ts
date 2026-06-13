@@ -302,6 +302,39 @@ const dateFromZonedComponents = (
   return new Date(utc);
 };
 
+const safeComponentParts = (
+  components: TempoComponents,
+): Required<Omit<TempoComponents, "timeZone">> => ({
+  day: components.day ?? 1,
+  hour: components.hour ?? 0,
+  millisecond: components.millisecond ?? 0,
+  minute: components.minute ?? 0,
+  month: components.month ?? 1,
+  second: components.second ?? 0,
+  year: components.year,
+});
+
+const assertSafeZonedComponents = (
+  components: TempoComponents,
+  date: Date,
+  timeZone: string,
+): void => {
+  const expected = safeComponentParts(components);
+  const actual = getZonedParts(date, timeZone);
+
+  if (
+    actual.year !== expected.year ||
+    actual.month !== expected.month ||
+    actual.day !== expected.day ||
+    actual.hour !== expected.hour ||
+    actual.minute !== expected.minute ||
+    actual.second !== expected.second ||
+    actual.millisecond !== expected.millisecond
+  ) {
+    throw new RangeError("Invalid Tempo local date/time components");
+  }
+};
+
 const fromNumericTimestamp = (input: number): Date => {
   assertFiniteNumber(input, "Timestamp");
   const magnitude = Math.abs(input);
@@ -1097,6 +1130,15 @@ export class TempoImmutable {
     return new TempoImmutable(dateFromZonedComponents(components), {
       timeZone: components.timeZone,
     });
+  }
+
+  static createSafe(components: TempoComponents): TempoImmutable {
+    const timeZone = normalizeTimeZone(components.timeZone);
+    const date = dateFromZonedComponents(components, timeZone);
+
+    assertSafeZonedComponents(components, date, timeZone);
+
+    return new TempoImmutable(date, { timeZone });
   }
 
   static createFromDate(
@@ -2625,6 +2667,15 @@ export class Tempo extends TempoImmutable {
     });
   }
 
+  static override createSafe(components: TempoComponents): Tempo {
+    const timeZone = normalizeTimeZone(components.timeZone);
+    const date = dateFromZonedComponents(components, timeZone);
+
+    assertSafeZonedComponents(components, date, timeZone);
+
+    return new Tempo(date, { timeZone });
+  }
+
   static override createFromDate(
     year: number,
     month = 1,
@@ -2732,6 +2783,15 @@ export class TempoMutable extends TempoImmutable {
     return new TempoMutable(dateFromZonedComponents(components), {
       timeZone: components.timeZone,
     });
+  }
+
+  static override createSafe(components: TempoComponents): TempoMutable {
+    const timeZone = normalizeTimeZone(components.timeZone);
+    const date = dateFromZonedComponents(components, timeZone);
+
+    assertSafeZonedComponents(components, date, timeZone);
+
+    return new TempoMutable(date, { timeZone });
   }
 
   static override createFromDate(
@@ -3097,6 +3157,10 @@ export class TempoFactory {
     return Tempo.create({ timeZone: this.zone, ...components });
   }
 
+  createSafe(components: TempoComponents): Tempo {
+    return Tempo.createSafe({ timeZone: this.zone, ...components });
+  }
+
   createFromDate(year: number, month = 1, day = 1): Tempo {
     return this.create({ day, month, year });
   }
@@ -3140,6 +3204,7 @@ export const fromFormat = Tempo.fromFormat;
 export const tryFromFormat = Tempo.tryFromFormat;
 export const hasFormat = Tempo.hasFormat;
 export const create = Tempo.create;
+export const createSafe = Tempo.createSafe;
 export const createFromDate = Tempo.createFromDate;
 export const createFromTime = Tempo.createFromTime;
 export const createMidnightDate = Tempo.createMidnightDate;

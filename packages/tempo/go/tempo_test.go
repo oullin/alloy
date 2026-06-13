@@ -127,6 +127,16 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	if got := created.ISOString(); got != "2024-01-01T00:00:00.000Z" {
 		t.Fatalf("Factory.Create().ISOString() = %q, want scoped timezone instant", got)
 	}
+	safeCreated, err := factory.CreateSafe(Components{Year: 2024, Month: 2, Day: 29})
+	if err != nil {
+		t.Fatalf("factory create safe: %v", err)
+	}
+	if got := safeCreated.ISOString(); got != "2024-02-28T15:00:00.000Z" {
+		t.Fatalf("Factory.CreateSafe().ISOString() = %q, want scoped safe instant", got)
+	}
+	if _, err := factory.CreateSafe(Components{Year: 2024, Month: 2, Day: 31}); err == nil {
+		t.Fatalf("Factory.CreateSafe(invalid) error = nil, want error")
+	}
 	fromObject, err := factory.FromObject(Components{Year: 2024, Month: 1, Day: 1, Hour: 9})
 	if err != nil {
 		t.Fatalf("factory from object: %v", err)
@@ -258,6 +268,24 @@ func TestCreateTimezoneAwareComponents(t *testing.T) {
 	object := tokyo.ToObject()
 	if object.Timezone != "Asia/Tokyo" || object.Weekday != 1 {
 		t.Fatalf("ToObject() = %#v, want Tokyo Monday object", object)
+	}
+
+	normalized, err := Create(Components{Year: 2024, Month: 2, Day: 31})
+	if err != nil {
+		t.Fatalf("create normalized date: %v", err)
+	}
+	if got := normalized.DateString(); got != "2024-03-02" {
+		t.Fatalf("Create(invalid date).DateString() = %q, want normalized date", got)
+	}
+	if _, err := CreateSafe(Components{Year: 2024, Month: 2, Day: 31}); err == nil {
+		t.Fatalf("CreateSafe(invalid date) error = nil, want error")
+	}
+	safe, err := CreateSafe(Components{Year: 2024, Month: 2, Day: 29, Timezone: "Asia/Tokyo"})
+	if err != nil {
+		t.Fatalf("create safe date: %v", err)
+	}
+	if got := safe.ISOString(); got != "2024-02-28T15:00:00.000Z" {
+		t.Fatalf("CreateSafe(valid Tokyo date).ISOString() = %q, want timezone instant", got)
 	}
 }
 
