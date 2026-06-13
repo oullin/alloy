@@ -3,6 +3,7 @@ package tempo
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestDateCases(t *testing.T) {
@@ -365,5 +366,89 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 	}
 	if got := base.DiffForHumans(base.AddHours(3)); got != "3 hours ago" {
 		t.Fatalf("DiffForHumans() = %q, want past diff", got)
+	}
+}
+
+func TestISOWeekMetadataWeekdayNavigationAndAge(t *testing.T) {
+	monday, err := Parse("2024-01-01T12:30:00Z")
+	if err != nil {
+		t.Fatalf("parse monday: %v", err)
+	}
+	week53, err := Parse("2020-12-31T12:30:00Z")
+	if err != nil {
+		t.Fatalf("parse week53: %v", err)
+	}
+	friday, err := Parse("2024-05-17T12:30:00Z")
+	if err != nil {
+		t.Fatalf("parse friday: %v", err)
+	}
+
+	if got := monday.ISOWeekday(); got != 1 {
+		t.Fatalf("ISOWeekday() = %d, want 1", got)
+	}
+	if got := monday.ISOWeekNumber(); got != 1 {
+		t.Fatalf("ISOWeekNumber() = %d, want 1", got)
+	}
+	if got := monday.ISOWeekYear(); got != 2024 {
+		t.Fatalf("ISOWeekYear() = %d, want 2024", got)
+	}
+	if got := monday.WeeksInISOYear(); got != 52 {
+		t.Fatalf("WeeksInISOYear() = %d, want 52", got)
+	}
+	if got := week53.ISOWeekNumber(); got != 53 {
+		t.Fatalf("ISOWeekNumber() = %d, want 53", got)
+	}
+	if got := week53.ISOWeekYear(); got != 2020 {
+		t.Fatalf("ISOWeekYear() = %d, want 2020", got)
+	}
+	if got := week53.WeeksInISOYear(); got != 53 {
+		t.Fatalf("WeeksInISOYear() = %d, want 53", got)
+	}
+	if !monday.IsMonday() {
+		t.Fatalf("IsMonday() = false, want true")
+	}
+	if got := monday.Next(time.Friday).DateTimeString(); got != "2024-01-05 12:30:00" {
+		t.Fatalf("Next(Friday).DateTimeString() = %q, want next Friday", got)
+	}
+	if got := monday.Previous(time.Friday).DateTimeString(); got != "2023-12-29 12:30:00" {
+		t.Fatalf("Previous(Friday).DateTimeString() = %q, want previous Friday", got)
+	}
+	if got := friday.NextWeekday().DateString(); got != "2024-05-20" {
+		t.Fatalf("NextWeekday().DateString() = %q, want Monday", got)
+	}
+	if got := monday.PreviousWeekday().DateString(); got != "2023-12-29" {
+		t.Fatalf("PreviousWeekday().DateString() = %q, want Friday", got)
+	}
+
+	if got := friday.FirstOfMonth().DateString(); got != "2024-05-01" {
+		t.Fatalf("FirstOfMonth().DateString() = %q, want month start", got)
+	}
+	if got := friday.FirstOfMonth(time.Monday).DateString(); got != "2024-05-06" {
+		t.Fatalf("FirstOfMonth(Monday).DateString() = %q, want first Monday", got)
+	}
+	if got := friday.LastOfMonth().DateString(); got != "2024-05-31" {
+		t.Fatalf("LastOfMonth().DateString() = %q, want month end date", got)
+	}
+	if got := friday.LastOfMonth(time.Friday).DateString(); got != "2024-05-31" {
+		t.Fatalf("LastOfMonth(Friday).DateString() = %q, want last Friday", got)
+	}
+
+	birthday, err := Parse("2000-06-15T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse birthday: %v", err)
+	}
+	beforeBirthday, err := Parse("2024-06-14T23:59:59Z")
+	if err != nil {
+		t.Fatalf("parse before birthday: %v", err)
+	}
+	onBirthday, err := Parse("2024-06-15T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse on birthday: %v", err)
+	}
+	if got := birthday.Age(beforeBirthday); got != 23 {
+		t.Fatalf("Age(before birthday) = %d, want 23", got)
+	}
+	if got := birthday.Age(onBirthday); got != 24 {
+		t.Fatalf("Age(on birthday) = %d, want 24", got)
 	}
 }

@@ -38,6 +38,29 @@ export type BoundaryUnit =
 
 export type ComparisonUnit = "millisecond" | BoundaryUnit;
 
+export type WeekdayInput =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sun"
+  | "mon"
+  | "tue"
+  | "wed"
+  | "thu"
+  | "fri"
+  | "sat";
+
 export type TempoOptions = {
   readonly timeZone?: string;
 };
@@ -357,6 +380,57 @@ const asDate = (input: TempoInput, options?: TempoOptions): Date => {
 
 const daysInMonth = (year: number, month: number): number =>
   new Date(Date.UTC(year, month, 0)).getUTCDate();
+
+const isoWeekData = (
+  parts: Pick<ZonedParts, "year" | "month" | "day">,
+): { readonly year: number; readonly week: number } => {
+  const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+
+  const year = date.getUTCFullYear();
+  const yearStart = new Date(Date.UTC(year, 0, 1));
+  const week = Math.ceil(
+    ((date.getTime() - yearStart.getTime()) / millisecondsPerDay + 1) / 7,
+  );
+
+  return { week, year };
+};
+
+const weeksInISOYear = (year: number): number =>
+  isoWeekData({ day: 28, month: 12, year }).week;
+
+const resolveWeekday = (weekday: WeekdayInput): number => {
+  if (typeof weekday === "number") {
+    return ((weekday % 7) + 7) % 7;
+  }
+
+  switch (weekday.toLowerCase()) {
+    case "sunday":
+    case "sun":
+      return 0;
+    case "monday":
+    case "mon":
+      return 1;
+    case "tuesday":
+    case "tue":
+      return 2;
+    case "wednesday":
+    case "wed":
+      return 3;
+    case "thursday":
+    case "thu":
+      return 4;
+    case "friday":
+    case "fri":
+      return 5;
+    case "saturday":
+    case "sat":
+      return 6;
+  }
+
+  throw new RangeError(`Invalid Tempo weekday: ${String(weekday)}`);
+};
 
 const normalizeUnit = (unit: TimeUnit): Exclude<TimeUnit, `${string}s`> => {
   switch (unit) {
@@ -773,6 +847,22 @@ export class TempoImmutable {
     return this.parts().weekday;
   }
 
+  get isoWeekday(): number {
+    return this.dayOfWeek === 0 ? 7 : this.dayOfWeek;
+  }
+
+  get isoWeek(): number {
+    return isoWeekData(this.parts()).week;
+  }
+
+  get isoWeekYear(): number {
+    return isoWeekData(this.parts()).year;
+  }
+
+  get weeksInISOYear(): number {
+    return weeksInISOYear(this.isoWeekYear);
+  }
+
   get dayOfYear(): number {
     return this.diffInDays(this.startOf("year")) + 1;
   }
@@ -813,6 +903,34 @@ export class TempoImmutable {
 
   isWeekend(): boolean {
     return this.dayOfWeek === 0 || this.dayOfWeek === 6;
+  }
+
+  isSunday(): boolean {
+    return this.dayOfWeek === 0;
+  }
+
+  isMonday(): boolean {
+    return this.dayOfWeek === 1;
+  }
+
+  isTuesday(): boolean {
+    return this.dayOfWeek === 2;
+  }
+
+  isWednesday(): boolean {
+    return this.dayOfWeek === 3;
+  }
+
+  isThursday(): boolean {
+    return this.dayOfWeek === 4;
+  }
+
+  isFriday(): boolean {
+    return this.dayOfWeek === 5;
+  }
+
+  isSaturday(): boolean {
+    return this.dayOfWeek === 6;
   }
 
   isWeekday(): boolean {
@@ -1102,6 +1220,12 @@ export class TempoImmutable {
     return this.set({ day, year: parts.year + years });
   }
 
+  age(reference: TempoInput = new Date()): number {
+    return TempoImmutable.parse(reference, { timeZone: this.zone }).diffInYears(
+      this,
+    );
+  }
+
   subYears(years: number): this {
     return this.addYears(-years);
   }
@@ -1193,6 +1317,32 @@ export class TempoImmutable {
     return this.endOf("month");
   }
 
+  firstOfMonth(weekday?: WeekdayInput): this {
+    const first = this.startOf("month");
+
+    if (weekday === undefined) {
+      return first;
+    }
+
+    const target = resolveWeekday(weekday);
+    const delta = (target - first.dayOfWeek + 7) % 7;
+
+    return first.addDays(delta);
+  }
+
+  lastOfMonth(weekday?: WeekdayInput): this {
+    const last = this.endOf("month").startOf("day");
+
+    if (weekday === undefined) {
+      return last;
+    }
+
+    const target = resolveWeekday(weekday);
+    const delta = (last.dayOfWeek - target + 7) % 7;
+
+    return last.subDays(delta);
+  }
+
   startOfYear(): this {
     return this.startOf("year");
   }
@@ -1234,6 +1384,40 @@ export class TempoImmutable {
     }
 
     return this.make(new Date(Math.round(this.timestampMs / fixed) * fixed));
+  }
+
+  next(weekday: WeekdayInput): this {
+    const target = resolveWeekday(weekday);
+    const delta = (target - this.dayOfWeek + 7) % 7 || 7;
+
+    return this.addDays(delta);
+  }
+
+  previous(weekday: WeekdayInput): this {
+    const target = resolveWeekday(weekday);
+    const delta = (this.dayOfWeek - target + 7) % 7 || 7;
+
+    return this.subDays(delta);
+  }
+
+  nextWeekday(): this {
+    let next = this.addDays(1);
+
+    while (next.isWeekend()) {
+      next = next.addDays(1);
+    }
+
+    return next;
+  }
+
+  previousWeekday(): this {
+    let previous = this.subDays(1);
+
+    while (previous.isWeekend()) {
+      previous = previous.subDays(1);
+    }
+
+    return previous;
   }
 
   diff(

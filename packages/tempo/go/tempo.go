@@ -274,6 +274,35 @@ func (tempo Tempo) DayOfWeek() int {
 	return int(tempo.local().Weekday())
 }
 
+func (tempo Tempo) ISOWeekday() int {
+	weekday := tempo.local().Weekday()
+	if weekday == time.Sunday {
+		return 7
+	}
+
+	return int(weekday)
+}
+
+func (tempo Tempo) ISOWeek() (int, int) {
+	year, week := tempo.local().ISOWeek()
+	return year, week
+}
+
+func (tempo Tempo) ISOWeekYear() int {
+	year, _ := tempo.ISOWeek()
+	return year
+}
+
+func (tempo Tempo) ISOWeekNumber() int {
+	_, week := tempo.ISOWeek()
+	return week
+}
+
+func (tempo Tempo) WeeksInISOYear() int {
+	_, week := time.Date(tempo.ISOWeekYear(), time.December, 28, 0, 0, 0, 0, tempo.location).ISOWeek()
+	return week
+}
+
 func (tempo Tempo) DayOfYear() int {
 	return tempo.local().YearDay()
 }
@@ -311,6 +340,34 @@ func (tempo Tempo) DaysInMonth() int {
 func (tempo Tempo) IsWeekend() bool {
 	weekday := tempo.local().Weekday()
 	return weekday == time.Saturday || weekday == time.Sunday
+}
+
+func (tempo Tempo) IsSunday() bool {
+	return tempo.local().Weekday() == time.Sunday
+}
+
+func (tempo Tempo) IsMonday() bool {
+	return tempo.local().Weekday() == time.Monday
+}
+
+func (tempo Tempo) IsTuesday() bool {
+	return tempo.local().Weekday() == time.Tuesday
+}
+
+func (tempo Tempo) IsWednesday() bool {
+	return tempo.local().Weekday() == time.Wednesday
+}
+
+func (tempo Tempo) IsThursday() bool {
+	return tempo.local().Weekday() == time.Thursday
+}
+
+func (tempo Tempo) IsFriday() bool {
+	return tempo.local().Weekday() == time.Friday
+}
+
+func (tempo Tempo) IsSaturday() bool {
+	return tempo.local().Weekday() == time.Saturday
 }
 
 func (tempo Tempo) IsWeekday() bool {
@@ -585,6 +642,10 @@ func (tempo Tempo) AddYearsNoOverflow(years int) Tempo {
 	return Tempo{value: next.UTC(), location: tempo.location}
 }
 
+func (tempo Tempo) Age(reference Tempo) int {
+	return reference.DiffInYears(tempo)
+}
+
 func (tempo Tempo) SubYearsNoOverflow(years int) Tempo {
 	return tempo.AddYearsNoOverflow(-years)
 }
@@ -659,6 +720,28 @@ func (tempo Tempo) EndOfMonth() Tempo {
 	return tempo.EndOf(Month)
 }
 
+func (tempo Tempo) FirstOfMonth(weekdays ...time.Weekday) Tempo {
+	first := tempo.StartOf(Month)
+	if len(weekdays) == 0 {
+		return first
+	}
+
+	target := weekdays[0]
+	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
+	return first.AddDays(delta)
+}
+
+func (tempo Tempo) LastOfMonth(weekdays ...time.Weekday) Tempo {
+	last := tempo.EndOf(Month).StartOf(Day)
+	if len(weekdays) == 0 {
+		return last
+	}
+
+	target := weekdays[0]
+	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
+	return last.SubDays(delta)
+}
+
 func (tempo Tempo) StartOfYear() Tempo {
 	return tempo.StartOf(Year)
 }
@@ -702,6 +785,42 @@ func (tempo Tempo) Round(unit Unit) Tempo {
 	}
 
 	return Tempo{value: tempo.value.Round(fixed).UTC(), location: tempo.location}
+}
+
+func (tempo Tempo) Next(weekday time.Weekday) Tempo {
+	delta := (int(weekday) - int(tempo.local().Weekday()) + 7) % 7
+	if delta == 0 {
+		delta = 7
+	}
+
+	return tempo.AddDays(delta)
+}
+
+func (tempo Tempo) Previous(weekday time.Weekday) Tempo {
+	delta := (int(tempo.local().Weekday()) - int(weekday) + 7) % 7
+	if delta == 0 {
+		delta = 7
+	}
+
+	return tempo.SubDays(delta)
+}
+
+func (tempo Tempo) NextWeekday() Tempo {
+	next := tempo.AddDays(1)
+	for next.IsWeekend() {
+		next = next.AddDays(1)
+	}
+
+	return next
+}
+
+func (tempo Tempo) PreviousWeekday() Tempo {
+	previous := tempo.SubDays(1)
+	for previous.IsWeekend() {
+		previous = previous.SubDays(1)
+	}
+
+	return previous
 }
 
 func (tempo Tempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {

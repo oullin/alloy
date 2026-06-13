@@ -234,4 +234,40 @@ describe("Tempo TypeScript behavior", () => {
       }),
     ).toBe("3 hours ago");
   });
+
+  it("supports ISO week metadata and weekday navigation", () => {
+    const monday = Tempo.parse("2024-01-01T12:30:00Z");
+    const week53 = Tempo.parse("2020-12-31T12:30:00Z");
+    const friday = Tempo.parse("2024-05-17T12:30:00Z");
+
+    expect(monday.isoWeekday).toBe(1);
+    expect(monday.isoWeek).toBe(1);
+    expect(monday.isoWeekYear).toBe(2024);
+    expect(monday.weeksInISOYear).toBe(52);
+    expect(week53.isoWeek).toBe(53);
+    expect(week53.isoWeekYear).toBe(2020);
+    expect(week53.weeksInISOYear).toBe(53);
+
+    expect(monday.isMonday()).toBe(true);
+    expect(monday.next("friday").toDateTimeString()).toBe(
+      "2024-01-05 12:30:00",
+    );
+    expect(monday.previous("friday").toDateTimeString()).toBe(
+      "2023-12-29 12:30:00",
+    );
+    expect(friday.nextWeekday().toDateString()).toBe("2024-05-20");
+    expect(monday.previousWeekday().toDateString()).toBe("2023-12-29");
+  });
+
+  it("finds weekday positions inside months and computes full-year ages", () => {
+    const may = Tempo.parse("2024-05-17T12:30:00Z");
+    const birthday = Tempo.parse("2000-06-15T00:00:00Z");
+
+    expect(may.firstOfMonth().toDateString()).toBe("2024-05-01");
+    expect(may.firstOfMonth("monday").toDateString()).toBe("2024-05-06");
+    expect(may.lastOfMonth().toDateString()).toBe("2024-05-31");
+    expect(may.lastOfMonth("friday").toDateString()).toBe("2024-05-31");
+    expect(birthday.age("2024-06-14T23:59:59Z")).toBe(23);
+    expect(birthday.age("2024-06-15T00:00:00Z")).toBe(24);
+  });
 });
