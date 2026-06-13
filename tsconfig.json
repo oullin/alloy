@@ -2,10 +2,8 @@
   "files": [],
   "references": [
     { "path": "./packages/artefacts" },
-    { "path": "./packages/carbon-oracle" },
-    { "path": "./packages/tempo/spec" },
     { "path": "./packages/tempo/ts" },
     { "path": "./packages/tests" },
-    { "path": "./provision" }
+    { "path": "./provision/tooling" }
   ]
 }

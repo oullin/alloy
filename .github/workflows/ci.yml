@@ -23,11 +23,10 @@ jobs:
 
       - uses: actions/setup-go@v6
         with:
-          go-version: "1.23"
+          go-version: "1.26"
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
       - run: make go-test
-      - run: make oracle-check

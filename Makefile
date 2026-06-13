@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-PROVISION_DIR := provision
+PROVISION_DIR := provision/tooling
 
 .DEFAULT_GOAL := help
 
@@ -15,4 +15,3 @@ Makefile:
 	@$(MAKE) --no-print-directory -C $(PROVISION_DIR) $@
 
 FORCE:
-

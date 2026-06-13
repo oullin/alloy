@@ -1,11 +1,9 @@
 SHELL := /bin/bash
 
 PROVISION_DIR := $(CURDIR)
-ROOT_PATH := $(abspath $(PROVISION_DIR)/..)
+ROOT_PATH := $(abspath $(PROVISION_DIR)/../..)
 
 include make/shared.mk
 include make/quality.mk
-include make/oracle.mk
 
 .DEFAULT_GOAL := help
-

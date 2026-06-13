@@ -11,8 +11,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@tempo/artefacts": repoPath("./packages/artefacts/src"),
-      "@tempo/spec/fixtures": repoPath("./packages/tempo/spec/fixtures"),
-      "@tempo/spec": repoPath("./packages/tempo/spec/src"),
       "@tempo/tempo": repoPath("./packages/tempo/ts/src"),
       "@tempo/tests": repoPath("./packages/tests/src"),
     },

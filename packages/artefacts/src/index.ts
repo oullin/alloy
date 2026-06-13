@@ -16,12 +16,8 @@ export const logDir = (...segments: string[]): string =>
   artefactsPath(".logs", ...segments);
 
 const packageRoot = resolve(repoRoot, "packages");
-const tempoRoot = resolve(packageRoot, "tempo");
-
 export const workspaceAliases = (): Record<string, string> => ({
   "@tempo/artefacts": resolve(packageRoot, "artefacts", "src"),
-  "@tempo/spec/fixtures": resolve(tempoRoot, "spec", "fixtures"),
-  "@tempo/spec": resolve(tempoRoot, "spec", "src"),
-  "@tempo/tempo": resolve(tempoRoot, "ts", "src"),
+  "@tempo/tempo": resolve(packageRoot, "tempo", "ts", "src"),
   "@tempo/tests": resolve(packageRoot, "tests", "src"),
 });

@@ -7,7 +7,7 @@ import (
 
 const isoLayout = time.RFC3339Nano
 
-// Tempo is an immutable timestamp wrapper with Carbon-compatible fixture behavior.
+// Tempo is an immutable timestamp wrapper.
 type Tempo struct {
 	value time.Time
 }

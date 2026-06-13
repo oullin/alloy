@@ -6,7 +6,6 @@
     "noEmit": true,
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@tempo/spec": ["../tempo/spec/src"],
       "@tempo/tempo": ["../tempo/ts/src"]
     }
   },

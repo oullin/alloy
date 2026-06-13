@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@tempo/artefacts": "workspace:*",
-    "@tempo/spec": "workspace:*",
     "tsdown": "^0.15.6",
     "typescript": "^6.0.3"
   }

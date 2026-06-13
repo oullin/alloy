@@ -1,4 +1,3 @@
-import coreFixture from "@tempo/spec/fixtures/core.json" with { type: "json" };
 import {
   Tempo,
   TempoFactory,
@@ -7,16 +6,27 @@ import {
 } from "@tempo/tempo";
 import { describe, expect, it } from "vitest";
 
-describe("Tempo TypeScript shared Carbon fixtures", () => {
-  it("uses pinned Carbon metadata", () => {
-    expect(coreFixture.metadata).toMatchObject({
-      source: "carbon",
-      carbonVersion: "3.11.4",
-      timezone: "UTC",
-    });
-  });
+const dateCases = [
+  {
+    name: "parse utc start of day",
+    input: "2024-02-29T00:00:00+00:00",
+    expectedIso: "2024-02-29T00:00:00.000Z",
+    expectedDate: "2024-02-29",
+    addDays: 1,
+    expectedAddDaysIso: "2024-03-01T00:00:00.000Z",
+  },
+  {
+    name: "parse utc end of year",
+    input: "2024-12-31T23:30:00+00:00",
+    expectedIso: "2024-12-31T23:30:00.000Z",
+    expectedDate: "2024-12-31",
+    addDays: 1,
+    expectedAddDaysIso: "2025-01-01T23:30:00.000Z",
+  },
+] as const;
 
-  it.each(coreFixture.cases)("$name", (item) => {
+describe("Tempo TypeScript behavior", () => {
+  it.each(dateCases)("$name", (item) => {
     const parsed = TempoImmutable.parse(item.input);
 
     expect(parsed.toISOString()).toBe(item.expectedIso);

@@ -9,8 +9,6 @@
     "format-all": "make format-all",
     "go:test": "make go-test",
     "lint": "turbo run lint",
-    "oracle:check": "make oracle-check",
-    "oracle:generate": "make oracle-generate",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },
