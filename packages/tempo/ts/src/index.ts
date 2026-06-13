@@ -996,6 +996,14 @@ export class TempoDuration {
     return Object.values(this.toObject()).every((value) => value === 0);
   }
 
+  isPositive(): boolean {
+    return !this.isZero() && this.direction() > 0;
+  }
+
+  isNegative(): boolean {
+    return this.direction() < 0;
+  }
+
   toObject(): DurationObject {
     return {
       days: this.days,

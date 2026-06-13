@@ -1011,6 +1011,19 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 	if !zero.IsZero() {
 		t.Fatalf("IsZero() = false, want true")
 	}
+	if !parsed.IsPositive() {
+		t.Fatalf("IsPositive() = false, want true")
+	}
+	negative, err := ParseDuration("-P1D")
+	if err != nil {
+		t.Fatalf("parse negative duration: %v", err)
+	}
+	if !negative.IsNegative() {
+		t.Fatalf("IsNegative() = false, want true")
+	}
+	if zero.IsPositive() || zero.IsNegative() {
+		t.Fatalf("zero duration sign predicates = positive:%t negative:%t, want false/false", zero.IsPositive(), zero.IsNegative())
+	}
 	weeks, err := ParseDuration("P2W")
 	if err != nil {
 		t.Fatalf("parse week duration: %v", err)

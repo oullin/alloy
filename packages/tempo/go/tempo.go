@@ -628,6 +628,14 @@ func (duration Duration) IsZero() bool {
 	return duration == (Duration{})
 }
 
+func (duration Duration) IsPositive() bool {
+	return !duration.IsZero() && duration.direction() > 0
+}
+
+func (duration Duration) IsNegative() bool {
+	return duration.direction() < 0
+}
+
 func (duration Duration) ToMap() map[string]int {
 	return map[string]int{
 		"years":        duration.Years,

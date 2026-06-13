@@ -552,6 +552,10 @@ describe("Tempo TypeScript behavior", () => {
     });
     expect(normalized.toISOString()).toBe("P2Y2M9DT2H2M1.250S");
     expect(TempoDuration.parse("PT0S").isZero()).toBe(true);
+    expect(parsed.isPositive()).toBe(true);
+    expect(TempoDuration.parse("-P1D").isNegative()).toBe(true);
+    expect(TempoDuration.parse("PT0S").isPositive()).toBe(false);
+    expect(TempoDuration.parse("PT0S").isNegative()).toBe(false);
     expect(TempoDuration.parse("P2W").normalized().toISOString()).toBe("P14D");
 
     expect(
