@@ -1187,8 +1187,35 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 	if !friday.SameSecond(sameSecond) || !friday.SameMinute(sameMinute) || !friday.SameHour(sameHour) || !friday.SameDay(sameDay) || !friday.SameWeek(sameWeek) || !friday.SameMonth(sameMonth) || !friday.SameQuarter(sameQuarter) || !friday.SameYear(sameYear) {
 		t.Fatalf("same-unit comparisons did not all match expected true values")
 	}
+	if !friday.EqualTo(friday.Clone()) || !friday.Eq(friday.Clone()) {
+		t.Fatalf("equality aliases = false, want true")
+	}
+	if !friday.NotEqualTo(wednesday) || !friday.Ne(wednesday) {
+		t.Fatalf("inequality aliases = false, want true")
+	}
+	if !wednesday.GreaterThan(friday) || !wednesday.Gt(friday) {
+		t.Fatalf("greater-than aliases = false, want true")
+	}
+	if !friday.GreaterThanOrEqualTo(friday.Clone()) || !friday.Gte(friday.Clone()) {
+		t.Fatalf("greater-than-or-equal aliases = false, want true")
+	}
+	if !friday.LessThan(wednesday) || !friday.Lt(wednesday) {
+		t.Fatalf("less-than aliases = false, want true")
+	}
+	if !friday.LessThanOrEqualTo(friday.Clone()) || !friday.Lte(friday.Clone()) {
+		t.Fatalf("less-than-or-equal aliases = false, want true")
+	}
+	if !friday.IsBetween(friday, wednesday) {
+		t.Fatalf("IsBetween(inclusive) = false, want true")
+	}
+	if friday.IsBetween(friday, wednesday, "()") {
+		t.Fatalf("IsBetween(exclusive) = true, want false")
+	}
 	if !friday.SameAs("YYYY-MM-DD", sameDay) {
 		t.Fatalf("SameAs(date pattern) = false, want true")
+	}
+	if !friday.IsSameUnit(Day, sameDay) {
+		t.Fatalf("IsSameUnit(Day) = false, want true")
 	}
 	if friday.SameAs("YYYY-MM-DD HH:mm", sameDay) {
 		t.Fatalf("SameAs(datetime pattern) = true, want false")
@@ -1198,6 +1225,15 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 	}
 	if friday.Birthday(notBirthday) {
 		t.Fatalf("Birthday() = true, want false")
+	}
+	if got := friday.SetTime(0, 0, 42, 0).SecondsSinceMidnight(); got != 42 {
+		t.Fatalf("SecondsSinceMidnight() = %d, want 42", got)
+	}
+	if got := friday.SetTime(23, 59, 17, 0).SecondsUntilEndOfDay(); got != 42 {
+		t.Fatalf("SecondsUntilEndOfDay() = %d, want 42", got)
+	}
+	if got := friday.MidDay().TimeString(); got != "12:00:00" {
+		t.Fatalf("MidDay().TimeString() = %q, want noon", got)
 	}
 }
 
@@ -1224,6 +1260,12 @@ func TestTimezoneNamesOffsetsAndDSTState(t *testing.T) {
 	if got := utc.OffsetString(""); got != "+0000" {
 		t.Fatalf("OffsetString(\"\") = %q, want +0000", got)
 	}
+	if got := utc.GetOffsetString(":"); got != "+00:00" {
+		t.Fatalf("GetOffsetString(\":\") = %q, want +00:00", got)
+	}
+	if got := utc.UTCOffset(); got != 0 {
+		t.Fatalf("UTCOffset() = %d, want 0", got)
+	}
 	if got := utc.ZoneName(); got != "UTC" {
 		t.Fatalf("ZoneName() = %q, want UTC", got)
 	}
@@ -1236,6 +1278,12 @@ func TestTimezoneNamesOffsetsAndDSTState(t *testing.T) {
 	}
 	if got := winter.OffsetString(":"); got != "-05:00" {
 		t.Fatalf("winter OffsetString() = %q, want -05:00", got)
+	}
+	if got := winter.GetOffsetString(""); got != "-0500" {
+		t.Fatalf("winter GetOffsetString() = %q, want -0500", got)
+	}
+	if got := winter.UTCOffset(); got != -300 {
+		t.Fatalf("winter UTCOffset() = %d, want -300", got)
 	}
 	if got := winter.ZoneName(); got != "EST" {
 		t.Fatalf("winter ZoneName() = %q, want EST", got)

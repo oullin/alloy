@@ -275,8 +275,22 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.isSame("2024-05-15T23:59:00Z", "day")).toBe(true);
     expect(base.isBetween(earlier, "2024-05-16T00:00:00Z")).toBe(true);
     expect(base.isBetween(base, "2024-05-16T00:00:00Z")).toBe(true);
+    expect(base.between(earlier, "2024-05-16T00:00:00Z")).toBe(true);
+    expect(base.between(base, "2024-05-16T00:00:00Z", false)).toBe(false);
     expect(base.betweenIncluded("2024-05-16T00:00:00Z", base)).toBe(true);
     expect(base.betweenExcluded(base, "2024-05-16T00:00:00Z")).toBe(false);
+    expect(base.equalTo(base.clone())).toBe(true);
+    expect(base.eq(base.clone())).toBe(true);
+    expect(base.notEqualTo(earlier)).toBe(true);
+    expect(base.ne(earlier)).toBe(true);
+    expect(base.greaterThan(earlier)).toBe(true);
+    expect(base.gt(earlier)).toBe(true);
+    expect(base.greaterThanOrEqualTo(base.clone())).toBe(true);
+    expect(base.gte(base.clone())).toBe(true);
+    expect(earlier.lessThan(base)).toBe(true);
+    expect(earlier.lt(base)).toBe(true);
+    expect(earlier.lessThanOrEqualTo(earlier.clone())).toBe(true);
+    expect(earlier.lte(earlier.clone())).toBe(true);
     expect(base.diffInHours(earlier)).toBe(26);
     expect(base.diffInMinutes(earlier)).toBe(1594);
     expect(base.diffAsDuration(earlier).toISOString()).toBe("P1DT2H34M45.600S");
@@ -626,11 +640,15 @@ describe("Tempo TypeScript behavior", () => {
     expect(friday.isSameQuarter("2024-04-01T00:00:00Z")).toBe(true);
     expect(friday.isSameYear("2024-12-31T23:59:59Z")).toBe(true);
     expect(friday.isSameAs("YYYY-MM-DD", "2024-05-17T23:59:59Z")).toBe(true);
+    expect(friday.isSameUnit("day", "2024-05-17T23:59:59Z")).toBe(true);
     expect(friday.isSameAs("YYYY-MM-DD HH:mm", "2024-05-17T23:59:59Z")).toBe(
       false,
     );
     expect(friday.isBirthday("1990-05-17T00:00:00Z")).toBe(true);
     expect(friday.isBirthday("1990-05-18T00:00:00Z")).toBe(false);
+    expect(friday.setTime(0, 0, 42, 0).secondsSinceMidnight()).toBe(42);
+    expect(friday.setTime(23, 59, 17, 0).secondsUntilEndOfDay()).toBe(42);
+    expect(friday.midDay().toTimeString()).toBe("12:00:00");
   });
 
   it("exposes timezone names, offsets, UTC predicates, and DST state", () => {
@@ -645,11 +663,15 @@ describe("Tempo TypeScript behavior", () => {
     expect(utc.isUtc()).toBe(true);
     expect(utc.offsetString()).toBe("+00:00");
     expect(utc.offsetString("")).toBe("+0000");
+    expect(utc.getOffsetString()).toBe("+00:00");
+    expect(utc.utcOffset()).toBe(0);
     expect(utc.timezoneName("shortOffset")).toBe("GMT+0");
 
     expect(winter.isUtc()).toBe(false);
     expect(winter.offsetMinutes).toBe(-300);
     expect(winter.offsetString()).toBe("-05:00");
+    expect(winter.getOffsetString("")).toBe("-0500");
+    expect(winter.utcOffset()).toBe(-300);
     expect(winter.timezoneName("shortOffset")).toBe("GMT-5");
     expect(winter.isDST()).toBe(false);
 

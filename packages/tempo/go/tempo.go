@@ -898,6 +898,14 @@ func (tempo Tempo) OffsetString(separator string) string {
 	return formatOffset(tempo.OffsetMinutes(), separator)
 }
 
+func (tempo Tempo) GetOffsetString(separator string) string {
+	return tempo.OffsetString(separator)
+}
+
+func (tempo Tempo) UTCOffset() int {
+	return tempo.OffsetMinutes()
+}
+
 func (tempo Tempo) ZoneName() string {
 	name, _ := tempo.local().Zone()
 	return name
@@ -1256,6 +1264,10 @@ func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
 
 func (tempo Tempo) Midday() Tempo {
 	return tempo.SetTime(12, 0, 0, 0)
+}
+
+func (tempo Tempo) MidDay() Tempo {
+	return tempo.Midday()
 }
 
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
@@ -2047,6 +2059,14 @@ func (tempo Tempo) DiffInYears(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Year, options...))
 }
 
+func (tempo Tempo) SecondsSinceMidnight() int {
+	return tempo.DiffInSeconds(tempo.StartOfDay(), DiffOptions{Absolute: true})
+}
+
+func (tempo Tempo) SecondsUntilEndOfDay() int {
+	return tempo.DiffInSeconds(tempo.EndOfDay(), DiffOptions{Absolute: true})
+}
+
 func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
 	opts := HumanDiffOptions{}
 	if len(options) > 0 {
@@ -2090,6 +2110,54 @@ func (tempo Tempo) Same(other Tempo, units ...Unit) bool {
 	return tempo.compareValue(units...) == other.compareValue(units...)
 }
 
+func (tempo Tempo) EqualTo(other Tempo, units ...Unit) bool {
+	return tempo.Same(other, units...)
+}
+
+func (tempo Tempo) Eq(other Tempo, units ...Unit) bool {
+	return tempo.EqualTo(other, units...)
+}
+
+func (tempo Tempo) NotEqualTo(other Tempo, units ...Unit) bool {
+	return !tempo.Same(other, units...)
+}
+
+func (tempo Tempo) Ne(other Tempo, units ...Unit) bool {
+	return tempo.NotEqualTo(other, units...)
+}
+
+func (tempo Tempo) GreaterThan(other Tempo, units ...Unit) bool {
+	return tempo.After(other, units...)
+}
+
+func (tempo Tempo) Gt(other Tempo, units ...Unit) bool {
+	return tempo.GreaterThan(other, units...)
+}
+
+func (tempo Tempo) GreaterThanOrEqualTo(other Tempo, units ...Unit) bool {
+	return tempo.SameOrAfter(other, units...)
+}
+
+func (tempo Tempo) Gte(other Tempo, units ...Unit) bool {
+	return tempo.GreaterThanOrEqualTo(other, units...)
+}
+
+func (tempo Tempo) LessThan(other Tempo, units ...Unit) bool {
+	return tempo.Before(other, units...)
+}
+
+func (tempo Tempo) Lt(other Tempo, units ...Unit) bool {
+	return tempo.LessThan(other, units...)
+}
+
+func (tempo Tempo) LessThanOrEqualTo(other Tempo, units ...Unit) bool {
+	return tempo.SameOrBefore(other, units...)
+}
+
+func (tempo Tempo) Lte(other Tempo, units ...Unit) bool {
+	return tempo.LessThanOrEqualTo(other, units...)
+}
+
 func (tempo Tempo) SameSecond(other Tempo) bool {
 	return tempo.Same(other, Second)
 }
@@ -2124,6 +2192,10 @@ func (tempo Tempo) SameYear(other Tempo) bool {
 
 func (tempo Tempo) SameAs(pattern string, other Tempo) bool {
 	return tempo.Format(pattern) == other.Format(pattern)
+}
+
+func (tempo Tempo) IsSameUnit(unit Unit, other Tempo) bool {
+	return tempo.Same(other, unit)
 }
 
 func (tempo Tempo) Birthday(other Tempo) bool {
@@ -2225,6 +2297,10 @@ func (tempo Tempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
 	}
 
 	return afterStart && beforeEnd
+}
+
+func (tempo Tempo) IsBetween(start Tempo, end Tempo, inclusivity ...string) bool {
+	return tempo.Between(start, end, inclusivity...)
 }
 
 func (tempo Tempo) BetweenIncluded(start Tempo, end Tempo) bool {
@@ -2649,6 +2725,14 @@ func (mutable *MutableTempo) OffsetString(separator string) string {
 	return mutable.Tempo().OffsetString(separator)
 }
 
+func (mutable *MutableTempo) GetOffsetString(separator string) string {
+	return mutable.Tempo().GetOffsetString(separator)
+}
+
+func (mutable *MutableTempo) UTCOffset() int {
+	return mutable.Tempo().UTCOffset()
+}
+
 func (mutable *MutableTempo) ZoneName() string {
 	return mutable.Tempo().ZoneName()
 }
@@ -3011,6 +3095,10 @@ func (mutable *MutableTempo) SetTimestamp(timestamp int64) *MutableTempo {
 
 func (mutable *MutableTempo) Midday() *MutableTempo {
 	return mutable.replace(mutable.Tempo().Midday())
+}
+
+func (mutable *MutableTempo) MidDay() *MutableTempo {
+	return mutable.replace(mutable.Tempo().MidDay())
 }
 
 func (mutable *MutableTempo) Add(value int, unit Unit) *MutableTempo {
@@ -3481,6 +3569,14 @@ func (mutable *MutableTempo) DiffInYears(other Tempo, options ...DiffOptions) in
 	return mutable.Tempo().DiffInYears(other, options...)
 }
 
+func (mutable *MutableTempo) SecondsSinceMidnight() int {
+	return mutable.Tempo().SecondsSinceMidnight()
+}
+
+func (mutable *MutableTempo) SecondsUntilEndOfDay() int {
+	return mutable.Tempo().SecondsUntilEndOfDay()
+}
+
 func (mutable *MutableTempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
 	return mutable.Tempo().DiffForHumans(other, options...)
 }
@@ -3495,6 +3591,54 @@ func (mutable *MutableTempo) After(other Tempo, units ...Unit) bool {
 
 func (mutable *MutableTempo) Same(other Tempo, units ...Unit) bool {
 	return mutable.Tempo().Same(other, units...)
+}
+
+func (mutable *MutableTempo) EqualTo(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().EqualTo(other, units...)
+}
+
+func (mutable *MutableTempo) Eq(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Eq(other, units...)
+}
+
+func (mutable *MutableTempo) NotEqualTo(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().NotEqualTo(other, units...)
+}
+
+func (mutable *MutableTempo) Ne(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Ne(other, units...)
+}
+
+func (mutable *MutableTempo) GreaterThan(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().GreaterThan(other, units...)
+}
+
+func (mutable *MutableTempo) Gt(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Gt(other, units...)
+}
+
+func (mutable *MutableTempo) GreaterThanOrEqualTo(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().GreaterThanOrEqualTo(other, units...)
+}
+
+func (mutable *MutableTempo) Gte(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Gte(other, units...)
+}
+
+func (mutable *MutableTempo) LessThan(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().LessThan(other, units...)
+}
+
+func (mutable *MutableTempo) Lt(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Lt(other, units...)
+}
+
+func (mutable *MutableTempo) LessThanOrEqualTo(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().LessThanOrEqualTo(other, units...)
+}
+
+func (mutable *MutableTempo) Lte(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Lte(other, units...)
 }
 
 func (mutable *MutableTempo) SameSecond(other Tempo) bool {
@@ -3531,6 +3675,10 @@ func (mutable *MutableTempo) SameYear(other Tempo) bool {
 
 func (mutable *MutableTempo) SameAs(pattern string, other Tempo) bool {
 	return mutable.Tempo().SameAs(pattern, other)
+}
+
+func (mutable *MutableTempo) IsSameUnit(unit Unit, other Tempo) bool {
+	return mutable.Tempo().IsSameUnit(unit, other)
 }
 
 func (mutable *MutableTempo) Birthday(other Tempo) bool {
@@ -3584,6 +3732,10 @@ func (mutable *MutableTempo) SameOrAfter(other Tempo, units ...Unit) bool {
 
 func (mutable *MutableTempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
 	return mutable.Tempo().Between(start, end, inclusivity...)
+}
+
+func (mutable *MutableTempo) IsBetween(start Tempo, end Tempo, inclusivity ...string) bool {
+	return mutable.Tempo().IsBetween(start, end, inclusivity...)
 }
 
 func (mutable *MutableTempo) BetweenIncluded(start Tempo, end Tempo) bool {

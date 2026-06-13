@@ -1425,6 +1425,14 @@ export class TempoImmutable {
     return formatOffset(this.offsetMinutes, separator);
   }
 
+  getOffsetString(separator: ":" | "" = ":"): string {
+    return this.offsetString(separator);
+  }
+
+  utcOffset(): number {
+    return this.offsetMinutes;
+  }
+
   timezoneName(style: TimeZoneNameStyle = "short", locale = "en-US"): string {
     return timeZoneName(this.value, this.zone, style, locale);
   }
@@ -1784,6 +1792,10 @@ export class TempoImmutable {
 
   midday(): this {
     return this.setTime(12, 0, 0, 0);
+  }
+
+  midDay(): this {
+    return this.midday();
   }
 
   add(value: number, unit: TimeUnit): this {
@@ -2624,6 +2636,14 @@ export class TempoImmutable {
     return this.diff(other, "year", options);
   }
 
+  secondsSinceMidnight(): number {
+    return this.diffInSeconds(this.startOfDay(), { absolute: true });
+  }
+
+  secondsUntilEndOfDay(): number {
+    return this.diffInSeconds(this.endOfDay(), { absolute: true });
+  }
+
   diffForHumans(
     other: TempoInput = new Date(),
     options?: HumanDiffOptions,
@@ -2658,6 +2678,54 @@ export class TempoImmutable {
       this.comparableValue(unit) ===
       TempoImmutable.parse(other, { timeZone: this.zone }).comparableValue(unit)
     );
+  }
+
+  equalTo(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.isSame(other, unit);
+  }
+
+  eq(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.equalTo(other, unit);
+  }
+
+  notEqualTo(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return !this.isSame(other, unit);
+  }
+
+  ne(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.notEqualTo(other, unit);
+  }
+
+  greaterThan(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.isAfter(other, unit);
+  }
+
+  gt(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.greaterThan(other, unit);
+  }
+
+  greaterThanOrEqualTo(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.isSameOrAfter(other, unit);
+  }
+
+  gte(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.greaterThanOrEqualTo(other, unit);
+  }
+
+  lessThan(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.isBefore(other, unit);
+  }
+
+  lt(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.lessThan(other, unit);
+  }
+
+  lessThanOrEqualTo(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.isSameOrBefore(other, unit);
+  }
+
+  lte(other: TempoInput, unit?: ComparisonUnit): boolean {
+    return this.lessThanOrEqualTo(other, unit);
   }
 
   isSameSecond(other: TempoInput): boolean {
@@ -2702,6 +2770,10 @@ export class TempoImmutable {
     return this.format(pattern, options) === compare.format(pattern, options);
   }
 
+  isSameUnit(unit: ComparisonUnit, other: TempoInput): boolean {
+    return this.isSame(other, unit);
+  }
+
   isBirthday(other: TempoInput = new Date()): boolean {
     const compare = TempoImmutable.parse(other, { timeZone: this.zone });
 
@@ -2735,6 +2807,15 @@ export class TempoImmutable {
       : this.isBefore(upper, unit);
 
     return afterStart && beforeEnd;
+  }
+
+  between(
+    start: TempoInput,
+    end: TempoInput,
+    equal = true,
+    unit: ComparisonUnit = "millisecond",
+  ): boolean {
+    return this.isBetween(start, end, unit, equal ? "[]" : "()");
   }
 
   betweenIncluded(
