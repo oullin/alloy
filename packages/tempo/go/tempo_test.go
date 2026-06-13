@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+func assertEqual(t *testing.T, label string, got string, want string) {
+	t.Helper()
+	if got != want {
+		t.Fatalf("%s = %q, want %q", label, got, want)
+	}
+}
+
 func TestDateCases(t *testing.T) {
 	cases := []struct {
 		Name               string
@@ -773,4 +780,52 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if notEndOfDay.IsEndOf(Day) {
 		t.Fatalf("IsEndOf(Day) = true, want false")
 	}
+}
+
+func TestNamedSerializationAndMapConversion(t *testing.T) {
+	tempo, err := Parse("2024-05-15T12:34:56.789Z", WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("parse fixture input: %v", err)
+	}
+
+	assertEqual(t, "DateTimeLocalString()", tempo.DateTimeLocalString(), "2024-05-15T21:34:56")
+	assertEqual(t, "DateTimeLocalString(ms)", tempo.DateTimeLocalString(MillisecondPrecision), "2024-05-15T21:34:56.789")
+	assertEqual(t, "TimeString(ms)", tempo.TimeString(MillisecondPrecision), "21:34:56.789")
+	assertEqual(t, "ISO8601String()", tempo.ISO8601String(), "2024-05-15T21:34:56+09:00")
+	assertEqual(t, "RFC3339String(ms)", tempo.RFC3339String(MillisecondPrecision), "2024-05-15T21:34:56.789+09:00")
+	assertEqual(t, "AtomString()", tempo.AtomString(), "2024-05-15T21:34:56+09:00")
+	assertEqual(t, "RSSString()", tempo.RSSString(), "Wed, 15 May 2024 21:34:56 +0900")
+	assertEqual(t, "RFC7231String()", tempo.RFC7231String(), "Wed, 15 May 2024 12:34:56 GMT")
+	assertEqual(t, "CookieString()", tempo.CookieString(), "Wed, 15-May-2024 12:34:56 GMT")
+	assertEqual(t, "UnixString()", tempo.UnixString(), "1715776496")
+
+	values := tempo.ToMap()
+	if values["timeZone"] != "Asia/Tokyo" {
+		t.Fatalf("ToMap()[timeZone] = %v, want Asia/Tokyo", values["timeZone"])
+	}
+	if values["hour"] != 21 {
+		t.Fatalf("ToMap()[hour] = %v, want 21", values["hour"])
+	}
+}
+
+func TestExplicitSettersHandleZeroValues(t *testing.T) {
+	tempo, err := Parse("2024-05-15T12:34:56.789Z")
+	if err != nil {
+		t.Fatalf("parse fixture input: %v", err)
+	}
+
+	assertEqual(t, "SetTime().ISOString()", tempo.SetTime(0, 0, 0, 0).ISOString(), "2024-05-15T00:00:00.000Z")
+	if got := tempo.SetHour(0).Hour(); got != 0 {
+		t.Fatalf("SetHour(0).Hour() = %d, want 0", got)
+	}
+	if got := tempo.SetMinute(0).Minute(); got != 0 {
+		t.Fatalf("SetMinute(0).Minute() = %d, want 0", got)
+	}
+	if got := tempo.SetSecond(0).Second(); got != 0 {
+		t.Fatalf("SetSecond(0).Second() = %d, want 0", got)
+	}
+	if got := tempo.SetMillisecond(0).Millisecond(); got != 0 {
+		t.Fatalf("SetMillisecond(0).Millisecond() = %d, want 0", got)
+	}
+	assertEqual(t, "SetDate().DateString()", tempo.SetDate(2025, 1, 2).DateString(), "2025-01-02")
 }

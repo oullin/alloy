@@ -118,6 +118,8 @@ export type FormatOptions = {
   readonly timeZone?: string;
 };
 
+export type TimeStringPrecision = "second" | "millisecond";
+
 export type HumanDiffOptions = {
   readonly absolute?: boolean;
   readonly locale?: string;
@@ -1344,6 +1346,47 @@ export class TempoImmutable {
     return this.set({ millisecond });
   }
 
+  setYear(year: number): this {
+    return this.set({ year });
+  }
+
+  setMonth(month: number): this {
+    return this.set({ month });
+  }
+
+  setDay(day: number): this {
+    return this.set({ day });
+  }
+
+  setDate(year: number, month: number, day: number): this {
+    return this.set({ day, month, year });
+  }
+
+  setHour(hour: number): this {
+    return this.set({ hour });
+  }
+
+  setMinute(minute: number): this {
+    return this.set({ minute });
+  }
+
+  setSecond(second: number): this {
+    return this.set({ second });
+  }
+
+  setMillisecond(millisecond: number): this {
+    return this.set({ millisecond });
+  }
+
+  setTime(
+    hour: number,
+    minute = this.minute,
+    second = this.second,
+    millisecond = this.millisecond,
+  ): this {
+    return this.set({ hour, millisecond, minute, second });
+  }
+
   add(value: number, unit: TimeUnit): this {
     assertFiniteNumber(value, "Amount");
 
@@ -2072,16 +2115,52 @@ export class TempoImmutable {
     return this.format("YYYY-MM-DD");
   }
 
-  toTimeString(): string {
-    return this.format("HH:mm:ss");
+  toTimeString(precision: TimeStringPrecision = "second"): string {
+    const base = this.format("HH:mm:ss");
+
+    return precision === "millisecond"
+      ? `${base}.${pad(this.millisecond, 3)}`
+      : base;
   }
 
   toDateTimeString(): string {
     return this.format("YYYY-MM-DD HH:mm:ss");
   }
 
+  toDateTimeLocalString(precision: TimeStringPrecision = "second"): string {
+    return `${this.toDateString()}T${this.toTimeString(precision)}`;
+  }
+
   toISOString(): string {
     return this.value.toISOString();
+  }
+
+  toIso8601String(): string {
+    return this.format("YYYY-MM-DDTHH:mm:ssZ");
+  }
+
+  toRfc3339String(precision: TimeStringPrecision = "second"): string {
+    return `${this.toDateTimeLocalString(precision)}${this.offsetString(":")}`;
+  }
+
+  toRfc7231String(): string {
+    return this.utc().format("ddd, DD MMM YYYY HH:mm:ss [GMT]");
+  }
+
+  toCookieString(): string {
+    return this.utc().format("ddd, DD-MMM-YYYY HH:mm:ss [GMT]");
+  }
+
+  toAtomString(): string {
+    return this.toRfc3339String();
+  }
+
+  toRssString(): string {
+    return this.format("ddd, DD MMM YYYY HH:mm:ss ZZ");
+  }
+
+  toUnixString(): string {
+    return String(this.timestamp);
   }
 
   toJSON(): string {
@@ -2097,6 +2176,14 @@ export class TempoImmutable {
       timeZone: this.zone,
       weekday: parts.weekday,
     };
+  }
+
+  toMap(): Map<keyof TempoObject, TempoObject[keyof TempoObject]> {
+    return new Map(
+      Object.entries(this.toObject()) as Array<
+        [keyof TempoObject, TempoObject[keyof TempoObject]]
+      >,
+    );
   }
 
   toArray(): [number, number, number, number, number, number, number] {

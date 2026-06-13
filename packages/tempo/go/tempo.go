@@ -24,6 +24,13 @@ const (
 	Year        Unit = "year"
 )
 
+type TimeStringPrecision string
+
+const (
+	SecondPrecision      TimeStringPrecision = "second"
+	MillisecondPrecision TimeStringPrecision = "millisecond"
+)
+
 type Components struct {
 	Year        int
 	Month       int
@@ -680,6 +687,21 @@ func (tempo Tempo) Local() Tempo {
 	return Tempo{value: tempo.value, location: time.Local}
 }
 
+func (tempo Tempo) fromObject(object Object, location *time.Location) Tempo {
+	next := time.Date(
+		object.Year,
+		time.Month(object.Month),
+		object.Day,
+		object.Hour,
+		object.Minute,
+		object.Second,
+		object.Millisecond*int(time.Millisecond),
+		location,
+	)
+
+	return Tempo{value: next.UTC(), location: location}
+}
+
 func (tempo Tempo) Set(components Components) (Tempo, error) {
 	object := tempo.ToObject()
 	location := tempo.location
@@ -713,18 +735,75 @@ func (tempo Tempo) Set(components Components) (Tempo, error) {
 		object.Millisecond = components.Millisecond
 	}
 
-	next := time.Date(
-		object.Year,
-		time.Month(object.Month),
-		object.Day,
-		object.Hour,
-		object.Minute,
-		object.Second,
-		object.Millisecond*int(time.Millisecond),
-		location,
-	)
+	return tempo.fromObject(object, location), nil
+}
 
-	return Tempo{value: next.UTC(), location: location}, nil
+func (tempo Tempo) SetYear(year int) Tempo {
+	object := tempo.ToObject()
+	object.Year = year
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetMonth(month int) Tempo {
+	object := tempo.ToObject()
+	object.Month = month
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetDay(day int) Tempo {
+	object := tempo.ToObject()
+	object.Day = day
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetDate(year int, month int, day int) Tempo {
+	object := tempo.ToObject()
+	object.Year = year
+	object.Month = month
+	object.Day = day
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetHour(hour int) Tempo {
+	object := tempo.ToObject()
+	object.Hour = hour
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetMinute(minute int) Tempo {
+	object := tempo.ToObject()
+	object.Minute = minute
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetSecond(second int) Tempo {
+	object := tempo.ToObject()
+	object.Second = second
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetMillisecond(millisecond int) Tempo {
+	object := tempo.ToObject()
+	object.Millisecond = millisecond
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetTime(hour int, minute int, second int, millisecond int) Tempo {
+	object := tempo.ToObject()
+	object.Hour = hour
+	object.Minute = minute
+	object.Second = second
+	object.Millisecond = millisecond
+
+	return tempo.fromObject(object, tempo.location)
 }
 
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
@@ -1421,16 +1500,53 @@ func (tempo Tempo) DateString() string {
 	return tempo.Format("YYYY-MM-DD")
 }
 
-func (tempo Tempo) TimeString() string {
-	return tempo.Format("HH:mm:ss")
+func (tempo Tempo) TimeString(precision ...TimeStringPrecision) string {
+	base := tempo.Format("HH:mm:ss")
+	if selectedPrecision(precision) == MillisecondPrecision {
+		return base + "." + pad(tempo.Millisecond(), 3)
+	}
+
+	return base
 }
 
 func (tempo Tempo) DateTimeString() string {
 	return tempo.Format("YYYY-MM-DD HH:mm:ss")
 }
 
+func (tempo Tempo) DateTimeLocalString(precision ...TimeStringPrecision) string {
+	return tempo.DateString() + "T" + tempo.TimeString(precision...)
+}
+
 func (tempo Tempo) ISOString() string {
 	return tempo.value.UTC().Format("2006-01-02T15:04:05.000Z")
+}
+
+func (tempo Tempo) ISO8601String() string {
+	return tempo.Format("YYYY-MM-DDTHH:mm:ssZ")
+}
+
+func (tempo Tempo) RFC3339String(precision ...TimeStringPrecision) string {
+	return tempo.DateTimeLocalString(precision...) + tempo.OffsetString(":")
+}
+
+func (tempo Tempo) RFC7231String() string {
+	return tempo.UTC().Format("ddd, DD MMM YYYY HH:mm:ss [GMT]")
+}
+
+func (tempo Tempo) CookieString() string {
+	return tempo.UTC().Format("ddd, DD-MMM-YYYY HH:mm:ss [GMT]")
+}
+
+func (tempo Tempo) AtomString() string {
+	return tempo.RFC3339String()
+}
+
+func (tempo Tempo) RSSString() string {
+	return tempo.Format("ddd, DD MMM YYYY HH:mm:ss ZZ")
+}
+
+func (tempo Tempo) UnixString() string {
+	return strconv.FormatInt(tempo.Timestamp(), 10)
 }
 
 func (tempo Tempo) Time() time.Time {
@@ -1451,6 +1567,23 @@ func (tempo Tempo) ToObject() Object {
 		Timezone:      tempo.Timezone(),
 		OffsetMinutes: tempo.OffsetMinutes(),
 		Weekday:       int(local.Weekday()),
+	}
+}
+
+func (tempo Tempo) ToMap() map[string]interface{} {
+	object := tempo.ToObject()
+
+	return map[string]interface{}{
+		"year":          object.Year,
+		"month":         object.Month,
+		"day":           object.Day,
+		"hour":          object.Hour,
+		"minute":        object.Minute,
+		"second":        object.Second,
+		"millisecond":   object.Millisecond,
+		"timeZone":      object.Timezone,
+		"offsetMinutes": object.OffsetMinutes,
+		"weekday":       object.Weekday,
 	}
 }
 
@@ -2010,6 +2143,14 @@ func pad(value int, length int) string {
 	}
 
 	return result
+}
+
+func selectedPrecision(precision []TimeStringPrecision) TimeStringPrecision {
+	if len(precision) > 0 && precision[0] == MillisecondPrecision {
+		return MillisecondPrecision
+	}
+
+	return SecondPrecision
 }
 
 func ordinal(value int) string {

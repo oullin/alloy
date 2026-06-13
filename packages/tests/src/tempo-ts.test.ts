@@ -426,4 +426,43 @@ describe("Tempo TypeScript behavior", () => {
     expect(Tempo.parse("2024-05-15T23:59:59.999Z").isEndOf("day")).toBe(true);
     expect(Tempo.parse("2024-05-15T23:59:59.998Z").isEndOf("day")).toBe(false);
   });
+
+  it("serializes named date formats and maps components", () => {
+    const tempo = Tempo.parse("2024-05-15T12:34:56.789Z", {
+      timeZone: "Asia/Tokyo",
+    });
+
+    expect(tempo.toDateTimeLocalString()).toBe("2024-05-15T21:34:56");
+    expect(tempo.toDateTimeLocalString("millisecond")).toBe(
+      "2024-05-15T21:34:56.789",
+    );
+    expect(tempo.toTimeString("millisecond")).toBe("21:34:56.789");
+    expect(tempo.toIso8601String()).toBe("2024-05-15T21:34:56+09:00");
+    expect(tempo.toRfc3339String("millisecond")).toBe(
+      "2024-05-15T21:34:56.789+09:00",
+    );
+    expect(tempo.toAtomString()).toBe("2024-05-15T21:34:56+09:00");
+    expect(tempo.toRssString()).toBe("Wed, 15 May 2024 21:34:56 +0900");
+    expect(tempo.toRfc7231String()).toBe("Wed, 15 May 2024 12:34:56 GMT");
+    expect(tempo.toCookieString()).toBe("Wed, 15-May-2024 12:34:56 GMT");
+    expect(tempo.toUnixString()).toBe("1715776496");
+
+    expect(tempo.toMap().get("timeZone")).toBe("Asia/Tokyo");
+    expect(tempo.toMap().get("hour")).toBe(21);
+  });
+
+  it("sets explicit components including zero values", () => {
+    const tempo = Tempo.parse("2024-05-15T12:34:56.789Z", {
+      timeZone: "UTC",
+    });
+
+    expect(tempo.setTime(0, 0, 0, 0).toISOString()).toBe(
+      "2024-05-15T00:00:00.000Z",
+    );
+    expect(tempo.setHour(0).hour).toBe(0);
+    expect(tempo.setMinute(0).minute).toBe(0);
+    expect(tempo.setSecond(0).second).toBe(0);
+    expect(tempo.setMillisecond(0).millisecond).toBe(0);
+    expect(tempo.setDate(2025, 1, 2).toDateString()).toBe("2025-01-02");
+  });
 });
