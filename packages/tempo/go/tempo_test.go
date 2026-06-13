@@ -61,3 +61,30 @@ func TestSharedCarbonFixtures(t *testing.T) {
 		})
 	}
 }
+
+func TestDiffInDaysUsesUnixSeconds(t *testing.T) {
+	later, err := Parse("2024-01-03T00:00:00+00:00")
+	if err != nil {
+		t.Fatalf("parse later: %v", err)
+	}
+
+	earlier, err := Parse("2024-01-01T00:00:00+00:00")
+	if err != nil {
+		t.Fatalf("parse earlier: %v", err)
+	}
+
+	if got := later.DiffInDays(earlier); got != 2 {
+		t.Fatalf("DiffInDays() = %d, want 2", got)
+	}
+}
+
+func TestISOStringFormatsUTC(t *testing.T) {
+	parsed, err := Parse("2024-01-01T01:00:00+01:00")
+	if err != nil {
+		t.Fatalf("parse offset timestamp: %v", err)
+	}
+
+	if got := parsed.ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("ISOString() = %q, want UTC ISO string", got)
+	}
+}

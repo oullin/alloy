@@ -39,7 +39,7 @@ func (tempo Tempo) AddMonths(months int) Tempo {
 
 // DiffInDays returns the whole-day difference between tempo and other.
 func (tempo Tempo) DiffInDays(other Tempo) int {
-	return int(tempo.value.Sub(other.value).Hours() / 24)
+	return int((tempo.value.Unix() - other.value.Unix()) / 86_400)
 }
 
 func (tempo Tempo) Before(other Tempo) bool {
@@ -55,7 +55,7 @@ func (tempo Tempo) DateString() string {
 }
 
 func (tempo Tempo) ISOString() string {
-	return tempo.value.Format("2006-01-02T15:04:05.000Z")
+	return tempo.value.UTC().Format("2006-01-02T15:04:05.000Z")
 }
 
 func (tempo Tempo) Time() time.Time {

@@ -3,12 +3,11 @@
 ORACLE_PATH := $(ROOT_PATH)/packages/carbon-oracle
 
 ##@ Oracle
-oracle-install: ## Install PHP oracle dependencies
-	$(call run_in,$(ORACLE_PATH),composer install --no-interaction --prefer-dist)
+oracle-install: ## Verify oracle workspace dependencies are installed
+	$(call run_in,$(ROOT_PATH),pnpm install --frozen-lockfile)
 
-oracle-generate: oracle-install ## Regenerate Carbon oracle fixtures
-	$(call run_in,$(ORACLE_PATH),php src/generate.php)
+oracle-generate: oracle-install ## Regenerate oracle fixtures
+	$(call run_in,$(ORACLE_PATH),pnpm oracle:generate)
 
-oracle-check: oracle-install ## Verify committed fixtures match the Carbon oracle
-	$(call run_in,$(ORACLE_PATH),php src/generate.php --check)
-
+oracle-check: oracle-install ## Verify committed fixtures match the oracle generator
+	$(call run_in,$(ORACLE_PATH),pnpm oracle:check)

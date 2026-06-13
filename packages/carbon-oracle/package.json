@@ -4,11 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "php -l src/generate.php",
-    "lint": "php -l src/generate.php",
-    "oracle:check": "php src/generate.php --check",
-    "oracle:generate": "php src/generate.php",
-    "test": "php src/generate.php --check",
-    "typecheck": "php -l src/generate.php"
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "oracle:check": "tsx src/generate.ts --check",
+    "oracle:generate": "tsx src/generate.ts",
+    "test": "tsx src/generate.ts --check",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@tempo/artefacts": "workspace:*",
+    "@types/node": "^25.0.0",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
   }
 }

@@ -11,7 +11,7 @@ The public API is branded as Tempo. Carbon remains the pinned behavioral oracle 
 - `packages/tempo/spec`: shared fixtures and API mapping notes.
 - `packages/tests`: shared TypeScript acceptance tests.
 - `packages/artefacts`: shared repo artifact paths and TypeScript config exports.
-- `packages/carbon-oracle`: PHP fixture generator pinned to Carbon.
+- `packages/carbon-oracle`: TypeScript fixture generator for Carbon compatibility cases.
 - `provision`: repo automation, Make targets, and validation scripts.
 
 ## Checks

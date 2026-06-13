@@ -6,8 +6,10 @@ Tempo keeps Carbon `v3.11.4` as the fixture oracle while exposing idiomatic Go a
 
 - `Carbon::parse(...)` maps to `Tempo.parse(...)`.
 - `CarbonImmutable::parse(...)` maps to `TempoImmutable.parse(...)`.
-- Mutating Carbon methods map to chainable methods on `Tempo`.
+- Mutating Carbon methods map to chainable methods on `TempoMutable`.
 - Immutable Carbon methods map to methods returning a new `TempoImmutable`.
+- `Tempo` is immutable by default across TypeScript and Go.
+- Test clocks use `TempoFactory.withTestNow(...)` instead of module-global mutable state.
 
 ## Go
 
