@@ -38,6 +38,10 @@ export type BoundaryUnit =
 
 export type ComparisonUnit = "millisecond" | BoundaryUnit;
 
+export type TimeZoneNameStyle = NonNullable<
+  Intl.DateTimeFormatOptions["timeZoneName"]
+>;
+
 export type WeekdayInput =
   | 0
   | 1
@@ -192,16 +196,17 @@ const normalizeTimeZone = (timeZone: string | undefined): string => {
 
 const getFormatter = (
   timeZone: string,
-  timeZoneName?: "shortOffset",
+  timeZoneName?: TimeZoneNameStyle,
+  locale = "en-US-u-nu-latn",
 ): Intl.DateTimeFormat => {
-  const key = `${timeZone}|${timeZoneName ?? "parts"}`;
+  const key = `${locale}|${timeZone}|${timeZoneName ?? "parts"}`;
   const cached = formatterCache.get(key);
 
   if (cached !== undefined) {
     return cached;
   }
 
-  const formatter = new Intl.DateTimeFormat("en-US-u-nu-latn", {
+  const formatter = new Intl.DateTimeFormat(locale, {
     calendar: "gregory",
     day: "2-digit",
     fractionalSecondDigits: 3,
@@ -524,6 +529,17 @@ const weekdayNames = (
 
   weekdayNameCache.set(key, names);
   return names;
+};
+
+const timeZoneName = (
+  date: Date,
+  timeZone: string,
+  style: TimeZoneNameStyle,
+  locale: string,
+): string => {
+  const parts = getFormatter(timeZone, style, locale).formatToParts(date);
+
+  return readPart(parts, "timeZoneName") || timeZone;
 };
 
 const formatOffset = (offsetMinutes: number, separator: ":" | ""): string => {
@@ -1127,6 +1143,45 @@ export class TempoImmutable {
     return Math.trunc(
       (localAsUTC - this.value.getTime()) / millisecondsPerMinute,
     );
+  }
+
+  offsetString(separator: ":" | "" = ":"): string {
+    return formatOffset(this.offsetMinutes, separator);
+  }
+
+  timezoneName(style: TimeZoneNameStyle = "short", locale = "en-US"): string {
+    return timeZoneName(this.value, this.zone, style, locale);
+  }
+
+  isUtc(): boolean {
+    return this.zone === defaultTimeZone && this.offsetMinutes === 0;
+  }
+
+  isLocal(): boolean {
+    return this.zone === Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+
+  isDST(): boolean {
+    const parts = this.parts();
+    const januaryOffset = this.offsetForDate(
+      dateFromZonedComponents({
+        day: 1,
+        month: 1,
+        timeZone: this.zone,
+        year: parts.year,
+      }),
+    );
+    const julyOffset = this.offsetForDate(
+      dateFromZonedComponents({
+        day: 1,
+        month: 7,
+        timeZone: this.zone,
+        year: parts.year,
+      }),
+    );
+    const standardOffset = Math.min(januaryOffset, julyOffset);
+
+    return this.offsetMinutes > standardOffset;
   }
 
   isLeapYear(): boolean {
@@ -2004,6 +2059,13 @@ export class TempoImmutable {
     return Math.trunc(
       (localAsUTC - this.value.getTime()) / millisecondsPerMinute,
     );
+  }
+
+  private offsetForDate(date: Date): number {
+    const parts = getZonedParts(date, this.zone);
+    const localAsUTC = dateFromPartsAsUTC(parts);
+
+    return Math.trunc((localAsUTC - date.getTime()) / millisecondsPerMinute);
   }
 
   private comparableValue(unit: ComparisonUnit): number {

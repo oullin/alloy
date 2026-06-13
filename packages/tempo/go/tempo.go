@@ -540,6 +540,35 @@ func (tempo Tempo) OffsetMinutes() int {
 	return offset / 60
 }
 
+func (tempo Tempo) OffsetString(separator string) string {
+	return formatOffset(tempo.OffsetMinutes(), separator)
+}
+
+func (tempo Tempo) ZoneName() string {
+	name, _ := tempo.local().Zone()
+	return name
+}
+
+func (tempo Tempo) IsUTC() bool {
+	return tempo.location == time.UTC && tempo.OffsetMinutes() == 0
+}
+
+func (tempo Tempo) IsLocal() bool {
+	return tempo.location.String() == time.Local.String()
+}
+
+func (tempo Tempo) IsDST() bool {
+	local := tempo.local()
+	january := time.Date(local.Year(), time.January, 1, 12, 0, 0, 0, tempo.location)
+	july := time.Date(local.Year(), time.July, 1, 12, 0, 0, 0, tempo.location)
+	_, januaryOffset := january.Zone()
+	_, julyOffset := july.Zone()
+	standardOffset := min(januaryOffset, julyOffset)
+	_, currentOffset := local.Zone()
+
+	return currentOffset > standardOffset
+}
+
 func (tempo Tempo) IsLeapYear() bool {
 	year := tempo.Year()
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
@@ -638,6 +667,10 @@ func (tempo Tempo) SetTimezoneKeepLocal(name string) (Tempo, error) {
 
 func (tempo Tempo) UTC() Tempo {
 	return Tempo{value: tempo.value, location: time.UTC}
+}
+
+func (tempo Tempo) Local() Tempo {
+	return Tempo{value: tempo.value, location: time.Local}
 }
 
 func (tempo Tempo) Set(components Components) (Tempo, error) {

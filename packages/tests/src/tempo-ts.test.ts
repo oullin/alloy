@@ -353,4 +353,30 @@ describe("Tempo TypeScript behavior", () => {
     expect(friday.isBirthday("1990-05-17T00:00:00Z")).toBe(true);
     expect(friday.isBirthday("1990-05-18T00:00:00Z")).toBe(false);
   });
+
+  it("exposes timezone names, offsets, UTC predicates, and DST state", () => {
+    const utc = Tempo.parse("2024-01-01T00:00:00Z");
+    const winter = Tempo.parse("2024-01-15T12:00:00Z", {
+      timeZone: "America/New_York",
+    });
+    const summer = Tempo.parse("2024-07-15T12:00:00Z", {
+      timeZone: "America/New_York",
+    });
+
+    expect(utc.isUtc()).toBe(true);
+    expect(utc.offsetString()).toBe("+00:00");
+    expect(utc.offsetString("")).toBe("+0000");
+    expect(utc.timezoneName("shortOffset")).toBe("GMT+0");
+
+    expect(winter.isUtc()).toBe(false);
+    expect(winter.offsetMinutes).toBe(-300);
+    expect(winter.offsetString()).toBe("-05:00");
+    expect(winter.timezoneName("shortOffset")).toBe("GMT-5");
+    expect(winter.isDST()).toBe(false);
+
+    expect(summer.offsetMinutes).toBe(-240);
+    expect(summer.offsetString()).toBe("-04:00");
+    expect(summer.timezoneName("shortOffset")).toBe("GMT-4");
+    expect(summer.isDST()).toBe(true);
+  });
 });

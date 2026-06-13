@@ -601,3 +601,60 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 		t.Fatalf("Birthday() = true, want false")
 	}
 }
+
+func TestTimezoneNamesOffsetsAndDSTState(t *testing.T) {
+	utc, err := Parse("2024-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse utc: %v", err)
+	}
+	winter, err := Parse("2024-01-15T12:00:00Z", WithTimezone("America/New_York"))
+	if err != nil {
+		t.Fatalf("parse winter: %v", err)
+	}
+	summer, err := Parse("2024-07-15T12:00:00Z", WithTimezone("America/New_York"))
+	if err != nil {
+		t.Fatalf("parse summer: %v", err)
+	}
+
+	if !utc.IsUTC() {
+		t.Fatalf("IsUTC() = false, want true")
+	}
+	if got := utc.OffsetString(":"); got != "+00:00" {
+		t.Fatalf("OffsetString(\":\") = %q, want +00:00", got)
+	}
+	if got := utc.OffsetString(""); got != "+0000" {
+		t.Fatalf("OffsetString(\"\") = %q, want +0000", got)
+	}
+	if got := utc.ZoneName(); got != "UTC" {
+		t.Fatalf("ZoneName() = %q, want UTC", got)
+	}
+
+	if winter.IsUTC() {
+		t.Fatalf("winter IsUTC() = true, want false")
+	}
+	if got := winter.OffsetMinutes(); got != -300 {
+		t.Fatalf("winter OffsetMinutes() = %d, want -300", got)
+	}
+	if got := winter.OffsetString(":"); got != "-05:00" {
+		t.Fatalf("winter OffsetString() = %q, want -05:00", got)
+	}
+	if got := winter.ZoneName(); got != "EST" {
+		t.Fatalf("winter ZoneName() = %q, want EST", got)
+	}
+	if winter.IsDST() {
+		t.Fatalf("winter IsDST() = true, want false")
+	}
+
+	if got := summer.OffsetMinutes(); got != -240 {
+		t.Fatalf("summer OffsetMinutes() = %d, want -240", got)
+	}
+	if got := summer.OffsetString(":"); got != "-04:00" {
+		t.Fatalf("summer OffsetString() = %q, want -04:00", got)
+	}
+	if got := summer.ZoneName(); got != "EDT" {
+		t.Fatalf("summer ZoneName() = %q, want EDT", got)
+	}
+	if !summer.IsDST() {
+		t.Fatalf("summer IsDST() = false, want true")
+	}
+}
