@@ -2962,6 +2962,16 @@ export class TempoInterval {
     return this.end.diffInYears(this.start);
   }
 
+  invert(): TempoInterval {
+    return new TempoInterval(this.end, this.start);
+  }
+
+  absolute(): TempoInterval {
+    return this.isInverted
+      ? this.invert()
+      : new TempoInterval(this.start, this.end);
+  }
+
   contains(
     input: TempoInput,
     inclusivity: "()" | "[]" | "[)" | "(]" = "[]",

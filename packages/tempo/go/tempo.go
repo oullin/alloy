@@ -2971,6 +2971,18 @@ func (interval Interval) ToDuration() Duration {
 	return Duration{Milliseconds: interval.Milliseconds()}.Normalize()
 }
 
+func (interval Interval) Invert() Interval {
+	return Interval{Start: interval.End, End: interval.Start}
+}
+
+func (interval Interval) Abs() Interval {
+	if interval.Inverted() {
+		return interval.Invert()
+	}
+
+	return interval
+}
+
 func (interval Interval) Contains(input Tempo, inclusivity ...string) bool {
 	mode := "[]"
 	if len(inclusivity) > 0 {

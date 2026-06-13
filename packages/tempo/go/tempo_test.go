@@ -487,6 +487,22 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 	if interval.Contains(end, "[)") {
 		t.Fatalf("Interval.Contains(end, \"[)\") = true, want false")
 	}
+	inverted := end.IntervalUntil(start)
+	if !inverted.Inverted() {
+		t.Fatalf("Interval.Inverted() = false, want true")
+	}
+	if got := inverted.Hours(); got != -60 {
+		t.Fatalf("inverted Interval.Hours() = %d, want -60", got)
+	}
+	if got := inverted.Invert().Hours(); got != 60 {
+		t.Fatalf("Interval.Invert().Hours() = %d, want 60", got)
+	}
+	if got := inverted.Abs().Start.ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Interval.Abs().Start = %q, want normalized start", got)
+	}
+	if got := inverted.Abs().End.ISOString(); got != "2024-01-03T12:00:00.000Z" {
+		t.Fatalf("Interval.Abs().End = %q, want normalized end", got)
+	}
 	calendarStart, err := Parse("2023-01-01T00:00:00Z")
 	if err != nil {
 		t.Fatalf("parse calendar start: %v", err)

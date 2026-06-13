@@ -303,6 +303,20 @@ describe("Tempo TypeScript behavior", () => {
     expect(interval.contains("2024-01-03T12:00:00Z")).toBe(true);
     expect(interval.contains("2024-01-03T12:00:00Z", "[)")).toBe(false);
 
+    const inverted = new TempoInterval(
+      "2024-01-03T12:00:00Z",
+      "2024-01-01T00:00:00Z",
+    );
+    expect(inverted.isInverted).toBe(true);
+    expect(inverted.hours).toBe(-60);
+    expect(inverted.invert().hours).toBe(60);
+    expect(inverted.absolute().start.toISOString()).toBe(
+      "2024-01-01T00:00:00.000Z",
+    );
+    expect(inverted.absolute().end.toISOString()).toBe(
+      "2024-01-03T12:00:00.000Z",
+    );
+
     const calendarInterval = new TempoInterval(
       "2023-01-01T00:00:00Z",
       "2024-03-01T00:00:00Z",
