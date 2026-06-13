@@ -307,6 +307,12 @@ describe("Tempo TypeScript behavior", () => {
     );
     expect(base.diffInMicroseconds(earlier)).toBe(95685600000);
     expect(base.diffFiltered((item) => item.isWeekday(), earlier)).toBe(1);
+    expect(base.getPreciseTimestamp()).toBe(1715769285600000);
+    expect(base.getPreciseTimestamp(3)).toBe(1715769285600);
+    expect(base.calendar(earlier)).toBe("Tomorrow at 10:34");
+    expect(base.calendar("2024-05-20T00:00:00Z")).toBe(
+      "Last Wednesday at 10:34",
+    );
     expect(base.floor("hour").toISOString()).toBe("2024-05-15T10:00:00.000Z");
     expect(base.ceil("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
     expect(base.round("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
@@ -853,6 +859,8 @@ describe("Tempo TypeScript behavior", () => {
     expect(Tempo.parse("3000-12-31T23:59:59.999Z").isEndOfMillennium()).toBe(
       true,
     );
+    expect(Tempo.parse(-8640000000000000).isStartOfTime()).toBe(true);
+    expect(Tempo.parse(8640000000000000).isEndOfTime()).toBe(true);
   });
 
   it("serializes named date formats and maps components", () => {
@@ -908,6 +916,14 @@ describe("Tempo TypeScript behavior", () => {
     ).toBe("2024-05-15T12:34:56.789Z");
     expect(TempoDuration.fromJSON('"P1DT2H"').toISOString()).toBe("P1DT2H");
     expect(() => Tempo.fromJSON("123")).toThrow("Tempo JSON must be a string");
+    expect(Tempo.make(null)).toBeNull();
+    expect(Tempo.make("2024-05-15")?.toDateString()).toBe("2024-05-15");
+    expect(Tempo.parseFromLocale("2024-05-15", "en-US").toDateString()).toBe(
+      "2024-05-15",
+    );
+    expect(Tempo.getDays().slice(0, 2)).toEqual(["Sunday", "Monday"]);
+    expect(Tempo.hasFormatWithModifiers("2024/05/15", "YYYY/MM/DD")).toBe(true);
+    expect(Tempo.hasFormatWithModifiers(null, "YYYY/MM/DD")).toBe(false);
 
     expect(tempo.toMap().get("timeZone")).toBe("Asia/Tokyo");
     expect(tempo.toMap().get("hour")).toBe(21);
@@ -949,6 +965,14 @@ describe("Tempo TypeScript behavior", () => {
       "1970-01-01T00:00:00.000Z",
     );
     expect(tempo.timestampTo(0).toISOString()).toBe("1970-01-01T00:00:00.000Z");
+    expect(tempo.setISODate(2024, 20, 3).toDateString()).toBe("2024-05-15");
+    expect(tempo.weekday()).toBe(3);
+    expect(tempo.weekday(5).toDateString()).toBe("2024-05-17");
+    expect(tempo.setWeekday("monday").toDateString()).toBe("2024-05-13");
+    expect(tempo.setDayOfYear(60).toDateString()).toBe("2024-02-29");
+    expect(tempo.modify("+2 days").toDateString()).toBe("2024-05-17");
+    expect(tempo.modify("previous day").toDateString()).toBe("2024-05-14");
+    expect(tempo.change("next week").toDateString()).toBe("2024-05-22");
     expect(tempo.subtract(2, "days").toDateString()).toBe("2024-05-13");
     expect(tempo.addUnit("day", 2).toDateString()).toBe("2024-05-17");
     expect(tempo.addRealUnit("day", 2).toDateString()).toBe("2024-05-17");

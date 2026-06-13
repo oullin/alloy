@@ -463,6 +463,18 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if got := base.DiffFiltered(earlier, func(item Tempo) bool { return item.IsWeekday() }); got != 1 {
 		t.Fatalf("DiffFiltered(weekday) = %d, want 1", got)
 	}
+	if got := base.GetPreciseTimestamp(); got != 1715769285600000 {
+		t.Fatalf("GetPreciseTimestamp() = %f, want microsecond timestamp", got)
+	}
+	if got := base.GetPreciseTimestamp(3); got != 1715769285600 {
+		t.Fatalf("GetPreciseTimestamp(3) = %f, want millisecond timestamp", got)
+	}
+	assertEqual(t, "Calendar(tomorrow)", base.Calendar(earlier), "Tomorrow at 10:34")
+	reference, err := Parse("2024-05-20T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse calendar reference: %v", err)
+	}
+	assertEqual(t, "Calendar(last week)", base.Calendar(reference), "Last Wednesday at 10:34")
 	if got := base.Floor(Hour).ISOString(); got != "2024-05-15T10:00:00.000Z" {
 		t.Fatalf("Floor(Hour).ISOString() = %q, want hour floor", got)
 	}
@@ -1676,6 +1688,12 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if !startOfMillennium.IsStartOfMillennium() || !endOfMillennium.IsEndOfMillennium() {
 		t.Fatalf("millennium boundary helpers = false, want true")
 	}
+	if !(Tempo{value: time.UnixMilli(-8640000000000000), location: time.UTC}).IsStartOfTime() {
+		t.Fatalf("IsStartOfTime() = false, want true")
+	}
+	if !(Tempo{value: time.UnixMilli(8640000000000000), location: time.UTC}).IsEndOfTime() {
+		t.Fatalf("IsEndOfTime() = false, want true")
+	}
 }
 
 func TestNamedSerializationAndMapConversion(t *testing.T) {
@@ -1803,6 +1821,27 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	}
 	assertEqual(t, "SetTimeFromTimeString().ISOString()", fromTimeString.ISOString(), "2024-05-15T03:04:05.006Z")
 	assertEqual(t, "SetTimestamp(0).ISOString()", tempo.SetTimestamp(0).ISOString(), "1970-01-01T00:00:00.000Z")
+	assertEqual(t, "SetISODate().DateString()", tempo.SetISODate(2024, 20, 3).DateString(), "2024-05-15")
+	if got := tempo.Weekday(); got != 3 {
+		t.Fatalf("Weekday() = %d, want 3", got)
+	}
+	assertEqual(t, "SetWeekday().DateString()", tempo.SetWeekday(time.Friday).DateString(), "2024-05-17")
+	assertEqual(t, "SetDayOfYear().DateString()", tempo.SetDayOfYear(60).DateString(), "2024-02-29")
+	modified, err := tempo.Modify("+2 days")
+	if err != nil {
+		t.Fatalf("Modify(+2 days): %v", err)
+	}
+	assertEqual(t, "Modify(+2 days).DateString()", modified.DateString(), "2024-05-17")
+	modified, err = tempo.Modify("previous day")
+	if err != nil {
+		t.Fatalf("Modify(previous day): %v", err)
+	}
+	assertEqual(t, "Modify(previous day).DateString()", modified.DateString(), "2024-05-14")
+	modified, err = tempo.Change("next week")
+	if err != nil {
+		t.Fatalf("Change(next week): %v", err)
+	}
+	assertEqual(t, "Change(next week).DateString()", modified.DateString(), "2024-05-22")
 	assertEqual(t, "Subtract(2, Day).DateString()", tempo.Subtract(2, Day).DateString(), "2024-05-13")
 	assertEqual(t, "AddUnit(Day, 2).DateString()", tempo.AddUnit(Day, 2).DateString(), "2024-05-17")
 	assertEqual(t, "AddRealUnit(Day, 2).DateString()", tempo.AddRealUnit(Day, 2).DateString(), "2024-05-17")
@@ -1858,6 +1897,23 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("RawParse(): %v", err)
 	}
 	assertEqual(t, "RawParse().DateString()", rawParsed.DateString(), "2024-05-15")
+	made, err := Make("2024-05-15")
+	if err != nil {
+		t.Fatalf("Make(): %v", err)
+	}
+	assertEqual(t, "Make().DateString()", made.DateString(), "2024-05-15")
+	parsedFromLocale, err := ParseFromLocale("2024-05-15", "en-US")
+	if err != nil {
+		t.Fatalf("ParseFromLocale(): %v", err)
+	}
+	assertEqual(t, "ParseFromLocale().DateString()", parsedFromLocale.DateString(), "2024-05-15")
+	days := GetDays()
+	if len(days) < 2 || days[0] != "Sunday" || days[1] != "Monday" {
+		t.Fatalf("GetDays()[0:2] = %v, want Sunday/Monday", days[:2])
+	}
+	if !HasFormatWithModifiers("2024/05/15", "YYYY/MM/DD") {
+		t.Fatalf("HasFormatWithModifiers() = false, want true")
+	}
 	if !CanBeCreatedFromFormat("2024/05/15", "YYYY/MM/DD") {
 		t.Fatalf("CanBeCreatedFromFormat() = false, want true")
 	}

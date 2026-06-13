@@ -128,6 +128,8 @@ var (
 	dateOnlyPattern = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})$`)
 	durationPattern = regexp.MustCompile(`^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$`)
 	localPattern    = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2})(?::?(\d{2}))?(?::?(\d{2})(?:\.(\d{1,9}))?)?)?$`)
+	modifierPattern = regexp.MustCompile(`^([+-]?\d+(?:\.\d+)?)\s*(milliseconds?|seconds?|minutes?|hours?|days?|weeks?|months?|quarters?|years?|decades?|centuries?|millenniums?)$`)
+	movePattern     = regexp.MustCompile(`^(next|last|previous)\s+(milliseconds?|seconds?|minutes?|hours?|days?|weeks?|months?|quarters?|years?|decades?|centuries?|millenniums?)$`)
 	zonePattern     = regexp.MustCompile(`(?:Z|[+-]\d{2}:?\d{2})$`)
 	monthNames      = [...]string{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
 	shortMonthNames = [...]string{"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
@@ -220,6 +222,26 @@ func CanParse(input string, options ...Option) bool {
 	return ok
 }
 
+func Make(input string, options ...Option) (Tempo, error) {
+	return Parse(input, options...)
+}
+
+func ParseFromLocale(input string, _ string, options ...Option) (Tempo, error) {
+	return Parse(input, options...)
+}
+
+func GetDays() []string {
+	return append([]string(nil), dayNames[:]...)
+}
+
+func Sleep(seconds float64) {
+	if seconds <= 0 {
+		return
+	}
+
+	time.Sleep(time.Duration(seconds * float64(time.Second)))
+}
+
 func HasRelativeKeywords(input string) bool {
 	value := strings.TrimSpace(strings.ToLower(input))
 	return strings.HasPrefix(value, "+") ||
@@ -295,6 +317,10 @@ func HasFormat(input string, pattern string, options ...Option) bool {
 }
 
 func CanBeCreatedFromFormat(input string, pattern string, options ...Option) bool {
+	return HasFormat(input, pattern, options...)
+}
+
+func HasFormatWithModifiers(input string, pattern string, options ...Option) bool {
 	return HasFormat(input, pattern, options...)
 }
 
@@ -914,6 +940,53 @@ func (tempo Tempo) NowWithSameTz() Tempo {
 	return Tempo{value: time.Now(), location: tempo.location}
 }
 
+func (tempo Tempo) Modify(modifier string) (Tempo, error) {
+	value := strings.TrimSpace(modifier)
+	if value == "" {
+		return Tempo{}, errors.New("Tempo modifier cannot be empty")
+	}
+
+	if parsed, err := Parse(value, WithTimezone(tempo.Timezone())); err == nil {
+		return parsed, nil
+	}
+
+	lower := strings.ToLower(value)
+	if match := modifierPattern.FindStringSubmatch(lower); match != nil {
+		amount, err := strconv.ParseFloat(match[1], 64)
+		if err != nil {
+			return Tempo{}, err
+		}
+
+		return tempo.Add(int(math.Round(amount)), Unit(match[2])), nil
+	}
+
+	if match := movePattern.FindStringSubmatch(lower); match != nil {
+		amount := 1
+		if match[1] != "next" {
+			amount = -1
+		}
+
+		return tempo.Add(amount, Unit(match[2])), nil
+	}
+
+	switch lower {
+	case "now":
+		return tempo.NowWithSameTz(), nil
+	case "today":
+		return tempo.NowWithSameTz().StartOfDay(), nil
+	case "tomorrow":
+		return tempo.NowWithSameTz().StartOfDay().AddDays(1), nil
+	case "yesterday":
+		return tempo.NowWithSameTz().StartOfDay().SubDays(1), nil
+	default:
+		return Tempo{}, fmt.Errorf("invalid Tempo modifier: %s", modifier)
+	}
+}
+
+func (tempo Tempo) Change(modifier string) (Tempo, error) {
+	return tempo.Modify(modifier)
+}
+
 func (tempo Tempo) Immutable() Tempo {
 	return tempo.Clone()
 }
@@ -938,6 +1011,15 @@ func (tempo Tempo) GetTimestampMs() int64 {
 	return tempo.TimestampMs()
 }
 
+func (tempo Tempo) GetPreciseTimestamp(precisions ...int) float64 {
+	precision := 6
+	if len(precisions) > 0 {
+		precision = precisions[0]
+	}
+
+	return math.Round(float64(tempo.value.UnixNano()) / math.Pow10(9-precision))
+}
+
 func (tempo Tempo) Unix() int64 {
 	return tempo.Timestamp()
 }
@@ -960,6 +1042,14 @@ func (tempo Tempo) Day() int {
 
 func (tempo Tempo) DayOfWeek() int {
 	return int(tempo.local().Weekday())
+}
+
+func (tempo Tempo) Weekday() int {
+	return tempo.DayOfWeek()
+}
+
+func (tempo Tempo) SetWeekday(weekday time.Weekday) Tempo {
+	return tempo.AddDays(int(weekday) - tempo.DayOfWeek())
 }
 
 func (tempo Tempo) ISOWeekday() int {
@@ -993,6 +1083,12 @@ func (tempo Tempo) WeeksInISOYear() int {
 
 func (tempo Tempo) DayOfYear() int {
 	return tempo.local().YearDay()
+}
+
+func (tempo Tempo) SetDayOfYear(day int) Tempo {
+	return tempo.StartOfYear().
+		AddDays(day-1).
+		SetTime(tempo.Hour(), tempo.Minute(), tempo.Second(), tempo.Millisecond())
 }
 
 func (tempo Tempo) Hour() int {
@@ -1409,6 +1505,18 @@ func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
 	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: tempo.location}
 }
 
+func (tempo Tempo) SetISODate(year int, week int, day int) Tempo {
+	isoYearStart := Tempo{
+		value:    time.Date(year, time.January, 4, 0, 0, 0, 0, tempo.location).UTC(),
+		location: tempo.location,
+	}.StartOfWeek(StartOfWeekOptions{WeekStartsOn: time.Monday})
+
+	return isoYearStart.
+		AddWeeks(week-1).
+		AddDays(day-1).
+		SetTime(tempo.Hour(), tempo.Minute(), tempo.Second(), tempo.Millisecond())
+}
+
 func (tempo Tempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
 	next, err := tempo.SetUnit(valueUnit, value)
 	if err != nil {
@@ -1765,6 +1873,14 @@ func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 
 func (tempo Tempo) IsEndOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.IsEndOf(unit, options...)
+}
+
+func (tempo Tempo) IsStartOfTime() bool {
+	return tempo.value.UnixMilli() <= -8640000000000000
+}
+
+func (tempo Tempo) IsEndOfTime() bool {
+	return tempo.value.UnixMilli() >= 8640000000000000
 }
 
 func (tempo Tempo) IsCurrentUnit(unit Unit, reference Tempo) bool {
@@ -2366,6 +2482,40 @@ func (tempo Tempo) SecondsSinceMidnight() int {
 
 func (tempo Tempo) SecondsUntilEndOfDay() int {
 	return tempo.DiffInSeconds(tempo.EndOfDay(), DiffOptions{Absolute: true})
+}
+
+func (tempo Tempo) Calendar(reference Tempo, formats ...map[string]string) string {
+	diff := tempo.StartOfDay().DiffInDays(reference.StartOfDay())
+	key := "sameElse"
+	switch {
+	case diff == 0:
+		key = "sameDay"
+	case diff == 1:
+		key = "nextDay"
+	case diff > 1 && diff < 7:
+		key = "nextWeek"
+	case diff == -1:
+		key = "lastDay"
+	case diff < -1 && diff > -7:
+		key = "lastWeek"
+	}
+
+	defaults := map[string]string{
+		"lastDay":  "[Yesterday at] HH:mm",
+		"lastWeek": "[Last] dddd [at] HH:mm",
+		"nextDay":  "[Tomorrow at] HH:mm",
+		"nextWeek": "dddd [at] HH:mm",
+		"sameDay":  "[Today at] HH:mm",
+		"sameElse": "YYYY-MM-DD",
+	}
+	pattern := defaults[key]
+	if len(formats) > 0 {
+		if custom, ok := formats[0][key]; ok {
+			pattern = custom
+		}
+	}
+
+	return tempo.ISOFormat(pattern)
 }
 
 func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
@@ -3081,6 +3231,19 @@ func (mutable *MutableTempo) NowWithSameTz() *MutableTempo {
 	return mutable.replace(mutable.Tempo().NowWithSameTz())
 }
 
+func (mutable *MutableTempo) Modify(modifier string) (*MutableTempo, error) {
+	next, err := mutable.Tempo().Modify(modifier)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) Change(modifier string) (*MutableTempo, error) {
+	return mutable.Modify(modifier)
+}
+
 func (mutable *MutableTempo) Immutable() Tempo {
 	return mutable.Tempo()
 }
@@ -3099,6 +3262,10 @@ func (mutable *MutableTempo) TimestampMs() int64 {
 
 func (mutable *MutableTempo) GetTimestampMs() int64 {
 	return mutable.Tempo().GetTimestampMs()
+}
+
+func (mutable *MutableTempo) GetPreciseTimestamp(precisions ...int) float64 {
+	return mutable.Tempo().GetPreciseTimestamp(precisions...)
 }
 
 func (mutable *MutableTempo) Unix() int64 {
@@ -3125,6 +3292,14 @@ func (mutable *MutableTempo) DayOfWeek() int {
 	return mutable.Tempo().DayOfWeek()
 }
 
+func (mutable *MutableTempo) Weekday() int {
+	return mutable.Tempo().Weekday()
+}
+
+func (mutable *MutableTempo) SetWeekday(weekday time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetWeekday(weekday))
+}
+
 func (mutable *MutableTempo) ISOWeekday() int {
 	return mutable.Tempo().ISOWeekday()
 }
@@ -3147,6 +3322,10 @@ func (mutable *MutableTempo) WeeksInISOYear() int {
 
 func (mutable *MutableTempo) DayOfYear() int {
 	return mutable.Tempo().DayOfYear()
+}
+
+func (mutable *MutableTempo) SetDayOfYear(day int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDayOfYear(day))
 }
 
 func (mutable *MutableTempo) Hour() int {
@@ -3600,6 +3779,10 @@ func (mutable *MutableTempo) SetTimeFromTimeString(input string) (*MutableTempo,
 
 func (mutable *MutableTempo) SetTimestamp(timestamp int64) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SetTimestamp(timestamp))
+}
+
+func (mutable *MutableTempo) SetISODate(year int, week int, day int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetISODate(year, week, day))
 }
 
 func (mutable *MutableTempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
@@ -4098,6 +4281,14 @@ func (mutable *MutableTempo) IsEndOfMillennium() bool {
 	return mutable.Tempo().IsEndOfMillennium()
 }
 
+func (mutable *MutableTempo) IsStartOfTime() bool {
+	return mutable.Tempo().IsStartOfTime()
+}
+
+func (mutable *MutableTempo) IsEndOfTime() bool {
+	return mutable.Tempo().IsEndOfTime()
+}
+
 func (mutable *MutableTempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
 	return mutable.Tempo().Diff(other, unit, options...)
 }
@@ -4184,6 +4375,10 @@ func (mutable *MutableTempo) SecondsSinceMidnight() int {
 
 func (mutable *MutableTempo) SecondsUntilEndOfDay() int {
 	return mutable.Tempo().SecondsUntilEndOfDay()
+}
+
+func (mutable *MutableTempo) Calendar(reference Tempo, formats ...map[string]string) string {
+	return mutable.Tempo().Calendar(reference, formats...)
 }
 
 func (mutable *MutableTempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {

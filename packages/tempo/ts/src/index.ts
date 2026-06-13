@@ -129,6 +129,16 @@ export type FormatOptions = {
   readonly timeZone?: string;
 };
 
+export type CalendarFormatKey =
+  | "sameDay"
+  | "nextDay"
+  | "nextWeek"
+  | "lastDay"
+  | "lastWeek"
+  | "sameElse";
+
+export type CalendarFormats = Partial<Record<CalendarFormatKey, string>>;
+
 export type TimeStringPrecision = "second" | "millisecond";
 
 export type HumanDiffOptions = {
@@ -1177,6 +1187,35 @@ export class TempoImmutable {
     return TempoImmutable.tryParse(input, options) !== null;
   }
 
+  static make(
+    input: TempoInput | null | undefined,
+    options?: TempoOptions,
+  ): TempoImmutable | null {
+    return input === null || input === undefined
+      ? null
+      : TempoImmutable.parse(input, options);
+  }
+
+  static parseFromLocale(
+    input: string,
+    _locale?: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.parse(input, options);
+  }
+
+  static getDays(locale = "en-US"): string[] {
+    return [...weekdayNames(locale, "long")];
+  }
+
+  static sleep(seconds: number): Promise<void> {
+    assertFiniteNumber(seconds, "Seconds");
+
+    return new Promise((resolve) => {
+      setTimeout(resolve, Math.max(0, seconds * 1000));
+    });
+  }
+
   static hasRelativeKeywords(input: string): boolean {
     return /\b(now|today|tomorrow|yesterday|next|last|ago)\b|^[+-]/i.test(
       input.trim(),
@@ -1279,6 +1318,16 @@ export class TempoImmutable {
     options?: TempoOptions,
   ): boolean {
     return TempoImmutable.hasFormat(input, pattern, options);
+  }
+
+  static hasFormatWithModifiers(
+    input: string | null | undefined,
+    pattern: string,
+    options?: TempoOptions,
+  ): boolean {
+    return input === null || input === undefined
+      ? false
+      : TempoImmutable.hasFormat(input, pattern, options);
   }
 
   static create(components: TempoComponents): TempoImmutable {
@@ -1734,6 +1783,54 @@ export class TempoImmutable {
     return this.make(new Date(), this.zone);
   }
 
+  modify(modifier: string): this {
+    const value = modifier.trim();
+    if (value === "") {
+      throw new RangeError("Tempo modifier cannot be empty");
+    }
+
+    const parsed = TempoImmutable.tryParse(value, { timeZone: this.zone });
+    if (parsed !== null) {
+      return this.make(parsed.toDate(), parsed.timeZone);
+    }
+
+    const relative = value.match(
+      /^([+-]?\d+(?:\.\d+)?)\s*(milliseconds?|seconds?|minutes?|hours?|days?|weeks?|months?|quarters?|years?|decades?|centuries?|millenniums?|millennia)$/i,
+    );
+    if (relative !== null) {
+      return this.add(
+        Number(relative[1]),
+        relative[2].toLowerCase() as TimeUnit,
+      );
+    }
+
+    const directional = value.match(
+      /^(next|last|previous)\s+(milliseconds?|seconds?|minutes?|hours?|days?|weeks?|months?|quarters?|years?|decades?|centuries?|millenniums?|millennia)$/i,
+    );
+    if (directional !== null) {
+      const amount = directional[1].toLowerCase() === "next" ? 1 : -1;
+
+      return this.add(amount, directional[2].toLowerCase() as TimeUnit);
+    }
+
+    switch (value.toLowerCase()) {
+      case "now":
+        return this.nowWithSameTz();
+      case "today":
+        return this.make(new Date(), this.zone).startOfDay();
+      case "tomorrow":
+        return this.make(new Date(), this.zone).startOfDay().addDays(1);
+      case "yesterday":
+        return this.make(new Date(), this.zone).startOfDay().subDays(1);
+    }
+
+    throw new RangeError(`Invalid Tempo modifier: ${modifier}`);
+  }
+
+  change(modifier: string): this {
+    return this.modify(modifier);
+  }
+
   toImmutable(): TempoImmutable {
     return new TempoImmutable(this.value, { timeZone: this.zone });
   }
@@ -1938,6 +2035,38 @@ export class TempoImmutable {
 
   timestampTo(timestamp: number): this {
     return this.setTimestamp(timestamp);
+  }
+
+  setISODate(year: number, week: number, day = 1): this {
+    const isoYearStart = this.make(
+      new Date(Date.UTC(year, 0, 4)),
+      this.zone,
+    ).startOfWeek({ weekStartsOn: 1 });
+
+    return isoYearStart
+      .addWeeks(week - 1)
+      .addDays(day - 1)
+      .setTime(this.hour, this.minute, this.second, this.millisecond);
+  }
+
+  weekday(): number;
+  weekday(value: WeekdayInput): this;
+  weekday(value?: WeekdayInput): number | this {
+    if (value === undefined) {
+      return this.dayOfWeek;
+    }
+
+    return this.addDays(resolveWeekday(value) - this.dayOfWeek);
+  }
+
+  setWeekday(value: WeekdayInput): this {
+    return this.weekday(value);
+  }
+
+  setDayOfYear(day: number): this {
+    return this.startOfYear()
+      .addDays(day - 1)
+      .setTime(this.hour, this.minute, this.second, this.millisecond);
   }
 
   setUnitNoOverflow(
@@ -2331,6 +2460,14 @@ export class TempoImmutable {
 
   isEndOfUnit(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
     return this.isEndOf(unit, options);
+  }
+
+  isStartOfTime(): boolean {
+    return this.timestampMs <= -8640000000000000;
+  }
+
+  isEndOfTime(): boolean {
+    return this.timestampMs >= 8640000000000000;
   }
 
   isCurrentUnit(
@@ -2951,6 +3088,38 @@ export class TempoImmutable {
     return this.diffInSeconds(this.endOfDay(), { absolute: true });
   }
 
+  calendar(
+    referenceTime: TempoInput = new Date(),
+    formats: CalendarFormats = {},
+  ): string {
+    const reference = TempoImmutable.parse(referenceTime, {
+      timeZone: this.zone,
+    });
+    const diff = this.startOfDay().diffInDays(reference.startOfDay());
+    const key: CalendarFormatKey =
+      diff === 0
+        ? "sameDay"
+        : diff === 1
+          ? "nextDay"
+          : diff > 1 && diff < 7
+            ? "nextWeek"
+            : diff === -1
+              ? "lastDay"
+              : diff < -1 && diff > -7
+                ? "lastWeek"
+                : "sameElse";
+    const defaults: Record<CalendarFormatKey, string> = {
+      lastDay: "[Yesterday at] HH:mm",
+      lastWeek: "[Last] dddd [at] HH:mm",
+      nextDay: "[Tomorrow at] HH:mm",
+      nextWeek: "dddd [at] HH:mm",
+      sameDay: "[Today at] HH:mm",
+      sameElse: "YYYY-MM-DD",
+    };
+
+    return this.isoFormat(formats[key] ?? defaults[key]);
+  }
+
   diffForHumans(
     other: TempoInput = new Date(),
     options?: HumanDiffOptions,
@@ -3538,6 +3707,12 @@ export class TempoImmutable {
 
   valueOf(): number {
     return this.timestampMs;
+  }
+
+  getPreciseTimestamp(precision = 6): number {
+    assertFiniteNumber(precision, "Precision");
+
+    return Math.round(this.timestampMs * 10 ** (precision - 3));
   }
 
   toString(): string {
