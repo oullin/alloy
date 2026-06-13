@@ -252,6 +252,81 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	}
 }
 
+func TestGlobalSettingsAffectDateBehavior(t *testing.T) {
+	original := SettingsState()
+	defer SettingsState(original)
+
+	SetLocale("fr-FR")
+	if got := GetLocale(); got != "fr-FR" {
+		t.Fatalf("GetLocale() = %q, want fr-FR", got)
+	}
+	SetFallbackLocale("en-GB")
+	if got := GetFallbackLocale(); got != "en-GB" {
+		t.Fatalf("GetFallbackLocale() = %q, want en-GB", got)
+	}
+
+	SetWeekendDays([]time.Weekday{time.Friday, time.Saturday})
+	friday, err := Parse("2024-05-17")
+	if err != nil {
+		t.Fatalf("parse friday: %v", err)
+	}
+	sunday, err := Parse("2024-05-19")
+	if err != nil {
+		t.Fatalf("parse sunday: %v", err)
+	}
+	if !friday.IsWeekend() || !sunday.IsWeekday() {
+		t.Fatalf("configured weekend predicates failed")
+	}
+
+	SetMidDayAt(13)
+	midday, err := Parse("2024-05-15T13:00:00Z")
+	if err != nil {
+		t.Fatalf("parse midday: %v", err)
+	}
+	if !midday.IsMidday() || midday.Midday().Hour() != 13 {
+		t.Fatalf("configured midday helpers failed")
+	}
+
+	UseMonthsOverflow(false)
+	january, err := Parse("2024-01-31")
+	if err != nil {
+		t.Fatalf("parse january: %v", err)
+	}
+	assertEqual(t, "configured AddMonths().DateString()", january.AddMonths(1).DateString(), "2024-02-29")
+	UseYearsOverflow(false)
+	leap, err := Parse("2024-02-29")
+	if err != nil {
+		t.Fatalf("parse leap day: %v", err)
+	}
+	assertEqual(t, "configured AddYears().DateString()", leap.AddYears(1).DateString(), "2025-02-28")
+
+	UseStrictMode(false)
+	if IsStrictModeEnabled() {
+		t.Fatalf("IsStrictModeEnabled() = true, want false")
+	}
+	SetHumanDiffOptions(HumanDiffOptions{Locale: "en-US", Numeric: "auto", Style: "long"})
+	if got := GetHumanDiffOptions().Numeric; got != "auto" {
+		t.Fatalf("GetHumanDiffOptions().Numeric = %q, want auto", got)
+	}
+
+	frozen, err := Parse("2025-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse frozen now: %v", err)
+	}
+	SetTestNowAndTimezone(&frozen, "Asia/Tokyo")
+	if !HasTestNow() {
+		t.Fatalf("HasTestNow() = false, want true")
+	}
+	now, err := Now()
+	if err != nil {
+		t.Fatalf("Now(): %v", err)
+	}
+	if got := now.Timezone(); got != "Asia/Tokyo" {
+		t.Fatalf("Now().Timezone() = %q, want Asia/Tokyo", got)
+	}
+	assertEqual(t, "configured Now().DateTimeString()", now.DateTimeString(), "2025-01-01 09:00:00")
+}
+
 func TestISOStringFormatsUTC(t *testing.T) {
 	parsed, err := Parse("2024-01-01T01:00:00+01:00")
 	if err != nil {

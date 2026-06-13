@@ -165,6 +165,48 @@ describe("Tempo TypeScript behavior", () => {
     ).toBe("09:30:15.250");
   });
 
+  it("applies global settings to real date behavior", () => {
+    const original = Tempo.settings();
+
+    try {
+      Tempo.setLocale("fr-FR");
+      expect(Tempo.parse("2024-05-15").monthName()).toBe("mai");
+      expect(Tempo.parse("2024-05-15").locale("en-US").monthName()).toBe("May");
+
+      Tempo.setWeekendDays([5, 6]);
+      expect(Tempo.parse("2024-05-17").isWeekend()).toBe(true);
+      expect(Tempo.parse("2024-05-19").isWeekday()).toBe(true);
+
+      Tempo.setMidDayAt(13);
+      expect(Tempo.parse("2024-05-15T13:00:00Z").isMidday()).toBe(true);
+      expect(Tempo.parse("2024-05-15").midday().hour).toBe(13);
+
+      Tempo.useMonthsOverflow(false);
+      expect(Tempo.parse("2024-01-31").addMonths(1).toDateString()).toBe(
+        "2024-02-29",
+      );
+      Tempo.useYearsOverflow(false);
+      expect(Tempo.parse("2024-02-29").addYears(1).toDateString()).toBe(
+        "2025-02-28",
+      );
+
+      Tempo.useStrictMode(false);
+      expect(Tempo.isStrictModeEnabled()).toBe(false);
+      Tempo.setHumanDiffOptions({ locale: "en-US", numeric: "auto" });
+      expect(Tempo.getHumanDiffOptions().numeric).toBe("auto");
+
+      Tempo.setTestNowAndTimezone("2025-01-01T00:00:00Z", "Asia/Tokyo");
+      expect(Tempo.hasTestNow()).toBe(true);
+      expect(Tempo.now().timeZone).toBe("Asia/Tokyo");
+      expect(Tempo.now().toDateTimeString()).toBe("2025-01-01 09:00:00");
+      expect(Tempo.getTestNow()?.toISOString()).toBe(
+        "2025-01-01T00:00:00.000Z",
+      );
+    } finally {
+      Tempo.settings(original);
+    }
+  });
+
   it("creates and renders timezone-aware local components", () => {
     const tokyo = Tempo.create({
       day: 1,

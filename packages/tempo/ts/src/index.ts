@@ -77,7 +77,21 @@ export type WeekdayInput =
   | "sat";
 
 export type TempoOptions = {
+  readonly locale?: string;
   readonly timeZone?: string;
+};
+
+export type TempoSettings = {
+  readonly fallbackLocale?: string;
+  readonly humanDiffOptions?: HumanDiffOptions;
+  readonly locale?: string;
+  readonly midDayAt?: number;
+  readonly monthsOverflow?: boolean;
+  readonly strictMode?: boolean;
+  readonly testNow?: TempoInput | null;
+  readonly timeZone?: string;
+  readonly weekendDays?: readonly number[];
+  readonly yearsOverflow?: boolean;
 };
 
 export type TempoComponents = {
@@ -193,6 +207,30 @@ const timezonePattern = /(?:Z|[+-]\d{2}:?\d{2})$/i;
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
 const monthNameCache = new Map<string, readonly string[]>();
 const weekdayNameCache = new Map<string, readonly string[]>();
+
+const defaultHumanDiffOptions: HumanDiffOptions = {
+  locale: "en-US",
+  numeric: "always",
+  style: "long",
+};
+
+const tempoConfig = {
+  fallbackLocale: "en-US",
+  humanDiffOptions: { ...defaultHumanDiffOptions },
+  locale: "en-US",
+  midDayAt: 12,
+  monthsOverflow: true,
+  strictMode: true,
+  testNow: null as Date | null,
+  timeZone: defaultTimeZone,
+  weekendDays: [0, 6],
+  yearsOverflow: true,
+};
+
+const configuredNow = (): Date =>
+  tempoConfig.testNow === null
+    ? new Date()
+    : new Date(tempoConfig.testNow.getTime());
 
 const pad = (value: number, length = 2): string =>
   String(Math.trunc(Math.abs(value))).padStart(length, "0");
@@ -1131,15 +1169,20 @@ export class TempoDuration {
 
 export class TempoImmutable {
   protected value: Date;
+  protected currentLocale: string;
   protected zone: string;
 
   constructor(input: TempoInput = new Date(), options?: TempoOptions) {
     this.value = asDate(input, options);
+    this.currentLocale = options?.locale ?? tempoConfig.locale;
     this.zone = zoneFromInput(input, options);
   }
 
   static now(options?: TempoOptions): TempoImmutable {
-    return new TempoImmutable(new Date(), options);
+    return new TempoImmutable(configuredNow(), {
+      locale: options?.locale,
+      timeZone: options?.timeZone ?? tempoConfig.timeZone,
+    });
   }
 
   static today(options?: TempoOptions): TempoImmutable {
@@ -1185,6 +1228,152 @@ export class TempoImmutable {
 
   static canParse(input: TempoInput, options?: TempoOptions): boolean {
     return TempoImmutable.tryParse(input, options) !== null;
+  }
+
+  static settings(settings?: TempoSettings): TempoSettings {
+    if (settings !== undefined) {
+      if (settings.locale !== undefined) {
+        TempoImmutable.setLocale(settings.locale);
+      }
+      if (settings.fallbackLocale !== undefined) {
+        TempoImmutable.setFallbackLocale(settings.fallbackLocale);
+      }
+      if (settings.humanDiffOptions !== undefined) {
+        TempoImmutable.setHumanDiffOptions(settings.humanDiffOptions);
+      }
+      if (settings.midDayAt !== undefined) {
+        TempoImmutable.setMidDayAt(settings.midDayAt);
+      }
+      if (settings.monthsOverflow !== undefined) {
+        TempoImmutable.useMonthsOverflow(settings.monthsOverflow);
+      }
+      if (settings.strictMode !== undefined) {
+        TempoImmutable.useStrictMode(settings.strictMode);
+      }
+      if (settings.testNow !== undefined) {
+        TempoImmutable.setTestNow(settings.testNow);
+      }
+      if (settings.timeZone !== undefined) {
+        tempoConfig.timeZone = normalizeTimeZone(settings.timeZone);
+      }
+      if (settings.weekendDays !== undefined) {
+        TempoImmutable.setWeekendDays(settings.weekendDays);
+      }
+      if (settings.yearsOverflow !== undefined) {
+        TempoImmutable.useYearsOverflow(settings.yearsOverflow);
+      }
+    }
+
+    return {
+      fallbackLocale: tempoConfig.fallbackLocale,
+      humanDiffOptions: { ...tempoConfig.humanDiffOptions },
+      locale: tempoConfig.locale,
+      midDayAt: tempoConfig.midDayAt,
+      monthsOverflow: tempoConfig.monthsOverflow,
+      strictMode: tempoConfig.strictMode,
+      testNow:
+        tempoConfig.testNow === null
+          ? null
+          : new Date(tempoConfig.testNow.getTime()),
+      timeZone: tempoConfig.timeZone,
+      weekendDays: [...tempoConfig.weekendDays],
+      yearsOverflow: tempoConfig.yearsOverflow,
+    };
+  }
+
+  static getLocale(): string {
+    return tempoConfig.locale;
+  }
+
+  static setLocale(locale: string): void {
+    tempoConfig.locale = locale;
+  }
+
+  static getFallbackLocale(): string {
+    return tempoConfig.fallbackLocale;
+  }
+
+  static setFallbackLocale(locale: string): void {
+    tempoConfig.fallbackLocale = locale;
+  }
+
+  static getHumanDiffOptions(): HumanDiffOptions {
+    return { ...tempoConfig.humanDiffOptions };
+  }
+
+  static setHumanDiffOptions(options: HumanDiffOptions): void {
+    tempoConfig.humanDiffOptions = { ...options };
+  }
+
+  static getMidDayAt(): number {
+    return tempoConfig.midDayAt;
+  }
+
+  static setMidDayAt(hour: number): void {
+    assertFiniteNumber(hour, "Midday hour");
+    tempoConfig.midDayAt = Math.trunc(hour);
+  }
+
+  static getWeekendDays(): number[] {
+    return [...tempoConfig.weekendDays];
+  }
+
+  static setWeekendDays(days: readonly number[]): void {
+    tempoConfig.weekendDays = days.map((day) => ((day % 7) + 7) % 7);
+  }
+
+  static shouldOverflowMonths(): boolean {
+    return tempoConfig.monthsOverflow;
+  }
+
+  static useMonthsOverflow(enabled = true): void {
+    tempoConfig.monthsOverflow = enabled;
+  }
+
+  static resetMonthsOverflow(): void {
+    tempoConfig.monthsOverflow = true;
+  }
+
+  static shouldOverflowYears(): boolean {
+    return tempoConfig.yearsOverflow;
+  }
+
+  static useYearsOverflow(enabled = true): void {
+    tempoConfig.yearsOverflow = enabled;
+  }
+
+  static resetYearsOverflow(): void {
+    tempoConfig.yearsOverflow = true;
+  }
+
+  static isStrictModeEnabled(): boolean {
+    return tempoConfig.strictMode;
+  }
+
+  static useStrictMode(enabled = true): void {
+    tempoConfig.strictMode = enabled;
+  }
+
+  static getTestNow(): Date | null {
+    return tempoConfig.testNow === null
+      ? null
+      : new Date(tempoConfig.testNow.getTime());
+  }
+
+  static setTestNow(input: TempoInput | null): void {
+    tempoConfig.testNow = input === null ? null : asDate(input);
+  }
+
+  static setTestNowAndTimezone(
+    input: TempoInput | null,
+    timeZone = tempoConfig.timeZone,
+  ): void {
+    TempoImmutable.setTestNow(input);
+    tempoConfig.timeZone = normalizeTimeZone(timeZone);
+  }
+
+  static hasTestNow(): boolean {
+    return tempoConfig.testNow !== null;
   }
 
   static make(
@@ -1491,17 +1680,54 @@ export class TempoImmutable {
     );
   }
 
-  protected make(value: Date, timeZone = this.zone): this {
+  protected make(
+    value: Date,
+    timeZone = this.zone,
+    locale = this.currentLocale,
+  ): this {
     const Constructor = this.constructor as new (
       input: TempoInput,
       options?: TempoOptions,
     ) => this;
 
-    return new Constructor(value, { timeZone });
+    return new Constructor(value, { locale, timeZone });
   }
 
   get timeZone(): string {
     return this.zone;
+  }
+
+  getLocale(): string {
+    return this.currentLocale;
+  }
+
+  locale(): string;
+  locale(locale: string): this;
+  locale(locale?: string): string | this {
+    return locale === undefined
+      ? this.currentLocale
+      : this.make(this.value, this.zone, locale);
+  }
+
+  getSettings(): TempoSettings {
+    return {
+      locale: this.currentLocale,
+      timeZone: this.zone,
+    };
+  }
+
+  settings(settings?: TempoSettings): TempoSettings | this {
+    if (settings === undefined) {
+      return this.getSettings();
+    }
+
+    return this.make(
+      this.value,
+      settings.timeZone === undefined
+        ? this.zone
+        : normalizeTimeZone(settings.timeZone),
+      settings.locale ?? this.currentLocale,
+    );
   }
 
   get timestamp(): number {
@@ -1589,23 +1815,26 @@ export class TempoImmutable {
     return this.offsetMinutes;
   }
 
-  timezoneName(style: TimeZoneNameStyle = "short", locale = "en-US"): string {
+  timezoneName(
+    style: TimeZoneNameStyle = "short",
+    locale = this.currentLocale,
+  ): string {
     return timeZoneName(this.value, this.zone, style, locale);
   }
 
-  monthName(locale = "en-US"): string {
+  monthName(locale = this.currentLocale): string {
     return monthNames(locale, "long")[this.month - 1] ?? "";
   }
 
-  shortMonthName(locale = "en-US"): string {
+  shortMonthName(locale = this.currentLocale): string {
     return monthNames(locale, "short")[this.month - 1] ?? "";
   }
 
-  dayName(locale = "en-US"): string {
+  dayName(locale = this.currentLocale): string {
     return weekdayNames(locale, "long")[this.dayOfWeek] ?? "";
   }
 
-  shortDayName(locale = "en-US"): string {
+  shortDayName(locale = this.currentLocale): string {
     return weekdayNames(locale, "short")[this.dayOfWeek] ?? "";
   }
 
@@ -1666,7 +1895,7 @@ export class TempoImmutable {
   }
 
   isWeekend(): boolean {
-    return this.dayOfWeek === 0 || this.dayOfWeek === 6;
+    return tempoConfig.weekendDays.includes(this.dayOfWeek);
   }
 
   isSunday(): boolean {
@@ -1750,7 +1979,7 @@ export class TempoImmutable {
 
   isMidday(): boolean {
     return (
-      this.hour === 12 &&
+      this.hour === tempoConfig.midDayAt &&
       this.minute === 0 &&
       this.second === 0 &&
       this.millisecond === 0
@@ -1832,11 +2061,17 @@ export class TempoImmutable {
   }
 
   toImmutable(): TempoImmutable {
-    return new TempoImmutable(this.value, { timeZone: this.zone });
+    return new TempoImmutable(this.value, {
+      locale: this.currentLocale,
+      timeZone: this.zone,
+    });
   }
 
   toMutable(): TempoMutable {
-    return new TempoMutable(this.value, { timeZone: this.zone });
+    return new TempoMutable(this.value, {
+      locale: this.currentLocale,
+      timeZone: this.zone,
+    });
   }
 
   timezone(timeZone: string): this {
@@ -2081,7 +2316,7 @@ export class TempoImmutable {
   }
 
   midday(): this {
-    return this.setTime(12, 0, 0, 0);
+    return this.setTime(tempoConfig.midDayAt, 0, 0, 0);
   }
 
   midDay(): this {
@@ -2260,6 +2495,10 @@ export class TempoImmutable {
   }
 
   addMonths(months: number): this {
+    if (!tempoConfig.monthsOverflow) {
+      return this.addMonthsNoOverflow(months);
+    }
+
     assertFiniteNumber(months, "Months");
     const parts = this.toObject();
 
@@ -2317,6 +2556,10 @@ export class TempoImmutable {
   }
 
   addYears(years: number): this {
+    if (!tempoConfig.yearsOverflow) {
+      return this.addYearsNoOverflow(years);
+    }
+
     assertFiniteNumber(years, "Years");
     const parts = this.toObject();
 
@@ -3124,15 +3367,25 @@ export class TempoImmutable {
     other: TempoInput = new Date(),
     options?: HumanDiffOptions,
   ): string {
+    const resolvedOptions = {
+      ...tempoConfig.humanDiffOptions,
+      ...options,
+    };
     const rawMilliseconds = this.timestampMs - asDate(other).getTime();
-    const unit = options?.unit ?? bestRelativeUnit(rawMilliseconds);
+    const unit = resolvedOptions.unit ?? bestRelativeUnit(rawMilliseconds);
     const value = Math.round(rawMilliseconds / unitDivisor(unit));
-    const formatter = new Intl.RelativeTimeFormat(options?.locale ?? "en-US", {
-      numeric: options?.numeric ?? "always",
-      style: options?.style ?? "long",
-    });
+    const formatter = new Intl.RelativeTimeFormat(
+      resolvedOptions.locale ?? this.currentLocale,
+      {
+        numeric: resolvedOptions.numeric ?? "always",
+        style: resolvedOptions.style ?? "long",
+      },
+    );
 
-    return formatter.format(options?.absolute ? Math.abs(value) : value, unit);
+    return formatter.format(
+      resolvedOptions.absolute ? Math.abs(value) : value,
+      unit,
+    );
   }
 
   from(other: TempoInput = new Date(), options?: HumanDiffOptions): string {
@@ -3437,7 +3690,7 @@ export class TempoImmutable {
   }
 
   format(pattern: string, options?: FormatOptions): string {
-    const locale = options?.locale ?? "en-US";
+    const locale = options?.locale ?? this.currentLocale;
     const timeZone = normalizeTimeZone(options?.timeZone ?? this.zone);
     const parts = getZonedParts(this.value, timeZone);
     const offset = this.offsetFor(timeZone);
@@ -3793,7 +4046,10 @@ export class TempoImmutable {
 
 export class Tempo extends TempoImmutable {
   static override now(options?: TempoOptions): Tempo {
-    return new Tempo(new Date(), options);
+    return new Tempo(configuredNow(), {
+      locale: options?.locale,
+      timeZone: options?.timeZone ?? tempoConfig.timeZone,
+    });
   }
 
   static override today(options?: TempoOptions): Tempo {
@@ -3975,7 +4231,10 @@ export class Tempo extends TempoImmutable {
 
 export class TempoMutable extends TempoImmutable {
   static override now(options?: TempoOptions): TempoMutable {
-    return new TempoMutable(new Date(), options);
+    return new TempoMutable(configuredNow(), {
+      locale: options?.locale,
+      timeZone: options?.timeZone ?? tempoConfig.timeZone,
+    });
   }
 
   static override today(options?: TempoOptions): TempoMutable {
