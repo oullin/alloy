@@ -6,8 +6,11 @@ import {
   TempoInterval,
   TempoMutable,
   TempoPeriod,
+  average,
   canParse,
   hasFormat,
+  max,
+  min,
   tryFromFormat,
   tryParse,
 } from "@tempo/tempo";
@@ -505,6 +508,15 @@ describe("Tempo TypeScript behavior", () => {
         "2024-05-17T00:00:00Z",
       ).toISOString(),
     ).toBe("2024-05-16T00:00:00.000Z");
+    expect(
+      average("2024-05-15T00:00:00Z", "2024-05-17T00:00:00Z").toISOString(),
+    ).toBe("2024-05-16T00:00:00.000Z");
+    expect(
+      min("2024-05-15T00:00:00Z", "2024-05-10T00:00:00Z").toISOString(),
+    ).toBe("2024-05-10T00:00:00.000Z");
+    expect(
+      max("2024-05-15T00:00:00Z", "2024-05-20T00:00:00Z").toISOString(),
+    ).toBe("2024-05-20T00:00:00.000Z");
     expect(
       base
         .closest(
