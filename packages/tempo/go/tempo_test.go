@@ -821,6 +821,12 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 	if got := base.DaysInMonth(); got != 29 {
 		t.Fatalf("DaysInMonth() = %d, want 29", got)
 	}
+	if !base.IsLastOfMonth() {
+		t.Fatalf("IsLastOfMonth() = false, want true")
+	}
+	if base.SubDays(1).IsLastOfMonth() {
+		t.Fatalf("IsLastOfMonth(previous day) = true, want false")
+	}
 	if !saturday.IsWeekend() {
 		t.Fatalf("IsWeekend() = false, want true")
 	}

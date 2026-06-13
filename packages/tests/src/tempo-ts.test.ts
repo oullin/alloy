@@ -445,6 +445,8 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.isLongYear()).toBe(false);
     expect(Tempo.parse("2020-12-31T00:00:00Z").isLongYear()).toBe(true);
     expect(base.daysInMonth()).toBe(29);
+    expect(base.isLastOfMonth()).toBe(true);
+    expect(base.subDays(1).isLastOfMonth()).toBe(false);
     expect(saturday.isWeekend()).toBe(true);
     expect(base.isWeekday()).toBe(true);
     expect(base.isToday("2024-02-29T12:00:00Z")).toBe(true);

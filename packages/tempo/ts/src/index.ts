@@ -1462,6 +1462,10 @@ export class TempoImmutable {
     return this.weeksInISOYear === 53;
   }
 
+  isLastOfMonth(): boolean {
+    return this.day === this.daysInMonth();
+  }
+
   daysInMonth(): number {
     return daysInMonth(this.year, this.month);
   }

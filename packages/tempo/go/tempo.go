@@ -927,6 +927,10 @@ func (tempo Tempo) IsLongYear() bool {
 	return tempo.WeeksInISOYear() == 53
 }
 
+func (tempo Tempo) IsLastOfMonth() bool {
+	return tempo.Day() == tempo.DaysInMonth()
+}
+
 func (tempo Tempo) DaysInMonth() int {
 	return daysInMonth(tempo.Year(), tempo.Month())
 }
@@ -2506,6 +2510,10 @@ func (mutable *MutableTempo) DaysInYear() int {
 
 func (mutable *MutableTempo) IsLongYear() bool {
 	return mutable.Tempo().IsLongYear()
+}
+
+func (mutable *MutableTempo) IsLastOfMonth() bool {
+	return mutable.Tempo().IsLastOfMonth()
 }
 
 func (mutable *MutableTempo) DaysInMonth() int {
