@@ -1828,6 +1828,11 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("unmarshal tempo: %v", err)
 	}
 	assertEqual(t, "json.Unmarshal(Tempo)", decoded.ISOString(), "2024-05-15T12:34:56.789Z")
+	fromSerialized, err := FromSerialized(`"2024-05-15T12:34:56.789Z"`)
+	if err != nil {
+		t.Fatalf("FromSerialized(): %v", err)
+	}
+	assertEqual(t, "FromSerialized().ISOString()", fromSerialized.ISOString(), "2024-05-15T12:34:56.789Z")
 	var decodedMutable MutableTempo
 	if err := json.Unmarshal(tempoJSON, &decodedMutable); err != nil {
 		t.Fatalf("unmarshal mutable tempo: %v", err)
@@ -1856,6 +1861,36 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	assertEqual(t, "GetTranslatedShortMonthName()", tempo.GetTranslatedShortMonthName(), "May")
 	assertEqual(t, "TranslateNumber()", tempo.TranslateNumber(1234), "1234")
 	assertEqual(t, "Translate()", tempo.Translate("Hello :name", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	if _, ok := TryParse("not a date"); ok || GetLastErrors() == nil {
+		t.Fatalf("TryParse(invalid), GetLastErrors() = %v, %v, want false and error", ok, GetLastErrors())
+	}
+	if got := ExecuteWithLocale("fr-FR", GetLocale); got != "fr-FR" {
+		t.Fatalf("ExecuteWithLocale() = %q, want fr-FR", got)
+	}
+	if got := GetLocale(); got != "en-US" {
+		t.Fatalf("GetLocale() after ExecuteWithLocale = %q, want restored default", got)
+	}
+	SetToStringFormat("YYYY-MM-DD")
+	assertEqual(t, "String() formatted", tempo.String(), "2024-05-15")
+	ResetToStringFormat()
+	SerializeUsing(func(value Tempo) string { return value.DateString() })
+	hookedJSON, err := json.Marshal(tempo)
+	if err != nil {
+		t.Fatalf("marshal hooked tempo: %v", err)
+	}
+	assertEqual(t, "json.Marshal(hooked Tempo)", string(hookedJSON), `"2024-05-15"`)
+	SerializeUsing(nil)
+	MacroRegister("dateOnly", func(value Tempo) string { return value.DateString() })
+	if !HasMacro("dateOnly") {
+		t.Fatalf("HasMacro(dateOnly) = false, want true")
+	}
+	if macro, ok := GetMacro("dateOnly"); !ok || macro == nil {
+		t.Fatalf("GetMacro(dateOnly) = %v, %v, want macro, true", macro, ok)
+	}
+	ResetMacros()
+	if HasMacro("dateOnly") {
+		t.Fatalf("HasMacro(dateOnly) after reset = true, want false")
+	}
 }
 
 func TestExplicitSettersHandleZeroValues(t *testing.T) {

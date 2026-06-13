@@ -94,6 +94,13 @@ export type TempoSettings = {
   readonly yearsOverflow?: boolean;
 };
 
+export type TempoMacro = (
+  this: TempoImmutable,
+  ...args: readonly unknown[]
+) => unknown;
+
+export type TempoSerializer = (tempo: TempoImmutable) => string;
+
 export type TempoComponents = {
   readonly year: number;
   readonly month?: number;
@@ -223,9 +230,14 @@ const tempoConfig = {
   strictMode: true,
   testNow: null as Date | null,
   timeZone: defaultTimeZone,
+  toStringFormat: null as string | null,
   weekendDays: [0, 6],
   yearsOverflow: true,
 };
+
+let tempoSerializer: TempoSerializer | null = null;
+let tempoLastError: unknown = null;
+const tempoMacros = new Map<string, TempoMacro>();
 
 const configuredNow = (): Date =>
   tempoConfig.testNow === null
@@ -1238,8 +1250,13 @@ export class TempoImmutable {
     options?: TempoOptions,
   ): TempoImmutable | null {
     try {
-      return TempoImmutable.parse(input, options);
-    } catch {
+      const parsed = TempoImmutable.parse(input, options);
+      tempoLastError = null;
+
+      return parsed;
+    } catch (error) {
+      tempoLastError = error;
+
       return null;
     }
   }
@@ -1400,6 +1417,80 @@ export class TempoImmutable {
 
   static hasTestNow(): boolean {
     return tempoConfig.testNow !== null;
+  }
+
+  static fromSerialized(input: string, options?: TempoOptions): TempoImmutable {
+    return TempoImmutable.fromJSON(input, options);
+  }
+
+  static getLastErrors(): unknown {
+    return tempoLastError;
+  }
+
+  static executeWithLocale(locale: string, callback: () => unknown): unknown {
+    const previous = tempoConfig.locale;
+    tempoConfig.locale = locale;
+
+    try {
+      return callback();
+    } finally {
+      tempoConfig.locale = previous;
+    }
+  }
+
+  static enableHumanDiffOption(option: keyof HumanDiffOptions): void {
+    tempoConfig.humanDiffOptions = {
+      ...tempoConfig.humanDiffOptions,
+      [option]: true,
+    };
+  }
+
+  static disableHumanDiffOption(option: keyof HumanDiffOptions): void {
+    const next = { ...tempoConfig.humanDiffOptions };
+    delete next[option];
+    tempoConfig.humanDiffOptions = next;
+  }
+
+  static serializeUsing(serializer: TempoSerializer | null): void {
+    tempoSerializer = serializer;
+  }
+
+  static setToStringFormat(pattern: string | null): void {
+    tempoConfig.toStringFormat = pattern;
+  }
+
+  static resetToStringFormat(): void {
+    tempoConfig.toStringFormat = null;
+  }
+
+  static macro(name: string, macro: TempoMacro): void {
+    tempoMacros.set(name, macro);
+  }
+
+  static genericMacro(name: string, macro: TempoMacro): void {
+    TempoImmutable.macro(name, macro);
+  }
+
+  static hasMacro(name: string): boolean {
+    return tempoMacros.has(name);
+  }
+
+  static getMacro(name: string): TempoMacro | undefined {
+    return tempoMacros.get(name);
+  }
+
+  static resetMacros(): void {
+    tempoMacros.clear();
+  }
+
+  static mixin(mixin: Record<string, TempoMacro>): void {
+    Object.entries(mixin).forEach(([name, macro]) => {
+      TempoImmutable.macro(name, macro);
+    });
+  }
+
+  static getClock(): Date | null {
+    return TempoImmutable.getTestNow();
   }
 
   static make(
@@ -4150,7 +4241,7 @@ export class TempoImmutable {
   }
 
   toJSON(): string {
-    return this.toISOString();
+    return tempoSerializer?.(this) ?? this.toISOString();
   }
 
   jsonSerialize(): string {
@@ -4205,7 +4296,9 @@ export class TempoImmutable {
   }
 
   toString(): string {
-    return this.toISOString();
+    return tempoConfig.toStringFormat === null
+      ? this.toISOString()
+      : this.format(tempoConfig.toStringFormat);
   }
 
   intervalUntil(end: TempoInput): TempoInterval {
@@ -4323,8 +4416,13 @@ export class Tempo extends TempoImmutable {
     options?: TempoOptions,
   ): Tempo | null {
     try {
-      return Tempo.parse(input, options);
-    } catch {
+      const parsed = Tempo.parse(input, options);
+      tempoLastError = null;
+
+      return parsed;
+    } catch (error) {
+      tempoLastError = error;
+
       return null;
     }
   }
@@ -4517,8 +4615,13 @@ export class TempoMutable extends TempoImmutable {
     options?: TempoOptions,
   ): TempoMutable | null {
     try {
-      return TempoMutable.parse(input, options);
-    } catch {
+      const parsed = TempoMutable.parse(input, options);
+      tempoLastError = null;
+
+      return parsed;
+    } catch (error) {
+      tempoLastError = error;
+
       return null;
     }
   }

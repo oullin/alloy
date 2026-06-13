@@ -96,6 +96,10 @@ type Settings struct {
 	YearsOverflow  bool
 }
 
+type Macro any
+
+type Serializer func(Tempo) string
+
 type StartOfWeekOptions struct {
 	WeekStartsOn time.Weekday
 }
@@ -141,6 +145,9 @@ type Factory struct {
 
 var (
 	defaultLocation = time.UTC
+	lastTempoError  error
+	macros          = map[string]Macro{}
+	serializer      Serializer
 	tempoSettings   = Settings{
 		FallbackLocale: "en-US",
 		HumanDiff:      HumanDiffOptions{Locale: "en-US", Numeric: "always", Style: "long"},
@@ -152,6 +159,7 @@ var (
 		WeekendDays:    []time.Weekday{time.Sunday, time.Saturday},
 		YearsOverflow:  true,
 	}
+	toStringFormat  string
 	dateOnlyPattern = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})$`)
 	durationPattern = regexp.MustCompile(`^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$`)
 	localPattern    = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2})(?::?(\d{2}))?(?::?(\d{2})(?:\.(\d{1,9}))?)?)?$`)
@@ -346,6 +354,7 @@ func RawParse(input string, options ...Option) (Tempo, error) {
 
 func TryParse(input string, options ...Option) (Tempo, bool) {
 	tempo, err := Parse(input, options...)
+	lastTempoError = err
 	return tempo, err == nil
 }
 
@@ -353,6 +362,55 @@ func CanParse(input string, options ...Option) bool {
 	_, ok := TryParse(input, options...)
 	return ok
 }
+
+func FromSerialized(input string, options ...Option) (Tempo, error) {
+	value, err := strconv.Unquote(input)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return Parse(value, options...)
+}
+
+func GetLastErrors() error { return lastTempoError }
+
+func ExecuteWithLocale[T any](locale string, callback func() T) T {
+	previous := tempoSettings.Locale
+	tempoSettings.Locale = locale
+	defer func() { tempoSettings.Locale = previous }()
+
+	return callback()
+}
+
+func SerializeUsing(next Serializer) { serializer = next }
+
+func SetToStringFormat(pattern string) { toStringFormat = pattern }
+
+func ResetToStringFormat() { toStringFormat = "" }
+
+func MacroRegister(name string, macro Macro) { macros[name] = macro }
+
+func GenericMacro(name string, macro Macro) { MacroRegister(name, macro) }
+
+func HasMacro(name string) bool {
+	_, ok := macros[name]
+	return ok
+}
+
+func GetMacro(name string) (Macro, bool) {
+	macro, ok := macros[name]
+	return macro, ok
+}
+
+func ResetMacros() { macros = map[string]Macro{} }
+
+func Mixin(items map[string]Macro) {
+	for name, macro := range items {
+		MacroRegister(name, macro)
+	}
+}
+
+func GetClock() *Tempo { return GetTestNow() }
 
 func Make(input string, options ...Option) (Tempo, error) {
 	return Parse(input, options...)
@@ -3296,6 +3354,10 @@ func (tempo Tempo) UnixString() string {
 }
 
 func (tempo Tempo) JSONSerialize() string {
+	if serializer != nil {
+		return serializer(tempo)
+	}
+
 	return tempo.ISOString()
 }
 
@@ -3303,12 +3365,20 @@ func (tempo Tempo) Serialize() string {
 	return tempo.JSONSerialize()
 }
 
+func (tempo Tempo) String() string {
+	if toStringFormat != "" {
+		return tempo.Format(toStringFormat)
+	}
+
+	return tempo.ISOString()
+}
+
 func (tempo Tempo) Time() time.Time {
 	return tempo.value
 }
 
 func (tempo Tempo) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.Quote(tempo.ISOString())), nil
+	return []byte(strconv.Quote(tempo.JSONSerialize())), nil
 }
 
 func (tempo *Tempo) UnmarshalJSON(data []byte) error {
@@ -3899,6 +3969,10 @@ func (mutable *MutableTempo) JSONSerialize() string {
 
 func (mutable *MutableTempo) Serialize() string {
 	return mutable.Tempo().Serialize()
+}
+
+func (mutable *MutableTempo) String() string {
+	return mutable.Tempo().String()
 }
 
 func (mutable *MutableTempo) Time() time.Time {

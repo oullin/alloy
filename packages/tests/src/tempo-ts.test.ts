@@ -194,6 +194,10 @@ describe("Tempo TypeScript behavior", () => {
       expect(Tempo.isStrictModeEnabled()).toBe(false);
       Tempo.setHumanDiffOptions({ locale: "en-US", numeric: "auto" });
       expect(Tempo.getHumanDiffOptions().numeric).toBe("auto");
+      Tempo.enableHumanDiffOption("absolute");
+      expect(Tempo.getHumanDiffOptions().absolute).toBe(true);
+      Tempo.disableHumanDiffOption("absolute");
+      expect(Tempo.getHumanDiffOptions().absolute).toBeUndefined();
 
       Tempo.setTestNowAndTimezone("2025-01-01T00:00:00Z", "Asia/Tokyo");
       expect(Tempo.hasTestNow()).toBe(true);
@@ -956,8 +960,30 @@ describe("Tempo TypeScript behavior", () => {
     expect(
       TempoMutable.fromJSON('"2024-05-15T12:34:56.789Z"').toISOString(),
     ).toBe("2024-05-15T12:34:56.789Z");
+    expect(
+      Tempo.fromSerialized('"2024-05-15T12:34:56.789Z"').toISOString(),
+    ).toBe("2024-05-15T12:34:56.789Z");
     expect(TempoDuration.fromJSON('"P1DT2H"').toISOString()).toBe("P1DT2H");
     expect(() => Tempo.fromJSON("123")).toThrow("Tempo JSON must be a string");
+    expect(Tempo.tryParse("not a date")).toBeNull();
+    expect(Tempo.getLastErrors()).toBeInstanceOf(Error);
+    expect(Tempo.executeWithLocale("fr-FR", () => Tempo.getLocale())).toBe(
+      "fr-FR",
+    );
+    expect(Tempo.getLocale()).toBe("en-US");
+    Tempo.setToStringFormat("YYYY-MM-DD");
+    expect(String(tempo)).toBe("2024-05-15");
+    Tempo.resetToStringFormat();
+    Tempo.serializeUsing((value) => value.toDateString());
+    expect(JSON.stringify(tempo)).toBe('"2024-05-15"');
+    Tempo.serializeUsing(null);
+    Tempo.macro("dateOnly", function () {
+      return this.toDateString();
+    });
+    expect(Tempo.hasMacro("dateOnly")).toBe(true);
+    expect(Tempo.getMacro("dateOnly")?.call(tempo)).toBe("2024-05-15");
+    Tempo.resetMacros();
+    expect(Tempo.hasMacro("dateOnly")).toBe(false);
     expect(Tempo.make(null)).toBeNull();
     expect(Tempo.make("2024-05-15")?.toDateString()).toBe("2024-05-15");
     expect(Tempo.parseFromLocale("2024-05-15", "en-US").toDateString()).toBe(
