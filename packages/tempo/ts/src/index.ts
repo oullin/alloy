@@ -2474,6 +2474,10 @@ export class TempoImmutable {
     return this.diff(other, "month", options);
   }
 
+  diffInQuarters(other: TempoInput, options?: DiffOptions): number {
+    return this.diff(other, "quarter", options);
+  }
+
   diffInYears(other: TempoInput, options?: DiffOptions): number {
     return this.diff(other, "year", options);
   }
@@ -3193,6 +3197,10 @@ export class TempoInterval {
 
   get months(): number {
     return this.end.diffInMonths(this.start);
+  }
+
+  get quarters(): number {
+    return this.end.diffInQuarters(this.start);
   }
 
   get years(): number {

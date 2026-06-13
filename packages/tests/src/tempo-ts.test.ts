@@ -600,6 +600,9 @@ describe("Tempo TypeScript behavior", () => {
     expect(wednesday.diffInWeekendDays(friday)).toBe(2);
     expect(friday.diffInWeekdays(wednesday)).toBe(-3);
     expect(friday.diffInWeekdays(wednesday, { absolute: true })).toBe(3);
+    expect(Tempo.parse("2024-10-01T00:00:00Z").diffInQuarters(friday)).toBe(1);
+    expect(friday.diffInQuarters("2024-10-01T00:00:00Z")).toBe(-1);
+    expect(friday.intervalUntil("2024-11-17T10:00:00Z").quarters).toBe(2);
 
     expect(friday.isSameSecond("2024-05-17T10:00:00.999Z")).toBe(true);
     expect(friday.isSameMinute("2024-05-17T10:00:59Z")).toBe(true);

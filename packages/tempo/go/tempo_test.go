@@ -1091,6 +1091,23 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 	if got := friday.DiffInWeekdays(wednesday, DiffOptions{Absolute: true}); got != 3 {
 		t.Fatalf("absolute DiffInWeekdays() = %d, want 3", got)
 	}
+	october, err := Parse("2024-10-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse october: %v", err)
+	}
+	if got := october.DiffInQuarters(friday); got != 1 {
+		t.Fatalf("DiffInQuarters() = %d, want 1", got)
+	}
+	if got := friday.DiffInQuarters(october); got != -1 {
+		t.Fatalf("negative DiffInQuarters() = %d, want -1", got)
+	}
+	november, err := Parse("2024-11-17T10:00:00Z")
+	if err != nil {
+		t.Fatalf("parse november: %v", err)
+	}
+	if got := friday.IntervalUntil(november).Quarters(); got != 2 {
+		t.Fatalf("Interval.Quarters() = %d, want 2", got)
+	}
 
 	sameSecond, err := Parse("2024-05-17T10:00:00.999Z")
 	if err != nil {

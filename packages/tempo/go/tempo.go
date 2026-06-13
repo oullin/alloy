@@ -1914,6 +1914,10 @@ func (tempo Tempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Month, options...))
 }
 
+func (tempo Tempo) DiffInQuarters(other Tempo, options ...DiffOptions) int {
+	return int(tempo.Diff(other, Quarter, options...))
+}
+
 func (tempo Tempo) DiffInYears(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Year, options...))
 }
@@ -3162,6 +3166,10 @@ func (mutable *MutableTempo) DiffInMonths(other Tempo, options ...DiffOptions) i
 	return mutable.Tempo().DiffInMonths(other, options...)
 }
 
+func (mutable *MutableTempo) DiffInQuarters(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInQuarters(other, options...)
+}
+
 func (mutable *MutableTempo) DiffInYears(other Tempo, options ...DiffOptions) int {
 	return mutable.Tempo().DiffInYears(other, options...)
 }
@@ -3299,6 +3307,10 @@ func (interval Interval) Weeks() int {
 
 func (interval Interval) Months() int {
 	return interval.End.DiffInMonths(interval.Start)
+}
+
+func (interval Interval) Quarters() int {
+	return interval.End.DiffInQuarters(interval.Start)
 }
 
 func (interval Interval) Years() int {
