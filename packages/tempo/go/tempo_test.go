@@ -424,6 +424,15 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if !base.Between(earlier, end) {
 		t.Fatalf("Between() = false, want true")
 	}
+	if !base.Between(base, end) {
+		t.Fatalf("Between(boundary) = false, want true")
+	}
+	if !base.BetweenIncluded(end, base) {
+		t.Fatalf("BetweenIncluded(reversed boundary) = false, want true")
+	}
+	if base.BetweenExcluded(base, end) {
+		t.Fatalf("BetweenExcluded(boundary) = true, want false")
+	}
 	if got := base.DiffInHours(earlier); got != 26 {
 		t.Fatalf("DiffInHours() = %d, want 26", got)
 	}

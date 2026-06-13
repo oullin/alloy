@@ -2076,7 +2076,11 @@ func (tempo Tempo) SameOrAfter(other Tempo, units ...Unit) bool {
 }
 
 func (tempo Tempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
-	mode := "()"
+	if start.After(end) {
+		start, end = end, start
+	}
+
+	mode := "[]"
 	if len(inclusivity) > 0 {
 		mode = inclusivity[0]
 	}
@@ -2092,6 +2096,14 @@ func (tempo Tempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
 	}
 
 	return afterStart && beforeEnd
+}
+
+func (tempo Tempo) BetweenIncluded(start Tempo, end Tempo) bool {
+	return tempo.Between(start, end, "[]")
+}
+
+func (tempo Tempo) BetweenExcluded(start Tempo, end Tempo) bool {
+	return tempo.Between(start, end, "()")
 }
 
 func (tempo Tempo) Format(pattern string) string {
@@ -3285,6 +3297,14 @@ func (mutable *MutableTempo) SameOrAfter(other Tempo, units ...Unit) bool {
 
 func (mutable *MutableTempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
 	return mutable.Tempo().Between(start, end, inclusivity...)
+}
+
+func (mutable *MutableTempo) BetweenIncluded(start Tempo, end Tempo) bool {
+	return mutable.Tempo().BetweenIncluded(start, end)
+}
+
+func (mutable *MutableTempo) BetweenExcluded(start Tempo, end Tempo) bool {
+	return mutable.Tempo().BetweenExcluded(start, end)
 }
 
 func (mutable *MutableTempo) IntervalUntil(end Tempo) Interval {

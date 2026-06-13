@@ -2590,16 +2590,37 @@ export class TempoImmutable {
     start: TempoInput,
     end: TempoInput,
     unit: ComparisonUnit = "millisecond",
-    inclusivity: "()" | "[]" | "[)" | "(]" = "()",
+    inclusivity: "()" | "[]" | "[)" | "(]" = "[]",
   ): boolean {
+    const startTempo = TempoImmutable.parse(start, { timeZone: this.zone });
+    const endTempo = TempoImmutable.parse(end, { timeZone: this.zone });
+    const [lower, upper] = startTempo.isAfter(endTempo, unit)
+      ? [endTempo, startTempo]
+      : [startTempo, endTempo];
     const afterStart = inclusivity.startsWith("[")
-      ? this.isSameOrAfter(start, unit)
-      : this.isAfter(start, unit);
+      ? this.isSameOrAfter(lower, unit)
+      : this.isAfter(lower, unit);
     const beforeEnd = inclusivity.endsWith("]")
-      ? this.isSameOrBefore(end, unit)
-      : this.isBefore(end, unit);
+      ? this.isSameOrBefore(upper, unit)
+      : this.isBefore(upper, unit);
 
     return afterStart && beforeEnd;
+  }
+
+  betweenIncluded(
+    start: TempoInput,
+    end: TempoInput,
+    unit: ComparisonUnit = "millisecond",
+  ): boolean {
+    return this.isBetween(start, end, unit, "[]");
+  }
+
+  betweenExcluded(
+    start: TempoInput,
+    end: TempoInput,
+    unit: ComparisonUnit = "millisecond",
+  ): boolean {
+    return this.isBetween(start, end, unit, "()");
   }
 
   clamp(min: TempoInput, max: TempoInput): this {
