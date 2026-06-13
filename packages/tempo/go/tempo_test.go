@@ -140,6 +140,36 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	if got := factory.FromTimestampMs(1704067200000).DateTimeString(); got != "2024-01-01 09:00:00" {
 		t.Fatalf("Factory.FromTimestampMs().DateTimeString() = %q, want scoped local time", got)
 	}
+	if got := factory.CreateFromDate(2024, 1, 2).ISOString(); got != "2024-01-01T15:00:00.000Z" {
+		t.Fatalf("Factory.CreateFromDate().ISOString() = %q, want scoped midnight instant", got)
+	}
+	if got := factory.CreateMidnightDate(2024, 1, 2).ISOString(); got != "2024-01-01T15:00:00.000Z" {
+		t.Fatalf("Factory.CreateMidnightDate().ISOString() = %q, want scoped midnight instant", got)
+	}
+	if got := factory.CreateFromTime(9, 30, 15, 250).TimeString(MillisecondPrecision); got != "09:30:15.250" {
+		t.Fatalf("Factory.CreateFromTime().TimeString(ms) = %q, want requested time", got)
+	}
+	fromDate, err := CreateFromDate(2024, 1, 2, WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("create from date: %v", err)
+	}
+	if got := fromDate.ISOString(); got != "2024-01-01T15:00:00.000Z" {
+		t.Fatalf("CreateFromDate().ISOString() = %q, want scoped midnight instant", got)
+	}
+	midnight, err := CreateMidnightDate(2024, 1, 2, WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("create midnight date: %v", err)
+	}
+	if got := midnight.ISOString(); got != "2024-01-01T15:00:00.000Z" {
+		t.Fatalf("CreateMidnightDate().ISOString() = %q, want scoped midnight instant", got)
+	}
+	fromTime, err := CreateFromTime(9, 30, 15, 250, WithTimezone("UTC"))
+	if err != nil {
+		t.Fatalf("create from time: %v", err)
+	}
+	if got := fromTime.TimeString(MillisecondPrecision); got != "09:30:15.250" {
+		t.Fatalf("CreateFromTime().TimeString(ms) = %q, want requested time", got)
+	}
 
 	frozen, err := NewFactoryWithTestNow(parsed)
 	if err != nil {

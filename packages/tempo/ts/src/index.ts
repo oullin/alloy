@@ -1099,6 +1099,44 @@ export class TempoImmutable {
     });
   }
 
+  static createFromDate(
+    year: number,
+    month = 1,
+    day = 1,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.create({
+      day,
+      month,
+      timeZone: options?.timeZone,
+      year,
+    });
+  }
+
+  static createMidnightDate(
+    year: number,
+    month: number,
+    day: number,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.createFromDate(year, month, day, options);
+  }
+
+  static createFromTime(
+    hour = 0,
+    minute = 0,
+    second = 0,
+    millisecond = 0,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.today(options).setTime(
+      hour,
+      minute,
+      second,
+      millisecond,
+    );
+  }
+
   static fromObject(components: TempoComponents): TempoImmutable {
     return TempoImmutable.create(components);
   }
@@ -2487,6 +2525,34 @@ export class Tempo extends TempoImmutable {
     });
   }
 
+  static override createFromDate(
+    year: number,
+    month = 1,
+    day = 1,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.create({ day, month, timeZone: options?.timeZone, year });
+  }
+
+  static override createMidnightDate(
+    year: number,
+    month: number,
+    day: number,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.createFromDate(year, month, day, options);
+  }
+
+  static override createFromTime(
+    hour = 0,
+    minute = 0,
+    second = 0,
+    millisecond = 0,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.today(options).setTime(hour, minute, second, millisecond);
+  }
+
   static override fromObject(components: TempoComponents): Tempo {
     return Tempo.create(components);
   }
@@ -2566,6 +2632,44 @@ export class TempoMutable extends TempoImmutable {
     return new TempoMutable(dateFromZonedComponents(components), {
       timeZone: components.timeZone,
     });
+  }
+
+  static override createFromDate(
+    year: number,
+    month = 1,
+    day = 1,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.create({
+      day,
+      month,
+      timeZone: options?.timeZone,
+      year,
+    });
+  }
+
+  static override createMidnightDate(
+    year: number,
+    month: number,
+    day: number,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.createFromDate(year, month, day, options);
+  }
+
+  static override createFromTime(
+    hour = 0,
+    minute = 0,
+    second = 0,
+    millisecond = 0,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.today(options).setTime(
+      hour,
+      minute,
+      second,
+      millisecond,
+    );
   }
 
   static override fromObject(components: TempoComponents): TempoMutable {
@@ -2855,6 +2959,18 @@ export class TempoFactory {
     return Tempo.create({ timeZone: this.zone, ...components });
   }
 
+  createFromDate(year: number, month = 1, day = 1): Tempo {
+    return this.create({ day, month, year });
+  }
+
+  createMidnightDate(year: number, month: number, day: number): Tempo {
+    return this.createFromDate(year, month, day);
+  }
+
+  createFromTime(hour = 0, minute = 0, second = 0, millisecond = 0): Tempo {
+    return this.today().setTime(hour, minute, second, millisecond);
+  }
+
   fromObject(components: TempoComponents): Tempo {
     return this.create(components);
   }
@@ -2886,6 +3002,9 @@ export const fromFormat = Tempo.fromFormat;
 export const tryFromFormat = Tempo.tryFromFormat;
 export const hasFormat = Tempo.hasFormat;
 export const create = Tempo.create;
+export const createFromDate = Tempo.createFromDate;
+export const createFromTime = Tempo.createFromTime;
+export const createMidnightDate = Tempo.createMidnightDate;
 export const fromObject = Tempo.fromObject;
 export const fromTimestamp = Tempo.fromTimestamp;
 export const fromTimestampMs = Tempo.fromTimestampMs;

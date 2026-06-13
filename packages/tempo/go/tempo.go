@@ -242,6 +242,31 @@ func Create(components Components) (Tempo, error) {
 	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
 }
 
+func CreateFromDate(year int, month int, day int, options ...Option) (Tempo, error) {
+	cfg, err := applyOptions(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return Tempo{
+		value:    timeFromComponents(Components{Year: year, Month: month, Day: day}, cfg.location).UTC(),
+		location: cfg.location,
+	}, nil
+}
+
+func CreateMidnightDate(year int, month int, day int, options ...Option) (Tempo, error) {
+	return CreateFromDate(year, month, day, options...)
+}
+
+func CreateFromTime(hour int, minute int, second int, millisecond int, options ...Option) (Tempo, error) {
+	today, err := Today(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return today.SetTime(hour, minute, second, millisecond), nil
+}
+
 func FromObject(components Components) (Tempo, error) {
 	return Create(components)
 }
@@ -366,6 +391,21 @@ func (factory Factory) Create(components Components) (Tempo, error) {
 	}
 
 	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
+}
+
+func (factory Factory) CreateFromDate(year int, month int, day int) Tempo {
+	return Tempo{
+		value:    timeFromComponents(Components{Year: year, Month: month, Day: day}, factory.location).UTC(),
+		location: factory.location,
+	}
+}
+
+func (factory Factory) CreateMidnightDate(year int, month int, day int) Tempo {
+	return factory.CreateFromDate(year, month, day)
+}
+
+func (factory Factory) CreateFromTime(hour int, minute int, second int, millisecond int) Tempo {
+	return factory.Today().SetTime(hour, minute, second, millisecond)
 }
 
 func (factory Factory) FromObject(components Components) (Tempo, error) {

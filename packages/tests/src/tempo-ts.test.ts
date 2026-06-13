@@ -8,6 +8,9 @@ import {
   TempoPeriod,
   average,
   canParse,
+  createFromDate,
+  createFromTime,
+  createMidnightDate,
   hasFormat,
   max,
   min,
@@ -121,6 +124,28 @@ describe("Tempo TypeScript behavior", () => {
     expect(tokyo.fromTimestampMs(1_735_689_600_000).toDateTimeString()).toBe(
       "2025-01-01 09:00:00",
     );
+    expect(tokyo.createFromDate(2025, 1, 2).toISOString()).toBe(
+      "2025-01-01T15:00:00.000Z",
+    );
+    expect(tokyo.createMidnightDate(2025, 1, 2).toISOString()).toBe(
+      "2025-01-01T15:00:00.000Z",
+    );
+    expect(
+      tokyo.createFromTime(9, 30, 15, 250).toTimeString("millisecond"),
+    ).toBe("09:30:15.250");
+    expect(
+      createFromDate(2025, 1, 2, { timeZone: "Asia/Tokyo" }).toISOString(),
+    ).toBe("2025-01-01T15:00:00.000Z");
+    expect(
+      createMidnightDate(2025, 1, 2, {
+        timeZone: "Asia/Tokyo",
+      }).toISOString(),
+    ).toBe("2025-01-01T15:00:00.000Z");
+    expect(
+      createFromTime(9, 30, 15, 250, { timeZone: "UTC" }).toTimeString(
+        "millisecond",
+      ),
+    ).toBe("09:30:15.250");
   });
 
   it("creates and renders timezone-aware local components", () => {
