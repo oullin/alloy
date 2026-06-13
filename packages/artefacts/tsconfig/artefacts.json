@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "outDir": "../.cache/typescript/artefacts/dist",
+    "tsBuildInfoFile": "../.cache/typescript/artefacts/tsconfig.tsbuildinfo"
+  }
+}

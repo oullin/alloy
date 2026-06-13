@@ -1,0 +1,14 @@
+{
+  "name": "@tempo/carbon-oracle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "php -l src/generate.php",
+    "lint": "php -l src/generate.php",
+    "oracle:check": "php src/generate.php --check",
+    "oracle:generate": "php src/generate.php",
+    "test": "php src/generate.php --check",
+    "typecheck": "php -l src/generate.php"
+  }
+}

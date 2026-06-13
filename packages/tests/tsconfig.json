@@ -1,0 +1,14 @@
+{
+  "extends": "@tempo/artefacts/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": false,
+    "noEmit": true,
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@tempo/spec": ["../tempo/spec/src"],
+      "@tempo/tempo": ["../tempo/ts/src"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

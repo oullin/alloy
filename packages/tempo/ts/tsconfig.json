@@ -1,0 +1,10 @@
+{
+  "extends": "@tempo/artefacts/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "../../artefacts/.cache/typescript/tempo-ts/dist",
+    "tsBuildInfoFile": "../../artefacts/.cache/typescript/tempo-ts/tsconfig.tsbuildinfo"
+  },
+  "references": [{ "path": "../../artefacts" }, { "path": "../spec" }],
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+.cache/
+storage/
+
+packages/artefacts/.cache/
+packages/artefacts/.logs/
+packages/artefacts/dist/
+packages/carbon-oracle/vendor/
