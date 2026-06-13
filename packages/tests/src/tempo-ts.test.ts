@@ -273,6 +273,7 @@ describe("Tempo TypeScript behavior", () => {
 
     expect(base.isAfter(earlier)).toBe(true);
     expect(base.isSame("2024-05-15T23:59:00Z", "day")).toBe(true);
+    expect(base.is("2024-05-15T23:59:00Z", "day")).toBe(true);
     expect(base.isCurrentUnit("day", "2024-05-15T23:59:00Z")).toBe(true);
     expect(base.isBetween(earlier, "2024-05-16T00:00:00Z")).toBe(true);
     expect(base.isBetween(base, "2024-05-16T00:00:00Z")).toBe(true);
@@ -298,6 +299,14 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.diffAsDuration(earlier, { absolute: true }).toISOString()).toBe(
       "P1DT2H34M45.600S",
     );
+    expect(base.diffAsDateInterval(earlier).toISOString()).toBe(
+      "P1DT2H34M45.600S",
+    );
+    expect(base.diffAsTempoInterval(earlier).toISOString()).toBe(
+      "P1DT2H34M45.600S",
+    );
+    expect(base.diffInMicroseconds(earlier)).toBe(95685600000);
+    expect(base.diffFiltered((item) => item.isWeekday(), earlier)).toBe(1);
     expect(base.floor("hour").toISOString()).toBe("2024-05-15T10:00:00.000Z");
     expect(base.ceil("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
     expect(base.round("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
@@ -317,6 +326,8 @@ describe("Tempo TypeScript behavior", () => {
       "2024-05-15 10:34:45.600 +0000 Q5",
     );
     expect(base.rawFormat("YYYY-MM-DD")).toBe("2024-05-15");
+    expect(base.isoFormat("YYYY-MM-DD")).toBe("2024-05-15");
+    expect(base.translatedFormat("YYYY-MM-DD")).toBe("2024-05-15");
     expect(base.format("dddd, MMMM Do YYYY", { locale: "en-US" })).toBe(
       "Wednesday, May 15th 2024",
     );
@@ -1000,9 +1011,24 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.to(tempo.addDays(2))).toBe("in 2 days");
     expect(tempo.addDays(2).timespan(tempo)).toBe("in 2 days");
     expect(tempo.isImmutable()).toBe(true);
+    expect(tempo.avoidMutation().toISOString()).toBe(
+      "2024-05-15T12:34:56.789Z",
+    );
+    expect(tempo.cast().toISOString()).toBe("2024-05-15T12:34:56.789Z");
+    expect(tempo.tempoize(tempo.addDays(1)).toDateString()).toBe("2024-05-16");
+    expect(tempo.nowWithSameTz().timeZone).toBe("UTC");
     expect(TempoImmutable.parse(tempo).isImmutable()).toBe(true);
     expect(tempo.isMutable()).toBe(false);
     expect(TempoImmutable.parse(tempo).isMutable()).toBe(false);
-    expect(TempoMutable.parse(tempo).isMutable()).toBe(true);
+    const mutable = TempoMutable.parse(tempo);
+    expect(mutable.isMutable()).toBe(true);
+    expect(mutable.avoidMutation().toISOString()).toBe(
+      "2024-05-15T12:34:56.789Z",
+    );
+    expect(mutable.cast().toISOString()).toBe("2024-05-15T12:34:56.789Z");
+    expect(mutable.tempoize(tempo.addDays(1)).toDateString()).toBe(
+      "2024-05-16",
+    );
+    expect(mutable.nowWithSameTz().timeZone).toBe("UTC");
   });
 });

@@ -220,6 +220,36 @@ func CanParse(input string, options ...Option) bool {
 	return ok
 }
 
+func HasRelativeKeywords(input string) bool {
+	value := strings.TrimSpace(strings.ToLower(input))
+	return strings.HasPrefix(value, "+") ||
+		strings.HasPrefix(value, "-") ||
+		strings.Contains(value, "now") ||
+		strings.Contains(value, "today") ||
+		strings.Contains(value, "tomorrow") ||
+		strings.Contains(value, "yesterday") ||
+		strings.Contains(value, "next") ||
+		strings.Contains(value, "last") ||
+		strings.Contains(value, "ago")
+}
+
+func IsModifiableUnit(unit Unit) bool {
+	switch normalizeUnit(unit) {
+	case Millisecond, Second, Minute, Hour, Day, Week, Month, Quarter, Year, Decade, Century, Millennium:
+		return true
+	default:
+		return false
+	}
+}
+
+func SingularUnit(unit Unit) Unit {
+	return normalizeUnit(unit)
+}
+
+func PluralUnit(unit Unit) string {
+	return string(normalizeUnit(unit)) + "s"
+}
+
 func FromFormat(input string, pattern string, options ...Option) (Tempo, error) {
 	cfg, err := applyOptions(options...)
 	if err != nil {
@@ -235,6 +265,18 @@ func FromFormat(input string, pattern string, options ...Option) (Tempo, error) 
 }
 
 func CreateFromFormat(input string, pattern string, options ...Option) (Tempo, error) {
+	return FromFormat(input, pattern, options...)
+}
+
+func CreateFromIsoFormat(input string, pattern string, options ...Option) (Tempo, error) {
+	return FromFormat(input, pattern, options...)
+}
+
+func CreateFromLocaleFormat(input string, pattern string, _ string, options ...Option) (Tempo, error) {
+	return FromFormat(input, pattern, options...)
+}
+
+func CreateFromLocaleIsoFormat(input string, pattern string, _ string, options ...Option) (Tempo, error) {
 	return FromFormat(input, pattern, options...)
 }
 
@@ -277,6 +319,14 @@ func CreateSafe(components Components) (Tempo, error) {
 	}
 
 	return Tempo{value: value.UTC(), location: location}, nil
+}
+
+func CreateStrict(components Components) (Tempo, error) {
+	return CreateSafe(components)
+}
+
+func Instance(input Tempo) Tempo {
+	return input.Clone()
 }
 
 func CreateFromDate(year int, month int, day int, options ...Option) (Tempo, error) {
@@ -846,6 +896,22 @@ func (duration Duration) direction() int {
 
 func (tempo Tempo) Clone() Tempo {
 	return tempo
+}
+
+func (tempo Tempo) AvoidMutation() Tempo {
+	return tempo.Clone()
+}
+
+func (tempo Tempo) Cast() Tempo {
+	return tempo.Clone()
+}
+
+func (tempo Tempo) Tempoize(input Tempo) Tempo {
+	return Tempo{value: input.value, location: input.location}
+}
+
+func (tempo Tempo) NowWithSameTz() Tempo {
+	return Tempo{value: time.Now(), location: tempo.location}
 }
 
 func (tempo Tempo) Immutable() Tempo {
@@ -2191,8 +2257,20 @@ func (tempo Tempo) DiffAsDuration(other Tempo, options ...DiffOptions) Duration 
 	return Duration{Milliseconds: tempo.DiffInMilliseconds(other, options...)}.Normalize()
 }
 
+func (tempo Tempo) DiffAsDateInterval(other Tempo, options ...DiffOptions) Duration {
+	return tempo.DiffAsDuration(other, options...)
+}
+
+func (tempo Tempo) DiffAsTempoInterval(other Tempo, options ...DiffOptions) Duration {
+	return tempo.DiffAsDuration(other, options...)
+}
+
 func (tempo Tempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Millisecond, options...))
+}
+
+func (tempo Tempo) DiffInMicroseconds(other Tempo, options ...DiffOptions) int {
+	return tempo.DiffInMilliseconds(other, options...) * 1000
 }
 
 func (tempo Tempo) DiffInSeconds(other Tempo, options ...DiffOptions) int {
@@ -2245,6 +2323,10 @@ func (tempo Tempo) DiffInUnit(unit Unit, other Tempo, options ...DiffOptions) in
 
 func (tempo Tempo) DiffInDaysFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
 	return tempo.diffFilteredDays(other, predicate, options...)
+}
+
+func (tempo Tempo) DiffFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	return tempo.DiffInDaysFiltered(other, predicate, options...)
 }
 
 func (tempo Tempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
@@ -2369,6 +2451,10 @@ func (tempo Tempo) After(other Tempo, units ...Unit) bool {
 
 func (tempo Tempo) Same(other Tempo, units ...Unit) bool {
 	return tempo.compareValue(units...) == other.compareValue(units...)
+}
+
+func (tempo Tempo) Is(other Tempo, units ...Unit) bool {
+	return tempo.Same(other, units...)
 }
 
 func (tempo Tempo) EqualTo(other Tempo, units ...Unit) bool {
@@ -2645,6 +2731,14 @@ func (tempo Tempo) Format(pattern string) string {
 }
 
 func (tempo Tempo) RawFormat(pattern string) string {
+	return tempo.Format(pattern)
+}
+
+func (tempo Tempo) ISOFormat(pattern string) string {
+	return tempo.Format(pattern)
+}
+
+func (tempo Tempo) TranslatedFormat(pattern string) string {
 	return tempo.Format(pattern)
 }
 
@@ -2969,6 +3063,22 @@ func (mutable *MutableTempo) Tempo() Tempo {
 
 func (mutable *MutableTempo) Clone() *MutableTempo {
 	return NewMutable(mutable.Tempo())
+}
+
+func (mutable *MutableTempo) AvoidMutation() *MutableTempo {
+	return mutable.Clone()
+}
+
+func (mutable *MutableTempo) Cast() *MutableTempo {
+	return mutable.Clone()
+}
+
+func (mutable *MutableTempo) Tempoize(input Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Tempoize(input))
+}
+
+func (mutable *MutableTempo) NowWithSameTz() *MutableTempo {
+	return mutable.replace(mutable.Tempo().NowWithSameTz())
 }
 
 func (mutable *MutableTempo) Immutable() Tempo {
@@ -3336,6 +3446,14 @@ func (mutable *MutableTempo) Format(pattern string) string {
 
 func (mutable *MutableTempo) RawFormat(pattern string) string {
 	return mutable.Tempo().RawFormat(pattern)
+}
+
+func (mutable *MutableTempo) ISOFormat(pattern string) string {
+	return mutable.Tempo().ISOFormat(pattern)
+}
+
+func (mutable *MutableTempo) TranslatedFormat(pattern string) string {
+	return mutable.Tempo().TranslatedFormat(pattern)
 }
 
 func (mutable *MutableTempo) Ordinal(unit Unit) string {
@@ -3988,8 +4106,20 @@ func (mutable *MutableTempo) DiffAsDuration(other Tempo, options ...DiffOptions)
 	return mutable.Tempo().DiffAsDuration(other, options...)
 }
 
+func (mutable *MutableTempo) DiffAsDateInterval(other Tempo, options ...DiffOptions) Duration {
+	return mutable.Tempo().DiffAsDateInterval(other, options...)
+}
+
+func (mutable *MutableTempo) DiffAsTempoInterval(other Tempo, options ...DiffOptions) Duration {
+	return mutable.Tempo().DiffAsTempoInterval(other, options...)
+}
+
 func (mutable *MutableTempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {
 	return mutable.Tempo().DiffInMilliseconds(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInMicroseconds(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInMicroseconds(other, options...)
 }
 
 func (mutable *MutableTempo) DiffInSeconds(other Tempo, options ...DiffOptions) int {
@@ -4038,6 +4168,10 @@ func (mutable *MutableTempo) DiffInUnit(unit Unit, other Tempo, options ...DiffO
 
 func (mutable *MutableTempo) DiffInDaysFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
 	return mutable.Tempo().DiffInDaysFiltered(other, predicate, options...)
+}
+
+func (mutable *MutableTempo) DiffFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	return mutable.Tempo().DiffFiltered(other, predicate, options...)
 }
 
 func (mutable *MutableTempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
@@ -4102,6 +4236,10 @@ func (mutable *MutableTempo) After(other Tempo, units ...Unit) bool {
 
 func (mutable *MutableTempo) Same(other Tempo, units ...Unit) bool {
 	return mutable.Tempo().Same(other, units...)
+}
+
+func (mutable *MutableTempo) Is(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Is(other, units...)
 }
 
 func (mutable *MutableTempo) EqualTo(other Tempo, units ...Unit) bool {

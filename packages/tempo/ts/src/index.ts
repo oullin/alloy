@@ -1177,6 +1177,29 @@ export class TempoImmutable {
     return TempoImmutable.tryParse(input, options) !== null;
   }
 
+  static hasRelativeKeywords(input: string): boolean {
+    return /\b(now|today|tomorrow|yesterday|next|last|ago)\b|^[+-]/i.test(
+      input.trim(),
+    );
+  }
+
+  static isModifiableUnit(unit: TimeUnit): boolean {
+    try {
+      normalizeUnit(unit);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  static singularUnit(unit: TimeUnit): BoundaryUnit {
+    return normalizeUnit(unit) as BoundaryUnit;
+  }
+
+  static pluralUnit(unit: TimeUnit): string {
+    return `${normalizeUnit(unit)}s`;
+  }
+
   static fromFormat(
     input: string,
     pattern: string,
@@ -1191,6 +1214,32 @@ export class TempoImmutable {
   static createFromFormat(
     input: string,
     pattern: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromFormat(input, pattern, options);
+  }
+
+  static createFromIsoFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromFormat(input, pattern, options);
+  }
+
+  static createFromLocaleFormat(
+    input: string,
+    pattern: string,
+    _locale?: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromFormat(input, pattern, options);
+  }
+
+  static createFromLocaleIsoFormat(
+    input: string,
+    pattern: string,
+    _locale?: string,
     options?: TempoOptions,
   ): TempoImmutable {
     return TempoImmutable.fromFormat(input, pattern, options);
@@ -1245,6 +1294,14 @@ export class TempoImmutable {
     assertSafeZonedComponents(components, date, timeZone);
 
     return new TempoImmutable(date, { timeZone });
+  }
+
+  static createStrict(components: TempoComponents): TempoImmutable {
+    return TempoImmutable.createSafe(components);
+  }
+
+  static instance(input: TempoInput, options?: TempoOptions): TempoImmutable {
+    return TempoImmutable.parse(input, options);
   }
 
   static createFromDate(
@@ -1657,6 +1714,24 @@ export class TempoImmutable {
 
   copy(): this {
     return this.clone();
+  }
+
+  avoidMutation(): this {
+    return this.clone();
+  }
+
+  cast(): this {
+    return this.clone();
+  }
+
+  tempoize(input: TempoInput): this {
+    const value = TempoImmutable.parse(input, { timeZone: this.zone });
+
+    return this.make(value.toDate(), value.timeZone);
+  }
+
+  nowWithSameTz(): this {
+    return this.make(new Date(), this.zone);
   }
 
   toImmutable(): TempoImmutable {
@@ -2767,8 +2842,20 @@ export class TempoImmutable {
     }).normalized();
   }
 
+  diffAsDateInterval(other: TempoInput, options?: DiffOptions): TempoDuration {
+    return this.diffAsDuration(other, options);
+  }
+
+  diffAsTempoInterval(other: TempoInput, options?: DiffOptions): TempoDuration {
+    return this.diffAsDuration(other, options);
+  }
+
   diffInMilliseconds(other: TempoInput, options?: DiffOptions): number {
     return this.diff(other, "millisecond", options);
+  }
+
+  diffInMicroseconds(other: TempoInput, options?: DiffOptions): number {
+    return this.diffInMilliseconds(other, options) * 1000;
   }
 
   diffInSeconds(other: TempoInput, options?: DiffOptions): number {
@@ -2821,6 +2908,14 @@ export class TempoImmutable {
     options?: DiffOptions,
   ): number {
     return this.diffFilteredDays(other, predicate, options);
+  }
+
+  diffFiltered(
+    predicate: (item: TempoImmutable) => boolean,
+    other: TempoInput,
+    options?: DiffOptions,
+  ): number {
+    return this.diffInDaysFiltered(predicate, other, options);
   }
 
   diffInHoursFiltered(
@@ -2931,6 +3026,10 @@ export class TempoImmutable {
       this.comparableValue(unit) ===
       TempoImmutable.parse(other, { timeZone: this.zone }).comparableValue(unit)
     );
+  }
+
+  is(other: TempoInput, unit: ComparisonUnit = "day"): boolean {
+    return this.isSame(other, unit);
   }
 
   equalTo(other: TempoInput, unit?: ComparisonUnit): boolean {
@@ -3219,6 +3318,14 @@ export class TempoImmutable {
   }
 
   rawFormat(pattern: string, options?: FormatOptions): string {
+    return this.format(pattern, options);
+  }
+
+  isoFormat(pattern: string, options?: FormatOptions): string {
+    return this.format(pattern, options);
+  }
+
+  translatedFormat(pattern: string, options?: FormatOptions): string {
     return this.format(pattern, options);
   }
 

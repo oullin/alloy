@@ -421,6 +421,9 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if !base.Same(sameDay, Day) {
 		t.Fatalf("Same(Day) = false, want true")
 	}
+	if !base.Is(sameDay, Day) {
+		t.Fatalf("Is(Day) = false, want true")
+	}
 	if !base.IsCurrentUnit(Day, sameDay) {
 		t.Fatalf("IsCurrentUnit(Day) = false, want true")
 	}
@@ -447,6 +450,18 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	}
 	if got := base.DiffAsDuration(earlier, DiffOptions{Absolute: true}).ISOString(); got != "P1DT2H34M45.600S" {
 		t.Fatalf("DiffAsDuration(absolute).ISOString() = %q, want duration diff", got)
+	}
+	if got := base.DiffAsDateInterval(earlier).ISOString(); got != "P1DT2H34M45.600S" {
+		t.Fatalf("DiffAsDateInterval().ISOString() = %q, want duration diff", got)
+	}
+	if got := base.DiffAsTempoInterval(earlier).ISOString(); got != "P1DT2H34M45.600S" {
+		t.Fatalf("DiffAsTempoInterval().ISOString() = %q, want duration diff", got)
+	}
+	if got := base.DiffInMicroseconds(earlier); got != 95685600000 {
+		t.Fatalf("DiffInMicroseconds() = %d, want microsecond diff", got)
+	}
+	if got := base.DiffFiltered(earlier, func(item Tempo) bool { return item.IsWeekday() }); got != 1 {
+		t.Fatalf("DiffFiltered(weekday) = %d, want 1", got)
 	}
 	if got := base.Floor(Hour).ISOString(); got != "2024-05-15T10:00:00.000Z" {
 		t.Fatalf("Floor(Hour).ISOString() = %q, want hour floor", got)
@@ -1671,6 +1686,8 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 
 	assertEqual(t, "DateTimeLocalString()", tempo.DateTimeLocalString(), "2024-05-15T21:34:56")
 	assertEqual(t, "DateTimeLocalString(ms)", tempo.DateTimeLocalString(MillisecondPrecision), "2024-05-15T21:34:56.789")
+	assertEqual(t, "ISOFormat()", tempo.ISOFormat("YYYY-MM-DD HH:mm:ss"), "2024-05-15 21:34:56")
+	assertEqual(t, "TranslatedFormat()", tempo.TranslatedFormat("YYYY-MM-DD HH:mm:ss"), "2024-05-15 21:34:56")
 	assertEqual(t, "FormattedDateString()", tempo.FormattedDateString(), "May 15, 2024")
 	assertEqual(t, "FormattedDayDateString()", tempo.FormattedDayDateString(), "Wed, May 15, 2024")
 	assertEqual(t, "DayDateTimeString()", tempo.DayDateTimeString(), "Wed, May 15, 2024 9:34 PM")
@@ -1888,8 +1905,20 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	if !tempo.IsImmutable() || tempo.IsMutable() {
 		t.Fatalf("Tempo mutability predicates = immutable:%t mutable:%t, want true/false", tempo.IsImmutable(), tempo.IsMutable())
 	}
+	assertEqual(t, "AvoidMutation().ISOString()", tempo.AvoidMutation().ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "Cast().ISOString()", tempo.Cast().ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "Tempoize().DateString()", tempo.Tempoize(tempo.AddDays(1)).DateString(), "2024-05-16")
+	if got := tempo.NowWithSameTz().Timezone(); got != "UTC" {
+		t.Fatalf("NowWithSameTz().Timezone() = %q, want UTC", got)
+	}
 	mutable := NewMutable(tempo)
 	if mutable.IsImmutable() || !mutable.IsMutable() {
 		t.Fatalf("MutableTempo mutability predicates = immutable:%t mutable:%t, want false/true", mutable.IsImmutable(), mutable.IsMutable())
+	}
+	assertEqual(t, "MutableTempo.AvoidMutation().ISOString()", mutable.AvoidMutation().ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "MutableTempo.Cast().ISOString()", mutable.Cast().ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "MutableTempo.Tempoize().DateString()", mutable.Tempoize(tempo.AddDays(1)).DateString(), "2024-05-16")
+	if got := mutable.NowWithSameTz().Timezone(); got != "UTC" {
+		t.Fatalf("MutableTempo.NowWithSameTz().Timezone() = %q, want UTC", got)
 	}
 }
