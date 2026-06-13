@@ -517,3 +517,87 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 		t.Fatalf("Interval.ToDuration().ISOString() = %q, want normalized interval", got)
 	}
 }
+
+func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
+	friday, err := Parse("2024-05-17T10:00:00Z")
+	if err != nil {
+		t.Fatalf("parse friday: %v", err)
+	}
+	wednesday, err := Parse("2024-05-22T10:00:00Z")
+	if err != nil {
+		t.Fatalf("parse wednesday: %v", err)
+	}
+
+	if got := friday.AddWeekdays(1).DateTimeString(); got != "2024-05-20 10:00:00" {
+		t.Fatalf("AddWeekdays(1).DateTimeString() = %q, want next Monday", got)
+	}
+	if got := friday.AddWeekdays(3).DateTimeString(); got != "2024-05-22 10:00:00" {
+		t.Fatalf("AddWeekdays(3).DateTimeString() = %q, want Wednesday", got)
+	}
+	if got := wednesday.SubWeekdays(3).DateTimeString(); got != "2024-05-17 10:00:00" {
+		t.Fatalf("SubWeekdays(3).DateTimeString() = %q, want Friday", got)
+	}
+	if got := wednesday.DiffInWeekdays(friday); got != 3 {
+		t.Fatalf("DiffInWeekdays() = %d, want 3", got)
+	}
+	if got := wednesday.DiffInWeekendDays(friday); got != 2 {
+		t.Fatalf("DiffInWeekendDays() = %d, want 2", got)
+	}
+	if got := friday.DiffInWeekdays(wednesday); got != -3 {
+		t.Fatalf("negative DiffInWeekdays() = %d, want -3", got)
+	}
+	if got := friday.DiffInWeekdays(wednesday, DiffOptions{Absolute: true}); got != 3 {
+		t.Fatalf("absolute DiffInWeekdays() = %d, want 3", got)
+	}
+
+	sameSecond, err := Parse("2024-05-17T10:00:00.999Z")
+	if err != nil {
+		t.Fatalf("parse same second: %v", err)
+	}
+	sameMinute, err := Parse("2024-05-17T10:00:59Z")
+	if err != nil {
+		t.Fatalf("parse same minute: %v", err)
+	}
+	sameHour, err := Parse("2024-05-17T10:59:59Z")
+	if err != nil {
+		t.Fatalf("parse same hour: %v", err)
+	}
+	sameDay, err := Parse("2024-05-17T23:59:59Z")
+	if err != nil {
+		t.Fatalf("parse same day: %v", err)
+	}
+	sameWeek, err := Parse("2024-05-13T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse same week: %v", err)
+	}
+	sameMonth, err := Parse("2024-05-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse same month: %v", err)
+	}
+	sameQuarter, err := Parse("2024-04-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse same quarter: %v", err)
+	}
+	sameYear, err := Parse("2024-12-31T23:59:59Z")
+	if err != nil {
+		t.Fatalf("parse same year: %v", err)
+	}
+	birthday, err := Parse("1990-05-17T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse birthday: %v", err)
+	}
+	notBirthday, err := Parse("1990-05-18T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse not birthday: %v", err)
+	}
+
+	if !friday.SameSecond(sameSecond) || !friday.SameMinute(sameMinute) || !friday.SameHour(sameHour) || !friday.SameDay(sameDay) || !friday.SameWeek(sameWeek) || !friday.SameMonth(sameMonth) || !friday.SameQuarter(sameQuarter) || !friday.SameYear(sameYear) {
+		t.Fatalf("same-unit comparisons did not all match expected true values")
+	}
+	if !friday.Birthday(birthday) {
+		t.Fatalf("Birthday() = false, want true")
+	}
+	if friday.Birthday(notBirthday) {
+		t.Fatalf("Birthday() = true, want false")
+	}
+}

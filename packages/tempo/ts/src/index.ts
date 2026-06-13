@@ -1359,6 +1359,32 @@ export class TempoImmutable {
     return this.sub(days, "day");
   }
 
+  addWeekdays(days: number): this {
+    assertFiniteNumber(days, "Weekdays");
+
+    if (days === 0) {
+      return this.clone();
+    }
+
+    const direction = days < 0 ? -1 : 1;
+    let remaining = Math.abs(Math.trunc(days));
+    let current = this.clone();
+
+    while (remaining > 0) {
+      current = current.addDays(direction);
+
+      if (current.isWeekday()) {
+        remaining -= 1;
+      }
+    }
+
+    return current;
+  }
+
+  subWeekdays(days: number): this {
+    return this.addWeekdays(-days);
+  }
+
   addWeeks(weeks: number): this {
     return this.add(weeks, "week");
   }
@@ -1715,6 +1741,14 @@ export class TempoImmutable {
     return this.diff(other, "week", options);
   }
 
+  diffInWeekdays(other: TempoInput, options?: DiffOptions): number {
+    return this.diffFilteredDays(other, (item) => item.isWeekday(), options);
+  }
+
+  diffInWeekendDays(other: TempoInput, options?: DiffOptions): number {
+    return this.diffFilteredDays(other, (item) => item.isWeekend(), options);
+  }
+
   diffInMonths(other: TempoInput, options?: DiffOptions): number {
     return this.diff(other, "month", options);
   }
@@ -1757,6 +1791,44 @@ export class TempoImmutable {
       this.comparableValue(unit) ===
       TempoImmutable.parse(other, { timeZone: this.zone }).comparableValue(unit)
     );
+  }
+
+  isSameSecond(other: TempoInput): boolean {
+    return this.isSame(other, "second");
+  }
+
+  isSameMinute(other: TempoInput): boolean {
+    return this.isSame(other, "minute");
+  }
+
+  isSameHour(other: TempoInput): boolean {
+    return this.isSame(other, "hour");
+  }
+
+  isSameDay(other: TempoInput): boolean {
+    return this.isSame(other, "day");
+  }
+
+  isSameWeek(other: TempoInput): boolean {
+    return this.isSame(other, "week");
+  }
+
+  isSameMonth(other: TempoInput): boolean {
+    return this.isSame(other, "month");
+  }
+
+  isSameQuarter(other: TempoInput): boolean {
+    return this.isSame(other, "quarter");
+  }
+
+  isSameYear(other: TempoInput): boolean {
+    return this.isSame(other, "year");
+  }
+
+  isBirthday(other: TempoInput = new Date()): boolean {
+    const compare = TempoImmutable.parse(other, { timeZone: this.zone });
+
+    return this.month === compare.month && this.day === compare.day;
   }
 
   isSameOrBefore(other: TempoInput, unit?: ComparisonUnit): boolean {
@@ -1938,6 +2010,31 @@ export class TempoImmutable {
     return unit === "millisecond"
       ? this.timestampMs
       : this.startOf(unit).timestampMs;
+  }
+
+  private diffFilteredDays(
+    other: TempoInput,
+    predicate: (item: TempoImmutable) => boolean,
+    options?: DiffOptions,
+  ): number {
+    const otherTempo = TempoImmutable.parse(other, { timeZone: this.zone });
+    const sign = this.isBefore(otherTempo, "day") ? -1 : 1;
+    const start = sign < 0 ? this.startOf("day") : otherTempo.startOf("day");
+    const end = sign < 0 ? otherTempo.startOf("day") : this.startOf("day");
+    let current = start;
+    let count = 0;
+
+    while (current.isBefore(end, "day")) {
+      current = current.addDays(1);
+
+      if (current.isSameOrBefore(end, "day") && predicate(current)) {
+        count += 1;
+      }
+    }
+
+    const result = options?.absolute ? count : count * sign;
+
+    return options?.float ? result : Math.trunc(result);
   }
 }
 

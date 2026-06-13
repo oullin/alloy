@@ -782,6 +782,32 @@ func (tempo Tempo) SubDays(days int) Tempo {
 	return tempo.Sub(days, Day)
 }
 
+func (tempo Tempo) AddWeekdays(days int) Tempo {
+	if days == 0 {
+		return tempo.Clone()
+	}
+
+	direction := 1
+	if days < 0 {
+		direction = -1
+		days = -days
+	}
+
+	current := tempo.Clone()
+	for days > 0 {
+		current = current.AddDays(direction)
+		if current.IsWeekday() {
+			days--
+		}
+	}
+
+	return current
+}
+
+func (tempo Tempo) SubWeekdays(days int) Tempo {
+	return tempo.AddWeekdays(-days)
+}
+
 func (tempo Tempo) AddWeeks(weeks int) Tempo {
 	return tempo.Add(weeks, Week)
 }
@@ -1095,6 +1121,18 @@ func (tempo Tempo) DiffInWeeks(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Week, options...))
 }
 
+func (tempo Tempo) DiffInWeekdays(other Tempo, options ...DiffOptions) int {
+	return tempo.diffFilteredDays(other, func(item Tempo) bool {
+		return item.IsWeekday()
+	}, options...)
+}
+
+func (tempo Tempo) DiffInWeekendDays(other Tempo, options ...DiffOptions) int {
+	return tempo.diffFilteredDays(other, func(item Tempo) bool {
+		return item.IsWeekend()
+	}, options...)
+}
+
 func (tempo Tempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Month, options...))
 }
@@ -1144,6 +1182,42 @@ func (tempo Tempo) After(other Tempo, units ...Unit) bool {
 
 func (tempo Tempo) Same(other Tempo, units ...Unit) bool {
 	return tempo.compareValue(units...) == other.compareValue(units...)
+}
+
+func (tempo Tempo) SameSecond(other Tempo) bool {
+	return tempo.Same(other, Second)
+}
+
+func (tempo Tempo) SameMinute(other Tempo) bool {
+	return tempo.Same(other, Minute)
+}
+
+func (tempo Tempo) SameHour(other Tempo) bool {
+	return tempo.Same(other, Hour)
+}
+
+func (tempo Tempo) SameDay(other Tempo) bool {
+	return tempo.Same(other, Day)
+}
+
+func (tempo Tempo) SameWeek(other Tempo) bool {
+	return tempo.Same(other, Week)
+}
+
+func (tempo Tempo) SameMonth(other Tempo) bool {
+	return tempo.Same(other, Month)
+}
+
+func (tempo Tempo) SameQuarter(other Tempo) bool {
+	return tempo.Same(other, Quarter)
+}
+
+func (tempo Tempo) SameYear(other Tempo) bool {
+	return tempo.Same(other, Year)
+}
+
+func (tempo Tempo) Birthday(other Tempo) bool {
+	return tempo.Month() == other.Month() && tempo.Day() == other.Day()
 }
 
 func (tempo Tempo) SameOrBefore(other Tempo, units ...Unit) bool {
@@ -1339,6 +1413,37 @@ func (tempo Tempo) compareValue(units ...Unit) int64 {
 	}
 
 	return tempo.StartOf(unit).TimestampMs()
+}
+
+func (tempo Tempo) diffFilteredDays(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	opts := DiffOptions{}
+	if len(options) > 0 {
+		opts = options[0]
+	}
+
+	sign := 1
+	start := other.StartOf(Day)
+	end := tempo.StartOf(Day)
+	if tempo.Before(other, Day) {
+		sign = -1
+		start = tempo.StartOf(Day)
+		end = other.StartOf(Day)
+	}
+
+	current := start
+	count := 0
+	for current.Before(end, Day) {
+		current = current.AddDays(1)
+		if current.SameOrBefore(end, Day) && predicate(current) {
+			count++
+		}
+	}
+
+	if opts.Absolute {
+		return count
+	}
+
+	return count * sign
 }
 
 func (mutable *MutableTempo) Tempo() Tempo {

@@ -323,4 +323,34 @@ describe("Tempo TypeScript behavior", () => {
       "2024-01-05",
     ]);
   });
+
+  it("adds business days and compares same calendar units", () => {
+    const friday = Tempo.parse("2024-05-17T10:00:00Z");
+    const wednesday = Tempo.parse("2024-05-22T10:00:00Z");
+
+    expect(friday.addWeekdays(1).toDateTimeString()).toBe(
+      "2024-05-20 10:00:00",
+    );
+    expect(friday.addWeekdays(3).toDateTimeString()).toBe(
+      "2024-05-22 10:00:00",
+    );
+    expect(wednesday.subWeekdays(3).toDateTimeString()).toBe(
+      "2024-05-17 10:00:00",
+    );
+    expect(wednesday.diffInWeekdays(friday)).toBe(3);
+    expect(wednesday.diffInWeekendDays(friday)).toBe(2);
+    expect(friday.diffInWeekdays(wednesday)).toBe(-3);
+    expect(friday.diffInWeekdays(wednesday, { absolute: true })).toBe(3);
+
+    expect(friday.isSameSecond("2024-05-17T10:00:00.999Z")).toBe(true);
+    expect(friday.isSameMinute("2024-05-17T10:00:59Z")).toBe(true);
+    expect(friday.isSameHour("2024-05-17T10:59:59Z")).toBe(true);
+    expect(friday.isSameDay("2024-05-17T23:59:59Z")).toBe(true);
+    expect(friday.isSameWeek("2024-05-13T00:00:00Z")).toBe(true);
+    expect(friday.isSameMonth("2024-05-01T00:00:00Z")).toBe(true);
+    expect(friday.isSameQuarter("2024-04-01T00:00:00Z")).toBe(true);
+    expect(friday.isSameYear("2024-12-31T23:59:59Z")).toBe(true);
+    expect(friday.isBirthday("1990-05-17T00:00:00Z")).toBe(true);
+    expect(friday.isBirthday("1990-05-18T00:00:00Z")).toBe(false);
+  });
 });
