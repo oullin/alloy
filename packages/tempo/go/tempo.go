@@ -1207,12 +1207,28 @@ func (tempo Tempo) EndOfDay() Tempo {
 	return tempo.EndOf(Day)
 }
 
+func (tempo Tempo) StartOfWeek(options ...StartOfWeekOptions) Tempo {
+	return tempo.StartOf(Week, options...)
+}
+
+func (tempo Tempo) EndOfWeek(options ...StartOfWeekOptions) Tempo {
+	return tempo.EndOf(Week, options...)
+}
+
 func (tempo Tempo) StartOfMonth() Tempo {
 	return tempo.StartOf(Month)
 }
 
 func (tempo Tempo) EndOfMonth() Tempo {
 	return tempo.EndOf(Month)
+}
+
+func (tempo Tempo) StartOfQuarter() Tempo {
+	return tempo.StartOf(Quarter)
+}
+
+func (tempo Tempo) EndOfQuarter() Tempo {
+	return tempo.EndOf(Quarter)
 }
 
 func (tempo Tempo) FirstOfMonth(weekdays ...time.Weekday) Tempo {
@@ -2310,12 +2326,28 @@ func (mutable *MutableTempo) EndOfDay() *MutableTempo {
 	return mutable.replace(mutable.Tempo().EndOfDay())
 }
 
+func (mutable *MutableTempo) StartOfWeek(options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfWeek(options...))
+}
+
+func (mutable *MutableTempo) EndOfWeek(options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfWeek(options...))
+}
+
 func (mutable *MutableTempo) StartOfMonth() *MutableTempo {
 	return mutable.replace(mutable.Tempo().StartOfMonth())
 }
 
 func (mutable *MutableTempo) EndOfMonth() *MutableTempo {
 	return mutable.replace(mutable.Tempo().EndOfMonth())
+}
+
+func (mutable *MutableTempo) StartOfQuarter() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfQuarter())
+}
+
+func (mutable *MutableTempo) EndOfQuarter() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfQuarter())
 }
 
 func (mutable *MutableTempo) FirstOfMonth(weekdays ...time.Weekday) *MutableTempo {

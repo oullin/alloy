@@ -1747,12 +1747,28 @@ export class TempoImmutable {
     return this.endOf("day");
   }
 
+  startOfWeek(options?: StartOfWeekOptions): this {
+    return this.startOf("week", options);
+  }
+
+  endOfWeek(options?: StartOfWeekOptions): this {
+    return this.endOf("week", options);
+  }
+
   startOfMonth(): this {
     return this.startOf("month");
   }
 
   endOfMonth(): this {
     return this.endOf("month");
+  }
+
+  startOfQuarter(): this {
+    return this.startOf("quarter");
+  }
+
+  endOfQuarter(): this {
+    return this.endOf("quarter");
   }
 
   firstOfMonth(weekday?: WeekdayInput): this {

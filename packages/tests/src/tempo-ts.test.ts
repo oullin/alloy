@@ -159,10 +159,18 @@ describe("Tempo TypeScript behavior", () => {
       Tempo.parse("2024-02-29T00:00:00Z").addYearsNoOverflow(1).toDateString(),
     ).toBe("2025-02-28");
     expect(base.startOf("day").toISOString()).toBe("2024-01-31T00:00:00.000Z");
+    expect(base.startOfWeek().toDateString()).toBe("2024-01-29");
+    expect(base.endOfWeek({ weekStartsOn: 0 }).toDateString()).toBe(
+      "2024-02-03",
+    );
     expect(base.endOf("month").toISOString()).toBe("2024-01-31T23:59:59.999Z");
     expect(base.startOf("quarter").toISOString()).toBe(
       "2024-01-01T00:00:00.000Z",
     );
+    expect(base.startOfQuarter().toISOString()).toBe(
+      "2024-01-01T00:00:00.000Z",
+    );
+    expect(base.endOfQuarter().toISOString()).toBe("2024-03-31T23:59:59.999Z");
     expect(base.endOf("year").toISOString()).toBe("2024-12-31T23:59:59.999Z");
   });
 

@@ -260,11 +260,23 @@ func TestArithmeticBoundariesAndOverflowModes(t *testing.T) {
 	if got := base.StartOf(Day).ISOString(); got != "2024-01-31T00:00:00.000Z" {
 		t.Fatalf("StartOf(Day).ISOString() = %q, want start of day", got)
 	}
+	if got := base.StartOfWeek().DateString(); got != "2024-01-29" {
+		t.Fatalf("StartOfWeek().DateString() = %q, want Monday week start", got)
+	}
+	if got := base.EndOfWeek(StartOfWeekOptions{WeekStartsOn: time.Sunday}).DateString(); got != "2024-02-03" {
+		t.Fatalf("EndOfWeek(Sunday).DateString() = %q, want Saturday week end", got)
+	}
 	if got := base.EndOf(Month).ISOString(); got != "2024-01-31T23:59:59.999Z" {
 		t.Fatalf("EndOf(Month).ISOString() = %q, want end of month", got)
 	}
 	if got := base.StartOf(Quarter).ISOString(); got != "2024-01-01T00:00:00.000Z" {
 		t.Fatalf("StartOf(Quarter).ISOString() = %q, want quarter start", got)
+	}
+	if got := base.StartOfQuarter().ISOString(); got != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("StartOfQuarter().ISOString() = %q, want quarter start", got)
+	}
+	if got := base.EndOfQuarter().ISOString(); got != "2024-03-31T23:59:59.999Z" {
+		t.Fatalf("EndOfQuarter().ISOString() = %q, want quarter end", got)
 	}
 	if got := base.EndOf(Year).ISOString(); got != "2024-12-31T23:59:59.999Z" {
 		t.Fatalf("EndOf(Year).ISOString() = %q, want end of year", got)
