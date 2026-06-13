@@ -1510,6 +1510,14 @@ export class TempoImmutable {
     return this.isAfter(reference);
   }
 
+  isNowOrPast(reference: TempoInput = new Date()): boolean {
+    return this.isSameOrBefore(reference);
+  }
+
+  isNowOrFuture(reference: TempoInput = new Date()): boolean {
+    return this.isSameOrAfter(reference);
+  }
+
   isToday(reference: TempoInput = new Date()): boolean {
     return this.isSame(reference, "day");
   }

@@ -450,6 +450,10 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.isToday("2024-02-29T12:00:00Z")).toBe(true);
     expect(base.isTomorrow("2024-02-28T12:00:00Z")).toBe(true);
     expect(base.isYesterday("2024-03-01T12:00:00Z")).toBe(true);
+    expect(base.isPast("2024-03-01T12:00:00Z")).toBe(true);
+    expect(base.isFuture("2024-02-28T12:00:00Z")).toBe(true);
+    expect(base.isNowOrPast("2024-02-29T00:00:00Z")).toBe(true);
+    expect(base.isNowOrFuture("2024-02-29T00:00:00Z")).toBe(true);
     expect(
       base.addDays(2).diffForHumans(base, {
         locale: "en-US",

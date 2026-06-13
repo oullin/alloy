@@ -833,6 +833,19 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 	if !base.IsYesterday(referenceTomorrow) {
 		t.Fatalf("IsYesterday() = false, want true")
 	}
+	if !base.IsPast(referenceTomorrow) {
+		t.Fatalf("IsPast() = false, want true")
+	}
+	if !base.IsFuture(referenceYesterday) {
+		t.Fatalf("IsFuture() = false, want true")
+	}
+	farFuture, err := Parse("3000-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse far future: %v", err)
+	}
+	if !base.IsNowOrPast() || !farFuture.IsNowOrFuture() {
+		t.Fatalf("now-or-past/future predicates did not match expected values")
+	}
 	if got := base.AddDays(2).DiffForHumans(base); got != "in 2 days" {
 		t.Fatalf("DiffForHumans() = %q, want future diff", got)
 	}

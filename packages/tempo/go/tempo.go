@@ -976,6 +976,14 @@ func (tempo Tempo) IsFuture(reference Tempo) bool {
 	return tempo.After(reference)
 }
 
+func (tempo Tempo) IsNowOrPast() bool {
+	return tempo.SameOrBefore(Tempo{value: time.Now().UTC(), location: tempo.location})
+}
+
+func (tempo Tempo) IsNowOrFuture() bool {
+	return tempo.SameOrAfter(Tempo{value: time.Now().UTC(), location: tempo.location})
+}
+
 func (tempo Tempo) IsToday(reference Tempo) bool {
 	return tempo.Same(reference, Day)
 }
@@ -2546,6 +2554,14 @@ func (mutable *MutableTempo) IsPast(reference Tempo) bool {
 
 func (mutable *MutableTempo) IsFuture(reference Tempo) bool {
 	return mutable.Tempo().IsFuture(reference)
+}
+
+func (mutable *MutableTempo) IsNowOrPast() bool {
+	return mutable.Tempo().IsNowOrPast()
+}
+
+func (mutable *MutableTempo) IsNowOrFuture() bool {
+	return mutable.Tempo().IsNowOrFuture()
 }
 
 func (mutable *MutableTempo) IsToday(reference Tempo) bool {
