@@ -22,6 +22,9 @@ const (
 	Month       Unit = "month"
 	Quarter     Unit = "quarter"
 	Year        Unit = "year"
+	Decade      Unit = "decade"
+	Century     Unit = "century"
+	Millennium  Unit = "millennium"
 )
 
 type TimeStringPrecision string
@@ -1389,6 +1392,12 @@ func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 		return tempo.fromLocal(time.Date(local.Year(), month, 1, 0, 0, 0, 0, tempo.location))
 	case Year:
 		return tempo.fromLocal(time.Date(local.Year(), time.January, 1, 0, 0, 0, 0, tempo.location))
+	case Decade:
+		return tempo.SetDate(local.Year()-local.Year()%10, 1, 1).StartOfDay()
+	case Century:
+		return tempo.SetDate(local.Year()-(local.Year()-1)%100, 1, 1).StartOfDay()
+	case Millennium:
+		return tempo.SetDate(local.Year()-(local.Year()-1)%1000, 1, 1).StartOfDay()
 	default:
 		return tempo
 	}
@@ -1414,6 +1423,12 @@ func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 		return tempo.StartOf(Quarter).AddQuarters(1).SubMilliseconds(1)
 	case Year:
 		return tempo.StartOf(Year).AddYears(1).SubMilliseconds(1)
+	case Decade:
+		return tempo.StartOf(Decade).AddYears(10).SubMilliseconds(1)
+	case Century:
+		return tempo.StartOf(Century).AddYears(100).SubMilliseconds(1)
+	case Millennium:
+		return tempo.StartOf(Millennium).AddYears(1000).SubMilliseconds(1)
 	default:
 		return tempo
 	}
@@ -1531,6 +1546,30 @@ func (tempo Tempo) IsEndOfYear() bool {
 	return tempo.IsEndOf(Year)
 }
 
+func (tempo Tempo) IsStartOfDecade() bool {
+	return tempo.IsStartOf(Decade)
+}
+
+func (tempo Tempo) IsEndOfDecade() bool {
+	return tempo.IsEndOf(Decade)
+}
+
+func (tempo Tempo) IsStartOfCentury() bool {
+	return tempo.IsStartOf(Century)
+}
+
+func (tempo Tempo) IsEndOfCentury() bool {
+	return tempo.IsEndOf(Century)
+}
+
+func (tempo Tempo) IsStartOfMillennium() bool {
+	return tempo.IsStartOf(Millennium)
+}
+
+func (tempo Tempo) IsEndOfMillennium() bool {
+	return tempo.IsEndOf(Millennium)
+}
+
 func (tempo Tempo) StartOfDay() Tempo {
 	return tempo.StartOf(Day)
 }
@@ -1644,6 +1683,30 @@ func (tempo Tempo) StartOfYear() Tempo {
 
 func (tempo Tempo) EndOfYear() Tempo {
 	return tempo.EndOf(Year)
+}
+
+func (tempo Tempo) StartOfDecade() Tempo {
+	return tempo.StartOf(Decade)
+}
+
+func (tempo Tempo) EndOfDecade() Tempo {
+	return tempo.EndOf(Decade)
+}
+
+func (tempo Tempo) StartOfCentury() Tempo {
+	return tempo.StartOf(Century)
+}
+
+func (tempo Tempo) EndOfCentury() Tempo {
+	return tempo.EndOf(Century)
+}
+
+func (tempo Tempo) StartOfMillennium() Tempo {
+	return tempo.StartOf(Millennium)
+}
+
+func (tempo Tempo) EndOfMillennium() Tempo {
+	return tempo.EndOf(Millennium)
 }
 
 func (tempo Tempo) FirstOfYear(weekdays ...time.Weekday) Tempo {
@@ -2879,6 +2942,30 @@ func (mutable *MutableTempo) EndOfYear() *MutableTempo {
 	return mutable.replace(mutable.Tempo().EndOfYear())
 }
 
+func (mutable *MutableTempo) StartOfDecade() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfDecade())
+}
+
+func (mutable *MutableTempo) EndOfDecade() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfDecade())
+}
+
+func (mutable *MutableTempo) StartOfCentury() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfCentury())
+}
+
+func (mutable *MutableTempo) EndOfCentury() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfCentury())
+}
+
+func (mutable *MutableTempo) StartOfMillennium() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfMillennium())
+}
+
+func (mutable *MutableTempo) EndOfMillennium() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfMillennium())
+}
+
 func (mutable *MutableTempo) FirstOfYear(weekdays ...time.Weekday) *MutableTempo {
 	return mutable.replace(mutable.Tempo().FirstOfYear(weekdays...))
 }
@@ -3005,6 +3092,30 @@ func (mutable *MutableTempo) IsStartOfYear() bool {
 
 func (mutable *MutableTempo) IsEndOfYear() bool {
 	return mutable.Tempo().IsEndOfYear()
+}
+
+func (mutable *MutableTempo) IsStartOfDecade() bool {
+	return mutable.Tempo().IsStartOfDecade()
+}
+
+func (mutable *MutableTempo) IsEndOfDecade() bool {
+	return mutable.Tempo().IsEndOfDecade()
+}
+
+func (mutable *MutableTempo) IsStartOfCentury() bool {
+	return mutable.Tempo().IsStartOfCentury()
+}
+
+func (mutable *MutableTempo) IsEndOfCentury() bool {
+	return mutable.Tempo().IsEndOfCentury()
+}
+
+func (mutable *MutableTempo) IsStartOfMillennium() bool {
+	return mutable.Tempo().IsStartOfMillennium()
+}
+
+func (mutable *MutableTempo) IsEndOfMillennium() bool {
+	return mutable.Tempo().IsEndOfMillennium()
 }
 
 func (mutable *MutableTempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
@@ -3621,6 +3732,12 @@ func normalizeUnit(unit Unit) Unit {
 		return Quarter
 	case "years":
 		return Year
+	case "decades":
+		return Decade
+	case "centuries":
+		return Century
+	case "millenniums", "millennia":
+		return Millennium
 	default:
 		return unit
 	}

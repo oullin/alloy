@@ -24,7 +24,14 @@ export type TimeUnit =
   | "quarter"
   | "quarters"
   | "year"
-  | "years";
+  | "years"
+  | "decade"
+  | "decades"
+  | "century"
+  | "centuries"
+  | "millennium"
+  | "millenniums"
+  | "millennia";
 
 export type BoundaryUnit =
   | "millisecond"
@@ -35,7 +42,10 @@ export type BoundaryUnit =
   | "week"
   | "month"
   | "quarter"
-  | "year";
+  | "year"
+  | "decade"
+  | "century"
+  | "millennium";
 
 export type ComparisonUnit = "millisecond" | BoundaryUnit;
 
@@ -499,6 +509,13 @@ const normalizeUnit = (unit: TimeUnit): Exclude<TimeUnit, `${string}s`> => {
       return "quarter";
     case "years":
       return "year";
+    case "decades":
+      return "decade";
+    case "centuries":
+      return "century";
+    case "millenniums":
+    case "millennia":
+      return "millennium";
     default:
       return unit;
   }
@@ -1916,6 +1933,20 @@ export class TempoImmutable {
           month: 1,
           second: 0,
         });
+      case "decade":
+        return this.setDate(parts.year - (parts.year % 10), 1, 1).startOfDay();
+      case "century":
+        return this.setDate(
+          parts.year - ((parts.year - 1) % 100),
+          1,
+          1,
+        ).startOfDay();
+      case "millennium":
+        return this.setDate(
+          parts.year - ((parts.year - 1) % 1000),
+          1,
+          1,
+        ).startOfDay();
     }
   }
 
@@ -1939,6 +1970,12 @@ export class TempoImmutable {
         return this.startOf("quarter").addQuarters(1).subMilliseconds(1);
       case "year":
         return this.startOf("year").addYears(1).subMilliseconds(1);
+      case "decade":
+        return this.startOf("decade").addYears(10).subMilliseconds(1);
+      case "century":
+        return this.startOf("century").addYears(100).subMilliseconds(1);
+      case "millennium":
+        return this.startOf("millennium").addYears(1000).subMilliseconds(1);
     }
   }
 
@@ -2052,6 +2089,30 @@ export class TempoImmutable {
 
   isEndOfYear(): boolean {
     return this.isEndOf("year");
+  }
+
+  isStartOfDecade(): boolean {
+    return this.isStartOf("decade");
+  }
+
+  isEndOfDecade(): boolean {
+    return this.isEndOf("decade");
+  }
+
+  isStartOfCentury(): boolean {
+    return this.isStartOf("century");
+  }
+
+  isEndOfCentury(): boolean {
+    return this.isEndOf("century");
+  }
+
+  isStartOfMillennium(): boolean {
+    return this.isStartOf("millennium");
+  }
+
+  isEndOfMillennium(): boolean {
+    return this.isEndOf("millennium");
   }
 
   startOfDay(): this {
@@ -2222,6 +2283,30 @@ export class TempoImmutable {
 
   endOfYear(): this {
     return this.endOf("year");
+  }
+
+  startOfDecade(): this {
+    return this.startOf("decade");
+  }
+
+  endOfDecade(): this {
+    return this.endOf("decade");
+  }
+
+  startOfCentury(): this {
+    return this.startOf("century");
+  }
+
+  endOfCentury(): this {
+    return this.endOf("century");
+  }
+
+  startOfMillennium(): this {
+    return this.startOf("millennium");
+  }
+
+  endOfMillennium(): this {
+    return this.endOf("millennium");
   }
 
   floor(unit: TimeUnit): this {

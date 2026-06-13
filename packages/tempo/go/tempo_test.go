@@ -1412,6 +1412,57 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if !startOfYear.IsStartOfYear() || !endOfYear.IsEndOfYear() {
 		t.Fatalf("year boundary helpers = false, want true")
 	}
+	if got := base.StartOfDecade().DateTimeString(); got != "2020-01-01 00:00:00" {
+		t.Fatalf("StartOfDecade().DateTimeString() = %q, want decade start", got)
+	}
+	if got := base.EndOfDecade().DateTimeString(); got != "2029-12-31 23:59:59" {
+		t.Fatalf("EndOfDecade().DateTimeString() = %q, want decade end", got)
+	}
+	if got := base.StartOfCentury().DateTimeString(); got != "2001-01-01 00:00:00" {
+		t.Fatalf("StartOfCentury().DateTimeString() = %q, want century start", got)
+	}
+	if got := base.EndOfCentury().DateTimeString(); got != "2100-12-31 23:59:59" {
+		t.Fatalf("EndOfCentury().DateTimeString() = %q, want century end", got)
+	}
+	if got := base.StartOfMillennium().DateTimeString(); got != "2001-01-01 00:00:00" {
+		t.Fatalf("StartOfMillennium().DateTimeString() = %q, want millennium start", got)
+	}
+	if got := base.EndOfMillennium().DateTimeString(); got != "3000-12-31 23:59:59" {
+		t.Fatalf("EndOfMillennium().DateTimeString() = %q, want millennium end", got)
+	}
+	startOfDecade, err := Parse("2020-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of decade: %v", err)
+	}
+	endOfDecade, err := Parse("2029-12-31T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of decade: %v", err)
+	}
+	startOfCentury, err := Parse("2001-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of century: %v", err)
+	}
+	endOfCentury, err := Parse("2100-12-31T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of century: %v", err)
+	}
+	startOfMillennium, err := Parse("2001-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of millennium: %v", err)
+	}
+	endOfMillennium, err := Parse("3000-12-31T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of millennium: %v", err)
+	}
+	if !startOfDecade.IsStartOfDecade() || !endOfDecade.IsEndOfDecade() {
+		t.Fatalf("decade boundary helpers = false, want true")
+	}
+	if !startOfCentury.IsStartOfCentury() || !endOfCentury.IsEndOfCentury() {
+		t.Fatalf("century boundary helpers = false, want true")
+	}
+	if !startOfMillennium.IsStartOfMillennium() || !endOfMillennium.IsEndOfMillennium() {
+		t.Fatalf("millennium boundary helpers = false, want true")
+	}
 }
 
 func TestNamedSerializationAndMapConversion(t *testing.T) {

@@ -725,6 +725,28 @@ describe("Tempo TypeScript behavior", () => {
     expect(Tempo.parse("2024-06-30T23:59:59.999Z").isEndOfQuarter()).toBe(true);
     expect(Tempo.parse("2024-01-01T00:00:00Z").isStartOfYear()).toBe(true);
     expect(Tempo.parse("2024-12-31T23:59:59.999Z").isEndOfYear()).toBe(true);
+    expect(base.startOfDecade().toDateTimeString()).toBe("2020-01-01 00:00:00");
+    expect(base.endOfDecade().toDateTimeString()).toBe("2029-12-31 23:59:59");
+    expect(Tempo.parse("2020-01-01T00:00:00Z").isStartOfDecade()).toBe(true);
+    expect(Tempo.parse("2029-12-31T23:59:59.999Z").isEndOfDecade()).toBe(true);
+    expect(base.startOfCentury().toDateTimeString()).toBe(
+      "2001-01-01 00:00:00",
+    );
+    expect(base.endOfCentury().toDateTimeString()).toBe("2100-12-31 23:59:59");
+    expect(Tempo.parse("2001-01-01T00:00:00Z").isStartOfCentury()).toBe(true);
+    expect(Tempo.parse("2100-12-31T23:59:59.999Z").isEndOfCentury()).toBe(true);
+    expect(base.startOfMillennium().toDateTimeString()).toBe(
+      "2001-01-01 00:00:00",
+    );
+    expect(base.endOfMillennium().toDateTimeString()).toBe(
+      "3000-12-31 23:59:59",
+    );
+    expect(Tempo.parse("2001-01-01T00:00:00Z").isStartOfMillennium()).toBe(
+      true,
+    );
+    expect(Tempo.parse("3000-12-31T23:59:59.999Z").isEndOfMillennium()).toBe(
+      true,
+    );
   });
 
   it("serializes named date formats and maps components", () => {
