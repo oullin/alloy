@@ -224,6 +224,14 @@ describe("Tempo TypeScript behavior", () => {
     expect(interval.contains("2024-01-03T12:00:00Z")).toBe(true);
     expect(interval.contains("2024-01-03T12:00:00Z", "[)")).toBe(false);
 
+    const calendarInterval = new TempoInterval(
+      "2023-01-01T00:00:00Z",
+      "2024-03-01T00:00:00Z",
+    );
+    expect(calendarInterval.weeks).toBe(60);
+    expect(calendarInterval.months).toBe(14);
+    expect(calendarInterval.years).toBe(1);
+
     const period = new TempoPeriod("2024-01-01", "2024-01-05", {
       step: { days: 2 },
     });

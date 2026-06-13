@@ -386,6 +386,24 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 	if interval.Contains(end, "[)") {
 		t.Fatalf("Interval.Contains(end, \"[)\") = true, want false")
 	}
+	calendarStart, err := Parse("2023-01-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse calendar start: %v", err)
+	}
+	calendarEnd, err := Parse("2024-03-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse calendar end: %v", err)
+	}
+	calendarInterval := calendarStart.IntervalUntil(calendarEnd)
+	if got := calendarInterval.Weeks(); got != 60 {
+		t.Fatalf("Interval.Weeks() = %d, want 60", got)
+	}
+	if got := calendarInterval.Months(); got != 14 {
+		t.Fatalf("Interval.Months() = %d, want 14", got)
+	}
+	if got := calendarInterval.Years(); got != 1 {
+		t.Fatalf("Interval.Years() = %d, want 1", got)
+	}
 
 	periodEnd, err := Parse("2024-01-05")
 	if err != nil {

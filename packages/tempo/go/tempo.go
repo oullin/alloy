@@ -2628,6 +2628,18 @@ func (interval Interval) Days() int {
 	return interval.End.DiffInDays(interval.Start)
 }
 
+func (interval Interval) Weeks() int {
+	return interval.End.DiffInWeeks(interval.Start)
+}
+
+func (interval Interval) Months() int {
+	return interval.End.DiffInMonths(interval.Start)
+}
+
+func (interval Interval) Years() int {
+	return interval.End.DiffInYears(interval.Start)
+}
+
 func (interval Interval) ToDuration() Duration {
 	return Duration{Milliseconds: interval.Milliseconds()}.Normalize()
 }

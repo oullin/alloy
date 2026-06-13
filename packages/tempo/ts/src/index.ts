@@ -2628,6 +2628,18 @@ export class TempoInterval {
     return this.end.diffInDays(this.start);
   }
 
+  get weeks(): number {
+    return this.end.diffInWeeks(this.start);
+  }
+
+  get months(): number {
+    return this.end.diffInMonths(this.start);
+  }
+
+  get years(): number {
+    return this.end.diffInYears(this.start);
+  }
+
   contains(
     input: TempoInput,
     inclusivity: "()" | "[]" | "[)" | "(]" = "[]",
