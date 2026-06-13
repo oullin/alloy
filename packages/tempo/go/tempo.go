@@ -1686,24 +1686,236 @@ func (mutable *MutableTempo) Tempo() Tempo {
 	return Tempo{value: mutable.value, location: mutable.location}
 }
 
-func (mutable *MutableTempo) ISOString() string {
-	return mutable.Tempo().ISOString()
+func (mutable *MutableTempo) Clone() *MutableTempo {
+	return NewMutable(mutable.Tempo())
+}
+
+func (mutable *MutableTempo) Timezone() string {
+	return mutable.Tempo().Timezone()
+}
+
+func (mutable *MutableTempo) Timestamp() int64 {
+	return mutable.Tempo().Timestamp()
+}
+
+func (mutable *MutableTempo) TimestampMs() int64 {
+	return mutable.Tempo().TimestampMs()
+}
+
+func (mutable *MutableTempo) Year() int {
+	return mutable.Tempo().Year()
+}
+
+func (mutable *MutableTempo) Month() int {
+	return mutable.Tempo().Month()
+}
+
+func (mutable *MutableTempo) Quarter() int {
+	return mutable.Tempo().Quarter()
+}
+
+func (mutable *MutableTempo) Day() int {
+	return mutable.Tempo().Day()
+}
+
+func (mutable *MutableTempo) DayOfWeek() int {
+	return mutable.Tempo().DayOfWeek()
+}
+
+func (mutable *MutableTempo) ISOWeekday() int {
+	return mutable.Tempo().ISOWeekday()
+}
+
+func (mutable *MutableTempo) ISOWeek() (int, int) {
+	return mutable.Tempo().ISOWeek()
+}
+
+func (mutable *MutableTempo) ISOWeekYear() int {
+	return mutable.Tempo().ISOWeekYear()
+}
+
+func (mutable *MutableTempo) ISOWeekNumber() int {
+	return mutable.Tempo().ISOWeekNumber()
+}
+
+func (mutable *MutableTempo) WeeksInISOYear() int {
+	return mutable.Tempo().WeeksInISOYear()
+}
+
+func (mutable *MutableTempo) DayOfYear() int {
+	return mutable.Tempo().DayOfYear()
+}
+
+func (mutable *MutableTempo) Hour() int {
+	return mutable.Tempo().Hour()
+}
+
+func (mutable *MutableTempo) Minute() int {
+	return mutable.Tempo().Minute()
+}
+
+func (mutable *MutableTempo) Second() int {
+	return mutable.Tempo().Second()
+}
+
+func (mutable *MutableTempo) Millisecond() int {
+	return mutable.Tempo().Millisecond()
+}
+
+func (mutable *MutableTempo) OffsetMinutes() int {
+	return mutable.Tempo().OffsetMinutes()
+}
+
+func (mutable *MutableTempo) OffsetString(separator string) string {
+	return mutable.Tempo().OffsetString(separator)
+}
+
+func (mutable *MutableTempo) ZoneName() string {
+	return mutable.Tempo().ZoneName()
+}
+
+func (mutable *MutableTempo) IsUTC() bool {
+	return mutable.Tempo().IsUTC()
+}
+
+func (mutable *MutableTempo) IsLocal() bool {
+	return mutable.Tempo().IsLocal()
+}
+
+func (mutable *MutableTempo) IsDST() bool {
+	return mutable.Tempo().IsDST()
+}
+
+func (mutable *MutableTempo) IsLeapYear() bool {
+	return mutable.Tempo().IsLeapYear()
+}
+
+func (mutable *MutableTempo) DaysInMonth() int {
+	return mutable.Tempo().DaysInMonth()
+}
+
+func (mutable *MutableTempo) IsWeekend() bool {
+	return mutable.Tempo().IsWeekend()
+}
+
+func (mutable *MutableTempo) IsSunday() bool {
+	return mutable.Tempo().IsSunday()
+}
+
+func (mutable *MutableTempo) IsMonday() bool {
+	return mutable.Tempo().IsMonday()
+}
+
+func (mutable *MutableTempo) IsTuesday() bool {
+	return mutable.Tempo().IsTuesday()
+}
+
+func (mutable *MutableTempo) IsWednesday() bool {
+	return mutable.Tempo().IsWednesday()
+}
+
+func (mutable *MutableTempo) IsThursday() bool {
+	return mutable.Tempo().IsThursday()
+}
+
+func (mutable *MutableTempo) IsFriday() bool {
+	return mutable.Tempo().IsFriday()
+}
+
+func (mutable *MutableTempo) IsSaturday() bool {
+	return mutable.Tempo().IsSaturday()
+}
+
+func (mutable *MutableTempo) IsWeekday() bool {
+	return mutable.Tempo().IsWeekday()
+}
+
+func (mutable *MutableTempo) IsPast(reference Tempo) bool {
+	return mutable.Tempo().IsPast(reference)
+}
+
+func (mutable *MutableTempo) IsFuture(reference Tempo) bool {
+	return mutable.Tempo().IsFuture(reference)
+}
+
+func (mutable *MutableTempo) IsToday(reference Tempo) bool {
+	return mutable.Tempo().IsToday(reference)
+}
+
+func (mutable *MutableTempo) IsTomorrow(reference Tempo) bool {
+	return mutable.Tempo().IsTomorrow(reference)
+}
+
+func (mutable *MutableTempo) IsYesterday(reference Tempo) bool {
+	return mutable.Tempo().IsYesterday(reference)
+}
+
+func (mutable *MutableTempo) DateString() string {
+	return mutable.Tempo().DateString()
+}
+
+func (mutable *MutableTempo) TimeString(precision ...TimeStringPrecision) string {
+	return mutable.Tempo().TimeString(precision...)
 }
 
 func (mutable *MutableTempo) DateTimeString() string {
 	return mutable.Tempo().DateTimeString()
 }
 
-func (mutable *MutableTempo) AddHours(hours int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddHours(hours))
+func (mutable *MutableTempo) DateTimeLocalString(precision ...TimeStringPrecision) string {
+	return mutable.Tempo().DateTimeLocalString(precision...)
 }
 
-func (mutable *MutableTempo) AddDays(days int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddDays(days))
+func (mutable *MutableTempo) ISOString() string {
+	return mutable.Tempo().ISOString()
 }
 
-func (mutable *MutableTempo) StartOf(unit Unit, options ...StartOfWeekOptions) *MutableTempo {
-	return mutable.replace(mutable.Tempo().StartOf(unit, options...))
+func (mutable *MutableTempo) ISO8601String() string {
+	return mutable.Tempo().ISO8601String()
+}
+
+func (mutable *MutableTempo) RFC3339String(precision ...TimeStringPrecision) string {
+	return mutable.Tempo().RFC3339String(precision...)
+}
+
+func (mutable *MutableTempo) RFC7231String() string {
+	return mutable.Tempo().RFC7231String()
+}
+
+func (mutable *MutableTempo) CookieString() string {
+	return mutable.Tempo().CookieString()
+}
+
+func (mutable *MutableTempo) AtomString() string {
+	return mutable.Tempo().AtomString()
+}
+
+func (mutable *MutableTempo) RSSString() string {
+	return mutable.Tempo().RSSString()
+}
+
+func (mutable *MutableTempo) UnixString() string {
+	return mutable.Tempo().UnixString()
+}
+
+func (mutable *MutableTempo) Time() time.Time {
+	return mutable.Tempo().Time()
+}
+
+func (mutable *MutableTempo) ToObject() Object {
+	return mutable.Tempo().ToObject()
+}
+
+func (mutable *MutableTempo) ToMap() map[string]interface{} {
+	return mutable.Tempo().ToMap()
+}
+
+func (mutable *MutableTempo) ToArray() [7]int {
+	return mutable.Tempo().ToArray()
+}
+
+func (mutable *MutableTempo) Format(pattern string) string {
+	return mutable.Tempo().Format(pattern)
 }
 
 func (mutable *MutableTempo) SetTimezone(name string) (*MutableTempo, error) {
@@ -1713,6 +1925,397 @@ func (mutable *MutableTempo) SetTimezone(name string) (*MutableTempo, error) {
 	}
 
 	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) SetTimezoneKeepLocal(name string) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetTimezoneKeepLocal(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) UTC() *MutableTempo {
+	return mutable.replace(mutable.Tempo().UTC())
+}
+
+func (mutable *MutableTempo) Local() *MutableTempo {
+	return mutable.replace(mutable.Tempo().Local())
+}
+
+func (mutable *MutableTempo) Set(components Components) (*MutableTempo, error) {
+	next, err := mutable.Tempo().Set(components)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) SetYear(year int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetYear(year))
+}
+
+func (mutable *MutableTempo) SetMonth(month int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetMonth(month))
+}
+
+func (mutable *MutableTempo) SetDay(day int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDay(day))
+}
+
+func (mutable *MutableTempo) SetDate(year int, month int, day int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDate(year, month, day))
+}
+
+func (mutable *MutableTempo) SetHour(hour int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetHour(hour))
+}
+
+func (mutable *MutableTempo) SetMinute(minute int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetMinute(minute))
+}
+
+func (mutable *MutableTempo) SetSecond(second int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetSecond(second))
+}
+
+func (mutable *MutableTempo) SetMillisecond(millisecond int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetMillisecond(millisecond))
+}
+
+func (mutable *MutableTempo) SetTime(hour int, minute int, second int, millisecond int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetTime(hour, minute, second, millisecond))
+}
+
+func (mutable *MutableTempo) Add(value int, unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Add(value, unit))
+}
+
+func (mutable *MutableTempo) Sub(value int, unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Sub(value, unit))
+}
+
+func (mutable *MutableTempo) AddDuration(duration Duration) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddDuration(duration))
+}
+
+func (mutable *MutableTempo) SubDuration(duration Duration) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubDuration(duration))
+}
+
+func (mutable *MutableTempo) AddMilliseconds(milliseconds int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddMilliseconds(milliseconds))
+}
+
+func (mutable *MutableTempo) SubMilliseconds(milliseconds int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubMilliseconds(milliseconds))
+}
+
+func (mutable *MutableTempo) AddSeconds(seconds int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddSeconds(seconds))
+}
+
+func (mutable *MutableTempo) SubSeconds(seconds int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubSeconds(seconds))
+}
+
+func (mutable *MutableTempo) AddMinutes(minutes int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddMinutes(minutes))
+}
+
+func (mutable *MutableTempo) SubMinutes(minutes int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubMinutes(minutes))
+}
+
+func (mutable *MutableTempo) AddHours(hours int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddHours(hours))
+}
+
+func (mutable *MutableTempo) SubHours(hours int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubHours(hours))
+}
+
+func (mutable *MutableTempo) AddDays(days int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddDays(days))
+}
+
+func (mutable *MutableTempo) SubDays(days int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubDays(days))
+}
+
+func (mutable *MutableTempo) AddWeekdays(days int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddWeekdays(days))
+}
+
+func (mutable *MutableTempo) SubWeekdays(days int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubWeekdays(days))
+}
+
+func (mutable *MutableTempo) AddWeeks(weeks int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddWeeks(weeks))
+}
+
+func (mutable *MutableTempo) SubWeeks(weeks int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubWeeks(weeks))
+}
+
+func (mutable *MutableTempo) AddMonths(months int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddMonths(months))
+}
+
+func (mutable *MutableTempo) SubMonths(months int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubMonths(months))
+}
+
+func (mutable *MutableTempo) AddMonthsNoOverflow(months int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddMonthsNoOverflow(months))
+}
+
+func (mutable *MutableTempo) SubMonthsNoOverflow(months int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubMonthsNoOverflow(months))
+}
+
+func (mutable *MutableTempo) AddQuarters(quarters int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddQuarters(quarters))
+}
+
+func (mutable *MutableTempo) SubQuarters(quarters int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubQuarters(quarters))
+}
+
+func (mutable *MutableTempo) AddYears(years int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddYears(years))
+}
+
+func (mutable *MutableTempo) SubYears(years int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubYears(years))
+}
+
+func (mutable *MutableTempo) AddYearsNoOverflow(years int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddYearsNoOverflow(years))
+}
+
+func (mutable *MutableTempo) SubYearsNoOverflow(years int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubYearsNoOverflow(years))
+}
+
+func (mutable *MutableTempo) Age(reference Tempo) int {
+	return mutable.Tempo().Age(reference)
+}
+
+func (mutable *MutableTempo) StartOf(unit Unit, options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOf(unit, options...))
+}
+
+func (mutable *MutableTempo) EndOf(unit Unit, options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOf(unit, options...))
+}
+
+func (mutable *MutableTempo) StartOfDay() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfDay())
+}
+
+func (mutable *MutableTempo) EndOfDay() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfDay())
+}
+
+func (mutable *MutableTempo) StartOfMonth() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfMonth())
+}
+
+func (mutable *MutableTempo) EndOfMonth() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfMonth())
+}
+
+func (mutable *MutableTempo) FirstOfMonth(weekdays ...time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().FirstOfMonth(weekdays...))
+}
+
+func (mutable *MutableTempo) LastOfMonth(weekdays ...time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().LastOfMonth(weekdays...))
+}
+
+func (mutable *MutableTempo) StartOfYear() *MutableTempo {
+	return mutable.replace(mutable.Tempo().StartOfYear())
+}
+
+func (mutable *MutableTempo) EndOfYear() *MutableTempo {
+	return mutable.replace(mutable.Tempo().EndOfYear())
+}
+
+func (mutable *MutableTempo) Floor(unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Floor(unit))
+}
+
+func (mutable *MutableTempo) Ceil(unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Ceil(unit))
+}
+
+func (mutable *MutableTempo) Round(unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Round(unit))
+}
+
+func (mutable *MutableTempo) Next(weekday time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Next(weekday))
+}
+
+func (mutable *MutableTempo) Previous(weekday time.Weekday) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Previous(weekday))
+}
+
+func (mutable *MutableTempo) NextWeekday() *MutableTempo {
+	return mutable.replace(mutable.Tempo().NextWeekday())
+}
+
+func (mutable *MutableTempo) PreviousWeekday() *MutableTempo {
+	return mutable.replace(mutable.Tempo().PreviousWeekday())
+}
+
+func (mutable *MutableTempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
+	return mutable.Tempo().IsStartOf(unit, options...)
+}
+
+func (mutable *MutableTempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
+	return mutable.Tempo().IsEndOf(unit, options...)
+}
+
+func (mutable *MutableTempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
+	return mutable.Tempo().Diff(other, unit, options...)
+}
+
+func (mutable *MutableTempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInMilliseconds(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInSeconds(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInSeconds(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInMinutes(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInMinutes(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInHours(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInHours(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInDays(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInDays(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInWeeks(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInWeeks(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInWeekdays(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInWeekdays(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInWeekendDays(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInWeekendDays(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInMonths(other, options...)
+}
+
+func (mutable *MutableTempo) DiffInYears(other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInYears(other, options...)
+}
+
+func (mutable *MutableTempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
+	return mutable.Tempo().DiffForHumans(other, options...)
+}
+
+func (mutable *MutableTempo) Before(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Before(other, units...)
+}
+
+func (mutable *MutableTempo) After(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().After(other, units...)
+}
+
+func (mutable *MutableTempo) Same(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().Same(other, units...)
+}
+
+func (mutable *MutableTempo) SameSecond(other Tempo) bool {
+	return mutable.Tempo().SameSecond(other)
+}
+
+func (mutable *MutableTempo) SameMinute(other Tempo) bool {
+	return mutable.Tempo().SameMinute(other)
+}
+
+func (mutable *MutableTempo) SameHour(other Tempo) bool {
+	return mutable.Tempo().SameHour(other)
+}
+
+func (mutable *MutableTempo) SameDay(other Tempo) bool {
+	return mutable.Tempo().SameDay(other)
+}
+
+func (mutable *MutableTempo) SameWeek(other Tempo) bool {
+	return mutable.Tempo().SameWeek(other)
+}
+
+func (mutable *MutableTempo) SameMonth(other Tempo) bool {
+	return mutable.Tempo().SameMonth(other)
+}
+
+func (mutable *MutableTempo) SameQuarter(other Tempo) bool {
+	return mutable.Tempo().SameQuarter(other)
+}
+
+func (mutable *MutableTempo) SameYear(other Tempo) bool {
+	return mutable.Tempo().SameYear(other)
+}
+
+func (mutable *MutableTempo) Birthday(other Tempo) bool {
+	return mutable.Tempo().Birthday(other)
+}
+
+func (mutable *MutableTempo) Clamp(minimum Tempo, maximum Tempo) (*MutableTempo, error) {
+	next, err := mutable.Tempo().Clamp(minimum, maximum)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) Average(other Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Average(other))
+}
+
+func (mutable *MutableTempo) Closest(first Tempo, rest ...Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Closest(first, rest...))
+}
+
+func (mutable *MutableTempo) Farthest(first Tempo, rest ...Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Farthest(first, rest...))
+}
+
+func (mutable *MutableTempo) SameOrBefore(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().SameOrBefore(other, units...)
+}
+
+func (mutable *MutableTempo) SameOrAfter(other Tempo, units ...Unit) bool {
+	return mutable.Tempo().SameOrAfter(other, units...)
+}
+
+func (mutable *MutableTempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
+	return mutable.Tempo().Between(start, end, inclusivity...)
+}
+
+func (mutable *MutableTempo) IntervalUntil(end Tempo) Interval {
+	return mutable.Tempo().IntervalUntil(end)
+}
+
+func (mutable *MutableTempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
+	return mutable.Tempo().PeriodUntil(end, options...)
 }
 
 func (mutable *MutableTempo) replace(next Tempo) *MutableTempo {

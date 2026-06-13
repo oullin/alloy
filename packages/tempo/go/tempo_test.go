@@ -372,6 +372,62 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 	if got := mutable.DateTimeString(); got != "2024-01-01 09:00:00" {
 		t.Fatalf("Mutable DateTimeString() = %q, want Tokyo local time", got)
 	}
+	if mutable.SetTime(0, 0, 0, 0) != mutable {
+		t.Fatalf("mutable SetTime returned a different pointer")
+	}
+	if got := mutable.TimeString(MillisecondPrecision); got != "00:00:00.000" {
+		t.Fatalf("Mutable TimeString(ms) = %q, want midnight", got)
+	}
+	mutable.AddDuration(Duration{Days: 2, Hours: 3}).SubHours(1).EndOf(Day)
+	if got := mutable.DateTimeString(); got != "2024-01-03 23:59:59" {
+		t.Fatalf("Mutable chained mutations DateTimeString() = %q, want end of day", got)
+	}
+	if !mutable.IsEndOf(Day) {
+		t.Fatalf("Mutable IsEndOf(Day) = false, want true")
+	}
+	if got := mutable.RFC3339String(); got != "2024-01-03T23:59:59+09:00" {
+		t.Fatalf("Mutable RFC3339String() = %q, want local offset output", got)
+	}
+	compare, err := Parse("2024-01-04T00:00:00+09:00", WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("parse mutable compare: %v", err)
+	}
+	if !mutable.Before(compare) {
+		t.Fatalf("Mutable Before(compare) = false, want true")
+	}
+	if got := mutable.DiffInHours(compare); got != 0 {
+		t.Fatalf("Mutable DiffInHours(compare) = %d, want truncated zero", got)
+	}
+	mutableInterval := mutable.IntervalUntil(compare)
+	if !mutableInterval.Contains(compare) {
+		t.Fatalf("Mutable IntervalUntil(compare).Contains(compare) = false, want true")
+	}
+	period := mutable.StartOfDay().PeriodUntil(compare, PeriodOptions{Step: Duration{Hours: 12}})
+	count, err := period.Count()
+	if err != nil {
+		t.Fatalf("mutable period count: %v", err)
+	}
+	if count != 3 {
+		t.Fatalf("Mutable PeriodUntil().Count() = %d, want 3", count)
+	}
+	minimum, err := Parse("2024-01-02T00:00:00+09:00", WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("parse mutable minimum: %v", err)
+	}
+	maximum, err := Parse("2024-01-02T12:00:00+09:00", WithTimezone("Asia/Tokyo"))
+	if err != nil {
+		t.Fatalf("parse mutable maximum: %v", err)
+	}
+	if _, err := mutable.Clamp(minimum, maximum); err != nil {
+		t.Fatalf("mutable clamp: %v", err)
+	}
+	if got := mutable.DateTimeString(); got != "2024-01-02 12:00:00" {
+		t.Fatalf("Mutable Clamp() DateTimeString() = %q, want maximum", got)
+	}
+	mutable.Average(compare)
+	if got := mutable.DateTimeString(); got != "2024-01-03 06:00:00" {
+		t.Fatalf("Mutable Average() DateTimeString() = %q, want midpoint", got)
+	}
 }
 
 func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
