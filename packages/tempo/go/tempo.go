@@ -1351,7 +1351,31 @@ func (tempo Tempo) AddUnit(unit Unit, value int) Tempo {
 	return tempo.Add(value, unit)
 }
 
+func (tempo Tempo) AddRealUnit(unit Unit, value int) Tempo {
+	return tempo.Add(value, unit)
+}
+
+func (tempo Tempo) AddUTCUnit(unit Unit, value int) Tempo {
+	return tempo.Add(value, unit)
+}
+
+func (tempo Tempo) RawAdd(value int, unit Unit) Tempo {
+	return tempo.Add(value, unit)
+}
+
 func (tempo Tempo) SubUnit(unit Unit, value int) Tempo {
+	return tempo.Sub(value, unit)
+}
+
+func (tempo Tempo) SubRealUnit(unit Unit, value int) Tempo {
+	return tempo.Sub(value, unit)
+}
+
+func (tempo Tempo) SubUTCUnit(unit Unit, value int) Tempo {
+	return tempo.Sub(value, unit)
+}
+
+func (tempo Tempo) RawSub(value int, unit Unit) Tempo {
 	return tempo.Sub(value, unit)
 }
 
@@ -1924,6 +1948,14 @@ func (tempo Tempo) Floor(unit Unit) Tempo {
 	return Tempo{value: time.Unix(0, unixNano/fixedNano*fixedNano).UTC(), location: tempo.location}
 }
 
+func (tempo Tempo) FloorUnit(unit Unit) Tempo {
+	return tempo.Floor(unit)
+}
+
+func (tempo Tempo) FloorWeek(options ...StartOfWeekOptions) Tempo {
+	return tempo.StartOfWeek(options...)
+}
+
 func (tempo Tempo) Ceil(unit Unit) Tempo {
 	floored := tempo.Floor(unit)
 	if floored.Same(tempo) {
@@ -1931,6 +1963,19 @@ func (tempo Tempo) Ceil(unit Unit) Tempo {
 	}
 
 	return floored.Add(1, unit)
+}
+
+func (tempo Tempo) CeilUnit(unit Unit) Tempo {
+	return tempo.Ceil(unit)
+}
+
+func (tempo Tempo) CeilWeek(options ...StartOfWeekOptions) Tempo {
+	floored := tempo.FloorWeek(options...)
+	if floored.Same(tempo) {
+		return floored
+	}
+
+	return floored.AddWeeks(1)
 }
 
 func (tempo Tempo) Round(unit Unit) Tempo {
@@ -1947,6 +1992,21 @@ func (tempo Tempo) Round(unit Unit) Tempo {
 	}
 
 	return Tempo{value: tempo.value.Round(fixed).UTC(), location: tempo.location}
+}
+
+func (tempo Tempo) RoundUnit(unit Unit) Tempo {
+	return tempo.Round(unit)
+}
+
+func (tempo Tempo) RoundWeek(options ...StartOfWeekOptions) Tempo {
+	start := tempo.StartOfWeek(options...)
+	end := tempo.EndOfWeek(options...)
+	midpoint := start.TimestampMs() + (end.TimestampMs()-start.TimestampMs())/2
+	if tempo.TimestampMs() >= midpoint {
+		return tempo.CeilWeek(options...)
+	}
+
+	return start
 }
 
 func (tempo Tempo) Next(weekday time.Weekday) Tempo {
@@ -2107,6 +2167,45 @@ func (tempo Tempo) DiffInYears(other Tempo, options ...DiffOptions) int {
 	return int(tempo.Diff(other, Year, options...))
 }
 
+func (tempo Tempo) DiffInUnit(unit Unit, other Tempo, options ...DiffOptions) int {
+	return int(tempo.Diff(other, unit, options...))
+}
+
+func (tempo Tempo) DiffInDaysFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	return tempo.diffFilteredDays(other, predicate, options...)
+}
+
+func (tempo Tempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	opts := DiffOptions{}
+	if len(options) > 0 {
+		opts = options[0]
+	}
+
+	sign := 1
+	start := other.StartOfHour()
+	end := tempo.StartOfHour()
+	if tempo.Before(other, Hour) {
+		sign = -1
+		start = tempo.StartOfHour()
+		end = other.StartOfHour()
+	}
+
+	count := 0
+	current := start
+	for current.Before(end, Hour) {
+		current = current.AddHours(1)
+		if current.SameOrBefore(end, Hour) && predicate(current) {
+			count++
+		}
+	}
+
+	if opts.Absolute || sign > 0 {
+		return count
+	}
+
+	return -count
+}
+
 func (tempo Tempo) SecondsSinceMidnight() int {
 	return tempo.DiffInSeconds(tempo.StartOfDay(), DiffOptions{Absolute: true})
 }
@@ -2144,6 +2243,48 @@ func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) strin
 	}
 
 	return fmt.Sprintf("in %d %s", value, unitName)
+}
+
+func (tempo Tempo) From(other Tempo, options ...HumanDiffOptions) string {
+	return tempo.DiffForHumans(other, options...)
+}
+
+func (tempo Tempo) Since(other Tempo, options ...HumanDiffOptions) string {
+	return tempo.From(other, options...)
+}
+
+func (tempo Tempo) To(other Tempo, options ...HumanDiffOptions) string {
+	return other.DiffForHumans(tempo, options...)
+}
+
+func (tempo Tempo) FromNow(options ...HumanDiffOptions) string {
+	return tempo.DiffForHumans(Tempo{value: time.Now().UTC(), location: tempo.location}, options...)
+}
+
+func (tempo Tempo) ToNow(options ...HumanDiffOptions) string {
+	return Tempo{value: time.Now().UTC(), location: tempo.location}.DiffForHumans(tempo, options...)
+}
+
+func (tempo Tempo) Ago(options ...HumanDiffOptions) string {
+	return tempo.FromNow(options...)
+}
+
+func (tempo Tempo) Timespan(other Tempo, options ...HumanDiffOptions) string {
+	opts := HumanDiffOptions{Absolute: true}
+	if len(options) > 0 {
+		opts = options[0]
+		opts.Absolute = true
+	}
+
+	return tempo.DiffForHumans(other, opts)
+}
+
+func (tempo Tempo) IsImmutable() bool {
+	return true
+}
+
+func (tempo Tempo) IsMutable() bool {
+	return false
 }
 
 func (tempo Tempo) Before(other Tempo, units ...Unit) bool {
@@ -3197,8 +3338,32 @@ func (mutable *MutableTempo) AddUnit(unit Unit, value int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().AddUnit(unit, value))
 }
 
+func (mutable *MutableTempo) AddRealUnit(unit Unit, value int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddRealUnit(unit, value))
+}
+
+func (mutable *MutableTempo) AddUTCUnit(unit Unit, value int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddUTCUnit(unit, value))
+}
+
+func (mutable *MutableTempo) RawAdd(value int, unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().RawAdd(value, unit))
+}
+
 func (mutable *MutableTempo) SubUnit(unit Unit, value int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SubUnit(unit, value))
+}
+
+func (mutable *MutableTempo) SubRealUnit(unit Unit, value int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubRealUnit(unit, value))
+}
+
+func (mutable *MutableTempo) SubUTCUnit(unit Unit, value int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubUTCUnit(unit, value))
+}
+
+func (mutable *MutableTempo) RawSub(value int, unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().RawSub(value, unit))
 }
 
 func (mutable *MutableTempo) Subtract(value int, unit Unit) *MutableTempo {
@@ -3457,12 +3622,36 @@ func (mutable *MutableTempo) Floor(unit Unit) *MutableTempo {
 	return mutable.replace(mutable.Tempo().Floor(unit))
 }
 
+func (mutable *MutableTempo) FloorUnit(unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().FloorUnit(unit))
+}
+
+func (mutable *MutableTempo) FloorWeek(options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().FloorWeek(options...))
+}
+
 func (mutable *MutableTempo) Ceil(unit Unit) *MutableTempo {
 	return mutable.replace(mutable.Tempo().Ceil(unit))
 }
 
+func (mutable *MutableTempo) CeilUnit(unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().CeilUnit(unit))
+}
+
+func (mutable *MutableTempo) CeilWeek(options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().CeilWeek(options...))
+}
+
 func (mutable *MutableTempo) Round(unit Unit) *MutableTempo {
 	return mutable.replace(mutable.Tempo().Round(unit))
+}
+
+func (mutable *MutableTempo) RoundUnit(unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().RoundUnit(unit))
+}
+
+func (mutable *MutableTempo) RoundWeek(options ...StartOfWeekOptions) *MutableTempo {
+	return mutable.replace(mutable.Tempo().RoundWeek(options...))
 }
 
 func (mutable *MutableTempo) Next(weekday time.Weekday) *MutableTempo {
@@ -3653,6 +3842,18 @@ func (mutable *MutableTempo) DiffInYears(other Tempo, options ...DiffOptions) in
 	return mutable.Tempo().DiffInYears(other, options...)
 }
 
+func (mutable *MutableTempo) DiffInUnit(unit Unit, other Tempo, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInUnit(unit, other, options...)
+}
+
+func (mutable *MutableTempo) DiffInDaysFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInDaysFiltered(other, predicate, options...)
+}
+
+func (mutable *MutableTempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
+	return mutable.Tempo().DiffInHoursFiltered(other, predicate, options...)
+}
+
 func (mutable *MutableTempo) SecondsSinceMidnight() int {
 	return mutable.Tempo().SecondsSinceMidnight()
 }
@@ -3663,6 +3864,42 @@ func (mutable *MutableTempo) SecondsUntilEndOfDay() int {
 
 func (mutable *MutableTempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
 	return mutable.Tempo().DiffForHumans(other, options...)
+}
+
+func (mutable *MutableTempo) From(other Tempo, options ...HumanDiffOptions) string {
+	return mutable.Tempo().From(other, options...)
+}
+
+func (mutable *MutableTempo) Since(other Tempo, options ...HumanDiffOptions) string {
+	return mutable.Tempo().Since(other, options...)
+}
+
+func (mutable *MutableTempo) To(other Tempo, options ...HumanDiffOptions) string {
+	return mutable.Tempo().To(other, options...)
+}
+
+func (mutable *MutableTempo) FromNow(options ...HumanDiffOptions) string {
+	return mutable.Tempo().FromNow(options...)
+}
+
+func (mutable *MutableTempo) ToNow(options ...HumanDiffOptions) string {
+	return mutable.Tempo().ToNow(options...)
+}
+
+func (mutable *MutableTempo) Ago(options ...HumanDiffOptions) string {
+	return mutable.Tempo().Ago(options...)
+}
+
+func (mutable *MutableTempo) Timespan(other Tempo, options ...HumanDiffOptions) string {
+	return mutable.Tempo().Timespan(other, options...)
+}
+
+func (mutable *MutableTempo) IsImmutable() bool {
+	return false
+}
+
+func (mutable *MutableTempo) IsMutable() bool {
+	return true
 }
 
 func (mutable *MutableTempo) Before(other Tempo, units ...Unit) bool {

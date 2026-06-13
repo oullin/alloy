@@ -1865,7 +1865,31 @@ export class TempoImmutable {
     return this.add(value, unit);
   }
 
+  addRealUnit(unit: TimeUnit, value = 1): this {
+    return this.add(value, unit);
+  }
+
+  addUTCUnit(unit: TimeUnit, value = 1): this {
+    return this.add(value, unit);
+  }
+
+  rawAdd(value: number, unit: TimeUnit): this {
+    return this.add(value, unit);
+  }
+
   subUnit(unit: TimeUnit, value = 1): this {
+    return this.sub(value, unit);
+  }
+
+  subRealUnit(unit: TimeUnit, value = 1): this {
+    return this.sub(value, unit);
+  }
+
+  subUTCUnit(unit: TimeUnit, value = 1): this {
+    return this.sub(value, unit);
+  }
+
+  rawSub(value: number, unit: TimeUnit): this {
     return this.sub(value, unit);
   }
 
@@ -2491,6 +2515,14 @@ export class TempoImmutable {
     return this.make(new Date(Math.floor(this.timestampMs / fixed) * fixed));
   }
 
+  floorUnit(unit: TimeUnit): this {
+    return this.floor(unit);
+  }
+
+  floorWeek(options?: StartOfWeekOptions): this {
+    return this.startOfWeek(options);
+  }
+
   ceil(unit: TimeUnit): this {
     const floored = this.floor(unit);
 
@@ -2499,6 +2531,16 @@ export class TempoImmutable {
     }
 
     return floored.add(1, unit);
+  }
+
+  ceilUnit(unit: TimeUnit): this {
+    return this.ceil(unit);
+  }
+
+  ceilWeek(options?: StartOfWeekOptions): this {
+    const floored = this.floorWeek(options);
+
+    return floored.isSame(this) ? floored : floored.addWeeks(1);
   }
 
   round(unit: TimeUnit): this {
@@ -2514,6 +2556,19 @@ export class TempoImmutable {
     }
 
     return this.make(new Date(Math.round(this.timestampMs / fixed) * fixed));
+  }
+
+  roundUnit(unit: TimeUnit): this {
+    return this.round(unit);
+  }
+
+  roundWeek(options?: StartOfWeekOptions): this {
+    const start = this.startOfWeek(options);
+    const end = this.endOfWeek(options);
+    const midpoint =
+      start.timestampMs + (end.timestampMs - start.timestampMs) / 2;
+
+    return this.timestampMs >= midpoint ? this.ceilWeek(options) : start;
   }
 
   next(weekday: WeekdayInput): this {
@@ -2674,6 +2729,43 @@ export class TempoImmutable {
     return this.diff(other, "year", options);
   }
 
+  diffInUnit(unit: TimeUnit, other: TempoInput, options?: DiffOptions): number {
+    return this.diff(other, unit, options);
+  }
+
+  diffInDaysFiltered(
+    predicate: (item: TempoImmutable) => boolean,
+    other: TempoInput,
+    options?: DiffOptions,
+  ): number {
+    return this.diffFilteredDays(other, predicate, options);
+  }
+
+  diffInHoursFiltered(
+    predicate: (item: TempoImmutable) => boolean,
+    other: TempoInput,
+    options?: DiffOptions,
+  ): number {
+    const otherTempo = TempoImmutable.parse(other, { timeZone: this.zone });
+    const sign = this.isBefore(otherTempo, "hour") ? -1 : 1;
+    const start = sign < 0 ? this.startOf("hour") : otherTempo.startOf("hour");
+    const end = sign < 0 ? otherTempo.startOf("hour") : this.startOf("hour");
+    let current = start;
+    let count = 0;
+
+    while (current.isBefore(end, "hour")) {
+      current = current.addHours(1);
+
+      if (current.isSameOrBefore(end, "hour") && predicate(current)) {
+        count += 1;
+      }
+    }
+
+    const result = options?.absolute ? count : count * sign;
+
+    return options?.float ? result : Math.trunc(result);
+  }
+
   secondsSinceMidnight(): number {
     return this.diffInSeconds(this.startOfDay(), { absolute: true });
   }
@@ -2695,6 +2787,47 @@ export class TempoImmutable {
     });
 
     return formatter.format(options?.absolute ? Math.abs(value) : value, unit);
+  }
+
+  from(other: TempoInput = new Date(), options?: HumanDiffOptions): string {
+    return this.diffForHumans(other, options);
+  }
+
+  since(other: TempoInput = new Date(), options?: HumanDiffOptions): string {
+    return this.from(other, options);
+  }
+
+  to(other: TempoInput = new Date(), options?: HumanDiffOptions): string {
+    return TempoImmutable.parse(other, { timeZone: this.zone }).diffForHumans(
+      this,
+      options,
+    );
+  }
+
+  fromNow(options?: HumanDiffOptions): string {
+    return this.diffForHumans(new Date(), options);
+  }
+
+  toNow(options?: HumanDiffOptions): string {
+    return TempoImmutable.parse(new Date(), {
+      timeZone: this.zone,
+    }).diffForHumans(this, options);
+  }
+
+  ago(options?: HumanDiffOptions): string {
+    return this.fromNow(options);
+  }
+
+  timespan(other: TempoInput = new Date(), options?: HumanDiffOptions): string {
+    return this.diffForHumans(other, { ...options, absolute: true });
+  }
+
+  isImmutable(): boolean {
+    return !(this instanceof TempoMutable);
+  }
+
+  isMutable(): boolean {
+    return this instanceof TempoMutable;
   }
 
   isBefore(other: TempoInput, unit: ComparisonUnit = "millisecond"): boolean {

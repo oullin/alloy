@@ -300,6 +300,18 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.floor("hour").toISOString()).toBe("2024-05-15T10:00:00.000Z");
     expect(base.ceil("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
     expect(base.round("hour").toISOString()).toBe("2024-05-15T11:00:00.000Z");
+    expect(base.floorUnit("hour").toISOString()).toBe(
+      "2024-05-15T10:00:00.000Z",
+    );
+    expect(base.ceilUnit("hour").toISOString()).toBe(
+      "2024-05-15T11:00:00.000Z",
+    );
+    expect(base.roundUnit("hour").toISOString()).toBe(
+      "2024-05-15T11:00:00.000Z",
+    );
+    expect(base.floorWeek().toDateString()).toBe("2024-05-13");
+    expect(base.ceilWeek().toDateString()).toBe("2024-05-20");
+    expect(base.roundWeek().toDateString()).toBe("2024-05-13");
     expect(base.format("YYYY-MM-DD HH:mm:ss.SSS ZZ [Q]M")).toBe(
       "2024-05-15 10:34:45.600 +0000 Q5",
     );
@@ -635,6 +647,13 @@ describe("Tempo TypeScript behavior", () => {
     expect(wednesday.diffInWeekendDays(friday)).toBe(2);
     expect(friday.diffInWeekdays(wednesday)).toBe(-3);
     expect(friday.diffInWeekdays(wednesday, { absolute: true })).toBe(3);
+    expect(wednesday.diffInUnit("day", friday)).toBe(5);
+    expect(
+      wednesday.diffInDaysFiltered((item) => item.isMonday(), friday),
+    ).toBe(1);
+    expect(
+      wednesday.diffInHoursFiltered((item) => item.hour === 12, friday),
+    ).toBe(5);
     expect(Tempo.parse("2024-10-01T00:00:00Z").diffInQuarters(friday)).toBe(1);
     expect(friday.diffInQuarters("2024-10-01T00:00:00Z")).toBe(-1);
     expect(friday.intervalUntil("2024-11-17T10:00:00Z").quarters).toBe(2);
@@ -902,7 +921,13 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.timestampTo(0).toISOString()).toBe("1970-01-01T00:00:00.000Z");
     expect(tempo.subtract(2, "days").toDateString()).toBe("2024-05-13");
     expect(tempo.addUnit("day", 2).toDateString()).toBe("2024-05-17");
+    expect(tempo.addRealUnit("day", 2).toDateString()).toBe("2024-05-17");
+    expect(tempo.addUTCUnit("day", 2).toDateString()).toBe("2024-05-17");
+    expect(tempo.rawAdd(2, "day").toDateString()).toBe("2024-05-17");
     expect(tempo.subUnit("day", 2).toDateString()).toBe("2024-05-13");
+    expect(tempo.subRealUnit("day", 2).toDateString()).toBe("2024-05-13");
+    expect(tempo.subUTCUnit("day", 2).toDateString()).toBe("2024-05-13");
+    expect(tempo.rawSub(2, "day").toDateString()).toBe("2024-05-13");
     expect(Tempo.parse("2024-05-17T12:00:00Z").nextWeekendDay().dayOfWeek).toBe(
       6,
     );
@@ -938,5 +963,14 @@ describe("Tempo TypeScript behavior", () => {
     expect(Tempo.createFromTimestampMsUTC(1).toISOString()).toBe(
       "1970-01-01T00:00:00.001Z",
     );
+    expect(tempo.addDays(2).from(tempo)).toBe("in 2 days");
+    expect(tempo.addDays(2).since(tempo)).toBe("in 2 days");
+    expect(tempo.to(tempo.addDays(2))).toBe("in 2 days");
+    expect(tempo.addDays(2).timespan(tempo)).toBe("in 2 days");
+    expect(tempo.isImmutable()).toBe(true);
+    expect(TempoImmutable.parse(tempo).isImmutable()).toBe(true);
+    expect(tempo.isMutable()).toBe(false);
+    expect(TempoImmutable.parse(tempo).isMutable()).toBe(false);
+    expect(TempoMutable.parse(tempo).isMutable()).toBe(true);
   });
 });

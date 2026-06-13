@@ -454,6 +454,24 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 	if got := base.Round(Hour).ISOString(); got != "2024-05-15T11:00:00.000Z" {
 		t.Fatalf("Round(Hour).ISOString() = %q, want hour round", got)
 	}
+	if got := base.FloorUnit(Hour).ISOString(); got != "2024-05-15T10:00:00.000Z" {
+		t.Fatalf("FloorUnit(Hour).ISOString() = %q, want hour floor", got)
+	}
+	if got := base.CeilUnit(Hour).ISOString(); got != "2024-05-15T11:00:00.000Z" {
+		t.Fatalf("CeilUnit(Hour).ISOString() = %q, want hour ceil", got)
+	}
+	if got := base.RoundUnit(Hour).ISOString(); got != "2024-05-15T11:00:00.000Z" {
+		t.Fatalf("RoundUnit(Hour).ISOString() = %q, want hour round", got)
+	}
+	if got := base.FloorWeek().DateString(); got != "2024-05-13" {
+		t.Fatalf("FloorWeek().DateString() = %q, want week start", got)
+	}
+	if got := base.CeilWeek().DateString(); got != "2024-05-20" {
+		t.Fatalf("CeilWeek().DateString() = %q, want next week start", got)
+	}
+	if got := base.RoundWeek().DateString(); got != "2024-05-13" {
+		t.Fatalf("RoundWeek().DateString() = %q, want week start", got)
+	}
 	if got := base.Format("YYYY-MM-DD HH:mm:ss.SSS ZZ [Q]M"); got != "2024-05-15 10:34:45.600 +0000 Q5" {
 		t.Fatalf("Format() = %q, want token output", got)
 	}
@@ -1136,6 +1154,15 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 	if got := wednesday.DiffInWeekendDays(friday); got != 2 {
 		t.Fatalf("DiffInWeekendDays() = %d, want 2", got)
 	}
+	if got := wednesday.DiffInUnit(Day, friday); got != 5 {
+		t.Fatalf("DiffInUnit(Day) = %d, want 5", got)
+	}
+	if got := wednesday.DiffInDaysFiltered(friday, func(item Tempo) bool { return item.IsMonday() }); got != 1 {
+		t.Fatalf("DiffInDaysFiltered(Monday) = %d, want 1", got)
+	}
+	if got := wednesday.DiffInHoursFiltered(friday, func(item Tempo) bool { return item.Hour() == 12 }); got != 5 {
+		t.Fatalf("DiffInHoursFiltered(hour 12) = %d, want 5", got)
+	}
 	if got := friday.DiffInWeekdays(wednesday); got != -3 {
 		t.Fatalf("negative DiffInWeekdays() = %d, want -3", got)
 	}
@@ -1713,7 +1740,13 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	assertEqual(t, "SetTimestamp(0).ISOString()", tempo.SetTimestamp(0).ISOString(), "1970-01-01T00:00:00.000Z")
 	assertEqual(t, "Subtract(2, Day).DateString()", tempo.Subtract(2, Day).DateString(), "2024-05-13")
 	assertEqual(t, "AddUnit(Day, 2).DateString()", tempo.AddUnit(Day, 2).DateString(), "2024-05-17")
+	assertEqual(t, "AddRealUnit(Day, 2).DateString()", tempo.AddRealUnit(Day, 2).DateString(), "2024-05-17")
+	assertEqual(t, "AddUTCUnit(Day, 2).DateString()", tempo.AddUTCUnit(Day, 2).DateString(), "2024-05-17")
+	assertEqual(t, "RawAdd(2, Day).DateString()", tempo.RawAdd(2, Day).DateString(), "2024-05-17")
 	assertEqual(t, "SubUnit(Day, 2).DateString()", tempo.SubUnit(Day, 2).DateString(), "2024-05-13")
+	assertEqual(t, "SubRealUnit(Day, 2).DateString()", tempo.SubRealUnit(Day, 2).DateString(), "2024-05-13")
+	assertEqual(t, "SubUTCUnit(Day, 2).DateString()", tempo.SubUTCUnit(Day, 2).DateString(), "2024-05-13")
+	assertEqual(t, "RawSub(2, Day).DateString()", tempo.RawSub(2, Day).DateString(), "2024-05-13")
 
 	friday, err := Parse("2024-05-17T12:00:00Z")
 	if err != nil {
@@ -1786,4 +1819,16 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("CreateFromTimestampMsUTC(): %v", err)
 	}
 	assertEqual(t, "CreateFromTimestampMsUTC(1).ISOString()", createdFromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
+
+	assertEqual(t, "From()", tempo.AddDays(2).From(tempo), "in 2 days")
+	assertEqual(t, "Since()", tempo.AddDays(2).Since(tempo), "in 2 days")
+	assertEqual(t, "To()", tempo.To(tempo.AddDays(2)), "in 2 days")
+	assertEqual(t, "Timespan()", tempo.AddDays(2).Timespan(tempo), "in 2 days")
+	if !tempo.IsImmutable() || tempo.IsMutable() {
+		t.Fatalf("Tempo mutability predicates = immutable:%t mutable:%t, want true/false", tempo.IsImmutable(), tempo.IsMutable())
+	}
+	mutable := NewMutable(tempo)
+	if mutable.IsImmutable() || !mutable.IsMutable() {
+		t.Fatalf("MutableTempo mutability predicates = immutable:%t mutable:%t, want false/true", mutable.IsImmutable(), mutable.IsMutable())
+	}
 }
