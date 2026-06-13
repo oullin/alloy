@@ -1,13 +1,21 @@
 import { fileURLToPath, URL } from "node:url";
-import { workspaceAliases } from "@tempo/artefacts";
 import { defineConfig } from "vitest/config";
+
+const repoPath = (path: string): string =>
+  fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
   cacheDir: fileURLToPath(
     new URL("./packages/artefacts/.cache/vitest", import.meta.url),
   ),
   resolve: {
-    alias: workspaceAliases(),
+    alias: {
+      "@tempo/artefacts": repoPath("./packages/artefacts/src"),
+      "@tempo/spec/fixtures": repoPath("./packages/tempo/spec/fixtures"),
+      "@tempo/spec": repoPath("./packages/tempo/spec/src"),
+      "@tempo/tempo": repoPath("./packages/tempo/ts/src"),
+      "@tempo/tests": repoPath("./packages/tests/src"),
+    },
   },
   test: {
     passWithNoTests: true,
