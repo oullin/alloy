@@ -149,6 +149,33 @@ func Now(options ...Option) (Tempo, error) {
 	return Tempo{value: time.Now().UTC(), location: cfg.location}, nil
 }
 
+func Today(options ...Option) (Tempo, error) {
+	now, err := Now(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return now.StartOfDay(), nil
+}
+
+func Tomorrow(options ...Option) (Tempo, error) {
+	today, err := Today(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return today.AddDays(1), nil
+}
+
+func Yesterday(options ...Option) (Tempo, error) {
+	today, err := Today(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return today.SubDays(1), nil
+}
+
 func FromTime(value time.Time, options ...Option) (Tempo, error) {
 	cfg, err := applyOptions(options...)
 	if err != nil {
@@ -264,6 +291,18 @@ func (factory Factory) Now() Tempo {
 	}
 
 	return Tempo{value: time.Now().UTC(), location: factory.location}
+}
+
+func (factory Factory) Today() Tempo {
+	return factory.Now().StartOfDay()
+}
+
+func (factory Factory) Tomorrow() Tempo {
+	return factory.Today().AddDays(1)
+}
+
+func (factory Factory) Yesterday() Tempo {
+	return factory.Today().SubDays(1)
 }
 
 func (factory Factory) ImmutableNow() Tempo {

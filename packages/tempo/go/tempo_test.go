@@ -148,11 +148,41 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	if got := frozen.Now().ISOString(); got != "2024-01-01T00:00:00.000Z" {
 		t.Fatalf("Factory.Now().ISOString() = %q, want frozen instant", got)
 	}
+	if got := frozen.Today().DateTimeString(); got != "2024-01-01 00:00:00" {
+		t.Fatalf("Factory.Today().DateTimeString() = %q, want frozen local start of day", got)
+	}
+	if got := frozen.Tomorrow().DateTimeString(); got != "2024-01-02 00:00:00" {
+		t.Fatalf("Factory.Tomorrow().DateTimeString() = %q, want next frozen local day", got)
+	}
+	if got := frozen.Yesterday().DateTimeString(); got != "2023-12-31 00:00:00" {
+		t.Fatalf("Factory.Yesterday().DateTimeString() = %q, want previous frozen local day", got)
+	}
 	if got := frozen.ImmutableNow().ISOString(); got != "2024-01-01T00:00:00.000Z" {
 		t.Fatalf("Factory.ImmutableNow().ISOString() = %q, want frozen instant", got)
 	}
 	if got := frozen.MutableNow().AddHours(1).ISOString(); got != "2024-01-01T01:00:00.000Z" {
 		t.Fatalf("Factory.MutableNow().AddHours().ISOString() = %q, want mutable frozen instant", got)
+	}
+	today, err := Today(WithTimezone("UTC"))
+	if err != nil {
+		t.Fatalf("today: %v", err)
+	}
+	tomorrow, err := Tomorrow(WithTimezone("UTC"))
+	if err != nil {
+		t.Fatalf("tomorrow: %v", err)
+	}
+	yesterday, err := Yesterday(WithTimezone("UTC"))
+	if err != nil {
+		t.Fatalf("yesterday: %v", err)
+	}
+	if today.Hour() != 0 || today.Minute() != 0 || today.Second() != 0 || today.Millisecond() != 0 {
+		t.Fatalf("Today() = %s, want start of day", today.DateTimeString())
+	}
+	if got := tomorrow.DiffInDays(today); got != 1 {
+		t.Fatalf("Tomorrow().DiffInDays(Today()) = %d, want 1", got)
+	}
+	if got := yesterday.DiffInDays(today); got != -1 {
+		t.Fatalf("Yesterday().DiffInDays(Today()) = %d, want -1", got)
 	}
 }
 

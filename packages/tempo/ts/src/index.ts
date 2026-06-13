@@ -1031,6 +1031,18 @@ export class TempoImmutable {
     return new TempoImmutable(new Date(), options);
   }
 
+  static today(options?: TempoOptions): TempoImmutable {
+    return TempoImmutable.now(options).startOfDay();
+  }
+
+  static tomorrow(options?: TempoOptions): TempoImmutable {
+    return TempoImmutable.today(options).addDays(1);
+  }
+
+  static yesterday(options?: TempoOptions): TempoImmutable {
+    return TempoImmutable.today(options).subDays(1);
+  }
+
   static parse(input: TempoInput, options?: TempoOptions): TempoImmutable {
     return new TempoImmutable(input, options);
   }
@@ -2422,6 +2434,18 @@ export class Tempo extends TempoImmutable {
     return new Tempo(new Date(), options);
   }
 
+  static override today(options?: TempoOptions): Tempo {
+    return Tempo.now(options).startOfDay();
+  }
+
+  static override tomorrow(options?: TempoOptions): Tempo {
+    return Tempo.today(options).addDays(1);
+  }
+
+  static override yesterday(options?: TempoOptions): Tempo {
+    return Tempo.today(options).subDays(1);
+  }
+
   static override parse(input: TempoInput, options?: TempoOptions): Tempo {
     return new Tempo(input, options);
   }
@@ -2486,6 +2510,18 @@ export class Tempo extends TempoImmutable {
 export class TempoMutable extends TempoImmutable {
   static override now(options?: TempoOptions): TempoMutable {
     return new TempoMutable(new Date(), options);
+  }
+
+  static override today(options?: TempoOptions): TempoMutable {
+    return TempoMutable.now(options).startOfDay();
+  }
+
+  static override tomorrow(options?: TempoOptions): TempoMutable {
+    return TempoMutable.today(options).addDays(1);
+  }
+
+  static override yesterday(options?: TempoOptions): TempoMutable {
+    return TempoMutable.today(options).subDays(1);
   }
 
   static override parse(
@@ -2747,6 +2783,18 @@ export class TempoFactory {
     return Tempo.parse(this.nowValue ?? new Date(), { timeZone: this.zone });
   }
 
+  today(): Tempo {
+    return this.now().startOfDay();
+  }
+
+  tomorrow(): Tempo {
+    return this.today().addDays(1);
+  }
+
+  yesterday(): Tempo {
+    return this.today().subDays(1);
+  }
+
   immutableNow(): TempoImmutable {
     return TempoImmutable.parse(this.nowValue ?? new Date(), {
       timeZone: this.zone,
@@ -2813,6 +2861,9 @@ export class TempoFactory {
 }
 
 export const now = Tempo.now;
+export const today = Tempo.today;
+export const tomorrow = Tempo.tomorrow;
+export const yesterday = Tempo.yesterday;
 export const parse = Tempo.parse;
 export const tryParse = Tempo.tryParse;
 export const canParse = Tempo.canParse;

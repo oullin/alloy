@@ -11,8 +11,11 @@ import {
   hasFormat,
   max,
   min,
+  today,
+  tomorrow,
   tryFromFormat,
   tryParse,
+  yesterday,
 } from "@tempo/tempo";
 import { describe, expect, it } from "vitest";
 
@@ -82,8 +85,21 @@ describe("Tempo TypeScript behavior", () => {
     const fixed = TempoFactory.withTestNow("2025-01-01T00:00:00+00:00");
 
     expect(fixed.now().toISOString()).toBe("2025-01-01T00:00:00.000Z");
+    expect(fixed.today().toISOString()).toBe("2025-01-01T00:00:00.000Z");
+    expect(fixed.tomorrow().toISOString()).toBe("2025-01-02T00:00:00.000Z");
+    expect(fixed.yesterday().toISOString()).toBe("2024-12-31T00:00:00.000Z");
     expect(fixed.immutableNow().toISOString()).toBe("2025-01-01T00:00:00.000Z");
     expect(fixed.mutableNow().toISOString()).toBe("2025-01-01T00:00:00.000Z");
+    expect(Tempo.today({ timeZone: "UTC" }).hour).toBe(0);
+    expect(Tempo.tomorrow({ timeZone: "UTC" }).diffInDays(Tempo.today())).toBe(
+      1,
+    );
+    expect(Tempo.yesterday({ timeZone: "UTC" }).diffInDays(Tempo.today())).toBe(
+      -1,
+    );
+    expect(today({ timeZone: "UTC" }).hour).toBe(0);
+    expect(tomorrow({ timeZone: "UTC" }).diffInDays(today())).toBe(1);
+    expect(yesterday({ timeZone: "UTC" }).diffInDays(today())).toBe(-1);
 
     const tokyo = TempoFactory.create({ timeZone: "Asia/Tokyo" });
 
