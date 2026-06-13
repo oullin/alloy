@@ -968,6 +968,10 @@ func (tempo Tempo) IsSaturday() bool {
 	return tempo.local().Weekday() == time.Saturday
 }
 
+func (tempo Tempo) IsDayOfWeek(weekday time.Weekday) bool {
+	return tempo.local().Weekday() == weekday
+}
+
 func (tempo Tempo) IsWeekday() bool {
 	return !tempo.IsWeekend()
 }
@@ -2562,6 +2566,10 @@ func (mutable *MutableTempo) IsFriday() bool {
 
 func (mutable *MutableTempo) IsSaturday() bool {
 	return mutable.Tempo().IsSaturday()
+}
+
+func (mutable *MutableTempo) IsDayOfWeek(weekday time.Weekday) bool {
+	return mutable.Tempo().IsDayOfWeek(weekday)
 }
 
 func (mutable *MutableTempo) IsWeekday() bool {

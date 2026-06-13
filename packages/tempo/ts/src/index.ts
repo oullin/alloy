@@ -1502,6 +1502,10 @@ export class TempoImmutable {
     return this.dayOfWeek === 6;
   }
 
+  isDayOfWeek(weekday: WeekdayInput): boolean {
+    return this.dayOfWeek === resolveWeekday(weekday);
+  }
+
   isWeekday(): boolean {
     return !this.isWeekend();
   }

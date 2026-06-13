@@ -842,6 +842,12 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 	if !base.IsWeekday() {
 		t.Fatalf("IsWeekday() = false, want true")
 	}
+	if !base.IsDayOfWeek(time.Thursday) {
+		t.Fatalf("IsDayOfWeek(Thursday) = false, want true")
+	}
+	if base.IsDayOfWeek(time.Friday) {
+		t.Fatalf("IsDayOfWeek(Friday) = true, want false")
+	}
 	if !base.IsTomorrow(referenceYesterday) {
 		t.Fatalf("IsTomorrow() = false, want true")
 	}

@@ -452,6 +452,8 @@ describe("Tempo TypeScript behavior", () => {
     expect(base.subDays(1).isLastOfMonth()).toBe(false);
     expect(saturday.isWeekend()).toBe(true);
     expect(base.isWeekday()).toBe(true);
+    expect(base.isDayOfWeek("thursday")).toBe(true);
+    expect(base.isDayOfWeek("friday")).toBe(false);
     expect(base.isToday("2024-02-29T12:00:00Z")).toBe(true);
     expect(base.isTomorrow("2024-02-28T12:00:00Z")).toBe(true);
     expect(base.isYesterday("2024-03-01T12:00:00Z")).toBe(true);
