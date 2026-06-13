@@ -797,6 +797,18 @@ func (tempo Tempo) IsLeapYear() bool {
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
 
+func (tempo Tempo) DaysInYear() int {
+	if tempo.IsLeapYear() {
+		return 366
+	}
+
+	return 365
+}
+
+func (tempo Tempo) IsLongYear() bool {
+	return tempo.WeeksInISOYear() == 53
+}
+
 func (tempo Tempo) DaysInMonth() int {
 	return daysInMonth(tempo.Year(), tempo.Month())
 }
@@ -2072,6 +2084,14 @@ func (mutable *MutableTempo) IsDST() bool {
 
 func (mutable *MutableTempo) IsLeapYear() bool {
 	return mutable.Tempo().IsLeapYear()
+}
+
+func (mutable *MutableTempo) DaysInYear() int {
+	return mutable.Tempo().DaysInYear()
+}
+
+func (mutable *MutableTempo) IsLongYear() bool {
+	return mutable.Tempo().IsLongYear()
 }
 
 func (mutable *MutableTempo) DaysInMonth() int {

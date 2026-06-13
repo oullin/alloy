@@ -372,6 +372,9 @@ describe("Tempo TypeScript behavior", () => {
     const saturday = Tempo.parse("2024-03-02T00:00:00Z");
 
     expect(base.isLeapYear()).toBe(true);
+    expect(base.daysInYear()).toBe(366);
+    expect(base.isLongYear()).toBe(false);
+    expect(Tempo.parse("2020-12-31T00:00:00Z").isLongYear()).toBe(true);
     expect(base.daysInMonth()).toBe(29);
     expect(saturday.isWeekend()).toBe(true);
     expect(base.isWeekday()).toBe(true);

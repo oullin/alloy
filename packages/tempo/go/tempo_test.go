@@ -717,6 +717,19 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 	if !base.IsLeapYear() {
 		t.Fatalf("IsLeapYear() = false, want true")
 	}
+	if got := base.DaysInYear(); got != 366 {
+		t.Fatalf("DaysInYear() = %d, want 366", got)
+	}
+	if base.IsLongYear() {
+		t.Fatalf("IsLongYear() = true, want false")
+	}
+	longYear, err := Parse("2020-12-31T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse long year: %v", err)
+	}
+	if !longYear.IsLongYear() {
+		t.Fatalf("IsLongYear() = false, want true")
+	}
 	if got := base.DaysInMonth(); got != 29 {
 		t.Fatalf("DaysInMonth() = %d, want 29", got)
 	}

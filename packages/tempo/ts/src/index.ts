@@ -1318,6 +1318,14 @@ export class TempoImmutable {
     return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
   }
 
+  daysInYear(): number {
+    return this.isLeapYear() ? 366 : 365;
+  }
+
+  isLongYear(): boolean {
+    return this.weeksInISOYear === 53;
+  }
+
   daysInMonth(): number {
     return daysInMonth(this.year, this.month);
   }
