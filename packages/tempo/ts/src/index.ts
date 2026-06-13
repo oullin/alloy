@@ -2468,9 +2468,59 @@ export class TempoPeriod implements Iterable<Tempo> {
       if (next.isSame(current)) {
         throw new RangeError("TempoPeriod step must advance the period");
       }
+      if (forward ? next.isBefore(current) : next.isAfter(current)) {
+        throw new RangeError("TempoPeriod step must advance toward the end");
+      }
 
       current = next;
     }
+  }
+
+  first(): Tempo | null {
+    const next = this[Symbol.iterator]().next();
+
+    return next.done === true ? null : next.value;
+  }
+
+  last(): Tempo | null {
+    let last: Tempo | null = null;
+
+    for (const value of this) {
+      last = value;
+    }
+
+    return last;
+  }
+
+  count(): number {
+    let total = 0;
+
+    for (const _value of this) {
+      total += 1;
+    }
+
+    return total;
+  }
+
+  isEmpty(): boolean {
+    return this.first() === null;
+  }
+
+  contains(input: TempoInput): boolean {
+    const value = Tempo.parse(input, { timeZone: this.start.timeZone });
+    const forward = this.end.isSameOrAfter(this.start);
+    const afterStart = forward
+      ? value.isSameOrAfter(this.start)
+      : value.isSameOrBefore(this.start);
+    const beforeEnd = forward
+      ? this.includeEnd
+        ? value.isSameOrBefore(this.end)
+        : value.isBefore(this.end)
+      : this.includeEnd
+        ? value.isSameOrAfter(this.end)
+        : value.isAfter(this.end);
+
+    return afterStart && beforeEnd;
   }
 
   toArray(): Tempo[] {

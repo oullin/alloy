@@ -289,6 +289,72 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 	if strings.Join(gotDates, ",") != strings.Join(wantDates, ",") {
 		t.Fatalf("Period.Values() = %#v, want %#v", gotDates, wantDates)
 	}
+	if got, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Count(); err != nil || got != 3 {
+		t.Fatalf("Period.Count() = %d, %v, want 3, nil", got, err)
+	}
+	first, ok, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).First()
+	if err != nil || !ok || first.DateString() != "2024-01-01" {
+		t.Fatalf("Period.First() = %q, %v, %v, want 2024-01-01, true, nil", first.DateString(), ok, err)
+	}
+	last, ok, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Last()
+	if err != nil || !ok || last.DateString() != "2024-01-05" {
+		t.Fatalf("Period.Last() = %q, %v, %v, want 2024-01-05, true, nil", last.DateString(), ok, err)
+	}
+	contains, err := Parse("2024-01-04")
+	if err != nil {
+		t.Fatalf("parse period contains input: %v", err)
+	}
+	if !start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Contains(contains) {
+		t.Fatalf("Period.Contains(inside) = false, want true")
+	}
+	outside, err := Parse("2024-01-06")
+	if err != nil {
+		t.Fatalf("parse period outside input: %v", err)
+	}
+	if start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Contains(outside) {
+		t.Fatalf("Period.Contains(outside) = true, want false")
+	}
+	if empty, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).IsEmpty(); err != nil || empty {
+		t.Fatalf("Period.IsEmpty() = %v, %v, want false, nil", empty, err)
+	}
+
+	openPeriod := start.PeriodUntil(periodEnd, PeriodOptions{
+		Step:       Duration{Days: 2},
+		ExcludeEnd: true,
+	})
+	openValues, err := openPeriod.Values()
+	if err != nil {
+		t.Fatalf("open period values: %v", err)
+	}
+	openDates := make([]string, 0, len(openValues))
+	for _, item := range openValues {
+		openDates = append(openDates, item.DateString())
+	}
+	wantOpenDates := []string{"2024-01-01", "2024-01-03"}
+	if strings.Join(openDates, ",") != strings.Join(wantOpenDates, ",") {
+		t.Fatalf("open Period.Values() = %#v, want %#v", openDates, wantOpenDates)
+	}
+	if openPeriod.Contains(periodEnd) {
+		t.Fatalf("open Period.Contains(end) = true, want false")
+	}
+
+	reverseValues, err := periodEnd.PeriodUntil(start, PeriodOptions{
+		Step: Duration{Days: -2},
+	}).Values()
+	if err != nil {
+		t.Fatalf("reverse period values: %v", err)
+	}
+	reverseDates := make([]string, 0, len(reverseValues))
+	for _, item := range reverseValues {
+		reverseDates = append(reverseDates, item.DateString())
+	}
+	wantReverseDates := []string{"2024-01-05", "2024-01-03", "2024-01-01"}
+	if strings.Join(reverseDates, ",") != strings.Join(wantReverseDates, ",") {
+		t.Fatalf("reverse Period.Values() = %#v, want %#v", reverseDates, wantReverseDates)
+	}
+	if _, err := periodEnd.PeriodUntil(start, PeriodOptions{Step: Duration{Days: 1}}).Values(); err == nil {
+		t.Fatalf("wrong-direction Period.Values() error = nil, want error")
+	}
 
 	mutable, err := ParseMutable("2024-01-01T00:00:00Z")
 	if err != nil {

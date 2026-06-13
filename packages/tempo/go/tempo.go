@@ -84,6 +84,7 @@ type StartOfWeekOptions struct {
 type PeriodOptions struct {
 	Step       Duration
 	IncludeEnd bool
+	ExcludeEnd bool
 }
 
 type Option func(*config) error
@@ -1611,7 +1612,11 @@ func (tempo Tempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
 		if options[0].Step != (Duration{}) {
 			step = options[0].Step
 		}
-		includeEnd = options[0].IncludeEnd
+		if options[0].ExcludeEnd {
+			includeEnd = false
+		} else if options[0].IncludeEnd {
+			includeEnd = true
+		}
 	}
 
 	return Period{Start: tempo, End: end, Step: step, IncludeEnd: includeEnd}
@@ -1803,10 +1808,77 @@ func (period Period) Values() ([]Tempo, error) {
 		if next.Same(current) {
 			return nil, errors.New("tempo period step must advance the period")
 		}
+		if (forward && next.Before(current)) || (!forward && next.After(current)) {
+			return nil, errors.New("tempo period step must advance toward the end")
+		}
 		current = next
 	}
 
 	return values, nil
+}
+
+func (period Period) First() (Tempo, bool, error) {
+	values, err := period.Values()
+	if err != nil {
+		return Tempo{}, false, err
+	}
+	if len(values) == 0 {
+		return Tempo{}, false, nil
+	}
+
+	return values[0], true, nil
+}
+
+func (period Period) Last() (Tempo, bool, error) {
+	values, err := period.Values()
+	if err != nil {
+		return Tempo{}, false, err
+	}
+	if len(values) == 0 {
+		return Tempo{}, false, nil
+	}
+
+	return values[len(values)-1], true, nil
+}
+
+func (period Period) Count() (int, error) {
+	values, err := period.Values()
+	if err != nil {
+		return 0, err
+	}
+
+	return len(values), nil
+}
+
+func (period Period) IsEmpty() (bool, error) {
+	count, err := period.Count()
+	if err != nil {
+		return false, err
+	}
+
+	return count == 0, nil
+}
+
+func (period Period) Contains(input Tempo) bool {
+	forward := period.End.SameOrAfter(period.Start)
+	afterStart := input.SameOrAfter(period.Start)
+	if !forward {
+		afterStart = input.SameOrBefore(period.Start)
+	}
+
+	beforeEnd := input.Before(period.End)
+	if forward {
+		if period.IncludeEnd {
+			beforeEnd = input.SameOrBefore(period.End)
+		}
+	} else {
+		beforeEnd = input.After(period.End)
+		if period.IncludeEnd {
+			beforeEnd = input.SameOrAfter(period.End)
+		}
+	}
+
+	return afterStart && beforeEnd
 }
 
 func applyOptions(options ...Option) (config, error) {

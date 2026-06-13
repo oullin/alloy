@@ -181,6 +181,36 @@ describe("Tempo TypeScript behavior", () => {
       "2024-01-03",
       "2024-01-05",
     ]);
+    expect(period.count()).toBe(3);
+    expect(period.first()?.toDateString()).toBe("2024-01-01");
+    expect(period.last()?.toDateString()).toBe("2024-01-05");
+    expect(period.contains("2024-01-04")).toBe(true);
+    expect(period.contains("2024-01-06")).toBe(false);
+    expect(period.isEmpty()).toBe(false);
+
+    const openPeriod = new TempoPeriod("2024-01-01", "2024-01-05", {
+      includeEnd: false,
+      step: { days: 2 },
+    });
+    expect(openPeriod.toArray().map((item) => item.toDateString())).toEqual([
+      "2024-01-01",
+      "2024-01-03",
+    ]);
+    expect(openPeriod.contains("2024-01-05")).toBe(false);
+
+    const reversePeriod = new TempoPeriod("2024-01-05", "2024-01-01", {
+      step: { days: -2 },
+    });
+    expect(reversePeriod.toArray().map((item) => item.toDateString())).toEqual([
+      "2024-01-05",
+      "2024-01-03",
+      "2024-01-01",
+    ]);
+    expect(() =>
+      new TempoPeriod("2024-01-05", "2024-01-01", {
+        step: { days: 1 },
+      }).toArray(),
+    ).toThrow("advance toward the end");
   });
 
   it("mutates mutable instances for the expanded API", () => {
