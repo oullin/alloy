@@ -602,6 +602,27 @@ func TestISOWeekMetadataWeekdayNavigationAndAge(t *testing.T) {
 	if got := friday.LastOfMonth(time.Friday).DateString(); got != "2024-05-31" {
 		t.Fatalf("LastOfMonth(Friday).DateString() = %q, want last Friday", got)
 	}
+	if got, ok := friday.NthOfMonth(3, time.Monday); !ok || got.DateString() != "2024-05-20" {
+		t.Fatalf("NthOfMonth(3, Monday) = %q, %v, want 2024-05-20, true", got.DateString(), ok)
+	}
+	if got, ok := friday.NthOfMonth(-1, time.Monday); !ok || got.DateString() != "2024-05-27" {
+		t.Fatalf("NthOfMonth(-1, Monday) = %q, %v, want 2024-05-27, true", got.DateString(), ok)
+	}
+	if _, ok := friday.NthOfMonth(5, time.Monday); ok {
+		t.Fatalf("NthOfMonth(5, Monday) ok = true, want false")
+	}
+	if got := friday.FirstOfQuarter(time.Monday).DateString(); got != "2024-04-01" {
+		t.Fatalf("FirstOfQuarter(Monday).DateString() = %q, want first quarter Monday", got)
+	}
+	if got := friday.LastOfQuarter(time.Friday).DateString(); got != "2024-06-28" {
+		t.Fatalf("LastOfQuarter(Friday).DateString() = %q, want last quarter Friday", got)
+	}
+	if got := friday.FirstOfYear(time.Monday).DateString(); got != "2024-01-01" {
+		t.Fatalf("FirstOfYear(Monday).DateString() = %q, want first year Monday", got)
+	}
+	if got := friday.LastOfYear(time.Tuesday).DateString(); got != "2024-12-31" {
+		t.Fatalf("LastOfYear(Tuesday).DateString() = %q, want last year Tuesday", got)
+	}
 
 	birthday, err := Parse("2000-06-15T00:00:00Z")
 	if err != nil {

@@ -1781,6 +1781,74 @@ export class TempoImmutable {
     return last.subDays(delta);
   }
 
+  nthOfMonth(occurrence: number, weekday: WeekdayInput): this | null {
+    if (!Number.isInteger(occurrence) || occurrence === 0) {
+      throw new RangeError(
+        "Tempo nthOfMonth occurrence must be a non-zero integer",
+      );
+    }
+
+    const currentMonth = this.month;
+    const candidate =
+      occurrence > 0
+        ? this.firstOfMonth(weekday).addWeeks(occurrence - 1)
+        : this.lastOfMonth(weekday).subWeeks(Math.abs(occurrence) - 1);
+
+    return candidate.month === currentMonth ? candidate : null;
+  }
+
+  firstOfQuarter(weekday?: WeekdayInput): this {
+    const first = this.startOf("quarter");
+
+    if (weekday === undefined) {
+      return first;
+    }
+
+    const target = resolveWeekday(weekday);
+    const delta = (target - first.dayOfWeek + 7) % 7;
+
+    return first.addDays(delta);
+  }
+
+  lastOfQuarter(weekday?: WeekdayInput): this {
+    const last = this.endOf("quarter").startOf("day");
+
+    if (weekday === undefined) {
+      return last;
+    }
+
+    const target = resolveWeekday(weekday);
+    const delta = (last.dayOfWeek - target + 7) % 7;
+
+    return last.subDays(delta);
+  }
+
+  firstOfYear(weekday?: WeekdayInput): this {
+    const first = this.startOf("year");
+
+    if (weekday === undefined) {
+      return first;
+    }
+
+    const target = resolveWeekday(weekday);
+    const delta = (target - first.dayOfWeek + 7) % 7;
+
+    return first.addDays(delta);
+  }
+
+  lastOfYear(weekday?: WeekdayInput): this {
+    const last = this.endOf("year").startOf("day");
+
+    if (weekday === undefined) {
+      return last;
+    }
+
+    const target = resolveWeekday(weekday);
+    const delta = (last.dayOfWeek - target + 7) % 7;
+
+    return last.subDays(delta);
+  }
+
   startOfYear(): this {
     return this.startOf("year");
   }
