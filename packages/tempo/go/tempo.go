@@ -288,6 +288,15 @@ func CreateFromTime(hour int, minute int, second int, millisecond int, options .
 	return today.SetTime(hour, minute, second, millisecond), nil
 }
 
+func CreateFromTimeString(input string, options ...Option) (Tempo, error) {
+	today, err := Today(options...)
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return today.SetTimeFromTimeString(input)
+}
+
 func FromObject(components Components) (Tempo, error) {
 	return Create(components)
 }
@@ -308,6 +317,14 @@ func FromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
 	}
 
 	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: cfg.location}, nil
+}
+
+func FromTimestampUTC(timestamp int64) (Tempo, error) {
+	return FromTimestamp(timestamp, WithTimezone(defaultLocation.String()))
+}
+
+func FromTimestampMsUTC(timestamp int64) (Tempo, error) {
+	return FromTimestampMs(timestamp, WithTimezone(defaultLocation.String()))
 }
 
 func NewFactory(options ...Option) (Factory, error) {
@@ -445,6 +462,10 @@ func (factory Factory) CreateMidnightDate(year int, month int, day int) Tempo {
 
 func (factory Factory) CreateFromTime(hour int, minute int, second int, millisecond int) Tempo {
 	return factory.Today().SetTime(hour, minute, second, millisecond)
+}
+
+func (factory Factory) CreateFromTimeString(input string) (Tempo, error) {
+	return factory.Today().SetTimeFromTimeString(input)
 }
 
 func (factory Factory) FromObject(components Components) (Tempo, error) {
@@ -1056,6 +1077,10 @@ func (tempo Tempo) SetTimezoneKeepLocal(name string) (Tempo, error) {
 	return Tempo{value: next.UTC(), location: location}, nil
 }
 
+func (tempo Tempo) ShiftTimezone(name string) (Tempo, error) {
+	return tempo.SetTimezoneKeepLocal(name)
+}
+
 func (tempo Tempo) UTC() Tempo {
 	return Tempo{value: tempo.value, location: time.UTC}
 }
@@ -1145,6 +1170,35 @@ func (tempo Tempo) SetDate(year int, month int, day int) Tempo {
 	return tempo.fromObject(object, tempo.location)
 }
 
+func (tempo Tempo) SetDateFrom(source Tempo) Tempo {
+	return tempo.SetDate(source.Year(), source.Month(), source.Day())
+}
+
+func (tempo Tempo) SetDateTime(year int, month int, day int, hour int, minute int, second int, millisecond int) Tempo {
+	object := tempo.ToObject()
+	object.Year = year
+	object.Month = month
+	object.Day = day
+	object.Hour = hour
+	object.Minute = minute
+	object.Second = second
+	object.Millisecond = millisecond
+
+	return tempo.fromObject(object, tempo.location)
+}
+
+func (tempo Tempo) SetDateTimeFrom(source Tempo) Tempo {
+	return tempo.SetDateTime(
+		source.Year(),
+		source.Month(),
+		source.Day(),
+		source.Hour(),
+		source.Minute(),
+		source.Second(),
+		source.Millisecond(),
+	)
+}
+
 func (tempo Tempo) SetHour(hour int) Tempo {
 	object := tempo.ToObject()
 	object.Hour = hour
@@ -1183,6 +1237,23 @@ func (tempo Tempo) SetTime(hour int, minute int, second int, millisecond int) Te
 	return tempo.fromObject(object, tempo.location)
 }
 
+func (tempo Tempo) SetTimeFrom(source Tempo) Tempo {
+	return tempo.SetTime(source.Hour(), source.Minute(), source.Second(), source.Millisecond())
+}
+
+func (tempo Tempo) SetTimeFromTimeString(input string) (Tempo, error) {
+	parsed, err := Parse(tempo.DateString()+"T"+input, WithTimezone(tempo.Timezone()))
+	if err != nil {
+		return Tempo{}, err
+	}
+
+	return tempo.SetTimeFrom(parsed), nil
+}
+
+func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
+	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: tempo.location}
+}
+
 func (tempo Tempo) Midday() Tempo {
 	return tempo.SetTime(12, 0, 0, 0)
 }
@@ -1214,6 +1285,18 @@ func (tempo Tempo) Add(value int, unit Unit) Tempo {
 
 func (tempo Tempo) Sub(value int, unit Unit) Tempo {
 	return tempo.Add(-value, unit)
+}
+
+func (tempo Tempo) AddUnit(unit Unit, value int) Tempo {
+	return tempo.Add(value, unit)
+}
+
+func (tempo Tempo) SubUnit(unit Unit, value int) Tempo {
+	return tempo.Sub(value, unit)
+}
+
+func (tempo Tempo) Subtract(value int, unit Unit) Tempo {
+	return tempo.Sub(value, unit)
 }
 
 func (tempo Tempo) AddDuration(duration Duration) Tempo {
@@ -1858,6 +1941,24 @@ func (tempo Tempo) PreviousWeekday() Tempo {
 	return previous
 }
 
+func (tempo Tempo) NextWeekendDay() Tempo {
+	next := tempo.AddDays(1)
+	for next.IsWeekday() {
+		next = next.AddDays(1)
+	}
+
+	return next
+}
+
+func (tempo Tempo) PreviousWeekendDay() Tempo {
+	previous := tempo.SubDays(1)
+	for previous.IsWeekday() {
+		previous = previous.SubDays(1)
+	}
+
+	return previous
+}
+
 func (tempo Tempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
 	opts := DiffOptions{}
 	if len(options) > 0 {
@@ -2245,6 +2346,10 @@ func (tempo Tempo) ISOString() string {
 
 func (tempo Tempo) ISO8601String() string {
 	return tempo.Format("YYYY-MM-DDTHH:mm:ssZ")
+}
+
+func (tempo Tempo) ISO8601ZuluString(precision ...TimeStringPrecision) string {
+	return tempo.UTC().DateTimeLocalString(precision...) + "Z"
 }
 
 func (tempo Tempo) RFC3339String(precision ...TimeStringPrecision) string {
@@ -2684,6 +2789,18 @@ func (mutable *MutableTempo) DateTimeString() string {
 	return mutable.Tempo().DateTimeString()
 }
 
+func (mutable *MutableTempo) FormattedDateString() string {
+	return mutable.Tempo().FormattedDateString()
+}
+
+func (mutable *MutableTempo) FormattedDayDateString() string {
+	return mutable.Tempo().FormattedDayDateString()
+}
+
+func (mutable *MutableTempo) DayDateTimeString() string {
+	return mutable.Tempo().DayDateTimeString()
+}
+
 func (mutable *MutableTempo) DateTimeLocalString(precision ...TimeStringPrecision) string {
 	return mutable.Tempo().DateTimeLocalString(precision...)
 }
@@ -2696,12 +2813,40 @@ func (mutable *MutableTempo) ISO8601String() string {
 	return mutable.Tempo().ISO8601String()
 }
 
+func (mutable *MutableTempo) ISO8601ZuluString(precision ...TimeStringPrecision) string {
+	return mutable.Tempo().ISO8601ZuluString(precision...)
+}
+
 func (mutable *MutableTempo) RFC3339String(precision ...TimeStringPrecision) string {
 	return mutable.Tempo().RFC3339String(precision...)
 }
 
 func (mutable *MutableTempo) RFC7231String() string {
 	return mutable.Tempo().RFC7231String()
+}
+
+func (mutable *MutableTempo) RFC822String() string {
+	return mutable.Tempo().RFC822String()
+}
+
+func (mutable *MutableTempo) RFC850String() string {
+	return mutable.Tempo().RFC850String()
+}
+
+func (mutable *MutableTempo) RFC1036String() string {
+	return mutable.Tempo().RFC1036String()
+}
+
+func (mutable *MutableTempo) RFC1123String() string {
+	return mutable.Tempo().RFC1123String()
+}
+
+func (mutable *MutableTempo) RFC2822String() string {
+	return mutable.Tempo().RFC2822String()
+}
+
+func (mutable *MutableTempo) W3CString() string {
+	return mutable.Tempo().W3CString()
 }
 
 func (mutable *MutableTempo) CookieString() string {
@@ -2773,6 +2918,15 @@ func (mutable *MutableTempo) SetTimezoneKeepLocal(name string) (*MutableTempo, e
 	return mutable.replace(next), nil
 }
 
+func (mutable *MutableTempo) ShiftTimezone(name string) (*MutableTempo, error) {
+	next, err := mutable.Tempo().ShiftTimezone(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
 func (mutable *MutableTempo) UTC() *MutableTempo {
 	return mutable.replace(mutable.Tempo().UTC())
 }
@@ -2806,6 +2960,18 @@ func (mutable *MutableTempo) SetDate(year int, month int, day int) *MutableTempo
 	return mutable.replace(mutable.Tempo().SetDate(year, month, day))
 }
 
+func (mutable *MutableTempo) SetDateFrom(source Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDateFrom(source))
+}
+
+func (mutable *MutableTempo) SetDateTime(year int, month int, day int, hour int, minute int, second int, millisecond int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDateTime(year, month, day, hour, minute, second, millisecond))
+}
+
+func (mutable *MutableTempo) SetDateTimeFrom(source Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetDateTimeFrom(source))
+}
+
 func (mutable *MutableTempo) SetHour(hour int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SetHour(hour))
 }
@@ -2826,6 +2992,23 @@ func (mutable *MutableTempo) SetTime(hour int, minute int, second int, milliseco
 	return mutable.replace(mutable.Tempo().SetTime(hour, minute, second, millisecond))
 }
 
+func (mutable *MutableTempo) SetTimeFrom(source Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetTimeFrom(source))
+}
+
+func (mutable *MutableTempo) SetTimeFromTimeString(input string) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetTimeFromTimeString(input)
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
+}
+
+func (mutable *MutableTempo) SetTimestamp(timestamp int64) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetTimestamp(timestamp))
+}
+
 func (mutable *MutableTempo) Midday() *MutableTempo {
 	return mutable.replace(mutable.Tempo().Midday())
 }
@@ -2836,6 +3019,18 @@ func (mutable *MutableTempo) Add(value int, unit Unit) *MutableTempo {
 
 func (mutable *MutableTempo) Sub(value int, unit Unit) *MutableTempo {
 	return mutable.replace(mutable.Tempo().Sub(value, unit))
+}
+
+func (mutable *MutableTempo) AddUnit(unit Unit, value int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().AddUnit(unit, value))
+}
+
+func (mutable *MutableTempo) SubUnit(unit Unit, value int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SubUnit(unit, value))
+}
+
+func (mutable *MutableTempo) Subtract(value int, unit Unit) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Subtract(value, unit))
 }
 
 func (mutable *MutableTempo) AddDuration(duration Duration) *MutableTempo {
@@ -3120,6 +3315,14 @@ func (mutable *MutableTempo) NextWeekday() *MutableTempo {
 
 func (mutable *MutableTempo) PreviousWeekday() *MutableTempo {
 	return mutable.replace(mutable.Tempo().PreviousWeekday())
+}
+
+func (mutable *MutableTempo) NextWeekendDay() *MutableTempo {
+	return mutable.replace(mutable.Tempo().NextWeekendDay())
+}
+
+func (mutable *MutableTempo) PreviousWeekendDay() *MutableTempo {
+	return mutable.replace(mutable.Tempo().PreviousWeekendDay())
 }
 
 func (mutable *MutableTempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {

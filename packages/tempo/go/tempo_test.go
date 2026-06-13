@@ -1541,6 +1541,8 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	assertEqual(t, "DayDateTimeString()", tempo.DayDateTimeString(), "Wed, May 15, 2024 9:34 PM")
 	assertEqual(t, "TimeString(ms)", tempo.TimeString(MillisecondPrecision), "21:34:56.789")
 	assertEqual(t, "ISO8601String()", tempo.ISO8601String(), "2024-05-15T21:34:56+09:00")
+	assertEqual(t, "ISO8601ZuluString()", tempo.ISO8601ZuluString(), "2024-05-15T12:34:56Z")
+	assertEqual(t, "ISO8601ZuluString(ms)", tempo.ISO8601ZuluString(MillisecondPrecision), "2024-05-15T12:34:56.789Z")
 	assertEqual(t, "RFC3339String(ms)", tempo.RFC3339String(MillisecondPrecision), "2024-05-15T21:34:56.789+09:00")
 	assertEqual(t, "RFC822String()", tempo.RFC822String(), "Wed, 15 May 24 21:34:56 +0900")
 	assertEqual(t, "RFC850String()", tempo.RFC850String(), "Wednesday, 15-May-24 21:34:56 +0900")
@@ -1620,4 +1622,62 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("SetMillisecond(0).Millisecond() = %d, want 0", got)
 	}
 	assertEqual(t, "SetDate().DateString()", tempo.SetDate(2025, 1, 2).DateString(), "2025-01-02")
+	assertEqual(t, "SetDateTime().ISOString()", tempo.SetDateTime(2025, 1, 2, 3, 4, 5, 6).ISOString(), "2025-01-02T03:04:05.006Z")
+
+	source, err := Parse("2025-01-02T03:04:05.006Z")
+	if err != nil {
+		t.Fatalf("parse setter source: %v", err)
+	}
+	assertEqual(t, "SetDateFrom().DateTimeString()", tempo.SetDateFrom(source).DateTimeString(), "2025-01-02 12:34:56")
+	assertEqual(t, "SetTimeFrom().DateTimeString()", tempo.SetTimeFrom(source).DateTimeString(), "2024-05-15 03:04:05")
+	assertEqual(t, "SetDateTimeFrom().ISOString()", tempo.SetDateTimeFrom(source).ISOString(), "2025-01-02T03:04:05.006Z")
+
+	fromTimeString, err := tempo.SetTimeFromTimeString("03:04:05.006")
+	if err != nil {
+		t.Fatalf("SetTimeFromTimeString(): %v", err)
+	}
+	assertEqual(t, "SetTimeFromTimeString().ISOString()", fromTimeString.ISOString(), "2024-05-15T03:04:05.006Z")
+	assertEqual(t, "SetTimestamp(0).ISOString()", tempo.SetTimestamp(0).ISOString(), "1970-01-01T00:00:00.000Z")
+	assertEqual(t, "Subtract(2, Day).DateString()", tempo.Subtract(2, Day).DateString(), "2024-05-13")
+	assertEqual(t, "AddUnit(Day, 2).DateString()", tempo.AddUnit(Day, 2).DateString(), "2024-05-17")
+	assertEqual(t, "SubUnit(Day, 2).DateString()", tempo.SubUnit(Day, 2).DateString(), "2024-05-13")
+
+	friday, err := Parse("2024-05-17T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse friday: %v", err)
+	}
+	monday, err := Parse("2024-05-20T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse monday: %v", err)
+	}
+	if got := friday.NextWeekendDay().DayOfWeek(); got != 6 {
+		t.Fatalf("NextWeekendDay().DayOfWeek() = %d, want 6", got)
+	}
+	if got := monday.PreviousWeekendDay().DayOfWeek(); got != 0 {
+		t.Fatalf("PreviousWeekendDay().DayOfWeek() = %d, want 0", got)
+	}
+
+	shifted, err := tempo.ShiftTimezone("Asia/Tokyo")
+	if err != nil {
+		t.Fatalf("ShiftTimezone(): %v", err)
+	}
+	assertEqual(t, "ShiftTimezone().DateTimeString()", shifted.DateTimeString(), "2024-05-15 12:34:56")
+
+	createdFromTimeString, err := CreateFromTimeString("03:04:05.006")
+	if err != nil {
+		t.Fatalf("CreateFromTimeString(): %v", err)
+	}
+	assertEqual(t, "CreateFromTimeString().TimeString(ms)", createdFromTimeString.TimeString(MillisecondPrecision), "03:04:05.006")
+
+	fromTimestampUTC, err := FromTimestampUTC(0)
+	if err != nil {
+		t.Fatalf("FromTimestampUTC(): %v", err)
+	}
+	assertEqual(t, "FromTimestampUTC(0).ISOString()", fromTimestampUTC.ISOString(), "1970-01-01T00:00:00.000Z")
+
+	fromTimestampMsUTC, err := FromTimestampMsUTC(1)
+	if err != nil {
+		t.Fatalf("FromTimestampMsUTC(): %v", err)
+	}
+	assertEqual(t, "FromTimestampMsUTC(1).ISOString()", fromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
 }

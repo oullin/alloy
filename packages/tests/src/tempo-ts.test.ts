@@ -791,6 +791,10 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.toDayDateTimeString()).toBe("Wed, May 15, 2024 9:34 PM");
     expect(tempo.toTimeString("millisecond")).toBe("21:34:56.789");
     expect(tempo.toIso8601String()).toBe("2024-05-15T21:34:56+09:00");
+    expect(tempo.toIso8601ZuluString()).toBe("2024-05-15T12:34:56Z");
+    expect(tempo.toIso8601ZuluString("millisecond")).toBe(
+      "2024-05-15T12:34:56.789Z",
+    );
     expect(tempo.toRfc3339String("millisecond")).toBe(
       "2024-05-15T21:34:56.789+09:00",
     );
@@ -839,5 +843,46 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.setSecond(0).second).toBe(0);
     expect(tempo.setMillisecond(0).millisecond).toBe(0);
     expect(tempo.setDate(2025, 1, 2).toDateString()).toBe("2025-01-02");
+    expect(tempo.setDateTime(2025, 1, 2, 3, 4, 5, 6).toISOString()).toBe(
+      "2025-01-02T03:04:05.006Z",
+    );
+    expect(
+      tempo.setDateFrom("2025-01-02T03:04:05.006Z").toDateTimeString(),
+    ).toBe("2025-01-02 12:34:56");
+    expect(
+      tempo.setTimeFrom("2025-01-02T03:04:05.006Z").toDateTimeString(),
+    ).toBe("2024-05-15 03:04:05");
+    expect(
+      tempo.setDateTimeFrom("2025-01-02T03:04:05.006Z").toISOString(),
+    ).toBe("2025-01-02T03:04:05.006Z");
+    expect(tempo.setTimeFromTimeString("03:04:05.006").toISOString()).toBe(
+      "2024-05-15T03:04:05.006Z",
+    );
+    expect(tempo.setTimestamp(0).toISOString()).toBe(
+      "1970-01-01T00:00:00.000Z",
+    );
+    expect(tempo.timestampTo(0).toISOString()).toBe("1970-01-01T00:00:00.000Z");
+    expect(tempo.subtract(2, "days").toDateString()).toBe("2024-05-13");
+    expect(tempo.addUnit("day", 2).toDateString()).toBe("2024-05-17");
+    expect(tempo.subUnit("day", 2).toDateString()).toBe("2024-05-13");
+    expect(Tempo.parse("2024-05-17T12:00:00Z").nextWeekendDay().dayOfWeek).toBe(
+      6,
+    );
+    expect(
+      Tempo.parse("2024-05-20T12:00:00Z").previousWeekendDay().dayOfWeek,
+    ).toBe(0);
+    expect(tempo.tz("Asia/Tokyo").timeZone).toBe("Asia/Tokyo");
+    expect(tempo.shiftTimezone("Asia/Tokyo").toDateTimeString()).toBe(
+      "2024-05-15 12:34:56",
+    );
+    expect(
+      Tempo.createFromTimeString("03:04:05.006").toTimeString("millisecond"),
+    ).toBe("03:04:05.006");
+    expect(Tempo.fromTimestampUTC(0).toISOString()).toBe(
+      "1970-01-01T00:00:00.000Z",
+    );
+    expect(Tempo.fromTimestampMsUTC(1).toISOString()).toBe(
+      "1970-01-01T00:00:00.001Z",
+    );
   });
 });

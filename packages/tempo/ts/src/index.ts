@@ -1257,6 +1257,13 @@ export class TempoImmutable {
     );
   }
 
+  static createFromTimeString(
+    time: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.today(options).setTimeFromTimeString(time);
+  }
+
   static fromObject(components: TempoComponents): TempoImmutable {
     return TempoImmutable.create(components);
   }
@@ -1274,6 +1281,18 @@ export class TempoImmutable {
   ): TempoImmutable {
     assertFiniteNumber(timestamp, "Timestamp");
     return new TempoImmutable(new Date(timestamp), options);
+  }
+
+  static fromTimestampUTC(timestamp: number): TempoImmutable {
+    return TempoImmutable.fromTimestamp(timestamp, {
+      timeZone: defaultTimeZone,
+    });
+  }
+
+  static fromTimestampMsUTC(timestamp: number): TempoImmutable {
+    return TempoImmutable.fromTimestampMs(timestamp, {
+      timeZone: defaultTimeZone,
+    });
   }
 
   static min(...items: readonly TempoInput[]): TempoImmutable {
@@ -1590,6 +1609,10 @@ export class TempoImmutable {
     return this.setTimezone(timeZone);
   }
 
+  tz(timeZone: string): this {
+    return this.timezone(timeZone);
+  }
+
   setTimezone(timeZone: string, keepLocalTime = false): this {
     const nextZone = normalizeTimeZone(timeZone);
 
@@ -1601,6 +1624,10 @@ export class TempoImmutable {
       dateFromZonedComponents({ ...this.toObject(), timeZone: nextZone }),
       nextZone,
     );
+  }
+
+  shiftTimezone(timeZone: string): this {
+    return this.setTimezone(timeZone, true);
   }
 
   utc(): this {
@@ -1671,6 +1698,38 @@ export class TempoImmutable {
     return this.set({ day, month, year });
   }
 
+  setDateFrom(source: TempoInput): this {
+    const date = TempoImmutable.parse(source, { timeZone: this.zone });
+
+    return this.setDate(date.year, date.month, date.day);
+  }
+
+  setDateTime(
+    year: number,
+    month: number,
+    day: number,
+    hour: number,
+    minute: number,
+    second = 0,
+    millisecond = 0,
+  ): this {
+    return this.set({ day, hour, millisecond, minute, month, second, year });
+  }
+
+  setDateTimeFrom(source: TempoInput): this {
+    const date = TempoImmutable.parse(source, { timeZone: this.zone });
+
+    return this.setDateTime(
+      date.year,
+      date.month,
+      date.day,
+      date.hour,
+      date.minute,
+      date.second,
+      date.millisecond,
+    );
+  }
+
   setHour(hour: number): this {
     return this.set({ hour });
   }
@@ -1694,6 +1753,33 @@ export class TempoImmutable {
     millisecond = this.millisecond,
   ): this {
     return this.set({ hour, millisecond, minute, second });
+  }
+
+  setTimeFrom(source: TempoInput): this {
+    const date = TempoImmutable.parse(source, { timeZone: this.zone });
+
+    return this.setTime(date.hour, date.minute, date.second, date.millisecond);
+  }
+
+  setTimeFromTimeString(time: string): this {
+    const parsed = TempoImmutable.parse(`${this.toDateString()}T${time}`, {
+      timeZone: this.zone,
+    });
+
+    return this.setTime(
+      parsed.hour,
+      parsed.minute,
+      parsed.second,
+      parsed.millisecond,
+    );
+  }
+
+  setTimestamp(timestamp: number): this {
+    return this.make(fromNumericTimestamp(timestamp), this.zone);
+  }
+
+  timestampTo(timestamp: number): this {
+    return this.setTimestamp(timestamp);
   }
 
   midday(): this {
@@ -1723,6 +1809,18 @@ export class TempoImmutable {
 
   sub(value: number, unit: TimeUnit): this {
     return this.add(-value, unit);
+  }
+
+  addUnit(unit: TimeUnit, value = 1): this {
+    return this.add(value, unit);
+  }
+
+  subUnit(unit: TimeUnit, value = 1): this {
+    return this.sub(value, unit);
+  }
+
+  subtract(value: number, unit: TimeUnit): this {
+    return this.sub(value, unit);
   }
 
   addDuration(duration: DurationInput): this {
@@ -2414,6 +2512,26 @@ export class TempoImmutable {
     return previous;
   }
 
+  nextWeekendDay(): this {
+    let next = this.addDays(1);
+
+    while (next.isWeekday()) {
+      next = next.addDays(1);
+    }
+
+    return next;
+  }
+
+  previousWeekendDay(): this {
+    let previous = this.subDays(1);
+
+    while (previous.isWeekday()) {
+      previous = previous.subDays(1);
+    }
+
+    return previous;
+  }
+
   diff(
     other: TempoInput,
     unit: TimeUnit = "millisecond",
@@ -2821,6 +2939,10 @@ export class TempoImmutable {
     return this.format("YYYY-MM-DDTHH:mm:ssZ");
   }
 
+  toIso8601ZuluString(precision: TimeStringPrecision = "second"): string {
+    return `${this.utc().toDateTimeLocalString(precision)}Z`;
+  }
+
   toRfc3339String(precision: TimeStringPrecision = "second"): string {
     return `${this.toDateTimeLocalString(precision)}${this.offsetString(":")}`;
   }
@@ -3079,6 +3201,13 @@ export class Tempo extends TempoImmutable {
     return Tempo.today(options).setTime(hour, minute, second, millisecond);
   }
 
+  static override createFromTimeString(
+    time: string,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.today(options).setTimeFromTimeString(time);
+  }
+
   static override fromObject(components: TempoComponents): Tempo {
     return Tempo.create(components);
   }
@@ -3096,6 +3225,14 @@ export class Tempo extends TempoImmutable {
   ): Tempo {
     assertFiniteNumber(timestamp, "Timestamp");
     return new Tempo(new Date(timestamp), options);
+  }
+
+  static override fromTimestampUTC(timestamp: number): Tempo {
+    return Tempo.fromTimestamp(timestamp, { timeZone: defaultTimeZone });
+  }
+
+  static override fromTimestampMsUTC(timestamp: number): Tempo {
+    return Tempo.fromTimestampMs(timestamp, { timeZone: defaultTimeZone });
   }
 }
 
@@ -3220,6 +3357,13 @@ export class TempoMutable extends TempoImmutable {
     );
   }
 
+  static override createFromTimeString(
+    time: string,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.today(options).setTimeFromTimeString(time);
+  }
+
   static override fromObject(components: TempoComponents): TempoMutable {
     return TempoMutable.create(components);
   }
@@ -3237,6 +3381,16 @@ export class TempoMutable extends TempoImmutable {
   ): TempoMutable {
     assertFiniteNumber(timestamp, "Timestamp");
     return new TempoMutable(new Date(timestamp), options);
+  }
+
+  static override fromTimestampUTC(timestamp: number): TempoMutable {
+    return TempoMutable.fromTimestamp(timestamp, { timeZone: defaultTimeZone });
+  }
+
+  static override fromTimestampMsUTC(timestamp: number): TempoMutable {
+    return TempoMutable.fromTimestampMs(timestamp, {
+      timeZone: defaultTimeZone,
+    });
   }
 
   protected override make(value: Date, timeZone = this.zone): this {
