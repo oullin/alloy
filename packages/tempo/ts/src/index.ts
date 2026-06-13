@@ -232,6 +232,24 @@ const configuredNow = (): Date =>
     ? new Date()
     : new Date(tempoConfig.testNow.getTime());
 
+const calendarFormatDefaults = (): Record<CalendarFormatKey, string> => ({
+  lastDay: "[Yesterday at] HH:mm",
+  lastWeek: "[Last] dddd [at] HH:mm",
+  nextDay: "[Tomorrow at] HH:mm",
+  nextWeek: "dddd [at] HH:mm",
+  sameDay: "[Today at] HH:mm",
+  sameElse: "YYYY-MM-DD",
+});
+
+const isoFormatDefaults = (): Record<string, string> => ({
+  atom: "YYYY-MM-DDTHH:mm:ssZZ",
+  cookie: "ddd, DD-MMM-YYYY HH:mm:ss [GMT]",
+  date: "YYYY-MM-DD",
+  dateTime: "YYYY-MM-DD HH:mm:ss",
+  iso8601: "YYYY-MM-DDTHH:mm:ssZZ",
+  time: "HH:mm:ss",
+});
+
 const pad = (value: number, length = 2): string =>
   String(Math.trunc(Math.abs(value))).padStart(length, "0");
 
@@ -1322,6 +1340,14 @@ export class TempoImmutable {
     tempoConfig.weekendDays = days.map((day) => ((day % 7) + 7) % 7);
   }
 
+  static getWeekStartsAt(): number {
+    return 1;
+  }
+
+  static getWeekEndsAt(): number {
+    return 0;
+  }
+
   static shouldOverflowMonths(): boolean {
     return tempoConfig.monthsOverflow;
   }
@@ -1395,6 +1421,95 @@ export class TempoImmutable {
 
   static getDays(locale = "en-US"): string[] {
     return [...weekdayNames(locale, "long")];
+  }
+
+  static getAvailableLocales(): string[] {
+    return [
+      ...new Set(
+        Intl.DateTimeFormat.supportedLocalesOf([
+          tempoConfig.locale,
+          tempoConfig.fallbackLocale,
+          "en-US",
+        ]),
+      ),
+    ];
+  }
+
+  static getAvailableLocalesInfo(): Record<string, { readonly name: string }> {
+    const displayNames =
+      typeof Intl.DisplayNames === "function"
+        ? new Intl.DisplayNames([tempoConfig.locale], { type: "language" })
+        : null;
+
+    return Object.fromEntries(
+      TempoImmutable.getAvailableLocales().map((locale) => [
+        locale,
+        { name: displayNames?.of(locale) ?? locale },
+      ]),
+    );
+  }
+
+  static getCalendarFormats(): Record<CalendarFormatKey, string> {
+    return calendarFormatDefaults();
+  }
+
+  static getFormatsToIsoReplacements(): Record<string, string> {
+    return {
+      A: "A",
+      D: "D",
+      H: "H",
+      M: "M",
+      S: "S",
+      Y: "Y",
+      d: "d",
+      h: "h",
+      m: "m",
+      s: "s",
+    };
+  }
+
+  static getIsoFormats(): Record<string, string> {
+    return isoFormatDefaults();
+  }
+
+  static getIsoUnits(): BoundaryUnit[] {
+    return [
+      "millisecond",
+      "second",
+      "minute",
+      "hour",
+      "day",
+      "week",
+      "month",
+      "quarter",
+      "year",
+    ];
+  }
+
+  static getTimeFormatByPrecision(
+    precision: TimeStringPrecision = "second",
+  ): string {
+    return precision === "millisecond" ? "HH:mm:ss.SSS" : "HH:mm:ss";
+  }
+
+  static localeHasDiffSyntax(locale: string): boolean {
+    return Intl.RelativeTimeFormat.supportedLocalesOf([locale]).length > 0;
+  }
+
+  static localeHasDiffOneDayWords(locale: string): boolean {
+    return TempoImmutable.localeHasDiffSyntax(locale);
+  }
+
+  static localeHasDiffTwoDayWords(locale: string): boolean {
+    return TempoImmutable.localeHasDiffSyntax(locale);
+  }
+
+  static localeHasPeriodSyntax(locale: string): boolean {
+    return Intl.ListFormat.supportedLocalesOf([locale]).length > 0;
+  }
+
+  static localeHasShortUnits(locale: string): boolean {
+    return Intl.RelativeTimeFormat.supportedLocalesOf([locale]).length > 0;
   }
 
   static sleep(seconds: number): Promise<void> {
@@ -1794,6 +1909,31 @@ export class TempoImmutable {
     return this.parts().millisecond;
   }
 
+  get(
+    field: keyof TempoObject | BoundaryUnit | "timestamp" | "timestampMs",
+  ): unknown {
+    switch (field) {
+      case "timestamp":
+        return this.timestamp;
+      case "timestampMs":
+        return this.timestampMs;
+      case "millisecond":
+      case "second":
+      case "minute":
+      case "hour":
+      case "day":
+      case "month":
+      case "year":
+        return this[field];
+      default:
+        return this.toObject()[field as keyof TempoObject];
+    }
+  }
+
+  getPaddedUnit(unit: keyof TempoObject | BoundaryUnit, length = 2): string {
+    return pad(Number(this.get(unit)), length);
+  }
+
   get offsetMinutes(): number {
     const parts = this.parts();
     const localAsUTC = dateFromPartsAsUTC(parts);
@@ -1836,6 +1976,109 @@ export class TempoImmutable {
 
   shortDayName(locale = this.currentLocale): string {
     return weekdayNames(locale, "short")[this.dayOfWeek] ?? "";
+  }
+
+  minDayName(locale = this.currentLocale): string {
+    return this.shortDayName(locale).slice(0, 2);
+  }
+
+  getTranslatedMonthName(locale = this.currentLocale): string {
+    return this.monthName(locale);
+  }
+
+  getTranslatedShortMonthName(locale = this.currentLocale): string {
+    return this.shortMonthName(locale);
+  }
+
+  getTranslatedDayName(locale = this.currentLocale): string {
+    return this.dayName(locale);
+  }
+
+  getTranslatedShortDayName(locale = this.currentLocale): string {
+    return this.shortDayName(locale);
+  }
+
+  getTranslatedMinDayName(locale = this.currentLocale): string {
+    return this.minDayName(locale);
+  }
+
+  translateNumber(value: number, locale = this.currentLocale): string {
+    return new Intl.NumberFormat(locale).format(value);
+  }
+
+  getAltNumber(value: number, locale = this.currentLocale): string {
+    return this.translateNumber(value, locale);
+  }
+
+  translate(
+    message: string,
+    replacements: Record<string, string> = {},
+  ): string {
+    return this.translateWith(message, replacements);
+  }
+
+  translateWith(
+    message: string,
+    replacements: Record<string, string> = {},
+  ): string {
+    return Object.entries(replacements).reduce(
+      (result, [key, value]) => result.replaceAll(`:${key}`, value),
+      message,
+    );
+  }
+
+  getTranslationMessage(key: string): string | number | null {
+    switch (key) {
+      case "day_of_first_week_of_year":
+        return 4;
+      case "first_day_of_week":
+        return 1;
+      case "locale":
+        return this.currentLocale;
+      default:
+        return null;
+    }
+  }
+
+  getTranslationMessageWith(
+    key: string,
+    replacements: Record<string, string> = {},
+  ): string | number | null {
+    const message = this.getTranslationMessage(key);
+
+    return typeof message === "string"
+      ? this.translateWith(message, replacements)
+      : message;
+  }
+
+  translateTimeString(
+    input: string,
+    locale = "en-US",
+    targetLocale = this.currentLocale,
+  ): string {
+    let output = input;
+    const sourceNames = [
+      ...monthNames(locale, "long"),
+      ...monthNames(locale, "short"),
+      ...weekdayNames(locale, "long"),
+      ...weekdayNames(locale, "short"),
+    ];
+    const targetNames = [
+      ...monthNames(targetLocale, "long"),
+      ...monthNames(targetLocale, "short"),
+      ...weekdayNames(targetLocale, "long"),
+      ...weekdayNames(targetLocale, "short"),
+    ];
+
+    sourceNames.forEach((sourceName, index) => {
+      output = output.replaceAll(sourceName, targetNames[index] ?? sourceName);
+    });
+
+    return output;
+  }
+
+  translateTimeStringTo(input: string, targetLocale: string): string {
+    return this.translateTimeString(input, this.currentLocale, targetLocale);
   }
 
   isUtc(): boolean {
@@ -3351,14 +3594,7 @@ export class TempoImmutable {
               : diff < -1 && diff > -7
                 ? "lastWeek"
                 : "sameElse";
-    const defaults: Record<CalendarFormatKey, string> = {
-      lastDay: "[Yesterday at] HH:mm",
-      lastWeek: "[Last] dddd [at] HH:mm",
-      nextDay: "[Tomorrow at] HH:mm",
-      nextWeek: "dddd [at] HH:mm",
-      sameDay: "[Today at] HH:mm",
-      sameElse: "YYYY-MM-DD",
-    };
+    const defaults = calendarFormatDefaults();
 
     return this.isoFormat(formats[key] ?? defaults[key]);
   }

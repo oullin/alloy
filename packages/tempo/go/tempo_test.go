@@ -1846,6 +1846,16 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	if values["hour"] != 21 {
 		t.Fatalf("ToMap()[hour] = %v, want 21", values["hour"])
 	}
+	if value, ok := tempo.Get("year"); !ok || value != 2024 {
+		t.Fatalf("Get(year) = %v, %v, want 2024, true", value, ok)
+	}
+	if value, ok := tempo.GetPaddedUnit("month", 2); !ok || value != "05" {
+		t.Fatalf("GetPaddedUnit(month) = %q, %v, want 05, true", value, ok)
+	}
+	assertEqual(t, "GetTranslatedDayName()", tempo.GetTranslatedDayName(), "Wednesday")
+	assertEqual(t, "GetTranslatedShortMonthName()", tempo.GetTranslatedShortMonthName(), "May")
+	assertEqual(t, "TranslateNumber()", tempo.TranslateNumber(1234), "1234")
+	assertEqual(t, "Translate()", tempo.Translate("Hello :name", map[string]string{"name": "Tempo"}), "Hello Tempo")
 }
 
 func TestExplicitSettersHandleZeroValues(t *testing.T) {
@@ -1985,6 +1995,24 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	days := GetDays()
 	if len(days) < 2 || days[0] != "Sunday" || days[1] != "Monday" {
 		t.Fatalf("GetDays()[0:2] = %v, want Sunday/Monday", days[:2])
+	}
+	if got := GetCalendarFormats()["sameDay"]; got != "[Today at] HH:mm" {
+		t.Fatalf("GetCalendarFormats()[sameDay] = %q, want default format", got)
+	}
+	if got := GetIsoFormats()["date"]; got != "YYYY-MM-DD" {
+		t.Fatalf("GetIsoFormats()[date] = %q, want date format", got)
+	}
+	if units := GetIsoUnits(); len(units) == 0 || units[0] != Millisecond {
+		t.Fatalf("GetIsoUnits()[0] = %v, want millisecond", units)
+	}
+	if got := GetTimeFormatByPrecision(MillisecondPrecision); got != "HH:mm:ss.SSS" {
+		t.Fatalf("GetTimeFormatByPrecision(ms) = %q, want millisecond format", got)
+	}
+	if GetWeekStartsAt() != time.Monday || GetWeekEndsAt() != time.Sunday {
+		t.Fatalf("week start/end settings = %v/%v, want Monday/Sunday", GetWeekStartsAt(), GetWeekEndsAt())
+	}
+	if !LocaleHasDiffSyntax("en-US") || !LocaleHasPeriodSyntax("en-US") {
+		t.Fatalf("locale capability helpers = false, want true")
 	}
 	if !HasFormatWithModifiers("2024/05/15", "YYYY/MM/DD") {
 		t.Fatalf("HasFormatWithModifiers() = false, want true")

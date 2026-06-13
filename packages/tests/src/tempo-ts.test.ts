@@ -966,6 +966,15 @@ describe("Tempo TypeScript behavior", () => {
     expect(Tempo.getDays().slice(0, 2)).toEqual(["Sunday", "Monday"]);
     expect(Tempo.hasFormatWithModifiers("2024/05/15", "YYYY/MM/DD")).toBe(true);
     expect(Tempo.hasFormatWithModifiers(null, "YYYY/MM/DD")).toBe(false);
+    expect(Tempo.getCalendarFormats().sameDay).toBe("[Today at] HH:mm");
+    expect(Tempo.getIsoUnits()).toContain("day");
+    expect(Tempo.getIsoFormats().date).toBe("YYYY-MM-DD");
+    expect(Tempo.getTimeFormatByPrecision("millisecond")).toBe("HH:mm:ss.SSS");
+    expect(Tempo.getWeekStartsAt()).toBe(1);
+    expect(Tempo.getWeekEndsAt()).toBe(0);
+    expect(Tempo.localeHasDiffSyntax("en-US")).toBe(true);
+    expect(Tempo.localeHasPeriodSyntax("en-US")).toBe(true);
+    expect(Tempo.getAvailableLocales()).toContain("en-US");
 
     expect(tempo.toMap().get("timeZone")).toBe("Asia/Tokyo");
     expect(tempo.toMap().get("hour")).toBe(21);
@@ -1076,6 +1085,17 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.addDays(2).since(tempo)).toBe("in 2 days");
     expect(tempo.to(tempo.addDays(2))).toBe("in 2 days");
     expect(tempo.addDays(2).timespan(tempo)).toBe("in 2 days");
+    expect(tempo.get("year")).toBe(2024);
+    expect(tempo.getPaddedUnit("month")).toBe("05");
+    expect(tempo.getTranslatedDayName()).toBe("Wednesday");
+    expect(tempo.getTranslatedShortMonthName()).toBe("May");
+    expect(tempo.translateNumber(1234)).toBe("1,234");
+    expect(tempo.translate("Hello :name", { name: "Tempo" })).toBe(
+      "Hello Tempo",
+    );
+    expect(
+      tempo.translateTimeString("Wednesday, May 15", "en-US", "fr-FR"),
+    ).toBe("mercredi, mai 15");
     expect(tempo.isImmutable()).toBe(true);
     expect(tempo.avoidMutation().toISOString()).toBe(
       "2024-05-15T12:34:56.789Z",

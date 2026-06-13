@@ -366,6 +366,54 @@ func GetDays() []string {
 	return append([]string(nil), dayNames[:]...)
 }
 
+func GetCalendarFormats() map[string]string {
+	return map[string]string{
+		"lastDay":  "[Yesterday at] HH:mm",
+		"lastWeek": "[Last] dddd [at] HH:mm",
+		"nextDay":  "[Tomorrow at] HH:mm",
+		"nextWeek": "dddd [at] HH:mm",
+		"sameDay":  "[Today at] HH:mm",
+		"sameElse": "YYYY-MM-DD",
+	}
+}
+
+func GetIsoFormats() map[string]string {
+	return map[string]string{
+		"atom":     "YYYY-MM-DDTHH:mm:ssZZ",
+		"cookie":   "ddd, DD-MMM-YYYY HH:mm:ss [GMT]",
+		"date":     "YYYY-MM-DD",
+		"dateTime": "YYYY-MM-DD HH:mm:ss",
+		"iso8601":  "YYYY-MM-DDTHH:mm:ssZZ",
+		"time":     "HH:mm:ss",
+	}
+}
+
+func GetIsoUnits() []Unit {
+	return []Unit{Millisecond, Second, Minute, Hour, Day, Week, Month, Quarter, Year}
+}
+
+func GetTimeFormatByPrecision(precision TimeStringPrecision) string {
+	if precision == MillisecondPrecision {
+		return "HH:mm:ss.SSS"
+	}
+
+	return "HH:mm:ss"
+}
+
+func GetWeekStartsAt() time.Weekday { return time.Monday }
+
+func GetWeekEndsAt() time.Weekday { return time.Sunday }
+
+func LocaleHasDiffSyntax(locale string) bool { return strings.TrimSpace(locale) != "" }
+
+func LocaleHasDiffOneDayWords(locale string) bool { return LocaleHasDiffSyntax(locale) }
+
+func LocaleHasDiffTwoDayWords(locale string) bool { return LocaleHasDiffSyntax(locale) }
+
+func LocaleHasPeriodSyntax(locale string) bool { return LocaleHasDiffSyntax(locale) }
+
+func LocaleHasShortUnits(locale string) bool { return LocaleHasDiffSyntax(locale) }
+
 func Sleep(seconds float64) {
 	if seconds <= 0 {
 		return
@@ -1239,6 +1287,37 @@ func (tempo Tempo) Millisecond() int {
 	return tempo.local().Nanosecond() / int(time.Millisecond)
 }
 
+func (tempo Tempo) Get(field string) (any, bool) {
+	values := tempo.ToMap()
+	value, ok := values[field]
+	if ok {
+		return value, true
+	}
+
+	switch field {
+	case "timestamp":
+		return tempo.Timestamp(), true
+	case "timestampMs":
+		return tempo.TimestampMs(), true
+	default:
+		return nil, false
+	}
+}
+
+func (tempo Tempo) GetPaddedUnit(field string, length int) (string, bool) {
+	value, ok := tempo.Get(field)
+	if !ok {
+		return "", false
+	}
+
+	number, ok := value.(int)
+	if !ok {
+		return "", false
+	}
+
+	return fmt.Sprintf("%0*d", length, number), true
+}
+
 func (tempo Tempo) OffsetMinutes() int {
 	_, offset := tempo.local().Zone()
 	return offset / 60
@@ -1275,6 +1354,46 @@ func (tempo Tempo) DayName() string {
 
 func (tempo Tempo) ShortDayName() string {
 	return shortDayNames[int(tempo.local().Weekday())]
+}
+
+func (tempo Tempo) MinDayName() string {
+	name := tempo.ShortDayName()
+	if len(name) < 2 {
+		return name
+	}
+
+	return name[:2]
+}
+
+func (tempo Tempo) GetTranslatedMonthName() string { return tempo.MonthName() }
+
+func (tempo Tempo) GetTranslatedShortMonthName() string { return tempo.ShortMonthName() }
+
+func (tempo Tempo) GetTranslatedDayName() string { return tempo.DayName() }
+
+func (tempo Tempo) GetTranslatedShortDayName() string { return tempo.ShortDayName() }
+
+func (tempo Tempo) GetTranslatedMinDayName() string { return tempo.MinDayName() }
+
+func (tempo Tempo) TranslateNumber(value int) string {
+	return strconv.Itoa(value)
+}
+
+func (tempo Tempo) GetAltNumber(value int) string {
+	return tempo.TranslateNumber(value)
+}
+
+func (tempo Tempo) Translate(message string, replacements map[string]string) string {
+	return tempo.TranslateWith(message, replacements)
+}
+
+func (tempo Tempo) TranslateWith(message string, replacements map[string]string) string {
+	output := message
+	for key, value := range replacements {
+		output = strings.ReplaceAll(output, ":"+key, value)
+	}
+
+	return output
 }
 
 func (tempo Tempo) IsUTC() bool {
@@ -3490,6 +3609,14 @@ func (mutable *MutableTempo) Millisecond() int {
 	return mutable.Tempo().Millisecond()
 }
 
+func (mutable *MutableTempo) Get(field string) (any, bool) {
+	return mutable.Tempo().Get(field)
+}
+
+func (mutable *MutableTempo) GetPaddedUnit(field string, length int) (string, bool) {
+	return mutable.Tempo().GetPaddedUnit(field, length)
+}
+
 func (mutable *MutableTempo) OffsetMinutes() int {
 	return mutable.Tempo().OffsetMinutes()
 }
@@ -3524,6 +3651,46 @@ func (mutable *MutableTempo) DayName() string {
 
 func (mutable *MutableTempo) ShortDayName() string {
 	return mutable.Tempo().ShortDayName()
+}
+
+func (mutable *MutableTempo) MinDayName() string {
+	return mutable.Tempo().MinDayName()
+}
+
+func (mutable *MutableTempo) GetTranslatedMonthName() string {
+	return mutable.Tempo().GetTranslatedMonthName()
+}
+
+func (mutable *MutableTempo) GetTranslatedShortMonthName() string {
+	return mutable.Tempo().GetTranslatedShortMonthName()
+}
+
+func (mutable *MutableTempo) GetTranslatedDayName() string {
+	return mutable.Tempo().GetTranslatedDayName()
+}
+
+func (mutable *MutableTempo) GetTranslatedShortDayName() string {
+	return mutable.Tempo().GetTranslatedShortDayName()
+}
+
+func (mutable *MutableTempo) GetTranslatedMinDayName() string {
+	return mutable.Tempo().GetTranslatedMinDayName()
+}
+
+func (mutable *MutableTempo) TranslateNumber(value int) string {
+	return mutable.Tempo().TranslateNumber(value)
+}
+
+func (mutable *MutableTempo) GetAltNumber(value int) string {
+	return mutable.Tempo().GetAltNumber(value)
+}
+
+func (mutable *MutableTempo) Translate(message string, replacements map[string]string) string {
+	return mutable.Tempo().Translate(message, replacements)
+}
+
+func (mutable *MutableTempo) TranslateWith(message string, replacements map[string]string) string {
+	return mutable.Tempo().TranslateWith(message, replacements)
 }
 
 func (mutable *MutableTempo) IsUTC() bool {
