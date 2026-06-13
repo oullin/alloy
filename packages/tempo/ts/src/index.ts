@@ -2797,6 +2797,18 @@ export class TempoImmutable {
     return this.format("YYYY-MM-DD HH:mm:ss");
   }
 
+  toFormattedDateString(): string {
+    return this.format("MMM D, YYYY");
+  }
+
+  toFormattedDayDateString(): string {
+    return this.format("ddd, MMM D, YYYY");
+  }
+
+  toDayDateTimeString(): string {
+    return this.format("ddd, MMM D, YYYY h:mm A");
+  }
+
   toDateTimeLocalString(precision: TimeStringPrecision = "second"): string {
     return `${this.toDateString()}T${this.toTimeString(precision)}`;
   }
@@ -2815,6 +2827,30 @@ export class TempoImmutable {
 
   toRfc7231String(): string {
     return this.utc().format("ddd, DD MMM YYYY HH:mm:ss [GMT]");
+  }
+
+  toRfc822String(): string {
+    return this.format("ddd, DD MMM YY HH:mm:ss ZZ");
+  }
+
+  toRfc850String(): string {
+    return this.format("dddd, DD-MMM-YY HH:mm:ss ZZ");
+  }
+
+  toRfc1036String(): string {
+    return this.toRfc822String();
+  }
+
+  toRfc1123String(): string {
+    return this.toRssString();
+  }
+
+  toRfc2822String(): string {
+    return this.toRssString();
+  }
+
+  toW3cString(): string {
+    return this.toRfc3339String();
   }
 
   toCookieString(): string {

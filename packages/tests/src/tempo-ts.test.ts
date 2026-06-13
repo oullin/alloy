@@ -786,11 +786,20 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.toDateTimeLocalString("millisecond")).toBe(
       "2024-05-15T21:34:56.789",
     );
+    expect(tempo.toFormattedDateString()).toBe("May 15, 2024");
+    expect(tempo.toFormattedDayDateString()).toBe("Wed, May 15, 2024");
+    expect(tempo.toDayDateTimeString()).toBe("Wed, May 15, 2024 9:34 PM");
     expect(tempo.toTimeString("millisecond")).toBe("21:34:56.789");
     expect(tempo.toIso8601String()).toBe("2024-05-15T21:34:56+09:00");
     expect(tempo.toRfc3339String("millisecond")).toBe(
       "2024-05-15T21:34:56.789+09:00",
     );
+    expect(tempo.toRfc822String()).toBe("Wed, 15 May 24 21:34:56 +0900");
+    expect(tempo.toRfc850String()).toBe("Wednesday, 15-May-24 21:34:56 +0900");
+    expect(tempo.toRfc1036String()).toBe("Wed, 15 May 24 21:34:56 +0900");
+    expect(tempo.toRfc1123String()).toBe("Wed, 15 May 2024 21:34:56 +0900");
+    expect(tempo.toRfc2822String()).toBe("Wed, 15 May 2024 21:34:56 +0900");
+    expect(tempo.toW3cString()).toBe("2024-05-15T21:34:56+09:00");
     expect(tempo.toAtomString()).toBe("2024-05-15T21:34:56+09:00");
     expect(tempo.toRssString()).toBe("Wed, 15 May 2024 21:34:56 +0900");
     expect(tempo.toRfc7231String()).toBe("Wed, 15 May 2024 12:34:56 GMT");

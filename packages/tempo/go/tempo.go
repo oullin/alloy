@@ -2223,6 +2223,18 @@ func (tempo Tempo) DateTimeString() string {
 	return tempo.Format("YYYY-MM-DD HH:mm:ss")
 }
 
+func (tempo Tempo) FormattedDateString() string {
+	return tempo.Format("MMM D, YYYY")
+}
+
+func (tempo Tempo) FormattedDayDateString() string {
+	return tempo.Format("ddd, MMM D, YYYY")
+}
+
+func (tempo Tempo) DayDateTimeString() string {
+	return tempo.Format("ddd, MMM D, YYYY h:mm A")
+}
+
 func (tempo Tempo) DateTimeLocalString(precision ...TimeStringPrecision) string {
 	return tempo.DateString() + "T" + tempo.TimeString(precision...)
 }
@@ -2241,6 +2253,30 @@ func (tempo Tempo) RFC3339String(precision ...TimeStringPrecision) string {
 
 func (tempo Tempo) RFC7231String() string {
 	return tempo.UTC().Format("ddd, DD MMM YYYY HH:mm:ss [GMT]")
+}
+
+func (tempo Tempo) RFC822String() string {
+	return tempo.Format("ddd, DD MMM YY HH:mm:ss ZZ")
+}
+
+func (tempo Tempo) RFC850String() string {
+	return tempo.Format("dddd, DD-MMM-YY HH:mm:ss ZZ")
+}
+
+func (tempo Tempo) RFC1036String() string {
+	return tempo.RFC822String()
+}
+
+func (tempo Tempo) RFC1123String() string {
+	return tempo.RSSString()
+}
+
+func (tempo Tempo) RFC2822String() string {
+	return tempo.RSSString()
+}
+
+func (tempo Tempo) W3CString() string {
+	return tempo.RFC3339String()
 }
 
 func (tempo Tempo) CookieString() string {
