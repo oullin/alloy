@@ -721,6 +721,8 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.toRfc7231String()).toBe("Wed, 15 May 2024 12:34:56 GMT");
     expect(tempo.toCookieString()).toBe("Wed, 15-May-2024 12:34:56 GMT");
     expect(tempo.toUnixString()).toBe("1715776496");
+    expect(JSON.stringify(tempo)).toBe('"2024-05-15T12:34:56.789Z"');
+    expect(JSON.stringify(TempoDuration.parse("P1DT2H"))).toBe('"P1DT2H"');
 
     expect(tempo.toMap().get("timeZone")).toBe("Asia/Tokyo");
     expect(tempo.toMap().get("hour")).toBe(21);

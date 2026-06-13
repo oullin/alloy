@@ -1,6 +1,7 @@
 package tempo
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -1369,6 +1370,21 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	assertEqual(t, "RFC7231String()", tempo.RFC7231String(), "Wed, 15 May 2024 12:34:56 GMT")
 	assertEqual(t, "CookieString()", tempo.CookieString(), "Wed, 15-May-2024 12:34:56 GMT")
 	assertEqual(t, "UnixString()", tempo.UnixString(), "1715776496")
+	tempoJSON, err := json.Marshal(tempo)
+	if err != nil {
+		t.Fatalf("marshal tempo: %v", err)
+	}
+	assertEqual(t, "json.Marshal(Tempo)", string(tempoJSON), `"2024-05-15T12:34:56.789Z"`)
+	mutableJSON, err := json.Marshal(NewMutable(tempo))
+	if err != nil {
+		t.Fatalf("marshal mutable tempo: %v", err)
+	}
+	assertEqual(t, "json.Marshal(MutableTempo)", string(mutableJSON), `"2024-05-15T12:34:56.789Z"`)
+	durationJSON, err := json.Marshal(Duration{Days: 1, Hours: 2})
+	if err != nil {
+		t.Fatalf("marshal duration: %v", err)
+	}
+	assertEqual(t, "json.Marshal(Duration)", string(durationJSON), `"P1DT2H"`)
 
 	values := tempo.ToMap()
 	if values["timeZone"] != "Asia/Tokyo" {

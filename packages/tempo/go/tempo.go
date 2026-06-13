@@ -677,6 +677,10 @@ func (duration Duration) String() string {
 	return duration.ISOString()
 }
 
+func (duration Duration) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Quote(duration.ISOString())), nil
+}
+
 func (duration Duration) totalMilliseconds() int64 {
 	return int64(duration.Weeks*7+duration.Days)*int64((24*time.Hour)/time.Millisecond) +
 		int64(duration.Hours)*int64(time.Hour/time.Millisecond) +
@@ -2021,6 +2025,10 @@ func (tempo Tempo) Time() time.Time {
 	return tempo.value
 }
 
+func (tempo Tempo) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Quote(tempo.ISOString())), nil
+}
+
 func (tempo Tempo) ToObject() Object {
 	local := tempo.local()
 
@@ -2403,6 +2411,10 @@ func (mutable *MutableTempo) UnixString() string {
 
 func (mutable *MutableTempo) Time() time.Time {
 	return mutable.Tempo().Time()
+}
+
+func (mutable *MutableTempo) MarshalJSON() ([]byte, error) {
+	return mutable.Tempo().MarshalJSON()
 }
 
 func (mutable *MutableTempo) ToObject() Object {
