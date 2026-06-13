@@ -608,6 +608,14 @@ describe("Tempo TypeScript behavior", () => {
       "2024-01-03",
       "2024-01-05",
     ]);
+    expect(
+      Tempo.parse("2024-01-01")
+        .toPeriod("2024-01-03")
+        .toArray()
+        .map((item) => item.toDateString()),
+    ).toEqual(["2024-01-01", "2024-01-02", "2024-01-03"]);
+    expect(Tempo.parse("2024-01-01").until("2024-01-02").count()).toBe(2);
+    expect(Tempo.parse("2024-01-01").range("2024-01-02").count()).toBe(2);
   });
 
   it("adds business days and compares same calendar units", () => {
@@ -831,6 +839,14 @@ describe("Tempo TypeScript behavior", () => {
     expect(tempo.toRfc7231String()).toBe("Wed, 15 May 2024 12:34:56 GMT");
     expect(tempo.toCookieString()).toBe("Wed, 15-May-2024 12:34:56 GMT");
     expect(tempo.toUnixString()).toBe("1715776496");
+    expect(tempo.unix()).toBe(1715776496);
+    expect(tempo.getTimestampMs()).toBe(1715776496789);
+    expect(tempo.toDateTime().toISOString()).toBe("2024-05-15T12:34:56.789Z");
+    expect(tempo.toDateTimeImmutable().toISOString()).toBe(
+      "2024-05-15T12:34:56.789Z",
+    );
+    expect(tempo.jsonSerialize()).toBe("2024-05-15T12:34:56.789Z");
+    expect(tempo.serialize()).toBe("2024-05-15T12:34:56.789Z");
     expect(JSON.stringify(tempo)).toBe('"2024-05-15T12:34:56.789Z"');
     expect(JSON.stringify(TempoDuration.parse("P1DT2H"))).toBe('"P1DT2H"');
     expect(fromJSON('"2024-05-15T12:34:56.789Z"').toISOString()).toBe(
@@ -900,10 +916,26 @@ describe("Tempo TypeScript behavior", () => {
     expect(
       Tempo.createFromTimeString("03:04:05.006").toTimeString("millisecond"),
     ).toBe("03:04:05.006");
+    expect(
+      Tempo.createFromFormat("2024/05/15", "YYYY/MM/DD").toDateString(),
+    ).toBe("2024-05-15");
+    expect(Tempo.canBeCreatedFromFormat("2024/05/15", "YYYY/MM/DD")).toBe(true);
+    expect(Tempo.createFromTimestamp(0).toISOString()).toBe(
+      "1970-01-01T00:00:00.000Z",
+    );
+    expect(Tempo.createFromTimestampMs(1).toISOString()).toBe(
+      "1970-01-01T00:00:00.001Z",
+    );
     expect(Tempo.fromTimestampUTC(0).toISOString()).toBe(
       "1970-01-01T00:00:00.000Z",
     );
     expect(Tempo.fromTimestampMsUTC(1).toISOString()).toBe(
+      "1970-01-01T00:00:00.001Z",
+    );
+    expect(Tempo.createFromTimestampUTC(0).toISOString()).toBe(
+      "1970-01-01T00:00:00.000Z",
+    );
+    expect(Tempo.createFromTimestampMsUTC(1).toISOString()).toBe(
       "1970-01-01T00:00:00.001Z",
     );
   });

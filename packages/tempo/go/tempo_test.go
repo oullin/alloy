@@ -1092,6 +1092,23 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 	if got := start.IntervalUntil(end).ToDuration().ISOString(); got != "P2DT12H" {
 		t.Fatalf("Interval.ToDuration().ISOString() = %q, want normalized interval", got)
 	}
+	periodStart, err := Parse("2024-01-01")
+	if err != nil {
+		t.Fatalf("parse period start: %v", err)
+	}
+	periodEnd, err := Parse("2024-01-03")
+	if err != nil {
+		t.Fatalf("parse period end: %v", err)
+	}
+	if got, err := periodStart.ToPeriod(periodEnd).Count(); err != nil || got != 3 {
+		t.Fatalf("ToPeriod().Count() = %d, %v, want 3, nil", got, err)
+	}
+	if got, err := periodStart.Until(periodEnd).Count(); err != nil || got != 3 {
+		t.Fatalf("Until().Count() = %d, %v, want 3, nil", got, err)
+	}
+	if got, err := periodStart.Range(periodEnd).Count(); err != nil || got != 3 {
+		t.Fatalf("Range().Count() = %d, %v, want 3, nil", got, err)
+	}
 }
 
 func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
@@ -1603,6 +1620,14 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	assertEqual(t, "RFC7231String()", tempo.RFC7231String(), "Wed, 15 May 2024 12:34:56 GMT")
 	assertEqual(t, "CookieString()", tempo.CookieString(), "Wed, 15-May-2024 12:34:56 GMT")
 	assertEqual(t, "UnixString()", tempo.UnixString(), "1715776496")
+	if got := tempo.Unix(); got != 1715776496 {
+		t.Fatalf("Unix() = %d, want 1715776496", got)
+	}
+	if got := tempo.GetTimestampMs(); got != 1715776496789 {
+		t.Fatalf("GetTimestampMs() = %d, want 1715776496789", got)
+	}
+	assertEqual(t, "JSONSerialize()", tempo.JSONSerialize(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "Serialize()", tempo.Serialize(), "2024-05-15T12:34:56.789Z")
 	tempoJSON, err := json.Marshal(tempo)
 	if err != nil {
 		t.Fatalf("marshal tempo: %v", err)
@@ -1717,6 +1742,27 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	}
 	assertEqual(t, "CreateFromTimeString().TimeString(ms)", createdFromTimeString.TimeString(MillisecondPrecision), "03:04:05.006")
 
+	createdFromFormat, err := CreateFromFormat("2024/05/15", "YYYY/MM/DD")
+	if err != nil {
+		t.Fatalf("CreateFromFormat(): %v", err)
+	}
+	assertEqual(t, "CreateFromFormat().DateString()", createdFromFormat.DateString(), "2024-05-15")
+	if !CanBeCreatedFromFormat("2024/05/15", "YYYY/MM/DD") {
+		t.Fatalf("CanBeCreatedFromFormat() = false, want true")
+	}
+
+	createdFromTimestamp, err := CreateFromTimestamp(0)
+	if err != nil {
+		t.Fatalf("CreateFromTimestamp(): %v", err)
+	}
+	assertEqual(t, "CreateFromTimestamp(0).ISOString()", createdFromTimestamp.ISOString(), "1970-01-01T00:00:00.000Z")
+
+	createdFromTimestampMs, err := CreateFromTimestampMs(1)
+	if err != nil {
+		t.Fatalf("CreateFromTimestampMs(): %v", err)
+	}
+	assertEqual(t, "CreateFromTimestampMs(1).ISOString()", createdFromTimestampMs.ISOString(), "1970-01-01T00:00:00.001Z")
+
 	fromTimestampUTC, err := FromTimestampUTC(0)
 	if err != nil {
 		t.Fatalf("FromTimestampUTC(): %v", err)
@@ -1728,4 +1774,16 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("FromTimestampMsUTC(): %v", err)
 	}
 	assertEqual(t, "FromTimestampMsUTC(1).ISOString()", fromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
+
+	createdFromTimestampUTC, err := CreateFromTimestampUTC(0)
+	if err != nil {
+		t.Fatalf("CreateFromTimestampUTC(): %v", err)
+	}
+	assertEqual(t, "CreateFromTimestampUTC(0).ISOString()", createdFromTimestampUTC.ISOString(), "1970-01-01T00:00:00.000Z")
+
+	createdFromTimestampMsUTC, err := CreateFromTimestampMsUTC(1)
+	if err != nil {
+		t.Fatalf("CreateFromTimestampMsUTC(): %v", err)
+	}
+	assertEqual(t, "CreateFromTimestampMsUTC(1).ISOString()", createdFromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
 }

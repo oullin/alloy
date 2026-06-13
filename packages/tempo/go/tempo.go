@@ -230,6 +230,10 @@ func FromFormat(input string, pattern string, options ...Option) (Tempo, error) 
 	return Tempo{value: parsed.UTC(), location: cfg.location}, nil
 }
 
+func CreateFromFormat(input string, pattern string, options ...Option) (Tempo, error) {
+	return FromFormat(input, pattern, options...)
+}
+
 func TryFromFormat(input string, pattern string, options ...Option) (Tempo, bool) {
 	tempo, err := FromFormat(input, pattern, options...)
 	return tempo, err == nil
@@ -238,6 +242,10 @@ func TryFromFormat(input string, pattern string, options ...Option) (Tempo, bool
 func HasFormat(input string, pattern string, options ...Option) bool {
 	_, ok := TryFromFormat(input, pattern, options...)
 	return ok
+}
+
+func CanBeCreatedFromFormat(input string, pattern string, options ...Option) bool {
+	return HasFormat(input, pattern, options...)
 }
 
 func Create(components Components) (Tempo, error) {
@@ -310,6 +318,10 @@ func FromTimestamp(timestamp int64, options ...Option) (Tempo, error) {
 	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: cfg.location}, nil
 }
 
+func CreateFromTimestamp(timestamp int64, options ...Option) (Tempo, error) {
+	return FromTimestamp(timestamp, options...)
+}
+
 func FromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
 	cfg, err := applyOptions(options...)
 	if err != nil {
@@ -319,12 +331,24 @@ func FromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
 	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: cfg.location}, nil
 }
 
+func CreateFromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
+	return FromTimestampMs(timestamp, options...)
+}
+
 func FromTimestampUTC(timestamp int64) (Tempo, error) {
 	return FromTimestamp(timestamp, WithTimezone(defaultLocation.String()))
 }
 
 func FromTimestampMsUTC(timestamp int64) (Tempo, error) {
 	return FromTimestampMs(timestamp, WithTimezone(defaultLocation.String()))
+}
+
+func CreateFromTimestampUTC(timestamp int64) (Tempo, error) {
+	return FromTimestampUTC(timestamp)
+}
+
+func CreateFromTimestampMsUTC(timestamp int64) (Tempo, error) {
+	return FromTimestampMsUTC(timestamp)
 }
 
 func NewFactory(options ...Option) (Factory, error) {
@@ -408,6 +432,10 @@ func (factory Factory) FromFormat(input string, pattern string) (Tempo, error) {
 	return Tempo{value: parsed.UTC(), location: factory.location}, nil
 }
 
+func (factory Factory) CreateFromFormat(input string, pattern string) (Tempo, error) {
+	return factory.FromFormat(input, pattern)
+}
+
 func (factory Factory) TryFromFormat(input string, pattern string) (Tempo, bool) {
 	tempo, err := factory.FromFormat(input, pattern)
 	return tempo, err == nil
@@ -416,6 +444,10 @@ func (factory Factory) TryFromFormat(input string, pattern string) (Tempo, bool)
 func (factory Factory) HasFormat(input string, pattern string) bool {
 	_, ok := factory.TryFromFormat(input, pattern)
 	return ok
+}
+
+func (factory Factory) CanBeCreatedFromFormat(input string, pattern string) bool {
+	return factory.HasFormat(input, pattern)
 }
 
 func (factory Factory) Create(components Components) (Tempo, error) {
@@ -476,8 +508,16 @@ func (factory Factory) FromTimestamp(timestamp int64) Tempo {
 	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: factory.location}
 }
 
+func (factory Factory) CreateFromTimestamp(timestamp int64) Tempo {
+	return factory.FromTimestamp(timestamp)
+}
+
 func (factory Factory) FromTimestampMs(timestamp int64) Tempo {
 	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: factory.location}
+}
+
+func (factory Factory) CreateFromTimestampMs(timestamp int64) Tempo {
+	return factory.FromTimestampMs(timestamp)
 }
 
 func ParseDuration(input string) (Duration, error) {
@@ -818,6 +858,14 @@ func (tempo Tempo) Timestamp() int64 {
 
 func (tempo Tempo) TimestampMs() int64 {
 	return tempo.value.UnixMilli()
+}
+
+func (tempo Tempo) GetTimestampMs() int64 {
+	return tempo.TimestampMs()
+}
+
+func (tempo Tempo) Unix() int64 {
+	return tempo.Timestamp()
 }
 
 func (tempo Tempo) Year() int {
@@ -2476,6 +2524,14 @@ func (tempo Tempo) UnixString() string {
 	return strconv.FormatInt(tempo.Timestamp(), 10)
 }
 
+func (tempo Tempo) JSONSerialize() string {
+	return tempo.ISOString()
+}
+
+func (tempo Tempo) Serialize() string {
+	return tempo.JSONSerialize()
+}
+
 func (tempo Tempo) Time() time.Time {
 	return tempo.value
 }
@@ -2573,6 +2629,18 @@ func (tempo Tempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
 	return Period{Start: tempo, End: end, Step: step, IncludeEnd: includeEnd}
 }
 
+func (tempo Tempo) ToPeriod(end Tempo, options ...PeriodOptions) Period {
+	return tempo.PeriodUntil(end, options...)
+}
+
+func (tempo Tempo) Until(end Tempo, options ...PeriodOptions) Period {
+	return tempo.PeriodUntil(end, options...)
+}
+
+func (tempo Tempo) Range(end Tempo, options ...PeriodOptions) Period {
+	return tempo.PeriodUntil(end, options...)
+}
+
 func (tempo Tempo) local() time.Time {
 	return tempo.value.In(tempo.location)
 }
@@ -2655,6 +2723,14 @@ func (mutable *MutableTempo) Timestamp() int64 {
 
 func (mutable *MutableTempo) TimestampMs() int64 {
 	return mutable.Tempo().TimestampMs()
+}
+
+func (mutable *MutableTempo) GetTimestampMs() int64 {
+	return mutable.Tempo().GetTimestampMs()
+}
+
+func (mutable *MutableTempo) Unix() int64 {
+	return mutable.Tempo().Unix()
 }
 
 func (mutable *MutableTempo) Year() int {
@@ -2947,6 +3023,14 @@ func (mutable *MutableTempo) RSSString() string {
 
 func (mutable *MutableTempo) UnixString() string {
 	return mutable.Tempo().UnixString()
+}
+
+func (mutable *MutableTempo) JSONSerialize() string {
+	return mutable.Tempo().JSONSerialize()
+}
+
+func (mutable *MutableTempo) Serialize() string {
+	return mutable.Tempo().Serialize()
 }
 
 func (mutable *MutableTempo) Time() time.Time {
@@ -3752,6 +3836,18 @@ func (mutable *MutableTempo) IntervalUntil(end Tempo) Interval {
 
 func (mutable *MutableTempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
 	return mutable.Tempo().PeriodUntil(end, options...)
+}
+
+func (mutable *MutableTempo) ToPeriod(end Tempo, options ...PeriodOptions) Period {
+	return mutable.Tempo().ToPeriod(end, options...)
+}
+
+func (mutable *MutableTempo) Until(end Tempo, options ...PeriodOptions) Period {
+	return mutable.Tempo().Until(end, options...)
+}
+
+func (mutable *MutableTempo) Range(end Tempo, options ...PeriodOptions) Period {
+	return mutable.Tempo().Range(end, options...)
 }
 
 func (mutable *MutableTempo) replace(next Tempo) *MutableTempo {

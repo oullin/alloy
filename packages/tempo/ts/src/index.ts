@@ -1184,6 +1184,14 @@ export class TempoImmutable {
     );
   }
 
+  static createFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromFormat(input, pattern, options);
+  }
+
   static tryFromFormat(
     input: string,
     pattern: string,
@@ -1202,6 +1210,14 @@ export class TempoImmutable {
     options?: TempoOptions,
   ): boolean {
     return TempoImmutable.tryFromFormat(input, pattern, options) !== null;
+  }
+
+  static canBeCreatedFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): boolean {
+    return TempoImmutable.hasFormat(input, pattern, options);
   }
 
   static create(components: TempoComponents): TempoImmutable {
@@ -1275,12 +1291,26 @@ export class TempoImmutable {
     return new TempoImmutable(fromNumericTimestamp(timestamp), options);
   }
 
+  static createFromTimestamp(
+    timestamp: number,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromTimestamp(timestamp, options);
+  }
+
   static fromTimestampMs(
     timestamp: number,
     options?: TempoOptions,
   ): TempoImmutable {
     assertFiniteNumber(timestamp, "Timestamp");
     return new TempoImmutable(new Date(timestamp), options);
+  }
+
+  static createFromTimestampMs(
+    timestamp: number,
+    options?: TempoOptions,
+  ): TempoImmutable {
+    return TempoImmutable.fromTimestampMs(timestamp, options);
   }
 
   static fromTimestampUTC(timestamp: number): TempoImmutable {
@@ -1293,6 +1323,14 @@ export class TempoImmutable {
     return TempoImmutable.fromTimestampMs(timestamp, {
       timeZone: defaultTimeZone,
     });
+  }
+
+  static createFromTimestampUTC(timestamp: number): TempoImmutable {
+    return TempoImmutable.fromTimestampUTC(timestamp);
+  }
+
+  static createFromTimestampMsUTC(timestamp: number): TempoImmutable {
+    return TempoImmutable.fromTimestampMsUTC(timestamp);
   }
 
   static min(...items: readonly TempoInput[]): TempoImmutable {
@@ -2980,6 +3018,14 @@ export class TempoImmutable {
     return new Date(this.value.getTime());
   }
 
+  toDateTime(): Date {
+    return this.toDate();
+  }
+
+  toDateTimeImmutable(): Date {
+    return this.toDate();
+  }
+
   toDateString(): string {
     return this.format("YYYY-MM-DD");
   }
@@ -3072,8 +3118,24 @@ export class TempoImmutable {
     return String(this.timestamp);
   }
 
+  unix(): number {
+    return this.timestamp;
+  }
+
+  getTimestampMs(): number {
+    return this.timestampMs;
+  }
+
   toJSON(): string {
     return this.toISOString();
+  }
+
+  jsonSerialize(): string {
+    return this.toJSON();
+  }
+
+  serialize(): string {
+    return this.toJSON();
   }
 
   toObject(): TempoObject {
@@ -3123,6 +3185,18 @@ export class TempoImmutable {
 
   periodUntil(end: TempoInput, options?: PeriodOptions): TempoPeriod {
     return new TempoPeriod(this, end, options);
+  }
+
+  toPeriod(end: TempoInput, options?: PeriodOptions): TempoPeriod {
+    return this.periodUntil(end, options);
+  }
+
+  until(end: TempoInput, options?: PeriodOptions): TempoPeriod {
+    return this.periodUntil(end, options);
+  }
+
+  range(end: TempoInput, options?: PeriodOptions): TempoPeriod {
+    return this.periodUntil(end, options);
   }
 
   private parts(): ZonedParts {
@@ -3227,6 +3301,14 @@ export class Tempo extends TempoImmutable {
     return new Tempo(parseFromPattern(input, pattern, options), options);
   }
 
+  static override createFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.fromFormat(input, pattern, options);
+  }
+
   static override tryFromFormat(
     input: string,
     pattern: string,
@@ -3300,6 +3382,13 @@ export class Tempo extends TempoImmutable {
     return new Tempo(fromNumericTimestamp(timestamp), options);
   }
 
+  static override createFromTimestamp(
+    timestamp: number,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.fromTimestamp(timestamp, options);
+  }
+
   static override fromTimestampMs(
     timestamp: number,
     options?: TempoOptions,
@@ -3308,12 +3397,27 @@ export class Tempo extends TempoImmutable {
     return new Tempo(new Date(timestamp), options);
   }
 
+  static override createFromTimestampMs(
+    timestamp: number,
+    options?: TempoOptions,
+  ): Tempo {
+    return Tempo.fromTimestampMs(timestamp, options);
+  }
+
   static override fromTimestampUTC(timestamp: number): Tempo {
     return Tempo.fromTimestamp(timestamp, { timeZone: defaultTimeZone });
   }
 
   static override fromTimestampMsUTC(timestamp: number): Tempo {
     return Tempo.fromTimestampMs(timestamp, { timeZone: defaultTimeZone });
+  }
+
+  static override createFromTimestampUTC(timestamp: number): Tempo {
+    return Tempo.fromTimestampUTC(timestamp);
+  }
+
+  static override createFromTimestampMsUTC(timestamp: number): Tempo {
+    return Tempo.fromTimestampMsUTC(timestamp);
   }
 }
 
@@ -3371,6 +3475,14 @@ export class TempoMutable extends TempoImmutable {
     options?: TempoOptions,
   ): TempoMutable {
     return new TempoMutable(parseFromPattern(input, pattern, options), options);
+  }
+
+  static override createFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.fromFormat(input, pattern, options);
   }
 
   static override tryFromFormat(
@@ -3456,12 +3568,26 @@ export class TempoMutable extends TempoImmutable {
     return new TempoMutable(fromNumericTimestamp(timestamp), options);
   }
 
+  static override createFromTimestamp(
+    timestamp: number,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.fromTimestamp(timestamp, options);
+  }
+
   static override fromTimestampMs(
     timestamp: number,
     options?: TempoOptions,
   ): TempoMutable {
     assertFiniteNumber(timestamp, "Timestamp");
     return new TempoMutable(new Date(timestamp), options);
+  }
+
+  static override createFromTimestampMs(
+    timestamp: number,
+    options?: TempoOptions,
+  ): TempoMutable {
+    return TempoMutable.fromTimestampMs(timestamp, options);
   }
 
   static override fromTimestampUTC(timestamp: number): TempoMutable {
@@ -3472,6 +3598,14 @@ export class TempoMutable extends TempoImmutable {
     return TempoMutable.fromTimestampMs(timestamp, {
       timeZone: defaultTimeZone,
     });
+  }
+
+  static override createFromTimestampUTC(timestamp: number): TempoMutable {
+    return TempoMutable.fromTimestampUTC(timestamp);
+  }
+
+  static override createFromTimestampMsUTC(timestamp: number): TempoMutable {
+    return TempoMutable.fromTimestampMsUTC(timestamp);
   }
 
   protected override make(value: Date, timeZone = this.zone): this {
