@@ -2747,10 +2747,32 @@ export class TempoFactory {
     return Tempo.parse(input, { timeZone: options?.timeZone ?? this.zone });
   }
 
+  tryParse(input: TempoInput, options?: TempoOptions): Tempo | null {
+    return Tempo.tryParse(input, { timeZone: options?.timeZone ?? this.zone });
+  }
+
+  canParse(input: TempoInput, options?: TempoOptions): boolean {
+    return this.tryParse(input, options) !== null;
+  }
+
   fromFormat(input: string, pattern: string, options?: TempoOptions): Tempo {
     return Tempo.fromFormat(input, pattern, {
       timeZone: options?.timeZone ?? this.zone,
     });
+  }
+
+  tryFromFormat(
+    input: string,
+    pattern: string,
+    options?: TempoOptions,
+  ): Tempo | null {
+    return Tempo.tryFromFormat(input, pattern, {
+      timeZone: options?.timeZone ?? this.zone,
+    });
+  }
+
+  hasFormat(input: string, pattern: string, options?: TempoOptions): boolean {
+    return this.tryFromFormat(input, pattern, options) !== null;
   }
 
   create(components: TempoComponents): Tempo {

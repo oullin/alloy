@@ -81,6 +81,21 @@ describe("Tempo TypeScript behavior", () => {
     expect(fixed.now().toISOString()).toBe("2025-01-01T00:00:00.000Z");
     expect(fixed.immutableNow().toISOString()).toBe("2025-01-01T00:00:00.000Z");
     expect(fixed.mutableNow().toISOString()).toBe("2025-01-01T00:00:00.000Z");
+
+    const tokyo = TempoFactory.create({ timeZone: "Asia/Tokyo" });
+
+    expect(tokyo.tryParse("2025-01-01 09:00")?.toISOString()).toBe(
+      "2025-01-01T00:00:00.000Z",
+    );
+    expect(tokyo.canParse("not a date")).toBe(false);
+    expect(tokyo.tryParse("not a date")).toBeNull();
+    expect(
+      tokyo
+        .tryFromFormat("2025-01-01 09:30", "YYYY-MM-DD HH:mm")
+        ?.toISOString(),
+    ).toBe("2025-01-01T00:30:00.000Z");
+    expect(tokyo.hasFormat("2025-01-01 09:30", "YYYY-MM-DD HH:mm")).toBe(true);
+    expect(tokyo.hasFormat("2025/01/01", "YYYY-MM-DD")).toBe(false);
   });
 
   it("creates and renders timezone-aware local components", () => {

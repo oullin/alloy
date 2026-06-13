@@ -287,6 +287,16 @@ func (factory Factory) Parse(input string) (Tempo, error) {
 	return Tempo{value: parsed.UTC(), location: factory.location}, nil
 }
 
+func (factory Factory) TryParse(input string) (Tempo, bool) {
+	tempo, err := factory.Parse(input)
+	return tempo, err == nil
+}
+
+func (factory Factory) CanParse(input string) bool {
+	_, ok := factory.TryParse(input)
+	return ok
+}
+
 func (factory Factory) FromFormat(input string, pattern string) (Tempo, error) {
 	parsed, err := parseFromPattern(input, pattern, factory.location)
 	if err != nil {
@@ -294,6 +304,16 @@ func (factory Factory) FromFormat(input string, pattern string) (Tempo, error) {
 	}
 
 	return Tempo{value: parsed.UTC(), location: factory.location}, nil
+}
+
+func (factory Factory) TryFromFormat(input string, pattern string) (Tempo, bool) {
+	tempo, err := factory.FromFormat(input, pattern)
+	return tempo, err == nil
+}
+
+func (factory Factory) HasFormat(input string, pattern string) bool {
+	_, ok := factory.TryFromFormat(input, pattern)
+	return ok
 }
 
 func (factory Factory) Create(components Components) (Tempo, error) {

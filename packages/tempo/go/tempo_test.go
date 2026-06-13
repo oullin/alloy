@@ -101,6 +101,24 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	if got := formatted.ISOString(); got != "2024-01-01T00:30:00.000Z" {
 		t.Fatalf("Factory.FromFormat().ISOString() = %q, want scoped timezone instant", got)
 	}
+	if parsed, ok := factory.TryParse("2024-01-01 09:00"); !ok || parsed.ISOString() != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.TryParse(valid) = %q, %v, want scoped instant, true", parsed.ISOString(), ok)
+	}
+	if factory.CanParse("not a date") {
+		t.Fatalf("Factory.CanParse(invalid) = true, want false")
+	}
+	if _, ok := factory.TryParse("not a date"); ok {
+		t.Fatalf("Factory.TryParse(invalid) ok = true, want false")
+	}
+	if parsed, ok := factory.TryFromFormat("2024-01-01 09:30", "YYYY-MM-DD HH:mm"); !ok || parsed.ISOString() != "2024-01-01T00:30:00.000Z" {
+		t.Fatalf("Factory.TryFromFormat(valid) = %q, %v, want scoped instant, true", parsed.ISOString(), ok)
+	}
+	if !factory.HasFormat("2024-01-01 09:30", "YYYY-MM-DD HH:mm") {
+		t.Fatalf("Factory.HasFormat(valid) = false, want true")
+	}
+	if factory.HasFormat("2024/01/01", "YYYY-MM-DD") {
+		t.Fatalf("Factory.HasFormat(invalid) = true, want false")
+	}
 
 	created, err := factory.Create(Components{Year: 2024, Month: 1, Day: 1, Hour: 9})
 	if err != nil {
