@@ -1059,6 +1059,18 @@ export class TempoImmutable {
       .reduce((latest, item) => (item.isAfter(latest) ? item : latest));
   }
 
+  static average(start: TempoInput, end: TempoInput): TempoImmutable {
+    const startTempo = TempoImmutable.parse(start);
+    const endTempo = TempoImmutable.parse(end, {
+      timeZone: startTempo.timeZone,
+    });
+
+    return new TempoImmutable(
+      new Date(Math.trunc((startTempo.timestampMs + endTempo.timestampMs) / 2)),
+      { timeZone: startTempo.timeZone },
+    );
+  }
+
   protected make(value: Date, timeZone = this.zone): this {
     const Constructor = this.constructor as new (
       input: TempoInput,
@@ -1611,6 +1623,14 @@ export class TempoImmutable {
     }
   }
 
+  isStartOf(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
+    return this.isSame(this.startOf(unit, options));
+  }
+
+  isEndOf(unit: BoundaryUnit, options?: StartOfWeekOptions): boolean {
+    return this.isSame(this.endOf(unit, options));
+  }
+
   startOfDay(): this {
     return this.startOf("day");
   }
@@ -1908,6 +1928,67 @@ export class TempoImmutable {
       : this.isBefore(end, unit);
 
     return afterStart && beforeEnd;
+  }
+
+  clamp(min: TempoInput, max: TempoInput): this {
+    const minTempo = TempoImmutable.parse(min, { timeZone: this.zone });
+    const maxTempo = TempoImmutable.parse(max, { timeZone: this.zone });
+
+    if (minTempo.isAfter(maxTempo)) {
+      throw new RangeError("Tempo clamp minimum must be before maximum");
+    }
+
+    if (this.isBefore(minTempo)) {
+      return this.make(minTempo.toDate(), minTempo.timeZone);
+    }
+
+    if (this.isAfter(maxTempo)) {
+      return this.make(maxTempo.toDate(), maxTempo.timeZone);
+    }
+
+    return this.clone();
+  }
+
+  average(other: TempoInput): this {
+    const end = TempoImmutable.parse(other, { timeZone: this.zone });
+
+    return this.make(
+      new Date(Math.trunc((this.timestampMs + end.timestampMs) / 2)),
+    );
+  }
+
+  closest(...items: readonly TempoInput[]): this {
+    if (items.length === 0) {
+      throw new RangeError("Tempo.closest requires at least one input");
+    }
+
+    const closest = items
+      .map((item) => TempoImmutable.parse(item, { timeZone: this.zone }))
+      .reduce((best, item) =>
+        Math.abs(item.timestampMs - this.timestampMs) <
+        Math.abs(best.timestampMs - this.timestampMs)
+          ? item
+          : best,
+      );
+
+    return this.make(closest.toDate(), closest.timeZone);
+  }
+
+  farthest(...items: readonly TempoInput[]): this {
+    if (items.length === 0) {
+      throw new RangeError("Tempo.farthest requires at least one input");
+    }
+
+    const farthest = items
+      .map((item) => TempoImmutable.parse(item, { timeZone: this.zone }))
+      .reduce((best, item) =>
+        Math.abs(item.timestampMs - this.timestampMs) >
+        Math.abs(best.timestampMs - this.timestampMs)
+          ? item
+          : best,
+      );
+
+    return this.make(farthest.toDate(), farthest.timeZone);
   }
 
   min(other: TempoInput): this {

@@ -379,4 +379,51 @@ describe("Tempo TypeScript behavior", () => {
     expect(summer.timezoneName("shortOffset")).toBe("GMT-4");
     expect(summer.isDST()).toBe(true);
   });
+
+  it("clamps ranges, averages instants, and detects unit boundaries", () => {
+    const base = Tempo.parse("2024-05-15T12:00:00Z");
+
+    expect(
+      Tempo.parse("2024-05-01T00:00:00Z")
+        .clamp("2024-05-10T00:00:00Z", "2024-05-20T00:00:00Z")
+        .toISOString(),
+    ).toBe("2024-05-10T00:00:00.000Z");
+    expect(
+      base.clamp("2024-05-10T00:00:00Z", "2024-05-20T00:00:00Z").toISOString(),
+    ).toBe("2024-05-15T12:00:00.000Z");
+    expect(
+      Tempo.parse("2024-05-30T00:00:00Z")
+        .clamp("2024-05-10T00:00:00Z", "2024-05-20T00:00:00Z")
+        .toISOString(),
+    ).toBe("2024-05-20T00:00:00.000Z");
+
+    expect(base.average("2024-05-17T12:00:00Z").toISOString()).toBe(
+      "2024-05-16T12:00:00.000Z",
+    );
+    expect(
+      Tempo.average(
+        "2024-05-15T00:00:00Z",
+        "2024-05-17T00:00:00Z",
+      ).toISOString(),
+    ).toBe("2024-05-16T00:00:00.000Z");
+    expect(
+      base
+        .closest(
+          "2024-05-10T00:00:00Z",
+          "2024-05-16T00:00:00Z",
+          "2024-05-20T00:00:00Z",
+        )
+        .toISOString(),
+    ).toBe("2024-05-16T00:00:00.000Z");
+    expect(
+      base
+        .farthest("2024-05-10T00:00:00Z", "2024-05-22T00:00:00Z")
+        .toISOString(),
+    ).toBe("2024-05-22T00:00:00.000Z");
+
+    expect(Tempo.parse("2024-05-15T00:00:00Z").isStartOf("day")).toBe(true);
+    expect(Tempo.parse("2024-05-15T00:00:01Z").isStartOf("day")).toBe(false);
+    expect(Tempo.parse("2024-05-15T23:59:59.999Z").isEndOf("day")).toBe(true);
+    expect(Tempo.parse("2024-05-15T23:59:59.998Z").isEndOf("day")).toBe(false);
+  });
 });

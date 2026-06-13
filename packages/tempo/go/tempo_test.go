@@ -658,3 +658,119 @@ func TestTimezoneNamesOffsetsAndDSTState(t *testing.T) {
 		t.Fatalf("summer IsDST() = false, want true")
 	}
 }
+
+func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
+	base, err := Parse("2024-05-15T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse base: %v", err)
+	}
+	minimum, err := Parse("2024-05-10T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse minimum: %v", err)
+	}
+	maximum, err := Parse("2024-05-20T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse maximum: %v", err)
+	}
+	before, err := Parse("2024-05-01T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse before: %v", err)
+	}
+	after, err := Parse("2024-05-30T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse after: %v", err)
+	}
+
+	clampedBefore, err := before.Clamp(minimum, maximum)
+	if err != nil {
+		t.Fatalf("clamp before: %v", err)
+	}
+	if got := clampedBefore.ISOString(); got != "2024-05-10T00:00:00.000Z" {
+		t.Fatalf("Clamp(before).ISOString() = %q, want minimum", got)
+	}
+	clampedBase, err := base.Clamp(minimum, maximum)
+	if err != nil {
+		t.Fatalf("clamp base: %v", err)
+	}
+	if got := clampedBase.ISOString(); got != "2024-05-15T12:00:00.000Z" {
+		t.Fatalf("Clamp(base).ISOString() = %q, want original", got)
+	}
+	clampedAfter, err := after.Clamp(minimum, maximum)
+	if err != nil {
+		t.Fatalf("clamp after: %v", err)
+	}
+	if got := clampedAfter.ISOString(); got != "2024-05-20T00:00:00.000Z" {
+		t.Fatalf("Clamp(after).ISOString() = %q, want maximum", got)
+	}
+
+	averageEnd, err := Parse("2024-05-17T12:00:00Z")
+	if err != nil {
+		t.Fatalf("parse average end: %v", err)
+	}
+	if got := base.Average(averageEnd).ISOString(); got != "2024-05-16T12:00:00.000Z" {
+		t.Fatalf("Average().ISOString() = %q, want midpoint", got)
+	}
+	staticStart, err := Parse("2024-05-15T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse static start: %v", err)
+	}
+	staticEnd, err := Parse("2024-05-17T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse static end: %v", err)
+	}
+	if got := Average(staticStart, staticEnd).ISOString(); got != "2024-05-16T00:00:00.000Z" {
+		t.Fatalf("Average(start,end).ISOString() = %q, want midpoint", got)
+	}
+
+	closestA, err := Parse("2024-05-10T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse closest A: %v", err)
+	}
+	closestB, err := Parse("2024-05-16T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse closest B: %v", err)
+	}
+	closestC, err := Parse("2024-05-20T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse closest C: %v", err)
+	}
+	if got := base.Closest(closestA, closestB, closestC).ISOString(); got != "2024-05-16T00:00:00.000Z" {
+		t.Fatalf("Closest().ISOString() = %q, want nearest", got)
+	}
+	farthest, err := Parse("2024-05-22T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse farthest: %v", err)
+	}
+	if got := base.Farthest(closestA, farthest).ISOString(); got != "2024-05-22T00:00:00.000Z" {
+		t.Fatalf("Farthest().ISOString() = %q, want farthest", got)
+	}
+
+	startOfDay, err := Parse("2024-05-15T00:00:00Z")
+	if err != nil {
+		t.Fatalf("parse start of day: %v", err)
+	}
+	notStartOfDay, err := Parse("2024-05-15T00:00:01Z")
+	if err != nil {
+		t.Fatalf("parse not start of day: %v", err)
+	}
+	endOfDay, err := Parse("2024-05-15T23:59:59.999Z")
+	if err != nil {
+		t.Fatalf("parse end of day: %v", err)
+	}
+	notEndOfDay, err := Parse("2024-05-15T23:59:59.998Z")
+	if err != nil {
+		t.Fatalf("parse not end of day: %v", err)
+	}
+	if !startOfDay.IsStartOf(Day) {
+		t.Fatalf("IsStartOf(Day) = false, want true")
+	}
+	if notStartOfDay.IsStartOf(Day) {
+		t.Fatalf("IsStartOf(Day) = true, want false")
+	}
+	if !endOfDay.IsEndOf(Day) {
+		t.Fatalf("IsEndOf(Day) = false, want true")
+	}
+	if notEndOfDay.IsEndOf(Day) {
+		t.Fatalf("IsEndOf(Day) = true, want false")
+	}
+}

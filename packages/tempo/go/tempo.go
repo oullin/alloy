@@ -260,6 +260,13 @@ func Max(first Tempo, rest ...Tempo) Tempo {
 	return result
 }
 
+func Average(start Tempo, end Tempo) Tempo {
+	return Tempo{
+		value:    time.UnixMilli((start.TimestampMs() + end.TimestampMs()) / 2).UTC(),
+		location: start.location,
+	}
+}
+
 func NewMutable(input Tempo) *MutableTempo {
 	return &MutableTempo{value: input.value, location: input.location}
 }
@@ -975,6 +982,14 @@ func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 	}
 }
 
+func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
+	return tempo.Same(tempo.StartOf(unit, options...))
+}
+
+func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
+	return tempo.Same(tempo.EndOf(unit, options...))
+}
+
 func (tempo Tempo) StartOfDay() Tempo {
 	return tempo.StartOf(Day)
 }
@@ -1251,6 +1266,56 @@ func (tempo Tempo) SameYear(other Tempo) bool {
 
 func (tempo Tempo) Birthday(other Tempo) bool {
 	return tempo.Month() == other.Month() && tempo.Day() == other.Day()
+}
+
+func (tempo Tempo) Clamp(minimum Tempo, maximum Tempo) (Tempo, error) {
+	if minimum.After(maximum) {
+		return Tempo{}, errors.New("tempo clamp minimum must be before maximum")
+	}
+
+	if tempo.Before(minimum) {
+		return minimum, nil
+	}
+
+	if tempo.After(maximum) {
+		return maximum, nil
+	}
+
+	return tempo.Clone(), nil
+}
+
+func (tempo Tempo) Average(other Tempo) Tempo {
+	return Average(tempo, other)
+}
+
+func (tempo Tempo) Closest(first Tempo, rest ...Tempo) Tempo {
+	result := first
+	bestDistance := absInt64(first.TimestampMs() - tempo.TimestampMs())
+
+	for _, item := range rest {
+		distance := absInt64(item.TimestampMs() - tempo.TimestampMs())
+		if distance < bestDistance {
+			result = item
+			bestDistance = distance
+		}
+	}
+
+	return result
+}
+
+func (tempo Tempo) Farthest(first Tempo, rest ...Tempo) Tempo {
+	result := first
+	bestDistance := absInt64(first.TimestampMs() - tempo.TimestampMs())
+
+	for _, item := range rest {
+		distance := absInt64(item.TimestampMs() - tempo.TimestampMs())
+		if distance > bestDistance {
+			result = item
+			bestDistance = distance
+		}
+	}
+
+	return result
 }
 
 func (tempo Tempo) SameOrBefore(other Tempo, units ...Unit) bool {
@@ -1919,6 +1984,14 @@ func daysInMonth(year int, month int) int {
 }
 
 func absInt(value int) int {
+	if value < 0 {
+		return -value
+	}
+
+	return value
+}
+
+func absInt64(value int64) int64 {
 	if value < 0 {
 		return -value
 	}
