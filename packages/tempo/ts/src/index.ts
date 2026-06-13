@@ -1296,6 +1296,14 @@ export class TempoImmutable {
       .reduce((latest, item) => (item.isAfter(latest) ? item : latest));
   }
 
+  static minimum(...items: readonly TempoInput[]): TempoImmutable {
+    return TempoImmutable.min(...items);
+  }
+
+  static maximum(...items: readonly TempoInput[]): TempoImmutable {
+    return TempoImmutable.max(...items);
+  }
+
   static average(start: TempoInput, end: TempoInput): TempoImmutable {
     const startTempo = TempoImmutable.parse(start);
     const endTempo = TempoImmutable.parse(end, {
@@ -2700,6 +2708,14 @@ export class TempoImmutable {
       : this.make(asDate(other), zoneFromInput(other, undefined));
   }
 
+  minimum(other: TempoInput): this {
+    return this.min(other);
+  }
+
+  maximum(other: TempoInput): this {
+    return this.max(other);
+  }
+
   format(pattern: string, options?: FormatOptions): string {
     const locale = options?.locale ?? "en-US";
     const timeZone = normalizeTimeZone(options?.timeZone ?? this.zone);
@@ -3550,6 +3566,8 @@ export const canParse = Tempo.canParse;
 export const fromJSON = Tempo.fromJSON;
 export const min = Tempo.min;
 export const max = Tempo.max;
+export const minimum = Tempo.minimum;
+export const maximum = Tempo.maximum;
 export const average = Tempo.average;
 export const fromFormat = Tempo.fromFormat;
 export const tryFromFormat = Tempo.tryFromFormat;

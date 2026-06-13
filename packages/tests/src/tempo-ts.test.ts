@@ -14,7 +14,9 @@ import {
   createSafe,
   fromJSON,
   hasFormat,
+  maximum,
   max,
+  minimum,
   min,
   today,
   tomorrow,
@@ -692,6 +694,18 @@ describe("Tempo TypeScript behavior", () => {
     expect(
       max("2024-05-15T00:00:00Z", "2024-05-20T00:00:00Z").toISOString(),
     ).toBe("2024-05-20T00:00:00.000Z");
+    expect(
+      minimum("2024-05-15T00:00:00Z", "2024-05-10T00:00:00Z").toISOString(),
+    ).toBe("2024-05-10T00:00:00.000Z");
+    expect(
+      maximum("2024-05-15T00:00:00Z", "2024-05-20T00:00:00Z").toISOString(),
+    ).toBe("2024-05-20T00:00:00.000Z");
+    expect(base.minimum("2024-05-10T00:00:00Z").toISOString()).toBe(
+      "2024-05-10T00:00:00.000Z",
+    );
+    expect(base.maximum("2024-05-20T00:00:00Z").toISOString()).toBe(
+      "2024-05-20T00:00:00.000Z",
+    );
     expect(
       base
         .closest(

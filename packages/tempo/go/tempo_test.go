@@ -1320,6 +1320,18 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 	if got := Average(staticStart, staticEnd).ISOString(); got != "2024-05-16T00:00:00.000Z" {
 		t.Fatalf("Average(start,end).ISOString() = %q, want midpoint", got)
 	}
+	if got := Minimum(staticStart, staticEnd).ISOString(); got != "2024-05-15T00:00:00.000Z" {
+		t.Fatalf("Minimum(start,end).ISOString() = %q, want earliest", got)
+	}
+	if got := Maximum(staticStart, staticEnd).ISOString(); got != "2024-05-17T00:00:00.000Z" {
+		t.Fatalf("Maximum(start,end).ISOString() = %q, want latest", got)
+	}
+	if got := base.Minimum(minimum).ISOString(); got != "2024-05-10T00:00:00.000Z" {
+		t.Fatalf("Minimum().ISOString() = %q, want minimum", got)
+	}
+	if got := base.Maximum(maximum).ISOString(); got != "2024-05-20T00:00:00.000Z" {
+		t.Fatalf("Maximum().ISOString() = %q, want maximum", got)
+	}
 
 	closestA, err := Parse("2024-05-10T00:00:00Z")
 	if err != nil {

@@ -515,6 +515,14 @@ func Max(first Tempo, rest ...Tempo) Tempo {
 	return result
 }
 
+func Minimum(first Tempo, rest ...Tempo) Tempo {
+	return Min(first, rest...)
+}
+
+func Maximum(first Tempo, rest ...Tempo) Tempo {
+	return Max(first, rest...)
+}
+
 func Average(start Tempo, end Tempo) Tempo {
 	return Tempo{
 		value:    time.UnixMilli((start.TimestampMs() + end.TimestampMs()) / 2).UTC(),
@@ -2071,6 +2079,22 @@ func (tempo Tempo) Farthest(first Tempo, rest ...Tempo) Tempo {
 	return result
 }
 
+func (tempo Tempo) Min(other Tempo) Tempo {
+	return Min(tempo, other)
+}
+
+func (tempo Tempo) Max(other Tempo) Tempo {
+	return Max(tempo, other)
+}
+
+func (tempo Tempo) Minimum(other Tempo) Tempo {
+	return tempo.Min(other)
+}
+
+func (tempo Tempo) Maximum(other Tempo) Tempo {
+	return tempo.Max(other)
+}
+
 func (tempo Tempo) SameOrBefore(other Tempo, units ...Unit) bool {
 	return tempo.Same(other, units...) || tempo.Before(other, units...)
 }
@@ -3293,6 +3317,22 @@ func (mutable *MutableTempo) Closest(first Tempo, rest ...Tempo) *MutableTempo {
 
 func (mutable *MutableTempo) Farthest(first Tempo, rest ...Tempo) *MutableTempo {
 	return mutable.replace(mutable.Tempo().Farthest(first, rest...))
+}
+
+func (mutable *MutableTempo) Min(other Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Min(other))
+}
+
+func (mutable *MutableTempo) Max(other Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Max(other))
+}
+
+func (mutable *MutableTempo) Minimum(other Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Minimum(other))
+}
+
+func (mutable *MutableTempo) Maximum(other Tempo) *MutableTempo {
+	return mutable.replace(mutable.Tempo().Maximum(other))
 }
 
 func (mutable *MutableTempo) SameOrBefore(other Tempo, units ...Unit) bool {
