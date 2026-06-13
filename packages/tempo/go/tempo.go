@@ -1382,6 +1382,21 @@ func (tempo Tempo) LastOfQuarter(weekdays ...time.Weekday) Tempo {
 	return last.SubDays(delta)
 }
 
+func (tempo Tempo) NthOfQuarter(occurrence int, weekday time.Weekday) (Tempo, bool) {
+	if occurrence == 0 {
+		return Tempo{}, false
+	}
+
+	quarter := tempo.Quarter()
+	year := tempo.Year()
+	candidate := tempo.FirstOfQuarter(weekday).AddWeeks(occurrence - 1)
+	if occurrence < 0 {
+		candidate = tempo.LastOfQuarter(weekday).SubWeeks(absInt(occurrence) - 1)
+	}
+
+	return candidate, candidate.Quarter() == quarter && candidate.Year() == year
+}
+
 func (tempo Tempo) StartOfYear() Tempo {
 	return tempo.StartOf(Year)
 }
@@ -1410,6 +1425,20 @@ func (tempo Tempo) LastOfYear(weekdays ...time.Weekday) Tempo {
 	target := weekdays[0]
 	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
 	return last.SubDays(delta)
+}
+
+func (tempo Tempo) NthOfYear(occurrence int, weekday time.Weekday) (Tempo, bool) {
+	if occurrence == 0 {
+		return Tempo{}, false
+	}
+
+	year := tempo.Year()
+	candidate := tempo.FirstOfYear(weekday).AddWeeks(occurrence - 1)
+	if occurrence < 0 {
+		candidate = tempo.LastOfYear(weekday).SubWeeks(absInt(occurrence) - 1)
+	}
+
+	return candidate, candidate.Year() == year
 }
 
 func (tempo Tempo) Floor(unit Unit) Tempo {
@@ -2469,6 +2498,10 @@ func (mutable *MutableTempo) LastOfQuarter(weekdays ...time.Weekday) *MutableTem
 	return mutable.replace(mutable.Tempo().LastOfQuarter(weekdays...))
 }
 
+func (mutable *MutableTempo) NthOfQuarter(occurrence int, weekday time.Weekday) (Tempo, bool) {
+	return mutable.Tempo().NthOfQuarter(occurrence, weekday)
+}
+
 func (mutable *MutableTempo) StartOfYear() *MutableTempo {
 	return mutable.replace(mutable.Tempo().StartOfYear())
 }
@@ -2483,6 +2516,10 @@ func (mutable *MutableTempo) FirstOfYear(weekdays ...time.Weekday) *MutableTempo
 
 func (mutable *MutableTempo) LastOfYear(weekdays ...time.Weekday) *MutableTempo {
 	return mutable.replace(mutable.Tempo().LastOfYear(weekdays...))
+}
+
+func (mutable *MutableTempo) NthOfYear(occurrence int, weekday time.Weekday) (Tempo, bool) {
+	return mutable.Tempo().NthOfYear(occurrence, weekday)
 }
 
 func (mutable *MutableTempo) Floor(unit Unit) *MutableTempo {

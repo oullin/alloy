@@ -1897,6 +1897,26 @@ export class TempoImmutable {
     return last.subDays(delta);
   }
 
+  nthOfQuarter(occurrence: number, weekday: WeekdayInput): this | null {
+    if (!Number.isInteger(occurrence) || occurrence === 0) {
+      throw new RangeError(
+        "Tempo nthOfQuarter occurrence must be a non-zero integer",
+      );
+    }
+
+    const currentQuarter = this.quarter;
+    const currentYear = this.year;
+    const candidate =
+      occurrence > 0
+        ? this.firstOfQuarter(weekday).addWeeks(occurrence - 1)
+        : this.lastOfQuarter(weekday).subWeeks(Math.abs(occurrence) - 1);
+
+    return candidate.quarter === currentQuarter &&
+      candidate.year === currentYear
+      ? candidate
+      : null;
+  }
+
   firstOfYear(weekday?: WeekdayInput): this {
     const first = this.startOf("year");
 
@@ -1921,6 +1941,22 @@ export class TempoImmutable {
     const delta = (last.dayOfWeek - target + 7) % 7;
 
     return last.subDays(delta);
+  }
+
+  nthOfYear(occurrence: number, weekday: WeekdayInput): this | null {
+    if (!Number.isInteger(occurrence) || occurrence === 0) {
+      throw new RangeError(
+        "Tempo nthOfYear occurrence must be a non-zero integer",
+      );
+    }
+
+    const currentYear = this.year;
+    const candidate =
+      occurrence > 0
+        ? this.firstOfYear(weekday).addWeeks(occurrence - 1)
+        : this.lastOfYear(weekday).subWeeks(Math.abs(occurrence) - 1);
+
+    return candidate.year === currentYear ? candidate : null;
   }
 
   startOfYear(): this {

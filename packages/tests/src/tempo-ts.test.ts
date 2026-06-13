@@ -432,8 +432,14 @@ describe("Tempo TypeScript behavior", () => {
     expect(may.nthOfMonth(5, "monday")).toBeNull();
     expect(may.firstOfQuarter("monday").toDateString()).toBe("2024-04-01");
     expect(may.lastOfQuarter("friday").toDateString()).toBe("2024-06-28");
+    expect(may.nthOfQuarter(2, "monday")?.toDateString()).toBe("2024-04-08");
+    expect(may.nthOfQuarter(-1, "friday")?.toDateString()).toBe("2024-06-28");
+    expect(may.nthOfQuarter(14, "monday")).toBeNull();
     expect(may.firstOfYear("monday").toDateString()).toBe("2024-01-01");
     expect(may.lastOfYear("tuesday").toDateString()).toBe("2024-12-31");
+    expect(may.nthOfYear(20, "monday")?.toDateString()).toBe("2024-05-13");
+    expect(may.nthOfYear(-1, "tuesday")?.toDateString()).toBe("2024-12-31");
+    expect(may.nthOfYear(54, "monday")).toBeNull();
     expect(birthday.age("2024-06-14T23:59:59Z")).toBe(23);
     expect(birthday.age("2024-06-15T00:00:00Z")).toBe(24);
   });
