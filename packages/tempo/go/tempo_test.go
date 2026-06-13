@@ -989,6 +989,12 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 	if parsed.Years != 1 || parsed.Months != 2 || parsed.Days != 3 || parsed.Hours != 4 || parsed.Minutes != 5 || parsed.Seconds != 6 || parsed.Milliseconds != 7 {
 		t.Fatalf("ParseDuration() = %#v, want parsed components", parsed)
 	}
+	if got := parsed.ToMap()["hours"]; got != 4 {
+		t.Fatalf("Duration.ToMap()[hours] = %d, want 4", got)
+	}
+	if got := parsed.ToArray(); got != [9]int{1, 0, 2, 0, 3, 4, 5, 6, 7} {
+		t.Fatalf("Duration.ToArray() = %#v, want component array", got)
+	}
 	if got := parsed.ISOString(); got != "P1Y2M3DT4H5M6.007S" {
 		t.Fatalf("ISOString() = %q, want parsed duration string", got)
 	}

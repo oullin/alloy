@@ -1010,6 +1010,38 @@ export class TempoDuration {
     };
   }
 
+  toMap(): Map<keyof DurationObject, DurationObject[keyof DurationObject]> {
+    return new Map(
+      Object.entries(this.toObject()) as Array<
+        [keyof DurationObject, DurationObject[keyof DurationObject]]
+      >,
+    );
+  }
+
+  toArray(): [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ] {
+    return [
+      this.years,
+      this.quarters,
+      this.months,
+      this.weeks,
+      this.days,
+      this.hours,
+      this.minutes,
+      this.seconds,
+      this.milliseconds,
+    ];
+  }
+
   toISOString(): string {
     if (this.isZero()) {
       return "PT0S";

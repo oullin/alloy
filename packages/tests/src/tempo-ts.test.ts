@@ -538,6 +538,8 @@ describe("Tempo TypeScript behavior", () => {
       seconds: 6,
       years: 1,
     });
+    expect(parsed.toMap().get("hours")).toBe(4);
+    expect(parsed.toArray()).toEqual([1, 0, 2, 0, 3, 4, 5, 6, 7]);
     expect(parsed.toISOString()).toBe("P1Y2M3DT4H5M6.007S");
     expect(normalized.toObject()).toMatchObject({
       days: 9,
