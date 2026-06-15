@@ -93,18 +93,3 @@ func (span Span) Union(other Span) Span {
 	}
 }
 
-func min(left int64, right int64) int64 {
-	if left < right {
-		return left
-	}
-
-	return right
-}
-
-func max(left int64, right int64) int64 {
-	if left > right {
-		return left
-	}
-
-	return right
-}
