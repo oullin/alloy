@@ -5,6 +5,7 @@ import (
 
 	"github.com/oullin/alloy/tempo/duration"
 	"github.com/oullin/alloy/tempo/factory"
+	"github.com/oullin/alloy/tempo/runtime"
 )
 
 type Unit = duration.Unit
@@ -56,10 +57,7 @@ type Settings struct {
 
 type Serializer func(Tempo) string
 
-type Translator interface {
-	Message(key string) (any, bool)
-	Translate(key string, replacements map[string]string) (string, bool)
-}
+type Translator = runtime.Translator
 
 type StartOfWeekOptions struct {
 	WeekStartsOn time.Weekday

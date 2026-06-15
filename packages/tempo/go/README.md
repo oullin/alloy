@@ -1,39 +1,52 @@
 # Tempo Go
 
-Tempo extension points are plain Go functions or user-owned wrapper types. Keep
-reusable behavior outside the package surface:
+Tempo is split into a small umbrella package (`tempo/tempo`) that wires
+methods onto `Tempo` / `*MutableTempo` and a set of feature packages
+that hold the actual math behind a generic `core.Bearer[T]` contract.
+Every feature package — `arithmetic`, `boundaries`, `comparison`,
+`setters`, `diff`, `formatting` — exports plain functions you can call
+on any bearer:
 
 ```go
 package examples
 
-import tempo "github.com/oullin/alloy/tempo/tempo"
-import "github.com/oullin/alloy/tempo/arithmetic"
-import "github.com/oullin/alloy/tempo/formatting"
+import (
+	"time"
+
+	"github.com/oullin/alloy/tempo/arithmetic"
+	"github.com/oullin/alloy/tempo/boundaries"
+	"github.com/oullin/alloy/tempo/formatting"
+	tempo "github.com/oullin/alloy/tempo/tempo"
+)
 
 func DateOnly(value tempo.Tempo) string {
-	return formatting.From(value).DateString()
+	return formatting.DateString(value)
 }
 
 func NextBusinessDay(value tempo.Tempo) tempo.Tempo {
-	next := arithmetic.From(value).AddDays(1).Tempo()
-	for next.IsWeekend() {
-		next = arithmetic.From(next).AddDays(1).Tempo()
-	}
+	return boundaries.NextWeekday(value, []time.Weekday{time.Saturday, time.Sunday})
+}
 
-	return next
+func ShiftDays(value *tempo.MutableTempo, days int) *tempo.MutableTempo {
+	return arithmetic.AddDays(value, days)
 }
 ```
 
 Locale and translation behavior is composed with runtimes and factories:
 
 ```go
-runtime := tempo.NewRuntime(
-	tempo.RuntimeLocale("en-US"),
-	tempo.RuntimeTranslator(myTranslator),
+import (
+	"github.com/oullin/alloy/tempo/runtime"
+	tempo "github.com/oullin/alloy/tempo/tempo"
+)
+
+rt := runtime.New(
+	runtime.Locale("en-US"),
+	runtime.WithTranslator(myTranslator),
 )
 
 factory, err := tempo.NewFactory(
-	tempo.WithRuntime(runtime),
+	tempo.WithRuntime(rt),
 	tempo.WithTimezone("UTC"),
 )
 if err != nil {
@@ -42,3 +55,23 @@ if err != nil {
 
 value, err := factory.Parse("2024-05-15")
 ```
+
+## Package layout
+
+- `core/` – the `State` snapshot and `Bearer[T]` contract feature
+  packages target.
+- `internal/kernel/` – pure `time.Time` math the feature packages
+  build on.
+- `duration/`, `calendar/` – calendar primitives and `Unit`
+  definitions.
+- `arithmetic/`, `boundaries/`, `comparison/`, `setters/`, `diff/`,
+  `formatting/` – generic Bearer-based feature implementations.
+- `interval/`, `period/` – the time-span helpers used by
+  `tempo.Interval` and `tempo.Period`.
+- `runtime/` – `Runtime`, `Translator`, locale/fallback/translator
+  options.
+- `factory/`, `parser/`, `config/` – construction and configuration.
+- `tempo/` – the umbrella package that wires methods onto `Tempo` and
+  `*MutableTempo`, exposes `Parse`, `NewFactory`, `NewRuntime`, and
+  re-exports the public surface (`Runtime`, `Translator`, etc.) via
+  type aliases so importers keep a single entry point.
