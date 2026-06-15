@@ -193,31 +193,15 @@ func (tempo Tempo) SetISODate(year int, week int, day int) Tempo {
 }
 
 func (tempo Tempo) SetISOWeek(week int, days ...int) Tempo {
-	day := tempo.ISOWeekday()
-
-	if len(days) > 0 {
-		day = days[0]
-	}
-
-	return tempo.SetISODate(tempo.ISOWeekYear(), week, day)
+	return setters.SetISOWeek(tempo, week, days...)
 }
 
 func (tempo Tempo) SetISOWeekYear(year int, days ...int) Tempo {
-	day := tempo.ISOWeekday()
-
-	if len(days) > 0 {
-		day = days[0]
-	}
-
-	return tempo.SetISODate(year, tempo.ISOWeekNumber(), day)
+	return setters.SetISOWeekYear(tempo, year, days...)
 }
 
 func (tempo Tempo) SetISOWeekday(day int) Tempo {
-	if day == 0 {
-		day = 7
-	}
-
-	return tempo.SetISODate(tempo.ISOWeekYear(), tempo.ISOWeekNumber(), day)
+	return setters.SetISOWeekday(tempo, day)
 }
 
 func (tempo Tempo) ISOWeeksInYear() int {

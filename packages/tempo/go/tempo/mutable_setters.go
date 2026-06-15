@@ -141,15 +141,15 @@ func (mutable *MutableTempo) SetISODate(year int, week int, day int) *MutableTem
 }
 
 func (mutable *MutableTempo) SetISOWeek(week int, days ...int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetISOWeek(week, days...))
+	return setters.SetISOWeek(mutable, week, days...)
 }
 
 func (mutable *MutableTempo) SetISOWeekYear(year int, days ...int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetISOWeekYear(year, days...))
+	return setters.SetISOWeekYear(mutable, year, days...)
 }
 
 func (mutable *MutableTempo) SetISOWeekday(day int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetISOWeekday(day))
+	return setters.SetISOWeekday(mutable, day)
 }
 
 func (mutable *MutableTempo) ISOWeeksInYear() int {

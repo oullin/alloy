@@ -1,6 +1,10 @@
 package tempo
 
-import "time"
+import (
+	"time"
+
+	"github.com/oullin/alloy/tempo/setters"
+)
 
 func (mutable *MutableTempo) Tempo() Tempo {
 	return newTempo(mutable.value, mutable.location, mutable.runtime)
@@ -117,7 +121,7 @@ func (mutable *MutableTempo) Weekday() int {
 }
 
 func (mutable *MutableTempo) SetWeekday(weekday time.Weekday) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetWeekday(weekday))
+	return setters.SetWeekday(mutable, weekday)
 }
 
 func (mutable *MutableTempo) ISOWeekday() int {
@@ -145,7 +149,7 @@ func (mutable *MutableTempo) DayOfYear() int {
 }
 
 func (mutable *MutableTempo) SetDayOfYear(day int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetDayOfYear(day))
+	return setters.SetDayOfYear(mutable, day)
 }
 
 func (mutable *MutableTempo) Hour() int {

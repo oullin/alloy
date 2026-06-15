@@ -166,3 +166,48 @@ func SetISODate[T core.Bearer[T]](bearer T, year int, week int, day int) T {
 func Midday[T core.Bearer[T]](bearer T, hour int) T {
 	return SetTime(bearer, hour, 0, 0, 0)
 }
+
+func SetISOWeek[T core.Bearer[T]](bearer T, week int, days ...int) T {
+	state := bearer.State()
+	year, _ := state.Value.In(state.Location).ISOWeek()
+	day := isoWeekday(state)
+
+	if len(days) > 0 {
+		day = days[0]
+	}
+
+	return SetISODate(bearer, year, week, day)
+}
+
+func SetISOWeekYear[T core.Bearer[T]](bearer T, year int, days ...int) T {
+	state := bearer.State()
+	_, week := state.Value.In(state.Location).ISOWeek()
+	day := isoWeekday(state)
+
+	if len(days) > 0 {
+		day = days[0]
+	}
+
+	return SetISODate(bearer, year, week, day)
+}
+
+func SetISOWeekday[T core.Bearer[T]](bearer T, day int) T {
+	if day == 0 {
+		day = 7
+	}
+
+	state := bearer.State()
+	year, week := state.Value.In(state.Location).ISOWeek()
+
+	return SetISODate(bearer, year, week, day)
+}
+
+func isoWeekday(state core.State) int {
+	weekday := state.Value.In(state.Location).Weekday()
+
+	if weekday == time.Sunday {
+		return 7
+	}
+
+	return int(weekday)
+}
