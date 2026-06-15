@@ -229,8 +229,8 @@ func (tempo Tempo) UnixString() string {
 }
 
 func (tempo Tempo) JSONSerialize() string {
-	if serializer != nil {
-		return serializer(tempo)
+	if defaultConfig.Serializer != nil {
+		return defaultConfig.Serializer(tempo)
 	}
 
 	return tempo.ISOString()
@@ -241,8 +241,8 @@ func (tempo Tempo) Serialize() string {
 }
 
 func (tempo Tempo) String() string {
-	if toStringFormat != "" {
-		return tempo.Format(toStringFormat)
+	if defaultConfig.ToStringFormat != "" {
+		return tempo.Format(defaultConfig.ToStringFormat)
 	}
 
 	return tempo.ISOString()
@@ -264,7 +264,7 @@ func (tempo *Tempo) UnmarshalJSON(data []byte) error {
 
 	location := tempo.location
 	if location == nil {
-		location = defaultLocation
+		location = defaultLocation()
 	}
 
 	parsed, err := parseInLocation(input, location)

@@ -193,7 +193,7 @@ func (tempo Tempo) Calendar(reference Tempo, formats ...map[string]string) strin
 }
 
 func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
-	opts := tempoSettings.HumanDiff
+	opts := defaultConfig.Settings.HumanDiff
 	if len(options) > 0 {
 		opts = options[0]
 	}

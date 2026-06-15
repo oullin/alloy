@@ -1,5 +1,7 @@
 package tempo
 
+import mutablepkg "github.com/oullin/alloy/tempo/mutable"
+
 func (mutable *MutableTempo) IntervalUntil(end Tempo) Interval {
 	return mutable.Tempo().IntervalUntil(end)
 }
@@ -21,8 +23,12 @@ func (mutable *MutableTempo) Range(end Tempo, options ...PeriodOptions) Period {
 }
 
 func (mutable *MutableTempo) replace(next Tempo) *MutableTempo {
-	mutable.value = next.value
-	mutable.location = next.location
-	mutable.runtime = next.Runtime()
+	state := mutablepkg.Replace(
+		mutablepkg.State[Runtime]{Value: mutable.value, Location: mutable.location, Runtime: mutable.Runtime()},
+		mutablepkg.State[Runtime]{Value: next.value, Location: next.location, Runtime: next.Runtime()},
+	)
+	mutable.value = state.Value
+	mutable.location = state.Location
+	mutable.runtime = state.Runtime
 	return mutable
 }

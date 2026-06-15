@@ -1,6 +1,6 @@
 package tempo
 
-import "time"
+import "github.com/oullin/alloy/tempo/temporal"
 
 func monthDiff(left Tempo, right Tempo, unit Unit) float64 {
 	sign := 1.0
@@ -31,5 +31,5 @@ func monthDiff(left Tempo, right Tempo, unit Unit) float64 {
 }
 
 func daysInMonth(year int, month int) int {
-	return time.Date(year, time.Month(month)+1, 0, 0, 0, 0, 0, time.UTC).Day()
+	return temporal.DaysInMonth(year, month)
 }

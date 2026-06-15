@@ -346,6 +346,36 @@ func TestGlobalSettingsAffectDateBehavior(t *testing.T) {
 	assertEqual(t, "configured Now().DateTimeString()", now.DateTimeString(), "2025-01-01 09:00:00")
 }
 
+func TestInjectedConfigControlsNowAndFactoryClock(t *testing.T) {
+	frozen, err := Parse("2025-02-03T04:05:06Z")
+	if err != nil {
+		t.Fatalf("parse frozen config time: %v", err)
+	}
+
+	cfg := NewConfig(Settings{
+		Locale:         "en-US",
+		FallbackLocale: "en-US",
+		MonthsOverflow: true,
+		StrictMode:     true,
+		TestNow:        &frozen,
+		Timezone:       "Asia/Tokyo",
+		WeekendDays:    []time.Weekday{time.Sunday, time.Saturday},
+		YearsOverflow:  true,
+	})
+
+	now, err := Now(WithConfig(cfg))
+	if err != nil {
+		t.Fatalf("now with config: %v", err)
+	}
+	assertEqual(t, "Now(WithConfig).DateTimeString()", now.DateTimeString(), "2025-02-03 13:05:06")
+
+	factory, err := NewFactory(WithConfig(cfg))
+	if err != nil {
+		t.Fatalf("factory with config: %v", err)
+	}
+	assertEqual(t, "Factory WithConfig Now", factory.Now().DateTimeString(), "2025-02-03 13:05:06")
+}
+
 func TestISOStringFormatsUTC(t *testing.T) {
 	parsed, err := Parse("2024-01-01T01:00:00+01:00")
 	if err != nil {

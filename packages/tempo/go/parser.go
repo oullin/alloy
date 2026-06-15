@@ -2,6 +2,8 @@ package tempo
 
 import "time"
 
+import dateparser "github.com/oullin/alloy/tempo/parser"
+
 type Parser struct {
 	location *time.Location
 	runtime  Runtime
@@ -21,7 +23,7 @@ func newParser(location *time.Location, runtime Runtime) Parser {
 }
 
 func (parser Parser) Parse(input string) (Tempo, error) {
-	parsed, err := parseInLocation(input, parser.location)
+	parsed, err := dateparser.New(parser.location).Parse(input)
 	if err != nil {
 		return Tempo{}, err
 	}
@@ -30,7 +32,7 @@ func (parser Parser) Parse(input string) (Tempo, error) {
 }
 
 func (parser Parser) FromFormat(input string, pattern string) (Tempo, error) {
-	parsed, err := parseFromPattern(input, pattern, parser.location)
+	parsed, err := dateparser.New(parser.location).FromFormat(input, pattern)
 	if err != nil {
 		return Tempo{}, err
 	}

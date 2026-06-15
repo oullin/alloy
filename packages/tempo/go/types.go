@@ -1,22 +1,27 @@
 package tempo
 
-import "time"
+import (
+	"time"
 
-type Unit string
+	"github.com/oullin/alloy/tempo/duration"
+	"github.com/oullin/alloy/tempo/factory"
+)
+
+type Unit = duration.Unit
 
 const (
-	Millisecond Unit = "millisecond"
-	Second      Unit = "second"
-	Minute      Unit = "minute"
-	Hour        Unit = "hour"
-	Day         Unit = "day"
-	Week        Unit = "week"
-	Month       Unit = "month"
-	Quarter     Unit = "quarter"
-	Year        Unit = "year"
-	Decade      Unit = "decade"
-	Century     Unit = "century"
-	Millennium  Unit = "millennium"
+	Millisecond = duration.Millisecond
+	Second      = duration.Second
+	Minute      = duration.Minute
+	Hour        = duration.Hour
+	Day         = duration.Day
+	Week        = duration.Week
+	Month       = duration.Month
+	Quarter     = duration.Quarter
+	Year        = duration.Year
+	Decade      = duration.Decade
+	Century     = duration.Century
+	Millennium  = duration.Millennium
 )
 
 type TimeStringPrecision string
@@ -26,16 +31,7 @@ const (
 	MillisecondPrecision TimeStringPrecision = "millisecond"
 )
 
-type Components struct {
-	Year        int
-	Month       int
-	Day         int
-	Hour        int
-	Minute      int
-	Second      int
-	Millisecond int
-	Timezone    string
-}
+type Components = factory.Components
 
 type Object struct {
 	Year          int
@@ -50,17 +46,7 @@ type Object struct {
 	Weekday       int
 }
 
-type Duration struct {
-	Years        int
-	Quarters     int
-	Months       int
-	Weeks        int
-	Days         int
-	Hours        int
-	Minutes      int
-	Seconds      int
-	Milliseconds int
-}
+type Duration = duration.Duration
 
 type DiffOptions struct {
 	Absolute bool
@@ -110,6 +96,7 @@ type Option func(*config) error
 type config struct {
 	location *time.Location
 	runtime  Runtime
+	app      *Config
 }
 
 type Tempo struct {
@@ -137,7 +124,7 @@ type Period struct {
 }
 
 type Factory struct {
-	now      *time.Time
+	clock    factory.Clock
 	location *time.Location
 	runtime  Runtime
 }

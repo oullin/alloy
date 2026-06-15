@@ -1,31 +1,41 @@
 package tempo
 
+import (
+	"time"
+
+	intervalpkg "github.com/oullin/alloy/tempo/interval"
+)
+
+func (interval Interval) span() intervalpkg.Span {
+	return intervalpkg.New(interval.Start.value, interval.End.value)
+}
+
 func (interval Interval) Inverted() bool {
-	return interval.Start.After(interval.End)
+	return interval.span().Inverted()
 }
 
 func (interval Interval) Milliseconds() int {
-	return interval.End.DiffInMilliseconds(interval.Start)
+	return interval.span().Milliseconds()
 }
 
 func (interval Interval) Seconds() int {
-	return interval.End.DiffInSeconds(interval.Start)
+	return interval.span().Seconds()
 }
 
 func (interval Interval) Minutes() int {
-	return interval.End.DiffInMinutes(interval.Start)
+	return interval.span().Minutes()
 }
 
 func (interval Interval) Hours() int {
-	return interval.End.DiffInHours(interval.Start)
+	return interval.span().Hours()
 }
 
 func (interval Interval) Days() int {
-	return interval.End.DiffInDays(interval.Start)
+	return interval.span().Days()
 }
 
 func (interval Interval) Weeks() int {
-	return interval.End.DiffInWeeks(interval.Start)
+	return interval.span().Weeks()
 }
 
 func (interval Interval) Months() int {
@@ -62,27 +72,30 @@ func (interval Interval) Contains(input Tempo, inclusivity ...string) bool {
 		mode = inclusivity[0]
 	}
 
-	return input.Between(interval.Start, interval.End, mode)
+	return interval.span().Contains(input.TimestampMs(), mode)
 }
 
 func (interval Interval) Overlaps(other Interval) bool {
-	return interval.Start.Before(other.End) && interval.End.After(other.Start)
+	return interval.span().Overlaps(other.span())
 }
 
 func (interval Interval) Intersection(other Interval) (Interval, bool) {
-	if !interval.Overlaps(other) {
+	intersection, ok := interval.span().Intersection(other.span())
+	if !ok {
 		return Interval{}, false
 	}
 
 	return Interval{
-		Start: Max(interval.Start, other.Start),
-		End:   Min(interval.End, other.End),
+		Start: newTempo(time.UnixMilli(intersection.StartMs), interval.Start.location, interval.Start.Runtime()),
+		End:   newTempo(time.UnixMilli(intersection.EndMs), interval.End.location, interval.End.Runtime()),
 	}, true
 }
 
 func (interval Interval) Union(other Interval) Interval {
+	union := interval.span().Union(other.span())
+
 	return Interval{
-		Start: Min(interval.Start, other.Start),
-		End:   Max(interval.End, other.End),
+		Start: newTempo(time.UnixMilli(union.StartMs), interval.Start.location, interval.Start.Runtime()),
+		End:   newTempo(time.UnixMilli(union.EndMs), interval.End.location, interval.End.Runtime()),
 	}
 }

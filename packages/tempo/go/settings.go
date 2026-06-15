@@ -6,90 +6,90 @@ func SettingsState(settings ...Settings) Settings {
 	if len(settings) > 0 {
 		next := settings[0]
 		if next.Locale != "" {
-			tempoSettings.Locale = next.Locale
+			defaultConfig.Settings.Locale = next.Locale
 		}
 		if next.FallbackLocale != "" {
-			tempoSettings.FallbackLocale = next.FallbackLocale
+			defaultConfig.Settings.FallbackLocale = next.FallbackLocale
 		}
 		if next.HumanDiff != (HumanDiffOptions{}) {
-			tempoSettings.HumanDiff = next.HumanDiff
+			defaultConfig.Settings.HumanDiff = next.HumanDiff
 		}
 		if next.MidDayAt != 0 {
-			tempoSettings.MidDayAt = next.MidDayAt
+			defaultConfig.Settings.MidDayAt = next.MidDayAt
 		}
-		tempoSettings.MonthsOverflow = next.MonthsOverflow
-		tempoSettings.StrictMode = next.StrictMode
-		tempoSettings.TestNow = next.TestNow
+		defaultConfig.Settings.MonthsOverflow = next.MonthsOverflow
+		defaultConfig.Settings.StrictMode = next.StrictMode
+		defaultConfig.Settings.TestNow = next.TestNow
 		if next.Timezone != "" {
-			tempoSettings.Timezone = next.Timezone
+			defaultConfig.Settings.Timezone = next.Timezone
 		}
 		if next.WeekendDays != nil {
-			tempoSettings.WeekendDays = append([]time.Weekday(nil), next.WeekendDays...)
+			defaultConfig.Settings.WeekendDays = append([]time.Weekday(nil), next.WeekendDays...)
 		}
-		tempoSettings.YearsOverflow = next.YearsOverflow
+		defaultConfig.Settings.YearsOverflow = next.YearsOverflow
 	}
 
 	return Settings{
-		FallbackLocale: tempoSettings.FallbackLocale,
-		HumanDiff:      tempoSettings.HumanDiff,
-		Locale:         tempoSettings.Locale,
-		MidDayAt:       tempoSettings.MidDayAt,
-		MonthsOverflow: tempoSettings.MonthsOverflow,
-		StrictMode:     tempoSettings.StrictMode,
-		TestNow:        tempoSettings.TestNow,
-		Timezone:       tempoSettings.Timezone,
-		WeekendDays:    append([]time.Weekday(nil), tempoSettings.WeekendDays...),
-		YearsOverflow:  tempoSettings.YearsOverflow,
+		FallbackLocale: defaultConfig.Settings.FallbackLocale,
+		HumanDiff:      defaultConfig.Settings.HumanDiff,
+		Locale:         defaultConfig.Settings.Locale,
+		MidDayAt:       defaultConfig.Settings.MidDayAt,
+		MonthsOverflow: defaultConfig.Settings.MonthsOverflow,
+		StrictMode:     defaultConfig.Settings.StrictMode,
+		TestNow:        defaultConfig.Settings.TestNow,
+		Timezone:       defaultConfig.Settings.Timezone,
+		WeekendDays:    append([]time.Weekday(nil), defaultConfig.Settings.WeekendDays...),
+		YearsOverflow:  defaultConfig.Settings.YearsOverflow,
 	}
 }
 
-func GetLocale() string { return tempoSettings.Locale }
+func GetLocale() string { return defaultConfig.Settings.Locale }
 
-func SetLocale(locale string) { tempoSettings.Locale = locale }
+func SetLocale(locale string) { defaultConfig.Settings.Locale = locale }
 
-func GetFallbackLocale() string { return tempoSettings.FallbackLocale }
+func GetFallbackLocale() string { return defaultConfig.Settings.FallbackLocale }
 
-func SetFallbackLocale(locale string) { tempoSettings.FallbackLocale = locale }
+func SetFallbackLocale(locale string) { defaultConfig.Settings.FallbackLocale = locale }
 
-func GetHumanDiffOptions() HumanDiffOptions { return tempoSettings.HumanDiff }
+func GetHumanDiffOptions() HumanDiffOptions { return defaultConfig.Settings.HumanDiff }
 
-func SetHumanDiffOptions(options HumanDiffOptions) { tempoSettings.HumanDiff = options }
+func SetHumanDiffOptions(options HumanDiffOptions) { defaultConfig.Settings.HumanDiff = options }
 
-func GetMidDayAt() int { return tempoSettings.MidDayAt }
+func GetMidDayAt() int { return defaultConfig.Settings.MidDayAt }
 
-func SetMidDayAt(hour int) { tempoSettings.MidDayAt = hour }
+func SetMidDayAt(hour int) { defaultConfig.Settings.MidDayAt = hour }
 
 func GetWeekendDays() []time.Weekday {
-	return append([]time.Weekday(nil), tempoSettings.WeekendDays...)
+	return append([]time.Weekday(nil), defaultConfig.Settings.WeekendDays...)
 }
 
 func SetWeekendDays(days []time.Weekday) {
-	tempoSettings.WeekendDays = append([]time.Weekday(nil), days...)
+	defaultConfig.Settings.WeekendDays = append([]time.Weekday(nil), days...)
 }
 
-func ShouldOverflowMonths() bool { return tempoSettings.MonthsOverflow }
+func ShouldOverflowMonths() bool { return defaultConfig.Settings.MonthsOverflow }
 
-func UseMonthsOverflow(enabled bool) { tempoSettings.MonthsOverflow = enabled }
+func UseMonthsOverflow(enabled bool) { defaultConfig.Settings.MonthsOverflow = enabled }
 
-func ResetMonthsOverflow() { tempoSettings.MonthsOverflow = true }
+func ResetMonthsOverflow() { defaultConfig.Settings.MonthsOverflow = true }
 
-func ShouldOverflowYears() bool { return tempoSettings.YearsOverflow }
+func ShouldOverflowYears() bool { return defaultConfig.Settings.YearsOverflow }
 
-func UseYearsOverflow(enabled bool) { tempoSettings.YearsOverflow = enabled }
+func UseYearsOverflow(enabled bool) { defaultConfig.Settings.YearsOverflow = enabled }
 
-func ResetYearsOverflow() { tempoSettings.YearsOverflow = true }
+func ResetYearsOverflow() { defaultConfig.Settings.YearsOverflow = true }
 
-func IsStrictModeEnabled() bool { return tempoSettings.StrictMode }
+func IsStrictModeEnabled() bool { return defaultConfig.Settings.StrictMode }
 
-func UseStrictMode(enabled bool) { tempoSettings.StrictMode = enabled }
+func UseStrictMode(enabled bool) { defaultConfig.Settings.StrictMode = enabled }
 
-func GetTestNow() *Tempo { return tempoSettings.TestNow }
+func GetTestNow() *Tempo { return defaultConfig.Settings.TestNow }
 
-func SetTestNow(input *Tempo) { tempoSettings.TestNow = input }
+func SetTestNow(input *Tempo) { defaultConfig.Settings.TestNow = input }
 
 func SetTestNowAndTimezone(input *Tempo, timezone string) {
-	tempoSettings.TestNow = input
-	tempoSettings.Timezone = timezone
+	defaultConfig.Settings.TestNow = input
+	defaultConfig.Settings.Timezone = timezone
 }
 
-func HasTestNow() bool { return tempoSettings.TestNow != nil }
+func HasTestNow() bool { return defaultConfig.Settings.TestNow != nil }

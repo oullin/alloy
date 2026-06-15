@@ -3,6 +3,8 @@ package tempo
 import (
 	"errors"
 	"time"
+
+	factorypkg "github.com/oullin/alloy/tempo/factory"
 )
 
 func NewFactory(options ...Option) (Factory, error) {
@@ -11,7 +13,13 @@ func NewFactory(options ...Option) (Factory, error) {
 		return Factory{}, err
 	}
 
-	return Factory{location: cfg.location, runtime: cfg.runtime}, nil
+	var now *time.Time
+	if cfg.app != nil && cfg.app.Settings.TestNow != nil {
+		value := cfg.app.Settings.TestNow.value
+		now = &value
+	}
+
+	return Factory{clock: factorypkg.NewClock(now), location: cfg.location, runtime: cfg.runtime}, nil
 }
 
 func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
@@ -23,22 +31,18 @@ func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
 	}
 
 	now := input.value
-	return Factory{now: &now, location: cfg.location, runtime: cfg.runtime}, nil
+	return Factory{clock: factorypkg.NewClock(&now), location: cfg.location, runtime: cfg.runtime}, nil
 }
 
 func (factory Factory) Now() Tempo {
-	if factory.now != nil {
-		return newTempo(*factory.now, factory.location, factory.runtime)
-	}
-
-	return newTempo(time.Now(), factory.location, factory.runtime)
+	return newTempo(factory.clock.Now(), factory.location, factory.runtime)
 }
 
 func (factory Factory) Runtime() Runtime {
 	if factory.runtime.Locale() == "" {
 		return NewRuntime(
-			RuntimeLocale(tempoSettings.Locale),
-			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+			RuntimeLocale(defaultConfig.Settings.Locale),
+			RuntimeFallbackLocale(defaultConfig.Settings.FallbackLocale),
 		)
 	}
 

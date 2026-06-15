@@ -13,17 +13,22 @@ func Now(options ...Option) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	if tempoSettings.TestNow != nil {
+	appConfig := cfg.app
+	if appConfig == nil {
+		appConfig = defaultConfig
+	}
+
+	if appConfig.Settings.TestNow != nil {
 		location := cfg.location
-		if len(options) == 0 && tempoSettings.Timezone != "" {
-			configured, err := loadLocation(tempoSettings.Timezone)
+		if len(options) == 0 && appConfig.Settings.Timezone != "" {
+			configured, err := loadLocation(appConfig.Settings.Timezone)
 			if err != nil {
 				return Tempo{}, err
 			}
 			location = configured
 		}
 
-		return newTempo(tempoSettings.TestNow.value, location, cfg.runtime), nil
+		return newTempo(appConfig.Settings.TestNow.value, location, cfg.runtime), nil
 	}
 
 	return newTempo(time.Now(), cfg.location, cfg.runtime), nil
@@ -80,7 +85,7 @@ func RawParse(input string, options ...Option) (Tempo, error) {
 
 func TryParse(input string, options ...Option) (Tempo, bool) {
 	tempo, err := Parse(input, options...)
-	lastTempoError = err
+	defaultConfig.LastError = err
 	return tempo, err == nil
 }
 
@@ -98,21 +103,21 @@ func FromSerialized(input string, options ...Option) (Tempo, error) {
 	return Parse(value, options...)
 }
 
-func GetLastErrors() error { return lastTempoError }
+func GetLastErrors() error { return defaultConfig.LastError }
 
 func ExecuteWithLocale[T any](locale string, callback func() T) T {
-	previous := tempoSettings.Locale
-	tempoSettings.Locale = locale
-	defer func() { tempoSettings.Locale = previous }()
+	previous := defaultConfig.Settings.Locale
+	defaultConfig.Settings.Locale = locale
+	defer func() { defaultConfig.Settings.Locale = previous }()
 
 	return callback()
 }
 
-func SerializeUsing(next Serializer) { serializer = next }
+func SerializeUsing(next Serializer) { defaultConfig.Serializer = next }
 
-func SetToStringFormat(pattern string) { toStringFormat = pattern }
+func SetToStringFormat(pattern string) { defaultConfig.ToStringFormat = pattern }
 
-func ResetToStringFormat() { toStringFormat = "" }
+func ResetToStringFormat() { defaultConfig.ToStringFormat = "" }
 
 func GetClock() *Tempo { return GetTestNow() }
 
@@ -271,8 +276,8 @@ func Create(components Components) (Tempo, error) {
 		timeFromComponents(components, location),
 		location,
 		NewRuntime(
-			RuntimeLocale(tempoSettings.Locale),
-			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+			RuntimeLocale(defaultConfig.Settings.Locale),
+			RuntimeFallbackLocale(defaultConfig.Settings.FallbackLocale),
 		),
 	), nil
 }
@@ -292,8 +297,8 @@ func CreateSafe(components Components) (Tempo, error) {
 		value,
 		location,
 		NewRuntime(
-			RuntimeLocale(tempoSettings.Locale),
-			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+			RuntimeLocale(defaultConfig.Settings.Locale),
+			RuntimeFallbackLocale(defaultConfig.Settings.FallbackLocale),
 		),
 	), nil
 }
@@ -372,11 +377,11 @@ func CreateFromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
 }
 
 func FromTimestampUTC(timestamp int64) (Tempo, error) {
-	return FromTimestamp(timestamp, WithTimezone(defaultLocation.String()))
+	return FromTimestamp(timestamp, WithTimezone(defaultLocation().String()))
 }
 
 func FromTimestampMsUTC(timestamp int64) (Tempo, error) {
-	return FromTimestampMs(timestamp, WithTimezone(defaultLocation.String()))
+	return FromTimestampMs(timestamp, WithTimezone(defaultLocation().String()))
 }
 
 func CreateFromTimestampUTC(timestamp int64) (Tempo, error) {

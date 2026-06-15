@@ -1,6 +1,10 @@
 package tempo
 
-import "errors"
+import (
+	"errors"
+
+	periodpkg "github.com/oullin/alloy/tempo/period"
+)
 
 func (period Period) Values() ([]Tempo, error) {
 	values := make([]Tempo, 0)
@@ -82,25 +86,11 @@ func (period Period) IsEmpty() (bool, error) {
 }
 
 func (period Period) Contains(input Tempo) bool {
-	forward := period.End.SameOrAfter(period.Start)
-	afterStart := input.SameOrAfter(period.Start)
-	if !forward {
-		afterStart = input.SameOrBefore(period.Start)
-	}
-
-	beforeEnd := input.Before(period.End)
-	if forward {
-		if period.IncludeEnd {
-			beforeEnd = input.SameOrBefore(period.End)
-		}
-	} else {
-		beforeEnd = input.After(period.End)
-		if period.IncludeEnd {
-			beforeEnd = input.SameOrAfter(period.End)
-		}
-	}
-
-	return afterStart && beforeEnd
+	return periodpkg.Bounds{
+		StartMs:    period.Start.TimestampMs(),
+		EndMs:      period.End.TimestampMs(),
+		IncludeEnd: period.IncludeEnd,
+	}.Contains(input.TimestampMs())
 }
 
 func (period Period) Filter(predicate func(Tempo, int) bool) ([]Tempo, error) {

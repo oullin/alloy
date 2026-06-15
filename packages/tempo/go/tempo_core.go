@@ -16,8 +16,8 @@ func (tempo Tempo) Clone() Tempo {
 func (tempo Tempo) Runtime() Runtime {
 	if tempo.runtime.Locale() == "" {
 		return NewRuntime(
-			RuntimeLocale(tempoSettings.Locale),
-			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+			RuntimeLocale(defaultConfig.Settings.Locale),
+			RuntimeFallbackLocale(defaultConfig.Settings.FallbackLocale),
 		)
 	}
 
@@ -391,7 +391,7 @@ func (tempo Tempo) DaysInMonth() int {
 
 func (tempo Tempo) IsWeekend() bool {
 	weekday := tempo.local().Weekday()
-	for _, weekendDay := range tempoSettings.WeekendDays {
+	for _, weekendDay := range defaultConfig.Settings.WeekendDays {
 		if weekday == weekendDay {
 			return true
 		}
@@ -472,7 +472,7 @@ func (tempo Tempo) IsMidnight() bool {
 }
 
 func (tempo Tempo) IsMidday() bool {
-	return tempo.Hour() == tempoSettings.MidDayAt &&
+	return tempo.Hour() == defaultConfig.Settings.MidDayAt &&
 		tempo.Minute() == 0 &&
 		tempo.Second() == 0 &&
 		tempo.Millisecond() == 0

@@ -295,7 +295,7 @@ func (tempo Tempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Uni
 }
 
 func (tempo Tempo) Midday() Tempo {
-	return tempo.SetTime(tempoSettings.MidDayAt, 0, 0, 0)
+	return tempo.SetTime(defaultConfig.Settings.MidDayAt, 0, 0, 0)
 }
 
 func (tempo Tempo) MidDay() Tempo {

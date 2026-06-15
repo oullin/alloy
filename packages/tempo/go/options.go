@@ -19,6 +19,29 @@ func WithRuntime(runtime Runtime) Option {
 	}
 }
 
+func WithConfig(appConfig *Config) Option {
+	return func(cfg *config) error {
+		if appConfig == nil {
+			return nil
+		}
+
+		cfg.app = appConfig
+		cfg.runtime = NewRuntime(
+			RuntimeLocale(appConfig.Settings.Locale),
+			RuntimeFallbackLocale(appConfig.Settings.FallbackLocale),
+		)
+		if appConfig.Settings.Timezone != "" {
+			location, err := loadLocation(appConfig.Settings.Timezone)
+			if err != nil {
+				return err
+			}
+			cfg.location = location
+		}
+
+		return nil
+	}
+}
+
 func WithTranslator(translator Translator) Option {
 	return func(cfg *config) error {
 		cfg.runtime = cfg.runtime.With(RuntimeTranslator(translator))

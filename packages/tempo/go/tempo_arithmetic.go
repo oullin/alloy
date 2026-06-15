@@ -1,30 +1,16 @@
 package tempo
 
-import "time"
+import "github.com/oullin/alloy/tempo/temporal"
 
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
-	switch normalizeUnit(unit) {
-	case Millisecond:
-		return tempo.addDuration(time.Duration(value) * time.Millisecond)
-	case Second:
-		return tempo.addDuration(time.Duration(value) * time.Second)
-	case Minute:
-		return tempo.addDuration(time.Duration(value) * time.Minute)
-	case Hour:
-		return tempo.addDuration(time.Duration(value) * time.Hour)
-	case Day:
-		return tempo.addDurationDate(0, 0, value)
-	case Week:
-		return tempo.addDurationDate(0, 0, value*7)
-	case Month:
-		return tempo.AddMonths(value)
-	case Quarter:
-		return tempo.AddMonths(value * 3)
-	case Year:
-		return tempo.AddYears(value)
-	default:
-		return tempo
-	}
+	return tempo.with(temporal.Add(
+		tempo.value,
+		tempo.location,
+		value,
+		unit,
+		defaultConfig.Settings.MonthsOverflow,
+		defaultConfig.Settings.YearsOverflow,
+	), tempo.location)
 }
 
 func (tempo Tempo) Sub(value int, unit Unit) Tempo {
@@ -181,7 +167,7 @@ func (tempo Tempo) SubWeeks(weeks int) Tempo {
 }
 
 func (tempo Tempo) AddMonths(months int) Tempo {
-	if !tempoSettings.MonthsOverflow {
+	if !defaultConfig.Settings.MonthsOverflow {
 		return tempo.AddMonthsNoOverflow(months)
 	}
 
@@ -193,21 +179,7 @@ func (tempo Tempo) SubMonths(months int) Tempo {
 }
 
 func (tempo Tempo) AddMonthsNoOverflow(months int) Tempo {
-	local := tempo.local()
-	target := time.Date(local.Year(), local.Month()+time.Month(months), 1, local.Hour(), local.Minute(), local.Second(), local.Nanosecond(), tempo.location)
-	day := min(local.Day(), daysInMonth(target.Year(), int(target.Month())))
-	next := time.Date(
-		target.Year(),
-		target.Month(),
-		day,
-		local.Hour(),
-		local.Minute(),
-		local.Second(),
-		local.Nanosecond(),
-		tempo.location,
-	)
-
-	return Tempo{value: next.UTC(), location: tempo.location}
+	return tempo.with(temporal.AddMonthsNoOverflow(tempo.value, tempo.location, months), tempo.location)
 }
 
 func (tempo Tempo) SubMonthsNoOverflow(months int) Tempo {
@@ -223,7 +195,7 @@ func (tempo Tempo) SubQuarters(quarters int) Tempo {
 }
 
 func (tempo Tempo) AddYears(years int) Tempo {
-	if !tempoSettings.YearsOverflow {
+	if !defaultConfig.Settings.YearsOverflow {
 		return tempo.AddYearsNoOverflow(years)
 	}
 
@@ -235,21 +207,7 @@ func (tempo Tempo) SubYears(years int) Tempo {
 }
 
 func (tempo Tempo) AddYearsNoOverflow(years int) Tempo {
-	local := tempo.local()
-	year := local.Year() + years
-	day := min(local.Day(), daysInMonth(year, int(local.Month())))
-	next := time.Date(
-		year,
-		local.Month(),
-		day,
-		local.Hour(),
-		local.Minute(),
-		local.Second(),
-		local.Nanosecond(),
-		tempo.location,
-	)
-
-	return Tempo{value: next.UTC(), location: tempo.location}
+	return tempo.with(temporal.AddYearsNoOverflow(tempo.value, tempo.location, years), tempo.location)
 }
 
 func (tempo Tempo) Age(reference Tempo) int {

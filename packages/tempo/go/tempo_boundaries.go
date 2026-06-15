@@ -1,75 +1,27 @@
 package tempo
 
-import "time"
+import (
+	"time"
+
+	"github.com/oullin/alloy/tempo/temporal"
+)
 
 func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
-	local := tempo.local()
-
-	switch normalizeUnit(unit) {
-	case Millisecond:
-		return tempo.Clone()
-	case Second:
-		return tempo.fromLocal(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), local.Minute(), local.Second(), 0, tempo.location))
-	case Minute:
-		return tempo.fromLocal(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), local.Minute(), 0, 0, tempo.location))
-	case Hour:
-		return tempo.fromLocal(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), 0, 0, 0, tempo.location))
-	case Day:
-		return tempo.fromLocal(time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, tempo.location))
-	case Week:
-		weekStartsOn := time.Monday
-		if len(options) > 0 {
-			weekStartsOn = options[0].WeekStartsOn
-		}
-		delta := (int(local.Weekday()) - int(weekStartsOn) + 7) % 7
-		return tempo.StartOf(Day).SubDays(delta)
-	case Month:
-		return tempo.fromLocal(time.Date(local.Year(), local.Month(), 1, 0, 0, 0, 0, tempo.location))
-	case Quarter:
-		month := time.Month((tempo.Quarter()-1)*3 + 1)
-		return tempo.fromLocal(time.Date(local.Year(), month, 1, 0, 0, 0, 0, tempo.location))
-	case Year:
-		return tempo.fromLocal(time.Date(local.Year(), time.January, 1, 0, 0, 0, 0, tempo.location))
-	case Decade:
-		return tempo.SetDate(local.Year()-local.Year()%10, 1, 1).StartOfDay()
-	case Century:
-		return tempo.SetDate(local.Year()-(local.Year()-1)%100, 1, 1).StartOfDay()
-	case Millennium:
-		return tempo.SetDate(local.Year()-(local.Year()-1)%1000, 1, 1).StartOfDay()
-	default:
-		return tempo
+	weekOptions := make([]temporal.WeekOptions, 0, len(options))
+	for _, option := range options {
+		weekOptions = append(weekOptions, temporal.WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
+
+	return tempo.with(temporal.StartOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
 }
 
 func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
-	switch normalizeUnit(unit) {
-	case Millisecond:
-		return tempo.Clone()
-	case Second:
-		return tempo.StartOf(Second).AddSeconds(1).SubMilliseconds(1)
-	case Minute:
-		return tempo.StartOf(Minute).AddMinutes(1).SubMilliseconds(1)
-	case Hour:
-		return tempo.StartOf(Hour).AddHours(1).SubMilliseconds(1)
-	case Day:
-		return tempo.StartOf(Day).AddDays(1).SubMilliseconds(1)
-	case Week:
-		return tempo.StartOf(Week, options...).AddWeeks(1).SubMilliseconds(1)
-	case Month:
-		return tempo.StartOf(Month).AddMonths(1).SubMilliseconds(1)
-	case Quarter:
-		return tempo.StartOf(Quarter).AddQuarters(1).SubMilliseconds(1)
-	case Year:
-		return tempo.StartOf(Year).AddYears(1).SubMilliseconds(1)
-	case Decade:
-		return tempo.StartOf(Decade).AddYears(10).SubMilliseconds(1)
-	case Century:
-		return tempo.StartOf(Century).AddYears(100).SubMilliseconds(1)
-	case Millennium:
-		return tempo.StartOf(Millennium).AddYears(1000).SubMilliseconds(1)
-	default:
-		return tempo
+	weekOptions := make([]temporal.WeekOptions, 0, len(options))
+	for _, option := range options {
+		weekOptions = append(weekOptions, temporal.WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
+
+	return tempo.with(temporal.EndOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
 }
 
 func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
