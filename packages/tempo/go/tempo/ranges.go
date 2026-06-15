@@ -2,8 +2,6 @@ package tempo
 
 import (
 	"time"
-
-	domain "github.com/oullin/alloy/tempo/tempo"
 )
 
 func (tempo Tempo) IntervalUntil(end Tempo) Interval {
@@ -68,7 +66,7 @@ func (tempo Tempo) compareValue(units ...Unit) int64 {
 		return tempo.TimestampMs()
 	}
 
-	return domain.CompareValue(tempo.value, tempo.location, unit) / int64(time.Millisecond)
+	return CompareValue(tempo.value, tempo.location, unit) / int64(time.Millisecond)
 }
 
 func (tempo Tempo) diffFilteredDays(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/tempo/duration"
-	domain "github.com/oullin/alloy/tempo/tempo"
 )
 
 func ParseDuration(input string) (Duration, error) {
@@ -19,7 +18,7 @@ func Min(first Tempo, rest ...Tempo) Tempo {
 		values = append(values, item.TimestampMs())
 	}
 
-	return items[domain.EarlierIndex(values)]
+	return items[EarlierIndex(values)]
 }
 
 func Max(first Tempo, rest ...Tempo) Tempo {
@@ -30,7 +29,7 @@ func Max(first Tempo, rest ...Tempo) Tempo {
 		values = append(values, item.TimestampMs())
 	}
 
-	return items[domain.LaterIndex(values)]
+	return items[LaterIndex(values)]
 }
 
 func Minimum(first Tempo, rest ...Tempo) Tempo {
@@ -43,7 +42,7 @@ func Maximum(first Tempo, rest ...Tempo) Tempo {
 
 func Average(start Tempo, end Tempo) Tempo {
 	return Tempo{
-		value:    time.UnixMilli(domain.AverageMilliseconds(start.TimestampMs(), end.TimestampMs())).UTC(),
+		value:    time.UnixMilli(AverageMilliseconds(start.TimestampMs(), end.TimestampMs())).UTC(),
 		location: start.location,
 	}
 }

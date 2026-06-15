@@ -2,28 +2,26 @@ package tempo
 
 import (
 	"time"
-
-	domain "github.com/oullin/alloy/tempo/tempo"
 )
 
 func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
-	weekOptions := make([]domain.WeekOptions, 0, len(options))
+	weekOptions := make([]WeekOptions, 0, len(options))
 
 	for _, option := range options {
-		weekOptions = append(weekOptions, domain.WeekOptions{WeekStartsOn: option.WeekStartsOn})
+		weekOptions = append(weekOptions, WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
 
-	return tempo.with(domain.StartOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
+	return tempo.with(StartOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
 }
 
 func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
-	weekOptions := make([]domain.WeekOptions, 0, len(options))
+	weekOptions := make([]WeekOptions, 0, len(options))
 
 	for _, option := range options {
-		weekOptions = append(weekOptions, domain.WeekOptions{WeekStartsOn: option.WeekStartsOn})
+		weekOptions = append(weekOptions, WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
 
-	return tempo.with(domain.EndOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
+	return tempo.with(EndOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
 }
 
 func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
