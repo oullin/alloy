@@ -24,7 +24,7 @@ import {
   tryFromFormat,
   tryParse,
   yesterday,
-} from "@tempo/tempo";
+} from "@alloy/tempo";
 import { describe, expect, it } from "vitest";
 
 const dateCases = [

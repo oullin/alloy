@@ -1,3 +1,3 @@
-module github.com/oullin/alloy/packages/tempo/go
+module github.com/oullin/alloy/tempo
 
 go 1.26

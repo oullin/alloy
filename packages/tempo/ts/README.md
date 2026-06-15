@@ -4,7 +4,7 @@ Tempo extension points are plain composables. Keep reusable behavior in normal
 functions that accept and return Tempo values:
 
 ```ts
-import { Tempo, type TempoImmutable } from "@tempo/tempo";
+import { Tempo, type TempoImmutable } from "@alloy/tempo";
 
 export const dateOnly = (value: TempoImmutable): string => value.toDateString();
 
@@ -24,7 +24,7 @@ dateOnly(Tempo.parse("2024-05-15"));
 Locale and translation behavior is composed with runtimes and factories:
 
 ```ts
-import { TempoFactory, createTempoRuntime } from "@tempo/tempo";
+import { TempoFactory, createTempoRuntime } from "@alloy/tempo";
 
 const runtime = createTempoRuntime({
   locale: "en-US",

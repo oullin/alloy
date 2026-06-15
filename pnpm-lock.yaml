@@ -52,7 +52,7 @@ importers:
 
   packages/tests:
     dependencies:
-      "@tempo/tempo":
+      "@alloy/tempo":
         specifier: workspace:*
         version: link:../tempo/ts
     devDependencies:

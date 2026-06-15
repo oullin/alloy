@@ -6,7 +6,7 @@ reusable behavior outside the package surface:
 ```go
 package examples
 
-import tempo "github.com/oullin/alloy/packages/tempo/go"
+import tempo "github.com/oullin/alloy/tempo"
 
 func DateOnly(value tempo.Tempo) string {
 	return value.DateString()

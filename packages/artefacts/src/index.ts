@@ -18,6 +18,6 @@ export const logDir = (...segments: string[]): string =>
 const packageRoot = resolve(repoRoot, "packages");
 export const workspaceAliases = (): Record<string, string> => ({
   "@tempo/artefacts": resolve(packageRoot, "artefacts", "src"),
-  "@tempo/tempo": resolve(packageRoot, "tempo", "ts", "src"),
+  "@alloy/tempo": resolve(packageRoot, "tempo", "ts", "src"),
   "@tempo/tests": resolve(packageRoot, "tests", "src"),
 });
