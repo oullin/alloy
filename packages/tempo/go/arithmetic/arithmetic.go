@@ -1,131 +1,206 @@
+// Package arithmetic exposes generic time-shift operations that work on any
+// core.Bearer — both the immutable Tempo and the mutable *MutableTempo — so
+// the underlying math is written once and instantiated per concrete type.
+//
+// Functions here are pure mechanism: callers (typically Tempo/Mutable method
+// shims) decide policy such as month/year overflow by passing the relevant
+// flags. The package itself depends only on core, duration, calendar and
+// internal/kernel — never on the higher-level tempo package — keeping it
+// safe to import from anywhere in the module.
 package arithmetic
 
-import tempopkg "github.com/oullin/alloy/tempo/tempo"
+import (
+	"time"
 
-type Tempo struct {
-	value tempopkg.Tempo
+	"github.com/oullin/alloy/tempo/core"
+	"github.com/oullin/alloy/tempo/duration"
+	"github.com/oullin/alloy/tempo/internal/kernel"
+)
+
+func Add[T core.Bearer[T]](bearer T, amount int, unit duration.Unit, monthsOverflow bool, yearsOverflow bool) T {
+	state := bearer.State()
+
+	return bearer.With(kernel.Add(state.Value, state.Location, amount, unit, monthsOverflow, yearsOverflow))
 }
 
-func From(value tempopkg.Tempo) Tempo {
-	return Tempo{value: value}
+func Sub[T core.Bearer[T]](bearer T, amount int, unit duration.Unit, monthsOverflow bool, yearsOverflow bool) T {
+	return Add(bearer, -amount, unit, monthsOverflow, yearsOverflow)
 }
 
-func (tempo Tempo) Tempo() tempopkg.Tempo {
-	return tempo.value
+func AddMilliseconds[T core.Bearer[T]](bearer T, milliseconds int) T {
+	return Add(bearer, milliseconds, duration.Millisecond, false, false)
 }
 
-func (tempo Tempo) Add(value int, unit tempopkg.Unit) Tempo {
-	return From(tempo.value.Add(value, unit))
+func SubMilliseconds[T core.Bearer[T]](bearer T, milliseconds int) T {
+	return AddMilliseconds(bearer, -milliseconds)
 }
 
-func (tempo Tempo) Sub(value int, unit tempopkg.Unit) Tempo {
-	return From(tempo.value.Sub(value, unit))
+func AddSeconds[T core.Bearer[T]](bearer T, seconds int) T {
+	return Add(bearer, seconds, duration.Second, false, false)
 }
 
-func (tempo Tempo) AddDuration(duration tempopkg.Duration) Tempo {
-	return From(tempo.value.AddDuration(duration))
+func SubSeconds[T core.Bearer[T]](bearer T, seconds int) T {
+	return AddSeconds(bearer, -seconds)
 }
 
-func (tempo Tempo) SubDuration(duration tempopkg.Duration) Tempo {
-	return From(tempo.value.SubDuration(duration))
+func AddMinutes[T core.Bearer[T]](bearer T, minutes int) T {
+	return Add(bearer, minutes, duration.Minute, false, false)
 }
 
-func (tempo Tempo) AddMilliseconds(milliseconds int) Tempo {
-	return From(tempo.value.AddMilliseconds(milliseconds))
+func SubMinutes[T core.Bearer[T]](bearer T, minutes int) T {
+	return AddMinutes(bearer, -minutes)
 }
 
-func (tempo Tempo) SubMilliseconds(milliseconds int) Tempo {
-	return From(tempo.value.SubMilliseconds(milliseconds))
+func AddHours[T core.Bearer[T]](bearer T, hours int) T {
+	return Add(bearer, hours, duration.Hour, false, false)
 }
 
-func (tempo Tempo) AddSeconds(seconds int) Tempo {
-	return From(tempo.value.AddSeconds(seconds))
+func SubHours[T core.Bearer[T]](bearer T, hours int) T {
+	return AddHours(bearer, -hours)
 }
 
-func (tempo Tempo) SubSeconds(seconds int) Tempo {
-	return From(tempo.value.SubSeconds(seconds))
+func AddDays[T core.Bearer[T]](bearer T, days int) T {
+	return Add(bearer, days, duration.Day, false, false)
 }
 
-func (tempo Tempo) AddMinutes(minutes int) Tempo {
-	return From(tempo.value.AddMinutes(minutes))
+func SubDays[T core.Bearer[T]](bearer T, days int) T {
+	return AddDays(bearer, -days)
 }
 
-func (tempo Tempo) SubMinutes(minutes int) Tempo {
-	return From(tempo.value.SubMinutes(minutes))
+func AddWeeks[T core.Bearer[T]](bearer T, weeks int) T {
+	return Add(bearer, weeks, duration.Week, false, false)
 }
 
-func (tempo Tempo) AddHours(hours int) Tempo {
-	return From(tempo.value.AddHours(hours))
+func SubWeeks[T core.Bearer[T]](bearer T, weeks int) T {
+	return AddWeeks(bearer, -weeks)
 }
 
-func (tempo Tempo) SubHours(hours int) Tempo {
-	return From(tempo.value.SubHours(hours))
+func AddMonths[T core.Bearer[T]](bearer T, months int, monthsOverflow bool) T {
+	if !monthsOverflow {
+		return AddMonthsNoOverflow(bearer, months)
+	}
+
+	state := bearer.State()
+
+	return bearer.With(state.Value.In(state.Location).AddDate(0, months, 0).UTC())
 }
 
-func (tempo Tempo) AddDays(days int) Tempo {
-	return From(tempo.value.AddDays(days))
+func SubMonths[T core.Bearer[T]](bearer T, months int, monthsOverflow bool) T {
+	return AddMonths(bearer, -months, monthsOverflow)
 }
 
-func (tempo Tempo) SubDays(days int) Tempo {
-	return From(tempo.value.SubDays(days))
+func AddMonthsNoOverflow[T core.Bearer[T]](bearer T, months int) T {
+	state := bearer.State()
+
+	return bearer.With(kernel.AddMonthsNoOverflow(state.Value, state.Location, months))
 }
 
-func (tempo Tempo) AddWeekdays(days int) Tempo {
-	return From(tempo.value.AddWeekdays(days))
+func SubMonthsNoOverflow[T core.Bearer[T]](bearer T, months int) T {
+	return AddMonthsNoOverflow(bearer, -months)
 }
 
-func (tempo Tempo) SubWeekdays(days int) Tempo {
-	return From(tempo.value.SubWeekdays(days))
+func AddQuarters[T core.Bearer[T]](bearer T, quarters int, monthsOverflow bool) T {
+	return AddMonths(bearer, quarters*3, monthsOverflow)
 }
 
-func (tempo Tempo) AddWeeks(weeks int) Tempo {
-	return From(tempo.value.AddWeeks(weeks))
+func SubQuarters[T core.Bearer[T]](bearer T, quarters int, monthsOverflow bool) T {
+	return AddQuarters(bearer, -quarters, monthsOverflow)
 }
 
-func (tempo Tempo) SubWeeks(weeks int) Tempo {
-	return From(tempo.value.SubWeeks(weeks))
+func AddYears[T core.Bearer[T]](bearer T, years int, yearsOverflow bool) T {
+	if !yearsOverflow {
+		return AddYearsNoOverflow(bearer, years)
+	}
+
+	state := bearer.State()
+
+	return bearer.With(state.Value.In(state.Location).AddDate(years, 0, 0).UTC())
 }
 
-func (tempo Tempo) AddMonths(months int) Tempo {
-	return From(tempo.value.AddMonths(months))
+func SubYears[T core.Bearer[T]](bearer T, years int, yearsOverflow bool) T {
+	return AddYears(bearer, -years, yearsOverflow)
 }
 
-func (tempo Tempo) SubMonths(months int) Tempo {
-	return From(tempo.value.SubMonths(months))
+func AddYearsNoOverflow[T core.Bearer[T]](bearer T, years int) T {
+	state := bearer.State()
+
+	return bearer.With(kernel.AddYearsNoOverflow(state.Value, state.Location, years))
 }
 
-func (tempo Tempo) AddMonthsNoOverflow(months int) Tempo {
-	return From(tempo.value.AddMonthsNoOverflow(months))
+func SubYearsNoOverflow[T core.Bearer[T]](bearer T, years int) T {
+	return AddYearsNoOverflow(bearer, -years)
 }
 
-func (tempo Tempo) SubMonthsNoOverflow(months int) Tempo {
-	return From(tempo.value.SubMonthsNoOverflow(months))
+func AddWeekdays[T core.Bearer[T]](bearer T, days int, weekendDays []time.Weekday) T {
+	if days == 0 {
+		return bearer
+	}
+
+	direction := 1
+
+	if days < 0 {
+		direction = -1
+		days = -days
+	}
+
+	current := bearer
+
+	for days > 0 {
+		current = AddDays(current, direction)
+		state := current.State()
+		weekday := state.Value.In(state.Location).Weekday()
+
+		if !isWeekend(weekday, weekendDays) {
+			days--
+		}
+	}
+
+	return current
 }
 
-func (tempo Tempo) AddQuarters(quarters int) Tempo {
-	return From(tempo.value.AddQuarters(quarters))
+func SubWeekdays[T core.Bearer[T]](bearer T, days int, weekendDays []time.Weekday) T {
+	return AddWeekdays(bearer, -days, weekendDays)
 }
 
-func (tempo Tempo) SubQuarters(quarters int) Tempo {
-	return From(tempo.value.SubQuarters(quarters))
+// AddDuration applies every non-zero field of the multi-unit Duration in a
+// fixed order — years → months (rolling quarters into months) → weeks → days
+// → hours → minutes → seconds → milliseconds — so calendar-aware shifts land
+// before fixed-length ones. The overflow flags propagate to the month/year
+// stages exactly as if each AddX had been invoked individually.
+func AddDuration[T core.Bearer[T]](bearer T, dur duration.Duration, monthsOverflow bool, yearsOverflow bool) T {
+	current := bearer
+	current = AddYears(current, dur.Years, yearsOverflow)
+	current = AddMonths(current, dur.Quarters*3+dur.Months, monthsOverflow)
+	current = AddWeeks(current, dur.Weeks)
+	current = AddDays(current, dur.Days)
+	current = AddHours(current, dur.Hours)
+	current = AddMinutes(current, dur.Minutes)
+	current = AddSeconds(current, dur.Seconds)
+	current = AddMilliseconds(current, dur.Milliseconds)
+
+	return current
 }
 
-func (tempo Tempo) AddYears(years int) Tempo {
-	return From(tempo.value.AddYears(years))
+func SubDuration[T core.Bearer[T]](bearer T, dur duration.Duration, monthsOverflow bool, yearsOverflow bool) T {
+	return AddDuration(bearer, duration.Duration{
+		Years:        -dur.Years,
+		Quarters:     -dur.Quarters,
+		Months:       -dur.Months,
+		Weeks:        -dur.Weeks,
+		Days:         -dur.Days,
+		Hours:        -dur.Hours,
+		Minutes:      -dur.Minutes,
+		Seconds:      -dur.Seconds,
+		Milliseconds: -dur.Milliseconds,
+	}, monthsOverflow, yearsOverflow)
 }
 
-func (tempo Tempo) SubYears(years int) Tempo {
-	return From(tempo.value.SubYears(years))
-}
+func isWeekend(weekday time.Weekday, weekendDays []time.Weekday) bool {
+	for _, day := range weekendDays {
+		if weekday == day {
+			return true
+		}
+	}
 
-func (tempo Tempo) AddYearsNoOverflow(years int) Tempo {
-	return From(tempo.value.AddYearsNoOverflow(years))
-}
-
-func (tempo Tempo) SubYearsNoOverflow(years int) Tempo {
-	return From(tempo.value.SubYearsNoOverflow(years))
-}
-
-func (tempo Tempo) Age(reference tempopkg.Tempo) int {
-	return tempo.value.Age(reference)
+	return false
 }

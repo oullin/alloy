@@ -1,17 +1,21 @@
 package tempo
 
-import "time"
+import (
+	"time"
+
+	"github.com/oullin/alloy/tempo/arithmetic"
+)
 
 func (mutable *MutableTempo) Add(value int, unit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Add(value, unit))
+	return arithmetic.Add(mutable, value, unit, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
 }
 
 func (mutable *MutableTempo) Sub(value int, unit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Sub(value, unit))
+	return mutable.Add(-value, unit)
 }
 
 func (mutable *MutableTempo) AddUnit(unit Unit, value int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddUnit(unit, value))
+	return mutable.Add(value, unit)
 }
 
 func (mutable *MutableTempo) AddUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
@@ -19,148 +23,152 @@ func (mutable *MutableTempo) AddUnitNoOverflow(valueUnit Unit, value int, overfl
 }
 
 func (mutable *MutableTempo) AddRealUnit(unit Unit, value int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddRealUnit(unit, value))
+	return mutable.Add(value, unit)
 }
 
 func (mutable *MutableTempo) AddUTCUnit(unit Unit, value int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddUTCUnit(unit, value))
+	return mutable.Add(value, unit)
 }
 
 func (mutable *MutableTempo) RawAdd(value int, unit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().RawAdd(value, unit))
+	return mutable.Add(value, unit)
 }
 
 func (mutable *MutableTempo) SubUnit(unit Unit, value int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubUnit(unit, value))
+	return mutable.Sub(value, unit)
 }
 
 func (mutable *MutableTempo) SubUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubUnitNoOverflow(valueUnit, value, overflowUnit))
+	return mutable.AddUnitNoOverflow(valueUnit, -value, overflowUnit)
 }
 
 func (mutable *MutableTempo) SubRealUnit(unit Unit, value int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubRealUnit(unit, value))
+	return mutable.Sub(value, unit)
 }
 
 func (mutable *MutableTempo) SubUTCUnit(unit Unit, value int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubUTCUnit(unit, value))
+	return mutable.Sub(value, unit)
 }
 
 func (mutable *MutableTempo) RawSub(value int, unit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().RawSub(value, unit))
+	return mutable.Sub(value, unit)
 }
 
 func (mutable *MutableTempo) Subtract(value int, unit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Subtract(value, unit))
+	return mutable.Sub(value, unit)
 }
 
-func (mutable *MutableTempo) AddDuration(duration Duration) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddDuration(duration))
+func (mutable *MutableTempo) AddDuration(dur Duration) *MutableTempo {
+	return arithmetic.AddDuration(mutable, dur, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
 }
 
-func (mutable *MutableTempo) SubDuration(duration Duration) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubDuration(duration))
+func (mutable *MutableTempo) SubDuration(dur Duration) *MutableTempo {
+	return arithmetic.SubDuration(mutable, dur, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
 }
 
 func (mutable *MutableTempo) AddMilliseconds(milliseconds int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddMilliseconds(milliseconds))
+	return arithmetic.AddMilliseconds(mutable, milliseconds)
 }
 
 func (mutable *MutableTempo) SubMilliseconds(milliseconds int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubMilliseconds(milliseconds))
+	return arithmetic.SubMilliseconds(mutable, milliseconds)
 }
 
 func (mutable *MutableTempo) AddSeconds(seconds int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddSeconds(seconds))
+	return arithmetic.AddSeconds(mutable, seconds)
 }
 
 func (mutable *MutableTempo) SubSeconds(seconds int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubSeconds(seconds))
+	return arithmetic.SubSeconds(mutable, seconds)
 }
 
 func (mutable *MutableTempo) AddMinutes(minutes int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddMinutes(minutes))
+	return arithmetic.AddMinutes(mutable, minutes)
 }
 
 func (mutable *MutableTempo) SubMinutes(minutes int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubMinutes(minutes))
+	return arithmetic.SubMinutes(mutable, minutes)
 }
 
 func (mutable *MutableTempo) AddHours(hours int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddHours(hours))
+	return arithmetic.AddHours(mutable, hours)
 }
 
 func (mutable *MutableTempo) SubHours(hours int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubHours(hours))
+	return arithmetic.SubHours(mutable, hours)
 }
 
 func (mutable *MutableTempo) AddDays(days int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddDays(days))
+	return arithmetic.AddDays(mutable, days)
 }
 
 func (mutable *MutableTempo) SubDays(days int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubDays(days))
+	return arithmetic.SubDays(mutable, days)
 }
 
 func (mutable *MutableTempo) AddWeekdays(days int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddWeekdays(days))
+	return arithmetic.AddWeekdays(mutable, days, defaultConfig.Settings.WeekendDays)
 }
 
 func (mutable *MutableTempo) SubWeekdays(days int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubWeekdays(days))
+	return arithmetic.SubWeekdays(mutable, days, defaultConfig.Settings.WeekendDays)
 }
 
 func (mutable *MutableTempo) AddWeeks(weeks int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddWeeks(weeks))
+	return arithmetic.AddWeeks(mutable, weeks)
 }
 
 func (mutable *MutableTempo) SubWeeks(weeks int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubWeeks(weeks))
+	return arithmetic.SubWeeks(mutable, weeks)
 }
 
 func (mutable *MutableTempo) AddMonths(months int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddMonths(months))
+	return arithmetic.AddMonths(mutable, months, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (mutable *MutableTempo) SubMonths(months int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubMonths(months))
+	return arithmetic.SubMonths(mutable, months, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (mutable *MutableTempo) AddMonthsNoOverflow(months int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddMonthsNoOverflow(months))
+	return arithmetic.AddMonthsNoOverflow(mutable, months)
 }
 
 func (mutable *MutableTempo) SubMonthsNoOverflow(months int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubMonthsNoOverflow(months))
+	return arithmetic.SubMonthsNoOverflow(mutable, months)
 }
 
 func (mutable *MutableTempo) AddQuarters(quarters int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddQuarters(quarters))
+	return arithmetic.AddQuarters(mutable, quarters, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (mutable *MutableTempo) SubQuarters(quarters int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubQuarters(quarters))
+	return arithmetic.SubQuarters(mutable, quarters, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (mutable *MutableTempo) AddYears(years int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddYears(years))
+	return arithmetic.AddYears(mutable, years, defaultConfig.Settings.YearsOverflow)
 }
 
 func (mutable *MutableTempo) SubYears(years int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubYears(years))
+	return arithmetic.SubYears(mutable, years, defaultConfig.Settings.YearsOverflow)
 }
 
 func (mutable *MutableTempo) AddYearsNoOverflow(years int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddYearsNoOverflow(years))
+	return arithmetic.AddYearsNoOverflow(mutable, years)
 }
 
 func (mutable *MutableTempo) SubYearsNoOverflow(years int) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubYearsNoOverflow(years))
+	return arithmetic.SubYearsNoOverflow(mutable, years)
 }
 
 func (mutable *MutableTempo) Age(reference Tempo) int {
 	return mutable.Tempo().Age(reference)
 }
+
+// The boundary delegations below are temporary — they remain on this file
+// until the boundaries feature package migration moves them onto generic
+// Bearer-based primitives. See Phase 3 task in the tempo refactor.
 
 func (mutable *MutableTempo) StartOf(unit Unit, options ...StartOfWeekOptions) *MutableTempo {
 	return mutable.replace(mutable.Tempo().StartOf(unit, options...))

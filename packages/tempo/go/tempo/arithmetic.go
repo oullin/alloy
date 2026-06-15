@@ -1,14 +1,9 @@
 package tempo
 
+import "github.com/oullin/alloy/tempo/arithmetic"
+
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
-	return tempo.with(Add(
-		tempo.value,
-		tempo.location,
-		value,
-		unit,
-		defaultConfig.Settings.MonthsOverflow,
-		defaultConfig.Settings.YearsOverflow,
-	), tempo.location)
+	return arithmetic.Add(tempo, value, unit, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
 }
 
 func (tempo Tempo) Sub(value int, unit Unit) Tempo {
@@ -65,151 +60,104 @@ func (tempo Tempo) Subtract(value int, unit Unit) Tempo {
 	return tempo.Sub(value, unit)
 }
 
-func (tempo Tempo) AddDuration(duration Duration) Tempo {
-	return tempo.
-		AddYears(duration.Years).
-		AddMonths(duration.Quarters*3 + duration.Months).
-		AddWeeks(duration.Weeks).
-		AddDays(duration.Days).
-		AddHours(duration.Hours).
-		AddMinutes(duration.Minutes).
-		AddSeconds(duration.Seconds).
-		AddMilliseconds(duration.Milliseconds)
+func (tempo Tempo) AddDuration(dur Duration) Tempo {
+	return arithmetic.AddDuration(tempo, dur, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
 }
 
-func (tempo Tempo) SubDuration(duration Duration) Tempo {
-	return tempo.AddDuration(Duration{
-		Years:        -duration.Years,
-		Quarters:     -duration.Quarters,
-		Months:       -duration.Months,
-		Weeks:        -duration.Weeks,
-		Days:         -duration.Days,
-		Hours:        -duration.Hours,
-		Minutes:      -duration.Minutes,
-		Seconds:      -duration.Seconds,
-		Milliseconds: -duration.Milliseconds,
-	})
+func (tempo Tempo) SubDuration(dur Duration) Tempo {
+	return arithmetic.SubDuration(tempo, dur, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
 }
 
 func (tempo Tempo) AddMilliseconds(milliseconds int) Tempo {
-	return tempo.Add(milliseconds, Millisecond)
+	return arithmetic.AddMilliseconds(tempo, milliseconds)
 }
 
 func (tempo Tempo) SubMilliseconds(milliseconds int) Tempo {
-	return tempo.Sub(milliseconds, Millisecond)
+	return arithmetic.SubMilliseconds(tempo, milliseconds)
 }
 
 func (tempo Tempo) AddSeconds(seconds int) Tempo {
-	return tempo.Add(seconds, Second)
+	return arithmetic.AddSeconds(tempo, seconds)
 }
 
 func (tempo Tempo) SubSeconds(seconds int) Tempo {
-	return tempo.Sub(seconds, Second)
+	return arithmetic.SubSeconds(tempo, seconds)
 }
 
 func (tempo Tempo) AddMinutes(minutes int) Tempo {
-	return tempo.Add(minutes, Minute)
+	return arithmetic.AddMinutes(tempo, minutes)
 }
 
 func (tempo Tempo) SubMinutes(minutes int) Tempo {
-	return tempo.Sub(minutes, Minute)
+	return arithmetic.SubMinutes(tempo, minutes)
 }
 
 func (tempo Tempo) AddHours(hours int) Tempo {
-	return tempo.Add(hours, Hour)
+	return arithmetic.AddHours(tempo, hours)
 }
 
 func (tempo Tempo) SubHours(hours int) Tempo {
-	return tempo.Sub(hours, Hour)
+	return arithmetic.SubHours(tempo, hours)
 }
 
 func (tempo Tempo) AddDays(days int) Tempo {
-	return tempo.Add(days, Day)
+	return arithmetic.AddDays(tempo, days)
 }
 
 func (tempo Tempo) SubDays(days int) Tempo {
-	return tempo.Sub(days, Day)
+	return arithmetic.SubDays(tempo, days)
 }
 
 func (tempo Tempo) AddWeekdays(days int) Tempo {
-	if days == 0 {
-		return tempo.Clone()
-	}
-
-	direction := 1
-
-	if days < 0 {
-		direction = -1
-		days = -days
-	}
-
-	current := tempo.Clone()
-
-	for days > 0 {
-		current = current.AddDays(direction)
-
-		if current.IsWeekday() {
-			days--
-		}
-	}
-
-	return current
+	return arithmetic.AddWeekdays(tempo, days, defaultConfig.Settings.WeekendDays)
 }
 
 func (tempo Tempo) SubWeekdays(days int) Tempo {
-	return tempo.AddWeekdays(-days)
+	return arithmetic.SubWeekdays(tempo, days, defaultConfig.Settings.WeekendDays)
 }
 
 func (tempo Tempo) AddWeeks(weeks int) Tempo {
-	return tempo.Add(weeks, Week)
+	return arithmetic.AddWeeks(tempo, weeks)
 }
 
 func (tempo Tempo) SubWeeks(weeks int) Tempo {
-	return tempo.Sub(weeks, Week)
+	return arithmetic.SubWeeks(tempo, weeks)
 }
 
 func (tempo Tempo) AddMonths(months int) Tempo {
-	if !defaultConfig.Settings.MonthsOverflow {
-		return tempo.AddMonthsNoOverflow(months)
-	}
-
-	return tempo.addDurationDate(0, months, 0)
+	return arithmetic.AddMonths(tempo, months, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (tempo Tempo) SubMonths(months int) Tempo {
-	return tempo.AddMonths(-months)
+	return arithmetic.SubMonths(tempo, months, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (tempo Tempo) AddMonthsNoOverflow(months int) Tempo {
-	return tempo.with(AddMonthsNoOverflow(tempo.value, tempo.location, months), tempo.location)
+	return arithmetic.AddMonthsNoOverflow(tempo, months)
 }
 
 func (tempo Tempo) SubMonthsNoOverflow(months int) Tempo {
-	return tempo.AddMonthsNoOverflow(-months)
+	return arithmetic.SubMonthsNoOverflow(tempo, months)
 }
 
 func (tempo Tempo) AddQuarters(quarters int) Tempo {
-	return tempo.AddMonths(quarters * 3)
+	return arithmetic.AddQuarters(tempo, quarters, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (tempo Tempo) SubQuarters(quarters int) Tempo {
-	return tempo.AddQuarters(-quarters)
+	return arithmetic.SubQuarters(tempo, quarters, defaultConfig.Settings.MonthsOverflow)
 }
 
 func (tempo Tempo) AddYears(years int) Tempo {
-	if !defaultConfig.Settings.YearsOverflow {
-		return tempo.AddYearsNoOverflow(years)
-	}
-
-	return tempo.addDurationDate(years, 0, 0)
+	return arithmetic.AddYears(tempo, years, defaultConfig.Settings.YearsOverflow)
 }
 
 func (tempo Tempo) SubYears(years int) Tempo {
-	return tempo.AddYears(-years)
+	return arithmetic.SubYears(tempo, years, defaultConfig.Settings.YearsOverflow)
 }
 
 func (tempo Tempo) AddYearsNoOverflow(years int) Tempo {
-	return tempo.with(AddYearsNoOverflow(tempo.value, tempo.location, years), tempo.location)
+	return arithmetic.AddYearsNoOverflow(tempo, years)
 }
 
 func (tempo Tempo) Age(reference Tempo) int {
@@ -217,5 +165,5 @@ func (tempo Tempo) Age(reference Tempo) int {
 }
 
 func (tempo Tempo) SubYearsNoOverflow(years int) Tempo {
-	return tempo.AddYearsNoOverflow(-years)
+	return arithmetic.SubYearsNoOverflow(tempo, years)
 }
