@@ -1,8 +1,9 @@
 package tempo
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/oullin/alloy/tempo/setters"
 )
 
 func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
@@ -110,54 +111,23 @@ func (tempo Tempo) Set(components Components) (Tempo, error) {
 }
 
 func (tempo Tempo) SetUnit(unit Unit, value int) (Tempo, error) {
-	switch normalizeUnit(unit) {
-	case Year:
-		return tempo.SetYear(value), nil
-	case Month:
-		return tempo.SetMonth(value), nil
-	case Day:
-		return tempo.SetDay(value), nil
-	case Hour:
-		return tempo.SetHour(value), nil
-	case Minute:
-		return tempo.SetMinute(value), nil
-	case Second:
-		return tempo.SetSecond(value), nil
-	case Millisecond:
-		return tempo.SetMillisecond(value), nil
-	default:
-		return Tempo{}, fmt.Errorf("tempo cannot set unit: %s", unit)
-	}
+	return setters.SetUnit(tempo, unit, value)
 }
 
 func (tempo Tempo) SetYear(year int) Tempo {
-	object := tempo.ToObject()
-	object.Year = year
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetYear(tempo, year)
 }
 
 func (tempo Tempo) SetMonth(month int) Tempo {
-	object := tempo.ToObject()
-	object.Month = month
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetMonth(tempo, month)
 }
 
 func (tempo Tempo) SetDay(day int) Tempo {
-	object := tempo.ToObject()
-	object.Day = day
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetDay(tempo, day)
 }
 
 func (tempo Tempo) SetDate(year int, month int, day int) Tempo {
-	object := tempo.ToObject()
-	object.Year = year
-	object.Month = month
-	object.Day = day
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetDate(tempo, year, month, day)
 }
 
 func (tempo Tempo) SetDateFrom(source Tempo) Tempo {
@@ -165,16 +135,7 @@ func (tempo Tempo) SetDateFrom(source Tempo) Tempo {
 }
 
 func (tempo Tempo) SetDateTime(year int, month int, day int, hour int, minute int, second int, millisecond int) Tempo {
-	object := tempo.ToObject()
-	object.Year = year
-	object.Month = month
-	object.Day = day
-	object.Hour = hour
-	object.Minute = minute
-	object.Second = second
-	object.Millisecond = millisecond
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetDateTime(tempo, year, month, day, hour, minute, second, millisecond)
 }
 
 func (tempo Tempo) SetDateTimeFrom(source Tempo) Tempo {
@@ -190,41 +151,23 @@ func (tempo Tempo) SetDateTimeFrom(source Tempo) Tempo {
 }
 
 func (tempo Tempo) SetHour(hour int) Tempo {
-	object := tempo.ToObject()
-	object.Hour = hour
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetHour(tempo, hour)
 }
 
 func (tempo Tempo) SetMinute(minute int) Tempo {
-	object := tempo.ToObject()
-	object.Minute = minute
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetMinute(tempo, minute)
 }
 
 func (tempo Tempo) SetSecond(second int) Tempo {
-	object := tempo.ToObject()
-	object.Second = second
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetSecond(tempo, second)
 }
 
 func (tempo Tempo) SetMillisecond(millisecond int) Tempo {
-	object := tempo.ToObject()
-	object.Millisecond = millisecond
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetMillisecond(tempo, millisecond)
 }
 
 func (tempo Tempo) SetTime(hour int, minute int, second int, millisecond int) Tempo {
-	object := tempo.ToObject()
-	object.Hour = hour
-	object.Minute = minute
-	object.Second = second
-	object.Millisecond = millisecond
-
-	return tempo.fromObject(object, tempo.location)
+	return setters.SetTime(tempo, hour, minute, second, millisecond)
 }
 
 func (tempo Tempo) SetTimeFrom(source Tempo) Tempo {
@@ -242,20 +185,11 @@ func (tempo Tempo) SetTimeFromTimeString(input string) (Tempo, error) {
 }
 
 func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
-	return newTempo(time.Unix(timestamp, 0), tempo.location, tempo.Runtime())
+	return setters.SetTimestamp(tempo, timestamp)
 }
 
 func (tempo Tempo) SetISODate(year int, week int, day int) Tempo {
-	isoYearStart := Tempo{
-		value:    time.Date(year, time.January, 4, 0, 0, 0, 0, tempo.location).UTC(),
-		location: tempo.location,
-		runtime:  tempo.Runtime(),
-	}.StartOfWeek(StartOfWeekOptions{WeekStartsOn: time.Monday})
-
-	return isoYearStart.
-		AddWeeks(week-1).
-		AddDays(day-1).
-		SetTime(tempo.Hour(), tempo.Minute(), tempo.Second(), tempo.Millisecond())
+	return setters.SetISODate(tempo, year, week, day)
 }
 
 func (tempo Tempo) SetISOWeek(week int, days ...int) Tempo {
@@ -295,23 +229,11 @@ func (tempo Tempo) SetTimestampFrom(timestamp int64) Tempo {
 }
 
 func (tempo Tempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
-	next, err := tempo.SetUnit(valueUnit, value)
-
-	if err != nil {
-		return tempo
-	}
-
-	clamped, err := next.Clamp(tempo.StartOf(overflowUnit), tempo.EndOf(overflowUnit))
-
-	if err != nil {
-		return tempo
-	}
-
-	return clamped
+	return setters.SetUnitNoOverflow(tempo, valueUnit, value, overflowUnit)
 }
 
 func (tempo Tempo) Midday() Tempo {
-	return tempo.SetTime(defaultConfig.Settings.MidDayAt, 0, 0, 0)
+	return setters.Midday(tempo, defaultConfig.Settings.MidDayAt)
 }
 
 func (tempo Tempo) MidDay() Tempo {

@@ -1,73 +1,168 @@
+// Package setters exposes generic field-replacement helpers that work on
+// any core.Bearer — both the immutable Tempo and the mutable
+// *MutableTempo — so SetYear/SetMonth/SetDay/SetTime and friends share a
+// single implementation.
+//
+// Field setters operate in the bearer's current location and emit a
+// fresh time.Time via Bearer.With. Operations that change the bearer's
+// location itself (SetTimezone, UTC, Local) cannot be expressed through
+// the With contract and stay on the umbrella tempo type.
+//
+// The package depends only on core, duration and internal/kernel —
+// never on the higher-level tempo package — keeping it safe to import
+// anywhere in the module.
 package setters
 
-import tempopkg "github.com/oullin/alloy/tempo/tempo"
+import (
+	"fmt"
+	"time"
 
-type Tempo struct {
-	value tempopkg.Tempo
+	"github.com/oullin/alloy/tempo/arithmetic"
+	"github.com/oullin/alloy/tempo/boundaries"
+	"github.com/oullin/alloy/tempo/comparison"
+	"github.com/oullin/alloy/tempo/core"
+	"github.com/oullin/alloy/tempo/duration"
+	"github.com/oullin/alloy/tempo/internal/kernel"
+)
+
+func SetYear[T core.Bearer[T]](bearer T, year int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(year, local.Month(), local.Day(), local.Hour(), local.Minute(), local.Second(), local.Nanosecond(), state.Location).UTC())
 }
 
-func From(value tempopkg.Tempo) Tempo {
-	return Tempo{value: value}
+func SetMonth[T core.Bearer[T]](bearer T, month int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), time.Month(month), local.Day(), local.Hour(), local.Minute(), local.Second(), local.Nanosecond(), state.Location).UTC())
 }
 
-func (tempo Tempo) Tempo() tempopkg.Tempo {
-	return tempo.value
+func SetDay[T core.Bearer[T]](bearer T, day int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), local.Month(), day, local.Hour(), local.Minute(), local.Second(), local.Nanosecond(), state.Location).UTC())
 }
 
-func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
-	next, err := tempo.value.SetTimezone(name)
+func SetHour[T core.Bearer[T]](bearer T, hour int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), local.Month(), local.Day(), hour, local.Minute(), local.Second(), local.Nanosecond(), state.Location).UTC())
+}
+
+func SetMinute[T core.Bearer[T]](bearer T, minute int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), minute, local.Second(), local.Nanosecond(), state.Location).UTC())
+}
+
+func SetSecond[T core.Bearer[T]](bearer T, second int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), local.Minute(), second, local.Nanosecond(), state.Location).UTC())
+}
+
+func SetMillisecond[T core.Bearer[T]](bearer T, millisecond int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), local.Month(), local.Day(), local.Hour(), local.Minute(), local.Second(), millisecond*int(time.Millisecond), state.Location).UTC())
+}
+
+func SetDate[T core.Bearer[T]](bearer T, year int, month int, day int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(year, time.Month(month), day, local.Hour(), local.Minute(), local.Second(), local.Nanosecond(), state.Location).UTC())
+}
+
+func SetTime[T core.Bearer[T]](bearer T, hour int, minute int, second int, millisecond int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return bearer.With(time.Date(local.Year(), local.Month(), local.Day(), hour, minute, second, millisecond*int(time.Millisecond), state.Location).UTC())
+}
+
+func SetDateTime[T core.Bearer[T]](bearer T, year int, month int, day int, hour int, minute int, second int, millisecond int) T {
+	state := bearer.State()
+
+	return bearer.With(time.Date(year, time.Month(month), day, hour, minute, second, millisecond*int(time.Millisecond), state.Location).UTC())
+}
+
+func SetTimestamp[T core.Bearer[T]](bearer T, timestamp int64) T {
+	return bearer.With(time.Unix(timestamp, 0).UTC())
+}
+
+func SetUnit[T core.Bearer[T]](bearer T, unit duration.Unit, value int) (T, error) {
+	var zero T
+
+	switch duration.NormalizeUnit(unit) {
+	case duration.Year:
+		return SetYear(bearer, value), nil
+	case duration.Month:
+		return SetMonth(bearer, value), nil
+	case duration.Day:
+		return SetDay(bearer, value), nil
+	case duration.Hour:
+		return SetHour(bearer, value), nil
+	case duration.Minute:
+		return SetMinute(bearer, value), nil
+	case duration.Second:
+		return SetSecond(bearer, value), nil
+	case duration.Millisecond:
+		return SetMillisecond(bearer, value), nil
+	default:
+		return zero, fmt.Errorf("tempo cannot set unit: %s", unit)
+	}
+}
+
+func SetUnitNoOverflow[T core.Bearer[T]](bearer T, valueUnit duration.Unit, value int, overflowUnit duration.Unit) T {
+	next, err := SetUnit(bearer, valueUnit, value)
 
 	if err != nil {
-		return Tempo{}, err
+		return bearer
 	}
 
-	return From(next), nil
-}
-
-func (tempo Tempo) SetTimezoneKeepLocal(name string) (Tempo, error) {
-	next, err := tempo.value.SetTimezoneKeepLocal(name)
+	clamped, err := comparison.Clamp(next, boundaries.StartOf(bearer, overflowUnit).State(), boundaries.EndOf(bearer, overflowUnit).State())
 
 	if err != nil {
-		return Tempo{}, err
+		return bearer
 	}
 
-	return From(next), nil
+	return clamped
 }
 
-func (tempo Tempo) Set(components tempopkg.Components) (Tempo, error) {
-	next, err := tempo.value.Set(components)
+func SetWeekday[T core.Bearer[T]](bearer T, weekday time.Weekday) T {
+	state := bearer.State()
+	current := int(state.Value.In(state.Location).Weekday())
 
-	if err != nil {
-		return Tempo{}, err
-	}
-
-	return From(next), nil
+	return arithmetic.AddDays(bearer, int(weekday)-current)
 }
 
-func (tempo Tempo) SetYear(year int) Tempo {
-	return From(tempo.value.SetYear(year))
+func SetDayOfYear[T core.Bearer[T]](bearer T, day int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+	yearStart := boundaries.StartOf(bearer, duration.Year)
+	withDay := arithmetic.AddDays(yearStart, day-1)
+
+	return SetTime(withDay, local.Hour(), local.Minute(), local.Second(), local.Nanosecond()/int(time.Millisecond))
 }
 
-func (tempo Tempo) SetMonth(month int) Tempo {
-	return From(tempo.value.SetMonth(month))
+func SetISODate[T core.Bearer[T]](bearer T, year int, week int, day int) T {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+	isoStart := bearer.With(kernel.StartOf(time.Date(year, time.January, 4, 0, 0, 0, 0, state.Location).UTC(), state.Location, duration.Week, kernel.WeekOptions{WeekStartsOn: time.Monday}))
+	advanced := arithmetic.AddWeeks(isoStart, week-1)
+	advanced = arithmetic.AddDays(advanced, day-1)
+
+	return SetTime(advanced, local.Hour(), local.Minute(), local.Second(), local.Nanosecond()/int(time.Millisecond))
 }
 
-func (tempo Tempo) SetDay(day int) Tempo {
-	return From(tempo.value.SetDay(day))
-}
-
-func (tempo Tempo) SetDate(year int, month int, day int) Tempo {
-	return From(tempo.value.SetDate(year, month, day))
-}
-
-func (tempo Tempo) SetTime(hour int, minute int, second int, millisecond int) Tempo {
-	return From(tempo.value.SetTime(hour, minute, second, millisecond))
-}
-
-func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
-	return From(tempo.value.SetTimestamp(timestamp))
-}
-
-func (tempo Tempo) Midday() Tempo {
-	return From(tempo.value.Midday())
+func Midday[T core.Bearer[T]](bearer T, hour int) T {
+	return SetTime(bearer, hour, 0, 0, 0)
 }
