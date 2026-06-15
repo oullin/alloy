@@ -1,17 +1,21 @@
 package tempo
 
-import "time"
+import (
+	"time"
+
+	"github.com/oullin/alloy/tempo/formatting"
+)
 
 func (mutable *MutableTempo) DateString() string {
-	return mutable.Tempo().DateString()
+	return formatting.DateString(mutable)
 }
 
 func (mutable *MutableTempo) TimeString(precision ...TimeStringPrecision) string {
-	return mutable.Tempo().TimeString(precision...)
+	return formatting.TimeString(mutable, selectedPrecision(precision) == MillisecondPrecision)
 }
 
 func (mutable *MutableTempo) DateTimeString() string {
-	return mutable.Tempo().DateTimeString()
+	return formatting.DateTimeString(mutable)
 }
 
 func (mutable *MutableTempo) FormattedDateString() string {
@@ -31,7 +35,7 @@ func (mutable *MutableTempo) DateTimeLocalString(precision ...TimeStringPrecisio
 }
 
 func (mutable *MutableTempo) ISOString() string {
-	return mutable.Tempo().ISOString()
+	return formatting.ISOString(mutable)
 }
 
 func (mutable *MutableTempo) ISO8601String() string {
@@ -103,7 +107,7 @@ func (mutable *MutableTempo) String() string {
 }
 
 func (mutable *MutableTempo) Time() time.Time {
-	return mutable.Tempo().Time()
+	return mutable.value
 }
 
 func (mutable *MutableTempo) MarshalJSON() ([]byte, error) {
@@ -128,27 +132,27 @@ func (mutable *MutableTempo) ToObject() Object {
 }
 
 func (mutable *MutableTempo) ToMap() map[string]interface{} {
-	return mutable.Tempo().ToMap()
+	return formatting.ToMap(mutable)
 }
 
 func (mutable *MutableTempo) ToArray() [7]int {
-	return mutable.Tempo().ToArray()
+	return formatting.ToArray(mutable)
 }
 
 func (mutable *MutableTempo) Format(pattern string) string {
-	return mutable.Tempo().Format(pattern)
+	return formatting.Format(mutable, pattern)
 }
 
 func (mutable *MutableTempo) RawFormat(pattern string) string {
-	return mutable.Tempo().RawFormat(pattern)
+	return mutable.Format(pattern)
 }
 
 func (mutable *MutableTempo) ISOFormat(pattern string) string {
-	return mutable.Tempo().ISOFormat(pattern)
+	return mutable.Format(pattern)
 }
 
 func (mutable *MutableTempo) TranslatedFormat(pattern string) string {
-	return mutable.Tempo().TranslatedFormat(pattern)
+	return mutable.Format(pattern)
 }
 
 func (mutable *MutableTempo) Ordinal(unit Unit) string {

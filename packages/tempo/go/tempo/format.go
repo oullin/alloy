@@ -4,84 +4,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/oullin/alloy/tempo/formatting"
 )
 
 func (tempo Tempo) Format(pattern string) string {
-	local := tempo.local()
-	offset := tempo.OffsetMinutes()
-	hour12 := local.Hour() % 12
-
-	if hour12 == 0 {
-		hour12 = 12
-	}
-
-	values := map[string]string{
-		"A":    ternary(local.Hour() < 12, "AM", "PM"),
-		"a":    ternary(local.Hour() < 12, "am", "pm"),
-		"D":    strconv.Itoa(local.Day()),
-		"DD":   pad(local.Day(), 2),
-		"Do":   ordinal(local.Day()),
-		"d":    strconv.Itoa(int(local.Weekday())),
-		"ddd":  local.Weekday().String()[:3],
-		"dddd": local.Weekday().String(),
-		"H":    strconv.Itoa(local.Hour()),
-		"HH":   pad(local.Hour(), 2),
-		"h":    strconv.Itoa(hour12),
-		"hh":   pad(hour12, 2),
-		"M":    strconv.Itoa(int(local.Month())),
-		"MM":   pad(int(local.Month()), 2),
-		"MMM":  local.Month().String()[:3],
-		"MMMM": local.Month().String(),
-		"m":    strconv.Itoa(local.Minute()),
-		"mm":   pad(local.Minute(), 2),
-		"S":    strconv.Itoa(tempo.Millisecond() / 100),
-		"SSS":  pad(tempo.Millisecond(), 3),
-		"s":    strconv.Itoa(local.Second()),
-		"ss":   pad(local.Second(), 2),
-		"X":    strconv.FormatInt(tempo.Timestamp(), 10),
-		"x":    strconv.FormatInt(tempo.TimestampMs(), 10),
-		"Y":    strconv.Itoa(local.Year()),
-		"YY":   pad(local.Year()%100, 2),
-		"YYYY": pad(local.Year(), 4),
-		"Z":    formatOffset(offset, ":"),
-		"ZZ":   formatOffset(offset, ""),
-	}
-
-	tokens := []string{"YYYY", "MMMM", "dddd", "MMM", "ddd", "SSS", "Do", "YY", "ZZ", "MM", "DD", "HH", "hh", "mm", "ss", "Z", "X", "x", "Y", "M", "D", "H", "h", "m", "s", "A", "a", "d"}
-
-	var builder strings.Builder
-
-	for index := 0; index < len(pattern); {
-		if pattern[index] == '[' {
-			end := strings.IndexByte(pattern[index:], ']')
-
-			if end >= 0 {
-				builder.WriteString(pattern[index+1 : index+end])
-				index += end + 1
-
-				continue
-			}
-		}
-
-		matched := false
-
-		for _, token := range tokens {
-			if strings.HasPrefix(pattern[index:], token) {
-				builder.WriteString(values[token])
-				index += len(token)
-				matched = true
-
-				break
-			}
-		}
-
-		if !matched {
-			builder.WriteByte(pattern[index])
-			index++
-		}
-	}
-
-	return builder.String()
+	return formatting.Format(tempo, pattern)
 }
 
 func (tempo Tempo) RawFormat(pattern string) string {
@@ -144,21 +72,15 @@ func (tempo Tempo) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) T
 }
 
 func (tempo Tempo) DateString() string {
-	return tempo.Format("YYYY-MM-DD")
+	return formatting.DateString(tempo)
 }
 
 func (tempo Tempo) TimeString(precision ...TimeStringPrecision) string {
-	base := tempo.Format("HH:mm:ss")
-
-	if selectedPrecision(precision) == MillisecondPrecision {
-		return base + "." + pad(tempo.Millisecond(), 3)
-	}
-
-	return base
+	return formatting.TimeString(tempo, selectedPrecision(precision) == MillisecondPrecision)
 }
 
 func (tempo Tempo) DateTimeString() string {
-	return tempo.Format("YYYY-MM-DD HH:mm:ss")
+	return formatting.DateTimeString(tempo)
 }
 
 func (tempo Tempo) FormattedDateString() string {
@@ -178,7 +100,7 @@ func (tempo Tempo) DateTimeLocalString(precision ...TimeStringPrecision) string 
 }
 
 func (tempo Tempo) ISOString() string {
-	return tempo.value.UTC().Format("2006-01-02T15:04:05.000Z")
+	return formatting.ISOString(tempo)
 }
 
 func (tempo Tempo) ISO8601String() string {
@@ -291,49 +213,26 @@ func (tempo *Tempo) UnmarshalJSON(data []byte) error {
 }
 
 func (tempo Tempo) ToObject() Object {
-	local := tempo.local()
+	object := formatting.ToObject(tempo)
 
 	return Object{
-		Year:          local.Year(),
-		Month:         int(local.Month()),
-		Day:           local.Day(),
-		Hour:          local.Hour(),
-		Minute:        local.Minute(),
-		Second:        local.Second(),
-		Millisecond:   local.Nanosecond() / int(time.Millisecond),
+		Year:          object.Year,
+		Month:         object.Month,
+		Day:           object.Day,
+		Hour:          object.Hour,
+		Minute:        object.Minute,
+		Second:        object.Second,
+		Millisecond:   object.Millisecond,
 		Timezone:      tempo.Timezone(),
-		OffsetMinutes: tempo.OffsetMinutes(),
-		Weekday:       int(local.Weekday()),
+		OffsetMinutes: object.OffsetMinutes,
+		Weekday:       object.Weekday,
 	}
 }
 
 func (tempo Tempo) ToMap() map[string]interface{} {
-	object := tempo.ToObject()
-
-	return map[string]interface{}{
-		"year":          object.Year,
-		"month":         object.Month,
-		"day":           object.Day,
-		"hour":          object.Hour,
-		"minute":        object.Minute,
-		"second":        object.Second,
-		"millisecond":   object.Millisecond,
-		"timeZone":      object.Timezone,
-		"offsetMinutes": object.OffsetMinutes,
-		"weekday":       object.Weekday,
-	}
+	return formatting.ToMap(tempo)
 }
 
 func (tempo Tempo) ToArray() [7]int {
-	object := tempo.ToObject()
-
-	return [7]int{
-		object.Year,
-		object.Month,
-		object.Day,
-		object.Hour,
-		object.Minute,
-		object.Second,
-		object.Millisecond,
-	}
+	return formatting.ToArray(tempo)
 }

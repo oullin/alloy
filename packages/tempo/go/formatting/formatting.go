@@ -1,71 +1,259 @@
+// Package formatting exposes generic time-string rendering helpers that
+// work on any core.Bearer — both the immutable Tempo and the mutable
+// *MutableTempo — so Format, ToObject and the projection helpers share
+// a single implementation.
+//
+// The package depends only on core, duration and calendar — never on
+// the higher-level tempo package — keeping it safe to import anywhere
+// in the module.
 package formatting
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
-	tempopkg "github.com/oullin/alloy/tempo/tempo"
+	"github.com/oullin/alloy/tempo/calendar"
+	"github.com/oullin/alloy/tempo/core"
 )
 
-type Tempo struct {
-	value tempopkg.Tempo
+type Object struct {
+	Year          int
+	Month         int
+	Day           int
+	Hour          int
+	Minute        int
+	Second        int
+	Millisecond   int
+	Timezone      string
+	OffsetMinutes int
+	Weekday       int
 }
 
-func From(value tempopkg.Tempo) Tempo {
-	return Tempo{value: value}
+func Format[T core.Bearer[T]](bearer T, pattern string) string {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+	offset := offsetMinutes(local)
+	hour12 := local.Hour() % 12
+
+	if hour12 == 0 {
+		hour12 = 12
+	}
+
+	milli := local.Nanosecond() / int(time.Millisecond)
+	values := map[string]string{
+		"A":    ternary(local.Hour() < 12, "AM", "PM"),
+		"a":    ternary(local.Hour() < 12, "am", "pm"),
+		"D":    strconv.Itoa(local.Day()),
+		"DD":   pad(local.Day(), 2),
+		"Do":   ordinal(local.Day()),
+		"d":    strconv.Itoa(int(local.Weekday())),
+		"ddd":  local.Weekday().String()[:3],
+		"dddd": local.Weekday().String(),
+		"H":    strconv.Itoa(local.Hour()),
+		"HH":   pad(local.Hour(), 2),
+		"h":    strconv.Itoa(hour12),
+		"hh":   pad(hour12, 2),
+		"M":    strconv.Itoa(int(local.Month())),
+		"MM":   pad(int(local.Month()), 2),
+		"MMM":  local.Month().String()[:3],
+		"MMMM": local.Month().String(),
+		"m":    strconv.Itoa(local.Minute()),
+		"mm":   pad(local.Minute(), 2),
+		"S":    strconv.Itoa(milli / 100),
+		"SSS":  pad(milli, 3),
+		"s":    strconv.Itoa(local.Second()),
+		"ss":   pad(local.Second(), 2),
+		"X":    strconv.FormatInt(state.Value.Unix(), 10),
+		"x":    strconv.FormatInt(state.Value.UnixMilli(), 10),
+		"Y":    strconv.Itoa(local.Year()),
+		"YY":   pad(local.Year()%100, 2),
+		"YYYY": pad(local.Year(), 4),
+		"Z":    FormatOffset(offset, ":"),
+		"ZZ":   FormatOffset(offset, ""),
+	}
+
+	tokens := []string{"YYYY", "MMMM", "dddd", "MMM", "ddd", "SSS", "Do", "YY", "ZZ", "MM", "DD", "HH", "hh", "mm", "ss", "Z", "X", "x", "Y", "M", "D", "H", "h", "m", "s", "A", "a", "d"}
+
+	var builder strings.Builder
+
+	for index := 0; index < len(pattern); {
+		if pattern[index] == '[' {
+			end := strings.IndexByte(pattern[index:], ']')
+
+			if end >= 0 {
+				builder.WriteString(pattern[index+1 : index+end])
+				index += end + 1
+
+				continue
+			}
+		}
+
+		matched := false
+
+		for _, token := range tokens {
+			if strings.HasPrefix(pattern[index:], token) {
+				builder.WriteString(values[token])
+				index += len(token)
+				matched = true
+
+				break
+			}
+		}
+
+		if !matched {
+			builder.WriteByte(pattern[index])
+			index++
+		}
+	}
+
+	return builder.String()
 }
 
-func (tempo Tempo) Tempo() tempopkg.Tempo {
-	return tempo.value
+func ToObject[T core.Bearer[T]](bearer T) Object {
+	state := bearer.State()
+	local := state.Value.In(state.Location)
+
+	return Object{
+		Year:          local.Year(),
+		Month:         int(local.Month()),
+		Day:           local.Day(),
+		Hour:          local.Hour(),
+		Minute:        local.Minute(),
+		Second:        local.Second(),
+		Millisecond:   local.Nanosecond() / int(time.Millisecond),
+		Timezone:      state.Location.String(),
+		OffsetMinutes: offsetMinutes(local),
+		Weekday:       int(local.Weekday()),
+	}
 }
 
-func (tempo Tempo) Format(pattern string) string {
-	return tempo.value.Format(pattern)
+func ToMap[T core.Bearer[T]](bearer T) map[string]interface{} {
+	object := ToObject(bearer)
+
+	return map[string]interface{}{
+		"year":          object.Year,
+		"month":         object.Month,
+		"day":           object.Day,
+		"hour":          object.Hour,
+		"minute":        object.Minute,
+		"second":        object.Second,
+		"millisecond":   object.Millisecond,
+		"timeZone":      object.Timezone,
+		"offsetMinutes": object.OffsetMinutes,
+		"weekday":       object.Weekday,
+	}
 }
 
-func (tempo Tempo) DateString() string {
-	return tempo.value.DateString()
+func ToArray[T core.Bearer[T]](bearer T) [7]int {
+	object := ToObject(bearer)
+
+	return [7]int{
+		object.Year,
+		object.Month,
+		object.Day,
+		object.Hour,
+		object.Minute,
+		object.Second,
+		object.Millisecond,
+	}
 }
 
-func (tempo Tempo) TimeString(precision ...tempopkg.TimeStringPrecision) string {
-	return tempo.value.TimeString(precision...)
+func ISOString[T core.Bearer[T]](bearer T) string {
+	return bearer.State().Value.UTC().Format("2006-01-02T15:04:05.000Z")
 }
 
-func (tempo Tempo) DateTimeString() string {
-	return tempo.value.DateTimeString()
+func DateString[T core.Bearer[T]](bearer T) string {
+	return Format(bearer, "YYYY-MM-DD")
 }
 
-func (tempo Tempo) ISOString() string {
-	return tempo.value.ISOString()
+func DateTimeString[T core.Bearer[T]](bearer T) string {
+	return Format(bearer, "YYYY-MM-DD HH:mm:ss")
 }
 
-func (tempo Tempo) ISO8601String() string {
-	return tempo.value.ISO8601String()
+func TimeString[T core.Bearer[T]](bearer T, includeMilliseconds bool) string {
+	base := Format(bearer, "HH:mm:ss")
+
+	if includeMilliseconds {
+		object := ToObject(bearer)
+
+		return base + "." + pad(object.Millisecond, 3)
+	}
+
+	return base
 }
 
-func (tempo Tempo) RFC3339String(precision ...tempopkg.TimeStringPrecision) string {
-	return tempo.value.RFC3339String(precision...)
+func MonthName(month int) string {
+	return calendar.MonthName(month)
 }
 
-func (tempo Tempo) Serialize() string {
-	return tempo.value.Serialize()
+func ShortMonthName(month int) string {
+	return calendar.ShortMonthName(month)
 }
 
-func (tempo Tempo) String() string {
-	return tempo.value.String()
+func DayName(weekday int) string {
+	return calendar.DayName(weekday)
 }
 
-func (tempo Tempo) Time() time.Time {
-	return tempo.value.Time()
+func ShortDayName(weekday int) string {
+	return calendar.ShortDayName(weekday)
 }
 
-func (tempo Tempo) ToObject() tempopkg.Object {
-	return tempo.value.ToObject()
+func FormatOffset(offsetMinutes int, separator string) string {
+	sign := "+"
+
+	if offsetMinutes < 0 {
+		sign = "-"
+		offsetMinutes = -offsetMinutes
+	}
+
+	return fmt.Sprintf("%s%s%s%s", sign, pad(offsetMinutes/60, 2), separator, pad(offsetMinutes%60, 2))
 }
 
-func (tempo Tempo) ToMap() map[string]interface{} {
-	return tempo.value.ToMap()
+func offsetMinutes(local time.Time) int {
+	_, offset := local.Zone()
+
+	return offset / 60
 }
 
-func (tempo Tempo) ToArray() [7]int {
-	return tempo.value.ToArray()
+func pad(value int, length int) string {
+	result := strconv.Itoa(value)
+
+	if value < 0 {
+		result = strconv.Itoa(-value)
+	}
+
+	for len(result) < length {
+		result = "0" + result
+	}
+
+	return result
+}
+
+func ordinal(value int) string {
+	remainder := value % 100
+
+	if remainder >= 11 && remainder <= 13 {
+		return strconv.Itoa(value) + "th"
+	}
+
+	switch value % 10 {
+	case 1:
+		return strconv.Itoa(value) + "st"
+	case 2:
+		return strconv.Itoa(value) + "nd"
+	case 3:
+		return strconv.Itoa(value) + "rd"
+	default:
+		return strconv.Itoa(value) + "th"
+	}
+}
+
+func ternary(condition bool, left string, right string) string {
+	if condition {
+		return left
+	}
+
+	return right
 }
