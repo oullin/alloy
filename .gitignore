@@ -10,3 +10,4 @@ packages/artefacts/.cache/
 packages/artefacts/.logs/
 packages/artefacts/dist/
 packages/carbon-oracle/vendor/
+packages/docs/src/.vitepress/
