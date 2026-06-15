@@ -1,4 +1,4 @@
-package temporal
+package tempo
 
 import (
 	"time"

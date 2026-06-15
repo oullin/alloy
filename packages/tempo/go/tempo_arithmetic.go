@@ -1,9 +1,9 @@
 package tempo
 
-import "github.com/oullin/alloy/tempo/temporal"
+import domain "github.com/oullin/alloy/tempo/tempo"
 
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
-	return tempo.with(temporal.Add(
+	return tempo.with(domain.Add(
 		tempo.value,
 		tempo.location,
 		value,
@@ -183,7 +183,7 @@ func (tempo Tempo) SubMonths(months int) Tempo {
 }
 
 func (tempo Tempo) AddMonthsNoOverflow(months int) Tempo {
-	return tempo.with(temporal.AddMonthsNoOverflow(tempo.value, tempo.location, months), tempo.location)
+	return tempo.with(domain.AddMonthsNoOverflow(tempo.value, tempo.location, months), tempo.location)
 }
 
 func (tempo Tempo) SubMonthsNoOverflow(months int) Tempo {
@@ -211,7 +211,7 @@ func (tempo Tempo) SubYears(years int) Tempo {
 }
 
 func (tempo Tempo) AddYearsNoOverflow(years int) Tempo {
-	return tempo.with(temporal.AddYearsNoOverflow(tempo.value, tempo.location, years), tempo.location)
+	return tempo.with(domain.AddYearsNoOverflow(tempo.value, tempo.location, years), tempo.location)
 }
 
 func (tempo Tempo) Age(reference Tempo) int {
