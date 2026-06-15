@@ -32,14 +32,6 @@ func Max(first Tempo, rest ...Tempo) Tempo {
 	return items[LaterIndex(values)]
 }
 
-func Minimum(first Tempo, rest ...Tempo) Tempo {
-	return Min(first, rest...)
-}
-
-func Maximum(first Tempo, rest ...Tempo) Tempo {
-	return Max(first, rest...)
-}
-
 func Average(start Tempo, end Tempo) Tempo {
 	return Tempo{
 		value:    time.UnixMilli(AverageMilliseconds(start.TimestampMs(), end.TimestampMs())).UTC(),
@@ -48,7 +40,14 @@ func Average(start Tempo, end Tempo) Tempo {
 }
 
 func NewMutable(input Tempo) *MutableTempo {
-	return &MutableTempo{value: input.value, location: input.location, runtime: input.Runtime()}
+	return &MutableTempo{
+		value:          input.value,
+		location:       input.location,
+		runtime:        input.Runtime(),
+		settings:       input.settingsSnapshot(),
+		serializer:     input.serializer,
+		toStringFormat: input.toStringFormat,
+	}
 }
 
 func ParseMutable(input string, options ...Option) (*MutableTempo, error) {

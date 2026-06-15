@@ -324,19 +324,19 @@ func (tempo Tempo) PreviousOrSame(weekday time.Weekday) Tempo {
 }
 
 func (tempo Tempo) NextWeekday() Tempo {
-	return boundaries.NextWeekday(tempo, defaultConfig.Settings.WeekendDays)
+	return boundaries.NextWeekday(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
 func (tempo Tempo) PreviousWeekday() Tempo {
-	return boundaries.PreviousWeekday(tempo, defaultConfig.Settings.WeekendDays)
+	return boundaries.PreviousWeekday(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
 func (tempo Tempo) NextWeekendDay() Tempo {
-	return boundaries.NextWeekendDay(tempo, defaultConfig.Settings.WeekendDays)
+	return boundaries.NextWeekendDay(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
 func (tempo Tempo) PreviousWeekendDay() Tempo {
-	return boundaries.PreviousWeekendDay(tempo, defaultConfig.Settings.WeekendDays)
+	return boundaries.PreviousWeekendDay(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
 func weekOptions(options []StartOfWeekOptions) []kernel.WeekOptions {

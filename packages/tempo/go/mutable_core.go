@@ -7,7 +7,7 @@ import (
 )
 
 func (mutable *MutableTempo) Tempo() Tempo {
-	return newTempo(mutable.value, mutable.location, mutable.runtime)
+	return newTempoWithPolicy(mutable.value, mutable.location, mutable.runtime, mutable.settingsSnapshot(), mutable.serializer, mutable.toStringFormat)
 }
 
 func (mutable *MutableTempo) Clone() *MutableTempo {
@@ -56,20 +56,12 @@ func (mutable *MutableTempo) WithRuntime(runtime Runtime) *MutableTempo {
 	return mutable.replace(mutable.Tempo().WithRuntime(runtime))
 }
 
-func (mutable *MutableTempo) GetLocalTranslator() Translator {
-	return mutable.Tempo().GetLocalTranslator()
-}
-
-func (mutable *MutableTempo) SetLocalTranslator(translator Translator) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetLocalTranslator(translator))
-}
-
 func (mutable *MutableTempo) WithTranslator(translator Translator) *MutableTempo {
-	return mutable.SetLocalTranslator(translator)
+	return mutable.replace(mutable.Tempo().WithTranslator(translator))
 }
 
-func (mutable *MutableTempo) HasLocalTranslator() bool {
-	return mutable.Tempo().HasLocalTranslator()
+func (mutable *MutableTempo) HasTranslator() bool {
+	return mutable.Tempo().HasTranslator()
 }
 
 func (mutable *MutableTempo) Timezone() string {
@@ -84,12 +76,8 @@ func (mutable *MutableTempo) TimestampMs() int64 {
 	return mutable.Tempo().TimestampMs()
 }
 
-func (mutable *MutableTempo) GetTimestampMs() int64 {
-	return mutable.Tempo().GetTimestampMs()
-}
-
-func (mutable *MutableTempo) GetPreciseTimestamp(precisions ...int) float64 {
-	return mutable.Tempo().GetPreciseTimestamp(precisions...)
+func (mutable *MutableTempo) PreciseTimestamp(precisions ...int) float64 {
+	return mutable.Tempo().PreciseTimestamp(precisions...)
 }
 
 func (mutable *MutableTempo) Unix() int64 {
@@ -168,12 +156,8 @@ func (mutable *MutableTempo) Millisecond() int {
 	return mutable.Tempo().Millisecond()
 }
 
-func (mutable *MutableTempo) Get(field string) (any, bool) {
-	return mutable.Tempo().Get(field)
-}
-
-func (mutable *MutableTempo) GetPaddedUnit(field string, length int) (string, bool) {
-	return mutable.Tempo().GetPaddedUnit(field, length)
+func (mutable *MutableTempo) PaddedUnit(field string, length int) (string, bool) {
+	return mutable.Tempo().PaddedUnit(field, length)
 }
 
 func (mutable *MutableTempo) OffsetMinutes() int {
@@ -182,10 +166,6 @@ func (mutable *MutableTempo) OffsetMinutes() int {
 
 func (mutable *MutableTempo) OffsetString(separator string) string {
 	return mutable.Tempo().OffsetString(separator)
-}
-
-func (mutable *MutableTempo) GetOffsetString(separator string) string {
-	return mutable.Tempo().GetOffsetString(separator)
 }
 
 func (mutable *MutableTempo) UTCOffset() int {
@@ -216,32 +196,8 @@ func (mutable *MutableTempo) MinDayName() string {
 	return mutable.Tempo().MinDayName()
 }
 
-func (mutable *MutableTempo) GetTranslatedMonthName() string {
-	return mutable.Tempo().GetTranslatedMonthName()
-}
-
-func (mutable *MutableTempo) GetTranslatedShortMonthName() string {
-	return mutable.Tempo().GetTranslatedShortMonthName()
-}
-
-func (mutable *MutableTempo) GetTranslatedDayName() string {
-	return mutable.Tempo().GetTranslatedDayName()
-}
-
-func (mutable *MutableTempo) GetTranslatedShortDayName() string {
-	return mutable.Tempo().GetTranslatedShortDayName()
-}
-
-func (mutable *MutableTempo) GetTranslatedMinDayName() string {
-	return mutable.Tempo().GetTranslatedMinDayName()
-}
-
 func (mutable *MutableTempo) TranslateNumber(value int) string {
 	return mutable.Tempo().TranslateNumber(value)
-}
-
-func (mutable *MutableTempo) GetAltNumber(value int) string {
-	return mutable.Tempo().GetAltNumber(value)
 }
 
 func (mutable *MutableTempo) Translate(message string, replacements map[string]string) string {
@@ -252,8 +208,8 @@ func (mutable *MutableTempo) TranslateWith(message string, replacements map[stri
 	return mutable.Tempo().TranslateWith(message, replacements)
 }
 
-func (mutable *MutableTempo) GetTranslationMessage(key string) (any, bool) {
-	return mutable.Tempo().GetTranslationMessage(key)
+func (mutable *MutableTempo) TranslationMessage(key string) (any, bool) {
+	return mutable.Tempo().TranslationMessage(key)
 }
 
 func (mutable *MutableTempo) IsUTC() bool {

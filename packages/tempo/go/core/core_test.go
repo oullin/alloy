@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/oullin/alloy/tempo"
 	"github.com/oullin/alloy/tempo/core"
-	"github.com/oullin/alloy/tempo/tempo"
 )
 
 // Compile-time guarantees that Tempo and *MutableTempo continue to satisfy

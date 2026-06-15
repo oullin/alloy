@@ -3,18 +3,14 @@ package tempo
 import "github.com/oullin/alloy/tempo/arithmetic"
 
 func (tempo Tempo) Add(value int, unit Unit) Tempo {
-	return arithmetic.Add(tempo, value, unit, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
+	return arithmetic.Add(tempo, value, unit, tempo.settingsSnapshot().MonthsOverflow, tempo.settingsSnapshot().YearsOverflow)
 }
 
 func (tempo Tempo) Sub(value int, unit Unit) Tempo {
 	return tempo.Add(-value, unit)
 }
 
-func (tempo Tempo) AddUnit(unit Unit, value int) Tempo {
-	return tempo.Add(value, unit)
-}
-
-func (tempo Tempo) AddUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
+func (tempo Tempo) AddNoOverflow(value int, valueUnit Unit, overflowUnit Unit) Tempo {
 	next, err := tempo.Add(value, valueUnit).Clamp(tempo.StartOf(overflowUnit), tempo.EndOf(overflowUnit))
 
 	if err != nil {
@@ -24,48 +20,16 @@ func (tempo Tempo) AddUnitNoOverflow(valueUnit Unit, value int, overflowUnit Uni
 	return next
 }
 
-func (tempo Tempo) AddRealUnit(unit Unit, value int) Tempo {
-	return tempo.Add(value, unit)
-}
-
-func (tempo Tempo) AddUTCUnit(unit Unit, value int) Tempo {
-	return tempo.Add(value, unit)
-}
-
-func (tempo Tempo) RawAdd(value int, unit Unit) Tempo {
-	return tempo.Add(value, unit)
-}
-
-func (tempo Tempo) SubUnit(unit Unit, value int) Tempo {
-	return tempo.Sub(value, unit)
-}
-
-func (tempo Tempo) SubUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
-	return tempo.AddUnitNoOverflow(valueUnit, -value, overflowUnit)
-}
-
-func (tempo Tempo) SubRealUnit(unit Unit, value int) Tempo {
-	return tempo.Sub(value, unit)
-}
-
-func (tempo Tempo) SubUTCUnit(unit Unit, value int) Tempo {
-	return tempo.Sub(value, unit)
-}
-
-func (tempo Tempo) RawSub(value int, unit Unit) Tempo {
-	return tempo.Sub(value, unit)
-}
-
-func (tempo Tempo) Subtract(value int, unit Unit) Tempo {
-	return tempo.Sub(value, unit)
+func (tempo Tempo) SubNoOverflow(value int, valueUnit Unit, overflowUnit Unit) Tempo {
+	return tempo.AddNoOverflow(-value, valueUnit, overflowUnit)
 }
 
 func (tempo Tempo) AddDuration(dur Duration) Tempo {
-	return arithmetic.AddDuration(tempo, dur, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
+	return arithmetic.AddDuration(tempo, dur, tempo.settingsSnapshot().MonthsOverflow, tempo.settingsSnapshot().YearsOverflow)
 }
 
 func (tempo Tempo) SubDuration(dur Duration) Tempo {
-	return arithmetic.SubDuration(tempo, dur, defaultConfig.Settings.MonthsOverflow, defaultConfig.Settings.YearsOverflow)
+	return arithmetic.SubDuration(tempo, dur, tempo.settingsSnapshot().MonthsOverflow, tempo.settingsSnapshot().YearsOverflow)
 }
 
 func (tempo Tempo) AddMilliseconds(milliseconds int) Tempo {
@@ -109,11 +73,11 @@ func (tempo Tempo) SubDays(days int) Tempo {
 }
 
 func (tempo Tempo) AddWeekdays(days int) Tempo {
-	return arithmetic.AddWeekdays(tempo, days, defaultConfig.Settings.WeekendDays)
+	return arithmetic.AddWeekdays(tempo, days, tempo.settingsSnapshot().WeekendDays)
 }
 
 func (tempo Tempo) SubWeekdays(days int) Tempo {
-	return arithmetic.SubWeekdays(tempo, days, defaultConfig.Settings.WeekendDays)
+	return arithmetic.SubWeekdays(tempo, days, tempo.settingsSnapshot().WeekendDays)
 }
 
 func (tempo Tempo) AddWeeks(weeks int) Tempo {
@@ -125,11 +89,11 @@ func (tempo Tempo) SubWeeks(weeks int) Tempo {
 }
 
 func (tempo Tempo) AddMonths(months int) Tempo {
-	return arithmetic.AddMonths(tempo, months, defaultConfig.Settings.MonthsOverflow)
+	return arithmetic.AddMonths(tempo, months, tempo.settingsSnapshot().MonthsOverflow)
 }
 
 func (tempo Tempo) SubMonths(months int) Tempo {
-	return arithmetic.SubMonths(tempo, months, defaultConfig.Settings.MonthsOverflow)
+	return arithmetic.SubMonths(tempo, months, tempo.settingsSnapshot().MonthsOverflow)
 }
 
 func (tempo Tempo) AddMonthsNoOverflow(months int) Tempo {
@@ -141,19 +105,19 @@ func (tempo Tempo) SubMonthsNoOverflow(months int) Tempo {
 }
 
 func (tempo Tempo) AddQuarters(quarters int) Tempo {
-	return arithmetic.AddQuarters(tempo, quarters, defaultConfig.Settings.MonthsOverflow)
+	return arithmetic.AddQuarters(tempo, quarters, tempo.settingsSnapshot().MonthsOverflow)
 }
 
 func (tempo Tempo) SubQuarters(quarters int) Tempo {
-	return arithmetic.SubQuarters(tempo, quarters, defaultConfig.Settings.MonthsOverflow)
+	return arithmetic.SubQuarters(tempo, quarters, tempo.settingsSnapshot().MonthsOverflow)
 }
 
 func (tempo Tempo) AddYears(years int) Tempo {
-	return arithmetic.AddYears(tempo, years, defaultConfig.Settings.YearsOverflow)
+	return arithmetic.AddYears(tempo, years, tempo.settingsSnapshot().YearsOverflow)
 }
 
 func (tempo Tempo) SubYears(years int) Tempo {
-	return arithmetic.SubYears(tempo, years, defaultConfig.Settings.YearsOverflow)
+	return arithmetic.SubYears(tempo, years, tempo.settingsSnapshot().YearsOverflow)
 }
 
 func (tempo Tempo) AddYearsNoOverflow(years int) Tempo {

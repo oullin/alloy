@@ -176,11 +176,11 @@ func (mutable *MutableTempo) DiffInWeeks(other Tempo, options ...DiffOptions) in
 }
 
 func (mutable *MutableTempo) DiffInWeekdays(other Tempo, options ...DiffOptions) int {
-	return diff.InWeekdays(mutable, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekdays(mutable, other.State(), mutable.settingsSnapshot().WeekendDays, diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInWeekendDays(other Tempo, options ...DiffOptions) int {
-	return diff.InWeekendDays(mutable, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekendDays(mutable, other.State(), mutable.settingsSnapshot().WeekendDays, diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
@@ -224,7 +224,7 @@ func (mutable *MutableTempo) Calendar(reference Tempo, formats ...map[string]str
 }
 
 func (mutable *MutableTempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
-	opts := defaultConfig.Settings.HumanDiff
+	opts := mutable.settingsSnapshot().HumanDiff
 
 	if len(options) > 0 {
 		opts = options[0]
@@ -399,14 +399,6 @@ func (mutable *MutableTempo) Min(other Tempo) *MutableTempo {
 
 func (mutable *MutableTempo) Max(other Tempo) *MutableTempo {
 	return comparison.Max(mutable, other.State())
-}
-
-func (mutable *MutableTempo) Minimum(other Tempo) *MutableTempo {
-	return mutable.Min(other)
-}
-
-func (mutable *MutableTempo) Maximum(other Tempo) *MutableTempo {
-	return mutable.Max(other)
 }
 
 func (mutable *MutableTempo) SameOrBefore(other Tempo, units ...Unit) bool {

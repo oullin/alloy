@@ -1,6 +1,10 @@
 package interval
 
-import "time"
+import (
+	"time"
+
+	"github.com/oullin/alloy/tempo/internal/kernel"
+)
 
 type Span struct {
 	StartMs int64
@@ -16,7 +20,7 @@ func (span Span) Inverted() bool {
 }
 
 func (span Span) Milliseconds() int {
-	return int(span.EndMs - span.StartMs)
+	return int(kernel.DifferenceInt64(span.EndMs, span.StartMs))
 }
 
 func (span Span) Seconds() int {

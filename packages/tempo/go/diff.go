@@ -53,11 +53,11 @@ func (tempo Tempo) DiffInWeeks(other Tempo, options ...DiffOptions) int {
 }
 
 func (tempo Tempo) DiffInWeekdays(other Tempo, options ...DiffOptions) int {
-	return diff.InWeekdays(tempo, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekdays(tempo, other.State(), tempo.settingsSnapshot().WeekendDays, diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInWeekendDays(other Tempo, options ...DiffOptions) int {
-	return diff.InWeekendDays(tempo, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekendDays(tempo, other.State(), tempo.settingsSnapshot().WeekendDays, diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
@@ -129,11 +129,11 @@ func (tempo Tempo) Calendar(reference Tempo, formats ...map[string]string) strin
 		}
 	}
 
-	return tempo.ISOFormat(pattern)
+	return tempo.Format(pattern)
 }
 
 func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
-	opts := defaultConfig.Settings.HumanDiff
+	opts := tempo.settingsSnapshot().HumanDiff
 
 	if len(options) > 0 {
 		opts = options[0]

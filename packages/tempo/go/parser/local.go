@@ -6,12 +6,21 @@ import (
 )
 
 func ParseInLocation(input string, location *time.Location) (time.Time, error) {
+	return ParseInLocationStrict(input, location, false)
+}
+
+func ParseInLocationStrict(input string, location *time.Location, strict bool) (time.Time, error) {
 	if matches := dateOnlyPattern.FindStringSubmatch(input); matches != nil {
 		year := mustInt(matches[1])
 		month := mustInt(matches[2])
 		day := mustInt(matches[3])
+		value := time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
 
-		return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location), nil
+		if strict && !componentsMatchTime(Components{Year: year, Month: month, Day: day}, value, location) {
+			return time.Time{}, fmt.Errorf("invalid tempo local date/time components")
+		}
+
+		return value, nil
 	}
 
 	if !zonePattern.MatchString(input) {
@@ -23,8 +32,21 @@ func ParseInLocation(input string, location *time.Location) (time.Time, error) {
 			minute := mustInt(defaultString(matches[5], "0"))
 			second := mustInt(defaultString(matches[6], "0"))
 			millisecond := mustInt(rightPad(defaultString(matches[7], "0"), 3))
+			value := time.Date(year, time.Month(month), day, hour, minute, second, millisecond*int(time.Millisecond), location)
 
-			return time.Date(year, time.Month(month), day, hour, minute, second, millisecond*int(time.Millisecond), location), nil
+			if strict && !componentsMatchTime(Components{
+				Year:        year,
+				Month:       month,
+				Day:         day,
+				Hour:        hour,
+				Minute:      minute,
+				Second:      second,
+				Millisecond: millisecond,
+			}, value, location) {
+				return time.Time{}, fmt.Errorf("invalid tempo local date/time components")
+			}
+
+			return value, nil
 		}
 	}
 

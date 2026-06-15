@@ -24,6 +24,9 @@ func (mutable *MutableTempo) replace(next Tempo) *MutableTempo {
 	mutable.value = next.value
 	mutable.location = next.location
 	mutable.runtime = next.Runtime()
+	mutable.settings = next.settingsSnapshot()
+	mutable.serializer = next.serializer
+	mutable.toStringFormat = next.toStringFormat
 
 	return mutable
 }

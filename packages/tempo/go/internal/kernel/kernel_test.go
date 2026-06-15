@@ -8,6 +8,11 @@ import (
 	"github.com/oullin/alloy/tempo/internal/kernel"
 )
 
+const (
+	maxTestInt64 = int64(^uint64(0) >> 1)
+	minTestInt64 = -maxTestInt64 - 1
+)
+
 func parseUTC(t *testing.T, value string) time.Time {
 	t.Helper()
 
@@ -110,5 +115,31 @@ func TestAddMonthsAndYearsNoOverflowClampsDay(t *testing.T) {
 
 	if got := kernel.AddYearsNoOverflow(leap, time.UTC, 1); got.Format("2006-01-02") != "2025-02-28" {
 		t.Fatalf("AddYearsNoOverflow = %q, want clamped", got.Format("2006-01-02"))
+	}
+}
+
+func TestSafeMillisecondMath(t *testing.T) {
+	if got := kernel.AverageMilliseconds(maxTestInt64, maxTestInt64); got != maxTestInt64 {
+		t.Fatalf("AverageMilliseconds(max,max) = %d, want %d", got, maxTestInt64)
+	}
+
+	if got := kernel.AverageMilliseconds(minTestInt64, minTestInt64); got != minTestInt64 {
+		t.Fatalf("AverageMilliseconds(min,min) = %d, want %d", got, minTestInt64)
+	}
+
+	if got := kernel.AverageMilliseconds(minTestInt64, maxTestInt64); got != 0 {
+		t.Fatalf("AverageMilliseconds(min,max) = %d, want 0", got)
+	}
+
+	if got := kernel.DistanceInt64(minTestInt64, maxTestInt64); got != uint64(maxTestInt64)+uint64(maxTestInt64)+1 {
+		t.Fatalf("DistanceInt64(min,max) = %d, want full unsigned distance", got)
+	}
+
+	if got := kernel.DifferenceInt64(maxTestInt64, minTestInt64); got != maxTestInt64 {
+		t.Fatalf("DifferenceInt64(max,min) = %d, want saturated max", got)
+	}
+
+	if got := kernel.DifferenceInt64(minTestInt64, maxTestInt64); got != minTestInt64 {
+		t.Fatalf("DifferenceInt64(min,max) = %d, want saturated min", got)
 	}
 }

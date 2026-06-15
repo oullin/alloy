@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	setterspkg "github.com/oullin/alloy/tempo/setters"
 )
 
 func (tempo Tempo) Clone() Tempo {
@@ -15,9 +17,11 @@ func (tempo Tempo) Clone() Tempo {
 
 func (tempo Tempo) Runtime() Runtime {
 	if tempo.runtime.Locale() == "" {
+		settings := tempo.settingsSnapshot()
+
 		return NewRuntime(
-			RuntimeLocale(defaultConfig.Settings.Locale),
-			RuntimeFallbackLocale(defaultConfig.Settings.FallbackLocale),
+			RuntimeLocale(settings.Locale),
+			RuntimeFallbackLocale(settings.FallbackLocale),
 		)
 	}
 
@@ -30,19 +34,11 @@ func (tempo Tempo) WithRuntime(runtime Runtime) Tempo {
 	return tempo
 }
 
-func (tempo Tempo) GetLocalTranslator() Translator {
-	return tempo.Runtime().Translator()
-}
-
-func (tempo Tempo) SetLocalTranslator(translator Translator) Tempo {
+func (tempo Tempo) WithTranslator(translator Translator) Tempo {
 	return tempo.WithRuntime(tempo.Runtime().With(RuntimeTranslator(translator)))
 }
 
-func (tempo Tempo) WithTranslator(translator Translator) Tempo {
-	return tempo.SetLocalTranslator(translator)
-}
-
-func (tempo Tempo) HasLocalTranslator() bool {
+func (tempo Tempo) HasTranslator() bool {
 	return tempo.Runtime().HasTranslator()
 }
 
@@ -133,11 +129,7 @@ func (tempo Tempo) TimestampMs() int64 {
 	return tempo.value.UnixMilli()
 }
 
-func (tempo Tempo) GetTimestampMs() int64 {
-	return tempo.TimestampMs()
-}
-
-func (tempo Tempo) GetPreciseTimestamp(precisions ...int) float64 {
+func (tempo Tempo) PreciseTimestamp(precisions ...int) float64 {
 	precision := 6
 
 	if len(precisions) > 0 {
@@ -218,9 +210,13 @@ func (tempo Tempo) DayOfYear() int {
 }
 
 func (tempo Tempo) SetDayOfYear(day int) Tempo {
-	return tempo.StartOfYear().
-		AddDays(day-1).
-		SetTime(tempo.Hour(), tempo.Minute(), tempo.Second(), tempo.Millisecond())
+	return setterspkg.SetTime(
+		tempo.StartOfYear().AddDays(day-1),
+		tempo.Hour(),
+		tempo.Minute(),
+		tempo.Second(),
+		tempo.Millisecond(),
+	)
 }
 
 func (tempo Tempo) Hour() int {
@@ -239,7 +235,7 @@ func (tempo Tempo) Millisecond() int {
 	return tempo.local().Nanosecond() / int(time.Millisecond)
 }
 
-func (tempo Tempo) Get(field string) (any, bool) {
+func (tempo Tempo) fieldValue(field string) (any, bool) {
 	values := tempo.ToMap()
 	value, ok := values[field]
 
@@ -257,8 +253,8 @@ func (tempo Tempo) Get(field string) (any, bool) {
 	}
 }
 
-func (tempo Tempo) GetPaddedUnit(field string, length int) (string, bool) {
-	value, ok := tempo.Get(field)
+func (tempo Tempo) PaddedUnit(field string, length int) (string, bool) {
+	value, ok := tempo.fieldValue(field)
 
 	if !ok {
 		return "", false
@@ -281,10 +277,6 @@ func (tempo Tempo) OffsetMinutes() int {
 
 func (tempo Tempo) OffsetString(separator string) string {
 	return formatOffset(tempo.OffsetMinutes(), separator)
-}
-
-func (tempo Tempo) GetOffsetString(separator string) string {
-	return tempo.OffsetString(separator)
 }
 
 func (tempo Tempo) UTCOffset() int {
@@ -323,22 +315,8 @@ func (tempo Tempo) MinDayName() string {
 	return name[:2]
 }
 
-func (tempo Tempo) GetTranslatedMonthName() string { return tempo.MonthName() }
-
-func (tempo Tempo) GetTranslatedShortMonthName() string { return tempo.ShortMonthName() }
-
-func (tempo Tempo) GetTranslatedDayName() string { return tempo.DayName() }
-
-func (tempo Tempo) GetTranslatedShortDayName() string { return tempo.ShortDayName() }
-
-func (tempo Tempo) GetTranslatedMinDayName() string { return tempo.MinDayName() }
-
 func (tempo Tempo) TranslateNumber(value int) string {
 	return strconv.Itoa(value)
-}
-
-func (tempo Tempo) GetAltNumber(value int) string {
-	return tempo.TranslateNumber(value)
 }
 
 func (tempo Tempo) Translate(message string, replacements map[string]string) string {
@@ -353,7 +331,7 @@ func (tempo Tempo) TranslateWith(message string, replacements map[string]string)
 	return replaceTranslationTokens(message, replacements)
 }
 
-func (tempo Tempo) GetTranslationMessage(key string) (any, bool) {
+func (tempo Tempo) TranslationMessage(key string) (any, bool) {
 	return tempo.Runtime().Message(key)
 }
 
@@ -410,7 +388,7 @@ func (tempo Tempo) DaysInMonth() int {
 func (tempo Tempo) IsWeekend() bool {
 	weekday := tempo.local().Weekday()
 
-	for _, weekendDay := range defaultConfig.Settings.WeekendDays {
+	for _, weekendDay := range tempo.settingsSnapshot().WeekendDays {
 		if weekday == weekendDay {
 			return true
 		}
@@ -491,7 +469,7 @@ func (tempo Tempo) IsMidnight() bool {
 }
 
 func (tempo Tempo) IsMidday() bool {
-	return tempo.Hour() == defaultConfig.Settings.MidDayAt &&
+	return tempo.Hour() == tempo.settingsSnapshot().MidDayAt &&
 		tempo.Minute() == 0 &&
 		tempo.Second() == 0 &&
 		tempo.Millisecond() == 0

@@ -143,18 +143,6 @@ func (mutable *MutableTempo) Format(pattern string) string {
 	return formatting.Format(mutable, pattern)
 }
 
-func (mutable *MutableTempo) RawFormat(pattern string) string {
-	return mutable.Format(pattern)
-}
-
-func (mutable *MutableTempo) ISOFormat(pattern string) string {
-	return mutable.Format(pattern)
-}
-
-func (mutable *MutableTempo) TranslatedFormat(pattern string) string {
-	return mutable.Format(pattern)
-}
-
 func (mutable *MutableTempo) Ordinal(unit Unit) string {
 	return mutable.Tempo().Ordinal(unit)
 }
@@ -175,8 +163,8 @@ func (mutable *MutableTempo) WeeksInYear() int {
 	return mutable.Tempo().WeeksInYear()
 }
 
-func (mutable *MutableTempo) GetDaysFromStartOfWeek(weekStartsOn time.Weekday) int {
-	return mutable.Tempo().GetDaysFromStartOfWeek(weekStartsOn)
+func (mutable *MutableTempo) DaysFromStartOfWeek(weekStartsOn time.Weekday) int {
+	return mutable.Tempo().DaysFromStartOfWeek(weekStartsOn)
 }
 
 func (mutable *MutableTempo) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) *MutableTempo {

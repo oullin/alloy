@@ -7,6 +7,11 @@ import (
 	"github.com/oullin/alloy/tempo/interval"
 )
 
+const (
+	maxTestInt64 = int64(^uint64(0) >> 1)
+	minTestInt64 = -maxTestInt64 - 1
+)
+
 func mustTime(t *testing.T, value string) time.Time {
 	t.Helper()
 
@@ -39,6 +44,20 @@ func TestSpanDurationAccessors(t *testing.T) {
 
 	if span.Inverted() {
 		t.Fatalf("Inverted() = true, want false")
+	}
+}
+
+func TestSpanMillisecondsSaturatesExtremeDifference(t *testing.T) {
+	forward := interval.Span{StartMs: minTestInt64, EndMs: maxTestInt64}
+
+	if got := forward.Milliseconds(); got != int(maxTestInt64) {
+		t.Fatalf("forward extreme Milliseconds() = %d, want saturated max", got)
+	}
+
+	backward := interval.Span{StartMs: maxTestInt64, EndMs: minTestInt64}
+
+	if got := backward.Milliseconds(); got != int(minTestInt64) {
+		t.Fatalf("backward extreme Milliseconds() = %d, want saturated min", got)
 	}
 }
 

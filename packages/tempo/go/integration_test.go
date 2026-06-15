@@ -14,6 +14,26 @@ func assertEqual(t *testing.T, label string, got string, want string) {
 	}
 }
 
+func mustTempo(t *testing.T, value Tempo, err error) Tempo {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("unexpected tempo error: %v", err)
+	}
+
+	return value
+}
+
+func mustMutable(t *testing.T, value *MutableTempo, err error) *MutableTempo {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("unexpected mutable tempo error: %v", err)
+	}
+
+	return value
+}
+
 func TestDateCases(t *testing.T) {
 	cases := []struct {
 		Name               string
@@ -123,28 +143,24 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 		t.Fatalf("Factory.FromFormat().ISOString() = %q, want scoped timezone instant", got)
 	}
 
-	if parsed, ok := factory.TryParse("2024-01-01 09:00"); !ok || parsed.ISOString() != "2024-01-01T00:00:00.000Z" {
-		t.Fatalf("Factory.TryParse(valid) = %q, %v, want scoped instant, true", parsed.ISOString(), ok)
+	parsedAgain, err := factory.Parse("2024-01-01 09:00")
+
+	if err != nil || parsedAgain.ISOString() != "2024-01-01T00:00:00.000Z" {
+		t.Fatalf("Factory.Parse(valid) = %q, %v, want scoped instant", parsedAgain.ISOString(), err)
 	}
 
-	if factory.CanParse("not a date") {
-		t.Fatalf("Factory.CanParse(invalid) = true, want false")
+	if _, err := factory.Parse("not a date"); err == nil {
+		t.Fatalf("Factory.Parse(invalid) error = nil, want error")
 	}
 
-	if _, ok := factory.TryParse("not a date"); ok {
-		t.Fatalf("Factory.TryParse(invalid) ok = true, want false")
+	formattedAgain, err := factory.FromFormat("2024-01-01 09:30", "YYYY-MM-DD HH:mm")
+
+	if err != nil || formattedAgain.ISOString() != "2024-01-01T00:30:00.000Z" {
+		t.Fatalf("Factory.FromFormat(valid) = %q, %v, want scoped instant", formattedAgain.ISOString(), err)
 	}
 
-	if parsed, ok := factory.TryFromFormat("2024-01-01 09:30", "YYYY-MM-DD HH:mm"); !ok || parsed.ISOString() != "2024-01-01T00:30:00.000Z" {
-		t.Fatalf("Factory.TryFromFormat(valid) = %q, %v, want scoped instant, true", parsed.ISOString(), ok)
-	}
-
-	if !factory.HasFormat("2024-01-01 09:30", "YYYY-MM-DD HH:mm") {
-		t.Fatalf("Factory.HasFormat(valid) = false, want true")
-	}
-
-	if factory.HasFormat("2024/01/01", "YYYY-MM-DD") {
-		t.Fatalf("Factory.HasFormat(invalid) = true, want false")
+	if _, err := factory.FromFormat("2024/01/01", "YYYY-MM-DD"); err == nil {
+		t.Fatalf("Factory.FromFormat(invalid) error = nil, want error")
 	}
 
 	created, err := factory.Create(Components{Year: 2024, Month: 1, Day: 1, Hour: 9})
@@ -157,18 +173,18 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 		t.Fatalf("Factory.Create().ISOString() = %q, want scoped timezone instant", got)
 	}
 
-	safeCreated, err := factory.CreateSafe(Components{Year: 2024, Month: 2, Day: 29})
+	strictCreated, err := factory.Create(Components{Year: 2024, Month: 2, Day: 29})
 
 	if err != nil {
-		t.Fatalf("factory create safe: %v", err)
+		t.Fatalf("factory create strict: %v", err)
 	}
 
-	if got := safeCreated.ISOString(); got != "2024-02-28T15:00:00.000Z" {
-		t.Fatalf("Factory.CreateSafe().ISOString() = %q, want scoped safe instant", got)
+	if got := strictCreated.ISOString(); got != "2024-02-28T15:00:00.000Z" {
+		t.Fatalf("Factory.Create().ISOString() = %q, want scoped strict instant", got)
 	}
 
-	if _, err := factory.CreateSafe(Components{Year: 2024, Month: 2, Day: 31}); err == nil {
-		t.Fatalf("Factory.CreateSafe(invalid) error = nil, want error")
+	if _, err := factory.Create(Components{Year: 2024, Month: 2, Day: 31}); err == nil {
+		t.Fatalf("Factory.Create(invalid) error = nil, want error")
 	}
 
 	fromObject, err := factory.FromObject(Components{Year: 2024, Month: 1, Day: 1, Hour: 9})
@@ -189,15 +205,33 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 		t.Fatalf("Factory.FromTimestampMs().DateTimeString() = %q, want scoped local time", got)
 	}
 
-	if got := factory.CreateFromDate(2024, 1, 2).ISOString(); got != "2024-01-01T15:00:00.000Z" {
+	factoryDate, err := factory.CreateFromDate(2024, 1, 2)
+
+	if err != nil {
+		t.Fatalf("Factory.CreateFromDate(): %v", err)
+	}
+
+	if got := factoryDate.ISOString(); got != "2024-01-01T15:00:00.000Z" {
 		t.Fatalf("Factory.CreateFromDate().ISOString() = %q, want scoped midnight instant", got)
 	}
 
-	if got := factory.CreateMidnightDate(2024, 1, 2).ISOString(); got != "2024-01-01T15:00:00.000Z" {
-		t.Fatalf("Factory.CreateMidnightDate().ISOString() = %q, want scoped midnight instant", got)
+	factoryMidnight, err := factory.CreateFromDate(2024, 1, 2)
+
+	if err != nil {
+		t.Fatalf("Factory.CreateFromDate(): %v", err)
 	}
 
-	if got := factory.CreateFromTime(9, 30, 15, 250).TimeString(MillisecondPrecision); got != "09:30:15.250" {
+	if got := factoryMidnight.ISOString(); got != "2024-01-01T15:00:00.000Z" {
+		t.Fatalf("Factory.CreateFromDate().ISOString() = %q, want scoped midnight instant", got)
+	}
+
+	factoryTime, err := factory.CreateFromTime(9, 30, 15, 250)
+
+	if err != nil {
+		t.Fatalf("Factory.CreateFromTime(): %v", err)
+	}
+
+	if got := factoryTime.TimeString(MillisecondPrecision); got != "09:30:15.250" {
 		t.Fatalf("Factory.CreateFromTime().TimeString(ms) = %q, want requested time", got)
 	}
 
@@ -211,14 +245,14 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 		t.Fatalf("CreateFromDate().ISOString() = %q, want scoped midnight instant", got)
 	}
 
-	midnight, err := CreateMidnightDate(2024, 1, 2, WithTimezone("Asia/Tokyo"))
+	midnight, err := CreateFromDate(2024, 1, 2, WithTimezone("Asia/Tokyo"))
 
 	if err != nil {
 		t.Fatalf("create midnight date: %v", err)
 	}
 
 	if got := midnight.ISOString(); got != "2024-01-01T15:00:00.000Z" {
-		t.Fatalf("CreateMidnightDate().ISOString() = %q, want scoped midnight instant", got)
+		t.Fatalf("CreateFromDate().ISOString() = %q, want scoped midnight instant", got)
 	}
 
 	fromTime, err := CreateFromTime(9, 30, 15, 250, WithTimezone("UTC"))
@@ -261,6 +295,22 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 		t.Fatalf("Factory.MutableNow().AddHours().ISOString() = %q, want mutable frozen instant", got)
 	}
 
+	relaxedFrozen, err := NewFactoryWithTestNow(parsed, WithStrictMode(false))
+
+	if err != nil {
+		t.Fatalf("new relaxed frozen factory: %v", err)
+	}
+
+	normalized, err := relaxedFrozen.Parse("2024-02-31")
+
+	if err != nil {
+		t.Fatalf("relaxed frozen Factory.Parse(normalized date): %v", err)
+	}
+
+	if got := normalized.DateString(); got != "2024-03-02" {
+		t.Fatalf("relaxed frozen Factory.Parse().DateString() = %q, want normalized date", got)
+	}
+
 	today, err := Today(WithTimezone("UTC"))
 
 	if err != nil {
@@ -292,31 +342,36 @@ func TestFactoryScopedTimezoneAndTestNow(t *testing.T) {
 	}
 }
 
-func TestGlobalSettingsAffectDateBehavior(t *testing.T) {
-	original := SettingsState()
+func TestFactorySettingsAffectDateBehavior(t *testing.T) {
+	frozen, err := Parse("2025-01-01T00:00:00Z")
 
-	defer SettingsState(original)
-
-	SetLocale("fr-FR")
-
-	if got := GetLocale(); got != "fr-FR" {
-		t.Fatalf("GetLocale() = %q, want fr-FR", got)
+	if err != nil {
+		t.Fatalf("parse frozen now: %v", err)
 	}
 
-	SetFallbackLocale("en-GB")
+	factory, err := NewFactory(
+		WithLocale("fr-FR"),
+		WithFallbackLocale("en-GB"),
+		WithWeekendDays([]time.Weekday{time.Friday, time.Saturday}),
+		WithMidDayAt(13),
+		WithMonthsOverflow(false),
+		WithYearsOverflow(false),
+		WithHumanDiffOptions(HumanDiffOptions{Locale: "en-US", Numeric: "auto", Style: "long"}),
+		WithTestNow(frozen),
+		WithTimezone("Asia/Tokyo"),
+	)
 
-	if got := GetFallbackLocale(); got != "en-GB" {
-		t.Fatalf("GetFallbackLocale() = %q, want en-GB", got)
+	if err != nil {
+		t.Fatalf("new configured factory: %v", err)
 	}
 
-	SetWeekendDays([]time.Weekday{time.Friday, time.Saturday})
-	friday, err := Parse("2024-05-17")
+	friday, err := factory.Parse("2024-05-17")
 
 	if err != nil {
 		t.Fatalf("parse friday: %v", err)
 	}
 
-	sunday, err := Parse("2024-05-19")
+	sunday, err := factory.Parse("2024-05-19")
 
 	if err != nil {
 		t.Fatalf("parse sunday: %v", err)
@@ -326,8 +381,7 @@ func TestGlobalSettingsAffectDateBehavior(t *testing.T) {
 		t.Fatalf("configured weekend predicates failed")
 	}
 
-	SetMidDayAt(13)
-	midday, err := Parse("2024-05-15T13:00:00Z")
+	midday, err := factory.Parse("2024-05-15T04:00:00Z")
 
 	if err != nil {
 		t.Fatalf("parse midday: %v", err)
@@ -337,16 +391,14 @@ func TestGlobalSettingsAffectDateBehavior(t *testing.T) {
 		t.Fatalf("configured midday helpers failed")
 	}
 
-	UseMonthsOverflow(false)
-	january, err := Parse("2024-01-31")
+	january, err := factory.Parse("2024-01-31")
 
 	if err != nil {
 		t.Fatalf("parse january: %v", err)
 	}
 
 	assertEqual(t, "configured AddMonths().DateString()", january.AddMonths(1).DateString(), "2024-02-29")
-	UseYearsOverflow(false)
-	leap, err := Parse("2024-02-29")
+	leap, err := factory.Parse("2024-02-29")
 
 	if err != nil {
 		t.Fatalf("parse leap day: %v", err)
@@ -354,35 +406,7 @@ func TestGlobalSettingsAffectDateBehavior(t *testing.T) {
 
 	assertEqual(t, "configured AddYears().DateString()", leap.AddYears(1).DateString(), "2025-02-28")
 
-	UseStrictMode(false)
-
-	if IsStrictModeEnabled() {
-		t.Fatalf("IsStrictModeEnabled() = true, want false")
-	}
-
-	SetHumanDiffOptions(HumanDiffOptions{Locale: "en-US", Numeric: "auto", Style: "long"})
-
-	if got := GetHumanDiffOptions().Numeric; got != "auto" {
-		t.Fatalf("GetHumanDiffOptions().Numeric = %q, want auto", got)
-	}
-
-	frozen, err := Parse("2025-01-01T00:00:00Z")
-
-	if err != nil {
-		t.Fatalf("parse frozen now: %v", err)
-	}
-
-	SetTestNowAndTimezone(&frozen, "Asia/Tokyo")
-
-	if !HasTestNow() {
-		t.Fatalf("HasTestNow() = false, want true")
-	}
-
-	now, err := Now()
-
-	if err != nil {
-		t.Fatalf("Now(): %v", err)
-	}
+	now := factory.Now()
 
 	if got := now.Timezone(); got != "Asia/Tokyo" {
 		t.Fatalf("Now().Timezone() = %q, want Asia/Tokyo", got)
@@ -398,16 +422,20 @@ func TestInjectedConfigControlsNowAndFactoryClock(t *testing.T) {
 		t.Fatalf("parse frozen config time: %v", err)
 	}
 
-	cfg := NewConfig(Settings{
-		Locale:         "en-US",
-		FallbackLocale: "en-US",
-		MonthsOverflow: true,
-		StrictMode:     true,
-		TestNow:        &frozen,
-		Timezone:       "Asia/Tokyo",
-		WeekendDays:    []time.Weekday{time.Sunday, time.Saturday},
-		YearsOverflow:  true,
-	})
+	cfg, err := NewConfig(
+		ConfigLocale("en-US"),
+		ConfigFallbackLocale("en-US"),
+		ConfigMonthsOverflow(true),
+		ConfigStrictMode(true),
+		ConfigTestNow(frozen),
+		ConfigTimezone("Asia/Tokyo"),
+		ConfigWeekendDays([]time.Weekday{time.Sunday, time.Saturday}),
+		ConfigYearsOverflow(true),
+	)
+
+	if err != nil {
+		t.Fatalf("new config: %v", err)
+	}
 
 	now, err := Now(WithConfig(cfg))
 
@@ -424,6 +452,77 @@ func TestInjectedConfigControlsNowAndFactoryClock(t *testing.T) {
 	}
 
 	assertEqual(t, "Factory WithConfig Now", factory.Now().DateTimeString(), "2025-02-03 13:05:06")
+}
+
+func TestStrictValidationAndExplicitNormalization(t *testing.T) {
+	if _, err := Parse("2024-02-31"); err == nil {
+		t.Fatalf("Parse(invalid date) error = nil, want strict error")
+	}
+
+	normalized, err := Parse("2024-02-31", WithStrictMode(false))
+
+	if err != nil {
+		t.Fatalf("Parse(invalid date, strict=false): %v", err)
+	}
+
+	assertEqual(t, "non-strict Parse().DateString()", normalized.DateString(), "2024-03-02")
+
+	if _, err := FromFormat("2024/02/31", "YYYY/MM/DD"); err == nil {
+		t.Fatalf("FromFormat(invalid date) error = nil, want strict error")
+	}
+
+	formatted, err := FromFormat("2024/02/31", "YYYY/MM/DD", WithStrictMode(false))
+
+	if err != nil {
+		t.Fatalf("FromFormat(invalid date, strict=false): %v", err)
+	}
+
+	assertEqual(t, "non-strict FromFormat().DateString()", formatted.DateString(), "2024-03-02")
+	base, err := Parse("2024-05-15T12:00:00Z")
+
+	if err != nil {
+		t.Fatalf("parse strict setter base: %v", err)
+	}
+
+	if _, err := base.SetDate(2024, 2, 31); err == nil {
+		t.Fatalf("SetDate(invalid) error = nil, want strict error")
+	}
+
+	if _, err := base.SetTime(24, 0, 0, 0); err == nil {
+		t.Fatalf("SetTime(invalid) error = nil, want strict error")
+	}
+
+	created, err := CreateNormalized(Components{Year: 2024, Month: 2, Day: 31})
+
+	if err != nil {
+		t.Fatalf("CreateNormalized(invalid date): %v", err)
+	}
+
+	assertEqual(t, "CreateNormalized().DateString()", created.DateString(), "2024-03-02")
+}
+
+func TestConfigOptionsPreserveDefaults(t *testing.T) {
+	cfg, err := NewConfig(ConfigLocale("fr-FR"))
+
+	if err != nil {
+		t.Fatalf("NewConfig(ConfigLocale): %v", err)
+	}
+
+	if !cfg.Settings.MonthsOverflow {
+		t.Fatalf("partial config cleared MonthsOverflow")
+	}
+
+	if !cfg.Settings.YearsOverflow {
+		t.Fatalf("partial config cleared YearsOverflow")
+	}
+
+	if !cfg.Settings.StrictMode {
+		t.Fatalf("partial config cleared StrictMode")
+	}
+
+	if len(cfg.Settings.WeekendDays) != 2 {
+		t.Fatalf("partial config WeekendDays = %v, want defaults", cfg.Settings.WeekendDays)
+	}
 }
 
 func TestCreateTimezoneAwareComponents(t *testing.T) {
@@ -464,28 +563,28 @@ func TestCreateTimezoneAwareComponents(t *testing.T) {
 		t.Fatalf("ToObject() = %#v, want Tokyo Monday object", object)
 	}
 
-	normalized, err := Create(Components{Year: 2024, Month: 2, Day: 31})
+	normalized, err := CreateNormalized(Components{Year: 2024, Month: 2, Day: 31})
 
 	if err != nil {
 		t.Fatalf("create normalized date: %v", err)
 	}
 
 	if got := normalized.DateString(); got != "2024-03-02" {
-		t.Fatalf("Create(invalid date).DateString() = %q, want normalized date", got)
+		t.Fatalf("CreateNormalized(invalid date).DateString() = %q, want normalized date", got)
 	}
 
-	if _, err := CreateSafe(Components{Year: 2024, Month: 2, Day: 31}); err == nil {
-		t.Fatalf("CreateSafe(invalid date) error = nil, want error")
+	if _, err := Create(Components{Year: 2024, Month: 2, Day: 31}); err == nil {
+		t.Fatalf("Create(invalid date) error = nil, want error")
 	}
 
-	safe, err := CreateSafe(Components{Year: 2024, Month: 2, Day: 29, Timezone: "Asia/Tokyo"})
+	strict, err := Create(Components{Year: 2024, Month: 2, Day: 29, Timezone: "Asia/Tokyo"})
 
 	if err != nil {
-		t.Fatalf("create safe date: %v", err)
+		t.Fatalf("create strict date: %v", err)
 	}
 
-	if got := safe.ISOString(); got != "2024-02-28T15:00:00.000Z" {
-		t.Fatalf("CreateSafe(valid Tokyo date).ISOString() = %q, want timezone instant", got)
+	if got := strict.ISOString(); got != "2024-02-28T15:00:00.000Z" {
+		t.Fatalf("Create(valid Tokyo date).ISOString() = %q, want timezone instant", got)
 	}
 }
 
@@ -586,12 +685,12 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 		t.Fatalf("DiffFiltered(weekday) = %d, want 1", got)
 	}
 
-	if got := base.GetPreciseTimestamp(); got != 1715769285600000 {
-		t.Fatalf("GetPreciseTimestamp() = %f, want microsecond timestamp", got)
+	if got := base.PreciseTimestamp(); got != 1715769285600000 {
+		t.Fatalf("PreciseTimestamp() = %f, want microsecond timestamp", got)
 	}
 
-	if got := base.GetPreciseTimestamp(3); got != 1715769285600 {
-		t.Fatalf("GetPreciseTimestamp(3) = %f, want millisecond timestamp", got)
+	if got := base.PreciseTimestamp(3); got != 1715769285600 {
+		t.Fatalf("PreciseTimestamp(3) = %f, want millisecond timestamp", got)
 	}
 
 	assertEqual(t, "Calendar(tomorrow)", base.Calendar(earlier), "Tomorrow at 10:34")
@@ -643,8 +742,8 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 		t.Fatalf("Format() = %q, want token output", got)
 	}
 
-	if got := base.RawFormat("YYYY-MM-DD"); got != "2024-05-15" {
-		t.Fatalf("RawFormat() = %q, want date output", got)
+	if got := base.Format("YYYY-MM-DD"); got != "2024-05-15" {
+		t.Fatalf("Format() = %q, want date output", got)
 	}
 
 	if got := base.Format("dddd, MMMM Do YYYY"); got != "Wednesday, May 15th 2024" {
@@ -679,8 +778,8 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 		t.Fatalf("WeeksInYear() = %d, want ISO weeks in year", got)
 	}
 
-	if got := base.GetDaysFromStartOfWeek(time.Monday); got != 2 {
-		t.Fatalf("GetDaysFromStartOfWeek(Monday) = %d, want 2", got)
+	if got := base.DaysFromStartOfWeek(time.Monday); got != 2 {
+		t.Fatalf("DaysFromStartOfWeek(Monday) = %d, want 2", got)
 	}
 
 	if got := base.SetDaysFromStartOfWeek(4, time.Monday).DateString(); got != "2024-05-17" {
@@ -984,7 +1083,13 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 		t.Fatalf("Mutable DateTimeString() = %q, want Tokyo local time", got)
 	}
 
-	if mutable.SetTime(0, 0, 0, 0) != mutable {
+	setMutable, err := mutable.SetTime(0, 0, 0, 0)
+
+	if err != nil {
+		t.Fatalf("mutable SetTime: %v", err)
+	}
+
+	if setMutable != mutable {
 		t.Fatalf("mutable SetTime returned a different pointer")
 	}
 
@@ -1095,8 +1200,8 @@ func TestTimezoneNamesOffsetsAndDSTState(t *testing.T) {
 		t.Fatalf("OffsetString(\"\") = %q, want +0000", got)
 	}
 
-	if got := utc.GetOffsetString(":"); got != "+00:00" {
-		t.Fatalf("GetOffsetString(\":\") = %q, want +00:00", got)
+	if got := utc.OffsetString(":"); got != "+00:00" {
+		t.Fatalf("OffsetString(\":\") = %q, want +00:00", got)
 	}
 
 	if got := utc.UTCOffset(); got != 0 {
@@ -1119,8 +1224,8 @@ func TestTimezoneNamesOffsetsAndDSTState(t *testing.T) {
 		t.Fatalf("winter OffsetString() = %q, want -05:00", got)
 	}
 
-	if got := winter.GetOffsetString(""); got != "-0500" {
-		t.Fatalf("winter GetOffsetString() = %q, want -0500", got)
+	if got := winter.OffsetString(""); got != "-0500" {
+		t.Fatalf("winter OffsetString() = %q, want -0500", got)
 	}
 
 	if got := winter.UTCOffset(); got != -300 {
@@ -1239,20 +1344,20 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 		t.Fatalf("Average(start,end).ISOString() = %q, want midpoint", got)
 	}
 
-	if got := Minimum(staticStart, staticEnd).ISOString(); got != "2024-05-15T00:00:00.000Z" {
-		t.Fatalf("Minimum(start,end).ISOString() = %q, want earliest", got)
+	if got := Min(staticStart, staticEnd).ISOString(); got != "2024-05-15T00:00:00.000Z" {
+		t.Fatalf("Min(start,end).ISOString() = %q, want earliest", got)
 	}
 
-	if got := Maximum(staticStart, staticEnd).ISOString(); got != "2024-05-17T00:00:00.000Z" {
-		t.Fatalf("Maximum(start,end).ISOString() = %q, want latest", got)
+	if got := Max(staticStart, staticEnd).ISOString(); got != "2024-05-17T00:00:00.000Z" {
+		t.Fatalf("Max(start,end).ISOString() = %q, want latest", got)
 	}
 
-	if got := base.Minimum(minimum).ISOString(); got != "2024-05-10T00:00:00.000Z" {
-		t.Fatalf("Minimum().ISOString() = %q, want minimum", got)
+	if got := base.Min(minimum).ISOString(); got != "2024-05-10T00:00:00.000Z" {
+		t.Fatalf("Min().ISOString() = %q, want minimum", got)
 	}
 
-	if got := base.Maximum(maximum).ISOString(); got != "2024-05-20T00:00:00.000Z" {
-		t.Fatalf("Maximum().ISOString() = %q, want maximum", got)
+	if got := base.Max(maximum).ISOString(); got != "2024-05-20T00:00:00.000Z" {
+		t.Fatalf("Max().ISOString() = %q, want maximum", got)
 	}
 
 	closestA, err := Parse("2024-05-10T00:00:00Z")
@@ -1580,5 +1685,5 @@ func TestParityAliases(t *testing.T) {
 	}
 
 	assertEqual(t, "SetDayOfYear().DateString()", monday.SetDayOfYear(32).DateString(), "2024-02-01")
-	assertEqual(t, "SetTimestampFrom().ISOString()", monday.SetTimestampFrom(0).ISOString(), "1970-01-01T00:00:00.000Z")
+	assertEqual(t, "SetTimestamp().ISOString()", monday.SetTimestamp(0).ISOString(), "1970-01-01T00:00:00.000Z")
 }

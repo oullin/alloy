@@ -155,14 +155,6 @@ func (tempo Tempo) Max(other Tempo) Tempo {
 	return comparison.Max(tempo, other.State())
 }
 
-func (tempo Tempo) Minimum(other Tempo) Tempo {
-	return tempo.Min(other)
-}
-
-func (tempo Tempo) Maximum(other Tempo) Tempo {
-	return tempo.Max(other)
-}
-
 func (tempo Tempo) SameOrBefore(other Tempo, units ...Unit) bool {
 	return comparison.SameOrBefore(tempo, other.State(), units...)
 }

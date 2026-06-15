@@ -3,9 +3,14 @@ package comparison_test
 import (
 	"testing"
 
+	"github.com/oullin/alloy/tempo"
 	"github.com/oullin/alloy/tempo/comparison"
 	"github.com/oullin/alloy/tempo/duration"
-	"github.com/oullin/alloy/tempo/tempo"
+)
+
+const (
+	maxTestInt64 = int64(^uint64(0) >> 1)
+	minTestInt64 = -maxTestInt64 - 1
 )
 
 func mustParse(t *testing.T, value string) tempo.Tempo {
@@ -15,6 +20,18 @@ func mustParse(t *testing.T, value string) tempo.Tempo {
 
 	if err != nil {
 		t.Fatalf("parse %q: %v", value, err)
+	}
+
+	return parsed
+}
+
+func mustTimestampMs(t *testing.T, value int64) tempo.Tempo {
+	t.Helper()
+
+	parsed, err := tempo.FromTimestampMs(value)
+
+	if err != nil {
+		t.Fatalf("timestamp %d: %v", value, err)
 	}
 
 	return parsed
@@ -125,5 +142,24 @@ func TestAveragePicksMidpoint(t *testing.T) {
 
 	if got := comparison.Average(left, right.State()).ISOString(); got != "2024-05-16T00:00:00.000Z" {
 		t.Fatalf("Average() = %q, want midpoint", got)
+	}
+}
+
+func TestSelectionHandlesExtremeMillisecondDistances(t *testing.T) {
+	base := mustTimestampMs(t, 0)
+	minimum := mustTimestampMs(t, minTestInt64)
+	maximum := mustTimestampMs(t, maxTestInt64)
+	near := mustTimestampMs(t, 1)
+
+	if got := comparison.Closest(base, minimum.State(), maximum.State(), near.State()).TimestampMs(); got != 1 {
+		t.Fatalf("Closest(extremes).TimestampMs() = %d, want 1", got)
+	}
+
+	if got := comparison.Farthest(base, near.State(), minimum.State(), maximum.State()).TimestampMs(); got != minTestInt64 {
+		t.Fatalf("Farthest(extremes).TimestampMs() = %d, want min int64", got)
+	}
+
+	if got := comparison.Average(maximum, maximum.State()).TimestampMs(); got != maxTestInt64 {
+		t.Fatalf("Average(max,max).TimestampMs() = %d, want max int64", got)
 	}
 }

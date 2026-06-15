@@ -199,17 +199,17 @@ func (mutable *MutableTempo) PreviousOrSame(weekday time.Weekday) *MutableTempo 
 }
 
 func (mutable *MutableTempo) NextWeekday() *MutableTempo {
-	return boundaries.NextWeekday(mutable, defaultConfig.Settings.WeekendDays)
+	return boundaries.NextWeekday(mutable, mutable.settingsSnapshot().WeekendDays)
 }
 
 func (mutable *MutableTempo) PreviousWeekday() *MutableTempo {
-	return boundaries.PreviousWeekday(mutable, defaultConfig.Settings.WeekendDays)
+	return boundaries.PreviousWeekday(mutable, mutable.settingsSnapshot().WeekendDays)
 }
 
 func (mutable *MutableTempo) NextWeekendDay() *MutableTempo {
-	return boundaries.NextWeekendDay(mutable, defaultConfig.Settings.WeekendDays)
+	return boundaries.NextWeekendDay(mutable, mutable.settingsSnapshot().WeekendDays)
 }
 
 func (mutable *MutableTempo) PreviousWeekendDay() *MutableTempo {
-	return boundaries.PreviousWeekendDay(mutable, defaultConfig.Settings.WeekendDays)
+	return boundaries.PreviousWeekendDay(mutable, mutable.settingsSnapshot().WeekendDays)
 }

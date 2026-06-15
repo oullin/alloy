@@ -55,34 +55,70 @@ func (mutable *MutableTempo) Set(components Components) (*MutableTempo, error) {
 }
 
 func (mutable *MutableTempo) SetUnit(unit Unit, value int) (*MutableTempo, error) {
-	return setters.SetUnit(mutable, unit, value)
+	next, err := mutable.Tempo().SetUnit(unit, value)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetYear(year int) *MutableTempo {
-	return setters.SetYear(mutable, year)
+func (mutable *MutableTempo) SetYear(year int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetYear(year)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetMonth(month int) *MutableTempo {
-	return setters.SetMonth(mutable, month)
+func (mutable *MutableTempo) SetMonth(month int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetMonth(month)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetDay(day int) *MutableTempo {
-	return setters.SetDay(mutable, day)
+func (mutable *MutableTempo) SetDay(day int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetDay(day)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetDate(year int, month int, day int) *MutableTempo {
-	return setters.SetDate(mutable, year, month, day)
+func (mutable *MutableTempo) SetDate(year int, month int, day int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetDate(year, month, day)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetDateFrom(source Tempo) *MutableTempo {
+func (mutable *MutableTempo) SetDateFrom(source Tempo) (*MutableTempo, error) {
 	return mutable.SetDate(source.Year(), source.Month(), source.Day())
 }
 
-func (mutable *MutableTempo) SetDateTime(year int, month int, day int, hour int, minute int, second int, millisecond int) *MutableTempo {
-	return setters.SetDateTime(mutable, year, month, day, hour, minute, second, millisecond)
+func (mutable *MutableTempo) SetDateTime(year int, month int, day int, hour int, minute int, second int, millisecond int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetDateTime(year, month, day, hour, minute, second, millisecond)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetDateTimeFrom(source Tempo) *MutableTempo {
+func (mutable *MutableTempo) SetDateTimeFrom(source Tempo) (*MutableTempo, error) {
 	return mutable.SetDateTime(
 		source.Year(),
 		source.Month(),
@@ -94,27 +130,57 @@ func (mutable *MutableTempo) SetDateTimeFrom(source Tempo) *MutableTempo {
 	)
 }
 
-func (mutable *MutableTempo) SetHour(hour int) *MutableTempo {
-	return setters.SetHour(mutable, hour)
+func (mutable *MutableTempo) SetHour(hour int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetHour(hour)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetMinute(minute int) *MutableTempo {
-	return setters.SetMinute(mutable, minute)
+func (mutable *MutableTempo) SetMinute(minute int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetMinute(minute)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetSecond(second int) *MutableTempo {
-	return setters.SetSecond(mutable, second)
+func (mutable *MutableTempo) SetSecond(second int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetSecond(second)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetMillisecond(millisecond int) *MutableTempo {
-	return setters.SetMillisecond(mutable, millisecond)
+func (mutable *MutableTempo) SetMillisecond(millisecond int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetMillisecond(millisecond)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetTime(hour int, minute int, second int, millisecond int) *MutableTempo {
-	return setters.SetTime(mutable, hour, minute, second, millisecond)
+func (mutable *MutableTempo) SetTime(hour int, minute int, second int, millisecond int) (*MutableTempo, error) {
+	next, err := mutable.Tempo().SetTime(hour, minute, second, millisecond)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) SetTimeFrom(source Tempo) *MutableTempo {
+func (mutable *MutableTempo) SetTimeFrom(source Tempo) (*MutableTempo, error) {
 	return mutable.SetTime(source.Hour(), source.Minute(), source.Second(), source.Millisecond())
 }
 
@@ -130,10 +196,6 @@ func (mutable *MutableTempo) SetTimeFromTimeString(input string) (*MutableTempo,
 
 func (mutable *MutableTempo) SetTimestamp(timestamp int64) *MutableTempo {
 	return setters.SetTimestamp(mutable, timestamp)
-}
-
-func (mutable *MutableTempo) SetTimestampFrom(timestamp int64) *MutableTempo {
-	return mutable.SetTimestamp(timestamp)
 }
 
 func (mutable *MutableTempo) SetISODate(year int, week int, day int) *MutableTempo {
@@ -161,7 +223,7 @@ func (mutable *MutableTempo) SetUnitNoOverflow(valueUnit Unit, value int, overfl
 }
 
 func (mutable *MutableTempo) Midday() *MutableTempo {
-	return setters.Midday(mutable, defaultConfig.Settings.MidDayAt)
+	return setters.Midday(mutable, mutable.settingsSnapshot().MidDayAt)
 }
 
 func (mutable *MutableTempo) MidDay() *MutableTempo {

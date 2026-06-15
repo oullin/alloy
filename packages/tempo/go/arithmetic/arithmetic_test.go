@@ -4,8 +4,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo/tempo"
+	"github.com/oullin/alloy/tempo"
 )
+
+func mustTempo(t *testing.T, value tempo.Tempo, err error) tempo.Tempo {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("unexpected tempo error: %v", err)
+	}
+
+	return value
+}
 
 func TestArithmeticBoundariesAndOverflowModes(t *testing.T) {
 	base, err := tempo.Parse("2024-01-31T10:20:30.400Z")
@@ -268,11 +278,23 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 		t.Fatalf("Birthday() = true, want false")
 	}
 
-	if got := friday.SetTime(0, 0, 42, 0).SecondsSinceMidnight(); got != 42 {
+	secondsSince, err := friday.SetTime(0, 0, 42, 0)
+
+	if err != nil {
+		t.Fatalf("SetTime seconds since: %v", err)
+	}
+
+	if got := secondsSince.SecondsSinceMidnight(); got != 42 {
 		t.Fatalf("SecondsSinceMidnight() = %d, want 42", got)
 	}
 
-	if got := friday.SetTime(23, 59, 17, 0).SecondsUntilEndOfDay(); got != 42 {
+	secondsUntil, err := friday.SetTime(23, 59, 17, 0)
+
+	if err != nil {
+		t.Fatalf("SetTime seconds until: %v", err)
+	}
+
+	if got := secondsUntil.SecondsUntilEndOfDay(); got != 42 {
 		t.Fatalf("SecondsUntilEndOfDay() = %d, want 42", got)
 	}
 

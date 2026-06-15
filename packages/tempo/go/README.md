@@ -1,8 +1,8 @@
 # Tempo Go
 
-Tempo is split into a small umbrella package (`tempo/tempo`) that wires
+Tempo exposes a root package (`github.com/oullin/alloy/tempo`) that wires
 methods onto `Tempo` / `*MutableTempo` and a set of feature packages
-that hold the actual math behind a generic `core.Bearer[T]` contract.
+that hold reusable mechanics behind a generic `core.Bearer[T]` contract.
 Every feature package — `arithmetic`, `boundaries`, `comparison`,
 `setters`, `diff`, `formatting` — exports plain functions you can call
 on any bearer:
@@ -16,7 +16,7 @@ import (
 	"github.com/oullin/alloy/tempo/arithmetic"
 	"github.com/oullin/alloy/tempo/boundaries"
 	"github.com/oullin/alloy/tempo/formatting"
-	tempo "github.com/oullin/alloy/tempo/tempo"
+	tempo "github.com/oullin/alloy/tempo"
 )
 
 func DateOnly(value tempo.Tempo) string {
@@ -37,7 +37,7 @@ Locale and translation behavior is composed with runtimes and factories:
 ```go
 import (
 	"github.com/oullin/alloy/tempo/runtime"
-	tempo "github.com/oullin/alloy/tempo/tempo"
+	tempo "github.com/oullin/alloy/tempo"
 )
 
 rt := runtime.New(
@@ -70,8 +70,8 @@ value, err := factory.Parse("2024-05-15")
   `tempo.Interval` and `tempo.Period`.
 - `runtime/` – `Runtime`, `Translator`, locale/fallback/translator
   options.
-- `factory/`, `parser/`, `config/` – construction and configuration.
-- `tempo/` – the umbrella package that wires methods onto `Tempo` and
-  `*MutableTempo`, exposes `Parse`, `NewFactory`, `NewRuntime`, and
-  re-exports the public surface (`Runtime`, `Translator`, etc.) via
-  type aliases so importers keep a single entry point.
+- `factory/`, `parser/`, `config/` – lower-level construction and
+  configuration mechanics.
+- module root – the application entrypoint that wires methods onto
+  `Tempo` and `*MutableTempo`, exposes `Parse`, `NewFactory`,
+  `NewRuntime`, and the public value/configuration surface.

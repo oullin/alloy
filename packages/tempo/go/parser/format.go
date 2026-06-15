@@ -8,6 +8,10 @@ import (
 )
 
 func ParseFromPattern(input string, pattern string, location *time.Location) (time.Time, error) {
+	return ParseFromPatternStrict(input, pattern, location, false)
+}
+
+func ParseFromPatternStrict(input string, pattern string, location *time.Location, strict bool) (time.Time, error) {
 	groups := make([]string, 0)
 
 	var expression strings.Builder
@@ -138,8 +142,21 @@ func ParseFromPattern(input string, pattern string, location *time.Location) (ti
 			time.UTC,
 		)
 
-		return utc.Add(-time.Duration(offsetMinutes) * time.Minute), nil
+		offsetLocation := time.FixedZone("", offsetMinutes*60)
+		value := utc.Add(-time.Duration(offsetMinutes) * time.Minute)
+
+		if strict && !componentsMatchTime(components, value, offsetLocation) {
+			return time.Time{}, fmt.Errorf("invalid tempo local date/time components")
+		}
+
+		return value, nil
 	}
 
-	return timeFromComponents(components, location), nil
+	value := timeFromComponents(components, location)
+
+	if strict && !componentsMatchTime(components, value, location) {
+		return time.Time{}, fmt.Errorf("invalid tempo local date/time components")
+	}
+
+	return value, nil
 }

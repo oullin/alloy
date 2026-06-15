@@ -1,7 +1,9 @@
 package tempo
 
+import "github.com/oullin/alloy/tempo/internal/kernel"
+
 func AverageMilliseconds(startMs int64, endMs int64) int64 {
-	return (startMs + endMs) / 2
+	return kernel.AverageMilliseconds(startMs, endMs)
 }
 
 func EarlierIndex(values []int64) int {

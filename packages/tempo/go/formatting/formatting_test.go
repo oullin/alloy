@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo/tempo"
+	"github.com/oullin/alloy/tempo"
 )
 
 func assertEqual(t *testing.T, label string, got string, want string) {
@@ -79,36 +79,32 @@ func TestFromFormatPredicatesAndHumanDiffs(t *testing.T) {
 		t.Fatalf("FromFormat timezone ISOString() = %q, want local timezone instant", got)
 	}
 
-	if !tempo.CanParse("2024-05-15T10:34:45Z") {
-		t.Fatalf("CanParse(valid) = false, want true")
+	if _, err := tempo.Parse("2024-05-15T10:34:45Z"); err != nil {
+		t.Fatalf("Parse(valid): %v", err)
 	}
 
-	if tempo.CanParse("not a date") {
-		t.Fatalf("CanParse(invalid) = true, want false")
+	if _, err := tempo.Parse("not a date"); err == nil {
+		t.Fatalf("Parse(invalid) error = nil, want error")
 	}
 
-	if parsed, ok := tempo.TryParse("2024-05-15"); !ok || parsed.DateString() != "2024-05-15" {
-		t.Fatalf("TryParse(valid) = %q, %v, want date, true", parsed.DateString(), ok)
+	parsedDate, err := tempo.Parse("2024-05-15")
+
+	if err != nil || parsedDate.DateString() != "2024-05-15" {
+		t.Fatalf("Parse(valid date) = %q, %v, want date", parsedDate.DateString(), err)
 	}
 
-	if _, ok := tempo.TryParse("not a date"); ok {
-		t.Fatalf("TryParse(invalid) ok = true, want false")
+	if _, err := tempo.FromFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm"); err != nil {
+		t.Fatalf("FromFormat(valid): %v", err)
 	}
 
-	if !tempo.HasFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm") {
-		t.Fatalf("HasFormat(valid) = false, want true")
+	if _, err := tempo.FromFormat("2024-05-15", "YYYY/MM/DD"); err == nil {
+		t.Fatalf("FromFormat(invalid) error = nil, want error")
 	}
 
-	if tempo.HasFormat("2024-05-15", "YYYY/MM/DD") {
-		t.Fatalf("HasFormat(invalid) = true, want false")
-	}
+	parsedFormatted, err := tempo.FromFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm")
 
-	if parsed, ok := tempo.TryFromFormat("2024/05/15 10:34", "YYYY/MM/DD HH:mm"); !ok || parsed.ISOString() != "2024-05-15T10:34:00.000Z" {
-		t.Fatalf("TryFromFormat(valid) = %q, %v, want parsed instant, true", parsed.ISOString(), ok)
-	}
-
-	if _, ok := tempo.TryFromFormat("2024-05-15", "YYYY/MM/DD"); ok {
-		t.Fatalf("TryFromFormat(invalid) ok = true, want false")
+	if err != nil || parsedFormatted.ISOString() != "2024-05-15T10:34:00.000Z" {
+		t.Fatalf("FromFormat(valid) = %q, %v, want parsed instant", parsedFormatted.ISOString(), err)
 	}
 
 	base, err := tempo.Parse("2024-02-29T00:00:00Z")
@@ -229,8 +225,7 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 
 	assertEqual(t, "DateTimeLocalString()", instance.DateTimeLocalString(), "2024-05-15T21:34:56")
 	assertEqual(t, "DateTimeLocalString(ms)", instance.DateTimeLocalString(tempo.MillisecondPrecision), "2024-05-15T21:34:56.789")
-	assertEqual(t, "ISOFormat()", instance.ISOFormat("YYYY-MM-DD HH:mm:ss"), "2024-05-15 21:34:56")
-	assertEqual(t, "TranslatedFormat()", instance.TranslatedFormat("YYYY-MM-DD HH:mm:ss"), "2024-05-15 21:34:56")
+	assertEqual(t, "Format()", instance.Format("YYYY-MM-DD HH:mm:ss"), "2024-05-15 21:34:56")
 	assertEqual(t, "FormattedDateString()", instance.FormattedDateString(), "May 15, 2024")
 	assertEqual(t, "FormattedDayDateString()", instance.FormattedDayDateString(), "Wed, May 15, 2024")
 	assertEqual(t, "DayDateTimeString()", instance.DayDateTimeString(), "Wed, May 15, 2024 9:34 PM")
@@ -255,8 +250,8 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("Unix() = %d, want 1715776496", got)
 	}
 
-	if got := instance.GetTimestampMs(); got != 1715776496789 {
-		t.Fatalf("GetTimestampMs() = %d, want 1715776496789", got)
+	if got := instance.TimestampMs(); got != 1715776496789 {
+		t.Fatalf("TimestampMs() = %d, want 1715776496789", got)
 	}
 
 	assertEqual(t, "JSONSerialize()", instance.JSONSerialize(), "2024-05-15T12:34:56.789Z")
@@ -330,43 +325,41 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("ToMap()[hour] = %v, want 21", values["hour"])
 	}
 
-	if value, ok := instance.Get("year"); !ok || value != 2024 {
-		t.Fatalf("Get(year) = %v, %v, want 2024, true", value, ok)
+	if value, ok := instance.PaddedUnit("month", 2); !ok || value != "05" {
+		t.Fatalf("PaddedUnit(month) = %q, %v, want 05, true", value, ok)
 	}
 
-	if value, ok := instance.GetPaddedUnit("month", 2); !ok || value != "05" {
-		t.Fatalf("GetPaddedUnit(month) = %q, %v, want 05, true", value, ok)
-	}
-
-	assertEqual(t, "GetTranslatedDayName()", instance.GetTranslatedDayName(), "Wednesday")
-	assertEqual(t, "GetTranslatedShortMonthName()", instance.GetTranslatedShortMonthName(), "May")
+	assertEqual(t, "DayName()", instance.DayName(), "Wednesday")
+	assertEqual(t, "ShortMonthName()", instance.ShortMonthName(), "May")
 	assertEqual(t, "TranslateNumber()", instance.TranslateNumber(1234), "1234")
 	assertEqual(t, "Translate()", instance.Translate("Hello :name", map[string]string{"name": "Tempo"}), "Hello Tempo")
 
-	if _, ok := tempo.TryParse("not a date"); ok || tempo.GetLastErrors() == nil {
-		t.Fatalf("TryParse(invalid), GetLastErrors() = %v, %v, want false and error", ok, tempo.GetLastErrors())
+	if _, err := tempo.Parse("not a date"); err == nil {
+		t.Fatalf("Parse(invalid) error = nil, want error")
 	}
 
-	if got := tempo.ExecuteWithLocale("fr-FR", tempo.GetLocale); got != "fr-FR" {
-		t.Fatalf("ExecuteWithLocale() = %q, want fr-FR", got)
+	formattedString, err := tempo.Parse("2024-05-15T12:34:56.789Z", tempo.WithToStringFormat("YYYY-MM-DD"))
+
+	if err != nil {
+		t.Fatalf("parse formatted string tempo: %v", err)
 	}
 
-	if got := tempo.GetLocale(); got != "en-US" {
-		t.Fatalf("GetLocale() after ExecuteWithLocale = %q, want restored default", got)
+	assertEqual(t, "String() formatted", formattedString.String(), "2024-05-15")
+	serialized, err := tempo.Parse("2024-05-15T12:34:56.789Z", tempo.WithSerializer(func(value tempo.Tempo) string {
+		return value.DateString()
+	}))
+
+	if err != nil {
+		t.Fatalf("parse serialized tempo: %v", err)
 	}
 
-	tempo.SetToStringFormat("YYYY-MM-DD")
-	assertEqual(t, "String() formatted", instance.String(), "2024-05-15")
-	tempo.ResetToStringFormat()
-	tempo.SerializeUsing(func(value tempo.Tempo) string { return value.DateString() })
-	hookedJSON, err := json.Marshal(instance)
+	hookedJSON, err := json.Marshal(serialized)
 
 	if err != nil {
 		t.Fatalf("marshal hooked tempo: %v", err)
 	}
 
 	assertEqual(t, "json.Marshal(hooked Tempo)", string(hookedJSON), `"2024-05-15"`)
-	tempo.SerializeUsing(nil)
 	dateOnly := func(value tempo.Tempo) string { return value.DateString() }
 	assertEqual(t, "composable dateOnly", dateOnly(instance), "2024-05-15")
 }

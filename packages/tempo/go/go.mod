@@ -1,6 +1,6 @@
 module github.com/oullin/alloy/tempo
 
-go 1.26
+go 1.26.4
 
 require github.com/spf13/viper v1.21.0
 

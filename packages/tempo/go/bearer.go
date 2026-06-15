@@ -18,7 +18,7 @@ func (tempo Tempo) State() core.State {
 }
 
 func (tempo Tempo) With(value time.Time) Tempo {
-	return newTempo(value, tempo.location, tempo.Runtime())
+	return newTempoWithPolicy(value, tempo.location, tempo.Runtime(), tempo.settingsSnapshot(), tempo.serializer, tempo.toStringFormat)
 }
 
 func (mutable *MutableTempo) State() core.State {
@@ -26,5 +26,5 @@ func (mutable *MutableTempo) State() core.State {
 }
 
 func (mutable *MutableTempo) With(value time.Time) *MutableTempo {
-	return mutable.replace(newTempo(value, mutable.location, mutable.runtime))
+	return mutable.replace(newTempoWithPolicy(value, mutable.location, mutable.runtime, mutable.settingsSnapshot(), mutable.serializer, mutable.toStringFormat))
 }

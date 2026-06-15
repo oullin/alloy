@@ -105,10 +105,10 @@ func Average[T core.Bearer[T]](bearer T, other core.State) T {
 func Closest[T core.Bearer[T]](bearer T, first core.State, rest ...core.State) T {
 	reference := bearer.State().Value.UnixMilli()
 	bestState := first
-	bestDistance := kernel.AbsInt64(first.Value.UnixMilli() - reference)
+	bestDistance := kernel.DistanceInt64(first.Value.UnixMilli(), reference)
 
 	for _, candidate := range rest {
-		distance := kernel.AbsInt64(candidate.Value.UnixMilli() - reference)
+		distance := kernel.DistanceInt64(candidate.Value.UnixMilli(), reference)
 
 		if distance < bestDistance {
 			bestState = candidate
@@ -122,10 +122,10 @@ func Closest[T core.Bearer[T]](bearer T, first core.State, rest ...core.State) T
 func Farthest[T core.Bearer[T]](bearer T, first core.State, rest ...core.State) T {
 	reference := bearer.State().Value.UnixMilli()
 	bestState := first
-	bestDistance := kernel.AbsInt64(first.Value.UnixMilli() - reference)
+	bestDistance := kernel.DistanceInt64(first.Value.UnixMilli(), reference)
 
 	for _, candidate := range rest {
-		distance := kernel.AbsInt64(candidate.Value.UnixMilli() - reference)
+		distance := kernel.DistanceInt64(candidate.Value.UnixMilli(), reference)
 
 		if distance > bestDistance {
 			bestState = candidate

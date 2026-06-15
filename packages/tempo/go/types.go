@@ -56,6 +56,8 @@ type Settings struct {
 
 type Serializer func(Tempo) string
 
+type ConfigOption func(*Config) error
+
 type Translator = runtime.Translator
 
 type StartOfWeekOptions struct {
@@ -71,21 +73,29 @@ type PeriodOptions struct {
 type Option func(*config) error
 
 type config struct {
-	location *time.Location
-	runtime  Runtime
-	app      *Config
+	location       *time.Location
+	runtime        Runtime
+	settings       Settings
+	serializer     Serializer
+	toStringFormat string
 }
 
 type Tempo struct {
-	value    time.Time
-	location *time.Location
-	runtime  Runtime
+	value          time.Time
+	location       *time.Location
+	runtime        Runtime
+	settings       Settings
+	serializer     Serializer
+	toStringFormat string
 }
 
 type MutableTempo struct {
-	value    time.Time
-	location *time.Location
-	runtime  Runtime
+	value          time.Time
+	location       *time.Location
+	runtime        Runtime
+	settings       Settings
+	serializer     Serializer
+	toStringFormat string
 }
 
 type Interval struct {
@@ -101,9 +111,12 @@ type Period struct {
 }
 
 type Factory struct {
-	clock    factory.Clock
-	location *time.Location
-	runtime  Runtime
+	clock          factory.Clock
+	location       *time.Location
+	runtime        Runtime
+	settings       Settings
+	serializer     Serializer
+	toStringFormat string
 }
 
 const (

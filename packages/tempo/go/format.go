@@ -12,18 +12,6 @@ func (tempo Tempo) Format(pattern string) string {
 	return formatting.Format(tempo, pattern)
 }
 
-func (tempo Tempo) RawFormat(pattern string) string {
-	return tempo.Format(pattern)
-}
-
-func (tempo Tempo) ISOFormat(pattern string) string {
-	return tempo.Format(pattern)
-}
-
-func (tempo Tempo) TranslatedFormat(pattern string) string {
-	return tempo.Format(pattern)
-}
-
 func (tempo Tempo) Ordinal(unit Unit) string {
 	switch normalizeUnit(unit) {
 	case Year:
@@ -63,7 +51,7 @@ func (tempo Tempo) WeeksInYear() int {
 	return tempo.WeeksInISOYear()
 }
 
-func (tempo Tempo) GetDaysFromStartOfWeek(weekStartsOn time.Weekday) int {
+func (tempo Tempo) DaysFromStartOfWeek(weekStartsOn time.Weekday) int {
 	return (int(tempo.local().Weekday()) - int(weekStartsOn) + 7) % 7
 }
 
@@ -160,8 +148,8 @@ func (tempo Tempo) UnixString() string {
 }
 
 func (tempo Tempo) JSONSerialize() string {
-	if defaultConfig.Serializer != nil {
-		return defaultConfig.Serializer(tempo)
+	if tempo.serializer != nil {
+		return tempo.serializer(tempo)
 	}
 
 	return tempo.ISOString()
@@ -172,8 +160,8 @@ func (tempo Tempo) Serialize() string {
 }
 
 func (tempo Tempo) String() string {
-	if defaultConfig.ToStringFormat != "" {
-		return tempo.Format(defaultConfig.ToStringFormat)
+	if tempo.toStringFormat != "" {
+		return tempo.Format(tempo.toStringFormat)
 	}
 
 	return tempo.ISOString()

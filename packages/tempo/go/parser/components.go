@@ -36,3 +36,23 @@ func timeFromComponents(components Components, location *time.Location) time.Tim
 		location,
 	).UTC()
 }
+
+func componentsMatchTime(components Components, value time.Time, location *time.Location) bool {
+	local := value.In(location)
+
+	if components.Month == 0 {
+		components.Month = 1
+	}
+
+	if components.Day == 0 {
+		components.Day = 1
+	}
+
+	return local.Year() == components.Year &&
+		int(local.Month()) == components.Month &&
+		local.Day() == components.Day &&
+		local.Hour() == components.Hour &&
+		local.Minute() == components.Minute &&
+		local.Second() == components.Second &&
+		local.Nanosecond()/int(time.Millisecond) == components.Millisecond
+}

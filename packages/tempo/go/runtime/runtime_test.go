@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/tempo/tempo"
+	"github.com/oullin/alloy/tempo"
 )
 
 type mapTranslator map[string]string
@@ -74,23 +74,23 @@ func TestRuntimeScopedTranslator(t *testing.T) {
 	assertEqual(t, "first Translate()", first.Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
 	assertEqual(t, "second Translate()", second.Translate("greeting", map[string]string{"name": "Tempo"}), "Hola Tempo")
 
-	if value, ok := first.GetTranslationMessage("locale"); !ok || value != "en-US" {
+	if value, ok := first.TranslationMessage("locale"); !ok || value != "en-US" {
 		t.Fatalf("first locale message = %v, %v, want en-US, true", value, ok)
 	}
 
-	if value, ok := second.GetTranslationMessage("locale"); !ok || value != "es-ES" {
+	if value, ok := second.TranslationMessage("locale"); !ok || value != "es-ES" {
 		t.Fatalf("second locale message = %v, %v, want es-ES, true", value, ok)
 	}
 
-	if !first.HasLocalTranslator() {
-		t.Fatalf("HasLocalTranslator() = false, want true")
+	if !first.HasTranslator() {
+		t.Fatalf("HasTranslator() = false, want true")
 	}
 
 	assertEqual(t, "Clone().Translate()", first.Clone().Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
 	assertEqual(t, "AddDays().Translate()", first.AddDays(1).Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
 	assertEqual(t, "Mutable AddDays().Translate()", first.Mutable().AddDays(1).Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
 
-	replaced := first.SetLocalTranslator(mapTranslator{"greeting": "Salut :name"})
+	replaced := first.WithTranslator(mapTranslator{"greeting": "Salut :name"})
 	assertEqual(t, "replaced Translate()", replaced.Translate("greeting", map[string]string{"name": "Tempo"}), "Salut Tempo")
 	assertEqual(t, "original Translate()", first.Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
 }

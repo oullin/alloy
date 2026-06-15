@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo/tempo"
+	"github.com/oullin/alloy/tempo"
 )
 
 func assertEqual(t *testing.T, label string, got string, want string) {
@@ -13,6 +13,16 @@ func assertEqual(t *testing.T, label string, got string, want string) {
 	if got != want {
 		t.Fatalf("%s = %q, want %q", label, got, want)
 	}
+}
+
+func mustTempo(t *testing.T, value tempo.Tempo, err error) tempo.Tempo {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("unexpected tempo error: %v", err)
+	}
+
+	return value
 }
 
 func TestTimezoneConversionModes(t *testing.T) {
@@ -236,9 +246,15 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("parse fixture input: %v", err)
 	}
 
-	assertEqual(t, "SetTime().ISOString()", instance.SetTime(0, 0, 0, 0).ISOString(), "2024-05-15T00:00:00.000Z")
+	midnight, err := instance.SetTime(0, 0, 0, 0)
 
-	if !instance.SetTime(0, 0, 0, 0).IsMidnight() {
+	if err != nil {
+		t.Fatalf("SetTime(0,0,0,0): %v", err)
+	}
+
+	assertEqual(t, "SetTime().ISOString()", midnight.ISOString(), "2024-05-15T00:00:00.000Z")
+
+	if !midnight.IsMidnight() {
 		t.Fatalf("SetTime(0,0,0,0).IsMidnight() = false, want true")
 	}
 
@@ -248,23 +264,53 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("Midday().IsMidday() = false, want true")
 	}
 
-	if got := instance.SetHour(0).Hour(); got != 0 {
+	hourZero, err := instance.SetHour(0)
+
+	if err != nil {
+		t.Fatalf("SetHour(0): %v", err)
+	}
+
+	if got := hourZero.Hour(); got != 0 {
 		t.Fatalf("SetHour(0).Hour() = %d, want 0", got)
 	}
 
-	if got := instance.SetMinute(0).Minute(); got != 0 {
+	minuteZero, err := instance.SetMinute(0)
+
+	if err != nil {
+		t.Fatalf("SetMinute(0): %v", err)
+	}
+
+	if got := minuteZero.Minute(); got != 0 {
 		t.Fatalf("SetMinute(0).Minute() = %d, want 0", got)
 	}
 
-	if got := instance.SetSecond(0).Second(); got != 0 {
+	secondZero, err := instance.SetSecond(0)
+
+	if err != nil {
+		t.Fatalf("SetSecond(0): %v", err)
+	}
+
+	if got := secondZero.Second(); got != 0 {
 		t.Fatalf("SetSecond(0).Second() = %d, want 0", got)
 	}
 
-	if got := instance.SetMillisecond(0).Millisecond(); got != 0 {
+	millisecondZero, err := instance.SetMillisecond(0)
+
+	if err != nil {
+		t.Fatalf("SetMillisecond(0): %v", err)
+	}
+
+	if got := millisecondZero.Millisecond(); got != 0 {
 		t.Fatalf("SetMillisecond(0).Millisecond() = %d, want 0", got)
 	}
 
-	assertEqual(t, "SetDate().DateString()", instance.SetDate(2025, 1, 2).DateString(), "2025-01-02")
+	setDate, err := instance.SetDate(2025, 1, 2)
+
+	if err != nil {
+		t.Fatalf("SetDate(2025,1,2): %v", err)
+	}
+
+	assertEqual(t, "SetDate().DateString()", setDate.DateString(), "2025-01-02")
 	setUnit, err := instance.SetUnit(tempo.Day, 2)
 
 	if err != nil {
@@ -272,7 +318,13 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	}
 
 	assertEqual(t, "SetUnit(Day, 2).DateString()", setUnit.DateString(), "2024-05-02")
-	assertEqual(t, "SetDateTime().ISOString()", instance.SetDateTime(2025, 1, 2, 3, 4, 5, 6).ISOString(), "2025-01-02T03:04:05.006Z")
+	setDateTime, err := instance.SetDateTime(2025, 1, 2, 3, 4, 5, 6)
+
+	if err != nil {
+		t.Fatalf("SetDateTime(): %v", err)
+	}
+
+	assertEqual(t, "SetDateTime().ISOString()", setDateTime.ISOString(), "2025-01-02T03:04:05.006Z")
 
 	source, err := tempo.Parse("2025-01-02T03:04:05.006Z")
 
@@ -280,9 +332,27 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 		t.Fatalf("parse setter source: %v", err)
 	}
 
-	assertEqual(t, "SetDateFrom().DateTimeString()", instance.SetDateFrom(source).DateTimeString(), "2025-01-02 12:34:56")
-	assertEqual(t, "SetTimeFrom().DateTimeString()", instance.SetTimeFrom(source).DateTimeString(), "2024-05-15 03:04:05")
-	assertEqual(t, "SetDateTimeFrom().ISOString()", instance.SetDateTimeFrom(source).ISOString(), "2025-01-02T03:04:05.006Z")
+	setDateFrom, err := instance.SetDateFrom(source)
+
+	if err != nil {
+		t.Fatalf("SetDateFrom(): %v", err)
+	}
+
+	assertEqual(t, "SetDateFrom().DateTimeString()", setDateFrom.DateTimeString(), "2025-01-02 12:34:56")
+	setTimeFrom, err := instance.SetTimeFrom(source)
+
+	if err != nil {
+		t.Fatalf("SetTimeFrom(): %v", err)
+	}
+
+	assertEqual(t, "SetTimeFrom().DateTimeString()", setTimeFrom.DateTimeString(), "2024-05-15 03:04:05")
+	setDateTimeFrom, err := instance.SetDateTimeFrom(source)
+
+	if err != nil {
+		t.Fatalf("SetDateTimeFrom(): %v", err)
+	}
+
+	assertEqual(t, "SetDateTimeFrom().ISOString()", setDateTimeFrom.ISOString(), "2025-01-02T03:04:05.006Z")
 
 	fromTimeString, err := instance.SetTimeFromTimeString("03:04:05.006")
 
@@ -321,17 +391,10 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	}
 
 	assertEqual(t, "Change(next week).DateString()", modified.DateString(), "2024-05-22")
-	assertEqual(t, "Subtract(2, Day).DateString()", instance.Subtract(2, tempo.Day).DateString(), "2024-05-13")
-	assertEqual(t, "AddUnit(Day, 2).DateString()", instance.AddUnit(tempo.Day, 2).DateString(), "2024-05-17")
-	assertEqual(t, "AddRealUnit(Day, 2).DateString()", instance.AddRealUnit(tempo.Day, 2).DateString(), "2024-05-17")
-	assertEqual(t, "AddUTCUnit(Day, 2).DateString()", instance.AddUTCUnit(tempo.Day, 2).DateString(), "2024-05-17")
-	assertEqual(t, "RawAdd(2, Day).DateString()", instance.RawAdd(2, tempo.Day).DateString(), "2024-05-17")
-	assertEqual(t, "AddUnitNoOverflow(Day, 20, Month).DateString()", instance.AddUnitNoOverflow(tempo.Day, 20, tempo.Month).DateString(), "2024-05-31")
-	assertEqual(t, "SubUnit(Day, 2).DateString()", instance.SubUnit(tempo.Day, 2).DateString(), "2024-05-13")
-	assertEqual(t, "SubRealUnit(Day, 2).DateString()", instance.SubRealUnit(tempo.Day, 2).DateString(), "2024-05-13")
-	assertEqual(t, "SubUTCUnit(Day, 2).DateString()", instance.SubUTCUnit(tempo.Day, 2).DateString(), "2024-05-13")
-	assertEqual(t, "RawSub(2, Day).DateString()", instance.RawSub(2, tempo.Day).DateString(), "2024-05-13")
-	assertEqual(t, "SubUnitNoOverflow(Day, 20, Month).DateString()", instance.SubUnitNoOverflow(tempo.Day, 20, tempo.Month).DateString(), "2024-05-01")
+	assertEqual(t, "Sub(2, Day).DateString()", instance.Sub(2, tempo.Day).DateString(), "2024-05-13")
+	assertEqual(t, "Add(2, Day).DateString()", instance.Add(2, tempo.Day).DateString(), "2024-05-17")
+	assertEqual(t, "AddNoOverflow(20, Day, Month).DateString()", instance.AddNoOverflow(20, tempo.Day, tempo.Month).DateString(), "2024-05-31")
+	assertEqual(t, "SubNoOverflow(20, Day, Month).DateString()", instance.SubNoOverflow(20, tempo.Day, tempo.Month).DateString(), "2024-05-01")
 	assertEqual(t, "SetUnitNoOverflow(Day, 40, Month).DateString()", instance.SetUnitNoOverflow(tempo.Day, 40, tempo.Month).DateString(), "2024-05-31")
 
 	friday, err := tempo.Parse("2024-05-17T12:00:00Z")
@@ -370,94 +433,72 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 
 	assertEqual(t, "CreateFromTimeString().TimeString(ms)", createdFromTimeString.TimeString(tempo.MillisecondPrecision), "03:04:05.006")
 
-	createdFromFormat, err := tempo.CreateFromFormat("2024/05/15", "YYYY/MM/DD")
+	createdFromFormat, err := tempo.FromFormat("2024/05/15", "YYYY/MM/DD")
 
 	if err != nil {
-		t.Fatalf("CreateFromFormat(): %v", err)
+		t.Fatalf("FromFormat(): %v", err)
 	}
 
-	assertEqual(t, "CreateFromFormat().DateString()", createdFromFormat.DateString(), "2024-05-15")
-	rawCreatedFromFormat, err := tempo.RawCreateFromFormat("2024/05/15", "YYYY/MM/DD")
+	assertEqual(t, "FromFormat().DateString()", createdFromFormat.DateString(), "2024-05-15")
+	parsed, err := tempo.Parse("2024-05-15")
 
 	if err != nil {
-		t.Fatalf("RawCreateFromFormat(): %v", err)
+		t.Fatalf("Parse(): %v", err)
 	}
 
-	assertEqual(t, "RawCreateFromFormat().DateString()", rawCreatedFromFormat.DateString(), "2024-05-15")
-	rawParsed, err := tempo.RawParse("2024-05-15")
+	assertEqual(t, "Parse().DateString()", parsed.DateString(), "2024-05-15")
+	fromLocale, err := tempo.Parse("2024-05-15", tempo.WithLocale("en-US"))
 
 	if err != nil {
-		t.Fatalf("RawParse(): %v", err)
+		t.Fatalf("Parse with locale: %v", err)
 	}
 
-	assertEqual(t, "RawParse().DateString()", rawParsed.DateString(), "2024-05-15")
-	made, err := tempo.Make("2024-05-15")
-
-	if err != nil {
-		t.Fatalf("Make(): %v", err)
-	}
-
-	assertEqual(t, "Make().DateString()", made.DateString(), "2024-05-15")
-	parsedFromLocale, err := tempo.ParseFromLocale("2024-05-15", "en-US")
-
-	if err != nil {
-		t.Fatalf("ParseFromLocale(): %v", err)
-	}
-
-	assertEqual(t, "ParseFromLocale().DateString()", parsedFromLocale.DateString(), "2024-05-15")
-	days := tempo.GetDays()
+	assertEqual(t, "Parse(locale).DateString()", fromLocale.DateString(), "2024-05-15")
+	days := tempo.Days()
 
 	if len(days) < 2 || days[0] != "Sunday" || days[1] != "Monday" {
-		t.Fatalf("GetDays()[0:2] = %v, want Sunday/Monday", days[:2])
+		t.Fatalf("Days()[0:2] = %v, want Sunday/Monday", days[:2])
 	}
 
-	if got := tempo.GetCalendarFormats()["sameDay"]; got != "[Today at] HH:mm" {
-		t.Fatalf("GetCalendarFormats()[sameDay] = %q, want default format", got)
+	if got := tempo.CalendarFormats()["sameDay"]; got != "[Today at] HH:mm" {
+		t.Fatalf("CalendarFormats()[sameDay] = %q, want default format", got)
 	}
 
-	if got := tempo.GetIsoFormats()["date"]; got != "YYYY-MM-DD" {
-		t.Fatalf("GetIsoFormats()[date] = %q, want date format", got)
+	if got := tempo.ISOFormats()["date"]; got != "YYYY-MM-DD" {
+		t.Fatalf("ISOFormats()[date] = %q, want date format", got)
 	}
 
-	if units := tempo.GetIsoUnits(); len(units) == 0 || units[0] != tempo.Millisecond {
-		t.Fatalf("GetIsoUnits()[0] = %v, want millisecond", units)
+	if units := tempo.ISOUnits(); len(units) == 0 || units[0] != tempo.Millisecond {
+		t.Fatalf("ISOUnits()[0] = %v, want millisecond", units)
 	}
 
-	if got := tempo.GetTimeFormatByPrecision(tempo.MillisecondPrecision); got != "HH:mm:ss.SSS" {
-		t.Fatalf("GetTimeFormatByPrecision(ms) = %q, want millisecond format", got)
+	if got := tempo.TimeFormatByPrecision(tempo.MillisecondPrecision); got != "HH:mm:ss.SSS" {
+		t.Fatalf("TimeFormatByPrecision(ms) = %q, want millisecond format", got)
 	}
 
-	if tempo.GetWeekStartsAt() != time.Monday || tempo.GetWeekEndsAt() != time.Sunday {
-		t.Fatalf("week start/end settings = %v/%v, want Monday/Sunday", tempo.GetWeekStartsAt(), tempo.GetWeekEndsAt())
+	if tempo.WeekStartsAt() != time.Monday || tempo.WeekEndsAt() != time.Sunday {
+		t.Fatalf("week start/end settings = %v/%v, want Monday/Sunday", tempo.WeekStartsAt(), tempo.WeekEndsAt())
 	}
 
 	if !tempo.LocaleHasDiffSyntax("en-US") || !tempo.LocaleHasPeriodSyntax("en-US") {
 		t.Fatalf("locale capability helpers = false, want true")
 	}
 
-	if !tempo.HasFormatWithModifiers("2024/05/15", "YYYY/MM/DD") {
-		t.Fatalf("HasFormatWithModifiers() = false, want true")
-	}
-
-	if !tempo.CanBeCreatedFromFormat("2024/05/15", "YYYY/MM/DD") {
-		t.Fatalf("CanBeCreatedFromFormat() = false, want true")
-	}
-
-	createdFromTimestamp, err := tempo.CreateFromTimestamp(0)
+	createdFromTimestamp, err := tempo.FromTimestamp(0)
 
 	if err != nil {
-		t.Fatalf("CreateFromTimestamp(): %v", err)
+		t.Fatalf("FromTimestamp(): %v", err)
 	}
 
-	assertEqual(t, "CreateFromTimestamp(0).ISOString()", createdFromTimestamp.ISOString(), "1970-01-01T00:00:00.000Z")
+	assertEqual(t, "FromTimestamp(0).ISOString()", createdFromTimestamp.ISOString(), "1970-01-01T00:00:00.000Z")
 
-	createdFromTimestampMs, err := tempo.CreateFromTimestampMs(1)
+	createdFromTimestampMs, err := tempo.FromTimestampMs(1)
 
 	if err != nil {
-		t.Fatalf("CreateFromTimestampMs(): %v", err)
+		t.Fatalf("FromTimestampMs(): %v", err)
 	}
 
-	assertEqual(t, "CreateFromTimestampMs(1).ISOString()", createdFromTimestampMs.ISOString(), "1970-01-01T00:00:00.001Z")
+	assertEqual(t, "FromTimestampMs(1).ISOString()", createdFromTimestampMs.ISOString(), "1970-01-01T00:00:00.001Z")
 
 	fromTimestampUTC, err := tempo.FromTimestampUTC(0)
 
@@ -475,21 +516,21 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 
 	assertEqual(t, "FromTimestampMsUTC(1).ISOString()", fromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
 
-	createdFromTimestampUTC, err := tempo.CreateFromTimestampUTC(0)
+	createdFromTimestampUTC, err := tempo.FromTimestampUTC(0)
 
 	if err != nil {
-		t.Fatalf("CreateFromTimestampUTC(): %v", err)
+		t.Fatalf("FromTimestampUTC(): %v", err)
 	}
 
-	assertEqual(t, "CreateFromTimestampUTC(0).ISOString()", createdFromTimestampUTC.ISOString(), "1970-01-01T00:00:00.000Z")
+	assertEqual(t, "FromTimestampUTC(0).ISOString()", createdFromTimestampUTC.ISOString(), "1970-01-01T00:00:00.000Z")
 
-	createdFromTimestampMsUTC, err := tempo.CreateFromTimestampMsUTC(1)
+	createdFromTimestampMsUTC, err := tempo.FromTimestampMsUTC(1)
 
 	if err != nil {
-		t.Fatalf("CreateFromTimestampMsUTC(): %v", err)
+		t.Fatalf("FromTimestampMsUTC(): %v", err)
 	}
 
-	assertEqual(t, "CreateFromTimestampMsUTC(1).ISOString()", createdFromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
+	assertEqual(t, "FromTimestampMsUTC(1).ISOString()", createdFromTimestampMsUTC.ISOString(), "1970-01-01T00:00:00.001Z")
 
 	assertEqual(t, "From()", instance.AddDays(2).From(instance), "in 2 days")
 	assertEqual(t, "Since()", instance.AddDays(2).Since(instance), "in 2 days")
