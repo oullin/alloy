@@ -12,6 +12,7 @@ func ParseDuration(input string) (Duration, error) {
 
 func Min(first Tempo, rest ...Tempo) Tempo {
 	result := first
+
 	for _, item := range rest {
 		if item.Before(result) {
 			result = item
@@ -23,6 +24,7 @@ func Min(first Tempo, rest ...Tempo) Tempo {
 
 func Max(first Tempo, rest ...Tempo) Tempo {
 	result := first
+
 	for _, item := range rest {
 		if item.After(result) {
 			result = item
@@ -53,6 +55,7 @@ func NewMutable(input Tempo) *MutableTempo {
 
 func ParseMutable(input string, options ...Option) (*MutableTempo, error) {
 	parsed, err := Parse(input, options...)
+
 	if err != nil {
 		return nil, err
 	}

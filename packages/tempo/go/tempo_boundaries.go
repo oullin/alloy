@@ -8,6 +8,7 @@ import (
 
 func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 	weekOptions := make([]temporal.WeekOptions, 0, len(options))
+
 	for _, option := range options {
 		weekOptions = append(weekOptions, temporal.WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
@@ -17,6 +18,7 @@ func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 
 func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
 	weekOptions := make([]temporal.WeekOptions, 0, len(options))
+
 	for _, option := range options {
 		weekOptions = append(weekOptions, temporal.WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
@@ -214,23 +216,27 @@ func (tempo Tempo) EndOfQuarter() Tempo {
 
 func (tempo Tempo) FirstOfMonth(weekdays ...time.Weekday) Tempo {
 	first := tempo.StartOf(Month)
+
 	if len(weekdays) == 0 {
 		return first
 	}
 
 	target := weekdays[0]
 	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
+
 	return first.AddDays(delta)
 }
 
 func (tempo Tempo) LastOfMonth(weekdays ...time.Weekday) Tempo {
 	last := tempo.EndOf(Month).StartOf(Day)
+
 	if len(weekdays) == 0 {
 		return last
 	}
 
 	target := weekdays[0]
 	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
+
 	return last.SubDays(delta)
 }
 
@@ -240,7 +246,9 @@ func (tempo Tempo) NthOfMonth(occurrence int, weekday time.Weekday) (Tempo, bool
 	}
 
 	month := tempo.Month()
+
 	var candidate Tempo
+
 	if occurrence > 0 {
 		candidate = tempo.FirstOfMonth(weekday).AddWeeks(occurrence - 1)
 	} else {
@@ -252,23 +260,27 @@ func (tempo Tempo) NthOfMonth(occurrence int, weekday time.Weekday) (Tempo, bool
 
 func (tempo Tempo) FirstOfQuarter(weekdays ...time.Weekday) Tempo {
 	first := tempo.StartOf(Quarter)
+
 	if len(weekdays) == 0 {
 		return first
 	}
 
 	target := weekdays[0]
 	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
+
 	return first.AddDays(delta)
 }
 
 func (tempo Tempo) LastOfQuarter(weekdays ...time.Weekday) Tempo {
 	last := tempo.EndOf(Quarter).StartOf(Day)
+
 	if len(weekdays) == 0 {
 		return last
 	}
 
 	target := weekdays[0]
 	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
+
 	return last.SubDays(delta)
 }
 
@@ -280,6 +292,7 @@ func (tempo Tempo) NthOfQuarter(occurrence int, weekday time.Weekday) (Tempo, bo
 	quarter := tempo.Quarter()
 	year := tempo.Year()
 	candidate := tempo.FirstOfQuarter(weekday).AddWeeks(occurrence - 1)
+
 	if occurrence < 0 {
 		candidate = tempo.LastOfQuarter(weekday).SubWeeks(absInt(occurrence) - 1)
 	}
@@ -321,23 +334,27 @@ func (tempo Tempo) EndOfMillennium() Tempo {
 
 func (tempo Tempo) FirstOfYear(weekdays ...time.Weekday) Tempo {
 	first := tempo.StartOf(Year)
+
 	if len(weekdays) == 0 {
 		return first
 	}
 
 	target := weekdays[0]
 	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
+
 	return first.AddDays(delta)
 }
 
 func (tempo Tempo) LastOfYear(weekdays ...time.Weekday) Tempo {
 	last := tempo.EndOf(Year).StartOf(Day)
+
 	if len(weekdays) == 0 {
 		return last
 	}
 
 	target := weekdays[0]
 	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
+
 	return last.SubDays(delta)
 }
 
@@ -348,6 +365,7 @@ func (tempo Tempo) NthOfYear(occurrence int, weekday time.Weekday) (Tempo, bool)
 
 	year := tempo.Year()
 	candidate := tempo.FirstOfYear(weekday).AddWeeks(occurrence - 1)
+
 	if occurrence < 0 {
 		candidate = tempo.LastOfYear(weekday).SubWeeks(absInt(occurrence) - 1)
 	}
@@ -357,6 +375,7 @@ func (tempo Tempo) NthOfYear(occurrence int, weekday time.Weekday) (Tempo, bool)
 
 func (tempo Tempo) Floor(unit Unit) Tempo {
 	fixed, ok := fixedUnitDuration(unit)
+
 	if !ok {
 		return tempo.StartOf(unit)
 	}
@@ -377,6 +396,7 @@ func (tempo Tempo) FloorWeek(options ...StartOfWeekOptions) Tempo {
 
 func (tempo Tempo) Ceil(unit Unit) Tempo {
 	floored := tempo.Floor(unit)
+
 	if floored.Same(tempo) {
 		return floored
 	}
@@ -390,6 +410,7 @@ func (tempo Tempo) CeilUnit(unit Unit) Tempo {
 
 func (tempo Tempo) CeilWeek(options ...StartOfWeekOptions) Tempo {
 	floored := tempo.FloorWeek(options...)
+
 	if floored.Same(tempo) {
 		return floored
 	}
@@ -399,10 +420,12 @@ func (tempo Tempo) CeilWeek(options ...StartOfWeekOptions) Tempo {
 
 func (tempo Tempo) Round(unit Unit) Tempo {
 	fixed, ok := fixedUnitDuration(unit)
+
 	if !ok {
 		start := tempo.StartOf(unit)
 		end := tempo.EndOf(unit)
 		midpoint := start.TimestampMs() + (end.TimestampMs()-start.TimestampMs())/2
+
 		if tempo.TimestampMs() >= midpoint {
 			return tempo.Ceil(unit)
 		}
@@ -421,6 +444,7 @@ func (tempo Tempo) RoundWeek(options ...StartOfWeekOptions) Tempo {
 	start := tempo.StartOfWeek(options...)
 	end := tempo.EndOfWeek(options...)
 	midpoint := start.TimestampMs() + (end.TimestampMs()-start.TimestampMs())/2
+
 	if tempo.TimestampMs() >= midpoint {
 		return tempo.CeilWeek(options...)
 	}
@@ -430,6 +454,7 @@ func (tempo Tempo) RoundWeek(options ...StartOfWeekOptions) Tempo {
 
 func (tempo Tempo) Next(weekday time.Weekday) Tempo {
 	delta := (int(weekday) - int(tempo.local().Weekday()) + 7) % 7
+
 	if delta == 0 {
 		delta = 7
 	}
@@ -439,6 +464,7 @@ func (tempo Tempo) Next(weekday time.Weekday) Tempo {
 
 func (tempo Tempo) Previous(weekday time.Weekday) Tempo {
 	delta := (int(tempo.local().Weekday()) - int(weekday) + 7) % 7
+
 	if delta == 0 {
 		delta = 7
 	}
@@ -464,6 +490,7 @@ func (tempo Tempo) PreviousOrSame(weekday time.Weekday) Tempo {
 
 func (tempo Tempo) NextWeekday() Tempo {
 	next := tempo.AddDays(1)
+
 	for next.IsWeekend() {
 		next = next.AddDays(1)
 	}
@@ -473,6 +500,7 @@ func (tempo Tempo) NextWeekday() Tempo {
 
 func (tempo Tempo) PreviousWeekday() Tempo {
 	previous := tempo.SubDays(1)
+
 	for previous.IsWeekend() {
 		previous = previous.SubDays(1)
 	}
@@ -482,6 +510,7 @@ func (tempo Tempo) PreviousWeekday() Tempo {
 
 func (tempo Tempo) NextWeekendDay() Tempo {
 	next := tempo.AddDays(1)
+
 	for next.IsWeekday() {
 		next = next.AddDays(1)
 	}
@@ -491,6 +520,7 @@ func (tempo Tempo) NextWeekendDay() Tempo {
 
 func (tempo Tempo) PreviousWeekendDay() Tempo {
 	previous := tempo.SubDays(1)
+
 	for previous.IsWeekday() {
 		previous = previous.SubDays(1)
 	}

@@ -2,6 +2,7 @@ package tempo
 
 func (mutable *MutableTempo) SetTimezone(name string) (*MutableTempo, error) {
 	next, err := mutable.Tempo().SetTimezone(name)
+
 	if err != nil {
 		return nil, err
 	}
@@ -11,6 +12,7 @@ func (mutable *MutableTempo) SetTimezone(name string) (*MutableTempo, error) {
 
 func (mutable *MutableTempo) SetTimezoneKeepLocal(name string) (*MutableTempo, error) {
 	next, err := mutable.Tempo().SetTimezoneKeepLocal(name)
+
 	if err != nil {
 		return nil, err
 	}
@@ -20,6 +22,7 @@ func (mutable *MutableTempo) SetTimezoneKeepLocal(name string) (*MutableTempo, e
 
 func (mutable *MutableTempo) ShiftTimezone(name string) (*MutableTempo, error) {
 	next, err := mutable.Tempo().ShiftTimezone(name)
+
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +40,7 @@ func (mutable *MutableTempo) Local() *MutableTempo {
 
 func (mutable *MutableTempo) Set(components Components) (*MutableTempo, error) {
 	next, err := mutable.Tempo().Set(components)
+
 	if err != nil {
 		return nil, err
 	}
@@ -46,6 +50,7 @@ func (mutable *MutableTempo) Set(components Components) (*MutableTempo, error) {
 
 func (mutable *MutableTempo) SetUnit(unit Unit, value int) (*MutableTempo, error) {
 	next, err := mutable.Tempo().SetUnit(unit, value)
+
 	if err != nil {
 		return nil, err
 	}
@@ -107,6 +112,7 @@ func (mutable *MutableTempo) SetTimeFrom(source Tempo) *MutableTempo {
 
 func (mutable *MutableTempo) SetTimeFromTimeString(input string) (*MutableTempo, error) {
 	next, err := mutable.Tempo().SetTimeFromTimeString(input)
+
 	if err != nil {
 		return nil, err
 	}

@@ -16,6 +16,7 @@ type Config struct {
 
 func NewConfig(settings ...Settings) *Config {
 	value := defaultSettings()
+
 	if len(settings) > 0 {
 		value = mergeSettings(value, settings[0])
 	}
@@ -56,6 +57,7 @@ func (config *Config) GetLastError() error {
 
 func defaultSettings() Settings {
 	settings := defaults.DefaultSettings()
+
 	return Settings{
 		FallbackLocale: settings.FallbackLocale,
 		HumanDiff: HumanDiffOptions{
@@ -83,24 +85,31 @@ func mergeSettings(current Settings, next Settings) Settings {
 	if next.Locale != "" {
 		current.Locale = next.Locale
 	}
+
 	if next.FallbackLocale != "" {
 		current.FallbackLocale = next.FallbackLocale
 	}
+
 	if next.HumanDiff != (HumanDiffOptions{}) {
 		current.HumanDiff = next.HumanDiff
 	}
+
 	if next.MidDayAt != 0 {
 		current.MidDayAt = next.MidDayAt
 	}
+
 	current.MonthsOverflow = next.MonthsOverflow
 	current.StrictMode = next.StrictMode
 	current.TestNow = next.TestNow
+
 	if next.Timezone != "" {
 		current.Timezone = next.Timezone
 	}
+
 	if next.WeekendDays != nil {
 		current.WeekendDays = append([]time.Weekday(nil), next.WeekendDays...)
 	}
+
 	current.YearsOverflow = next.YearsOverflow
 
 	return current

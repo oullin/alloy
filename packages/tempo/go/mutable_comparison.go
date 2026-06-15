@@ -366,6 +366,7 @@ func (mutable *MutableTempo) Birthday(other Tempo) bool {
 
 func (mutable *MutableTempo) Clamp(minimum Tempo, maximum Tempo) (*MutableTempo, error) {
 	next, err := mutable.Tempo().Clamp(minimum, maximum)
+
 	if err != nil {
 		return nil, err
 	}

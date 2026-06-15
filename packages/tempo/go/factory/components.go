@@ -17,11 +17,13 @@ type Components struct {
 
 func TimeFromComponents(components Components, location *time.Location) time.Time {
 	month := components.Month
+
 	if month == 0 {
 		month = 1
 	}
 
 	day := components.Day
+
 	if day == 0 {
 		day = 1
 	}
@@ -40,9 +42,11 @@ func TimeFromComponents(components Components, location *time.Location) time.Tim
 
 func ComponentsMatchTime(components Components, value time.Time, location *time.Location) bool {
 	local := value.In(location)
+
 	if components.Month == 0 {
 		components.Month = 1
 	}
+
 	if components.Day == 0 {
 		components.Day = 1
 	}

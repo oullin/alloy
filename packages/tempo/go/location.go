@@ -11,6 +11,7 @@ func loadLocation(name string) (*time.Location, error) {
 	}
 
 	location, err := time.LoadLocation(name)
+
 	if err != nil {
 		return nil, fmt.Errorf("invalid tempo time zone %q: %w", name, err)
 	}

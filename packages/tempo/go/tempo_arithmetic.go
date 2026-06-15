@@ -23,6 +23,7 @@ func (tempo Tempo) AddUnit(unit Unit, value int) Tempo {
 
 func (tempo Tempo) AddUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
 	next, err := tempo.Add(value, valueUnit).Clamp(tempo.StartOf(overflowUnit), tempo.EndOf(overflowUnit))
+
 	if err != nil {
 		return tempo
 	}
@@ -138,14 +139,17 @@ func (tempo Tempo) AddWeekdays(days int) Tempo {
 	}
 
 	direction := 1
+
 	if days < 0 {
 		direction = -1
 		days = -days
 	}
 
 	current := tempo.Clone()
+
 	for days > 0 {
 		current = current.AddDays(direction)
+
 		if current.IsWeekday() {
 			days--
 		}

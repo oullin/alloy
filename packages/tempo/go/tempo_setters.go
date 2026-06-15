@@ -7,6 +7,7 @@ import (
 
 func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
 	location, err := loadLocation(name)
+
 	if err != nil {
 		return Tempo{}, err
 	}
@@ -16,6 +17,7 @@ func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
 
 func (tempo Tempo) SetTimezoneKeepLocal(name string) (Tempo, error) {
 	location, err := loadLocation(name)
+
 	if err != nil {
 		return Tempo{}, err
 	}
@@ -65,32 +67,41 @@ func (tempo Tempo) fromObject(object Object, location *time.Location) Tempo {
 func (tempo Tempo) Set(components Components) (Tempo, error) {
 	object := tempo.ToObject()
 	location := tempo.location
+
 	if components.Timezone != "" {
 		nextLocation, err := loadLocation(components.Timezone)
+
 		if err != nil {
 			return Tempo{}, err
 		}
+
 		location = nextLocation
 	}
 
 	if components.Year != 0 {
 		object.Year = components.Year
 	}
+
 	if components.Month != 0 {
 		object.Month = components.Month
 	}
+
 	if components.Day != 0 {
 		object.Day = components.Day
 	}
+
 	if components.Hour != 0 {
 		object.Hour = components.Hour
 	}
+
 	if components.Minute != 0 {
 		object.Minute = components.Minute
 	}
+
 	if components.Second != 0 {
 		object.Second = components.Second
 	}
+
 	if components.Millisecond != 0 {
 		object.Millisecond = components.Millisecond
 	}
@@ -222,6 +233,7 @@ func (tempo Tempo) SetTimeFrom(source Tempo) Tempo {
 
 func (tempo Tempo) SetTimeFromTimeString(input string) (Tempo, error) {
 	parsed, err := Parse(tempo.DateString()+"T"+input, WithTimezone(tempo.Timezone()))
+
 	if err != nil {
 		return Tempo{}, err
 	}
@@ -248,6 +260,7 @@ func (tempo Tempo) SetISODate(year int, week int, day int) Tempo {
 
 func (tempo Tempo) SetISOWeek(week int, days ...int) Tempo {
 	day := tempo.ISOWeekday()
+
 	if len(days) > 0 {
 		day = days[0]
 	}
@@ -257,6 +270,7 @@ func (tempo Tempo) SetISOWeek(week int, days ...int) Tempo {
 
 func (tempo Tempo) SetISOWeekYear(year int, days ...int) Tempo {
 	day := tempo.ISOWeekday()
+
 	if len(days) > 0 {
 		day = days[0]
 	}
@@ -282,11 +296,13 @@ func (tempo Tempo) SetTimestampFrom(timestamp int64) Tempo {
 
 func (tempo Tempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
 	next, err := tempo.SetUnit(valueUnit, value)
+
 	if err != nil {
 		return tempo
 	}
 
 	clamped, err := next.Clamp(tempo.StartOf(overflowUnit), tempo.EndOf(overflowUnit))
+
 	if err != nil {
 		return tempo
 	}

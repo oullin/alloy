@@ -28,16 +28,19 @@ func Add(value time.Time, location *time.Location, amount int, unit duration.Uni
 		if monthsOverflow {
 			return addDate(value, location, 0, amount, 0)
 		}
+
 		return AddMonthsNoOverflow(value, location, amount)
 	case duration.Quarter:
 		if monthsOverflow {
 			return addDate(value, location, 0, amount*3, 0)
 		}
+
 		return AddMonthsNoOverflow(value, location, amount*3)
 	case duration.Year:
 		if yearsOverflow {
 			return addDate(value, location, amount, 0, 0)
 		}
+
 		return AddYearsNoOverflow(value, location, amount)
 	default:
 		return value.UTC()
@@ -96,15 +99,19 @@ func StartOf(value time.Time, location *time.Location, unit duration.Unit, optio
 		return time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, location).UTC()
 	case duration.Week:
 		weekStartsOn := time.Monday
+
 		if len(options) > 0 {
 			weekStartsOn = options[0].WeekStartsOn
 		}
+
 		delta := (int(local.Weekday()) - int(weekStartsOn) + 7) % 7
+
 		return Add(StartOf(value, location, duration.Day), location, -delta, duration.Day, true, true)
 	case duration.Month:
 		return time.Date(local.Year(), local.Month(), 1, 0, 0, 0, 0, location).UTC()
 	case duration.Quarter:
 		month := time.Month(((int(local.Month())-1)/3)*3 + 1)
+
 		return time.Date(local.Year(), month, 1, 0, 0, 0, 0, location).UTC()
 	case duration.Year:
 		return time.Date(local.Year(), time.January, 1, 0, 0, 0, 0, location).UTC()

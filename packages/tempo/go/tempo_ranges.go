@@ -13,10 +13,12 @@ func (tempo Tempo) IntervalUntil(end Tempo) Interval {
 func (tempo Tempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
 	step := Duration{Days: 1}
 	includeEnd := true
+
 	if len(options) > 0 {
 		if options[0].Step != (Duration{}) {
 			step = options[0].Step
 		}
+
 		if options[0].ExcludeEnd {
 			includeEnd = false
 		} else if options[0].IncludeEnd {
@@ -57,6 +59,7 @@ func (tempo Tempo) fromLocal(local time.Time) Tempo {
 
 func (tempo Tempo) compareValue(units ...Unit) int64 {
 	unit := Millisecond
+
 	if len(units) > 0 {
 		unit = units[0]
 	}
@@ -70,6 +73,7 @@ func (tempo Tempo) compareValue(units ...Unit) int64 {
 
 func (tempo Tempo) diffFilteredDays(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
 	opts := DiffOptions{}
+
 	if len(options) > 0 {
 		opts = options[0]
 	}
@@ -77,6 +81,7 @@ func (tempo Tempo) diffFilteredDays(other Tempo, predicate func(Tempo) bool, opt
 	sign := 1
 	start := other.StartOf(Day)
 	end := tempo.StartOf(Day)
+
 	if tempo.Before(other, Day) {
 		sign = -1
 		start = tempo.StartOf(Day)
@@ -85,8 +90,10 @@ func (tempo Tempo) diffFilteredDays(other Tempo, predicate func(Tempo) bool, opt
 
 	current := start
 	count := 0
+
 	for current.Before(end, Day) {
 		current = current.AddDays(1)
+
 		if current.SameOrBefore(end, Day) && predicate(current) {
 			count++
 		}

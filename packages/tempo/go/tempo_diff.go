@@ -9,12 +9,14 @@ import (
 
 func (tempo Tempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
 	opts := DiffOptions{}
+
 	if len(options) > 0 {
 		opts = options[0]
 	}
 
 	duration := tempo.value.Sub(other.value)
 	value := 0.0
+
 	switch normalizeUnit(unit) {
 	case Millisecond:
 		value = float64(duration.Milliseconds())
@@ -121,6 +123,7 @@ func (tempo Tempo) DiffFiltered(other Tempo, predicate func(Tempo) bool, options
 
 func (tempo Tempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
 	opts := DiffOptions{}
+
 	if len(options) > 0 {
 		opts = options[0]
 	}
@@ -128,6 +131,7 @@ func (tempo Tempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, 
 	sign := 1
 	start := other.StartOfHour()
 	end := tempo.StartOfHour()
+
 	if tempo.Before(other, Hour) {
 		sign = -1
 		start = tempo.StartOfHour()
@@ -136,8 +140,10 @@ func (tempo Tempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, 
 
 	count := 0
 	current := start
+
 	for current.Before(end, Hour) {
 		current = current.AddHours(1)
+
 		if current.SameOrBefore(end, Hour) && predicate(current) {
 			count++
 		}
@@ -161,6 +167,7 @@ func (tempo Tempo) SecondsUntilEndOfDay() int {
 func (tempo Tempo) Calendar(reference Tempo, formats ...map[string]string) string {
 	diff := tempo.StartOfDay().DiffInDays(reference.StartOfDay())
 	key := "sameElse"
+
 	switch {
 	case diff == 0:
 		key = "sameDay"
@@ -183,6 +190,7 @@ func (tempo Tempo) Calendar(reference Tempo, formats ...map[string]string) strin
 		"sameElse": "YYYY-MM-DD",
 	}
 	pattern := defaults[key]
+
 	if len(formats) > 0 {
 		if custom, ok := formats[0][key]; ok {
 			pattern = custom
@@ -194,22 +202,26 @@ func (tempo Tempo) Calendar(reference Tempo, formats ...map[string]string) strin
 
 func (tempo Tempo) DiffForHumans(other Tempo, options ...HumanDiffOptions) string {
 	opts := defaultConfig.Settings.HumanDiff
+
 	if len(options) > 0 {
 		opts = options[0]
 	}
 
 	milliseconds := tempo.TimestampMs() - other.TimestampMs()
 	unit := opts.Unit
+
 	if unit == "" {
 		unit = bestRelativeUnit(milliseconds)
 	}
 
 	value := int(math.Round(float64(milliseconds) / float64(unitDuration(unit).Milliseconds())))
+
 	if opts.Absolute && value < 0 {
 		value = -value
 	}
 
 	unitName := string(normalizeUnit(unit))
+
 	if value == 1 || value == -1 {
 		unitName = strings.TrimSuffix(unitName, "s")
 	} else {
@@ -249,6 +261,7 @@ func (tempo Tempo) Ago(options ...HumanDiffOptions) string {
 
 func (tempo Tempo) Timespan(other Tempo, options ...HumanDiffOptions) string {
 	opts := HumanDiffOptions{Absolute: true}
+
 	if len(options) > 0 {
 		opts = options[0]
 		opts.Absolute = true

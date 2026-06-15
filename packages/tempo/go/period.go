@@ -13,13 +13,16 @@ func (period Period) Values() ([]Tempo, error) {
 
 	for {
 		include := current.Before(period.End)
+
 		if forward {
 			include = current.Before(period.End)
+
 			if period.IncludeEnd {
 				include = current.SameOrBefore(period.End)
 			}
 		} else {
 			include = current.After(period.End)
+
 			if period.IncludeEnd {
 				include = current.SameOrAfter(period.End)
 			}
@@ -31,12 +34,15 @@ func (period Period) Values() ([]Tempo, error) {
 
 		values = append(values, current)
 		next := current.AddDuration(period.Step)
+
 		if next.Same(current) {
 			return nil, errors.New("tempo period step must advance the period")
 		}
+
 		if (forward && next.Before(current)) || (!forward && next.After(current)) {
 			return nil, errors.New("tempo period step must advance toward the end")
 		}
+
 		current = next
 	}
 
@@ -45,9 +51,11 @@ func (period Period) Values() ([]Tempo, error) {
 
 func (period Period) First() (Tempo, bool, error) {
 	values, err := period.Values()
+
 	if err != nil {
 		return Tempo{}, false, err
 	}
+
 	if len(values) == 0 {
 		return Tempo{}, false, nil
 	}
@@ -57,9 +65,11 @@ func (period Period) First() (Tempo, bool, error) {
 
 func (period Period) Last() (Tempo, bool, error) {
 	values, err := period.Values()
+
 	if err != nil {
 		return Tempo{}, false, err
 	}
+
 	if len(values) == 0 {
 		return Tempo{}, false, nil
 	}
@@ -69,6 +79,7 @@ func (period Period) Last() (Tempo, bool, error) {
 
 func (period Period) Count() (int, error) {
 	values, err := period.Values()
+
 	if err != nil {
 		return 0, err
 	}
@@ -78,6 +89,7 @@ func (period Period) Count() (int, error) {
 
 func (period Period) IsEmpty() (bool, error) {
 	count, err := period.Count()
+
 	if err != nil {
 		return false, err
 	}
@@ -95,11 +107,13 @@ func (period Period) Contains(input Tempo) bool {
 
 func (period Period) Filter(predicate func(Tempo, int) bool) ([]Tempo, error) {
 	values, err := period.Values()
+
 	if err != nil {
 		return nil, err
 	}
 
 	filtered := make([]Tempo, 0, len(values))
+
 	for index, value := range values {
 		if predicate(value, index) {
 			filtered = append(filtered, value)
@@ -111,11 +125,13 @@ func (period Period) Filter(predicate func(Tempo, int) bool) ([]Tempo, error) {
 
 func (period Period) Map(mapper func(Tempo, int) Tempo) ([]Tempo, error) {
 	values, err := period.Values()
+
 	if err != nil {
 		return nil, err
 	}
 
 	mapped := make([]Tempo, 0, len(values))
+
 	for index, value := range values {
 		mapped = append(mapped, mapper(value, index))
 	}
@@ -125,6 +141,7 @@ func (period Period) Map(mapper func(Tempo, int) Tempo) ([]Tempo, error) {
 
 func (period Period) Every(step Duration) Period {
 	period.Step = step
+
 	return period
 }
 

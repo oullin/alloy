@@ -68,6 +68,7 @@ func (interval Interval) Abs() Interval {
 
 func (interval Interval) Contains(input Tempo, inclusivity ...string) bool {
 	mode := "[]"
+
 	if len(inclusivity) > 0 {
 		mode = inclusivity[0]
 	}
@@ -81,6 +82,7 @@ func (interval Interval) Overlaps(other Interval) bool {
 
 func (interval Interval) Intersection(other Interval) (Interval, bool) {
 	intersection, ok := interval.span().Intersection(other.span())
+
 	if !ok {
 		return Interval{}, false
 	}

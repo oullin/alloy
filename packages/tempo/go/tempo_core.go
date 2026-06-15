@@ -26,6 +26,7 @@ func (tempo Tempo) Runtime() Runtime {
 
 func (tempo Tempo) WithRuntime(runtime Runtime) Tempo {
 	tempo.runtime = runtime
+
 	return tempo
 }
 
@@ -63,6 +64,7 @@ func (tempo Tempo) NowWithSameTz() Tempo {
 
 func (tempo Tempo) Modify(modifier string) (Tempo, error) {
 	value := strings.TrimSpace(modifier)
+
 	if value == "" {
 		return Tempo{}, errors.New("Tempo modifier cannot be empty")
 	}
@@ -72,8 +74,10 @@ func (tempo Tempo) Modify(modifier string) (Tempo, error) {
 	}
 
 	lower := strings.ToLower(value)
+
 	if match := modifierPattern.FindStringSubmatch(lower); match != nil {
 		amount, err := strconv.ParseFloat(match[1], 64)
+
 		if err != nil {
 			return Tempo{}, err
 		}
@@ -83,6 +87,7 @@ func (tempo Tempo) Modify(modifier string) (Tempo, error) {
 
 	if match := movePattern.FindStringSubmatch(lower); match != nil {
 		amount := 1
+
 		if match[1] != "next" {
 			amount = -1
 		}
@@ -134,6 +139,7 @@ func (tempo Tempo) GetTimestampMs() int64 {
 
 func (tempo Tempo) GetPreciseTimestamp(precisions ...int) float64 {
 	precision := 6
+
 	if len(precisions) > 0 {
 		precision = precisions[0]
 	}
@@ -175,6 +181,7 @@ func (tempo Tempo) SetWeekday(weekday time.Weekday) Tempo {
 
 func (tempo Tempo) ISOWeekday() int {
 	weekday := tempo.local().Weekday()
+
 	if weekday == time.Sunday {
 		return 7
 	}
@@ -184,21 +191,25 @@ func (tempo Tempo) ISOWeekday() int {
 
 func (tempo Tempo) ISOWeek() (int, int) {
 	year, week := tempo.local().ISOWeek()
+
 	return year, week
 }
 
 func (tempo Tempo) ISOWeekYear() int {
 	year, _ := tempo.ISOWeek()
+
 	return year
 }
 
 func (tempo Tempo) ISOWeekNumber() int {
 	_, week := tempo.ISOWeek()
+
 	return week
 }
 
 func (tempo Tempo) WeeksInISOYear() int {
 	_, week := time.Date(tempo.ISOWeekYear(), time.December, 28, 0, 0, 0, 0, tempo.location).ISOWeek()
+
 	return week
 }
 
@@ -231,6 +242,7 @@ func (tempo Tempo) Millisecond() int {
 func (tempo Tempo) Get(field string) (any, bool) {
 	values := tempo.ToMap()
 	value, ok := values[field]
+
 	if ok {
 		return value, true
 	}
@@ -247,11 +259,13 @@ func (tempo Tempo) Get(field string) (any, bool) {
 
 func (tempo Tempo) GetPaddedUnit(field string, length int) (string, bool) {
 	value, ok := tempo.Get(field)
+
 	if !ok {
 		return "", false
 	}
 
 	number, ok := value.(int)
+
 	if !ok {
 		return "", false
 	}
@@ -261,6 +275,7 @@ func (tempo Tempo) GetPaddedUnit(field string, length int) (string, bool) {
 
 func (tempo Tempo) OffsetMinutes() int {
 	_, offset := tempo.local().Zone()
+
 	return offset / 60
 }
 
@@ -278,27 +293,29 @@ func (tempo Tempo) UTCOffset() int {
 
 func (tempo Tempo) ZoneName() string {
 	name, _ := tempo.local().Zone()
+
 	return name
 }
 
 func (tempo Tempo) MonthName() string {
-	return monthNames[tempo.Month()-1]
+	return calendarMonthName(tempo.Month())
 }
 
 func (tempo Tempo) ShortMonthName() string {
-	return shortMonthNames[tempo.Month()-1]
+	return calendarShortMonthName(tempo.Month())
 }
 
 func (tempo Tempo) DayName() string {
-	return dayNames[int(tempo.local().Weekday())]
+	return calendarDayName(int(tempo.local().Weekday()))
 }
 
 func (tempo Tempo) ShortDayName() string {
-	return shortDayNames[int(tempo.local().Weekday())]
+	return calendarShortDayName(int(tempo.local().Weekday()))
 }
 
 func (tempo Tempo) MinDayName() string {
 	name := tempo.ShortDayName()
+
 	if len(name) < 2 {
 		return name
 	}
@@ -362,6 +379,7 @@ func (tempo Tempo) IsDST() bool {
 
 func (tempo Tempo) IsLeapYear() bool {
 	year := tempo.Year()
+
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
 
@@ -391,6 +409,7 @@ func (tempo Tempo) DaysInMonth() int {
 
 func (tempo Tempo) IsWeekend() bool {
 	weekday := tempo.local().Weekday()
+
 	for _, weekendDay := range defaultConfig.Settings.WeekendDays {
 		if weekday == weekendDay {
 			return true

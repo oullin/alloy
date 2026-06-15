@@ -112,12 +112,14 @@ func (mutable *MutableTempo) MarshalJSON() ([]byte, error) {
 
 func (mutable *MutableTempo) UnmarshalJSON(data []byte) error {
 	tempo := mutable.Tempo()
+
 	if err := tempo.UnmarshalJSON(data); err != nil {
 		return err
 	}
 
 	mutable.value = tempo.value
 	mutable.location = tempo.location
+
 	return nil
 }
 

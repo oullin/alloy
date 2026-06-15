@@ -8,16 +8,17 @@ type Runtime struct {
 	translator     Translator
 }
 
+type RuntimeOption func(*Runtime)
+
 func NewRuntime(options ...RuntimeOption) Runtime {
 	runtime := Runtime{locale: "en-US", fallbackLocale: "en-US"}
+
 	for _, option := range options {
 		option(&runtime)
 	}
 
 	return runtime
 }
-
-type RuntimeOption func(*Runtime)
 
 func RuntimeLocale(locale string) RuntimeOption {
 	return func(runtime *Runtime) {
@@ -43,6 +44,7 @@ func RuntimeTranslator(translator Translator) RuntimeOption {
 
 func (runtime Runtime) With(options ...RuntimeOption) Runtime {
 	next := runtime
+
 	for _, option := range options {
 		option(&next)
 	}
@@ -83,6 +85,7 @@ func (runtime Runtime) Translate(key string, replacements map[string]string) (st
 			return value, true
 		}
 	}
+
 	if value, ok := runtime.Message(key); ok {
 		if message, ok := value.(string); ok {
 			return replaceTranslationTokens(message, replacements), true

@@ -9,11 +9,13 @@ import (
 
 func NewFactory(options ...Option) (Factory, error) {
 	cfg, err := applyOptions(options...)
+
 	if err != nil {
 		return Factory{}, err
 	}
 
 	var now *time.Time
+
 	if cfg.app != nil && cfg.app.Settings.TestNow != nil {
 		value := cfg.app.Settings.TestNow.value
 		now = &value
@@ -24,6 +26,7 @@ func NewFactory(options ...Option) (Factory, error) {
 
 func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
 	cfg := config{location: input.location, runtime: input.Runtime()}
+
 	for _, option := range options {
 		if err := option(&cfg); err != nil {
 			return Factory{}, err
@@ -31,6 +34,7 @@ func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
 	}
 
 	now := input.value
+
 	return Factory{clock: factorypkg.NewClock(&now), location: cfg.location, runtime: cfg.runtime}, nil
 }
 
@@ -51,11 +55,13 @@ func (factory Factory) Runtime() Runtime {
 
 func (factory Factory) WithRuntime(runtime Runtime) Factory {
 	factory.runtime = runtime
+
 	return factory
 }
 
 func (factory Factory) WithTranslator(translator Translator) Factory {
 	factory.runtime = factory.Runtime().With(RuntimeTranslator(translator))
+
 	return factory
 }
 
@@ -89,11 +95,13 @@ func (factory Factory) Parse(input string) (Tempo, error) {
 
 func (factory Factory) TryParse(input string) (Tempo, bool) {
 	tempo, err := factory.Parse(input)
+
 	return tempo, err == nil
 }
 
 func (factory Factory) CanParse(input string) bool {
 	_, ok := factory.TryParse(input)
+
 	return ok
 }
 
@@ -107,11 +115,13 @@ func (factory Factory) CreateFromFormat(input string, pattern string) (Tempo, er
 
 func (factory Factory) TryFromFormat(input string, pattern string) (Tempo, bool) {
 	tempo, err := factory.FromFormat(input, pattern)
+
 	return tempo, err == nil
 }
 
 func (factory Factory) HasFormat(input string, pattern string) bool {
 	_, ok := factory.TryFromFormat(input, pattern)
+
 	return ok
 }
 
@@ -121,11 +131,14 @@ func (factory Factory) CanBeCreatedFromFormat(input string, pattern string) bool
 
 func (factory Factory) Create(components Components) (Tempo, error) {
 	location := factory.location
+
 	if components.Timezone != "" {
 		nextLocation, err := loadLocation(components.Timezone)
+
 		if err != nil {
 			return Tempo{}, err
 		}
+
 		location = nextLocation
 	}
 
@@ -134,15 +147,19 @@ func (factory Factory) Create(components Components) (Tempo, error) {
 
 func (factory Factory) CreateSafe(components Components) (Tempo, error) {
 	location := factory.location
+
 	if components.Timezone != "" {
 		nextLocation, err := loadLocation(components.Timezone)
+
 		if err != nil {
 			return Tempo{}, err
 		}
+
 		location = nextLocation
 	}
 
 	value := timeFromComponents(components, location)
+
 	if !componentsMatchTime(components, value, location) {
 		return Tempo{}, errors.New("invalid Tempo local date/time components")
 	}

@@ -10,6 +10,7 @@ func (tempo Tempo) Format(pattern string) string {
 	local := tempo.local()
 	offset := tempo.OffsetMinutes()
 	hour12 := local.Hour() % 12
+
 	if hour12 == 0 {
 		hour12 = 12
 	}
@@ -47,24 +48,29 @@ func (tempo Tempo) Format(pattern string) string {
 	}
 
 	tokens := []string{"YYYY", "MMMM", "dddd", "MMM", "ddd", "SSS", "Do", "YY", "ZZ", "MM", "DD", "HH", "hh", "mm", "ss", "Z", "X", "x", "Y", "M", "D", "H", "h", "m", "s", "A", "a", "d"}
+
 	var builder strings.Builder
 
 	for index := 0; index < len(pattern); {
 		if pattern[index] == '[' {
 			end := strings.IndexByte(pattern[index:], ']')
+
 			if end >= 0 {
 				builder.WriteString(pattern[index+1 : index+end])
 				index += end + 1
+
 				continue
 			}
 		}
 
 		matched := false
+
 		for _, token := range tokens {
 			if strings.HasPrefix(pattern[index:], token) {
 				builder.WriteString(values[token])
 				index += len(token)
 				matched = true
+
 				break
 			}
 		}
@@ -105,9 +111,11 @@ func (tempo Tempo) Ordinal(unit Unit) string {
 
 func (tempo Tempo) Meridiem(lowercase bool) string {
 	value := "AM"
+
 	if tempo.Hour() >= 12 {
 		value = "PM"
 	}
+
 	if lowercase {
 		return strings.ToLower(value)
 	}
@@ -141,6 +149,7 @@ func (tempo Tempo) DateString() string {
 
 func (tempo Tempo) TimeString(precision ...TimeStringPrecision) string {
 	base := tempo.Format("HH:mm:ss")
+
 	if selectedPrecision(precision) == MillisecondPrecision {
 		return base + "." + pad(tempo.Millisecond(), 3)
 	}
@@ -258,22 +267,26 @@ func (tempo Tempo) MarshalJSON() ([]byte, error) {
 
 func (tempo *Tempo) UnmarshalJSON(data []byte) error {
 	input, err := strconv.Unquote(string(data))
+
 	if err != nil {
 		return err
 	}
 
 	location := tempo.location
+
 	if location == nil {
 		location = defaultLocation()
 	}
 
 	parsed, err := parseInLocation(input, location)
+
 	if err != nil {
 		return err
 	}
 
 	tempo.value = parsed.UTC()
 	tempo.location = location
+
 	return nil
 }
 
@@ -313,6 +326,7 @@ func (tempo Tempo) ToMap() map[string]interface{} {
 
 func (tempo Tempo) ToArray() [7]int {
 	object := tempo.ToObject()
+
 	return [7]int{
 		object.Year,
 		object.Month,

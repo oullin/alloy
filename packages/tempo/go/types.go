@@ -9,27 +9,7 @@ import (
 
 type Unit = duration.Unit
 
-const (
-	Millisecond = duration.Millisecond
-	Second      = duration.Second
-	Minute      = duration.Minute
-	Hour        = duration.Hour
-	Day         = duration.Day
-	Week        = duration.Week
-	Month       = duration.Month
-	Quarter     = duration.Quarter
-	Year        = duration.Year
-	Decade      = duration.Decade
-	Century     = duration.Century
-	Millennium  = duration.Millennium
-)
-
 type TimeStringPrecision string
-
-const (
-	SecondPrecision      TimeStringPrecision = "second"
-	MillisecondPrecision TimeStringPrecision = "millisecond"
-)
 
 type Components = factory.Components
 
@@ -128,3 +108,23 @@ type Factory struct {
 	location *time.Location
 	runtime  Runtime
 }
+
+const (
+	Millisecond = duration.Millisecond
+	Second      = duration.Second
+	Minute      = duration.Minute
+	Hour        = duration.Hour
+	Day         = duration.Day
+	Week        = duration.Week
+	Month       = duration.Month
+	Quarter     = duration.Quarter
+	Year        = duration.Year
+	Decade      = duration.Decade
+	Century     = duration.Century
+	Millennium  = duration.Millennium
+)
+
+const (
+	SecondPrecision      TimeStringPrecision = "second"
+	MillisecondPrecision TimeStringPrecision = "millisecond"
+)

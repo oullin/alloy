@@ -28,6 +28,7 @@ func (mutable *MutableTempo) NowWithSameTz() *MutableTempo {
 
 func (mutable *MutableTempo) Modify(modifier string) (*MutableTempo, error) {
 	next, err := mutable.Tempo().Modify(modifier)
+
 	if err != nil {
 		return nil, err
 	}

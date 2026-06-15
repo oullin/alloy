@@ -30,5 +30,6 @@ func (mutable *MutableTempo) replace(next Tempo) *MutableTempo {
 	mutable.value = state.Value
 	mutable.location = state.Location
 	mutable.runtime = state.Runtime
+
 	return mutable
 }

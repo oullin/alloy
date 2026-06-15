@@ -11,6 +11,7 @@ func applyOptions(options ...Option) (config, error) {
 			RuntimeFallbackLocale(defaultConfig.Settings.FallbackLocale),
 		),
 	}
+
 	for _, option := range options {
 		if err := option(&cfg); err != nil {
 			return config{}, err
@@ -24,6 +25,7 @@ func newTempo(value time.Time, location *time.Location, runtime Runtime) Tempo {
 	if location == nil {
 		location = defaultLocation()
 	}
+
 	if runtime.Locale() == "" {
 		runtime = NewRuntime(
 			RuntimeLocale(defaultConfig.Settings.Locale),

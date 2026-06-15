@@ -147,6 +147,7 @@ func (tempo Tempo) Closest(first Tempo, rest ...Tempo) Tempo {
 
 	for _, item := range rest {
 		distance := absInt64(item.TimestampMs() - tempo.TimestampMs())
+
 		if distance < bestDistance {
 			result = item
 			bestDistance = distance
@@ -162,6 +163,7 @@ func (tempo Tempo) Farthest(first Tempo, rest ...Tempo) Tempo {
 
 	for _, item := range rest {
 		distance := absInt64(item.TimestampMs() - tempo.TimestampMs())
+
 		if distance > bestDistance {
 			result = item
 			bestDistance = distance
@@ -201,16 +203,19 @@ func (tempo Tempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
 	}
 
 	mode := "[]"
+
 	if len(inclusivity) > 0 {
 		mode = inclusivity[0]
 	}
 
 	afterStart := tempo.After(start)
+
 	if strings.HasPrefix(mode, "[") {
 		afterStart = tempo.SameOrAfter(start)
 	}
 
 	beforeEnd := tempo.Before(end)
+
 	if strings.HasSuffix(mode, "]") {
 		beforeEnd = tempo.SameOrBefore(end)
 	}

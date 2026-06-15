@@ -24,6 +24,7 @@ func absInt64(value int64) int64 {
 
 func pad(value int, length int) string {
 	result := strconv.Itoa(value)
+
 	if value < 0 {
 		result = strconv.Itoa(-value)
 	}
@@ -78,6 +79,7 @@ func monthNumberFromName(input string) (int, bool) {
 
 func ordinal(value int) string {
 	remainder := value % 100
+
 	if remainder >= 11 && remainder <= 13 {
 		return strconv.Itoa(value) + "th"
 	}
@@ -96,6 +98,7 @@ func ordinal(value int) string {
 
 func formatOffset(offsetMinutes int, separator string) string {
 	sign := "+"
+
 	if offsetMinutes < 0 {
 		sign = "-"
 		offsetMinutes = -offsetMinutes
@@ -110,11 +113,13 @@ func parseOffsetMinutes(input string) (int, error) {
 	}
 
 	clean := strings.ReplaceAll(input, ":", "")
+
 	if len(clean) != 5 {
 		return 0, fmt.Errorf("invalid tempo offset: %s", input)
 	}
 
 	sign := 1
+
 	if clean[0] == '-' {
 		sign = -1
 	} else if clean[0] != '+' {
@@ -122,10 +127,13 @@ func parseOffsetMinutes(input string) (int, error) {
 	}
 
 	hours, err := strconv.Atoi(clean[1:3])
+
 	if err != nil {
 		return 0, fmt.Errorf("invalid tempo offset: %s", input)
 	}
+
 	minutes, err := strconv.Atoi(clean[3:5])
+
 	if err != nil {
 		return 0, fmt.Errorf("invalid tempo offset: %s", input)
 	}
@@ -145,6 +153,7 @@ func firstPresent(values map[string]string, keys ...string) string {
 
 func mustInt(input string) int {
 	value, _ := strconv.Atoi(input)
+
 	return value
 }
 

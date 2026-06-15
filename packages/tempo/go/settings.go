@@ -5,27 +5,35 @@ import "time"
 func SettingsState(settings ...Settings) Settings {
 	if len(settings) > 0 {
 		next := settings[0]
+
 		if next.Locale != "" {
 			defaultConfig.Settings.Locale = next.Locale
 		}
+
 		if next.FallbackLocale != "" {
 			defaultConfig.Settings.FallbackLocale = next.FallbackLocale
 		}
+
 		if next.HumanDiff != (HumanDiffOptions{}) {
 			defaultConfig.Settings.HumanDiff = next.HumanDiff
 		}
+
 		if next.MidDayAt != 0 {
 			defaultConfig.Settings.MidDayAt = next.MidDayAt
 		}
+
 		defaultConfig.Settings.MonthsOverflow = next.MonthsOverflow
 		defaultConfig.Settings.StrictMode = next.StrictMode
 		defaultConfig.Settings.TestNow = next.TestNow
+
 		if next.Timezone != "" {
 			defaultConfig.Settings.Timezone = next.Timezone
 		}
+
 		if next.WeekendDays != nil {
 			defaultConfig.Settings.WeekendDays = append([]time.Weekday(nil), next.WeekendDays...)
 		}
+
 		defaultConfig.Settings.YearsOverflow = next.YearsOverflow
 	}
 

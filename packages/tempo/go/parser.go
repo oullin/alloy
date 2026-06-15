@@ -1,8 +1,10 @@
 package tempo
 
-import "time"
+import (
+	"time"
 
-import dateparser "github.com/oullin/alloy/tempo/parser"
+	dateparser "github.com/oullin/alloy/tempo/parser"
+)
 
 type Parser struct {
 	location *time.Location
@@ -11,6 +13,7 @@ type Parser struct {
 
 func NewParser(options ...Option) (Parser, error) {
 	cfg, err := applyOptions(options...)
+
 	if err != nil {
 		return Parser{}, err
 	}
@@ -24,6 +27,7 @@ func newParser(location *time.Location, runtime Runtime) Parser {
 
 func (parser Parser) Parse(input string) (Tempo, error) {
 	parsed, err := dateparser.New(parser.location).Parse(input)
+
 	if err != nil {
 		return Tempo{}, err
 	}
@@ -33,6 +37,7 @@ func (parser Parser) Parse(input string) (Tempo, error) {
 
 func (parser Parser) FromFormat(input string, pattern string) (Tempo, error) {
 	parsed, err := dateparser.New(parser.location).FromFormat(input, pattern)
+
 	if err != nil {
 		return Tempo{}, err
 	}
