@@ -1,9 +1,19 @@
 package tempo
 
 import (
-	"errors"
-	"strings"
+	"github.com/oullin/alloy/tempo/comparison"
+	"github.com/oullin/alloy/tempo/core"
 )
+
+func states(values []Tempo) []core.State {
+	result := make([]core.State, 0, len(values))
+
+	for _, value := range values {
+		result = append(result, value.State())
+	}
+
+	return result
+}
 
 func (tempo Tempo) IsImmutable() bool {
 	return true
@@ -14,15 +24,15 @@ func (tempo Tempo) IsMutable() bool {
 }
 
 func (tempo Tempo) Before(other Tempo, units ...Unit) bool {
-	return tempo.compareValue(units...) < other.compareValue(units...)
+	return comparison.Before(tempo, other.State(), units...)
 }
 
 func (tempo Tempo) After(other Tempo, units ...Unit) bool {
-	return tempo.compareValue(units...) > other.compareValue(units...)
+	return comparison.After(tempo, other.State(), units...)
 }
 
 func (tempo Tempo) Same(other Tempo, units ...Unit) bool {
-	return tempo.compareValue(units...) == other.compareValue(units...)
+	return comparison.Same(tempo, other.State(), units...)
 }
 
 func (tempo Tempo) Is(other Tempo, units ...Unit) bool {
@@ -122,63 +132,27 @@ func (tempo Tempo) Birthday(other Tempo) bool {
 }
 
 func (tempo Tempo) Clamp(minimum Tempo, maximum Tempo) (Tempo, error) {
-	if minimum.After(maximum) {
-		return Tempo{}, errors.New("tempo clamp minimum must be before maximum")
-	}
-
-	if tempo.Before(minimum) {
-		return minimum, nil
-	}
-
-	if tempo.After(maximum) {
-		return maximum, nil
-	}
-
-	return tempo.Clone(), nil
+	return comparison.Clamp(tempo, minimum.State(), maximum.State())
 }
 
 func (tempo Tempo) Average(other Tempo) Tempo {
-	return Average(tempo, other)
+	return comparison.Average(tempo, other.State())
 }
 
 func (tempo Tempo) Closest(first Tempo, rest ...Tempo) Tempo {
-	result := first
-	bestDistance := absInt64(first.TimestampMs() - tempo.TimestampMs())
-
-	for _, item := range rest {
-		distance := absInt64(item.TimestampMs() - tempo.TimestampMs())
-
-		if distance < bestDistance {
-			result = item
-			bestDistance = distance
-		}
-	}
-
-	return result
+	return comparison.Closest(tempo, first.State(), states(rest)...)
 }
 
 func (tempo Tempo) Farthest(first Tempo, rest ...Tempo) Tempo {
-	result := first
-	bestDistance := absInt64(first.TimestampMs() - tempo.TimestampMs())
-
-	for _, item := range rest {
-		distance := absInt64(item.TimestampMs() - tempo.TimestampMs())
-
-		if distance > bestDistance {
-			result = item
-			bestDistance = distance
-		}
-	}
-
-	return result
+	return comparison.Farthest(tempo, first.State(), states(rest)...)
 }
 
 func (tempo Tempo) Min(other Tempo) Tempo {
-	return Min(tempo, other)
+	return comparison.Min(tempo, other.State())
 }
 
 func (tempo Tempo) Max(other Tempo) Tempo {
-	return Max(tempo, other)
+	return comparison.Max(tempo, other.State())
 }
 
 func (tempo Tempo) Minimum(other Tempo) Tempo {
@@ -190,37 +164,15 @@ func (tempo Tempo) Maximum(other Tempo) Tempo {
 }
 
 func (tempo Tempo) SameOrBefore(other Tempo, units ...Unit) bool {
-	return tempo.Same(other, units...) || tempo.Before(other, units...)
+	return comparison.SameOrBefore(tempo, other.State(), units...)
 }
 
 func (tempo Tempo) SameOrAfter(other Tempo, units ...Unit) bool {
-	return tempo.Same(other, units...) || tempo.After(other, units...)
+	return comparison.SameOrAfter(tempo, other.State(), units...)
 }
 
 func (tempo Tempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
-	if start.After(end) {
-		start, end = end, start
-	}
-
-	mode := "[]"
-
-	if len(inclusivity) > 0 {
-		mode = inclusivity[0]
-	}
-
-	afterStart := tempo.After(start)
-
-	if strings.HasPrefix(mode, "[") {
-		afterStart = tempo.SameOrAfter(start)
-	}
-
-	beforeEnd := tempo.Before(end)
-
-	if strings.HasSuffix(mode, "]") {
-		beforeEnd = tempo.SameOrBefore(end)
-	}
-
-	return afterStart && beforeEnd
+	return comparison.Between(tempo, start.State(), end.State(), inclusivity...)
 }
 
 func (tempo Tempo) IsBetween(start Tempo, end Tempo, inclusivity ...string) bool {

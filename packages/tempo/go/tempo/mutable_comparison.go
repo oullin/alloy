@@ -1,5 +1,7 @@
 package tempo
 
+import "github.com/oullin/alloy/tempo/comparison"
+
 func (mutable *MutableTempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return mutable.Tempo().IsStartOf(unit, options...)
 }
@@ -257,99 +259,99 @@ func (mutable *MutableTempo) IsMutable() bool {
 }
 
 func (mutable *MutableTempo) Before(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Before(other, units...)
+	return comparison.Before(mutable, other.State(), units...)
 }
 
 func (mutable *MutableTempo) After(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().After(other, units...)
+	return comparison.After(mutable, other.State(), units...)
 }
 
 func (mutable *MutableTempo) Same(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Same(other, units...)
+	return comparison.Same(mutable, other.State(), units...)
 }
 
 func (mutable *MutableTempo) Is(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Is(other, units...)
+	return mutable.Same(other, units...)
 }
 
 func (mutable *MutableTempo) EqualTo(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().EqualTo(other, units...)
+	return mutable.Same(other, units...)
 }
 
 func (mutable *MutableTempo) Eq(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Eq(other, units...)
+	return mutable.EqualTo(other, units...)
 }
 
 func (mutable *MutableTempo) NotEqualTo(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().NotEqualTo(other, units...)
+	return !mutable.Same(other, units...)
 }
 
 func (mutable *MutableTempo) Ne(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Ne(other, units...)
+	return mutable.NotEqualTo(other, units...)
 }
 
 func (mutable *MutableTempo) GreaterThan(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().GreaterThan(other, units...)
+	return mutable.After(other, units...)
 }
 
 func (mutable *MutableTempo) Gt(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Gt(other, units...)
+	return mutable.GreaterThan(other, units...)
 }
 
 func (mutable *MutableTempo) GreaterThanOrEqualTo(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().GreaterThanOrEqualTo(other, units...)
+	return mutable.SameOrAfter(other, units...)
 }
 
 func (mutable *MutableTempo) Gte(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Gte(other, units...)
+	return mutable.GreaterThanOrEqualTo(other, units...)
 }
 
 func (mutable *MutableTempo) LessThan(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().LessThan(other, units...)
+	return mutable.Before(other, units...)
 }
 
 func (mutable *MutableTempo) Lt(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Lt(other, units...)
+	return mutable.LessThan(other, units...)
 }
 
 func (mutable *MutableTempo) LessThanOrEqualTo(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().LessThanOrEqualTo(other, units...)
+	return mutable.SameOrBefore(other, units...)
 }
 
 func (mutable *MutableTempo) Lte(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().Lte(other, units...)
+	return mutable.LessThanOrEqualTo(other, units...)
 }
 
 func (mutable *MutableTempo) SameSecond(other Tempo) bool {
-	return mutable.Tempo().SameSecond(other)
+	return mutable.Same(other, Second)
 }
 
 func (mutable *MutableTempo) SameMinute(other Tempo) bool {
-	return mutable.Tempo().SameMinute(other)
+	return mutable.Same(other, Minute)
 }
 
 func (mutable *MutableTempo) SameHour(other Tempo) bool {
-	return mutable.Tempo().SameHour(other)
+	return mutable.Same(other, Hour)
 }
 
 func (mutable *MutableTempo) SameDay(other Tempo) bool {
-	return mutable.Tempo().SameDay(other)
+	return mutable.Same(other, Day)
 }
 
 func (mutable *MutableTempo) SameWeek(other Tempo) bool {
-	return mutable.Tempo().SameWeek(other)
+	return mutable.Same(other, Week)
 }
 
 func (mutable *MutableTempo) SameMonth(other Tempo) bool {
-	return mutable.Tempo().SameMonth(other)
+	return mutable.Same(other, Month)
 }
 
 func (mutable *MutableTempo) SameQuarter(other Tempo) bool {
-	return mutable.Tempo().SameQuarter(other)
+	return mutable.Same(other, Quarter)
 }
 
 func (mutable *MutableTempo) SameYear(other Tempo) bool {
-	return mutable.Tempo().SameYear(other)
+	return mutable.Same(other, Year)
 }
 
 func (mutable *MutableTempo) SameAs(pattern string, other Tempo) bool {
@@ -357,7 +359,7 @@ func (mutable *MutableTempo) SameAs(pattern string, other Tempo) bool {
 }
 
 func (mutable *MutableTempo) IsSameUnit(unit Unit, other Tempo) bool {
-	return mutable.Tempo().IsSameUnit(unit, other)
+	return mutable.Same(other, unit)
 }
 
 func (mutable *MutableTempo) Birthday(other Tempo) bool {
@@ -365,63 +367,57 @@ func (mutable *MutableTempo) Birthday(other Tempo) bool {
 }
 
 func (mutable *MutableTempo) Clamp(minimum Tempo, maximum Tempo) (*MutableTempo, error) {
-	next, err := mutable.Tempo().Clamp(minimum, maximum)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return mutable.replace(next), nil
+	return comparison.Clamp(mutable, minimum.State(), maximum.State())
 }
 
 func (mutable *MutableTempo) Average(other Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Average(other))
+	return comparison.Average(mutable, other.State())
 }
 
 func (mutable *MutableTempo) Closest(first Tempo, rest ...Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Closest(first, rest...))
+	return comparison.Closest(mutable, first.State(), states(rest)...)
 }
 
 func (mutable *MutableTempo) Farthest(first Tempo, rest ...Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Farthest(first, rest...))
+	return comparison.Farthest(mutable, first.State(), states(rest)...)
 }
 
 func (mutable *MutableTempo) Min(other Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Min(other))
+	return comparison.Min(mutable, other.State())
 }
 
 func (mutable *MutableTempo) Max(other Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Max(other))
+	return comparison.Max(mutable, other.State())
 }
 
 func (mutable *MutableTempo) Minimum(other Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Minimum(other))
+	return mutable.Min(other)
 }
 
 func (mutable *MutableTempo) Maximum(other Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Maximum(other))
+	return mutable.Max(other)
 }
 
 func (mutable *MutableTempo) SameOrBefore(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().SameOrBefore(other, units...)
+	return comparison.SameOrBefore(mutable, other.State(), units...)
 }
 
 func (mutable *MutableTempo) SameOrAfter(other Tempo, units ...Unit) bool {
-	return mutable.Tempo().SameOrAfter(other, units...)
+	return comparison.SameOrAfter(mutable, other.State(), units...)
 }
 
 func (mutable *MutableTempo) Between(start Tempo, end Tempo, inclusivity ...string) bool {
-	return mutable.Tempo().Between(start, end, inclusivity...)
+	return comparison.Between(mutable, start.State(), end.State(), inclusivity...)
 }
 
 func (mutable *MutableTempo) IsBetween(start Tempo, end Tempo, inclusivity ...string) bool {
-	return mutable.Tempo().IsBetween(start, end, inclusivity...)
+	return mutable.Between(start, end, inclusivity...)
 }
 
 func (mutable *MutableTempo) BetweenIncluded(start Tempo, end Tempo) bool {
-	return mutable.Tempo().BetweenIncluded(start, end)
+	return mutable.Between(start, end, "[]")
 }
 
 func (mutable *MutableTempo) BetweenExcluded(start Tempo, end Tempo) bool {
-	return mutable.Tempo().BetweenExcluded(start, end)
+	return mutable.Between(start, end, "()")
 }
