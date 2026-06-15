@@ -2,30 +2,21 @@ package tempo
 
 import (
 	"time"
+
+	"github.com/oullin/alloy/tempo/boundaries"
+	"github.com/oullin/alloy/tempo/internal/kernel"
 )
 
 func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
-	weekOptions := make([]WeekOptions, 0, len(options))
-
-	for _, option := range options {
-		weekOptions = append(weekOptions, WeekOptions{WeekStartsOn: option.WeekStartsOn})
-	}
-
-	return tempo.with(StartOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
+	return boundaries.StartOf(tempo, unit, weekOptions(options)...)
 }
 
 func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
-	weekOptions := make([]WeekOptions, 0, len(options))
-
-	for _, option := range options {
-		weekOptions = append(weekOptions, WeekOptions{WeekStartsOn: option.WeekStartsOn})
-	}
-
-	return tempo.with(EndOf(tempo.value, tempo.location, unit, weekOptions...), tempo.location)
+	return boundaries.EndOf(tempo, unit, weekOptions(options)...)
 }
 
 func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
-	return tempo.Same(tempo.StartOf(unit, options...))
+	return boundaries.IsStartOf(tempo, unit, weekOptions(options)...)
 }
 
 func (tempo Tempo) IsStartOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
@@ -33,7 +24,7 @@ func (tempo Tempo) IsStartOfUnit(unit Unit, options ...StartOfWeekOptions) bool 
 }
 
 func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
-	return tempo.Same(tempo.EndOf(unit, options...))
+	return boundaries.IsEndOf(tempo, unit, weekOptions(options)...)
 }
 
 func (tempo Tempo) IsEndOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
@@ -213,89 +204,27 @@ func (tempo Tempo) EndOfQuarter() Tempo {
 }
 
 func (tempo Tempo) FirstOfMonth(weekdays ...time.Weekday) Tempo {
-	first := tempo.StartOf(Month)
-
-	if len(weekdays) == 0 {
-		return first
-	}
-
-	target := weekdays[0]
-	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
-
-	return first.AddDays(delta)
+	return boundaries.FirstOfMonth(tempo, weekdays...)
 }
 
 func (tempo Tempo) LastOfMonth(weekdays ...time.Weekday) Tempo {
-	last := tempo.EndOf(Month).StartOf(Day)
-
-	if len(weekdays) == 0 {
-		return last
-	}
-
-	target := weekdays[0]
-	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
-
-	return last.SubDays(delta)
+	return boundaries.LastOfMonth(tempo, weekdays...)
 }
 
 func (tempo Tempo) NthOfMonth(occurrence int, weekday time.Weekday) (Tempo, bool) {
-	if occurrence == 0 {
-		return Tempo{}, false
-	}
-
-	month := tempo.Month()
-
-	var candidate Tempo
-
-	if occurrence > 0 {
-		candidate = tempo.FirstOfMonth(weekday).AddWeeks(occurrence - 1)
-	} else {
-		candidate = tempo.LastOfMonth(weekday).SubWeeks(absInt(occurrence) - 1)
-	}
-
-	return candidate, candidate.Month() == month
+	return boundaries.NthOfMonth(tempo, occurrence, weekday)
 }
 
 func (tempo Tempo) FirstOfQuarter(weekdays ...time.Weekday) Tempo {
-	first := tempo.StartOf(Quarter)
-
-	if len(weekdays) == 0 {
-		return first
-	}
-
-	target := weekdays[0]
-	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
-
-	return first.AddDays(delta)
+	return boundaries.FirstOfQuarter(tempo, weekdays...)
 }
 
 func (tempo Tempo) LastOfQuarter(weekdays ...time.Weekday) Tempo {
-	last := tempo.EndOf(Quarter).StartOf(Day)
-
-	if len(weekdays) == 0 {
-		return last
-	}
-
-	target := weekdays[0]
-	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
-
-	return last.SubDays(delta)
+	return boundaries.LastOfQuarter(tempo, weekdays...)
 }
 
 func (tempo Tempo) NthOfQuarter(occurrence int, weekday time.Weekday) (Tempo, bool) {
-	if occurrence == 0 {
-		return Tempo{}, false
-	}
-
-	quarter := tempo.Quarter()
-	year := tempo.Year()
-	candidate := tempo.FirstOfQuarter(weekday).AddWeeks(occurrence - 1)
-
-	if occurrence < 0 {
-		candidate = tempo.LastOfQuarter(weekday).SubWeeks(absInt(occurrence) - 1)
-	}
-
-	return candidate, candidate.Quarter() == quarter && candidate.Year() == year
+	return boundaries.NthOfQuarter(tempo, occurrence, weekday)
 }
 
 func (tempo Tempo) StartOfYear() Tempo {
@@ -331,57 +260,19 @@ func (tempo Tempo) EndOfMillennium() Tempo {
 }
 
 func (tempo Tempo) FirstOfYear(weekdays ...time.Weekday) Tempo {
-	first := tempo.StartOf(Year)
-
-	if len(weekdays) == 0 {
-		return first
-	}
-
-	target := weekdays[0]
-	delta := (int(target) - int(first.local().Weekday()) + 7) % 7
-
-	return first.AddDays(delta)
+	return boundaries.FirstOfYear(tempo, weekdays...)
 }
 
 func (tempo Tempo) LastOfYear(weekdays ...time.Weekday) Tempo {
-	last := tempo.EndOf(Year).StartOf(Day)
-
-	if len(weekdays) == 0 {
-		return last
-	}
-
-	target := weekdays[0]
-	delta := (int(last.local().Weekday()) - int(target) + 7) % 7
-
-	return last.SubDays(delta)
+	return boundaries.LastOfYear(tempo, weekdays...)
 }
 
 func (tempo Tempo) NthOfYear(occurrence int, weekday time.Weekday) (Tempo, bool) {
-	if occurrence == 0 {
-		return Tempo{}, false
-	}
-
-	year := tempo.Year()
-	candidate := tempo.FirstOfYear(weekday).AddWeeks(occurrence - 1)
-
-	if occurrence < 0 {
-		candidate = tempo.LastOfYear(weekday).SubWeeks(absInt(occurrence) - 1)
-	}
-
-	return candidate, candidate.Year() == year
+	return boundaries.NthOfYear(tempo, occurrence, weekday)
 }
 
 func (tempo Tempo) Floor(unit Unit) Tempo {
-	fixed, ok := fixedUnitDuration(unit)
-
-	if !ok {
-		return tempo.StartOf(unit)
-	}
-
-	unixNano := tempo.value.UnixNano()
-	fixedNano := int64(fixed)
-
-	return Tempo{value: time.Unix(0, unixNano/fixedNano*fixedNano).UTC(), location: tempo.location}
+	return boundaries.Floor(tempo, unit)
 }
 
 func (tempo Tempo) FloorUnit(unit Unit) Tempo {
@@ -389,17 +280,11 @@ func (tempo Tempo) FloorUnit(unit Unit) Tempo {
 }
 
 func (tempo Tempo) FloorWeek(options ...StartOfWeekOptions) Tempo {
-	return tempo.StartOfWeek(options...)
+	return boundaries.FloorWeek(tempo, weekOptions(options)...)
 }
 
 func (tempo Tempo) Ceil(unit Unit) Tempo {
-	floored := tempo.Floor(unit)
-
-	if floored.Same(tempo) {
-		return floored
-	}
-
-	return floored.Add(1, unit)
+	return boundaries.Ceil(tempo, unit)
 }
 
 func (tempo Tempo) CeilUnit(unit Unit) Tempo {
@@ -407,31 +292,11 @@ func (tempo Tempo) CeilUnit(unit Unit) Tempo {
 }
 
 func (tempo Tempo) CeilWeek(options ...StartOfWeekOptions) Tempo {
-	floored := tempo.FloorWeek(options...)
-
-	if floored.Same(tempo) {
-		return floored
-	}
-
-	return floored.AddWeeks(1)
+	return boundaries.CeilWeek(tempo, weekOptions(options)...)
 }
 
 func (tempo Tempo) Round(unit Unit) Tempo {
-	fixed, ok := fixedUnitDuration(unit)
-
-	if !ok {
-		start := tempo.StartOf(unit)
-		end := tempo.EndOf(unit)
-		midpoint := start.TimestampMs() + (end.TimestampMs()-start.TimestampMs())/2
-
-		if tempo.TimestampMs() >= midpoint {
-			return tempo.Ceil(unit)
-		}
-
-		return start
-	}
-
-	return Tempo{value: tempo.value.Round(fixed).UTC(), location: tempo.location}
+	return boundaries.Round(tempo, unit)
 }
 
 func (tempo Tempo) RoundUnit(unit Unit) Tempo {
@@ -439,89 +304,47 @@ func (tempo Tempo) RoundUnit(unit Unit) Tempo {
 }
 
 func (tempo Tempo) RoundWeek(options ...StartOfWeekOptions) Tempo {
-	start := tempo.StartOfWeek(options...)
-	end := tempo.EndOfWeek(options...)
-	midpoint := start.TimestampMs() + (end.TimestampMs()-start.TimestampMs())/2
-
-	if tempo.TimestampMs() >= midpoint {
-		return tempo.CeilWeek(options...)
-	}
-
-	return start
+	return boundaries.RoundWeek(tempo, weekOptions(options)...)
 }
 
 func (tempo Tempo) Next(weekday time.Weekday) Tempo {
-	delta := (int(weekday) - int(tempo.local().Weekday()) + 7) % 7
-
-	if delta == 0 {
-		delta = 7
-	}
-
-	return tempo.AddDays(delta)
+	return boundaries.Next(tempo, weekday)
 }
 
 func (tempo Tempo) Previous(weekday time.Weekday) Tempo {
-	delta := (int(tempo.local().Weekday()) - int(weekday) + 7) % 7
-
-	if delta == 0 {
-		delta = 7
-	}
-
-	return tempo.SubDays(delta)
+	return boundaries.Previous(tempo, weekday)
 }
 
 func (tempo Tempo) NextOrSame(weekday time.Weekday) Tempo {
-	if tempo.local().Weekday() == weekday {
-		return tempo.Clone()
-	}
-
-	return tempo.Next(weekday)
+	return boundaries.NextOrSame(tempo, weekday)
 }
 
 func (tempo Tempo) PreviousOrSame(weekday time.Weekday) Tempo {
-	if tempo.local().Weekday() == weekday {
-		return tempo.Clone()
-	}
-
-	return tempo.Previous(weekday)
+	return boundaries.PreviousOrSame(tempo, weekday)
 }
 
 func (tempo Tempo) NextWeekday() Tempo {
-	next := tempo.AddDays(1)
-
-	for next.IsWeekend() {
-		next = next.AddDays(1)
-	}
-
-	return next
+	return boundaries.NextWeekday(tempo, defaultConfig.Settings.WeekendDays)
 }
 
 func (tempo Tempo) PreviousWeekday() Tempo {
-	previous := tempo.SubDays(1)
-
-	for previous.IsWeekend() {
-		previous = previous.SubDays(1)
-	}
-
-	return previous
+	return boundaries.PreviousWeekday(tempo, defaultConfig.Settings.WeekendDays)
 }
 
 func (tempo Tempo) NextWeekendDay() Tempo {
-	next := tempo.AddDays(1)
-
-	for next.IsWeekday() {
-		next = next.AddDays(1)
-	}
-
-	return next
+	return boundaries.NextWeekendDay(tempo, defaultConfig.Settings.WeekendDays)
 }
 
 func (tempo Tempo) PreviousWeekendDay() Tempo {
-	previous := tempo.SubDays(1)
+	return boundaries.PreviousWeekendDay(tempo, defaultConfig.Settings.WeekendDays)
+}
 
-	for previous.IsWeekday() {
-		previous = previous.SubDays(1)
+func weekOptions(options []StartOfWeekOptions) []kernel.WeekOptions {
+	result := make([]kernel.WeekOptions, 0, len(options))
+
+	for _, option := range options {
+		result = append(result, kernel.WeekOptions{WeekStartsOn: option.WeekStartsOn})
 	}
 
-	return previous
+	return result
 }
