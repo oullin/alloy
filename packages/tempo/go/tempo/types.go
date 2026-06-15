@@ -3,6 +3,7 @@ package tempo
 import (
 	"time"
 
+	configpkg "github.com/oullin/alloy/tempo/config"
 	"github.com/oullin/alloy/tempo/duration"
 	"github.com/oullin/alloy/tempo/factory"
 	"github.com/oullin/alloy/tempo/runtime"
@@ -34,13 +35,11 @@ type DiffOptions struct {
 	Float    bool
 }
 
-type HumanDiffOptions struct {
-	Absolute bool
-	Locale   string
-	Numeric  string
-	Style    string
-	Unit     Unit
-}
+// HumanDiffOptions aliases the equivalent type in the config package so
+// env-loaded defaults and runtime overrides share a single shape. Settings
+// cannot be aliased the same way — it carries TestNow *Tempo, which would
+// create an import cycle if pushed down into config/.
+type HumanDiffOptions = configpkg.HumanDiffOptions
 
 type Settings struct {
 	FallbackLocale string

@@ -60,13 +60,7 @@ func defaultSettings() Settings {
 
 	return Settings{
 		FallbackLocale: settings.FallbackLocale,
-		HumanDiff: HumanDiffOptions{
-			Absolute: settings.HumanDiff.Absolute,
-			Locale:   settings.HumanDiff.Locale,
-			Numeric:  settings.HumanDiff.Numeric,
-			Style:    settings.HumanDiff.Style,
-			Unit:     settings.HumanDiff.Unit,
-		},
+		HumanDiff:      settings.HumanDiff,
 		Locale:         settings.Locale,
 		MidDayAt:       settings.MidDayAt,
 		MonthsOverflow: settings.MonthsOverflow,
