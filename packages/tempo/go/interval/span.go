@@ -92,4 +92,3 @@ func (span Span) Union(other Span) Span {
 		EndMs:   max(left.EndMs, right.EndMs),
 	}
 }
-

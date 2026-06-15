@@ -1,231 +1,206 @@
-import type { DurationInput, PeriodOptions, TempoInput } from "../types";
-import { Tempo, TempoImmutable } from "../core";
-import { TempoDuration } from "../duration";
+import type { DurationInput, PeriodOptions, TempoInput } from '../types';
+import { Tempo, TempoImmutable } from '../core';
+import { TempoDuration } from '../duration';
 
 export class TempoInterval {
-  readonly start: TempoImmutable;
-  readonly end: TempoImmutable;
+	readonly start: TempoImmutable;
+	readonly end: TempoImmutable;
 
-  constructor(start: TempoInput, end: TempoInput) {
-    this.start = TempoImmutable.parse(start);
-    this.end = TempoImmutable.parse(end);
-  }
+	constructor(start: TempoInput, end: TempoInput) {
+		this.start = TempoImmutable.parse(start);
+		this.end = TempoImmutable.parse(end);
+	}
 
-  get isInverted(): boolean {
-    return this.start.isAfter(this.end);
-  }
+	get isInverted(): boolean {
+		return this.start.isAfter(this.end);
+	}
 
-  get milliseconds(): number {
-    return this.end.diffInMilliseconds(this.start);
-  }
+	get milliseconds(): number {
+		return this.end.diffInMilliseconds(this.start);
+	}
 
-  get seconds(): number {
-    return this.end.diffInSeconds(this.start);
-  }
+	get seconds(): number {
+		return this.end.diffInSeconds(this.start);
+	}
 
-  get minutes(): number {
-    return this.end.diffInMinutes(this.start);
-  }
+	get minutes(): number {
+		return this.end.diffInMinutes(this.start);
+	}
 
-  get hours(): number {
-    return this.end.diffInHours(this.start);
-  }
+	get hours(): number {
+		return this.end.diffInHours(this.start);
+	}
 
-  get days(): number {
-    return this.end.diffInDays(this.start);
-  }
+	get days(): number {
+		return this.end.diffInDays(this.start);
+	}
 
-  get weeks(): number {
-    return this.end.diffInWeeks(this.start);
-  }
+	get weeks(): number {
+		return this.end.diffInWeeks(this.start);
+	}
 
-  get months(): number {
-    return this.end.diffInMonths(this.start);
-  }
+	get months(): number {
+		return this.end.diffInMonths(this.start);
+	}
 
-  get quarters(): number {
-    return this.end.diffInQuarters(this.start);
-  }
+	get quarters(): number {
+		return this.end.diffInQuarters(this.start);
+	}
 
-  get years(): number {
-    return this.end.diffInYears(this.start);
-  }
+	get years(): number {
+		return this.end.diffInYears(this.start);
+	}
 
-  invert(): TempoInterval {
-    return new TempoInterval(this.end, this.start);
-  }
+	invert(): TempoInterval {
+		return new TempoInterval(this.end, this.start);
+	}
 
-  absolute(): TempoInterval {
-    return this.isInverted
-      ? this.invert()
-      : new TempoInterval(this.start, this.end);
-  }
+	absolute(): TempoInterval {
+		return this.isInverted ? this.invert() : new TempoInterval(this.start, this.end);
+	}
 
-  contains(
-    input: TempoInput,
-    inclusivity: "()" | "[]" | "[)" | "(]" = "[]",
-  ): boolean {
-    return TempoImmutable.parse(input).isBetween(
-      this.start,
-      this.end,
-      "millisecond",
-      inclusivity,
-    );
-  }
+	contains(input: TempoInput, inclusivity: '()' | '[]' | '[)' | '(]' = '[]'): boolean {
+		return TempoImmutable.parse(input).isBetween(this.start, this.end, 'millisecond', inclusivity);
+	}
 
-  overlaps(other: TempoInterval): boolean {
-    return this.start.isBefore(other.end) && this.end.isAfter(other.start);
-  }
+	overlaps(other: TempoInterval): boolean {
+		return this.start.isBefore(other.end) && this.end.isAfter(other.start);
+	}
 
-  intersection(other: TempoInterval): TempoInterval | null {
-    if (!this.overlaps(other)) {
-      return null;
-    }
+	intersection(other: TempoInterval): TempoInterval | null {
+		if (!this.overlaps(other)) {
+			return null;
+		}
 
-    return new TempoInterval(
-      this.start.isAfter(other.start) ? this.start : other.start,
-      this.end.isBefore(other.end) ? this.end : other.end,
-    );
-  }
+		return new TempoInterval(this.start.isAfter(other.start) ? this.start : other.start, this.end.isBefore(other.end) ? this.end : other.end);
+	}
 
-  union(other: TempoInterval): TempoInterval {
-    return new TempoInterval(
-      this.start.isBefore(other.start) ? this.start : other.start,
-      this.end.isAfter(other.end) ? this.end : other.end,
-    );
-  }
+	union(other: TempoInterval): TempoInterval {
+		return new TempoInterval(this.start.isBefore(other.start) ? this.start : other.start, this.end.isAfter(other.end) ? this.end : other.end);
+	}
 
-  toDuration(): TempoDuration {
-    return new TempoDuration({ milliseconds: this.milliseconds }).normalized();
-  }
+	toDuration(): TempoDuration {
+		return new TempoDuration({ milliseconds: this.milliseconds }).normalized();
+	}
 }
 
 export class TempoPeriod implements Iterable<Tempo> {
-  readonly start: Tempo;
-  readonly end: Tempo;
-  readonly step: DurationInput;
-  readonly includeEnd: boolean;
+	readonly start: Tempo;
+	readonly end: Tempo;
+	readonly step: DurationInput;
+	readonly includeEnd: boolean;
 
-  constructor(start: TempoInput, end: TempoInput, options?: PeriodOptions) {
-    this.start = Tempo.parse(start);
-    this.end = Tempo.parse(end);
-    this.step = options?.step ?? { days: 1 };
-    this.includeEnd = options?.includeEnd ?? true;
-  }
+	constructor(start: TempoInput, end: TempoInput, options?: PeriodOptions) {
+		this.start = Tempo.parse(start);
+		this.end = Tempo.parse(end);
+		this.step = options?.step ?? { days: 1 };
+		this.includeEnd = options?.includeEnd ?? true;
+	}
 
-  *[Symbol.iterator](): Iterator<Tempo> {
-    let current = this.start;
-    const forward = this.end.isSameOrAfter(this.start);
+	*[Symbol.iterator](): Iterator<Tempo> {
+		let current = this.start;
 
-    while (
-      this.includeEnd
-        ? forward
-          ? current.isSameOrBefore(this.end)
-          : current.isSameOrAfter(this.end)
-        : forward
-          ? current.isBefore(this.end)
-          : current.isAfter(this.end)
-    ) {
-      yield current;
-      const next = current.addDuration(this.step);
+		const forward = this.end.isSameOrAfter(this.start);
 
-      if (next.isSame(current)) {
-        throw new RangeError("TempoPeriod step must advance the period");
-      }
-      if (forward ? next.isBefore(current) : next.isAfter(current)) {
-        throw new RangeError("TempoPeriod step must advance toward the end");
-      }
+		while (this.includeEnd ? (forward ? current.isSameOrBefore(this.end) : current.isSameOrAfter(this.end)) : forward ? current.isBefore(this.end) : current.isAfter(this.end)) {
+			yield current;
 
-      current = next;
-    }
-  }
+			const next = current.addDuration(this.step);
 
-  first(): Tempo | null {
-    const next = this[Symbol.iterator]().next();
+			if (next.isSame(current)) {
+				throw new RangeError('TempoPeriod step must advance the period');
+			}
 
-    return next.done === true ? null : next.value;
-  }
+			if (forward ? next.isBefore(current) : next.isAfter(current)) {
+				throw new RangeError('TempoPeriod step must advance toward the end');
+			}
 
-  last(): Tempo | null {
-    let last: Tempo | null = null;
+			current = next;
+		}
+	}
 
-    for (const value of this) {
-      last = value;
-    }
+	first(): Tempo | null {
+		const next = this[Symbol.iterator]().next();
 
-    return last;
-  }
+		return next.done === true ? null : next.value;
+	}
 
-  count(): number {
-    let total = 0;
+	last(): Tempo | null {
+		let last: Tempo | null = null;
 
-    for (const _value of this) {
-      total += 1;
-    }
+		for (const value of this) {
+			last = value;
+		}
 
-    return total;
-  }
+		return last;
+	}
 
-  isEmpty(): boolean {
-    return this.first() === null;
-  }
+	count(): number {
+		let total = 0;
 
-  contains(input: TempoInput): boolean {
-    const value = Tempo.parse(input, { timeZone: this.start.timeZone });
-    const forward = this.end.isSameOrAfter(this.start);
-    const afterStart = forward
-      ? value.isSameOrAfter(this.start)
-      : value.isSameOrBefore(this.start);
-    const beforeEnd = forward
-      ? this.includeEnd
-        ? value.isSameOrBefore(this.end)
-        : value.isBefore(this.end)
-      : this.includeEnd
-        ? value.isSameOrAfter(this.end)
-        : value.isAfter(this.end);
+		for (const _value of this) {
+			total += 1;
+		}
 
-    return afterStart && beforeEnd;
-  }
+		return total;
+	}
 
-  filter(predicate: (value: Tempo, index: number) => boolean): Tempo[] {
-    const values: Tempo[] = [];
-    let index = 0;
+	isEmpty(): boolean {
+		return this.first() === null;
+	}
 
-    for (const value of this) {
-      if (predicate(value, index)) {
-        values.push(value);
-      }
+	contains(input: TempoInput): boolean {
+		const value = Tempo.parse(input, { timeZone: this.start.timeZone });
+		const forward = this.end.isSameOrAfter(this.start);
 
-      index += 1;
-    }
+		const afterStart = forward ? value.isSameOrAfter(this.start) : value.isSameOrBefore(this.start);
 
-    return values;
-  }
+		const beforeEnd = forward ? (this.includeEnd ? value.isSameOrBefore(this.end) : value.isBefore(this.end)) : this.includeEnd ? value.isSameOrAfter(this.end) : value.isAfter(this.end);
 
-  map<T>(mapper: (value: Tempo, index: number) => T): T[] {
-    const values: T[] = [];
-    let index = 0;
+		return afterStart && beforeEnd;
+	}
 
-    for (const value of this) {
-      values.push(mapper(value, index));
-      index += 1;
-    }
+	filter(predicate: (value: Tempo, index: number) => boolean): Tempo[] {
+		const values: Tempo[] = [];
 
-    return values;
-  }
+		let index = 0;
 
-  every(step: DurationInput): TempoPeriod {
-    return new TempoPeriod(this.start, this.end, {
-      includeEnd: this.includeEnd,
-      step,
-    });
-  }
+		for (const value of this) {
+			if (predicate(value, index)) {
+				values.push(value);
+			}
 
-  toDuration(): TempoDuration {
-    return this.start.intervalUntil(this.end).toDuration();
-  }
+			index += 1;
+		}
 
-  toArray(): Tempo[] {
-    return Array.from(this);
-  }
+		return values;
+	}
+
+	map<T>(mapper: (value: Tempo, index: number) => T): T[] {
+		const values: T[] = [];
+
+		let index = 0;
+
+		for (const value of this) {
+			values.push(mapper(value, index));
+			index += 1;
+		}
+
+		return values;
+	}
+
+	every(step: DurationInput): TempoPeriod {
+		return new TempoPeriod(this.start, this.end, {
+			includeEnd: this.includeEnd,
+			step,
+		});
+	}
+
+	toDuration(): TempoDuration {
+		return this.start.intervalUntil(this.end).toDuration();
+	}
+
+	toArray(): Tempo[] {
+		return Array.from(this);
+	}
 }

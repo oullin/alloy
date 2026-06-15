@@ -1,1 +1,1 @@
-export const provisionWorkspace = "@tempo/provision";
+export const provisionWorkspace = '@tempo/provision';

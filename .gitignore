@@ -5,7 +5,7 @@ coverage/
 .cache/
 .DS_Store
 storage/
-
+.idea
 packages/artefacts/.cache/
 packages/artefacts/.logs/
 packages/artefacts/dist/
