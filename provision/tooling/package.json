@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "format": "pnpm exec prettier --write .",
     "lint": "tsc -p tsconfig.json --noEmit",
+    "parity:audit": "tsx src/parity-audit.ts",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

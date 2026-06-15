@@ -61,6 +61,7 @@ export type WeekdayInput =
   | 4
   | 5
   | 6
+  | 7
   | "sunday"
   | "monday"
   | "tuesday"
@@ -77,8 +78,11 @@ export type WeekdayInput =
   | "sat";
 
 export type TempoOptions = {
+  readonly fallbackLocale?: string;
   readonly locale?: string;
+  readonly runtime?: TempoRuntime;
   readonly timeZone?: string;
+  readonly translator?: TempoTranslator;
 };
 
 export type TempoSettings = {
@@ -94,12 +98,19 @@ export type TempoSettings = {
   readonly yearsOverflow?: boolean;
 };
 
-export type TempoMacro = (
-  this: TempoImmutable,
-  ...args: readonly unknown[]
-) => unknown;
-
 export type TempoSerializer = (tempo: TempoImmutable) => string;
+
+export type TempoTranslationValue = string | number | null;
+
+export type TempoTranslator = {
+  readonly fallbackLocale?: string;
+  readonly locale?: string;
+  translate?: (
+    key: string,
+    replacements?: Record<string, string>,
+  ) => TempoTranslationValue;
+  getMessage?: (key: string) => TempoTranslationValue;
+};
 
 export type TempoComponents = {
   readonly year: number;
@@ -237,7 +248,123 @@ const tempoConfig = {
 
 let tempoSerializer: TempoSerializer | null = null;
 let tempoLastError: unknown = null;
-const tempoMacros = new Map<string, TempoMacro>();
+
+export class TempoRuntime {
+  readonly fallbackLocale: string;
+  readonly locale: string;
+  readonly translator: TempoTranslator | null;
+
+  constructor(
+    options: {
+      readonly fallbackLocale?: string;
+      readonly locale?: string;
+      readonly translator?: TempoTranslator | null;
+    } = {},
+  ) {
+    this.fallbackLocale = options.fallbackLocale ?? "en-US";
+    this.locale = options.locale ?? options.translator?.locale ?? "en-US";
+    this.translator = options.translator ?? null;
+  }
+
+  with(
+    options: {
+      readonly fallbackLocale?: string;
+      readonly locale?: string;
+      readonly translator?: TempoTranslator | null;
+    } = {},
+  ): TempoRuntime {
+    return new TempoRuntime({
+      fallbackLocale: options.fallbackLocale ?? this.fallbackLocale,
+      locale: options.locale ?? this.locale,
+      translator:
+        options.translator === undefined ? this.translator : options.translator,
+    });
+  }
+
+  hasTranslator(): boolean {
+    return this.translator !== null;
+  }
+
+  translatorState(): TempoTranslator {
+    return (
+      this.translator ?? {
+        fallbackLocale: this.fallbackLocale,
+        locale: this.locale,
+      }
+    );
+  }
+
+  getMessage(key: string): TempoTranslationValue {
+    const translated = this.translator?.getMessage?.(key);
+
+    if (translated !== undefined && translated !== null) {
+      return translated;
+    }
+
+    switch (key) {
+      case "day_of_first_week_of_year":
+        return 4;
+      case "first_day_of_week":
+        return 1;
+      case "locale":
+        return this.locale;
+      default:
+        return null;
+    }
+  }
+
+  translate(
+    key: string,
+    replacements: Record<string, string> = {},
+  ): TempoTranslationValue {
+    const translated = this.translator?.translate?.(key, replacements);
+    const message =
+      translated === undefined || translated === null
+        ? this.getMessage(key)
+        : translated;
+
+    return typeof message === "string"
+      ? replaceTranslationTokens(message, replacements)
+      : message;
+  }
+}
+
+export const createTempoRuntime = (
+  options?: ConstructorParameters<typeof TempoRuntime>[0],
+): TempoRuntime => new TempoRuntime(options);
+
+const replaceTranslationTokens = (
+  message: string,
+  replacements: Record<string, string>,
+): string =>
+  Object.entries(replacements).reduce(
+    (result, [key, value]) => result.replaceAll(`:${key}`, value),
+    message,
+  );
+
+const runtimeFromOptions = (
+  input: TempoInput | undefined,
+  options?: TempoOptions,
+): TempoRuntime => {
+  const base =
+    options?.runtime ??
+    (input instanceof TempoImmutable
+      ? input.getRuntime()
+      : new TempoRuntime({
+          fallbackLocale: tempoConfig.fallbackLocale,
+          locale: tempoConfig.locale,
+        }));
+
+  return options?.translator !== undefined ||
+    options?.locale !== undefined ||
+    options?.fallbackLocale !== undefined
+    ? base.with({
+        fallbackLocale: options.fallbackLocale,
+        locale: options.locale,
+        translator: options.translator,
+      })
+    : base;
+};
 
 const configuredNow = (): Date =>
   tempoConfig.testNow === null
@@ -1200,18 +1327,23 @@ export class TempoDuration {
 export class TempoImmutable {
   protected value: Date;
   protected currentLocale: string;
+  protected runtime: TempoRuntime;
   protected zone: string;
 
   constructor(input: TempoInput = new Date(), options?: TempoOptions) {
     this.value = asDate(input, options);
-    this.currentLocale = options?.locale ?? tempoConfig.locale;
+    this.runtime = runtimeFromOptions(input, options);
+    this.currentLocale = options?.locale ?? this.runtime.locale;
     this.zone = zoneFromInput(input, options);
   }
 
   static now(options?: TempoOptions): TempoImmutable {
     return new TempoImmutable(configuredNow(), {
+      fallbackLocale: options?.fallbackLocale,
       locale: options?.locale,
+      runtime: options?.runtime,
       timeZone: options?.timeZone ?? tempoConfig.timeZone,
+      translator: options?.translator,
     });
   }
 
@@ -1461,32 +1593,6 @@ export class TempoImmutable {
 
   static resetToStringFormat(): void {
     tempoConfig.toStringFormat = null;
-  }
-
-  static macro(name: string, macro: TempoMacro): void {
-    tempoMacros.set(name, macro);
-  }
-
-  static genericMacro(name: string, macro: TempoMacro): void {
-    TempoImmutable.macro(name, macro);
-  }
-
-  static hasMacro(name: string): boolean {
-    return tempoMacros.has(name);
-  }
-
-  static getMacro(name: string): TempoMacro | undefined {
-    return tempoMacros.get(name);
-  }
-
-  static resetMacros(): void {
-    tempoMacros.clear();
-  }
-
-  static mixin(mixin: Record<string, TempoMacro>): void {
-    Object.entries(mixin).forEach(([name, macro]) => {
-      TempoImmutable.macro(name, macro);
-    });
   }
 
   static getClock(): Date | null {
@@ -1890,13 +1996,14 @@ export class TempoImmutable {
     value: Date,
     timeZone = this.zone,
     locale = this.currentLocale,
+    runtime = this.runtime.with({ locale }),
   ): this {
     const Constructor = this.constructor as new (
       input: TempoInput,
       options?: TempoOptions,
     ) => this;
 
-    return new Constructor(value, { locale, timeZone });
+    return new Constructor(value, { locale, runtime, timeZone });
   }
 
   get timeZone(): string {
@@ -1907,12 +2014,42 @@ export class TempoImmutable {
     return this.currentLocale;
   }
 
+  getRuntime(): TempoRuntime {
+    return this.runtime;
+  }
+
+  withRuntime(runtime: TempoRuntime): this {
+    return this.make(this.value, this.zone, runtime.locale, runtime);
+  }
+
+  getLocalTranslator(): TempoTranslator {
+    return this.runtime.translatorState();
+  }
+
+  setLocalTranslator(translator: TempoTranslator): this {
+    const runtime = this.runtime.with({
+      fallbackLocale: translator.fallbackLocale,
+      locale: translator.locale ?? this.currentLocale,
+      translator,
+    });
+
+    return this.withRuntime(runtime);
+  }
+
+  withTranslator(translator: TempoTranslator): this {
+    return this.setLocalTranslator(translator);
+  }
+
+  hasLocalTranslator(): boolean {
+    return this.runtime.hasTranslator();
+  }
+
   locale(): string;
   locale(locale: string): this;
   locale(locale?: string): string | this {
     return locale === undefined
       ? this.currentLocale
-      : this.make(this.value, this.zone, locale);
+      : this.make(this.value, this.zone, locale, this.runtime.with({ locale }));
   }
 
   getSettings(): TempoSettings {
@@ -1933,11 +2070,19 @@ export class TempoImmutable {
         ? this.zone
         : normalizeTimeZone(settings.timeZone),
       settings.locale ?? this.currentLocale,
+      this.runtime.with({
+        fallbackLocale: settings.fallbackLocale,
+        locale: settings.locale ?? this.currentLocale,
+      }),
     );
   }
 
   get timestamp(): number {
     return Math.trunc(this.value.getTime() / millisecondsPerSecond);
+  }
+
+  getTimestamp(): number {
+    return this.timestamp;
   }
 
   get timestampMs(): number {
@@ -1968,20 +2113,44 @@ export class TempoImmutable {
     return this.dayOfWeek === 0 ? 7 : this.dayOfWeek;
   }
 
+  getISOWeekday(): number {
+    return this.isoWeekday;
+  }
+
   get isoWeek(): number {
     return isoWeekData(this.parts()).week;
+  }
+
+  getISOWeek(): number {
+    return this.isoWeek;
   }
 
   get isoWeekYear(): number {
     return isoWeekData(this.parts()).year;
   }
 
+  getISOWeekYear(): number {
+    return this.isoWeekYear;
+  }
+
   get weeksInISOYear(): number {
     return weeksInISOYear(this.isoWeekYear);
   }
 
+  get isoWeeksInYear(): number {
+    return this.weeksInISOYear;
+  }
+
+  getISOWeeksInYear(): number {
+    return this.isoWeeksInYear;
+  }
+
   get dayOfYear(): number {
     return this.diffInDays(this.startOf("year")) + 1;
+  }
+
+  getDayOfYear(): number {
+    return this.dayOfYear;
   }
 
   get hour(): number {
@@ -2105,30 +2274,22 @@ export class TempoImmutable {
     message: string,
     replacements: Record<string, string> = {},
   ): string {
-    return this.translateWith(message, replacements);
+    const translated = this.runtime.translate(message, replacements);
+
+    return typeof translated === "string"
+      ? translated
+      : this.translateWith(message, replacements);
   }
 
   translateWith(
     message: string,
     replacements: Record<string, string> = {},
   ): string {
-    return Object.entries(replacements).reduce(
-      (result, [key, value]) => result.replaceAll(`:${key}`, value),
-      message,
-    );
+    return replaceTranslationTokens(message, replacements);
   }
 
   getTranslationMessage(key: string): string | number | null {
-    switch (key) {
-      case "day_of_first_week_of_year":
-        return 4;
-      case "first_day_of_week":
-        return 1;
-      case "locale":
-        return this.currentLocale;
-      default:
-        return null;
-    }
+    return this.runtime.getMessage(key);
   }
 
   getTranslationMessageWith(
@@ -2397,6 +2558,7 @@ export class TempoImmutable {
   toImmutable(): TempoImmutable {
     return new TempoImmutable(this.value, {
       locale: this.currentLocale,
+      runtime: this.runtime,
       timeZone: this.zone,
     });
   }
@@ -2404,6 +2566,7 @@ export class TempoImmutable {
   toMutable(): TempoMutable {
     return new TempoMutable(this.value, {
       locale: this.currentLocale,
+      runtime: this.runtime,
       timeZone: this.zone,
     });
   }
@@ -2606,6 +2769,10 @@ export class TempoImmutable {
     return this.setTimestamp(timestamp);
   }
 
+  setTimestampFrom(timestamp: number): this {
+    return this.setTimestamp(timestamp);
+  }
+
   setISODate(year: number, week: number, day = 1): this {
     const isoYearStart = this.make(
       new Date(Date.UTC(year, 0, 4)),
@@ -2616,6 +2783,24 @@ export class TempoImmutable {
       .addWeeks(week - 1)
       .addDays(day - 1)
       .setTime(this.hour, this.minute, this.second, this.millisecond);
+  }
+
+  setISOWeek(week: number, day = this.isoWeekday): this {
+    return this.setISODate(this.isoWeekYear, week, day);
+  }
+
+  setISOWeekYear(year: number, day = this.isoWeekday): this {
+    return this.setISODate(year, this.isoWeek, day);
+  }
+
+  setISOWeekday(value: WeekdayInput): this {
+    const weekday = resolveWeekday(value);
+
+    return this.setISODate(
+      this.isoWeekYear,
+      this.isoWeek,
+      weekday === 0 ? 7 : weekday,
+    );
   }
 
   weekday(): number;
@@ -2636,6 +2821,10 @@ export class TempoImmutable {
     return this.startOfYear()
       .addDays(day - 1)
       .setTime(this.hour, this.minute, this.second, this.millisecond);
+  }
+
+  dayOfYearTo(day: number): this {
+    return this.setDayOfYear(day);
   }
 
   setUnitNoOverflow(
@@ -3702,7 +3891,7 @@ export class TempoImmutable {
     const unit = resolvedOptions.unit ?? bestRelativeUnit(rawMilliseconds);
     const value = Math.round(rawMilliseconds / unitDivisor(unit));
     const formatter = new Intl.RelativeTimeFormat(
-      resolvedOptions.locale ?? this.currentLocale,
+      resolvedOptions.locale ?? this.currentLocale ?? this.runtime.locale,
       {
         numeric: resolvedOptions.numeric ?? "always",
         style: resolvedOptions.style ?? "long",
@@ -4376,8 +4565,11 @@ export class TempoImmutable {
 export class Tempo extends TempoImmutable {
   static override now(options?: TempoOptions): Tempo {
     return new Tempo(configuredNow(), {
+      fallbackLocale: options?.fallbackLocale,
       locale: options?.locale,
+      runtime: options?.runtime,
       timeZone: options?.timeZone ?? tempoConfig.timeZone,
+      translator: options?.translator,
     });
   }
 
@@ -4566,8 +4758,11 @@ export class Tempo extends TempoImmutable {
 export class TempoMutable extends TempoImmutable {
   static override now(options?: TempoOptions): TempoMutable {
     return new TempoMutable(configuredNow(), {
+      fallbackLocale: options?.fallbackLocale,
       locale: options?.locale,
+      runtime: options?.runtime,
       timeZone: options?.timeZone ?? tempoConfig.timeZone,
+      translator: options?.translator,
     });
   }
 
@@ -4773,8 +4968,15 @@ export class TempoMutable extends TempoImmutable {
     return TempoMutable.fromTimestampMsUTC(timestamp);
   }
 
-  protected override make(value: Date, timeZone = this.zone): this {
+  protected override make(
+    value: Date,
+    timeZone = this.zone,
+    locale = this.currentLocale,
+    runtime = this.runtime.with({ locale }),
+  ): this {
     this.value = new Date(value.getTime());
+    this.currentLocale = locale;
+    this.runtime = runtime;
     this.zone = normalizeTimeZone(timeZone);
 
     return this;
@@ -5011,26 +5213,74 @@ export class TempoPeriod implements Iterable<Tempo> {
 
 export class TempoFactory {
   private readonly nowValue: Date | null;
+  private readonly runtime: TempoRuntime;
   private readonly zone: string;
 
-  private constructor(nowValue: Date | null, timeZone = defaultTimeZone) {
+  private constructor(
+    nowValue: Date | null,
+    timeZone = defaultTimeZone,
+    runtime = new TempoRuntime({
+      fallbackLocale: tempoConfig.fallbackLocale,
+      locale: tempoConfig.locale,
+    }),
+  ) {
     this.nowValue = nowValue === null ? null : new Date(nowValue.getTime());
+    this.runtime = runtime;
     this.zone = normalizeTimeZone(timeZone);
   }
 
   static create(options?: TempoOptions): TempoFactory {
-    return new TempoFactory(null, options?.timeZone);
+    return new TempoFactory(
+      null,
+      options?.timeZone,
+      runtimeFromOptions(undefined, options),
+    );
   }
 
   static withTestNow(input: TempoInput, options?: TempoOptions): TempoFactory {
     return new TempoFactory(
       asDate(input, options),
       zoneFromInput(input, options),
+      runtimeFromOptions(input, options),
     );
   }
 
+  getRuntime(): TempoRuntime {
+    return this.runtime;
+  }
+
+  withRuntime(runtime: TempoRuntime): TempoFactory {
+    return new TempoFactory(this.nowValue, this.zone, runtime);
+  }
+
+  withTranslator(translator: TempoTranslator): TempoFactory {
+    return this.withRuntime(
+      this.runtime.with({
+        fallbackLocale: translator.fallbackLocale,
+        locale: translator.locale ?? this.runtime.locale,
+        translator,
+      }),
+    );
+  }
+
+  private options(options?: TempoOptions): TempoOptions {
+    return {
+      fallbackLocale: options?.fallbackLocale,
+      locale: options?.locale,
+      runtime:
+        options?.runtime ??
+        this.runtime.with({
+          fallbackLocale: options?.fallbackLocale,
+          locale: options?.locale,
+          translator: options?.translator,
+        }),
+      timeZone: options?.timeZone ?? this.zone,
+      translator: options?.translator,
+    };
+  }
+
   now(): Tempo {
-    return Tempo.parse(this.nowValue ?? new Date(), { timeZone: this.zone });
+    return Tempo.parse(this.nowValue ?? new Date(), this.options());
   }
 
   today(): Tempo {
@@ -5046,23 +5296,19 @@ export class TempoFactory {
   }
 
   immutableNow(): TempoImmutable {
-    return TempoImmutable.parse(this.nowValue ?? new Date(), {
-      timeZone: this.zone,
-    });
+    return TempoImmutable.parse(this.nowValue ?? new Date(), this.options());
   }
 
   mutableNow(): TempoMutable {
-    return TempoMutable.parse(this.nowValue ?? new Date(), {
-      timeZone: this.zone,
-    });
+    return TempoMutable.parse(this.nowValue ?? new Date(), this.options());
   }
 
   parse(input: TempoInput, options?: TempoOptions): Tempo {
-    return Tempo.parse(input, { timeZone: options?.timeZone ?? this.zone });
+    return Tempo.parse(input, this.options(options));
   }
 
   tryParse(input: TempoInput, options?: TempoOptions): Tempo | null {
-    return Tempo.tryParse(input, { timeZone: options?.timeZone ?? this.zone });
+    return Tempo.tryParse(input, this.options(options));
   }
 
   canParse(input: TempoInput, options?: TempoOptions): boolean {
@@ -5070,9 +5316,7 @@ export class TempoFactory {
   }
 
   fromFormat(input: string, pattern: string, options?: TempoOptions): Tempo {
-    return Tempo.fromFormat(input, pattern, {
-      timeZone: options?.timeZone ?? this.zone,
-    });
+    return Tempo.fromFormat(input, pattern, this.options(options));
   }
 
   tryFromFormat(
@@ -5080,9 +5324,7 @@ export class TempoFactory {
     pattern: string,
     options?: TempoOptions,
   ): Tempo | null {
-    return Tempo.tryFromFormat(input, pattern, {
-      timeZone: options?.timeZone ?? this.zone,
-    });
+    return Tempo.tryFromFormat(input, pattern, this.options(options));
   }
 
   hasFormat(input: string, pattern: string, options?: TempoOptions): boolean {
@@ -5090,11 +5332,15 @@ export class TempoFactory {
   }
 
   create(components: TempoComponents): Tempo {
-    return Tempo.create({ timeZone: this.zone, ...components });
+    return Tempo.create({ timeZone: this.zone, ...components }).withRuntime(
+      this.runtime,
+    ) as Tempo;
   }
 
   createSafe(components: TempoComponents): Tempo {
-    return Tempo.createSafe({ timeZone: this.zone, ...components });
+    return Tempo.createSafe({ timeZone: this.zone, ...components }).withRuntime(
+      this.runtime,
+    ) as Tempo;
   }
 
   createFromDate(year: number, month = 1, day = 1): Tempo {
@@ -5114,15 +5360,11 @@ export class TempoFactory {
   }
 
   fromTimestamp(timestamp: number, options?: TempoOptions): Tempo {
-    return Tempo.fromTimestamp(timestamp, {
-      timeZone: options?.timeZone ?? this.zone,
-    });
+    return Tempo.fromTimestamp(timestamp, this.options(options));
   }
 
   fromTimestampMs(timestamp: number, options?: TempoOptions): Tempo {
-    return Tempo.fromTimestampMs(timestamp, {
-      timeZone: options?.timeZone ?? this.zone,
-    });
+    return Tempo.fromTimestampMs(timestamp, this.options(options));
   }
 }
 

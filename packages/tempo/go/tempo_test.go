@@ -14,6 +14,25 @@ func assertEqual(t *testing.T, label string, got string, want string) {
 	}
 }
 
+type mapTranslator map[string]string
+
+func (translator mapTranslator) Message(key string) (any, bool) {
+	value, ok := translator[key]
+	return value, ok
+}
+
+func (translator mapTranslator) Translate(key string, replacements map[string]string) (string, bool) {
+	value, ok := translator[key]
+	if !ok {
+		return "", false
+	}
+	for name, replacement := range replacements {
+		value = strings.ReplaceAll(value, ":"+name, replacement)
+	}
+
+	return value, true
+}
+
 func TestDateCases(t *testing.T) {
 	cases := []struct {
 		Name               string
@@ -1880,17 +1899,8 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	}
 	assertEqual(t, "json.Marshal(hooked Tempo)", string(hookedJSON), `"2024-05-15"`)
 	SerializeUsing(nil)
-	MacroRegister("dateOnly", func(value Tempo) string { return value.DateString() })
-	if !HasMacro("dateOnly") {
-		t.Fatalf("HasMacro(dateOnly) = false, want true")
-	}
-	if macro, ok := GetMacro("dateOnly"); !ok || macro == nil {
-		t.Fatalf("GetMacro(dateOnly) = %v, %v, want macro, true", macro, ok)
-	}
-	ResetMacros()
-	if HasMacro("dateOnly") {
-		t.Fatalf("HasMacro(dateOnly) after reset = true, want false")
-	}
+	dateOnly := func(value Tempo) string { return value.DateString() }
+	assertEqual(t, "composable dateOnly", dateOnly(tempo), "2024-05-15")
 }
 
 func TestExplicitSettersHandleZeroValues(t *testing.T) {
@@ -2115,4 +2125,84 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	if got := mutable.NowWithSameTz().Timezone(); got != "UTC" {
 		t.Fatalf("MutableTempo.NowWithSameTz().Timezone() = %q, want UTC", got)
 	}
+}
+
+func TestRuntimeScopedTranslator(t *testing.T) {
+	firstRuntime := NewRuntime(
+		RuntimeLocale("en-US"),
+		RuntimeTranslator(mapTranslator{"greeting": "Hello :name"}),
+	)
+	secondRuntime := NewRuntime(
+		RuntimeLocale("es-ES"),
+		RuntimeTranslator(mapTranslator{"greeting": "Hola :name"}),
+	)
+
+	firstFactory, err := NewFactory(WithTimezone("UTC"), WithRuntime(firstRuntime))
+	if err != nil {
+		t.Fatalf("new first factory: %v", err)
+	}
+	secondFactory, err := NewFactory(WithTimezone("UTC"), WithRuntime(secondRuntime))
+	if err != nil {
+		t.Fatalf("new second factory: %v", err)
+	}
+
+	first, err := firstFactory.Parse("2024-05-15")
+	if err != nil {
+		t.Fatalf("first parse: %v", err)
+	}
+	second, err := secondFactory.Parse("2024-05-15")
+	if err != nil {
+		t.Fatalf("second parse: %v", err)
+	}
+
+	assertEqual(t, "first Translate()", first.Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	assertEqual(t, "second Translate()", second.Translate("greeting", map[string]string{"name": "Tempo"}), "Hola Tempo")
+	if value, ok := first.GetTranslationMessage("locale"); !ok || value != "en-US" {
+		t.Fatalf("first locale message = %v, %v, want en-US, true", value, ok)
+	}
+	if value, ok := second.GetTranslationMessage("locale"); !ok || value != "es-ES" {
+		t.Fatalf("second locale message = %v, %v, want es-ES, true", value, ok)
+	}
+	if !first.HasLocalTranslator() {
+		t.Fatalf("HasLocalTranslator() = false, want true")
+	}
+	assertEqual(t, "Clone().Translate()", first.Clone().Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	assertEqual(t, "AddDays().Translate()", first.AddDays(1).Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	assertEqual(t, "Mutable AddDays().Translate()", first.Mutable().AddDays(1).Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+
+	replaced := first.SetLocalTranslator(mapTranslator{"greeting": "Salut :name"})
+	assertEqual(t, "replaced Translate()", replaced.Translate("greeting", map[string]string{"name": "Tempo"}), "Salut Tempo")
+	assertEqual(t, "original Translate()", first.Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+}
+
+func TestParityAliases(t *testing.T) {
+	monday, err := Parse("2024-01-01T00:00:00Z", WithTimezone("UTC"))
+	if err != nil {
+		t.Fatalf("parse monday: %v", err)
+	}
+
+	if got := monday.ISOWeekday(); got != 1 {
+		t.Fatalf("ISOWeekday() = %d, want 1", got)
+	}
+	if got := monday.ISOWeekNumber(); got != 1 {
+		t.Fatalf("ISOWeekNumber() = %d, want 1", got)
+	}
+	if got := monday.ISOWeekYear(); got != 2024 {
+		t.Fatalf("ISOWeekYear() = %d, want 2024", got)
+	}
+	if got := monday.ISOWeeksInYear(); got != 52 {
+		t.Fatalf("ISOWeeksInYear() = %d, want 52", got)
+	}
+	if got := monday.DayOfYear(); got != 1 {
+		t.Fatalf("DayOfYear() = %d, want 1", got)
+	}
+	assertEqual(t, "SetISOWeek().DateString()", monday.SetISOWeek(2).DateString(), "2024-01-08")
+	if got := monday.SetISOWeekYear(2025).ISOWeekYear(); got != 2025 {
+		t.Fatalf("SetISOWeekYear().ISOWeekYear() = %d, want 2025", got)
+	}
+	if got := monday.SetISOWeekday(7).ISOWeekday(); got != 7 {
+		t.Fatalf("SetISOWeekday().ISOWeekday() = %d, want 7", got)
+	}
+	assertEqual(t, "SetDayOfYear().DateString()", monday.SetDayOfYear(32).DateString(), "2024-02-01")
+	assertEqual(t, "SetTimestampFrom().ISOString()", monday.SetTimestampFrom(0).ISOString(), "1970-01-01T00:00:00.000Z")
 }

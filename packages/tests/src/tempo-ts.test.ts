@@ -11,6 +11,7 @@ import {
   createFromDate,
   createFromTime,
   createMidnightDate,
+  createTempoRuntime,
   createSafe,
   fromJSON,
   hasFormat,
@@ -977,13 +978,11 @@ describe("Tempo TypeScript behavior", () => {
     Tempo.serializeUsing((value) => value.toDateString());
     expect(JSON.stringify(tempo)).toBe('"2024-05-15"');
     Tempo.serializeUsing(null);
-    Tempo.macro("dateOnly", function () {
-      return this.toDateString();
-    });
-    expect(Tempo.hasMacro("dateOnly")).toBe(true);
-    expect(Tempo.getMacro("dateOnly")?.call(tempo)).toBe("2024-05-15");
-    Tempo.resetMacros();
-    expect(Tempo.hasMacro("dateOnly")).toBe(false);
+    const dateOnly = (value: Tempo) => value.toDateString();
+    expect(dateOnly(tempo)).toBe("2024-05-15");
+    expect("macro" in Tempo).toBe(false);
+    expect("genericMacro" in Tempo).toBe(false);
+    expect("mixin" in Tempo).toBe(false);
     expect(Tempo.make(null)).toBeNull();
     expect(Tempo.make("2024-05-15")?.toDateString()).toBe("2024-05-15");
     expect(Tempo.parseFromLocale("2024-05-15", "en-US").toDateString()).toBe(
@@ -1042,6 +1041,10 @@ describe("Tempo TypeScript behavior", () => {
       "1970-01-01T00:00:00.000Z",
     );
     expect(tempo.timestampTo(0).toISOString()).toBe("1970-01-01T00:00:00.000Z");
+    expect(tempo.getTimestamp()).toBe(1715776496);
+    expect(tempo.setTimestampFrom(0).toISOString()).toBe(
+      "1970-01-01T00:00:00.000Z",
+    );
     expect(tempo.setISODate(2024, 20, 3).toDateString()).toBe("2024-05-15");
     expect(tempo.weekday()).toBe(3);
     expect(tempo.weekday(5).toDateString()).toBe("2024-05-17");
@@ -1142,5 +1145,75 @@ describe("Tempo TypeScript behavior", () => {
       "2024-05-16",
     );
     expect(mutable.nowWithSameTz().timeZone).toBe("UTC");
+  });
+
+  it("scopes translator behavior through composable runtimes", () => {
+    const firstRuntime = createTempoRuntime({
+      locale: "en-US",
+      translator: {
+        getMessage: (key) => (key === "greeting" ? "Hello :name" : null),
+        locale: "en-US",
+      },
+    });
+    const secondRuntime = createTempoRuntime({
+      locale: "es-ES",
+      translator: {
+        getMessage: (key) => (key === "greeting" ? "Hola :name" : null),
+        locale: "es-ES",
+      },
+    });
+
+    const first = TempoFactory.create({
+      runtime: firstRuntime,
+      timeZone: "UTC",
+    }).parse("2024-05-15");
+    const second = TempoFactory.create({
+      runtime: secondRuntime,
+      timeZone: "UTC",
+    }).parse("2024-05-15");
+
+    expect(first.translate("greeting", { name: "Tempo" })).toBe("Hello Tempo");
+    expect(second.translate("greeting", { name: "Tempo" })).toBe("Hola Tempo");
+    expect(first.getTranslationMessage("locale")).toBe("en-US");
+    expect(second.getTranslationMessage("locale")).toBe("es-ES");
+    expect(first.hasLocalTranslator()).toBe(true);
+    expect(first.clone().translate("greeting", { name: "Tempo" })).toBe(
+      "Hello Tempo",
+    );
+    expect(first.addDays(1).translate("greeting", { name: "Tempo" })).toBe(
+      "Hello Tempo",
+    );
+    expect(
+      first.toMutable().addDays(1).translate("greeting", { name: "Tempo" }),
+    ).toBe("Hello Tempo");
+
+    const replaced = first.setLocalTranslator({
+      getMessage: (key) => (key === "greeting" ? "Salut :name" : null),
+      locale: "fr-FR",
+    });
+
+    expect(replaced.translate("greeting", { name: "Tempo" })).toBe(
+      "Salut Tempo",
+    );
+    expect(first.translate("greeting", { name: "Tempo" })).toBe("Hello Tempo");
+  });
+
+  it("exposes explicit parity aliases without replacing numeric properties", () => {
+    const monday = Tempo.parse("2024-01-01T00:00:00Z", { timeZone: "UTC" });
+
+    expect(monday.isoWeekday).toBe(1);
+    expect(monday.getISOWeekday()).toBe(1);
+    expect(monday.isoWeek).toBe(1);
+    expect(monday.getISOWeek()).toBe(1);
+    expect(monday.isoWeekYear).toBe(2024);
+    expect(monday.getISOWeekYear()).toBe(2024);
+    expect(monday.isoWeeksInYear).toBe(52);
+    expect(monday.getISOWeeksInYear()).toBe(52);
+    expect(monday.dayOfYear).toBe(1);
+    expect(monday.getDayOfYear()).toBe(1);
+    expect(monday.setISOWeek(2).toDateString()).toBe("2024-01-08");
+    expect(monday.setISOWeekYear(2025).isoWeekYear).toBe(2025);
+    expect(monday.setISOWeekday(7).isoWeekday).toBe(7);
+    expect(monday.dayOfYearTo(32).toDateString()).toBe("2024-02-01");
   });
 });

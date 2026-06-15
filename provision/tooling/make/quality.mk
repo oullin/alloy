@@ -1,4 +1,4 @@
-.PHONY: build format format-all go-test lint test typecheck
+.PHONY: build format format-all go-test lint parity-audit test typecheck
 
 ##@ Quality
 build: ## Build all TypeScript packages through Turbo
@@ -17,9 +17,11 @@ go-test: ## Run Go tests
 lint: ## Run static checks
 	$(call run_in,$(ROOT_PATH),pnpm lint)
 
+parity-audit: ## Audit adjusted Tempo parity coverage
+	$(call run_in,$(ROOT_PATH)/$(PROVISION_DIR),pnpm parity:audit)
+
 test: ## Run all TypeScript tests
 	$(call run_in,$(ROOT_PATH),pnpm test)
 
 typecheck: ## Typecheck all TypeScript packages
 	$(call run_in,$(ROOT_PATH),pnpm typecheck)
-

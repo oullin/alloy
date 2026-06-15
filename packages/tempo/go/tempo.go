@@ -96,9 +96,102 @@ type Settings struct {
 	YearsOverflow  bool
 }
 
-type Macro any
-
 type Serializer func(Tempo) string
+
+type Translator interface {
+	Message(key string) (any, bool)
+	Translate(key string, replacements map[string]string) (string, bool)
+}
+
+type Runtime struct {
+	locale         string
+	fallbackLocale string
+	translator     Translator
+}
+
+func NewRuntime(options ...RuntimeOption) Runtime {
+	runtime := Runtime{locale: "en-US", fallbackLocale: "en-US"}
+	for _, option := range options {
+		option(&runtime)
+	}
+
+	return runtime
+}
+
+type RuntimeOption func(*Runtime)
+
+func RuntimeLocale(locale string) RuntimeOption {
+	return func(runtime *Runtime) {
+		if strings.TrimSpace(locale) != "" {
+			runtime.locale = locale
+		}
+	}
+}
+
+func RuntimeFallbackLocale(locale string) RuntimeOption {
+	return func(runtime *Runtime) {
+		if strings.TrimSpace(locale) != "" {
+			runtime.fallbackLocale = locale
+		}
+	}
+}
+
+func RuntimeTranslator(translator Translator) RuntimeOption {
+	return func(runtime *Runtime) {
+		runtime.translator = translator
+	}
+}
+
+func (runtime Runtime) With(options ...RuntimeOption) Runtime {
+	next := runtime
+	for _, option := range options {
+		option(&next)
+	}
+
+	return next
+}
+
+func (runtime Runtime) Locale() string { return runtime.locale }
+
+func (runtime Runtime) FallbackLocale() string { return runtime.fallbackLocale }
+
+func (runtime Runtime) HasTranslator() bool { return runtime.translator != nil }
+
+func (runtime Runtime) Translator() Translator { return runtime.translator }
+
+func (runtime Runtime) Message(key string) (any, bool) {
+	if runtime.translator != nil {
+		if value, ok := runtime.translator.Message(key); ok {
+			return value, true
+		}
+	}
+
+	switch key {
+	case "day_of_first_week_of_year":
+		return 4, true
+	case "first_day_of_week":
+		return 1, true
+	case "locale":
+		return runtime.locale, true
+	default:
+		return nil, false
+	}
+}
+
+func (runtime Runtime) Translate(key string, replacements map[string]string) (string, bool) {
+	if runtime.translator != nil {
+		if value, ok := runtime.translator.Translate(key, replacements); ok {
+			return value, true
+		}
+	}
+	if value, ok := runtime.Message(key); ok {
+		if message, ok := value.(string); ok {
+			return replaceTranslationTokens(message, replacements), true
+		}
+	}
+
+	return "", false
+}
 
 type StartOfWeekOptions struct {
 	WeekStartsOn time.Weekday
@@ -114,16 +207,19 @@ type Option func(*config) error
 
 type config struct {
 	location *time.Location
+	runtime  Runtime
 }
 
 type Tempo struct {
 	value    time.Time
 	location *time.Location
+	runtime  Runtime
 }
 
 type MutableTempo struct {
 	value    time.Time
 	location *time.Location
+	runtime  Runtime
 }
 
 type Interval struct {
@@ -141,12 +237,12 @@ type Period struct {
 type Factory struct {
 	now      *time.Time
 	location *time.Location
+	runtime  Runtime
 }
 
 var (
 	defaultLocation = time.UTC
 	lastTempoError  error
-	macros          = map[string]Macro{}
 	serializer      Serializer
 	tempoSettings   = Settings{
 		FallbackLocale: "en-US",
@@ -180,6 +276,34 @@ func WithTimezone(name string) Option {
 		}
 
 		cfg.location = location
+		return nil
+	}
+}
+
+func WithRuntime(runtime Runtime) Option {
+	return func(cfg *config) error {
+		cfg.runtime = runtime
+		return nil
+	}
+}
+
+func WithTranslator(translator Translator) Option {
+	return func(cfg *config) error {
+		cfg.runtime = cfg.runtime.With(RuntimeTranslator(translator))
+		return nil
+	}
+}
+
+func WithLocale(locale string) Option {
+	return func(cfg *config) error {
+		cfg.runtime = cfg.runtime.With(RuntimeLocale(locale))
+		return nil
+	}
+}
+
+func WithFallbackLocale(locale string) Option {
+	return func(cfg *config) error {
+		cfg.runtime = cfg.runtime.With(RuntimeFallbackLocale(locale))
 		return nil
 	}
 }
@@ -292,10 +416,10 @@ func Now(options ...Option) (Tempo, error) {
 			location = configured
 		}
 
-		return Tempo{value: tempoSettings.TestNow.value.UTC(), location: location}, nil
+		return newTempo(tempoSettings.TestNow.value, location, cfg.runtime), nil
 	}
 
-	return Tempo{value: time.Now().UTC(), location: cfg.location}, nil
+	return newTempo(time.Now(), cfg.location, cfg.runtime), nil
 }
 
 func Today(options ...Option) (Tempo, error) {
@@ -331,7 +455,7 @@ func FromTime(value time.Time, options ...Option) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: value.UTC(), location: cfg.location}, nil
+	return newTempo(value, cfg.location, cfg.runtime), nil
 }
 
 func Parse(input string, options ...Option) (Tempo, error) {
@@ -345,7 +469,7 @@ func Parse(input string, options ...Option) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: parsed.UTC(), location: cfg.location}, nil
+	return newTempo(parsed, cfg.location, cfg.runtime), nil
 }
 
 func RawParse(input string, options ...Option) (Tempo, error) {
@@ -387,28 +511,6 @@ func SerializeUsing(next Serializer) { serializer = next }
 func SetToStringFormat(pattern string) { toStringFormat = pattern }
 
 func ResetToStringFormat() { toStringFormat = "" }
-
-func MacroRegister(name string, macro Macro) { macros[name] = macro }
-
-func GenericMacro(name string, macro Macro) { MacroRegister(name, macro) }
-
-func HasMacro(name string) bool {
-	_, ok := macros[name]
-	return ok
-}
-
-func GetMacro(name string) (Macro, bool) {
-	macro, ok := macros[name]
-	return macro, ok
-}
-
-func ResetMacros() { macros = map[string]Macro{} }
-
-func Mixin(items map[string]Macro) {
-	for name, macro := range items {
-		MacroRegister(name, macro)
-	}
-}
 
 func GetClock() *Tempo { return GetTestNow() }
 
@@ -568,7 +670,14 @@ func Create(components Components) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
+	return newTempo(
+		timeFromComponents(components, location),
+		location,
+		NewRuntime(
+			RuntimeLocale(tempoSettings.Locale),
+			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+		),
+	), nil
 }
 
 func CreateSafe(components Components) (Tempo, error) {
@@ -582,7 +691,14 @@ func CreateSafe(components Components) (Tempo, error) {
 		return Tempo{}, errors.New("invalid Tempo local date/time components")
 	}
 
-	return Tempo{value: value.UTC(), location: location}, nil
+	return newTempo(
+		value,
+		location,
+		NewRuntime(
+			RuntimeLocale(tempoSettings.Locale),
+			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+		),
+	), nil
 }
 
 func CreateStrict(components Components) (Tempo, error) {
@@ -599,10 +715,11 @@ func CreateFromDate(year int, month int, day int, options ...Option) (Tempo, err
 		return Tempo{}, err
 	}
 
-	return Tempo{
-		value:    timeFromComponents(Components{Year: year, Month: month, Day: day}, cfg.location).UTC(),
-		location: cfg.location,
-	}, nil
+	return newTempo(
+		timeFromComponents(Components{Year: year, Month: month, Day: day}, cfg.location),
+		cfg.location,
+		cfg.runtime,
+	), nil
 }
 
 func CreateMidnightDate(year int, month int, day int, options ...Option) (Tempo, error) {
@@ -637,7 +754,7 @@ func FromTimestamp(timestamp int64, options ...Option) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: cfg.location}, nil
+	return newTempo(time.Unix(timestamp, 0), cfg.location, cfg.runtime), nil
 }
 
 func CreateFromTimestamp(timestamp int64, options ...Option) (Tempo, error) {
@@ -650,7 +767,7 @@ func FromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: cfg.location}, nil
+	return newTempo(time.UnixMilli(timestamp), cfg.location, cfg.runtime), nil
 }
 
 func CreateFromTimestampMs(timestamp int64, options ...Option) (Tempo, error) {
@@ -679,11 +796,11 @@ func NewFactory(options ...Option) (Factory, error) {
 		return Factory{}, err
 	}
 
-	return Factory{location: cfg.location}, nil
+	return Factory{location: cfg.location, runtime: cfg.runtime}, nil
 }
 
 func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
-	cfg := config{location: input.location}
+	cfg := config{location: input.location, runtime: input.Runtime()}
 	for _, option := range options {
 		if err := option(&cfg); err != nil {
 			return Factory{}, err
@@ -691,15 +808,36 @@ func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
 	}
 
 	now := input.value
-	return Factory{now: &now, location: cfg.location}, nil
+	return Factory{now: &now, location: cfg.location, runtime: cfg.runtime}, nil
 }
 
 func (factory Factory) Now() Tempo {
 	if factory.now != nil {
-		return Tempo{value: factory.now.UTC(), location: factory.location}
+		return newTempo(*factory.now, factory.location, factory.runtime)
 	}
 
-	return Tempo{value: time.Now().UTC(), location: factory.location}
+	return newTempo(time.Now(), factory.location, factory.runtime)
+}
+
+func (factory Factory) Runtime() Runtime {
+	if factory.runtime.Locale() == "" {
+		return NewRuntime(
+			RuntimeLocale(tempoSettings.Locale),
+			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+		)
+	}
+
+	return factory.runtime
+}
+
+func (factory Factory) WithRuntime(runtime Runtime) Factory {
+	factory.runtime = runtime
+	return factory
+}
+
+func (factory Factory) WithTranslator(translator Translator) Factory {
+	factory.runtime = factory.Runtime().With(RuntimeTranslator(translator))
+	return factory
 }
 
 func (factory Factory) Today() Tempo {
@@ -723,7 +861,7 @@ func (factory Factory) MutableNow() *MutableTempo {
 }
 
 func (factory Factory) FromTime(value time.Time) Tempo {
-	return Tempo{value: value.UTC(), location: factory.location}
+	return newTempo(value, factory.location, factory.runtime)
 }
 
 func (factory Factory) Parse(input string) (Tempo, error) {
@@ -732,7 +870,7 @@ func (factory Factory) Parse(input string) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: parsed.UTC(), location: factory.location}, nil
+	return newTempo(parsed, factory.location, factory.runtime), nil
 }
 
 func (factory Factory) TryParse(input string) (Tempo, bool) {
@@ -751,7 +889,7 @@ func (factory Factory) FromFormat(input string, pattern string) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: parsed.UTC(), location: factory.location}, nil
+	return newTempo(parsed, factory.location, factory.runtime), nil
 }
 
 func (factory Factory) CreateFromFormat(input string, pattern string) (Tempo, error) {
@@ -782,7 +920,7 @@ func (factory Factory) Create(components Components) (Tempo, error) {
 		location = nextLocation
 	}
 
-	return Tempo{value: timeFromComponents(components, location).UTC(), location: location}, nil
+	return newTempo(timeFromComponents(components, location), location, factory.runtime), nil
 }
 
 func (factory Factory) CreateSafe(components Components) (Tempo, error) {
@@ -800,13 +938,14 @@ func (factory Factory) CreateSafe(components Components) (Tempo, error) {
 		return Tempo{}, errors.New("invalid Tempo local date/time components")
 	}
 
-	return Tempo{value: value.UTC(), location: location}, nil
+	return newTempo(value, location, factory.runtime), nil
 }
 
 func (factory Factory) CreateFromDate(year int, month int, day int) Tempo {
 	return Tempo{
 		value:    timeFromComponents(Components{Year: year, Month: month, Day: day}, factory.location).UTC(),
 		location: factory.location,
+		runtime:  factory.runtime,
 	}
 }
 
@@ -827,7 +966,7 @@ func (factory Factory) FromObject(components Components) (Tempo, error) {
 }
 
 func (factory Factory) FromTimestamp(timestamp int64) Tempo {
-	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: factory.location}
+	return newTempo(time.Unix(timestamp, 0), factory.location, factory.runtime)
 }
 
 func (factory Factory) CreateFromTimestamp(timestamp int64) Tempo {
@@ -835,7 +974,7 @@ func (factory Factory) CreateFromTimestamp(timestamp int64) Tempo {
 }
 
 func (factory Factory) FromTimestampMs(timestamp int64) Tempo {
-	return Tempo{value: time.UnixMilli(timestamp).UTC(), location: factory.location}
+	return newTempo(time.UnixMilli(timestamp), factory.location, factory.runtime)
 }
 
 func (factory Factory) CreateFromTimestampMs(timestamp int64) Tempo {
@@ -914,7 +1053,7 @@ func Average(start Tempo, end Tempo) Tempo {
 }
 
 func NewMutable(input Tempo) *MutableTempo {
-	return &MutableTempo{value: input.value, location: input.location}
+	return &MutableTempo{value: input.value, location: input.location, runtime: input.Runtime()}
 }
 
 func ParseMutable(input string, options ...Option) (*MutableTempo, error) {
@@ -1162,6 +1301,38 @@ func (tempo Tempo) Clone() Tempo {
 	return tempo
 }
 
+func (tempo Tempo) Runtime() Runtime {
+	if tempo.runtime.Locale() == "" {
+		return NewRuntime(
+			RuntimeLocale(tempoSettings.Locale),
+			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+		)
+	}
+
+	return tempo.runtime
+}
+
+func (tempo Tempo) WithRuntime(runtime Runtime) Tempo {
+	tempo.runtime = runtime
+	return tempo
+}
+
+func (tempo Tempo) GetLocalTranslator() Translator {
+	return tempo.Runtime().Translator()
+}
+
+func (tempo Tempo) SetLocalTranslator(translator Translator) Tempo {
+	return tempo.WithRuntime(tempo.Runtime().With(RuntimeTranslator(translator)))
+}
+
+func (tempo Tempo) WithTranslator(translator Translator) Tempo {
+	return tempo.SetLocalTranslator(translator)
+}
+
+func (tempo Tempo) HasLocalTranslator() bool {
+	return tempo.Runtime().HasTranslator()
+}
+
 func (tempo Tempo) AvoidMutation() Tempo {
 	return tempo.Clone()
 }
@@ -1171,11 +1342,11 @@ func (tempo Tempo) Cast() Tempo {
 }
 
 func (tempo Tempo) Tempoize(input Tempo) Tempo {
-	return Tempo{value: input.value, location: input.location}
+	return newTempo(input.value, input.location, tempo.Runtime())
 }
 
 func (tempo Tempo) NowWithSameTz() Tempo {
-	return Tempo{value: time.Now(), location: tempo.location}
+	return newTempo(time.Now(), tempo.location, tempo.Runtime())
 }
 
 func (tempo Tempo) Modify(modifier string) (Tempo, error) {
@@ -1442,16 +1613,19 @@ func (tempo Tempo) GetAltNumber(value int) string {
 }
 
 func (tempo Tempo) Translate(message string, replacements map[string]string) string {
+	if translated, ok := tempo.Runtime().Translate(message, replacements); ok {
+		return translated
+	}
+
 	return tempo.TranslateWith(message, replacements)
 }
 
 func (tempo Tempo) TranslateWith(message string, replacements map[string]string) string {
-	output := message
-	for key, value := range replacements {
-		output = strings.ReplaceAll(output, ":"+key, value)
-	}
+	return replaceTranslationTokens(message, replacements)
+}
 
-	return output
+func (tempo Tempo) GetTranslationMessage(key string) (any, bool) {
+	return tempo.Runtime().Message(key)
 }
 
 func (tempo Tempo) IsUTC() bool {
@@ -1598,7 +1772,7 @@ func (tempo Tempo) SetTimezone(name string) (Tempo, error) {
 		return Tempo{}, err
 	}
 
-	return Tempo{value: tempo.value, location: location}, nil
+	return newTempo(tempo.value, location, tempo.Runtime()), nil
 }
 
 func (tempo Tempo) SetTimezoneKeepLocal(name string) (Tempo, error) {
@@ -1619,7 +1793,7 @@ func (tempo Tempo) SetTimezoneKeepLocal(name string) (Tempo, error) {
 		location,
 	)
 
-	return Tempo{value: next.UTC(), location: location}, nil
+	return newTempo(next, location, tempo.Runtime()), nil
 }
 
 func (tempo Tempo) ShiftTimezone(name string) (Tempo, error) {
@@ -1627,11 +1801,11 @@ func (tempo Tempo) ShiftTimezone(name string) (Tempo, error) {
 }
 
 func (tempo Tempo) UTC() Tempo {
-	return Tempo{value: tempo.value, location: time.UTC}
+	return newTempo(tempo.value, time.UTC, tempo.Runtime())
 }
 
 func (tempo Tempo) Local() Tempo {
-	return Tempo{value: tempo.value, location: time.Local}
+	return newTempo(tempo.value, time.Local, tempo.Runtime())
 }
 
 func (tempo Tempo) fromObject(object Object, location *time.Location) Tempo {
@@ -1646,7 +1820,7 @@ func (tempo Tempo) fromObject(object Object, location *time.Location) Tempo {
 		location,
 	)
 
-	return Tempo{value: next.UTC(), location: location}
+	return newTempo(next, location, tempo.Runtime())
 }
 
 func (tempo Tempo) Set(components Components) (Tempo, error) {
@@ -1817,19 +1991,54 @@ func (tempo Tempo) SetTimeFromTimeString(input string) (Tempo, error) {
 }
 
 func (tempo Tempo) SetTimestamp(timestamp int64) Tempo {
-	return Tempo{value: time.Unix(timestamp, 0).UTC(), location: tempo.location}
+	return newTempo(time.Unix(timestamp, 0), tempo.location, tempo.Runtime())
 }
 
 func (tempo Tempo) SetISODate(year int, week int, day int) Tempo {
 	isoYearStart := Tempo{
 		value:    time.Date(year, time.January, 4, 0, 0, 0, 0, tempo.location).UTC(),
 		location: tempo.location,
+		runtime:  tempo.Runtime(),
 	}.StartOfWeek(StartOfWeekOptions{WeekStartsOn: time.Monday})
 
 	return isoYearStart.
 		AddWeeks(week-1).
 		AddDays(day-1).
 		SetTime(tempo.Hour(), tempo.Minute(), tempo.Second(), tempo.Millisecond())
+}
+
+func (tempo Tempo) SetISOWeek(week int, days ...int) Tempo {
+	day := tempo.ISOWeekday()
+	if len(days) > 0 {
+		day = days[0]
+	}
+
+	return tempo.SetISODate(tempo.ISOWeekYear(), week, day)
+}
+
+func (tempo Tempo) SetISOWeekYear(year int, days ...int) Tempo {
+	day := tempo.ISOWeekday()
+	if len(days) > 0 {
+		day = days[0]
+	}
+
+	return tempo.SetISODate(year, tempo.ISOWeekNumber(), day)
+}
+
+func (tempo Tempo) SetISOWeekday(day int) Tempo {
+	if day == 0 {
+		day = 7
+	}
+
+	return tempo.SetISODate(tempo.ISOWeekYear(), tempo.ISOWeekNumber(), day)
+}
+
+func (tempo Tempo) ISOWeeksInYear() int {
+	return tempo.WeeksInISOYear()
+}
+
+func (tempo Tempo) SetTimestampFrom(timestamp int64) Tempo {
+	return tempo.SetTimestamp(timestamp)
 }
 
 func (tempo Tempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) Tempo {
@@ -3487,15 +3696,15 @@ func (tempo Tempo) local() time.Time {
 }
 
 func (tempo Tempo) addDuration(duration time.Duration) Tempo {
-	return Tempo{value: tempo.value.Add(duration).UTC(), location: tempo.location}
+	return newTempo(tempo.value.Add(duration), tempo.location, tempo.Runtime())
 }
 
 func (tempo Tempo) addDurationDate(years int, months int, days int) Tempo {
-	return Tempo{value: tempo.local().AddDate(years, months, days).UTC(), location: tempo.location}
+	return newTempo(tempo.local().AddDate(years, months, days), tempo.location, tempo.Runtime())
 }
 
 func (tempo Tempo) fromLocal(local time.Time) Tempo {
-	return Tempo{value: local.UTC(), location: tempo.location}
+	return newTempo(local, tempo.location, tempo.Runtime())
 }
 
 func (tempo Tempo) compareValue(units ...Unit) int64 {
@@ -3543,7 +3752,7 @@ func (tempo Tempo) diffFilteredDays(other Tempo, predicate func(Tempo) bool, opt
 }
 
 func (mutable *MutableTempo) Tempo() Tempo {
-	return Tempo{value: mutable.value, location: mutable.location}
+	return newTempo(mutable.value, mutable.location, mutable.runtime)
 }
 
 func (mutable *MutableTempo) Clone() *MutableTempo {
@@ -3581,6 +3790,30 @@ func (mutable *MutableTempo) Change(modifier string) (*MutableTempo, error) {
 
 func (mutable *MutableTempo) Immutable() Tempo {
 	return mutable.Tempo()
+}
+
+func (mutable *MutableTempo) Runtime() Runtime {
+	return mutable.Tempo().Runtime()
+}
+
+func (mutable *MutableTempo) WithRuntime(runtime Runtime) *MutableTempo {
+	return mutable.replace(mutable.Tempo().WithRuntime(runtime))
+}
+
+func (mutable *MutableTempo) GetLocalTranslator() Translator {
+	return mutable.Tempo().GetLocalTranslator()
+}
+
+func (mutable *MutableTempo) SetLocalTranslator(translator Translator) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetLocalTranslator(translator))
+}
+
+func (mutable *MutableTempo) WithTranslator(translator Translator) *MutableTempo {
+	return mutable.SetLocalTranslator(translator)
+}
+
+func (mutable *MutableTempo) HasLocalTranslator() bool {
+	return mutable.Tempo().HasLocalTranslator()
 }
 
 func (mutable *MutableTempo) Timezone() string {
@@ -3761,6 +3994,10 @@ func (mutable *MutableTempo) Translate(message string, replacements map[string]s
 
 func (mutable *MutableTempo) TranslateWith(message string, replacements map[string]string) string {
 	return mutable.Tempo().TranslateWith(message, replacements)
+}
+
+func (mutable *MutableTempo) GetTranslationMessage(key string) (any, bool) {
+	return mutable.Tempo().GetTranslationMessage(key)
 }
 
 func (mutable *MutableTempo) IsUTC() bool {
@@ -4168,8 +4405,28 @@ func (mutable *MutableTempo) SetTimestamp(timestamp int64) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SetTimestamp(timestamp))
 }
 
+func (mutable *MutableTempo) SetTimestampFrom(timestamp int64) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetTimestampFrom(timestamp))
+}
+
 func (mutable *MutableTempo) SetISODate(year int, week int, day int) *MutableTempo {
 	return mutable.replace(mutable.Tempo().SetISODate(year, week, day))
+}
+
+func (mutable *MutableTempo) SetISOWeek(week int, days ...int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetISOWeek(week, days...))
+}
+
+func (mutable *MutableTempo) SetISOWeekYear(year int, days ...int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetISOWeekYear(year, days...))
+}
+
+func (mutable *MutableTempo) SetISOWeekday(day int) *MutableTempo {
+	return mutable.replace(mutable.Tempo().SetISOWeekday(day))
+}
+
+func (mutable *MutableTempo) ISOWeeksInYear() int {
+	return mutable.Tempo().ISOWeeksInYear()
 }
 
 func (mutable *MutableTempo) SetUnitNoOverflow(valueUnit Unit, value int, overflowUnit Unit) *MutableTempo {
@@ -5000,6 +5257,7 @@ func (mutable *MutableTempo) Range(end Tempo, options ...PeriodOptions) Period {
 func (mutable *MutableTempo) replace(next Tempo) *MutableTempo {
 	mutable.value = next.value
 	mutable.location = next.location
+	mutable.runtime = next.Runtime()
 	return mutable
 }
 
@@ -5231,7 +5489,13 @@ func (period Period) ToDuration() Duration {
 }
 
 func applyOptions(options ...Option) (config, error) {
-	cfg := config{location: defaultLocation}
+	cfg := config{
+		location: defaultLocation,
+		runtime: NewRuntime(
+			RuntimeLocale(tempoSettings.Locale),
+			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+		),
+	}
 	for _, option := range options {
 		if err := option(&cfg); err != nil {
 			return config{}, err
@@ -5239,6 +5503,33 @@ func applyOptions(options ...Option) (config, error) {
 	}
 
 	return cfg, nil
+}
+
+func newTempo(value time.Time, location *time.Location, runtime Runtime) Tempo {
+	if location == nil {
+		location = defaultLocation
+	}
+	if runtime.Locale() == "" {
+		runtime = NewRuntime(
+			RuntimeLocale(tempoSettings.Locale),
+			RuntimeFallbackLocale(tempoSettings.FallbackLocale),
+		)
+	}
+
+	return Tempo{value: value.UTC(), location: location, runtime: runtime}
+}
+
+func (tempo Tempo) with(value time.Time, location *time.Location) Tempo {
+	return newTempo(value, location, tempo.Runtime())
+}
+
+func replaceTranslationTokens(message string, replacements map[string]string) string {
+	output := message
+	for key, value := range replacements {
+		output = strings.ReplaceAll(output, ":"+key, value)
+	}
+
+	return output
 }
 
 func loadLocation(name string) (*time.Location, error) {
