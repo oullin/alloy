@@ -130,11 +130,13 @@ func (mutable *MutableTempo) IsEndOfTime() bool {
 }
 
 func (mutable *MutableTempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
-	return diff.Diff(mutable, other.State(), unit, diffOptions(options)...)
+	return diff.Between(mutable, other.State(), unit, diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffAsDuration(other Tempo, options ...DiffOptions) Duration {
-	return Duration{Milliseconds: mutable.DiffInMilliseconds(other, options...)}.Normalize()
+	value := Duration{Milliseconds: mutable.DiffInMilliseconds(other, options...)}
+
+	return value.Normalize()
 }
 
 func (mutable *MutableTempo) DiffAsDateInterval(other Tempo, options ...DiffOptions) Duration {
@@ -146,55 +148,55 @@ func (mutable *MutableTempo) DiffAsTempoInterval(other Tempo, options ...DiffOpt
 }
 
 func (mutable *MutableTempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMilliseconds(mutable, other.State(), diffOptions(options)...)
+	return diff.InMilliseconds(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInMicroseconds(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMicroseconds(mutable, other.State(), diffOptions(options)...)
+	return diff.InMicroseconds(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInSeconds(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInSeconds(mutable, other.State(), diffOptions(options)...)
+	return diff.InSeconds(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInMinutes(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMinutes(mutable, other.State(), diffOptions(options)...)
+	return diff.InMinutes(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInHours(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInHours(mutable, other.State(), diffOptions(options)...)
+	return diff.InHours(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInDays(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInDays(mutable, other.State(), diffOptions(options)...)
+	return diff.InDays(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInWeeks(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInWeeks(mutable, other.State(), diffOptions(options)...)
+	return diff.InWeeks(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInWeekdays(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInWeekdays(mutable, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekdays(mutable, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInWeekendDays(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInWeekendDays(mutable, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekendDays(mutable, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMonths(mutable, other.State(), diffOptions(options)...)
+	return diff.InMonths(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInQuarters(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInQuarters(mutable, other.State(), diffOptions(options)...)
+	return diff.InQuarters(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInYears(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInYears(mutable, other.State(), diffOptions(options)...)
+	return diff.InYears(mutable, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInUnit(unit Unit, other Tempo, options ...DiffOptions) int {
-	return diff.DiffInUnit(mutable, unit, other.State(), diffOptions(options)...)
+	return diff.InUnit(mutable, unit, other.State(), diffOptions(options)...)
 }
 
 func (mutable *MutableTempo) DiffInDaysFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {

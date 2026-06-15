@@ -2,66 +2,66 @@ package duration
 
 import "time"
 
-func (duration Duration) Plus(other Duration) Duration {
+func (value *Duration) Plus(other Duration) Duration {
 	return Duration{
-		Years:        duration.Years + other.Years,
-		Quarters:     duration.Quarters + other.Quarters,
-		Months:       duration.Months + other.Months,
-		Weeks:        duration.Weeks + other.Weeks,
-		Days:         duration.Days + other.Days,
-		Hours:        duration.Hours + other.Hours,
-		Minutes:      duration.Minutes + other.Minutes,
-		Seconds:      duration.Seconds + other.Seconds,
-		Milliseconds: duration.Milliseconds + other.Milliseconds,
+		Years:        value.Years + other.Years,
+		Quarters:     value.Quarters + other.Quarters,
+		Months:       value.Months + other.Months,
+		Weeks:        value.Weeks + other.Weeks,
+		Days:         value.Days + other.Days,
+		Hours:        value.Hours + other.Hours,
+		Minutes:      value.Minutes + other.Minutes,
+		Seconds:      value.Seconds + other.Seconds,
+		Milliseconds: value.Milliseconds + other.Milliseconds,
 	}
 }
 
-func (duration Duration) Minus(other Duration) Duration {
-	return duration.Plus(other.Negated())
+func (value *Duration) Minus(other Duration) Duration {
+	return value.Plus(other.Negated())
 }
 
-func (duration Duration) Negated() Duration {
+func (value *Duration) Negated() Duration {
 	return Duration{
-		Years:        -duration.Years,
-		Quarters:     -duration.Quarters,
-		Months:       -duration.Months,
-		Weeks:        -duration.Weeks,
-		Days:         -duration.Days,
-		Hours:        -duration.Hours,
-		Minutes:      -duration.Minutes,
-		Seconds:      -duration.Seconds,
-		Milliseconds: -duration.Milliseconds,
+		Years:        -value.Years,
+		Quarters:     -value.Quarters,
+		Months:       -value.Months,
+		Weeks:        -value.Weeks,
+		Days:         -value.Days,
+		Hours:        -value.Hours,
+		Minutes:      -value.Minutes,
+		Seconds:      -value.Seconds,
+		Milliseconds: -value.Milliseconds,
 	}
 }
 
-func (duration Duration) Abs() Duration {
+func (value *Duration) Abs() Duration {
 	return Duration{
-		Years:        absInt(duration.Years),
-		Quarters:     absInt(duration.Quarters),
-		Months:       absInt(duration.Months),
-		Weeks:        absInt(duration.Weeks),
-		Days:         absInt(duration.Days),
-		Hours:        absInt(duration.Hours),
-		Minutes:      absInt(duration.Minutes),
-		Seconds:      absInt(duration.Seconds),
-		Milliseconds: absInt(duration.Milliseconds),
+		Years:        absInt(value.Years),
+		Quarters:     absInt(value.Quarters),
+		Months:       absInt(value.Months),
+		Weeks:        absInt(value.Weeks),
+		Days:         absInt(value.Days),
+		Hours:        absInt(value.Hours),
+		Minutes:      absInt(value.Minutes),
+		Seconds:      absInt(value.Seconds),
+		Milliseconds: absInt(value.Milliseconds),
 	}
 }
 
-func (duration Duration) Normalize() Duration {
-	sign := duration.direction()
-	value := duration.Abs()
-	milliseconds := value.Milliseconds
-	seconds := value.Seconds + milliseconds/1000
+func (value *Duration) Normalize() Duration {
+	sign := value.direction()
+	absolute := value.Abs()
+	milliseconds := absolute.Milliseconds
+	seconds := absolute.Seconds + milliseconds/1000
 	milliseconds %= 1000
-	minutes := value.Minutes + seconds/60
+	minutes := absolute.Minutes + seconds/60
 	seconds %= 60
-	hours := value.Hours + minutes/60
+	hours := absolute.Hours + minutes/60
 	minutes %= 60
-	days := value.Days + hours/24 + value.Weeks*7
+	days := absolute.Days + hours/24 + absolute.Weeks*7
 	hours %= 24
-	months := value.Months + value.Quarters*3
-	years := value.Years + months/12
+	months := absolute.Months + absolute.Quarters*3
+	years := absolute.Years + months/12
 	months %= 12
 
 	return Duration{
@@ -75,14 +75,14 @@ func (duration Duration) Normalize() Duration {
 	}
 }
 
-func (duration Duration) Total(unit Unit) float64 {
-	milliseconds := duration.totalMilliseconds()
+func (value *Duration) Total(unit Unit) float64 {
+	milliseconds := value.totalMilliseconds()
 
 	if fixed, ok := FixedUnitDuration(unit); ok {
 		return float64(milliseconds) / float64(fixed.Milliseconds())
 	}
 
-	months := float64(duration.Years*12+duration.Quarters*3+duration.Months) + float64(milliseconds)/float64((30*24*time.Hour).Milliseconds())
+	months := float64(value.Years*12+value.Quarters*3+value.Months) + float64(milliseconds)/float64((30*24*time.Hour).Milliseconds())
 
 	switch NormalizeUnit(unit) {
 	case Month:
@@ -96,37 +96,37 @@ func (duration Duration) Total(unit Unit) float64 {
 	}
 }
 
-func (duration Duration) IsZero() bool {
-	return duration == (Duration{})
+func (value *Duration) IsZero() bool {
+	return *value == (Duration{})
 }
 
-func (duration Duration) IsPositive() bool {
-	return !duration.IsZero() && duration.direction() > 0
+func (value *Duration) IsPositive() bool {
+	return !value.IsZero() && value.direction() > 0
 }
 
-func (duration Duration) IsNegative() bool {
-	return duration.direction() < 0
+func (value *Duration) IsNegative() bool {
+	return value.direction() < 0
 }
 
-func (duration Duration) totalMilliseconds() int64 {
-	return int64(duration.Weeks*7+duration.Days)*int64((24*time.Hour)/time.Millisecond) +
-		int64(duration.Hours)*int64(time.Hour/time.Millisecond) +
-		int64(duration.Minutes)*int64(time.Minute/time.Millisecond) +
-		int64(duration.Seconds)*int64(time.Second/time.Millisecond) +
-		int64(duration.Milliseconds)
+func (value *Duration) totalMilliseconds() int64 {
+	return int64(value.Weeks*7+value.Days)*int64((24*time.Hour)/time.Millisecond) +
+		int64(value.Hours)*int64(time.Hour/time.Millisecond) +
+		int64(value.Minutes)*int64(time.Minute/time.Millisecond) +
+		int64(value.Seconds)*int64(time.Second/time.Millisecond) +
+		int64(value.Milliseconds)
 }
 
-func (duration Duration) direction() int {
+func (value *Duration) direction() int {
 	values := []int{
-		duration.Years,
-		duration.Quarters,
-		duration.Months,
-		duration.Weeks,
-		duration.Days,
-		duration.Hours,
-		duration.Minutes,
-		duration.Seconds,
-		duration.Milliseconds,
+		value.Years,
+		value.Quarters,
+		value.Months,
+		value.Weeks,
+		value.Days,
+		value.Hours,
+		value.Minutes,
+		value.Seconds,
+		value.Milliseconds,
 	}
 
 	for _, value := range values {

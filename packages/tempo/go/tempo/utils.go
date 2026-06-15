@@ -77,25 +77,6 @@ func monthNumberFromName(input string) (int, bool) {
 	return month, ok
 }
 
-func ordinal(value int) string {
-	remainder := value % 100
-
-	if remainder >= 11 && remainder <= 13 {
-		return strconv.Itoa(value) + "th"
-	}
-
-	switch value % 10 {
-	case 1:
-		return strconv.Itoa(value) + "st"
-	case 2:
-		return strconv.Itoa(value) + "nd"
-	case 3:
-		return strconv.Itoa(value) + "rd"
-	default:
-		return strconv.Itoa(value) + "th"
-	}
-}
-
 func formatOffset(offsetMinutes int, separator string) string {
 	sign := "+"
 

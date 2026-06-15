@@ -1,6 +1,6 @@
 // Package diff exposes generic temporal difference helpers that work on
 // any core.Bearer — both the immutable Tempo and the mutable
-// *MutableTempo — so Diff/DiffInDays/DiffForHumans share a single
+// *MutableTempo — so Between/InDays/ForHumans share a single
 // implementation.
 //
 // Read-only queries take a core.State for the right-hand side instead
@@ -38,7 +38,7 @@ type HumanOptions struct {
 	Unit     duration.Unit
 }
 
-func Diff[T core.Bearer[T]](bearer T, other core.State, unit duration.Unit, options ...Options) float64 {
+func Between[T core.Bearer[T]](bearer T, other core.State, unit duration.Unit, options ...Options) float64 {
 	opts := Options{}
 
 	if len(options) > 0 {
@@ -77,51 +77,51 @@ func Diff[T core.Bearer[T]](bearer T, other core.State, unit duration.Unit, opti
 	return math.Trunc(value)
 }
 
-func DiffInMilliseconds[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Millisecond, options...))
+func InMilliseconds[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Millisecond, options...))
 }
 
-func DiffInMicroseconds[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return DiffInMilliseconds(bearer, other, options...) * 1000
+func InMicroseconds[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return InMilliseconds(bearer, other, options...) * 1000
 }
 
-func DiffInSeconds[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Second, options...))
+func InSeconds[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Second, options...))
 }
 
-func DiffInMinutes[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Minute, options...))
+func InMinutes[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Minute, options...))
 }
 
-func DiffInHours[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Hour, options...))
+func InHours[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Hour, options...))
 }
 
-func DiffInDays[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Day, options...))
+func InDays[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Day, options...))
 }
 
-func DiffInWeeks[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Week, options...))
+func InWeeks[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Week, options...))
 }
 
-func DiffInMonths[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Month, options...))
+func InMonths[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Month, options...))
 }
 
-func DiffInQuarters[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Quarter, options...))
+func InQuarters[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Quarter, options...))
 }
 
-func DiffInYears[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, duration.Year, options...))
+func InYears[T core.Bearer[T]](bearer T, other core.State, options ...Options) int {
+	return int(Between(bearer, other, duration.Year, options...))
 }
 
-func DiffInUnit[T core.Bearer[T]](bearer T, unit duration.Unit, other core.State, options ...Options) int {
-	return int(Diff(bearer, other, unit, options...))
+func InUnit[T core.Bearer[T]](bearer T, unit duration.Unit, other core.State, options ...Options) int {
+	return int(Between(bearer, other, unit, options...))
 }
 
-func DiffInDaysFiltered[T core.Bearer[T]](bearer T, other core.State, predicate func(T) bool, options ...Options) int {
+func InDaysFiltered[T core.Bearer[T]](bearer T, other core.State, predicate func(T) bool, options ...Options) int {
 	opts := Options{}
 
 	if len(options) > 0 {
@@ -158,7 +158,7 @@ func DiffInDaysFiltered[T core.Bearer[T]](bearer T, other core.State, predicate 
 	return count * sign
 }
 
-func DiffInHoursFiltered[T core.Bearer[T]](bearer T, other core.State, predicate func(T) bool, options ...Options) int {
+func InHoursFiltered[T core.Bearer[T]](bearer T, other core.State, predicate func(T) bool, options ...Options) int {
 	opts := Options{}
 
 	if len(options) > 0 {
@@ -194,8 +194,8 @@ func DiffInHoursFiltered[T core.Bearer[T]](bearer T, other core.State, predicate
 	return -count
 }
 
-func DiffInWeekdays[T core.Bearer[T]](bearer T, other core.State, weekendDays []time.Weekday, options ...Options) int {
-	return DiffInDaysFiltered(bearer, other, func(item T) bool {
+func InWeekdays[T core.Bearer[T]](bearer T, other core.State, weekendDays []time.Weekday, options ...Options) int {
+	return InDaysFiltered(bearer, other, func(item T) bool {
 		state := item.State()
 		weekday := state.Value.In(state.Location).Weekday()
 
@@ -209,8 +209,8 @@ func DiffInWeekdays[T core.Bearer[T]](bearer T, other core.State, weekendDays []
 	}, options...)
 }
 
-func DiffInWeekendDays[T core.Bearer[T]](bearer T, other core.State, weekendDays []time.Weekday, options ...Options) int {
-	return DiffInDaysFiltered(bearer, other, func(item T) bool {
+func InWeekendDays[T core.Bearer[T]](bearer T, other core.State, weekendDays []time.Weekday, options ...Options) int {
+	return InDaysFiltered(bearer, other, func(item T) bool {
 		state := item.State()
 		weekday := state.Value.In(state.Location).Weekday()
 
@@ -227,13 +227,13 @@ func DiffInWeekendDays[T core.Bearer[T]](bearer T, other core.State, weekendDays
 func SecondsSinceMidnight[T core.Bearer[T]](bearer T) int {
 	startOfDay := boundaries.StartOf(bearer, duration.Day)
 
-	return DiffInSeconds(bearer, startOfDay.State(), Options{Absolute: true})
+	return InSeconds(bearer, startOfDay.State(), Options{Absolute: true})
 }
 
 func SecondsUntilEndOfDay[T core.Bearer[T]](bearer T) int {
 	endOfDay := boundaries.EndOf(bearer, duration.Day)
 
-	return DiffInSeconds(bearer, endOfDay.State(), Options{Absolute: true})
+	return InSeconds(bearer, endOfDay.State(), Options{Absolute: true})
 }
 
 func ForHumans[T core.Bearer[T]](bearer T, other core.State, options HumanOptions) string {

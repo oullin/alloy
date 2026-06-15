@@ -45,113 +45,43 @@ func IsEndOf[T core.Bearer[T]](bearer T, unit duration.Unit, options ...kernel.W
 }
 
 func FirstOfMonth[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
-	first := StartOf(bearer, duration.Month)
-
-	if len(weekdays) == 0 {
-		return first
-	}
-
-	state := first.State()
-	target := weekdays[0]
-	delta := (int(target) - int(state.Value.In(state.Location).Weekday()) + 7) % 7
-
-	return arithmetic.AddDays(first, delta)
+	return firstOfUnit(bearer, duration.Month, weekdays...)
 }
 
 func LastOfMonth[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
-	last := StartOf(EndOf(bearer, duration.Month), duration.Day)
-
-	if len(weekdays) == 0 {
-		return last
-	}
-
-	state := last.State()
-	target := weekdays[0]
-	delta := (int(state.Value.In(state.Location).Weekday()) - int(target) + 7) % 7
-
-	return arithmetic.AddDays(last, -delta)
+	return lastOfUnit(bearer, duration.Month, weekdays...)
 }
 
 func NthOfMonth[T core.Bearer[T]](bearer T, occurrence int, weekday time.Weekday) (T, bool) {
-	var zero T
-
-	if occurrence == 0 {
-		return zero, false
-	}
-
-	state := bearer.State()
-	originMonth := state.Value.In(state.Location).Month()
-
-	var candidate T
-
-	if occurrence > 0 {
-		candidate = arithmetic.AddWeeks(FirstOfMonth(bearer, weekday), occurrence-1)
-	} else {
-		candidate = arithmetic.AddWeeks(LastOfMonth(bearer, weekday), -(abs(occurrence) - 1))
-	}
-
-	candidateState := candidate.State()
-
-	return candidate, candidateState.Value.In(candidateState.Location).Month() == originMonth
+	return nthOfUnit(bearer, occurrence, weekday, duration.Month, sameMonth)
 }
 
 func FirstOfQuarter[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
-	first := StartOf(bearer, duration.Quarter)
-
-	if len(weekdays) == 0 {
-		return first
-	}
-
-	state := first.State()
-	target := weekdays[0]
-	delta := (int(target) - int(state.Value.In(state.Location).Weekday()) + 7) % 7
-
-	return arithmetic.AddDays(first, delta)
+	return firstOfUnit(bearer, duration.Quarter, weekdays...)
 }
 
 func LastOfQuarter[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
-	last := StartOf(EndOf(bearer, duration.Quarter), duration.Day)
-
-	if len(weekdays) == 0 {
-		return last
-	}
-
-	state := last.State()
-	target := weekdays[0]
-	delta := (int(state.Value.In(state.Location).Weekday()) - int(target) + 7) % 7
-
-	return arithmetic.AddDays(last, -delta)
+	return lastOfUnit(bearer, duration.Quarter, weekdays...)
 }
 
 func NthOfQuarter[T core.Bearer[T]](bearer T, occurrence int, weekday time.Weekday) (T, bool) {
-	var zero T
-
-	if occurrence == 0 {
-		return zero, false
-	}
-
-	state := bearer.State()
-	local := state.Value.In(state.Location)
-	originQuarter := (int(local.Month())-1)/3 + 1
-	originYear := local.Year()
-
-	var candidate T
-
-	if occurrence > 0 {
-		candidate = arithmetic.AddWeeks(FirstOfQuarter(bearer, weekday), occurrence-1)
-	} else {
-		candidate = arithmetic.AddWeeks(LastOfQuarter(bearer, weekday), -(abs(occurrence) - 1))
-	}
-
-	candidateState := candidate.State()
-	candidateLocal := candidateState.Value.In(candidateState.Location)
-	candidateQuarter := (int(candidateLocal.Month())-1)/3 + 1
-
-	return candidate, candidateQuarter == originQuarter && candidateLocal.Year() == originYear
+	return nthOfUnit(bearer, occurrence, weekday, duration.Quarter, sameQuarter)
 }
 
 func FirstOfYear[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
-	first := StartOf(bearer, duration.Year)
+	return firstOfUnit(bearer, duration.Year, weekdays...)
+}
+
+func LastOfYear[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
+	return lastOfUnit(bearer, duration.Year, weekdays...)
+}
+
+func NthOfYear[T core.Bearer[T]](bearer T, occurrence int, weekday time.Weekday) (T, bool) {
+	return nthOfUnit(bearer, occurrence, weekday, duration.Year, sameYear)
+}
+
+func firstOfUnit[T core.Bearer[T]](bearer T, unit duration.Unit, weekdays ...time.Weekday) T {
+	first := StartOf(bearer, unit)
 
 	if len(weekdays) == 0 {
 		return first
@@ -164,8 +94,8 @@ func FirstOfYear[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
 	return arithmetic.AddDays(first, delta)
 }
 
-func LastOfYear[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
-	last := StartOf(EndOf(bearer, duration.Year), duration.Day)
+func lastOfUnit[T core.Bearer[T]](bearer T, unit duration.Unit, weekdays ...time.Weekday) T {
+	last := StartOf(EndOf(bearer, unit), duration.Day)
 
 	if len(weekdays) == 0 {
 		return last
@@ -178,27 +108,50 @@ func LastOfYear[T core.Bearer[T]](bearer T, weekdays ...time.Weekday) T {
 	return arithmetic.AddDays(last, -delta)
 }
 
-func NthOfYear[T core.Bearer[T]](bearer T, occurrence int, weekday time.Weekday) (T, bool) {
+func nthOfUnit[T core.Bearer[T]](
+	bearer T,
+	occurrence int,
+	weekday time.Weekday,
+	unit duration.Unit,
+	sameUnit func(core.State, core.State) bool,
+) (T, bool) {
 	var zero T
 
 	if occurrence == 0 {
 		return zero, false
 	}
 
-	state := bearer.State()
-	originYear := state.Value.In(state.Location).Year()
-
 	var candidate T
 
 	if occurrence > 0 {
-		candidate = arithmetic.AddWeeks(FirstOfYear(bearer, weekday), occurrence-1)
+		candidate = arithmetic.AddWeeks(firstOfUnit(bearer, unit, weekday), occurrence-1)
 	} else {
-		candidate = arithmetic.AddWeeks(LastOfYear(bearer, weekday), -(abs(occurrence) - 1))
+		candidate = arithmetic.AddWeeks(lastOfUnit(bearer, unit, weekday), -(abs(occurrence) - 1))
 	}
 
-	candidateState := candidate.State()
+	return candidate, sameUnit(bearer.State(), candidate.State())
+}
 
-	return candidate, candidateState.Value.In(candidateState.Location).Year() == originYear
+func sameMonth(origin core.State, candidate core.State) bool {
+	originMonth := origin.Value.In(origin.Location).Month()
+	candidateMonth := candidate.Value.In(candidate.Location).Month()
+
+	return candidateMonth == originMonth
+}
+
+func sameQuarter(origin core.State, candidate core.State) bool {
+	originLocal := origin.Value.In(origin.Location)
+	candidateLocal := candidate.Value.In(candidate.Location)
+
+	return quarterOf(candidateLocal) == quarterOf(originLocal) && candidateLocal.Year() == originLocal.Year()
+}
+
+func sameYear(origin core.State, candidate core.State) bool {
+	return candidate.Value.In(candidate.Location).Year() == origin.Value.In(origin.Location).Year()
+}
+
+func quarterOf(value time.Time) int {
+	return (int(value.Month())-1)/3 + 1
 }
 
 func Floor[T core.Bearer[T]](bearer T, unit duration.Unit) T {

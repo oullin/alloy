@@ -5,48 +5,48 @@ import (
 	"strings"
 )
 
-func (duration Duration) ISOString() string {
-	if duration.IsZero() {
+func (value *Duration) ISOString() string {
+	if value.IsZero() {
 		return "PT0S"
 	}
 
-	normalized := duration.Normalize()
+	normalized := value.Normalize()
 	sign := ""
 
 	if normalized.direction() < 0 {
 		sign = "-"
 	}
 
-	value := normalized.Abs()
+	absolute := normalized.Abs()
 	dateParts := strings.Builder{}
 
-	if value.Years != 0 {
-		dateParts.WriteString(strconv.Itoa(value.Years) + "Y")
+	if absolute.Years != 0 {
+		dateParts.WriteString(strconv.Itoa(absolute.Years) + "Y")
 	}
 
-	if value.Months != 0 {
-		dateParts.WriteString(strconv.Itoa(value.Months) + "M")
+	if absolute.Months != 0 {
+		dateParts.WriteString(strconv.Itoa(absolute.Months) + "M")
 	}
 
-	if value.Days != 0 {
-		dateParts.WriteString(strconv.Itoa(value.Days) + "D")
+	if absolute.Days != 0 {
+		dateParts.WriteString(strconv.Itoa(absolute.Days) + "D")
 	}
 
 	timeParts := strings.Builder{}
 
-	if value.Hours != 0 {
-		timeParts.WriteString(strconv.Itoa(value.Hours) + "H")
+	if absolute.Hours != 0 {
+		timeParts.WriteString(strconv.Itoa(absolute.Hours) + "H")
 	}
 
-	if value.Minutes != 0 {
-		timeParts.WriteString(strconv.Itoa(value.Minutes) + "M")
+	if absolute.Minutes != 0 {
+		timeParts.WriteString(strconv.Itoa(absolute.Minutes) + "M")
 	}
 
-	if value.Seconds != 0 || value.Milliseconds != 0 {
-		seconds := strconv.Itoa(value.Seconds)
+	if absolute.Seconds != 0 || absolute.Milliseconds != 0 {
+		seconds := strconv.Itoa(absolute.Seconds)
 
-		if value.Milliseconds != 0 {
-			seconds += "." + pad(value.Milliseconds, 3)
+		if absolute.Milliseconds != 0 {
+			seconds += "." + pad(absolute.Milliseconds, 3)
 		}
 
 		timeParts.WriteString(seconds + "S")
@@ -61,6 +61,6 @@ func (duration Duration) ISOString() string {
 	return result
 }
 
-func (duration Duration) String() string {
-	return duration.ISOString()
+func (value *Duration) String() string {
+	return value.ISOString()
 }

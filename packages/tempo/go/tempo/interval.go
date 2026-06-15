@@ -51,7 +51,9 @@ func (interval Interval) Years() int {
 }
 
 func (interval Interval) ToDuration() Duration {
-	return Duration{Milliseconds: interval.Milliseconds()}.Normalize()
+	value := Duration{Milliseconds: interval.Milliseconds()}
+
+	return value.Normalize()
 }
 
 func (interval Interval) Invert() Interval {

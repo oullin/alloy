@@ -7,11 +7,13 @@ import (
 )
 
 func (tempo Tempo) Diff(other Tempo, unit Unit, options ...DiffOptions) float64 {
-	return diff.Diff(tempo, other.State(), unit, diffOptions(options)...)
+	return diff.Between(tempo, other.State(), unit, diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffAsDuration(other Tempo, options ...DiffOptions) Duration {
-	return Duration{Milliseconds: tempo.DiffInMilliseconds(other, options...)}.Normalize()
+	value := Duration{Milliseconds: tempo.DiffInMilliseconds(other, options...)}
+
+	return value.Normalize()
 }
 
 func (tempo Tempo) DiffAsDateInterval(other Tempo, options ...DiffOptions) Duration {
@@ -23,59 +25,59 @@ func (tempo Tempo) DiffAsTempoInterval(other Tempo, options ...DiffOptions) Dura
 }
 
 func (tempo Tempo) DiffInMilliseconds(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMilliseconds(tempo, other.State(), diffOptions(options)...)
+	return diff.InMilliseconds(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInMicroseconds(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMicroseconds(tempo, other.State(), diffOptions(options)...)
+	return diff.InMicroseconds(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInSeconds(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInSeconds(tempo, other.State(), diffOptions(options)...)
+	return diff.InSeconds(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInMinutes(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMinutes(tempo, other.State(), diffOptions(options)...)
+	return diff.InMinutes(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInHours(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInHours(tempo, other.State(), diffOptions(options)...)
+	return diff.InHours(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInDays(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInDays(tempo, other.State(), diffOptions(options)...)
+	return diff.InDays(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInWeeks(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInWeeks(tempo, other.State(), diffOptions(options)...)
+	return diff.InWeeks(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInWeekdays(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInWeekdays(tempo, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekdays(tempo, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInWeekendDays(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInWeekendDays(tempo, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
+	return diff.InWeekendDays(tempo, other.State(), defaultConfig.Settings.WeekendDays, diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInMonths(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInMonths(tempo, other.State(), diffOptions(options)...)
+	return diff.InMonths(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInQuarters(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInQuarters(tempo, other.State(), diffOptions(options)...)
+	return diff.InQuarters(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInYears(other Tempo, options ...DiffOptions) int {
-	return diff.DiffInYears(tempo, other.State(), diffOptions(options)...)
+	return diff.InYears(tempo, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInUnit(unit Unit, other Tempo, options ...DiffOptions) int {
-	return diff.DiffInUnit(tempo, unit, other.State(), diffOptions(options)...)
+	return diff.InUnit(tempo, unit, other.State(), diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffInDaysFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
-	return diff.DiffInDaysFiltered(tempo, other.State(), predicate, diffOptions(options)...)
+	return diff.InDaysFiltered(tempo, other.State(), predicate, diffOptions(options)...)
 }
 
 func (tempo Tempo) DiffFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
@@ -83,7 +85,7 @@ func (tempo Tempo) DiffFiltered(other Tempo, predicate func(Tempo) bool, options
 }
 
 func (tempo Tempo) DiffInHoursFiltered(other Tempo, predicate func(Tempo) bool, options ...DiffOptions) int {
-	return diff.DiffInHoursFiltered(tempo, other.State(), predicate, diffOptions(options)...)
+	return diff.InHoursFiltered(tempo, other.State(), predicate, diffOptions(options)...)
 }
 
 func (tempo Tempo) SecondsSinceMidnight() int {

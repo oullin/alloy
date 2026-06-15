@@ -1,7 +1,7 @@
 // Package kernel is the pure time math layer that all higher-level tempo
 // packages compose on top of. It operates on (time.Time, *time.Location, Unit)
 // only — no Tempo type, no Runtime, no Settings — so every consumer (immutable
-// Tempo, mutable Mutable, feature packages) shares the same engine without
+// Tempo, mutable, feature packages) shares the same engine without
 // circular dependencies.
 package kernel
 

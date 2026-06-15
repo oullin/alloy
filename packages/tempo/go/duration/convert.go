@@ -1,29 +1,29 @@
 package duration
 
-func (duration Duration) ToMap() map[string]int {
+func (value *Duration) ToMap() map[string]int {
 	return map[string]int{
-		"years":        duration.Years,
-		"quarters":     duration.Quarters,
-		"months":       duration.Months,
-		"weeks":        duration.Weeks,
-		"days":         duration.Days,
-		"hours":        duration.Hours,
-		"minutes":      duration.Minutes,
-		"seconds":      duration.Seconds,
-		"milliseconds": duration.Milliseconds,
+		"years":        value.Years,
+		"quarters":     value.Quarters,
+		"months":       value.Months,
+		"weeks":        value.Weeks,
+		"days":         value.Days,
+		"hours":        value.Hours,
+		"minutes":      value.Minutes,
+		"seconds":      value.Seconds,
+		"milliseconds": value.Milliseconds,
 	}
 }
 
-func (duration Duration) ToArray() [9]int {
-	return [9]int{
-		duration.Years,
-		duration.Quarters,
-		duration.Months,
-		duration.Weeks,
-		duration.Days,
-		duration.Hours,
-		duration.Minutes,
-		duration.Seconds,
-		duration.Milliseconds,
+func (value *Duration) ToSlice() []int {
+	return []int{
+		value.Years,
+		value.Quarters,
+		value.Months,
+		value.Weeks,
+		value.Days,
+		value.Hours,
+		value.Minutes,
+		value.Seconds,
+		value.Milliseconds,
 	}
 }

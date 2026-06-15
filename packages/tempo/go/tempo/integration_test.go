@@ -554,19 +554,27 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 		t.Fatalf("DiffInMinutes() = %d, want 1594", got)
 	}
 
-	if got := base.DiffAsDuration(earlier).ISOString(); got != "P1DT2H34M45.600S" {
+	diffDuration := base.DiffAsDuration(earlier)
+
+	if got := diffDuration.ISOString(); got != "P1DT2H34M45.600S" {
 		t.Fatalf("DiffAsDuration().ISOString() = %q, want duration diff", got)
 	}
 
-	if got := base.DiffAsDuration(earlier, DiffOptions{Absolute: true}).ISOString(); got != "P1DT2H34M45.600S" {
+	absoluteDiffDuration := base.DiffAsDuration(earlier, DiffOptions{Absolute: true})
+
+	if got := absoluteDiffDuration.ISOString(); got != "P1DT2H34M45.600S" {
 		t.Fatalf("DiffAsDuration(absolute).ISOString() = %q, want duration diff", got)
 	}
 
-	if got := base.DiffAsDateInterval(earlier).ISOString(); got != "P1DT2H34M45.600S" {
+	dateIntervalDuration := base.DiffAsDateInterval(earlier)
+
+	if got := dateIntervalDuration.ISOString(); got != "P1DT2H34M45.600S" {
 		t.Fatalf("DiffAsDateInterval().ISOString() = %q, want duration diff", got)
 	}
 
-	if got := base.DiffAsTempoInterval(earlier).ISOString(); got != "P1DT2H34M45.600S" {
+	tempoIntervalDuration := base.DiffAsTempoInterval(earlier)
+
+	if got := tempoIntervalDuration.ISOString(); got != "P1DT2H34M45.600S" {
 		t.Fatalf("DiffAsTempoInterval().ISOString() = %q, want duration diff", got)
 	}
 
@@ -898,7 +906,9 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 		t.Fatalf("Period.Every().Count() = %d, %v, want 5, nil", everyCount, err)
 	}
 
-	if got := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).ToDuration().ISOString(); got != "P4D" {
+	periodDuration := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).ToDuration()
+
+	if got := periodDuration.ISOString(); got != "P4D" {
 		t.Fatalf("Period.ToDuration().ISOString() = %q, want P4D", got)
 	}
 

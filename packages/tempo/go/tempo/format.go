@@ -27,13 +27,13 @@ func (tempo Tempo) TranslatedFormat(pattern string) string {
 func (tempo Tempo) Ordinal(unit Unit) string {
 	switch normalizeUnit(unit) {
 	case Year:
-		return ordinal(tempo.Year())
+		return formatting.Ordinal(tempo.Year())
 	case Quarter:
-		return ordinal(tempo.Quarter())
+		return formatting.Ordinal(tempo.Quarter())
 	case Month:
-		return ordinal(tempo.Month())
+		return formatting.Ordinal(tempo.Month())
 	default:
-		return ordinal(tempo.Day())
+		return formatting.Ordinal(tempo.Day())
 	}
 }
 
@@ -187,14 +187,12 @@ func (tempo Tempo) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(tempo.JSONSerialize())), nil
 }
 
-func (tempo *Tempo) UnmarshalJSON(data []byte) error {
+func parseSerializedJSON(data []byte, location *time.Location) (time.Time, *time.Location, error) {
 	input, err := strconv.Unquote(string(data))
 
 	if err != nil {
-		return err
+		return time.Time{}, nil, err
 	}
-
-	location := tempo.location
 
 	if location == nil {
 		location = defaultLocation()
@@ -203,13 +201,10 @@ func (tempo *Tempo) UnmarshalJSON(data []byte) error {
 	parsed, err := parseInLocation(input, location)
 
 	if err != nil {
-		return err
+		return time.Time{}, nil, err
 	}
 
-	tempo.value = parsed.UTC()
-	tempo.location = location
-
-	return nil
+	return parsed.UTC(), location, nil
 }
 
 func (tempo Tempo) ToObject() Object {

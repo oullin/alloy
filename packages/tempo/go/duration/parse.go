@@ -36,7 +36,7 @@ func Parse(input string) (Duration, error) {
 		milliseconds = int(math.Round((value - math.Trunc(value)) * 1000))
 	}
 
-	return Duration{
+	parsed := Duration{
 		Years:        sign * mustInt(defaultString(matches[2], "0")),
 		Months:       sign * mustInt(defaultString(matches[3], "0")),
 		Weeks:        sign * mustInt(defaultString(matches[4], "0")),
@@ -45,5 +45,7 @@ func Parse(input string) (Duration, error) {
 		Minutes:      sign * mustInt(defaultString(matches[7], "0")),
 		Seconds:      sign * seconds,
 		Milliseconds: sign * milliseconds,
-	}.Normalize(), nil
+	}
+
+	return parsed.Normalize(), nil
 }

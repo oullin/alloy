@@ -47,7 +47,7 @@ func Format[T core.Bearer[T]](bearer T, pattern string) string {
 		"a":    ternary(local.Hour() < 12, "am", "pm"),
 		"D":    strconv.Itoa(local.Day()),
 		"DD":   pad(local.Day(), 2),
-		"Do":   ordinal(local.Day()),
+		"Do":   Ordinal(local.Day()),
 		"d":    strconv.Itoa(int(local.Weekday())),
 		"ddd":  local.Weekday().String()[:3],
 		"dddd": local.Weekday().String(),
@@ -231,23 +231,24 @@ func pad(value int, length int) string {
 	return result
 }
 
-func ordinal(value int) string {
+func Ordinal(value int) string {
 	remainder := value % 100
+	suffix := "th"
 
 	if remainder >= 11 && remainder <= 13 {
-		return strconv.Itoa(value) + "th"
+		return strconv.Itoa(value) + suffix
 	}
 
 	switch value % 10 {
 	case 1:
-		return strconv.Itoa(value) + "st"
+		suffix = "st"
 	case 2:
-		return strconv.Itoa(value) + "nd"
+		suffix = "nd"
 	case 3:
-		return strconv.Itoa(value) + "rd"
-	default:
-		return strconv.Itoa(value) + "th"
+		suffix = "rd"
 	}
+
+	return strconv.Itoa(value) + suffix
 }
 
 func ternary(condition bool, left string, right string) string {

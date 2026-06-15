@@ -1,6 +1,7 @@
 package duration_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/oullin/alloy/tempo/tempo"
@@ -27,8 +28,8 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 		t.Fatalf("Duration.ToMap()[hours] = %d, want 4", got)
 	}
 
-	if got := parsed.ToArray(); got != [9]int{1, 0, 2, 0, 3, 4, 5, 6, 7} {
-		t.Fatalf("Duration.ToArray() = %#v, want component array", got)
+	if got := parsed.ToSlice(); !reflect.DeepEqual(got, []int{1, 0, 2, 0, 3, 4, 5, 6, 7}) {
+		t.Fatalf("Duration.ToSlice() = %#v, want component slice", got)
 	}
 
 	if got := parsed.ISOString(); got != "P1Y2M3DT4H5M6.007S" {
@@ -77,7 +78,9 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 		t.Fatalf("parse week duration: %v", err)
 	}
 
-	if got := weeks.Normalize().ISOString(); got != "P14D" {
+	normalizedWeeks := weeks.Normalize()
+
+	if got := normalizedWeeks.ISOString(); got != "P14D" {
 		t.Fatalf("Normalize().ISOString() = %q, want week carried to days", got)
 	}
 
@@ -113,7 +116,9 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 		t.Fatalf("parse interval end: %v", err)
 	}
 
-	if got := start.IntervalUntil(end).ToDuration().ISOString(); got != "P2DT12H" {
+	intervalDuration := start.IntervalUntil(end).ToDuration()
+
+	if got := intervalDuration.ISOString(); got != "P2DT12H" {
 		t.Fatalf("Interval.ToDuration().ISOString() = %q, want normalized interval", got)
 	}
 
