@@ -7,15 +7,17 @@ reusable behavior outside the package surface:
 package examples
 
 import tempo "github.com/oullin/alloy/tempo/tempo"
+import "github.com/oullin/alloy/tempo/arithmetic"
+import "github.com/oullin/alloy/tempo/formatting"
 
 func DateOnly(value tempo.Tempo) string {
-	return value.DateString()
+	return formatting.From(value).DateString()
 }
 
 func NextBusinessDay(value tempo.Tempo) tempo.Tempo {
-	next := value.AddDays(1)
+	next := arithmetic.From(value).AddDays(1).Tempo()
 	for next.IsWeekend() {
-		next = next.AddDays(1)
+		next = arithmetic.From(next).AddDays(1).Tempo()
 	}
 
 	return next
