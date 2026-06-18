@@ -2,9 +2,8 @@
 set -euo pipefail
 
 MODE="${1:-}"
+SCOPE="${2:-}"
 ROOT_PATH="$(git rev-parse --show-toplevel)"
-FMT_IMAGE="ghcr.io/oullin/go-fmt:v0.4.0"
-FORMAT_GLOBS=('*.go' '*.ts' '*.tsx' '*.vue' '*.mts' '*.cts')
 
 case "${MODE}" in
 	changed)
@@ -14,7 +13,20 @@ case "${MODE}" in
 		GIT_FLAGS=(--cached --others)
 		;;
 	*)
-		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all" >&2
+		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all go|ts" >&2
+		exit 2
+		;;
+esac
+
+case "${SCOPE}" in
+	go)
+		FORMAT_GLOBS=('*.go')
+		;;
+	ts)
+		FORMAT_GLOBS=('*.ts' '*.tsx' '*.vue' '*.mts' '*.cts')
+		;;
+	*)
+		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all go|ts" >&2
 		exit 2
 		;;
 esac
@@ -30,13 +42,10 @@ git ls-files -z "${GIT_FLAGS[@]}" --exclude-standard -- "${FORMAT_GLOBS[@]}" |
 	done > "${tmp}"
 
 if [ ! -s "${tmp}" ]; then
-	echo "No Go/TypeScript files to format."
+	echo "No ${SCOPE} files to format."
 	exit 0
 fi
 
-xargs -0 docker run --rm \
+xargs -0 docker-compose run --rm -T \
 	--user "$(id -u):$(id -g)" \
-	-v "${ROOT_PATH}:/work" \
-	-w /work \
-	-e HOST_PROJECT_PATH="${ROOT_PATH}" \
-	"${FMT_IMAGE}" format < "${tmp}"
+	fmt format < "${tmp}"

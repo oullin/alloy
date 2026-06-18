@@ -16,9 +16,9 @@ The public API is branded as Tempo across both runtimes.
 ```sh
 pnpm install
 pnpm exec task monorepo:initialise
-pnpm exec task typecheck
-pnpm exec task test
-pnpm exec task build
+pnpm exec task ts:typecheck
+pnpm exec task ts:test
+pnpm exec task ts:build
 pnpm exec task go:test
 pnpm exec task format-all
 ```

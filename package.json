@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "task build",
-    "format": "task format",
-    "format-all": "task format-all",
+    "build": "task ts:build",
+    "format": "make format",
+    "format-all": "make format-all",
     "go:test": "task go:test",
-    "lint": "task lint",
+    "lint": "task ts:lint",
     "monorepo:initialise": "task monorepo:initialise",
-    "test": "task test",
-    "typecheck": "task typecheck"
+    "test": "task ts:test",
+    "typecheck": "task ts:typecheck"
   },
   "devDependencies": {
     "@alloy/infra": "workspace:*",

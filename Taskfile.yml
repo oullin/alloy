@@ -36,37 +36,34 @@ tasks:
     cmds:
       - bash infra/scripts/tasks/ts-lint.sh
 
-  parity-audit:
-    desc: Audit adjusted Tempo parity coverage
+  go:format:
+    desc: Format changed Go files
     cmds:
-      - bash infra/scripts/tasks/parity-audit.sh
+      - bash infra/scripts/tasks/format-files.sh changed go
+
+  go:format-all:
+    desc: Format every non-ignored Go file
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh all go
+
+  ts:format:
+    desc: Format changed TypeScript files
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh changed ts
+
+  ts:format-all:
+    desc: Format every non-ignored TypeScript file
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh all ts
 
   format:
     desc: Format changed Go and TypeScript files
     cmds:
-      - bash infra/scripts/tasks/format-files.sh changed
+      - task: go:format
+      - task: ts:format
 
   format-all:
     desc: Format every non-ignored Go and TypeScript file
     cmds:
-      - bash infra/scripts/tasks/format-files.sh all
-
-  go-test:
-    cmds:
-      - task: go:test
-
-  typecheck:
-    cmds:
-      - task: ts:typecheck
-
-  test:
-    cmds:
-      - task: ts:test
-
-  build:
-    cmds:
-      - task: ts:build
-
-  lint:
-    cmds:
-      - task: ts:lint
+      - task: go:format-all
+      - task: ts:format-all

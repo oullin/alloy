@@ -10,5 +10,4 @@ go.work.sum
 infra/.cache/
 infra/.logs/
 infra/dist/
-packages/carbon-oracle/vendor/
 packages/docs/src/.vitepress/
