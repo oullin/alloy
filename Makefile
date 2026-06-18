@@ -14,7 +14,7 @@ export GO_BUILD_VOLUME
 DOCKER_RUN := docker-compose run --rm -T app
 TASK := sh -lc 'apk add --no-cache bash git >/dev/null && git config --global --add safe.directory /workspace && export PATH=/go/bin:/usr/local/go/bin:$$PATH; go install github.com/go-task/task/v3/cmd/task@$(TASK_VERSION) && task "$$@"' task
 
-export FMT_IMAGE ?= ghcr.io/oullin/go-fmt:v0.4.1
+export FMT_IMAGE ?= ghcr.io/oullin/go-fmt:v0.4.1-full
 export PWD := $(shell pwd)
 
 .DEFAULT_GOAL := help

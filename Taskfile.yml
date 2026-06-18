@@ -59,11 +59,9 @@ tasks:
   format:
     desc: Format changed Go and TypeScript files
     cmds:
-      - task: go:format
-      - task: ts:format
+      - bash infra/scripts/tasks/format-files.sh changed
 
   format-all:
     desc: Format every non-ignored Go and TypeScript file
     cmds:
-      - task: go:format-all
-      - task: ts:format-all
+      - docker-compose run --rm -T fmt format-all

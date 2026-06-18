@@ -9,7 +9,7 @@ services:
     working_dir: /workspace
 
   fmt:
-    image: ${FMT_IMAGE:-ghcr.io/oullin/go-fmt:v0.4.1}
+    image: ${FMT_IMAGE:-ghcr.io/oullin/go-fmt:v0.4.1-full}
     volumes:
       - .:/work
     environment:

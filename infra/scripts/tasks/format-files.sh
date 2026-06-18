@@ -2,7 +2,7 @@
 set -euo pipefail
 
 MODE="${1:-}"
-SCOPE="${2:-}"
+SCOPE="${2:-all}"
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 
 case "${MODE}" in
@@ -13,20 +13,26 @@ case "${MODE}" in
 		GIT_FLAGS=(--cached --others)
 		;;
 	*)
-		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all go|ts" >&2
+		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all [all|go|ts]" >&2
 		exit 2
 		;;
 esac
 
 case "${SCOPE}" in
+	all)
+		FORMAT_GLOBS=('*.go' '*.ts' '*.tsx' '*.vue' '*.mts' '*.cts')
+		FORMAT_LABEL='Go and TypeScript'
+		;;
 	go)
 		FORMAT_GLOBS=('*.go')
+		FORMAT_LABEL='Go'
 		;;
 	ts)
 		FORMAT_GLOBS=('*.ts' '*.tsx' '*.vue' '*.mts' '*.cts')
+		FORMAT_LABEL='TypeScript'
 		;;
 	*)
-		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all go|ts" >&2
+		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all [all|go|ts]" >&2
 		exit 2
 		;;
 esac
@@ -42,7 +48,7 @@ git ls-files -z "${GIT_FLAGS[@]}" --exclude-standard -- "${FORMAT_GLOBS[@]}" |
 	done > "${tmp}"
 
 if [ ! -s "${tmp}" ]; then
-	echo "No ${SCOPE} files to format."
+	echo "No ${FORMAT_LABEL} files to format."
 	exit 0
 fi
 
