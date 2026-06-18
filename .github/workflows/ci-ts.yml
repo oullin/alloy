@@ -14,6 +14,6 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - run: pnpm exec task typecheck
-      - run: pnpm exec task test
-      - run: pnpm exec task build
+      - run: pnpm exec task ts:typecheck
+      - run: pnpm exec task ts:test
+      - run: pnpm exec task ts:build
