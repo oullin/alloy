@@ -6,25 +6,17 @@ import {
 	TempoFactory,
 	TempoImmutable,
 	TempoInterval,
-	TempoMutable,
 	TempoPeriod,
 	average,
-	canParse,
-	createFromDate,
-	createFromTime,
-	createMidnightDate,
+	createNormalized,
 	createTempoRuntime,
-	createSafe,
+	fromDate,
 	fromJSON,
-	hasFormat,
-	maximum,
+	fromTime,
 	max,
-	minimum,
 	min,
 	today,
 	tomorrow,
-	tryFromFormat,
-	tryParse,
 	yesterday,
 } from '@alloy/tempo';
 
@@ -59,9 +51,8 @@ describe('Tempo TypeScript behavior', () => {
 		}
 	});
 
-	it('uses immutable Tempo by default and exposes explicit mutable behavior', () => {
+	it('uses immutable Tempo values only', () => {
 		const tempo = Tempo.parse('2024-02-29T00:00:00+00:00');
-		const mutable = TempoMutable.parse('2024-02-29T00:00:00+00:00');
 		const immutable = TempoImmutable.parse('2024-02-29T00:00:00+00:00');
 
 		const tempoNext = tempo.addDays(1);
@@ -70,27 +61,18 @@ describe('Tempo TypeScript behavior', () => {
 		expect(tempo.toISOString()).toBe('2024-02-29T00:00:00.000Z');
 		expect(tempoNext.toISOString()).toBe('2024-03-01T00:00:00.000Z');
 
-		expect(mutable.addDays(1)).toBe(mutable);
-		expect(mutable.toISOString()).toBe('2024-03-01T00:00:00.000Z');
-
 		const next = immutable.addDays(1);
 
 		expect(next).not.toBe(immutable);
 		expect(immutable.toISOString()).toBe('2024-02-29T00:00:00.000Z');
 		expect(next.toISOString()).toBe('2024-03-01T00:00:00.000Z');
 
-		const convertedMutable = immutable.toMutable();
-
-		expect(convertedMutable).toBeInstanceOf(TempoMutable);
-		expect(convertedMutable.addDays(1).toISOString()).toBe('2024-03-01T00:00:00.000Z');
-		expect(immutable.toISOString()).toBe('2024-02-29T00:00:00.000Z');
-
-		const convertedImmutable = convertedMutable.toImmutable();
+		const convertedImmutable = immutable.toImmutable();
 
 		expect(convertedImmutable).toBeInstanceOf(TempoImmutable);
-		convertedMutable.addDays(1);
-		expect(convertedImmutable.toISOString()).toBe('2024-03-01T00:00:00.000Z');
-		expect(convertedMutable.toISOString()).toBe('2024-03-02T00:00:00.000Z');
+		expect(convertedImmutable.toISOString()).toBe('2024-02-29T00:00:00.000Z');
+		expect(immutable.isImmutable()).toBe(true);
+		expect(immutable.isMutable()).toBe(false);
 	});
 
 	it('accepts both second and millisecond numeric timestamps', () => {
@@ -107,7 +89,6 @@ describe('Tempo TypeScript behavior', () => {
 		expect(fixed.tomorrow().toISOString()).toBe('2025-01-02T00:00:00.000Z');
 		expect(fixed.yesterday().toISOString()).toBe('2024-12-31T00:00:00.000Z');
 		expect(fixed.immutableNow().toISOString()).toBe('2025-01-01T00:00:00.000Z');
-		expect(fixed.mutableNow().toISOString()).toBe('2025-01-01T00:00:00.000Z');
 		expect(Tempo.today({ timeZone: 'UTC' }).hour).toBe(0);
 		expect(Tempo.tomorrow({ timeZone: 'UTC' }).diffInDays(Tempo.today())).toBe(1);
 		expect(Tempo.yesterday({ timeZone: 'UTC' }).diffInDays(Tempo.today())).toBe(-1);
@@ -117,64 +98,53 @@ describe('Tempo TypeScript behavior', () => {
 
 		const tokyo = TempoFactory.create({ timeZone: 'Asia/Tokyo' });
 
-		expect(tokyo.tryParse('2025-01-01 09:00')?.toISOString()).toBe('2025-01-01T00:00:00.000Z');
-		expect(tokyo.canParse('not a date')).toBe(false);
-		expect(tokyo.tryParse('not a date')).toBeNull();
-		expect(tokyo.tryFromFormat('2025-01-01 09:30', 'YYYY-MM-DD HH:mm')?.toISOString()).toBe('2025-01-01T00:30:00.000Z');
-		expect(tokyo.hasFormat('2025-01-01 09:30', 'YYYY-MM-DD HH:mm')).toBe(true);
-		expect(tokyo.hasFormat('2025/01/01', 'YYYY-MM-DD')).toBe(false);
+		expect(tokyo.parse('2025-01-01 09:00').toISOString()).toBe('2025-01-01T00:00:00.000Z');
+		expect(() => tokyo.parse('not a date')).toThrow('Invalid Tempo input');
+		expect(tokyo.fromFormat('2025-01-01 09:30', 'YYYY-MM-DD HH:mm').toISOString()).toBe('2025-01-01T00:30:00.000Z');
+		expect(() => tokyo.fromFormat('2025/01/01', 'YYYY-MM-DD')).toThrow('Input does not match Tempo format');
 		expect(tokyo.fromObject({ day: 1, hour: 9, month: 1, year: 2025 }).toISOString()).toBe('2025-01-01T00:00:00.000Z');
 		expect(tokyo.fromTimestampMs(1_735_689_600_000).toDateTimeString()).toBe('2025-01-01 09:00:00');
-		expect(tokyo.createFromDate(2025, 1, 2).toISOString()).toBe('2025-01-01T15:00:00.000Z');
-		expect(tokyo.createMidnightDate(2025, 1, 2).toISOString()).toBe('2025-01-01T15:00:00.000Z');
-		expect(tokyo.createFromTime(9, 30, 15, 250).toTimeString('millisecond')).toBe('09:30:15.250');
-		expect(createFromDate(2025, 1, 2, { timeZone: 'Asia/Tokyo' }).toISOString()).toBe('2025-01-01T15:00:00.000Z');
-		expect(
-			createMidnightDate(2025, 1, 2, {
-				timeZone: 'Asia/Tokyo',
-			}).toISOString(),
-		).toBe('2025-01-01T15:00:00.000Z');
-		expect(createFromTime(9, 30, 15, 250, { timeZone: 'UTC' }).toTimeString('millisecond')).toBe('09:30:15.250');
+		expect(tokyo.fromDate(2025, 1, 2).toISOString()).toBe('2025-01-01T15:00:00.000Z');
+		expect(tokyo.fromTime(9, 30, 15, 250).toTimeString('millisecond')).toBe('09:30:15.250');
+		expect(fromDate(2025, 1, 2, { timeZone: 'Asia/Tokyo' }).toISOString()).toBe('2025-01-01T15:00:00.000Z');
+		expect(fromTime(9, 30, 15, 250, { timeZone: 'UTC' }).toTimeString('millisecond')).toBe('09:30:15.250');
 	});
 
-	it('applies global settings to real date behavior', () => {
-		const original = Tempo.settings();
+	it('applies scoped policy to real date behavior without global mutation', () => {
+		const french = TempoFactory.create({ locale: 'fr-FR' });
 
-		try {
-			Tempo.setLocale('fr-FR');
-			expect(Tempo.parse('2024-05-15').monthName()).toBe('mai');
-			expect(Tempo.parse('2024-05-15').locale('en-US').monthName()).toBe('May');
+		expect(french.parse('2024-05-15').monthName()).toBe('mai');
+		expect(Tempo.parse('2024-05-15').monthName()).toBe('May');
 
-			Tempo.setWeekendDays([5, 6]);
-			expect(Tempo.parse('2024-05-17').isWeekend()).toBe(true);
-			expect(Tempo.parse('2024-05-19').isWeekday()).toBe(true);
+		const fridayWeekend = TempoFactory.create({ weekendDays: [5, 6] });
 
-			Tempo.setMidDayAt(13);
-			expect(Tempo.parse('2024-05-15T13:00:00Z').isMidday()).toBe(true);
-			expect(Tempo.parse('2024-05-15').midday().hour).toBe(13);
+		expect(fridayWeekend.parse('2024-05-17').isWeekend()).toBe(true);
+		expect(Tempo.parse('2024-05-17').isWeekend()).toBe(false);
+		expect(
+			TempoFactory.create({ weekendDays: [3] })
+				.create({ day: 15, month: 5, year: 2024 })
+				.isWeekend(),
+		).toBe(true);
 
-			Tempo.useMonthsOverflow(false);
-			expect(Tempo.parse('2024-01-31').addMonths(1).toDateString()).toBe('2024-02-29');
-			Tempo.useYearsOverflow(false);
-			expect(Tempo.parse('2024-02-29').addYears(1).toDateString()).toBe('2025-02-28');
+		const customMidday = TempoFactory.create({ midDayAt: 13 });
 
-			Tempo.useStrictMode(false);
-			expect(Tempo.isStrictModeEnabled()).toBe(false);
-			Tempo.setHumanDiffOptions({ locale: 'en-US', numeric: 'auto' });
-			expect(Tempo.getHumanDiffOptions().numeric).toBe('auto');
-			Tempo.enableHumanDiffOption('absolute');
-			expect(Tempo.getHumanDiffOptions().absolute).toBe(true);
-			Tempo.disableHumanDiffOption('absolute');
-			expect(Tempo.getHumanDiffOptions().absolute).toBeUndefined();
+		expect(customMidday.parse('2024-05-15T13:00:00Z').isMidday()).toBe(true);
+		expect(customMidday.parse('2024-05-15').midday().hour).toBe(13);
+		expect(Tempo.parse('2024-05-15T13:00:00Z').isMidday()).toBe(false);
 
-			Tempo.setTestNowAndTimezone('2025-01-01T00:00:00Z', 'Asia/Tokyo');
-			expect(Tempo.hasTestNow()).toBe(true);
-			expect(Tempo.now().timeZone).toBe('Asia/Tokyo');
-			expect(Tempo.now().toDateTimeString()).toBe('2025-01-01 09:00:00');
-			expect(Tempo.getTestNow()?.toISOString()).toBe('2025-01-01T00:00:00.000Z');
-		} finally {
-			Tempo.settings(original);
-		}
+		expect(TempoFactory.create({ monthsOverflow: false }).parse('2024-01-31').addMonths(1).toDateString()).toBe('2024-02-29');
+		expect(TempoFactory.create({ yearsOverflow: false }).parse('2024-02-29').addYears(1).toDateString()).toBe('2025-02-28');
+
+		const fixedTokyo = TempoFactory.withTestNow('2025-01-01T00:00:00Z', { timeZone: 'Asia/Tokyo' });
+
+		expect(fixedTokyo.now().timeZone).toBe('Asia/Tokyo');
+		expect(fixedTokyo.now().toDateTimeString()).toBe('2025-01-01 09:00:00');
+		expect(Tempo.now({ timeZone: 'Asia/Tokyo' }).toDateString()).not.toBe('2025-01-01');
+
+		const relaxed = TempoFactory.create({ strictMode: false });
+
+		expect(relaxed.parse('2024-02-31').toDateString()).toBe('2024-03-02');
+		expect(() => Tempo.parse('2024-02-31')).toThrow('Invalid Tempo local date/time components');
 	});
 
 	it('creates and renders timezone-aware local components', () => {
@@ -207,11 +177,11 @@ describe('Tempo TypeScript behavior', () => {
 		});
 	});
 
-	it('rejects normalized component construction through safe constructors', () => {
-		expect(Tempo.create({ day: 31, month: 2, year: 2024 }).toDateString()).toBe('2024-03-02');
-		expect(() => Tempo.createSafe({ day: 31, month: 2, year: 2024 })).toThrow('Invalid Tempo local date/time components');
+	it('rejects invalid components by default and normalizes only through explicit APIs', () => {
+		expect(() => Tempo.create({ day: 31, month: 2, year: 2024 })).toThrow('Invalid Tempo local date/time components');
+		expect(Tempo.createNormalized({ day: 31, month: 2, year: 2024 }).toDateString()).toBe('2024-03-02');
 		expect(
-			Tempo.createSafe({
+			Tempo.create({
 				day: 29,
 				month: 2,
 				timeZone: 'Asia/Tokyo',
@@ -219,15 +189,15 @@ describe('Tempo TypeScript behavior', () => {
 			}).toISOString(),
 		).toBe('2024-02-28T15:00:00.000Z');
 		expect(
-			createSafe({
-				day: 29,
+			createNormalized({
+				day: 31,
 				month: 2,
 				timeZone: 'UTC',
 				year: 2024,
 			}).toDateString(),
-		).toBe('2024-02-29');
+		).toBe('2024-03-02');
 		expect(() =>
-			TempoFactory.create({ timeZone: 'Asia/Tokyo' }).createSafe({
+			TempoFactory.create({ timeZone: 'Asia/Tokyo' }).create({
 				day: 31,
 				month: 2,
 				year: 2024,
@@ -297,8 +267,8 @@ describe('Tempo TypeScript behavior', () => {
 		expect(base.diffAsTempoInterval(earlier).toISOString()).toBe('P1DT2H34M45.600S');
 		expect(base.diffInMicroseconds(earlier)).toBe(95685600000);
 		expect(base.diffFiltered((item) => item.isWeekday(), earlier)).toBe(1);
-		expect(base.getPreciseTimestamp()).toBe(1715769285600000);
-		expect(base.getPreciseTimestamp(3)).toBe(1715769285600);
+		expect(base.preciseTimestamp()).toBe(1715769285600000);
+		expect(base.preciseTimestamp(3)).toBe(1715769285600);
 		expect(base.calendar(earlier)).toBe('Tomorrow at 10:34');
 		expect(base.calendar('2024-05-20T00:00:00Z')).toBe('Last Wednesday at 10:34');
 		expect(base.floor('hour').toISOString()).toBe('2024-05-15T10:00:00.000Z');
@@ -311,9 +281,9 @@ describe('Tempo TypeScript behavior', () => {
 		expect(base.ceilWeek().toDateString()).toBe('2024-05-20');
 		expect(base.roundWeek().toDateString()).toBe('2024-05-13');
 		expect(base.format('YYYY-MM-DD HH:mm:ss.SSS ZZ [Q]M')).toBe('2024-05-15 10:34:45.600 +0000 Q5');
-		expect(base.rawFormat('YYYY-MM-DD')).toBe('2024-05-15');
-		expect(base.isoFormat('YYYY-MM-DD')).toBe('2024-05-15');
-		expect(base.translatedFormat('YYYY-MM-DD')).toBe('2024-05-15');
+		expect(base.format('YYYY-MM-DD')).toBe('2024-05-15');
+		expect(base.format('YYYY-MM-DD')).toBe('2024-05-15');
+		expect(base.format('YYYY-MM-DD')).toBe('2024-05-15');
 		expect(base.format('dddd, MMMM Do YYYY', { locale: 'en-US' })).toBe('Wednesday, May 15th 2024');
 		expect(base.ordinal()).toBe('15th');
 		expect(base.ordinal('month')).toBe('5th');
@@ -322,7 +292,7 @@ describe('Tempo TypeScript behavior', () => {
 		expect(base.week()).toBe(base.isoWeek);
 		expect(base.weekYear()).toBe(base.isoWeekYear);
 		expect(base.weeksInYear()).toBe(base.weeksInISOYear);
-		expect(base.getDaysFromStartOfWeek()).toBe(2);
+		expect(base.daysFromStartOfWeek()).toBe(2);
 		expect(base.setDaysFromStartOfWeek(4).toDateString()).toBe('2024-05-17');
 		expect(Tempo.parse('2015-06-01T00:00:00Z').isLongIsoYear()).toBe(true);
 		expect(base.monthName()).toBe('May');
@@ -389,15 +359,6 @@ describe('Tempo TypeScript behavior', () => {
 		).toThrow('advance toward the end');
 	});
 
-	it('mutates mutable instances for the expanded API', () => {
-		const mutable = TempoMutable.parse('2024-01-01T00:00:00Z');
-
-		expect(mutable.addHours(5).startOf('day')).toBe(mutable);
-		expect(mutable.toISOString()).toBe('2024-01-01T00:00:00.000Z');
-		expect(mutable.setTimezone('Asia/Tokyo')).toBe(mutable);
-		expect(mutable.toDateTimeString()).toBe('2024-01-01 09:00:00');
-	});
-
 	it('parses known token formats and applies offsets', () => {
 		expect(Tempo.fromFormat('2024/05/15 10:34:45.600 +0900', 'YYYY/MM/DD HH:mm:ss.SSS ZZ').toISOString()).toBe('2024-05-15T01:34:45.600Z');
 
@@ -409,19 +370,10 @@ describe('Tempo TypeScript behavior', () => {
 
 		expect(TempoFactory.create({ timeZone: 'Asia/Tokyo' }).fromFormat('2024-01-01 09:00', 'YYYY-MM-DD HH:mm').toISOString()).toBe('2024-01-01T00:00:00.000Z');
 
-		expect(Tempo.canParse('2024-05-15T10:34:45Z')).toBe(true);
-		expect(Tempo.canParse('not a date')).toBe(false);
-		expect(canParse('2024-05-15')).toBe(true);
-		expect(tryParse('not a date')).toBeNull();
-		expect(TempoImmutable.tryParse('2024-05-15')).toBeInstanceOf(TempoImmutable);
-		expect(Tempo.tryParse('2024-05-15')).toBeInstanceOf(Tempo);
-		expect(TempoMutable.tryParse('2024-05-15')).toBeInstanceOf(TempoMutable);
-
-		expect(Tempo.hasFormat('2024/05/15 10:34', 'YYYY/MM/DD HH:mm')).toBe(true);
-		expect(Tempo.hasFormat('2024-05-15', 'YYYY/MM/DD')).toBe(false);
-		expect(hasFormat('2024-05-15', 'YYYY-MM-DD')).toBe(true);
-		expect(tryFromFormat('2024/05/15 10:34', 'YYYY/MM/DD HH:mm')?.toISOString()).toBe('2024-05-15T10:34:00.000Z');
-		expect(Tempo.tryFromFormat('2024-05-15', 'YYYY/MM/DD')).toBeNull();
+		expect(Tempo.parse('2024-05-15T10:34:45Z')).toBeInstanceOf(Tempo);
+		expect(() => Tempo.parse('not a date')).toThrow('Invalid Tempo input');
+		expect(Tempo.fromFormat('2024/05/15 10:34', 'YYYY/MM/DD HH:mm').toISOString()).toBe('2024-05-15T10:34:00.000Z');
+		expect(() => Tempo.fromFormat('2024-05-15', 'YYYY/MM/DD')).toThrow('Input does not match Tempo format');
 	});
 
 	it('exposes calendar predicates and humanized diffs', () => {
@@ -618,14 +570,14 @@ describe('Tempo TypeScript behavior', () => {
 		expect(utc.isUtc()).toBe(true);
 		expect(utc.offsetString()).toBe('+00:00');
 		expect(utc.offsetString('')).toBe('+0000');
-		expect(utc.getOffsetString()).toBe('+00:00');
+		expect(utc.offsetString()).toBe('+00:00');
 		expect(utc.utcOffset()).toBe(0);
 		expect(utc.timezoneName('shortOffset')).toBe('GMT+0');
 
 		expect(winter.isUtc()).toBe(false);
 		expect(winter.offsetMinutes).toBe(-300);
 		expect(winter.offsetString()).toBe('-05:00');
-		expect(winter.getOffsetString('')).toBe('-0500');
+		expect(winter.offsetString('')).toBe('-0500');
 		expect(winter.utcOffset()).toBe(-300);
 		expect(winter.timezoneName('shortOffset')).toBe('GMT-5');
 		expect(winter.isDST()).toBe(false);
@@ -648,10 +600,10 @@ describe('Tempo TypeScript behavior', () => {
 		expect(average('2024-05-15T00:00:00Z', '2024-05-17T00:00:00Z').toISOString()).toBe('2024-05-16T00:00:00.000Z');
 		expect(min('2024-05-15T00:00:00Z', '2024-05-10T00:00:00Z').toISOString()).toBe('2024-05-10T00:00:00.000Z');
 		expect(max('2024-05-15T00:00:00Z', '2024-05-20T00:00:00Z').toISOString()).toBe('2024-05-20T00:00:00.000Z');
-		expect(minimum('2024-05-15T00:00:00Z', '2024-05-10T00:00:00Z').toISOString()).toBe('2024-05-10T00:00:00.000Z');
-		expect(maximum('2024-05-15T00:00:00Z', '2024-05-20T00:00:00Z').toISOString()).toBe('2024-05-20T00:00:00.000Z');
-		expect(base.minimum('2024-05-10T00:00:00Z').toISOString()).toBe('2024-05-10T00:00:00.000Z');
-		expect(base.maximum('2024-05-20T00:00:00Z').toISOString()).toBe('2024-05-20T00:00:00.000Z');
+		expect(min('2024-05-15T00:00:00Z', '2024-05-10T00:00:00Z').toISOString()).toBe('2024-05-10T00:00:00.000Z');
+		expect(max('2024-05-15T00:00:00Z', '2024-05-20T00:00:00Z').toISOString()).toBe('2024-05-20T00:00:00.000Z');
+		expect(base.min('2024-05-10T00:00:00Z').toISOString()).toBe('2024-05-10T00:00:00.000Z');
+		expect(base.max('2024-05-20T00:00:00Z').toISOString()).toBe('2024-05-20T00:00:00.000Z');
 		expect(base.closest('2024-05-10T00:00:00Z', '2024-05-16T00:00:00Z', '2024-05-20T00:00:00Z').toISOString()).toBe('2024-05-16T00:00:00.000Z');
 		expect(base.farthest('2024-05-10T00:00:00Z', '2024-05-22T00:00:00Z').toISOString()).toBe('2024-05-22T00:00:00.000Z');
 
@@ -701,6 +653,12 @@ describe('Tempo TypeScript behavior', () => {
 		const tempo = Tempo.parse('2024-05-15T12:34:56.789Z', {
 			timeZone: 'Asia/Tokyo',
 		});
+		const customString = Tempo.parse('2024-05-15T12:34:56.789Z', {
+			toStringFormat: 'YYYY-MM-DD',
+		});
+		const customJSON = Tempo.parse('2024-05-15T12:34:56.789Z', {
+			serializer: (value) => value.toDateString(),
+		});
 
 		expect(tempo.toDateTimeLocalString()).toBe('2024-05-15T21:34:56');
 		expect(tempo.toDateTimeLocalString('millisecond')).toBe('2024-05-15T21:34:56.789');
@@ -724,7 +682,7 @@ describe('Tempo TypeScript behavior', () => {
 		expect(tempo.toCookieString()).toBe('Wed, 15-May-2024 12:34:56 GMT');
 		expect(tempo.toUnixString()).toBe('1715776496');
 		expect(tempo.unix()).toBe(1715776496);
-		expect(tempo.getTimestampMs()).toBe(1715776496789);
+		expect(tempo.timestampMs).toBe(1715776496789);
 		expect(tempo.toDateTime().toISOString()).toBe('2024-05-15T12:34:56.789Z');
 		expect(tempo.toDateTimeImmutable().toISOString()).toBe('2024-05-15T12:34:56.789Z');
 		expect(tempo.jsonSerialize()).toBe('2024-05-15T12:34:56.789Z');
@@ -733,20 +691,13 @@ describe('Tempo TypeScript behavior', () => {
 		expect(JSON.stringify(TempoDuration.parse('P1DT2H'))).toBe('"P1DT2H"');
 		expect(fromJSON('"2024-05-15T12:34:56.789Z"').toISOString()).toBe('2024-05-15T12:34:56.789Z');
 		expect(TempoImmutable.fromJSON('"2024-05-15T12:34:56.789Z"').toISOString()).toBe('2024-05-15T12:34:56.789Z');
-		expect(TempoMutable.fromJSON('"2024-05-15T12:34:56.789Z"').toISOString()).toBe('2024-05-15T12:34:56.789Z');
 		expect(Tempo.fromSerialized('"2024-05-15T12:34:56.789Z"').toISOString()).toBe('2024-05-15T12:34:56.789Z');
 		expect(TempoDuration.fromJSON('"P1DT2H"').toISOString()).toBe('P1DT2H');
 		expect(() => Tempo.fromJSON('123')).toThrow('Tempo JSON must be a string');
-		expect(Tempo.tryParse('not a date')).toBeNull();
-		expect(Tempo.getLastErrors()).toBeInstanceOf(Error);
-		expect(Tempo.executeWithLocale('fr-FR', () => Tempo.getLocale())).toBe('fr-FR');
-		expect(Tempo.getLocale()).toBe('en-US');
-		Tempo.setToStringFormat('YYYY-MM-DD');
-		expect(String(tempo)).toBe('2024-05-15');
-		Tempo.resetToStringFormat();
-		Tempo.serializeUsing((value) => value.toDateString());
-		expect(JSON.stringify(tempo)).toBe('"2024-05-15"');
-		Tempo.serializeUsing(null);
+		expect(() => Tempo.parse('not a date')).toThrow('Invalid Tempo input');
+		expect(String(customString)).toBe('2024-05-15');
+		expect(JSON.stringify(customJSON)).toBe('"2024-05-15"');
+		expect(String(tempo)).toBe('2024-05-15T12:34:56.789Z');
 
 		const dateOnly = (value: Tempo) => value.toDateString();
 
@@ -754,21 +705,16 @@ describe('Tempo TypeScript behavior', () => {
 		expect('macro' in Tempo).toBe(false);
 		expect('genericMacro' in Tempo).toBe(false);
 		expect('mixin' in Tempo).toBe(false);
-		expect(Tempo.make(null)).toBeNull();
-		expect(Tempo.make('2024-05-15')?.toDateString()).toBe('2024-05-15');
-		expect(Tempo.parseFromLocale('2024-05-15', 'en-US').toDateString()).toBe('2024-05-15');
-		expect(Tempo.getDays().slice(0, 2)).toEqual(['Sunday', 'Monday']);
-		expect(Tempo.hasFormatWithModifiers('2024/05/15', 'YYYY/MM/DD')).toBe(true);
-		expect(Tempo.hasFormatWithModifiers(null, 'YYYY/MM/DD')).toBe(false);
-		expect(Tempo.getCalendarFormats().sameDay).toBe('[Today at] HH:mm');
-		expect(Tempo.getIsoUnits()).toContain('day');
-		expect(Tempo.getIsoFormats().date).toBe('YYYY-MM-DD');
-		expect(Tempo.getTimeFormatByPrecision('millisecond')).toBe('HH:mm:ss.SSS');
-		expect(Tempo.getWeekStartsAt()).toBe(1);
-		expect(Tempo.getWeekEndsAt()).toBe(0);
+		expect(Tempo.days().slice(0, 2)).toEqual(['Sunday', 'Monday']);
+		expect(Tempo.calendarFormats().sameDay).toBe('[Today at] HH:mm');
+		expect(Tempo.isoUnits()).toContain('day');
+		expect(Tempo.isoFormats().date).toBe('YYYY-MM-DD');
+		expect(Tempo.timeFormatByPrecision('millisecond')).toBe('HH:mm:ss.SSS');
+		expect(Tempo.weekStartsAt()).toBe(1);
+		expect(Tempo.weekEndsAt()).toBe(0);
 		expect(Tempo.localeHasDiffSyntax('en-US')).toBe(true);
 		expect(Tempo.localeHasPeriodSyntax('en-US')).toBe(true);
-		expect(Tempo.getAvailableLocales()).toContain('en-US');
+		expect(Tempo.availableLocales()).toContain('en-US');
 
 		expect(tempo.toMap().get('timeZone')).toBe('Asia/Tokyo');
 		expect(tempo.toMap().get('hour')).toBe(21);
@@ -795,9 +741,9 @@ describe('Tempo TypeScript behavior', () => {
 		expect(tempo.setDateTimeFrom('2025-01-02T03:04:05.006Z').toISOString()).toBe('2025-01-02T03:04:05.006Z');
 		expect(tempo.setTimeFromTimeString('03:04:05.006').toISOString()).toBe('2024-05-15T03:04:05.006Z');
 		expect(tempo.setTimestamp(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
-		expect(tempo.timestampTo(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
-		expect(tempo.getTimestamp()).toBe(1715776496);
-		expect(tempo.setTimestampFrom(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
+		expect(tempo.setTimestamp(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
+		expect(tempo.timestamp).toBe(1715776496);
+		expect(tempo.setTimestamp(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
 		expect(tempo.setISODate(2024, 20, 3).toDateString()).toBe('2024-05-15');
 		expect(tempo.weekday()).toBe(3);
 		expect(tempo.weekday(5).toDateString()).toBe('2024-05-17');
@@ -806,41 +752,34 @@ describe('Tempo TypeScript behavior', () => {
 		expect(tempo.modify('+2 days').toDateString()).toBe('2024-05-17');
 		expect(tempo.modify('previous day').toDateString()).toBe('2024-05-14');
 		expect(tempo.change('next week').toDateString()).toBe('2024-05-22');
-		expect(tempo.subtract(2, 'days').toDateString()).toBe('2024-05-13');
-		expect(tempo.addUnit('day', 2).toDateString()).toBe('2024-05-17');
-		expect(tempo.addRealUnit('day', 2).toDateString()).toBe('2024-05-17');
-		expect(tempo.addUTCUnit('day', 2).toDateString()).toBe('2024-05-17');
-		expect(tempo.rawAdd(2, 'day').toDateString()).toBe('2024-05-17');
-		expect(tempo.addUnitNoOverflow('day', 20, 'month').toDateString()).toBe('2024-05-31');
-		expect(tempo.subUnit('day', 2).toDateString()).toBe('2024-05-13');
-		expect(tempo.subRealUnit('day', 2).toDateString()).toBe('2024-05-13');
-		expect(tempo.subUTCUnit('day', 2).toDateString()).toBe('2024-05-13');
-		expect(tempo.rawSub(2, 'day').toDateString()).toBe('2024-05-13');
-		expect(tempo.subUnitNoOverflow('day', 20, 'month').toDateString()).toBe('2024-05-01');
+		expect(tempo.sub(2, 'days').toDateString()).toBe('2024-05-13');
+		expect(tempo.add(2, 'day').toDateString()).toBe('2024-05-17');
+		expect(tempo.addNoOverflow(20, 'day', 'month').toDateString()).toBe('2024-05-31');
+		expect(tempo.sub(2, 'day').toDateString()).toBe('2024-05-13');
+		expect(tempo.subNoOverflow(20, 'day', 'month').toDateString()).toBe('2024-05-01');
 		expect(tempo.setUnitNoOverflow('day', 40, 'month').toDateString()).toBe('2024-05-31');
 		expect(Tempo.parse('2024-05-17T12:00:00Z').nextWeekendDay().dayOfWeek).toBe(6);
 		expect(Tempo.parse('2024-05-20T12:00:00Z').previousWeekendDay().dayOfWeek).toBe(0);
 		expect(tempo.tz('Asia/Tokyo').timeZone).toBe('Asia/Tokyo');
 		expect(tempo.shiftTimezone('Asia/Tokyo').toDateTimeString()).toBe('2024-05-15 12:34:56');
-		expect(Tempo.createFromTimeString('03:04:05.006').toTimeString('millisecond')).toBe('03:04:05.006');
-		expect(Tempo.createFromFormat('2024/05/15', 'YYYY/MM/DD').toDateString()).toBe('2024-05-15');
-		expect(Tempo.rawCreateFromFormat('2024/05/15', 'YYYY/MM/DD').toDateString()).toBe('2024-05-15');
-		expect(Tempo.rawParse('2024-05-15').toDateString()).toBe('2024-05-15');
-		expect(Tempo.canBeCreatedFromFormat('2024/05/15', 'YYYY/MM/DD')).toBe(true);
-		expect(Tempo.createFromTimestamp(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
-		expect(Tempo.createFromTimestampMs(1).toISOString()).toBe('1970-01-01T00:00:00.001Z');
+		expect(Tempo.fromTimeString('03:04:05.006').toTimeString('millisecond')).toBe('03:04:05.006');
+		expect(Tempo.fromFormat('2024/05/15', 'YYYY/MM/DD').toDateString()).toBe('2024-05-15');
+		expect(Tempo.fromFormat('2024/05/15', 'YYYY/MM/DD').toDateString()).toBe('2024-05-15');
+		expect(Tempo.parse('2024-05-15').toDateString()).toBe('2024-05-15');
+		expect(Tempo.fromTimestamp(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
+		expect(Tempo.fromTimestampMs(1).toISOString()).toBe('1970-01-01T00:00:00.001Z');
 		expect(Tempo.fromTimestampUTC(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
 		expect(Tempo.fromTimestampMsUTC(1).toISOString()).toBe('1970-01-01T00:00:00.001Z');
-		expect(Tempo.createFromTimestampUTC(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
-		expect(Tempo.createFromTimestampMsUTC(1).toISOString()).toBe('1970-01-01T00:00:00.001Z');
+		expect(Tempo.fromTimestampUTC(0).toISOString()).toBe('1970-01-01T00:00:00.000Z');
+		expect(Tempo.fromTimestampMsUTC(1).toISOString()).toBe('1970-01-01T00:00:00.001Z');
 		expect(tempo.addDays(2).from(tempo)).toBe('in 2 days');
 		expect(tempo.addDays(2).since(tempo)).toBe('in 2 days');
 		expect(tempo.to(tempo.addDays(2))).toBe('in 2 days');
 		expect(tempo.addDays(2).timespan(tempo)).toBe('in 2 days');
-		expect(tempo.get('year')).toBe(2024);
-		expect(tempo.getPaddedUnit('month')).toBe('05');
-		expect(tempo.getTranslatedDayName()).toBe('Wednesday');
-		expect(tempo.getTranslatedShortMonthName()).toBe('May');
+		expect(tempo.year).toBe(2024);
+		expect(tempo.paddedUnit('month')).toBe('05');
+		expect(tempo.dayName()).toBe('Wednesday');
+		expect(tempo.shortMonthName()).toBe('May');
 		expect(tempo.translateNumber(1234)).toBe('1,234');
 		expect(tempo.translate('Hello :name', { name: 'Tempo' })).toBe('Hello Tempo');
 		expect(tempo.translateTimeString('Wednesday, May 15', 'en-US', 'fr-FR')).toBe('mercredi, mai 15');
@@ -852,14 +791,6 @@ describe('Tempo TypeScript behavior', () => {
 		expect(TempoImmutable.parse(tempo).isImmutable()).toBe(true);
 		expect(tempo.isMutable()).toBe(false);
 		expect(TempoImmutable.parse(tempo).isMutable()).toBe(false);
-
-		const mutable = TempoMutable.parse(tempo);
-
-		expect(mutable.isMutable()).toBe(true);
-		expect(mutable.avoidMutation().toISOString()).toBe('2024-05-15T12:34:56.789Z');
-		expect(mutable.cast().toISOString()).toBe('2024-05-15T12:34:56.789Z');
-		expect(mutable.tempoize(tempo.addDays(1)).toDateString()).toBe('2024-05-16');
-		expect(mutable.nowWithSameTz().timeZone).toBe('UTC');
 	});
 
 	it('scopes translator behavior through composable runtimes', () => {
@@ -889,14 +820,14 @@ describe('Tempo TypeScript behavior', () => {
 
 		expect(first.translate('greeting', { name: 'Tempo' })).toBe('Hello Tempo');
 		expect(second.translate('greeting', { name: 'Tempo' })).toBe('Hola Tempo');
-		expect(first.getTranslationMessage('locale')).toBe('en-US');
-		expect(second.getTranslationMessage('locale')).toBe('es-ES');
-		expect(first.hasLocalTranslator()).toBe(true);
+		expect(first.translationMessage('locale')).toBe('en-US');
+		expect(second.translationMessage('locale')).toBe('es-ES');
+		expect(first.hasTranslator()).toBe(true);
 		expect(first.clone().translate('greeting', { name: 'Tempo' })).toBe('Hello Tempo');
 		expect(first.addDays(1).translate('greeting', { name: 'Tempo' })).toBe('Hello Tempo');
-		expect(first.toMutable().addDays(1).translate('greeting', { name: 'Tempo' })).toBe('Hello Tempo');
+		expect(first.toImmutable().addDays(1).translate('greeting', { name: 'Tempo' })).toBe('Hello Tempo');
 
-		const replaced = first.setLocalTranslator({
+		const replaced = first.withTranslator({
 			getMessage: (key) => (key === 'greeting' ? 'Salut :name' : null),
 			locale: 'fr-FR',
 		});
@@ -909,15 +840,15 @@ describe('Tempo TypeScript behavior', () => {
 		const monday = Tempo.parse('2024-01-01T00:00:00Z', { timeZone: 'UTC' });
 
 		expect(monday.isoWeekday).toBe(1);
-		expect(monday.getISOWeekday()).toBe(1);
+		expect(monday.isoWeekday).toBe(1);
 		expect(monday.isoWeek).toBe(1);
-		expect(monday.getISOWeek()).toBe(1);
+		expect(monday.isoWeek).toBe(1);
 		expect(monday.isoWeekYear).toBe(2024);
-		expect(monday.getISOWeekYear()).toBe(2024);
+		expect(monday.isoWeekYear).toBe(2024);
 		expect(monday.isoWeeksInYear).toBe(52);
-		expect(monday.getISOWeeksInYear()).toBe(52);
+		expect(monday.isoWeeksInYear).toBe(52);
 		expect(monday.dayOfYear).toBe(1);
-		expect(monday.getDayOfYear()).toBe(1);
+		expect(monday.dayOfYear).toBe(1);
 		expect(monday.setISOWeek(2).toDateString()).toBe('2024-01-08');
 		expect(monday.setISOWeekYear(2025).isoWeekYear).toBe(2025);
 		expect(monday.setISOWeekday(7).isoWeekday).toBe(7);

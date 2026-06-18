@@ -1,8 +1,8 @@
 import type { TempoDuration } from './duration';
-import type { Tempo, TempoImmutable, TempoMutable } from './core';
+import type { Tempo, TempoImmutable } from './core';
 import type { TempoRuntime } from './runtime';
 
-export type TempoInput = Date | Tempo | TempoImmutable | TempoMutable | number | string;
+export type TempoInput = Date | Tempo | TempoImmutable | number | string;
 
 export type TimeUnit =
 	| 'millisecond'
@@ -41,10 +41,19 @@ export type WeekdayInput = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 'sunday' | 'monday' |
 
 export type TempoOptions = {
 	readonly fallbackLocale?: string;
+	readonly humanDiffOptions?: HumanDiffOptions;
 	readonly locale?: string;
+	readonly midDayAt?: number;
+	readonly monthsOverflow?: boolean;
 	readonly runtime?: TempoRuntime;
+	readonly serializer?: TempoSerializer | null;
+	readonly strictMode?: boolean;
+	readonly testNow?: TempoInput | null;
 	readonly timeZone?: string;
+	readonly toStringFormat?: string | null;
 	readonly translator?: TempoTranslator;
+	readonly weekendDays?: readonly number[];
+	readonly yearsOverflow?: boolean;
 };
 
 export type TempoSettings = {
@@ -61,6 +70,23 @@ export type TempoSettings = {
 };
 
 export type TempoSerializer = (tempo: TempoImmutable) => string;
+
+export type TempoPolicy = {
+	readonly fallbackLocale: string;
+	readonly humanDiffOptions: HumanDiffOptions;
+	readonly locale: string;
+	readonly midDayAt: number;
+	readonly monthsOverflow: boolean;
+	readonly runtime?: TempoRuntime;
+	readonly serializer: TempoSerializer | null;
+	readonly strictMode: boolean;
+	readonly testNow: Date | null;
+	readonly timeZone: string;
+	readonly toStringFormat: string | null;
+	readonly translator?: TempoTranslator;
+	readonly weekendDays: readonly number[];
+	readonly yearsOverflow: boolean;
+};
 
 export type TempoTranslationValue = string | number | null;
 

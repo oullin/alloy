@@ -1,8 +1,9 @@
-import type { TempoComponents, TempoInput, TempoOptions } from '../types';
-import { tempoConfig } from '../config';
+import type { TempoComponents, TempoInput, TempoOptions, TempoPolicy } from '../types';
+import { defaultTempoPolicy, resolveTempoPolicy } from '../config';
 import { TempoRuntime } from '../runtime';
 
 import {
+	assertSafeZonedComponents,
 	assertFiniteNumber,
 	dateFromPartsAsUTC,
 	dateFromZonedComponents,
@@ -32,14 +33,14 @@ const isTempoDateCarrier = (input: unknown): input is TempoDateCarrier =>
 
 const isTempoRuntimeCarrier = (input: unknown): input is TempoRuntimeCarrier => isTempoDateCarrier(input) && typeof (input as { readonly getRuntime?: unknown }).getRuntime === 'function';
 
-export const runtimeFromOptions = (input: TempoInput | undefined, options?: TempoOptions): TempoRuntime => {
+export const runtimeFromOptions = (input: TempoInput | undefined, options?: TempoOptions, policy: TempoPolicy = resolveTempoPolicy(options)): TempoRuntime => {
 	const base =
 		options?.runtime ??
 		(isTempoRuntimeCarrier(input)
 			? input.getRuntime()
 			: new TempoRuntime({
-					fallbackLocale: tempoConfig.fallbackLocale,
-					locale: tempoConfig.locale,
+					fallbackLocale: policy.fallbackLocale,
+					locale: policy.locale,
 				}));
 
 	return options?.translator !== undefined || options?.locale !== undefined || options?.fallbackLocale !== undefined
@@ -60,19 +61,50 @@ export const fromNumericTimestamp = (input: number): Date => {
 	return new Date(milliseconds);
 };
 
-export const parseLocalText = (input: string, timeZone: string): Date | null => {
+const requireMatchingUTCComponents = (components: TempoComponents, date: Date): void => {
+	const year = date.getUTCFullYear();
+	const month = date.getUTCMonth() + 1;
+	const day = date.getUTCDate();
+	const hour = date.getUTCHours();
+	const minute = date.getUTCMinutes();
+	const second = date.getUTCSeconds();
+	const millisecond = date.getUTCMilliseconds();
+
+	if (
+		components.year !== year ||
+		(components.month ?? 1) !== month ||
+		(components.day ?? 1) !== day ||
+		(components.hour ?? 0) !== hour ||
+		(components.minute ?? 0) !== minute ||
+		(components.second ?? 0) !== second ||
+		(components.millisecond ?? 0) !== millisecond
+	) {
+		throw new RangeError('Invalid Tempo local date/time components');
+	}
+};
+
+const assertStrictZonedComponents = (components: TempoComponents, date: Date, timeZone: string, strict: boolean): void => {
+	if (strict) {
+		assertSafeZonedComponents(components, date, timeZone);
+	}
+};
+
+export const parseLocalText = (input: string, timeZone: string, strict = true): Date | null => {
 	const dateOnly = isoDatePattern.exec(input);
 
 	if (dateOnly !== null) {
-		return dateFromZonedComponents(
-			{
-				day: Number(dateOnly[3]),
-				month: Number(dateOnly[2]),
-				timeZone,
-				year: Number(dateOnly[1]),
-			},
+		const components = {
+			day: Number(dateOnly[3]),
+			month: Number(dateOnly[2]),
 			timeZone,
-		);
+			year: Number(dateOnly[1]),
+		};
+
+		const date = dateFromZonedComponents(components, timeZone);
+
+		assertStrictZonedComponents(components, date, timeZone, strict);
+
+		return date;
 	}
 
 	if (timezonePattern.test(input)) {
@@ -85,30 +117,33 @@ export const parseLocalText = (input: string, timeZone: string): Date | null => 
 		return null;
 	}
 
-	return dateFromZonedComponents(
-		{
-			day: Number(local[3]),
-			hour: Number(local[4] ?? 0),
-			millisecond: Number((local[7] ?? '0').slice(0, 3).padEnd(3, '0')),
-			minute: Number(local[5] ?? 0),
-			month: Number(local[2]),
-			second: Number(local[6] ?? 0),
-			timeZone,
-			year: Number(local[1]),
-		},
+	const components = {
+		day: Number(local[3]),
+		hour: Number(local[4] ?? 0),
+		millisecond: Number((local[7] ?? '0').slice(0, 3).padEnd(3, '0')),
+		minute: Number(local[5] ?? 0),
+		month: Number(local[2]),
+		second: Number(local[6] ?? 0),
 		timeZone,
-	);
+		year: Number(local[1]),
+	};
+
+	const date = dateFromZonedComponents(components, timeZone);
+
+	assertStrictZonedComponents(components, date, timeZone, strict);
+
+	return date;
 };
 
-export const zoneFromInput = (input: TempoInput, options: TempoOptions | undefined): string => {
+export const zoneFromInput = (input: TempoInput, options: TempoOptions | undefined, policy: TempoPolicy = resolveTempoPolicy(options)): string => {
 	if (isTempoDateCarrier(input)) {
 		return normalizeTimeZone(options?.timeZone ?? input.timeZone);
 	}
 
-	return normalizeTimeZone(options?.timeZone);
+	return normalizeTimeZone(options?.timeZone ?? policy.timeZone);
 };
 
-export const asDate = (input: TempoInput, options?: TempoOptions): Date => {
+export const asDate = (input: TempoInput, options?: TempoOptions, policy: TempoPolicy = resolveTempoPolicy(options)): Date => {
 	if (isTempoDateCarrier(input)) {
 		return input.toDate();
 	}
@@ -117,12 +152,41 @@ export const asDate = (input: TempoInput, options?: TempoOptions): Date => {
 		return new Date(input.getTime());
 	}
 
-	const timeZone = normalizeTimeZone(options?.timeZone);
+	const timeZone = normalizeTimeZone(options?.timeZone ?? policy.timeZone);
 
-	const date = typeof input === 'number' ? fromNumericTimestamp(input) : (parseLocalText(input, timeZone) ?? new Date(input));
+	const date = typeof input === 'number' ? fromNumericTimestamp(input) : (parseLocalText(input, timeZone, policy.strictMode) ?? new Date(input));
 
 	if (Number.isNaN(date.getTime())) {
 		throw new RangeError(`Invalid Tempo input: ${String(input)}`);
+	}
+
+	if (typeof input === 'string' && policy.strictMode && timezonePattern.test(input)) {
+		const match = isoLocalPattern.exec(input.replace(timezonePattern, ''));
+
+		if (match !== null) {
+			requireMatchingUTCComponents(
+				{
+					day: Number(match[3]),
+					hour: Number(match[4] ?? 0),
+					millisecond: Number((match[7] ?? '0').slice(0, 3).padEnd(3, '0')),
+					minute: Number(match[5] ?? 0),
+					month: Number(match[2]),
+					second: Number(match[6] ?? 0),
+					year: Number(match[1]),
+				},
+				new Date(
+					Date.UTC(
+						Number(match[1]),
+						Number(match[2]) - 1,
+						Number(match[3]),
+						Number(match[4] ?? 0),
+						Number(match[5] ?? 0),
+						Number(match[6] ?? 0),
+						Number((match[7] ?? '0').slice(0, 3).padEnd(3, '0')),
+					),
+				),
+			);
+		}
 	}
 
 	return date;
@@ -146,7 +210,7 @@ export const parseOffsetMinutes = (input: string): number => {
 	return match[1] === '-' ? -minutes : minutes;
 };
 
-export const parseFromPattern = (input: string, pattern: string, options?: TempoOptions): Date => {
+export const parseFromPattern = (input: string, pattern: string, options?: TempoOptions, policy: TempoPolicy = resolveTempoPolicy(options)): Date => {
 	const tokens = ['YYYY', 'MMMM', 'dddd', 'MMM', 'ddd', 'SSS', 'Do', 'YY', 'ZZ', 'MM', 'DD', 'HH', 'hh', 'mm', 'ss', 'Z', 'M', 'D', 'H', 'h', 'm', 's', 'A', 'a'] as const;
 
 	const groups: string[] = [];
@@ -239,24 +303,40 @@ export const parseFromPattern = (input: string, pattern: string, options?: Tempo
 
 	if (offset !== undefined && offset !== '') {
 		const offsetMinutes = parseOffsetMinutes(offset);
+		const utcDate = new Date(dateFromPartsAsUTC(components));
 
-		return new Date(dateFromPartsAsUTC(components) - offsetMinutes * millisecondsPerMinute);
+		if (policy.strictMode) {
+			requireMatchingUTCComponents(components, utcDate);
+		}
+
+		return new Date(utcDate.getTime() - offsetMinutes * millisecondsPerMinute);
 	}
 
-	return dateFromZonedComponents(components, options?.timeZone);
+	const timeZone = normalizeTimeZone(options?.timeZone ?? policy.timeZone);
+	const date = dateFromZonedComponents(components, timeZone);
+
+	assertStrictZonedComponents(components, date, timeZone, policy.strictMode);
+
+	return date;
 };
 
 export class TempoParser {
+	private readonly policy: TempoPolicy;
+
+	constructor(policy: TempoPolicy = defaultTempoPolicy()) {
+		this.policy = policy;
+	}
+
 	runtimeFromOptions(input: TempoInput | undefined, options?: TempoOptions): TempoRuntime {
-		return runtimeFromOptions(input, options);
+		return runtimeFromOptions(input, options, resolveTempoPolicy(options, this.policy));
 	}
 
 	asDate(input: TempoInput, options?: TempoOptions): Date {
-		return asDate(input, options);
+		return asDate(input, options, resolveTempoPolicy(options, this.policy));
 	}
 
 	zoneFromInput(input: TempoInput, options?: TempoOptions): string {
-		return zoneFromInput(input, options);
+		return zoneFromInput(input, options, resolveTempoPolicy(options, this.policy));
 	}
 
 	fromNumericTimestamp(input: number): Date {
@@ -264,6 +344,6 @@ export class TempoParser {
 	}
 
 	parseFromPattern(input: string, pattern: string, options?: TempoOptions): Date {
-		return parseFromPattern(input, pattern, options);
+		return parseFromPattern(input, pattern, options, resolveTempoPolicy(options, this.policy));
 	}
 }

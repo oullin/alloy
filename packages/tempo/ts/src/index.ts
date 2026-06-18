@@ -19,6 +19,7 @@ export type {
 	TempoInput,
 	TempoObject,
 	TempoOptions,
+	TempoPolicy,
 	TempoSerializer,
 	TempoSettableComponents,
 	TempoSettings,
@@ -31,7 +32,7 @@ export type {
 } from './types';
 export { createTempoRuntime, TempoRuntime } from './runtime';
 export { TempoDuration } from './duration';
-export { Tempo, TempoImmutable, TempoMutable } from './core';
+export { Tempo, TempoImmutable } from './core';
 export { TempoInterval, TempoPeriod } from './ranges';
 export { TempoFactory } from './factory';
 
@@ -45,37 +46,25 @@ export const yesterday = Tempo.yesterday;
 
 export const parse = Tempo.parse;
 
-export const tryParse = Tempo.tryParse;
-
-export const canParse = Tempo.canParse;
-
 export const fromJSON = Tempo.fromJSON;
 
 export const min = Tempo.min;
 
 export const max = Tempo.max;
 
-export const minimum = Tempo.minimum;
-
-export const maximum = Tempo.maximum;
-
 export const average = Tempo.average;
 
 export const fromFormat = Tempo.fromFormat;
 
-export const tryFromFormat = Tempo.tryFromFormat;
-
-export const hasFormat = Tempo.hasFormat;
-
 export const create = Tempo.create;
 
-export const createSafe = Tempo.createSafe;
+export const createNormalized = Tempo.createNormalized;
 
-export const createFromDate = Tempo.createFromDate;
+export const fromDate = Tempo.fromDate;
 
-export const createFromTime = Tempo.createFromTime;
+export const fromTime = Tempo.fromTime;
 
-export const createMidnightDate = Tempo.createMidnightDate;
+export const fromTimeString = Tempo.fromTimeString;
 
 export const fromObject = Tempo.fromObject;
 

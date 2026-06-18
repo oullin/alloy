@@ -21,6 +21,13 @@ export const nextBusinessDay = (value: TempoImmutable): TempoImmutable => {
 dateOnly(Tempo.parse("2024-05-15"));
 ```
 
+Parsing and component construction are strict by default:
+
+```ts
+Tempo.create({ year: 2024, month: 2, day: 29 });
+Tempo.createNormalized({ year: 2024, month: 2, day: 31 });
+```
+
 Locale and translation behavior is composed with runtimes and factories:
 
 ```ts

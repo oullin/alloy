@@ -1,35 +1,55 @@
-import { defaultTimeZone, normalizeTimeZone } from '../calendar';
-import { tempoConfig } from '../config';
-import { Tempo, TempoImmutable, TempoMutable } from '../core';
-import { asDate, runtimeFromOptions, zoneFromInput } from '../parsing';
+import { cloneTempoPolicy, resolveTempoPolicy } from '../config';
+import { Tempo, TempoImmutable } from '../core';
+import { asDate, zoneFromInput } from '../parsing';
 import { TempoRuntime } from '../runtime';
 
-import type { TempoComponents, TempoInput, TempoOptions, TempoTranslator } from '../types';
+import type { TempoComponents, TempoInput, TempoOptions, TempoPolicy, TempoTranslator } from '../types';
 
 export class TempoFactory {
 	private readonly nowValue: Date | null;
+	private readonly policy: TempoPolicy;
 	private readonly runtime: TempoRuntime;
 	private readonly zone: string;
 
-	private constructor(
-		nowValue: Date | null,
-		timeZone = defaultTimeZone,
-		runtime = new TempoRuntime({
-			fallbackLocale: tempoConfig.fallbackLocale,
-			locale: tempoConfig.locale,
-		}),
-	) {
+	private constructor(policy: TempoPolicy, nowValue: Date | null = policy.testNow) {
 		this.nowValue = nowValue === null ? null : new Date(nowValue.getTime());
-		this.runtime = runtime;
-		this.zone = normalizeTimeZone(timeZone);
+		this.runtime =
+			policy.runtime ??
+			new TempoRuntime({
+				fallbackLocale: policy.fallbackLocale,
+				locale: policy.locale,
+				translator: policy.translator,
+			});
+		this.policy = cloneTempoPolicy({
+			...policy,
+			fallbackLocale: this.runtime.fallbackLocale,
+			locale: this.runtime.locale,
+			runtime: this.runtime,
+			testNow: this.nowValue,
+		});
+		this.zone = policy.timeZone;
 	}
 
 	static create(options?: TempoOptions): TempoFactory {
-		return new TempoFactory(null, options?.timeZone, runtimeFromOptions(undefined, options));
+		const policy = resolveTempoPolicy(options);
+
+		return new TempoFactory(policy, policy.testNow);
 	}
 
 	static withTestNow(input: TempoInput, options?: TempoOptions): TempoFactory {
-		return new TempoFactory(asDate(input, options), zoneFromInput(input, options), runtimeFromOptions(input, options));
+		const policy = resolveTempoPolicy(options);
+		const now = asDate(input, options, policy);
+
+		return new TempoFactory(
+			resolveTempoPolicy(
+				{
+					...options,
+					timeZone: zoneFromInput(input, options, policy),
+				},
+				policy,
+			),
+			now,
+		);
 	}
 
 	getRuntime(): TempoRuntime {
@@ -37,7 +57,15 @@ export class TempoFactory {
 	}
 
 	withRuntime(runtime: TempoRuntime): TempoFactory {
-		return new TempoFactory(this.nowValue, this.zone, runtime);
+		return new TempoFactory(
+			resolveTempoPolicy(
+				{
+					runtime,
+				},
+				this.policy,
+			),
+			this.nowValue,
+		);
 	}
 
 	withTranslator(translator: TempoTranslator): TempoFactory {
@@ -51,18 +79,31 @@ export class TempoFactory {
 	}
 
 	private options(options?: TempoOptions): TempoOptions {
+		const policy = resolveTempoPolicy(options, this.policy);
+
+		const runtime =
+			options?.runtime ??
+			this.runtime.with({
+				fallbackLocale: options?.fallbackLocale,
+				locale: options?.locale,
+				translator: options?.translator,
+			});
+
 		return {
-			fallbackLocale: options?.fallbackLocale,
-			locale: options?.locale,
-			runtime:
-				options?.runtime ??
-				this.runtime.with({
-					fallbackLocale: options?.fallbackLocale,
-					locale: options?.locale,
-					translator: options?.translator,
-				}),
-			timeZone: options?.timeZone ?? this.zone,
-			translator: options?.translator,
+			fallbackLocale: policy.fallbackLocale,
+			humanDiffOptions: policy.humanDiffOptions,
+			locale: policy.locale,
+			midDayAt: policy.midDayAt,
+			monthsOverflow: policy.monthsOverflow,
+			runtime,
+			serializer: policy.serializer,
+			strictMode: policy.strictMode,
+			testNow: this.nowValue,
+			timeZone: policy.timeZone,
+			toStringFormat: policy.toStringFormat,
+			translator: policy.translator,
+			weekendDays: policy.weekendDays,
+			yearsOverflow: policy.yearsOverflow,
 		};
 	}
 
@@ -86,51 +127,27 @@ export class TempoFactory {
 		return TempoImmutable.parse(this.nowValue ?? new Date(), this.options());
 	}
 
-	mutableNow(): TempoMutable {
-		return TempoMutable.parse(this.nowValue ?? new Date(), this.options());
-	}
-
 	parse(input: TempoInput, options?: TempoOptions): Tempo {
 		return Tempo.parse(input, this.options(options));
-	}
-
-	tryParse(input: TempoInput, options?: TempoOptions): Tempo | null {
-		return Tempo.tryParse(input, this.options(options));
-	}
-
-	canParse(input: TempoInput, options?: TempoOptions): boolean {
-		return this.tryParse(input, options) !== null;
 	}
 
 	fromFormat(input: string, pattern: string, options?: TempoOptions): Tempo {
 		return Tempo.fromFormat(input, pattern, this.options(options));
 	}
 
-	tryFromFormat(input: string, pattern: string, options?: TempoOptions): Tempo | null {
-		return Tempo.tryFromFormat(input, pattern, this.options(options));
-	}
-
-	hasFormat(input: string, pattern: string, options?: TempoOptions): boolean {
-		return this.tryFromFormat(input, pattern, options) !== null;
-	}
-
 	create(components: TempoComponents): Tempo {
-		return Tempo.create({ timeZone: this.zone, ...components }).withRuntime(this.runtime) as Tempo;
+		return Tempo.create({ timeZone: this.zone, ...components }, this.options());
 	}
 
-	createSafe(components: TempoComponents): Tempo {
-		return Tempo.createSafe({ timeZone: this.zone, ...components }).withRuntime(this.runtime) as Tempo;
+	createNormalized(components: TempoComponents): Tempo {
+		return Tempo.createNormalized({ timeZone: this.zone, ...components }, this.options());
 	}
 
-	createFromDate(year: number, month = 1, day = 1): Tempo {
+	fromDate(year: number, month = 1, day = 1): Tempo {
 		return this.create({ day, month, year });
 	}
 
-	createMidnightDate(year: number, month: number, day: number): Tempo {
-		return this.createFromDate(year, month, day);
-	}
-
-	createFromTime(hour = 0, minute = 0, second = 0, millisecond = 0): Tempo {
+	fromTime(hour = 0, minute = 0, second = 0, millisecond = 0): Tempo {
 		return this.today().setTime(hour, minute, second, millisecond);
 	}
 
