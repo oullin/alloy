@@ -1,0 +1,24 @@
+{
+  "name": "@tempo/acceptance",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#acceptance/*": "./src/*.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "test:tempo-ts": "vitest run src/tempo-ts.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@alloy/tempo": "workspace:*"
+  },
+  "devDependencies": {
+    "@tempo/artefacts": "workspace:*",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}
