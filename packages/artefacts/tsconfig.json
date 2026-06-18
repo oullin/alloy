@@ -1,8 +1,0 @@
-{
-  "extends": ["./tsconfig/base.json", "./tsconfig/artefacts.json"],
-  "compilerOptions": {
-    "baseUrl": ".",
-    "types": ["node"]
-  },
-  "include": ["src/**/*.ts"]
-}

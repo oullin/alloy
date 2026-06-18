@@ -1,9 +1,23 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const root = resolve(import.meta.dirname, '../../..');
-const tsSource = readFileSync(resolve(root, 'packages/tempo/ts/src/index.ts'), 'utf8');
-const goSource = readFileSync(resolve(root, 'packages/tempo/go/tempo.go'), 'utf8');
+const root = resolve(import.meta.dirname, '../..');
+
+const readSourceTree = (path: string, extension: string): string =>
+	readdirSync(path, { withFileTypes: true })
+		.flatMap((entry) => {
+			const entryPath = resolve(path, entry.name);
+
+			if (entry.isDirectory()) {
+				return readSourceTree(entryPath, extension);
+			}
+
+			return entry.isFile() && entry.name.endsWith(extension) ? readFileSync(entryPath, 'utf8') : [];
+		})
+		.join('\n');
+
+const tsSource = readSourceTree(resolve(root, 'packages/tempo-ts/src'), '.ts');
+const goSource = readSourceTree(resolve(root, 'packages/tempo-go'), '.go');
 
 const forbiddenExportPatterns = [
 	/\bmacro\s*\(/,
@@ -23,19 +37,19 @@ const requiredTsTerms = [
 	'createTempoRuntime',
 	'getRuntime',
 	'withRuntime',
-	'getLocalTranslator',
-	'setLocalTranslator',
-	'hasLocalTranslator',
+	'TempoTranslator',
+	'translator',
+	'hasTranslator',
 	'withTranslator',
-	'getDayOfYear',
-	'getISOWeek',
-	'getISOWeekYear',
-	'getISOWeekday',
-	'getISOWeeksInYear',
+	'dayOfYear',
+	'isoWeek',
+	'isoWeekYear',
+	'isoWeekday',
+	'isoWeeksInYear',
 	'setISOWeek',
 	'setISOWeekYear',
 	'setISOWeekday',
-	'setTimestampFrom',
+	'setTimestamp',
 	'tempoize',
 	['diffAs', 'Tempo', 'Interval'].join(''),
 ];
@@ -43,19 +57,20 @@ const requiredTsTerms = [
 const requiredGoTerms = [
 	'type Runtime struct',
 	'type Translator interface',
+	'NewRuntime',
 	'WithRuntime',
 	'WithTranslator',
 	'WithLocale',
 	'WithFallbackLocale',
-	'GetLocalTranslator',
-	'SetLocalTranslator',
-	'HasLocalTranslator',
-	'WithTranslator',
+	'RuntimeLocale',
+	'RuntimeFallbackLocale',
+	'RuntimeTranslator',
+	'HasTranslator',
+	'Translator',
 	'ISOWeeksInYear',
 	'SetISOWeek',
 	'SetISOWeekYear',
 	'SetISOWeekday',
-	'SetTimestampFrom',
 	'Tempoize',
 	['DiffAs', 'Tempo', 'Interval'].join(''),
 ];

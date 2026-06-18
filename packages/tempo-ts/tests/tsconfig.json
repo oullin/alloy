@@ -1,12 +1,12 @@
 {
-  "extends": "@tempo/artefacts/tsconfig/base.json",
+  "extends": "../../../infra/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "composite": false,
     "noEmit": true,
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@alloy/tempo": ["../tempo/ts/src"]
+      "@alloy/tempo": ["../src"]
     }
   },
   "include": ["src/**/*.ts"]

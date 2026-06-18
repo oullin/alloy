@@ -13,7 +13,7 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@tempo/artefacts": "workspace:*",
+    "@alloy/infra": "workspace:*",
     "@types/node": "^25.0.0",
     "prettier": "^3.7.4",
     "turbo": "^2.9.12",

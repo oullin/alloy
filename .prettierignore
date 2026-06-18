@@ -3,9 +3,8 @@ dist/
 coverage/
 .turbo/
 .cache/
-storage/
 
-packages/artefacts/.cache/
-packages/artefacts/.logs/
-packages/artefacts/dist/
+infra/.cache/
+infra/.logs/
+infra/dist/
 packages/carbon-oracle/vendor/
