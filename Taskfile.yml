@@ -1,0 +1,72 @@
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  monorepo:initialise:
+    desc: Initialise local monorepo workspace files
+    cmds:
+      - bash infra/scripts/tasks/monorepo-initialise.sh
+
+  go:test:
+    desc: Run Go tests
+    cmds:
+      - bash infra/scripts/tasks/go-test.sh
+
+  ts:typecheck:
+    desc: Typecheck TypeScript packages
+    cmds:
+      - bash infra/scripts/tasks/ts-typecheck.sh
+
+  ts:test:
+    desc: Run TypeScript tests
+    cmds:
+      - bash infra/scripts/tasks/ts-test.sh
+
+  ts:build:
+    desc: Build TypeScript packages
+    cmds:
+      - bash infra/scripts/tasks/ts-build.sh
+
+  ts:lint:
+    desc: Run TypeScript static checks
+    cmds:
+      - bash infra/scripts/tasks/ts-lint.sh
+
+  parity-audit:
+    desc: Audit adjusted Tempo parity coverage
+    cmds:
+      - bash infra/scripts/tasks/parity-audit.sh
+
+  format:
+    desc: Format changed Go and TypeScript files
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh changed
+
+  format-all:
+    desc: Format every non-ignored Go and TypeScript file
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh all
+
+  go-test:
+    cmds:
+      - task: go:test
+
+  typecheck:
+    cmds:
+      - task: ts:typecheck
+
+  test:
+    cmds:
+      - task: ts:test
+
+  build:
+    cmds:
+      - task: ts:build
+
+  lint:
+    cmds:
+      - task: ts:lint

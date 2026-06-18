@@ -26,7 +26,7 @@ jobs:
           go-version: "1.26.4"
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm build
-      - run: make go-test
+      - run: pnpm exec task typecheck
+      - run: pnpm exec task test
+      - run: pnpm exec task build
+      - run: pnpm exec task go:test

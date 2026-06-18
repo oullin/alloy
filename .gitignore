@@ -5,6 +5,8 @@ coverage/
 .cache/
 .DS_Store
 .idea
+go.work
+go.work.sum
 infra/.cache/
 infra/.logs/
 infra/dist/

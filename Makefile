@@ -1,19 +1,17 @@
 SHELL := /bin/bash
 
-INFRA_MAKEFILE := infra/make/Makefile
-
 .DEFAULT_GOAL := help
 
-# Every real target lives in infra/make. This root Makefile is a transparent
-# forwarder so existing `make <target>` commands keep working.
+# Task owns orchestration. This Makefile only keeps existing `make <target>`
+# commands working.
 .PHONY: help FORCE
 help:
-	@$(MAKE) --no-print-directory -f $(INFRA_MAKEFILE) help
+	@pnpm exec task --list
 
 Makefile:
 	@:
 
 %: FORCE
-	@$(MAKE) --no-print-directory -f $(INFRA_MAKEFILE) $@
+	@pnpm exec task $@
 
 FORCE:
