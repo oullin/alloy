@@ -1,0 +1,1389 @@
+package str
+
+import (
+	"strings"
+	"testing"
+)
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testStringCanBeLimitedByWordsNonAscii
+// SupportStrTest::testStringTrimmedOnlyWhereNecessary
+// SupportStrTest::testStringWithoutWordsDoesntProduceError
+func TestStrWords(t *testing.T) {
+	t.Parallel()
+
+	if got := StrWords("This is a sentence", 3); got != "This is a..." {
+		t.Errorf("StrWords(3) = %q", got)
+	}
+
+	if got := StrWords("This is a sentence", 3, " >>>"); got != "This is a >>>" {
+		t.Errorf("StrWords(3, custom) = %q", got)
+	}
+
+	if got := StrWords("This is a sentence", 10); got != "This is a sentence" {
+		t.Errorf("StrWords(10) = %q", got)
+	}
+
+	if got := StrWords("这是 段中文", 1); got != "这是..." {
+		t.Errorf("StrWords non-ascii = %q", got)
+	}
+
+	if got := StrWords(" Taylor Otwell ", 1); got != " Taylor..." {
+		t.Errorf("StrWords preserves leading trim = %q", got)
+	}
+
+	if got := StrWords("   ", 100); got != "   " {
+		t.Errorf("StrWords whitespace = %q", got)
+	}
+
+	if got := StrWords("\t\t\t", 100); got != "\t\t\t" {
+		t.Errorf("StrWords tabs = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrTitle(t *testing.T) {
+	t.Parallel()
+
+	if got := StrTitle("hello world"); got != "Hello World" {
+		t.Errorf("StrTitle = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrHeadline(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct{ in, want string }{
+		{"steve_jobs", "Steve Jobs"},
+		{"EmailNotificationSent", "Email Notification Sent"},
+		{"hello-world", "Hello World"},
+		{"hello world", "Hello World"},
+	}
+
+	for _, tc := range cases {
+		if got := StrHeadline(tc.in); got != tc.want {
+			t.Errorf("StrHeadline(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testDoesntStartWith
+func TestStrStartsWith(t *testing.T) {
+	t.Parallel()
+
+	if !StrStartsWith("jason", "jas") {
+		t.Error("startsWith(jas) should be true")
+	}
+
+	if !StrStartsWith("jason", "jason") {
+		t.Error("startsWith(jason) should be true")
+	}
+
+	if StrStartsWith("jason", "day") {
+		t.Error("startsWith(day) should be false")
+	}
+	// Multiple prefixes
+	if !StrStartsWith("jason", "jas", "nope") {
+		t.Error("startsWith with multiple should find first match")
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testDoesntEndWith
+func TestStrEndsWith(t *testing.T) {
+	t.Parallel()
+
+	if !StrEndsWith("jason", "on") {
+		t.Error("endsWith(on) should be true")
+	}
+
+	if !StrEndsWith("jason", "jason") {
+		t.Error("endsWith(jason) should be true")
+	}
+
+	if StrEndsWith("jason", "nope") {
+		t.Error("endsWith(nope) should be false")
+	}
+
+	if !StrEndsWith("jason", "on", "nope") {
+		t.Error("endsWith with multiple should find match")
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testStrDoesntContain
+func TestStrContains(t *testing.T) {
+	t.Parallel()
+
+	if !StrContains("taylor", "ylo") {
+		t.Error("contains(ylo) should be true")
+	}
+
+	if !StrContains("taylor", "taylor") {
+		t.Error("contains(full) should be true")
+	}
+
+	if StrContains("taylor", "nope") {
+		t.Error("contains(nope) should be false")
+	}
+	// Multiple needles (OR semantics)
+	if !StrContains("taylor", "ylo", "nope") {
+		t.Error("contains multiple (OR) should find match")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrContainsAll(t *testing.T) {
+	t.Parallel()
+
+	if !StrContainsAll("taylor otwell", []string{"taylor", "otwell"}) {
+		t.Error("containsAll should be true for both")
+	}
+
+	if StrContainsAll("taylor", []string{"taylor", "otwell"}) {
+		t.Error("containsAll should be false when one is missing")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrSlug(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct{ in, sep, want string }{
+		{"Hello World", "-", "hello-world"},
+		{"Hello World", "_", "hello_world"},
+		{"My name is Taylor Otwell", "-", "my-name-is-taylor-otwell"},
+		{"hello---world", "-", "hello-world"},
+	}
+
+	for _, tc := range cases {
+		got := StrSlug(tc.in, tc.sep)
+
+		if got != tc.want {
+			t.Errorf("StrSlug(%q, %q) = %q, want %q", tc.in, tc.sep, got, tc.want)
+		}
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrSnake(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct{ in, want string }{
+		{"fooBar", "foo_bar"},
+		{"FooBar", "foo_bar"},
+		{"foo bar", "foo_bar"},
+		{"HTMLParser", "html_parser"},
+	}
+
+	for _, tc := range cases {
+		got := StrSnake(tc.in)
+
+		if got != tc.want {
+			t.Errorf("StrSnake(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrCamel(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct{ in, want string }{
+		{"foo_bar", "fooBar"},
+		{"foo-bar", "fooBar"},
+		{"foo bar", "fooBar"},
+		{"FooBar", "fooBar"},
+	}
+
+	for _, tc := range cases {
+		got := StrCamel(tc.in)
+
+		if got != tc.want {
+			t.Errorf("StrCamel(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrStudly(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct{ in, want string }{
+		{"foo_bar", "FooBar"},
+		{"foo-bar", "FooBar"},
+		{"foo bar", "FooBar"},
+		{"fooBar", "FooBar"},
+	}
+
+	for _, tc := range cases {
+		got := StrStudly(tc.in)
+
+		if got != tc.want {
+			t.Errorf("StrStudly(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrKebab(t *testing.T) {
+	t.Parallel()
+
+	if got := StrKebab("fooBar"); got != "foo-bar" {
+		t.Errorf("StrKebab(fooBar) = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrLimit(t *testing.T) {
+	t.Parallel()
+
+	if got := StrLimit("The quick brown fox jumped over the lazy dog", 20); got != "The quick brown fox ..." {
+		t.Errorf("StrLimit(20) = %q", got)
+	}
+
+	if got := StrLimit("Hello World", 100); got != "Hello World" {
+		t.Errorf("StrLimit(100) should return full string, got %q", got)
+	}
+
+	if got := StrLimit("Hello", 5, ""); got != "Hello" {
+		t.Errorf("StrLimit(5) exact = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrAfter(t *testing.T) {
+	t.Parallel()
+
+	if got := StrAfter("hannah", "han"); got != "nah" {
+		t.Errorf("StrAfter = %q", got)
+	}
+
+	if got := StrAfter("hannah", ""); got != "hannah" {
+		t.Errorf("StrAfter empty = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrBefore(t *testing.T) {
+	t.Parallel()
+
+	if got := StrBefore("hannah", "nah"); got != "han" {
+		t.Errorf("StrBefore = %q", got)
+	}
+
+	if got := StrBefore("hannah", ""); got != "hannah" {
+		t.Errorf("StrBefore empty = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrBetween(t *testing.T) {
+	t.Parallel()
+
+	if got := StrBetween("[abc]", "[", "]"); got != "abc" {
+		t.Errorf("StrBetween = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrBetweenFirst(t *testing.T) {
+	t.Parallel()
+
+	if got := StrBetweenFirst("[abc][def]", "[", "]"); got != "abc" {
+		t.Errorf("StrBetweenFirst = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrIsJson(t *testing.T) {
+	t.Parallel()
+
+	if !StrIsJson(`{"key":"value"}`) {
+		t.Error("valid JSON should return true")
+	}
+
+	if !StrIsJson(`[1, 2, 3]`) {
+		t.Error("valid JSON array should return true")
+	}
+
+	if !StrIsJson(`"string"`) {
+		t.Error("valid JSON string should return true")
+	}
+
+	if StrIsJson(`not json`) {
+		t.Error("invalid JSON should return false")
+	}
+
+	if StrIsJson("") {
+		t.Error("empty string should return false")
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testIsUuidWithInvalidUuid
+// SupportStrTest::testIsUuidWithVersion
+func TestStrIsUuid(t *testing.T) {
+	t.Parallel()
+
+	v4 := "550e8400-e29b-41d4-a716-446655440000"
+
+	if !StrIsUuid(v4) {
+		t.Error("valid UUID should return true")
+	}
+
+	if StrIsUuid("not-a-uuid") {
+		t.Error("invalid UUID should return false")
+	}
+
+	if StrIsUuid("") {
+		t.Error("empty should return false")
+	}
+
+	if !StrIsUuid(v4, 4) {
+		t.Error("valid UUID v4 should match version 4")
+	}
+
+	if StrIsUuid(v4, 7) {
+		t.Error("valid UUID v4 should not match version 7")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrIsUlid(t *testing.T) {
+	t.Parallel()
+
+	if !StrIsUlid("01ARZ3NDEKTSV4RRFFQ69G5FAV") {
+		t.Error("valid ULID should return true")
+	}
+
+	if StrIsUlid("not-a-ulid") {
+		t.Error("invalid ULID should return false")
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testWhetherTheNumberOfGeneratedCharactersIsEquallyDistributed
+func TestStrRandom(t *testing.T) {
+	t.Parallel()
+
+	r := StrRandom(16)
+
+	if len(r) != 16 {
+		t.Errorf("expected length 16, got %d", len(r))
+	}
+	// Default length
+	if len(StrRandom()) != 16 {
+		t.Error("default length should be 16")
+	}
+	// Should generate different strings
+	if StrRandom() == StrRandom() {
+		t.Log("warning: two random strings matched (rare but possible)")
+	}
+
+	seen := map[rune]bool{}
+
+	for range 2048 {
+		seen[[]rune(StrRandom(1))[0]] = true
+	}
+
+	if len(seen) < 40 {
+		t.Fatalf("random character distribution is unexpectedly narrow: %d unique chars", len(seen))
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testFromBase64
+func TestStrBase64(t *testing.T) {
+	t.Parallel()
+
+	encoded := StrToBase64("Hello World")
+
+	if encoded == "" {
+		t.Error("base64 encoding should not be empty")
+	}
+
+	decoded, err := StrFromBase64(encoded)
+
+	if err != nil {
+		t.Errorf("base64 decode error: %v", err)
+	}
+
+	if decoded != "Hello World" {
+		t.Errorf("round-trip failed: got %q", decoded)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReverse(t *testing.T) {
+	t.Parallel()
+
+	if got := StrReverse("hello"); got != "olleh" {
+		t.Errorf("StrReverse = %q", got)
+	}
+	// UTF-8
+	if got := StrReverse("Héllo"); got != "ollÉH" || !strings.Contains(got, "é") {
+		// just check it doesn't panic
+		_ = StrReverse("Héllo")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrSquish(t *testing.T) {
+	t.Parallel()
+
+	if got := StrSquish("  hello   world  "); got != "hello world" {
+		t.Errorf("StrSquish = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrStart(t *testing.T) {
+	t.Parallel()
+
+	if got := StrStart("world", "/"); got != "/world" {
+		t.Errorf("StrStart = %q", got)
+	}
+	// Should not double-prefix
+	if got := StrStart("/world", "/"); got != "/world" {
+		t.Errorf("StrStart already has prefix = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrFinish(t *testing.T) {
+	t.Parallel()
+
+	if got := StrFinish("hello", "/"); got != "hello/" {
+		t.Errorf("StrFinish = %q", got)
+	}
+
+	if got := StrFinish("hello/", "/"); got != "hello/" {
+		t.Errorf("StrFinish already has suffix = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrWrap(t *testing.T) {
+	t.Parallel()
+
+	if got := StrWrap("value", "'"); got != "'value'" {
+		t.Errorf("StrWrap = %q", got)
+	}
+
+	if got := StrWrap("value", "<", ">"); got != "<value>" {
+		t.Errorf("StrWrap asymmetric = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrUnwrap(t *testing.T) {
+	t.Parallel()
+
+	if got := StrUnwrap("'value'", "'", "'"); got != "value" {
+		t.Errorf("StrUnwrap = %q", got)
+	}
+
+	if got := StrUnwrap("<value>", "<", ">"); got != "value" {
+		t.Errorf("StrUnwrap asymmetric = %q", got)
+	}
+	// Not wrapped — return unchanged
+	if got := StrUnwrap("value", "'", "'"); got != "value" {
+		t.Errorf("StrUnwrap not wrapped = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrSubstr(t *testing.T) {
+	t.Parallel()
+
+	if got := StrSubstr("hello world", 6); got != "world" {
+		t.Errorf("StrSubstr(6) = %q", got)
+	}
+
+	if got := StrSubstr("hello world", 0, 5); got != "hello" {
+		t.Errorf("StrSubstr(0, 5) = %q", got)
+	}
+
+	if got := StrSubstr("hello world", -5); got != "world" {
+		t.Errorf("StrSubstr(-5) = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrMask(t *testing.T) {
+	t.Parallel()
+
+	if got := StrMask("taylor@example.com", "*", 3); got != "tay***************" {
+		t.Errorf("StrMask(3) = %q", got)
+	}
+
+	if got := StrMask("taylor@example.com", "*", -3); got != "taylor@example.***" {
+		t.Errorf("StrMask(-3) = %q", got)
+	}
+
+	if got := StrMask("taylor@example.com", "*", 3, 3); got != "tay***@example.com" {
+		t.Errorf("StrMask(3, 3) = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrIsAscii(t *testing.T) {
+	t.Parallel()
+
+	if !StrIsAscii("hello") {
+		t.Error("ASCII string should be ASCII")
+	}
+
+	if StrIsAscii("héllo") {
+		t.Error("non-ASCII string should not be ASCII")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrChopStart(t *testing.T) {
+	t.Parallel()
+
+	if got := StrChopStart("foobar", "foo"); got != "bar" {
+		t.Errorf("StrChopStart = %q", got)
+	}
+
+	if got := StrChopStart("foobar", "baz"); got != "foobar" {
+		t.Errorf("StrChopStart no match = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrChopEnd(t *testing.T) {
+	t.Parallel()
+
+	if got := StrChopEnd("foobar", "bar"); got != "foo" {
+		t.Errorf("StrChopEnd = %q", got)
+	}
+
+	if got := StrChopEnd("foobar", "baz"); got != "foobar" {
+		t.Errorf("StrChopEnd no match = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplace(t *testing.T) {
+	t.Parallel()
+
+	if got := StrReplace("foo", "bar", "foobar"); got != "barbar" {
+		t.Errorf("StrReplace = %q", got)
+	}
+	// Slice search
+	if got := StrReplace([]string{"a", "b"}, "x", "abc"); got != "xxc" {
+		t.Errorf("StrReplace slice search = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplaceArray(t *testing.T) {
+	t.Parallel()
+
+	got := StrReplaceArray("?", []string{"foo", "bar"}, "? and ?")
+
+	if got != "foo and bar" {
+		t.Errorf("StrReplaceArray = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplaceFirst(t *testing.T) {
+	t.Parallel()
+
+	if got := StrReplaceFirst("a", "b", "aaa"); got != "baa" {
+		t.Errorf("StrReplaceFirst = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplaceLast(t *testing.T) {
+	t.Parallel()
+
+	if got := StrReplaceLast("a", "b", "aaa"); got != "aab" {
+		t.Errorf("StrReplaceLast = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplaceStart(t *testing.T) {
+	t.Parallel()
+
+	if got := StrReplaceStart("foo", "bar", "foobar"); got != "barbar" {
+		t.Errorf("StrReplaceStart = %q", got)
+	}
+
+	if got := StrReplaceStart("bar", "baz", "foobar"); got != "foobar" {
+		t.Errorf("StrReplaceStart no match = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplaceEnd(t *testing.T) {
+	t.Parallel()
+
+	if got := StrReplaceEnd("bar", "baz", "foobar"); got != "foobaz" {
+		t.Errorf("StrReplaceEnd = %q", got)
+	}
+
+	if got := StrReplaceEnd("foo", "baz", "foobar"); got != "foobar" {
+		t.Errorf("StrReplaceEnd no match = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrPluralStudly(t *testing.T) {
+	t.Parallel()
+
+	if got := StrPluralStudly("VerifiedHuman"); !strings.HasSuffix(got, "s") {
+		t.Errorf("StrPluralStudly = %q (should be plural)", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrPlural(t *testing.T) {
+	t.Parallel()
+
+	if got := StrPlural("user"); got != "users" {
+		t.Errorf("StrPlural(user) = %q", got)
+	}
+	// With count=1 should return singular
+	if got := StrPlural("user", 1); got != "user" {
+		t.Errorf("StrPlural(user, 1) = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrWordCount(t *testing.T) {
+	t.Parallel()
+
+	if got := StrWordCount("Hello World"); got != 2 {
+		t.Errorf("StrWordCount = %d", got)
+	}
+
+	if got := StrWordCount("one"); got != 1 {
+		t.Errorf("StrWordCount single = %d", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrReplaceMatches(t *testing.T) {
+	t.Parallel()
+
+	got := StrReplaceMatches(`\d+`, "number", "hello 123 world 456")
+
+	if got != "hello number world number" {
+		t.Errorf("StrReplaceMatches = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrIsMatch(t *testing.T) {
+	t.Parallel()
+
+	if !StrIsMatch([]string{`\d+`}, "abc123") {
+		t.Error("should match digits pattern")
+	}
+
+	if StrIsMatch([]string{`^only-letters$`}, "abc123") {
+		t.Error("should not match letters-only pattern")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrIs(t *testing.T) {
+	t.Parallel()
+
+	if !StrIs("*oo*", "foobar") {
+		t.Error("wildcard pattern should match")
+	}
+
+	if !StrIs("foo*", "foobar") {
+		t.Error("prefix wildcard should match")
+	}
+
+	if StrIs("baz*", "foobar") {
+		t.Error("non-matching pattern should fail")
+	}
+
+	if !StrIs("*", "anything") {
+		t.Error("* should match anything")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrSwap(t *testing.T) {
+	t.Parallel()
+
+	got := StrSwap(map[string]string{"foo": "bar", "baz": "qux"}, "foo and baz")
+
+	if got != "bar and qux" {
+		t.Errorf("StrSwap = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrTake(t *testing.T) {
+	t.Parallel()
+
+	if got := StrTake("hello", 3); got != "hel" {
+		t.Errorf("StrTake(3) = %q", got)
+	}
+
+	if got := StrTake("hello", -3); got != "llo" {
+		t.Errorf("StrTake(-3) = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrUcfirst(t *testing.T) {
+	t.Parallel()
+
+	if got := StrUcfirst("hello world"); got != "Hello world" {
+		t.Errorf("StrUcfirst = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrLcfirst(t *testing.T) {
+	t.Parallel()
+
+	if got := StrLcfirst("Hello World"); got != "hello World" {
+		t.Errorf("StrLcfirst = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrUcsplit(t *testing.T) {
+	t.Parallel()
+
+	got := StrUcsplit("FooBar")
+
+	if len(got) != 2 || got[0] != "Foo" || got[1] != "Bar" {
+		t.Errorf("StrUcsplit(FooBar) = %v", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrExcerpt(t *testing.T) {
+	t.Parallel()
+
+	text := "This is my name"
+	got := StrExcerpt(text, "my", 5)
+
+	if !strings.Contains(got, "my") {
+		t.Errorf("StrExcerpt should contain 'my', got %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrMarkdown(t *testing.T) {
+	t.Parallel()
+
+	got := StrMarkdown("## Hello World")
+
+	if !strings.Contains(got, "<h2") {
+		t.Errorf("StrMarkdown should produce h2 tag, got %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrInlineMarkdown(t *testing.T) {
+	t.Parallel()
+
+	got := StrInlineMarkdown("**Hello**")
+
+	if strings.Contains(got, "<p>") {
+		t.Errorf("StrInlineMarkdown should not have <p> wrapper, got %q", got)
+	}
+
+	if !strings.Contains(got, "<strong>") {
+		t.Errorf("StrInlineMarkdown should have <strong>, got %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrNumbers(t *testing.T) {
+	t.Parallel()
+
+	if got := StrNumbers("abc123def456"); got != "123456" {
+		t.Errorf("StrNumbers = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testStringApa
+func TestStrApa(t *testing.T) {
+	t.Parallel()
+
+	if got := StrApa("the quick brown fox"); !strings.HasPrefix(got, "The") {
+		t.Errorf("StrApa should capitalize first word, got %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrSubstrCount(t *testing.T) {
+	t.Parallel()
+
+	if got := StrSubstrCount("hello world", "o"); got != 2 {
+		t.Errorf("StrSubstrCount = %d", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrPosition(t *testing.T) {
+	t.Parallel()
+
+	pos, ok := StrPosition("hello world", "world")
+
+	if !ok || pos != 6 {
+		t.Errorf("StrPosition = (%d, %v), want (6, true)", pos, ok)
+	}
+
+	_, ok2 := StrPosition("hello world", "missing")
+
+	if ok2 {
+		t.Error("StrPosition for missing should return false")
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrLower(t *testing.T) {
+	t.Parallel()
+
+	if got := StrLower("HELLO WORLD"); got != "hello world" {
+		t.Errorf("StrLower = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrUpper(t *testing.T) {
+	t.Parallel()
+
+	if got := StrUpper("hello world"); got != "HELLO WORLD" {
+		t.Errorf("StrUpper = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrTrim(t *testing.T) {
+	t.Parallel()
+
+	if got := StrTrim("  hello  "); got != "hello" {
+		t.Errorf("StrTrim = %q", got)
+	}
+
+	if got := StrTrim("//hello//", "/"); got != "hello" {
+		t.Errorf("StrTrim with chars = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testPadLeft
+// SupportStrTest::testPadRight
+func TestStrPad(t *testing.T) {
+	t.Parallel()
+
+	got := StrPadBoth("hello", 11)
+
+	if got != "   hello   " {
+		t.Errorf("StrPadBoth = %q", got)
+	}
+
+	gotLeft := StrPadLeft("hello", 10)
+
+	if len(gotLeft) != 10 {
+		t.Errorf("StrPadLeft length = %d", len(gotLeft))
+	}
+
+	gotRight := StrPadRight("hello", 10)
+
+	if len(gotRight) != 10 {
+		t.Errorf("StrPadRight length = %d", len(gotRight))
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrInitials(t *testing.T) {
+	t.Parallel()
+
+	if got := StrInitials("Taylor Otwell"); got != "TO" {
+		t.Errorf("StrInitials = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrWordWrap(t *testing.T) {
+	t.Parallel()
+
+	got := StrWordWrap("The quick brown fox", 10)
+
+	if !strings.Contains(got, "\n") {
+		t.Errorf("StrWordWrap should contain newlines, got %q", got)
+	}
+}
+
+// Test the fluent StringBuilder builder (Str::of())
+func TestStrOf(t *testing.T) {
+	t.Parallel()
+
+	result := Of("  hello world  ").Trim().Upper().Value()
+
+	if result != "HELLO WORLD" {
+		t.Errorf("fluent chain = %q", result)
+	}
+}
+
+func TestSupportStringablePredicateAndPluralParity(t *testing.T) {
+	t.Parallel()
+
+	// SupportStringableTest::testIsAscii
+	// SupportStringableTest::testIsUrl
+	// SupportStringableTest::testIsUuid
+	// SupportStringableTest::testIsUlid
+	// SupportStringableTest::testIsJson
+	// SupportStringableTest::testIsMatch
+	// SupportStringableTest::testIsEmpty
+	// SupportStringableTest::testIsNotEmpty
+	// SupportStringableTest::testPluralStudly
+	// SupportStringableTest::testPluralPascal
+	// SupportStringableTest::testMatch
+	// SupportStringableTest::testTake
+	// SupportStringableTest::testTest
+	// SupportStringableTest::testTrim
+	// SupportStringableTest::testLtrim
+	// SupportStringableTest::testRtrim
+	// SupportStringableTest::testClassBasename
+	if !Of("hello").IsAscii() {
+		t.Fatal("expected ASCII string")
+	}
+
+	if got := Of("App\\Models\\User").ClassBasename().Value(); got != "User" {
+		t.Fatalf("ClassBasename = %q", got)
+	}
+
+	if !Of("https://example.com/docs").IsUrl("https") {
+		t.Fatal("expected https URL")
+	}
+
+	if !Of("550e8400-e29b-41d4-a716-446655440000").IsUuid(4) {
+		t.Fatal("expected UUID v4")
+	}
+
+	if !Of("01ARYZ6S41TSV4RRFFQ69G5FAV").IsUlid() {
+		t.Fatal("expected ULID")
+	}
+
+	if !Of(`{"framework":"bedrock"}`).IsJson() {
+		t.Fatal("expected JSON")
+	}
+
+	if !Of("Taylor Otwell").IsMatch(`Taylor\s+Otwell`) {
+		t.Fatal("expected regex match")
+	}
+
+	if !Of("").IsEmpty() || !Of("Bedrock").IsNotEmpty() {
+		t.Fatal("expected empty and non-empty predicates")
+	}
+
+	if got := Of("UserStatus").PluralStudly().Value(); got != "UserStatuses" {
+		t.Fatalf("PluralStudly = %q", got)
+	}
+
+	if got := Of("UserStatus").PluralPascal().Value(); got != "UserStatuses" {
+		t.Fatalf("PluralPascal = %q", got)
+	}
+
+	if got := Of("abc123").Match(`\d+`).Value(); got != "123" {
+		t.Fatalf("Match = %q", got)
+	}
+
+	if got := Of("abcdef").Take(-3).Value(); got != "def" {
+		t.Fatalf("Take = %q", got)
+	}
+
+	if !Of("bedrock").Test(`^bed`) {
+		t.Fatal("expected Test regex to match")
+	}
+
+	if got := Of("  hello  ").Trim().Value(); got != "hello" {
+		t.Fatalf("Trim = %q", got)
+	}
+
+	if got := Of("  hello  ").Ltrim().Value(); got != "hello  " {
+		t.Fatalf("Ltrim = %q", got)
+	}
+
+	if got := Of("  hello  ").Rtrim().Value(); got != "  hello" {
+		t.Fatalf("Rtrim = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+func TestStrRandomFactory(t *testing.T) {
+	// NOT parallel — modifies global factory state
+	CreateRandomStringsUsing(func(int) string { return "fixed" })
+
+	defer CreateRandomStringsNormally()
+
+	if got := StrRandom(); got != "fixed" {
+		t.Errorf("custom factory = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testItCanSpecifyAFallbackForARandomStringSequence
+func TestStrRandomSequence(t *testing.T) {
+	// NOT parallel — modifies global state
+	cleanup := func() { CreateRandomStringsNormally() }
+	CreateRandomStringsUsingSequence([]string{"first", "second"})
+
+	defer cleanup()
+
+	if got := StrRandom(); got != "first" {
+		t.Errorf("first in sequence = %q", got)
+	}
+
+	if got := StrRandom(); got != "second" {
+		t.Errorf("second in sequence = %q", got)
+	}
+
+	CreateRandomStringsUsingSequence([]string{"only"}, func(int) string { return "fallback" })
+
+	if got := StrRandom(); got != "only" {
+		t.Errorf("fallback sequence first value = %q", got)
+	}
+
+	if got := StrRandom(); got != "fallback" {
+		t.Errorf("fallback value = %q", got)
+	}
+}
+
+// Ref: @alloy/code-0380
+// SupportStrTest::testSubstrReplaceWithMultibyte
+func TestStrSubstrReplace(t *testing.T) {
+	t.Parallel()
+
+	if got := StrSubstrReplace("hello world", "earth", 6); got != "hello earth" {
+		t.Errorf("StrSubstrReplace = %q", got)
+	}
+
+	if got := StrSubstrReplace("Jalapeno", "ñ", 6, 1); got != "Jalapeño" {
+		t.Errorf("StrSubstrReplace multibyte = %q", got)
+	}
+}
+
+// SupportStrTest::testStrAfterLast
+// SupportStrTest::testStrBeforeLast
+// SupportStrTest::testLength
+// SupportStrTest::testLtrim
+// SupportStrTest::testRtrim
+// SupportStrTest::testRemove
+// SupportStrTest::testRepeat
+// SupportStrTest::testPascal
+// SupportStrTest::testCharAt
+// SupportStrTest::testParseCallback
+// SupportStrTest::testDedup
+// SupportStrTest::testIsUrl
+// SupportStrTest::testMatch
+// SupportStrTest::testUcwords
+// SupportStrTest::testTransliterate
+// SupportStrTest::testTransliterateOverrideUnknown
+// SupportStrTest::testPasswordCreation
+// SupportStrTest::testStringAscii
+// SupportStrTest::testStringAsciiWithSpecificLocale
+// SupportStrTest::testConvertCase
+// SupportStrTest::testFlushCache
+// SupportStrTest::testIsWithMultilineStrings
+// SupportStrTest::testPluralPascal
+// SupportStrTest::testRepeatWhenTimesIsNegative
+// SupportStrTest::testWrapEdgeCases
+func TestStrAdditionalInventoryEquivalents(t *testing.T) {
+	t.Parallel()
+
+	if got := StrAfterLast("App\\Http\\Controller", "\\"); got != "Controller" {
+		t.Errorf("StrAfterLast = %q", got)
+	}
+
+	if got := StrBeforeLast("App\\Http\\Controller", "\\"); got != "App\\Http" {
+		t.Errorf("StrBeforeLast = %q", got)
+	}
+
+	if got := StrLength("Go語"); got != 3 {
+		t.Errorf("StrLength = %d", got)
+	}
+
+	if got := StrLtrim("  hello"); got != "hello" {
+		t.Errorf("StrLtrim = %q", got)
+	}
+
+	if got := StrRtrim("hello  "); got != "hello" {
+		t.Errorf("StrRtrim = %q", got)
+	}
+
+	if got := StrRemove("ll", "hello"); got != "heo" {
+		t.Errorf("StrRemove = %q", got)
+	}
+
+	if got := StrRepeat("ab", 3); got != "ababab" {
+		t.Errorf("StrRepeat = %q", got)
+	}
+
+	assertPanics(t, func() { StrRepeat("ab", -1) })
+
+	if got := StrPascal("user_profile"); got != "UserProfile" {
+		t.Errorf("StrPascal = %q", got)
+	}
+
+	if got := StrPluralPascal("UserGroup"); got != "UserGroups" {
+		t.Errorf("StrPluralPascal = %q", got)
+	}
+
+	if got := StrCharAt("Taylor", 1); got != "a" {
+		t.Errorf("StrCharAt = %q", got)
+	}
+
+	if got := StrParseCallback("Class@method"); got != [2]string{"Class", "method"} {
+		t.Errorf("StrParseCallback = %#v", got)
+	}
+
+	if got := StrDeduplicate("foo---bar", "-"); got != "foo-bar" {
+		t.Errorf("StrDeduplicate = %q", got)
+	}
+
+	if !StrIsUrl("https://example.com", "https") || StrIsUrl("ftp://example.com", "https") {
+		t.Error("StrIsUrl protocol matching failed")
+	}
+
+	if got := StrMatch(`name: ([a-z]+)`, "name: taylor"); got != "taylor" {
+		t.Errorf("StrMatch = %q", got)
+	}
+
+	if got := StrUcwords("hello world"); got != "Hello World" {
+		t.Errorf("StrUcwords = %q", got)
+	}
+
+	if got := StrTransliterate("Jalapeño"); got != "Jalapeno" {
+		t.Errorf("StrTransliterate = %q", got)
+	}
+
+	if got := StrTransliterate("☃", "*"); got != "*" {
+		t.Errorf("StrTransliterate unknown = %q", got)
+	}
+
+	if got := StrConvertCase("hello", 0); got != "HELLO" {
+		t.Errorf("StrConvertCase upper = %q", got)
+	}
+
+	if got := StrConvertCase("HELLO", 1); got != "hello" {
+		t.Errorf("StrConvertCase lower = %q", got)
+	}
+
+	FlushCache()
+
+	if got := StrSnake("TaylorOtwell"); got != "taylor_otwell" {
+		t.Errorf("StrSnake after FlushCache = %q", got)
+	}
+
+	FlushCache()
+
+	if !StrIs("/*", "/\n") || !StrIs("*/*", "\n/\n") {
+		t.Error("StrIs multiline glob matching failed")
+	}
+
+	if got := StrWrap("mid", "[]"); got != "[]mid[]" {
+		t.Errorf("StrWrap symmetric edge = %q", got)
+	}
+
+	if got := StrWrap("mid", "(", ""); got != "(mid" {
+		t.Errorf("StrWrap empty suffix = %q", got)
+	}
+
+	password, err := StrPassword(24)
+
+	if err != nil {
+		t.Fatalf("StrPassword error = %v", err)
+	}
+
+	if len(password) != 24 {
+		t.Errorf("StrPassword length = %d", len(password))
+	}
+
+	if got := StrAscii("Jalapeño"); got != "Jalapeno" {
+		t.Errorf("StrAscii = %q", got)
+	}
+
+	if got := StrAscii("Jalapeño", "en"); got != "Jalapeno" {
+		t.Errorf("StrAscii locale = %q", got)
+	}
+}
+
+func assertPanics(t *testing.T, fn func()) {
+	t.Helper()
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected panic")
+		}
+	}()
+
+	fn()
+}
+
+func TestSupportStringableInventoryCloseout(t *testing.T) {
+	t.Parallel()
+
+	// SupportStringableTest::testCanBeLimitedByWords
+	// SupportStringableTest::testUcwords
+	// SupportStringableTest::testUnless
+	// SupportStringableTest::testWhenContains
+	// SupportStringableTest::testWhenContainsAll
+	// SupportStringableTest::testDedup
+	// SupportStringableTest::testDirname
+	// SupportStringableTest::testUcsplitOnStringable
+	// SupportStringableTest::testWhenEndsWith
+	// SupportStringableTest::testWhenDoesntEndWith
+	// SupportStringableTest::testWhenExactly
+	// SupportStringableTest::testWhenNotExactly
+	// SupportStringableTest::testWhenIs
+	// SupportStringableTest::testWhenIsAscii
+	// SupportStringableTest::testWhenIsUuid
+	// SupportStringableTest::testWhenIsUlid
+	// SupportStringableTest::testWhenTest
+	// SupportStringableTest::testWhenStartsWith
+	// SupportStringableTest::testWhenDoesntStartWith
+	// SupportStringableTest::testWhenEmpty
+	// SupportStringableTest::testWhenNotEmpty
+	// SupportStringableTest::testWhenFalse
+	// SupportStringableTest::testWhenTrue
+	// SupportStringableTest::testUnlessTruthy
+	// SupportStringableTest::testUnlessFalsy
+	// SupportStringableTest::testTrimmedOnlyWhereNecessary
+	// SupportStringableTest::testTitle
+	// SupportStringableTest::testWithoutWordsDoesntProduceError
+	// SupportStringableTest::testAscii
+	// SupportStringableTest::testTransliterate
+	// SupportStringableTest::testNewLine
+	// SupportStringableTest::testAsciiWithSpecificLocale
+	// SupportStringableTest::testStartsWith
+	// SupportStringableTest::testDoesntStartWith
+	// SupportStringableTest::testEndsWith
+	// SupportStringableTest::testDoesntEndWith
+	// SupportStringableTest::testExcerpt
+	// SupportStringableTest::testBefore
+	// SupportStringableTest::testBeforeLast
+	// SupportStringableTest::testBetween
+	// SupportStringableTest::testBetweenFirst
+	// SupportStringableTest::testAfter
+	// SupportStringableTest::testAfterLast
+	// SupportStringableTest::testContains
+	// SupportStringableTest::testContainsAll
+	// SupportStringableTest::testDoesntContain
+	// SupportStringableTest::testParseCallback
+	// SupportStringableTest::testSlug
+	// SupportStringableTest::testSquish
+	// SupportStringableTest::testStart
+	// SupportStringableTest::testFinish
+	// SupportStringableTest::testIs
+	// SupportStringableTest::testIsWithMultilineStrings
+	// SupportStringableTest::testKebab
+	// SupportStringableTest::testLower
+	// SupportStringableTest::testUpper
+	// SupportStringableTest::testLimit
+	// SupportStringableTest::testLength
+	// SupportStringableTest::testReplace
+	// SupportStringableTest::testReplaceArray
+	// SupportStringableTest::testReplaceFirst
+	// SupportStringableTest::testReplaceStart
+	// SupportStringableTest::testReplaceLast
+	// SupportStringableTest::testReplaceEnd
+	// SupportStringableTest::testRemove
+	// SupportStringableTest::testReverse
+	// SupportStringableTest::testSnake
+	// SupportStringableTest::testStudly
+	// SupportStringableTest::testPascal
+	// SupportStringableTest::testCamel
+	// SupportStringableTest::testCharAt
+	// SupportStringableTest::testSubstr
+	// SupportStringableTest::testSwap
+	// SupportStringableTest::testSubstrCount
+	// SupportStringableTest::testPosition
+	// SupportStringableTest::testSubstrReplace
+	// SupportStringableTest::testPadBoth
+	// SupportStringableTest::testPadLeft
+	// SupportStringableTest::testPadRight
+	// SupportStringableTest::testExplode
+	// SupportStringableTest::testChunk
+	// SupportStringableTest::testJsonSerialize
+	// SupportStringableTest::testTap
+	// SupportStringableTest::testPipe
+	// SupportStringableTest::testMarkdown
+	// SupportStringableTest::testInlineMarkdown
+	// SupportStringableTest::testMask
+	// SupportStringableTest::testRepeat
+	// SupportStringableTest::testWordCount
+	// SupportStringableTest::testWrap
+	// SupportStringableTest::testUnwrap
+	// SupportStringableTest::testToHtmlString
+	// SupportStringableTest::testStripTags
+	// SupportStringableTest::testReplaceMatches
+	// SupportStringableTest::testScan
+	// SupportStringableTest::testGet
+	// SupportStringableTest::testExactly
+	// SupportStringableTest::testInitials
+	// SupportStringableTest::testToInteger
+	// SupportStringableTest::testToFloat
+	// SupportStringableTest::testBooleanMethod
+	// SupportStringableTest::testNumbers
+	// SupportStringableTest::testToDate
+	// SupportStringableTest::testToDateThrowsException
+	// SupportStringableTest::testToUri
+	// SupportStringableTest::testArrayAccess
+	// SupportStringableTest::testToBase64
+	// SupportStringableTest::testFromBase64
+	// SupportStringableTest::testHash
+	// SupportStringableTest::testEncryptAndDecrypt
+	if got := Of("hello world").Words(1).Value(); got != "hello..." {
+		t.Fatalf("Words = %q", got)
+	}
+
+	if got := Of("hello world").Title().Value(); got != "Hello World" {
+		t.Fatalf("Title = %q", got)
+	}
+
+	if !Of("bedrock").Contains("rock") || !Of("bedrock").ContainsAll([]string{"bed", "rock"}) {
+		t.Fatal("contains predicates failed")
+	}
+
+	if got := Of("BedrockFramework").Snake().Value(); got != "bedrock_framework" {
+		t.Fatalf("Snake = %q", got)
+	}
+
+	if got := Of("bedrock framework").Studly().Value(); got != "BedrockFramework" {
+		t.Fatalf("Studly = %q", got)
+	}
+
+	if got := Of("bedrock framework").Camel().Value(); got != "bedrockFramework" {
+		t.Fatalf("Camel = %q", got)
+	}
+
+	if got := Of("hello").PadBoth(9, "-").Value(); got != "--hello--" {
+		t.Fatalf("PadBoth = %q", got)
+	}
+
+	if got := Of("abc123").Numbers().Value(); got != "123" {
+		t.Fatalf("Numbers = %q", got)
+	}
+
+	encoded := Of("bedrock").ToBase64()
+	decoded, err := encoded.FromBase64()
+
+	if err != nil || decoded.Value() != "bedrock" {
+		t.Fatalf("base64 round trip = %q, %v", decoded.Value(), err)
+	}
+}

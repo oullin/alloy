@@ -6,9 +6,9 @@ The public API is branded as Tempo across both runtimes.
 
 ## Workspace
 
-- `packages/tempo-ts`: TypeScript package.
-- `packages/tempo-go`: Go module.
-- `packages/tempo-ts/tests`: TypeScript acceptance tests.
+- `packages/tempo/tempo-ts`: TypeScript package.
+- `packages/tempo/tempo-go`: Go module.
+- `packages/tempo/tempo-ts/tests`: TypeScript acceptance tests.
 - `infra`: repo automation, Task scripts, cache paths, and TypeScript config exports.
 
 ## Checks

@@ -2,7 +2,7 @@
   "files": [],
   "references": [
     { "path": "./infra" },
-    { "path": "./packages/tempo-ts" },
-    { "path": "./packages/tempo-ts/tests" }
+    { "path": "./packages/tempo/tempo-ts" },
+    { "path": "./packages/tempo/tempo-ts/tests" }
   ]
 }

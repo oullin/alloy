@@ -8,8 +8,8 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@alloy/infra': repoPath('./infra/src'),
-			'@alloy/tempo': repoPath('./packages/tempo-ts/src'),
-			'@alloy/tempo-tests': repoPath('./packages/tempo-ts/tests/src'),
+			'@alloy/tempo': repoPath('./packages/tempo/tempo-ts/src'),
+			'@alloy/tempo-tests': repoPath('./packages/tempo/tempo-ts/tests/src'),
 		},
 	},
 	test: {

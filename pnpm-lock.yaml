@@ -42,7 +42,23 @@ importers:
         specifier: ^4.1.5
         version: 4.1.8(@types/node@25.9.3)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
 
-  packages/tempo-ts:
+  packages/collection/collect-go: {}
+
+  packages/concurrency/concurrency-go: {}
+
+  packages/config/config-go: {}
+
+  packages/container/container-go: {}
+
+  packages/contracts/contracts-go: {}
+
+  packages/money/money-go: {}
+
+  packages/str/str-go: {}
+
+  packages/tempo/tempo-go: {}
+
+  packages/tempo/tempo-ts:
     devDependencies:
       tsdown:
         specifier: ^0.15.6
@@ -51,7 +67,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/tempo-ts/tests:
+  packages/tempo/tempo-ts/tests:
     dependencies:
       '@alloy/tempo':
         specifier: workspace:*
@@ -63,6 +79,8 @@ importers:
       vitest:
         specifier: ^4.1.5
         version: 4.1.8(@types/node@25.9.3)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
+
+  packages/workflow/workflow-go: {}
 
 packages:
 

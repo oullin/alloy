@@ -1,6 +1,6 @@
 packages:
-  - "packages/*"
-  - "packages/tempo-ts/tests"
+  - "packages/*/*"
+  - "packages/tempo/tempo-ts/tests"
   - "infra"
   - "infra/*"
 
