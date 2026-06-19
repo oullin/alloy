@@ -4,12 +4,12 @@ import { defineConfig } from 'vitest/config';
 const repoPath = (path: string): string => fileURLToPath(new URL(path, import.meta.url));
 
 export default defineConfig({
-	cacheDir: fileURLToPath(new URL('./packages/artefacts/.cache/vitest', import.meta.url)),
+	cacheDir: fileURLToPath(new URL('./infra/.cache/vitest', import.meta.url)),
 	resolve: {
 		alias: {
-			'@tempo/artefacts': repoPath('./packages/artefacts/src'),
-			'@alloy/tempo': repoPath('./packages/tempo/ts/src'),
-			'@tempo/tests': repoPath('./packages/tests/src'),
+			'@alloy/infra': repoPath('./infra/src'),
+			'@alloy/tempo': repoPath('./packages/tempo/tempo-ts/src'),
+			'@alloy/tempo-tests': repoPath('./packages/tempo/tempo-ts/tests/src'),
 		},
 	},
 	test: {

@@ -1,0 +1,19 @@
+name: TypeScript CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+
+      - run: pnpm exec task ts:typecheck
+      - run: pnpm exec task ts:test
+      - run: pnpm exec task ts:build

@@ -1,0 +1,67 @@
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  monorepo:initialise:
+    desc: Initialise local monorepo workspace files
+    cmds:
+      - bash infra/scripts/tasks/monorepo-initialise.sh
+
+  go:test:
+    desc: Run Go tests
+    cmds:
+      - bash infra/scripts/tasks/go-test.sh
+
+  ts:typecheck:
+    desc: Typecheck TypeScript packages
+    cmds:
+      - bash infra/scripts/tasks/ts-typecheck.sh
+
+  ts:test:
+    desc: Run TypeScript tests
+    cmds:
+      - bash infra/scripts/tasks/ts-test.sh
+
+  ts:build:
+    desc: Build TypeScript packages
+    cmds:
+      - bash infra/scripts/tasks/ts-build.sh
+
+  ts:lint:
+    desc: Run TypeScript static checks
+    cmds:
+      - bash infra/scripts/tasks/ts-lint.sh
+
+  go:format:
+    desc: Format changed Go files
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh changed go
+
+  go:format-all:
+    desc: Format every non-ignored Go file
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh all go
+
+  ts:format:
+    desc: Format changed TypeScript files
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh changed ts
+
+  ts:format-all:
+    desc: Format every non-ignored TypeScript file
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh all ts
+
+  format:
+    desc: Format changed Go and TypeScript files
+    cmds:
+      - bash infra/scripts/tasks/format-files.sh changed
+
+  format-all:
+    desc: Format every non-ignored Go and TypeScript file
+    cmds:
+      - docker-compose run --rm -T fmt format-all

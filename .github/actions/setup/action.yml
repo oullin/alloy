@@ -1,0 +1,28 @@
+name: Setup Alloy
+description: Install shared CI dependencies.
+
+inputs:
+  go-version:
+    description: Optional Go version to install.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 10.33.0
+
+    - uses: actions/setup-node@v5
+      with:
+        node-version: 20
+        cache: pnpm
+
+    - uses: actions/setup-go@v6
+      if: inputs.go-version != ''
+      with:
+        go-version: ${{ inputs.go-version }}
+
+    - run: pnpm install --frozen-lockfile
+      shell: bash

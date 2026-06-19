@@ -4,10 +4,10 @@ coverage/
 .turbo/
 .cache/
 .DS_Store
-storage/
 .idea
-packages/artefacts/.cache/
-packages/artefacts/.logs/
-packages/artefacts/dist/
-packages/carbon-oracle/vendor/
+go.work
+go.work.sum
+infra/.cache/
+infra/.logs/
+infra/dist/
 packages/docs/src/.vitepress/

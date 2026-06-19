@@ -1,7 +1,8 @@
 packages:
-  - "packages/*"
-  - "packages/tempo/*"
-  - "provision/*"
+  - "packages/*/*"
+  - "packages/tempo/tempo-ts/tests"
+  - "infra"
+  - "infra/*"
 
 onlyBuiltDependencies:
   - esbuild

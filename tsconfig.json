@@ -1,9 +1,8 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/artefacts" },
-    { "path": "./packages/tempo/ts" },
-    { "path": "./packages/tests" },
-    { "path": "./provision/tooling" }
+    { "path": "./infra" },
+    { "path": "./packages/tempo/tempo-ts" },
+    { "path": "./packages/tempo/tempo-ts/tests" }
   ]
 }
