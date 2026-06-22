@@ -38,7 +38,7 @@ func NewEncrypter(key []byte, c Cipher) (*Encrypter, error) {
 		return nil, ErrUnsupportedCipher
 	}
 
-	return &Encrypter{key: key, cipher: c}, nil
+	return &Encrypter{key: cloneBytes(key), cipher: c}, nil
 }
 
 // Encrypt encrypts the given value. When serialize is true the value is
@@ -162,7 +162,7 @@ func (e *Encrypter) DecryptString(raw string) (string, error) {
 
 // PreviousKeys sets legacy keys used for decryption during key rotation.
 func (e *Encrypter) PreviousKeys(keys [][]byte) {
-	e.previousKeys = keys
+	e.previousKeys = cloneKeySet(keys)
 }
 
 // GetKey returns the current encryption key as a base64-encoded string.
@@ -288,11 +288,11 @@ func (e *Encrypter) parsePayload(raw string) (payload, error) {
 }
 
 func (e *Encrypter) decryptWithKeys(p payload) ([]byte, error) {
-	allKeys := make([][]byte, 0, 1+len(e.previousKeys))
-	allKeys = append(allKeys, e.key)
-	allKeys = append(allKeys, e.previousKeys...)
+	if plaintext, err := e.decryptPayload(p, e.key); err == nil {
+		return plaintext, nil
+	}
 
-	for _, k := range allKeys {
+	for _, k := range e.previousKeys {
 		plaintext, err := e.decryptPayload(p, k)
 
 		if err == nil {
@@ -301,6 +301,31 @@ func (e *Encrypter) decryptWithKeys(p payload) ([]byte, error) {
 	}
 
 	return nil, ErrDecryptFailed
+}
+
+func cloneKeySet(keys [][]byte) [][]byte {
+	if len(keys) == 0 {
+		return nil
+	}
+
+	cloned := make([][]byte, len(keys))
+
+	for i, key := range keys {
+		cloned[i] = cloneBytes(key)
+	}
+
+	return cloned
+}
+
+func cloneBytes(value []byte) []byte {
+	if value == nil {
+		return nil
+	}
+
+	cloned := make([]byte, len(value))
+	copy(cloned, value)
+
+	return cloned
 }
 
 func (e *Encrypter) decryptPayload(p payload, key []byte) ([]byte, error) {

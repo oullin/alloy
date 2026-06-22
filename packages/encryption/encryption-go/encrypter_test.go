@@ -625,6 +625,48 @@ func TestGetKeyAndGetAllKeys(t *testing.T) {
 	}
 }
 
+func TestNewEncrypterCopiesKey(t *testing.T) {
+	t.Parallel()
+
+	key := mustGenerateKey(t, AES256CBC)
+	expected := base64.StdEncoding.EncodeToString(key)
+
+	enc := mustNewEncrypter(t, key, AES256CBC)
+	key[0] ^= 0xff
+
+	if enc.GetKey() != expected {
+		t.Fatal("mutating caller-owned key should not change encrypter key")
+	}
+}
+
+func TestPreviousKeysCopiesKeys(t *testing.T) {
+	t.Parallel()
+
+	keyOld := mustGenerateKey(t, AES256CBC)
+	keyNew := mustGenerateKey(t, AES256CBC)
+
+	encOld := mustNewEncrypter(t, keyOld, AES256CBC)
+	ciphertext, err := encOld.EncryptString("legacy")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	encNew := mustNewEncrypter(t, keyNew, AES256CBC)
+	encNew.PreviousKeys([][]byte{keyOld})
+	keyOld[0] ^= 0xff
+
+	plaintext, err := encNew.DecryptString(ciphertext)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if plaintext != "legacy" {
+		t.Fatalf("expected legacy, got %s", plaintext)
+	}
+}
+
 // --- test helpers ---
 
 func mustGenerateKey(t *testing.T, c Cipher) []byte {
