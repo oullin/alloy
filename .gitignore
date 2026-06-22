@@ -11,3 +11,4 @@ infra/.cache/
 infra/.logs/
 infra/dist/
 packages/docs/src/.vitepress/
+.pnpm-store/

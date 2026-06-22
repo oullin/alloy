@@ -1,7 +1,6 @@
 {
   "extends": "../../../../infra/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "composite": false,
     "noEmit": true,
     "types": ["node", "vitest/globals"],

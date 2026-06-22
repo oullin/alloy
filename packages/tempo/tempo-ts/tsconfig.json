@@ -1,7 +1,6 @@
 {
   "extends": "../../../infra/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "../../../infra/.cache/typescript/tempo-ts/dist",
     "tsBuildInfoFile": "../../../infra/.cache/typescript/tempo-ts/tsconfig.tsbuildinfo",
     "paths": {

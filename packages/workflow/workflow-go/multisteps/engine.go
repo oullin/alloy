@@ -3,9 +3,15 @@ package multisteps
 import (
 	"context"
 	"sync"
-
-	cconcurrency "github.com/oullin/alloy/contracts/concurrency"
 )
+
+// Task is a unit of concurrent work.
+type Task func() (any, error)
+
+// Driver defines the concurrency backend contract.
+type Driver interface {
+	Run(ctx context.Context, tasks []Task) ([]any, error)
+}
 
 // Result captures the outcome of a workflow run.
 type Result struct {
@@ -18,7 +24,7 @@ type Result struct {
 
 // Engine executes compiled workflows.
 type Engine struct {
-	driver          cconcurrency.Driver
+	driver          Driver
 	continueOnError bool
 }
 
@@ -60,7 +66,7 @@ type runState struct {
 	skipped   map[string]bool
 }
 
-func WithDriver(d cconcurrency.Driver) EngineOption {
+func WithDriver(d Driver) EngineOption {
 	return func(e *Engine) { e.driver = d }
 }
 
@@ -150,7 +156,7 @@ func (e *Engine) runAsyncWave(ctx context.Context, g *compiledGraph, state *runS
 
 	defer cancel()
 
-	tasks := make([]cconcurrency.Task, len(names))
+	tasks := make([]Task, len(names))
 	results := make([]any, len(names))
 	errs := make([]error, len(names))
 

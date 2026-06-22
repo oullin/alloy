@@ -44,7 +44,9 @@ trap 'rm -f "${tmp}"' EXIT
 
 git ls-files -z "${GIT_FLAGS[@]}" --exclude-standard -- "${FORMAT_GLOBS[@]}" |
 	while IFS= read -r -d '' file; do
-		[ -f "${file}" ] && printf '%s\0' "${file}"
+		if [ -f "${file}" ]; then
+			printf '%s\0' "${file}"
+		fi
 	done > "${tmp}"
 
 if [ ! -s "${tmp}" ]; then

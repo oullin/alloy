@@ -1,8 +1,19 @@
 packages:
   - "packages/*/*"
+  - "packages/console"
   - "packages/tempo/tempo-ts/tests"
   - "infra"
   - "infra/*"
 
 onlyBuiltDependencies:
   - esbuild
+
+supportedArchitectures:
+  os:
+    - current
+    - linux
+    - darwin
+  cpu:
+    - current
+    - x64
+    - arm64
