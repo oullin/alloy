@@ -32,7 +32,14 @@ export const renderCancelledChoices = <T>(message: string, choices: Array<Choice
 	promptEnvironment().error.write(`${red('  ⚠ Cancelled.')}\n`);
 };
 
-export const renderMultipleChoices = <T>(message: string, choices: Array<Choice<T>>, selected: number, marked: Set<number>, scroll?: number, info?: MultiSelectPromptOptions<T>['info']): string => {
+export const renderMultipleChoices = <T>(
+	message: string,
+	choices: Array<Choice<T>>,
+	selected: number,
+	marked: Set<number>,
+	scroll?: number,
+	info?: MultiSelectPromptOptions<T>['info'],
+): string => {
 	const text = resolveInfo(info, choices[selected]?.value ?? null);
 	const summary = scroll !== undefined && choices.length > scroll ? `${marked.size} selected` : '';
 	const details = joinedInfoDetails(text, summary);
