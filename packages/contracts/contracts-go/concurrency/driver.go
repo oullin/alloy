@@ -3,7 +3,7 @@ package concurrency
 import "context"
 
 // Task is a unit of concurrent work.
-type Task func() (any, error)
+type Task func(context.Context) (any, error)
 
 // Driver defines the concurrency backend contract.
 type Driver interface {

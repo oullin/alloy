@@ -3,9 +3,9 @@ package debugbar
 import "time"
 
 // IncomingEntry is the minimal entry shape the repository contract operates on.
-// The concrete type lives in the debugbar package; this alias keeps the
+// The concrete type lives in the debugbar package; this struct keeps the
 // contracts package free of circular dependencies.
-type IncomingEntry = struct {
+type IncomingEntry struct {
 	UUID       string
 	BatchID    string
 	Type       string
@@ -17,7 +17,7 @@ type IncomingEntry = struct {
 }
 
 // EntryUpdate describes a mutation to apply to a stored entry.
-type EntryUpdate = struct {
+type EntryUpdate struct {
 	UUID    string
 	Type    string
 	Changes map[string]any
@@ -28,7 +28,7 @@ type EntryUpdate = struct {
 }
 
 // EntryResult is the serialised form of a stored entry returned by queries.
-type EntryResult = struct {
+type EntryResult struct {
 	ID         string
 	Sequence   int64
 	BatchID    string
@@ -41,7 +41,7 @@ type EntryResult = struct {
 }
 
 // EntryQueryOptions carries filter parameters for repository queries.
-type EntryQueryOptions = struct {
+type EntryQueryOptions struct {
 	BatchID        string
 	Tag            string
 	FamilyHash     string

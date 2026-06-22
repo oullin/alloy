@@ -35,91 +35,17 @@ type Embed struct {
 	Mime string
 }
 
-// NewMessage creates a new empty Message.
-
-// From sets the sender address.
-
-// GetFrom returns the sender address.
-
-// Sender sets the actual sender (Sender header), distinct from From.
-
-// GetSender returns the Sender header address.
-
-// ReturnPath sets the Return-Path address for bounce handling.
-
-// GetReturnPath returns the Return-Path address.
-
-// To adds primary recipients. If override is true, existing To
-// addresses are replaced.
-
-// ForgetTo removes all To recipients.
-
-// GetTo returns the To recipients.
-
-// CC adds carbon-copy recipients. If override is true, existing CC
-// addresses are replaced.
-
-// ForgetCC removes all CC recipients.
-
-// GetCC returns the CC recipients.
-
-// BCC adds blind-carbon-copy recipients. If override is true, existing
-// BCC addresses are replaced.
-
-// ForgetBCC removes all BCC recipients.
-
-// GetBCC returns the BCC recipients.
-
-// ReplyTo adds reply-to addresses.
-
-// GetReplyTo returns the Reply-To addresses.
-
-// Subject sets the email subject line.
-
-// GetSubject returns the subject line.
-
-// Priority sets the email priority (1 = highest, 5 = lowest).
-
-// GetPriority returns the priority level.
-
-// SetHTMLBody sets the HTML body content.
-
-// GetHTMLBody returns the HTML body.
-
-// SetTextBody sets the plain-text body content.
-
-// GetTextBody returns the plain-text body.
-
-// Attach adds a file attachment by path.
-
-// AttachData adds an attachment from raw data.
-
-// AttachWith adds a pre-built Attachment to the message.
-
-// GetAttachments returns all file attachments.
-
-// Embed embeds a file inline and returns the Content-ID reference.
-
-// EmbedData embeds raw data inline and returns the Content-ID reference.
-
-// GetEmbeds returns all inline embeds.
-
-// SetHeader sets a custom header value.
-
-// GetCustomHeaders returns all custom headers.
-
-// AllRecipients returns a deduplicated list of all recipients
-// (To + CC + BCC).
-
 // AttachOption configures an attachment.
 type AttachOption func(*Attachment)
 
+// NewMessage creates a new empty Message.
 func NewMessage() *Message {
 	return &Message{
 		headers: make(map[string][]string),
 	}
 }
 
+// From sets the sender address.
 func (m *Message) From(address string, name ...string) *Message {
 	m.from = Address{Email: address}
 
@@ -130,10 +56,12 @@ func (m *Message) From(address string, name ...string) *Message {
 	return m
 }
 
+// GetFrom returns the sender address.
 func (m *Message) GetFrom() Address {
 	return m.from
 }
 
+// Sender sets the actual sender (Sender header), distinct from From.
 func (m *Message) Sender(address string, name ...string) *Message {
 	m.sender = Address{Email: address}
 
@@ -144,20 +72,24 @@ func (m *Message) Sender(address string, name ...string) *Message {
 	return m
 }
 
+// GetSender returns the Sender header address.
 func (m *Message) GetSender() Address {
 	return m.sender
 }
 
+// ReturnPath sets the Return-Path address for bounce handling.
 func (m *Message) ReturnPath(address string) *Message {
 	m.returnPath = address
 
 	return m
 }
 
+// GetReturnPath returns the Return-Path address.
 func (m *Message) GetReturnPath() string {
 	return m.returnPath
 }
 
+// To adds primary recipients. If override is true, existing To addresses are replaced.
 func (m *Message) To(addresses []Address, override ...bool) *Message {
 	if len(override) > 0 && override[0] {
 		m.to = nil
@@ -168,16 +100,19 @@ func (m *Message) To(addresses []Address, override ...bool) *Message {
 	return m
 }
 
+// ForgetTo removes all To recipients.
 func (m *Message) ForgetTo() *Message {
 	m.to = nil
 
 	return m
 }
 
+// GetTo returns the To recipients.
 func (m *Message) GetTo() []Address {
 	return m.to
 }
 
+// CC adds carbon-copy recipients. If override is true, existing CC addresses are replaced.
 func (m *Message) CC(addresses []Address, override ...bool) *Message {
 	if len(override) > 0 && override[0] {
 		m.cc = nil
@@ -188,16 +123,19 @@ func (m *Message) CC(addresses []Address, override ...bool) *Message {
 	return m
 }
 
+// ForgetCC removes all CC recipients.
 func (m *Message) ForgetCC() *Message {
 	m.cc = nil
 
 	return m
 }
 
+// GetCC returns the CC recipients.
 func (m *Message) GetCC() []Address {
 	return m.cc
 }
 
+// BCC adds blind-carbon-copy recipients. If override is true, existing BCC addresses are replaced.
 func (m *Message) BCC(addresses []Address, override ...bool) *Message {
 	if len(override) > 0 && override[0] {
 		m.bcc = nil
@@ -208,66 +146,79 @@ func (m *Message) BCC(addresses []Address, override ...bool) *Message {
 	return m
 }
 
+// ForgetBCC removes all BCC recipients.
 func (m *Message) ForgetBCC() *Message {
 	m.bcc = nil
 
 	return m
 }
 
+// GetBCC returns the BCC recipients.
 func (m *Message) GetBCC() []Address {
 	return m.bcc
 }
 
+// ReplyTo adds reply-to addresses.
 func (m *Message) ReplyTo(addresses []Address) *Message {
 	m.replyTo = append(m.replyTo, addresses...)
 
 	return m
 }
 
+// GetReplyTo returns the Reply-To addresses.
 func (m *Message) GetReplyTo() []Address {
 	return m.replyTo
 }
 
+// Subject sets the email subject line.
 func (m *Message) Subject(subject string) *Message {
 	m.subject = subject
 
 	return m
 }
 
+// GetSubject returns the subject line.
 func (m *Message) GetSubject() string {
 	return m.subject
 }
 
+// Priority sets the email priority (1 = highest, 5 = lowest).
 func (m *Message) Priority(level int) *Message {
 	m.priority = level
 
 	return m
 }
 
+// GetPriority returns the priority level.
 func (m *Message) GetPriority() int {
 	return m.priority
 }
 
+// SetHTMLBody sets the HTML body content.
 func (m *Message) SetHTMLBody(html string) *Message {
 	m.htmlBody = html
 
 	return m
 }
 
+// GetHTMLBody returns the HTML body.
 func (m *Message) GetHTMLBody() string {
 	return m.htmlBody
 }
 
+// SetTextBody sets the plain-text body content.
 func (m *Message) SetTextBody(text string) *Message {
 	m.textBody = text
 
 	return m
 }
 
+// GetTextBody returns the plain-text body.
 func (m *Message) GetTextBody() string {
 	return m.textBody
 }
 
+// Attach adds a file attachment by path.
 func (m *Message) Attach(path string, options ...AttachOption) *Message {
 	a := &Attachment{Path: path}
 
@@ -280,6 +231,7 @@ func (m *Message) Attach(path string, options ...AttachOption) *Message {
 	return m
 }
 
+// AttachData adds an attachment from raw data.
 func (m *Message) AttachData(data []byte, name string, options ...AttachOption) *Message {
 	a := FromData(func() (io.Reader, error) {
 		return bytes.NewReader(data), nil
@@ -294,16 +246,19 @@ func (m *Message) AttachData(data []byte, name string, options ...AttachOption) 
 	return m
 }
 
+// AttachWith adds a pre-built Attachment to the message.
 func (m *Message) AttachWith(a *Attachment) *Message {
 	m.attachments = append(m.attachments, a)
 
 	return m
 }
 
+// GetAttachments returns all file attachments.
 func (m *Message) GetAttachments() []*Attachment {
 	return m.attachments
 }
 
+// Embed embeds a file inline and returns the Content-ID reference.
 func (m *Message) Embed(path string, options ...AttachOption) string {
 	cid := generateCID()
 	a := &Attachment{Path: path, Inline: true}
@@ -321,6 +276,7 @@ func (m *Message) Embed(path string, options ...AttachOption) string {
 	return "cid:" + cid
 }
 
+// EmbedData embeds raw data inline and returns the Content-ID reference.
 func (m *Message) EmbedData(data []byte, name string, mime ...string) string {
 	cid := generateCID()
 	mimeType := "application/octet-stream"
@@ -339,20 +295,24 @@ func (m *Message) EmbedData(data []byte, name string, mime ...string) string {
 	return "cid:" + cid
 }
 
+// GetEmbeds returns all inline embeds.
 func (m *Message) GetEmbeds() []*Embed {
 	return m.embeds
 }
 
+// SetHeader sets a custom header value.
 func (m *Message) SetHeader(name string, values ...string) *Message {
 	m.headers[name] = values
 
 	return m
 }
 
+// GetCustomHeaders returns all custom headers.
 func (m *Message) GetCustomHeaders() map[string][]string {
 	return m.headers
 }
 
+// AllRecipients returns a deduplicated list of all recipients (To + CC + BCC).
 func (m *Message) AllRecipients() []Address {
 	seen := make(map[string]struct{})
 
@@ -386,7 +346,10 @@ func WithMimeType(mime string) AttachOption {
 
 func generateCID() string {
 	b := make([]byte, 16)
-	_, _ = rand.Read(b)
+
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		panic(fmt.Errorf("mail: generate content id: %w", err))
+	}
 
 	return fmt.Sprintf("%x", b)
 }

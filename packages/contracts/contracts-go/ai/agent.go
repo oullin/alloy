@@ -17,14 +17,6 @@ type PromptConfig struct {
 	Timeout  *int
 }
 
-// WithProvider overrides the provider for a single invocation.
-
-// WithModel overrides the model for a single invocation.
-
-// WithTimeout sets the request timeout in seconds.
-
-// ApplyPromptOptions applies all options to a config.
-
 // MiddlewareFunc is the pipeline stage signature for agent middleware.
 // It matches packages/pipeline.Pipe so no adapter is needed.
 type MiddlewareFunc = func(ctx context.Context, passable any, next func(any) (any, error)) (any, error)
@@ -95,18 +87,22 @@ type CanActAsTool interface {
 	Description() string
 }
 
+// WithProvider overrides the provider for a single invocation.
 func WithProvider(p string) PromptOption {
 	return func(c *PromptConfig) { c.Provider = &p }
 }
 
+// WithModel overrides the model for a single invocation.
 func WithModel(m string) PromptOption {
 	return func(c *PromptConfig) { c.Model = &m }
 }
 
+// WithTimeout sets the request timeout in seconds.
 func WithTimeout(secs int) PromptOption {
 	return func(c *PromptConfig) { c.Timeout = &secs }
 }
 
+// ApplyPromptOptions applies all options to a config.
 func ApplyPromptOptions(opts []PromptOption) PromptConfig {
 	cfg := PromptConfig{}
 

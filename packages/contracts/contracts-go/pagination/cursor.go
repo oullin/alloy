@@ -6,14 +6,13 @@ import (
 	"errors"
 )
 
-// ErrInvalidCursor is returned when a cursor string cannot be decoded.
-
 // Cursor encapsulates the parameters used for cursor-based pagination.
 type Cursor struct {
 	parameters        map[string]string
 	pointsToNextItems bool
 }
 
+// ErrInvalidCursor is returned when a cursor string cannot be decoded.
 var ErrInvalidCursor = errors.New("pagination: invalid cursor")
 
 // NewCursor creates a new Cursor with the given parameters and direction.
@@ -24,14 +23,14 @@ func NewCursor(parameters map[string]string, pointsToNextItems bool) *Cursor {
 	}
 }
 
-// DecodeCursor decodes a base64-encoded cursor string into a Cursor.
+// DecodeCursor decodes a URL-safe base64 cursor string into a Cursor.
 // Returns nil, nil if the encoded string is empty.
 func DecodeCursor(encoded string) (*Cursor, error) {
 	if encoded == "" {
 		return nil, nil
 	}
 
-	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	decoded, err := base64.RawURLEncoding.DecodeString(encoded)
 
 	if err != nil {
 		return nil, ErrInvalidCursor
@@ -87,7 +86,7 @@ func (c *Cursor) PointsToPreviousItems() bool {
 	return !c.PointsToNextItems()
 }
 
-// Encode returns the base64-encoded string representation of the cursor.
+// Encode returns the URL-safe base64 string representation of the cursor.
 func (c *Cursor) Encode() string {
 	if c == nil {
 		return ""
@@ -103,7 +102,7 @@ func (c *Cursor) Encode() string {
 
 	b, _ := json.Marshal(payload)
 
-	return base64.StdEncoding.EncodeToString(b)
+	return base64.RawURLEncoding.EncodeToString(b)
 }
 
 // ToMap returns the cursor as a map suitable for JSON serialization.
