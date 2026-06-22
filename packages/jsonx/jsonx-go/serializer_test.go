@@ -38,6 +38,17 @@ func TestSerializeTypedNilReturnsError(t *testing.T) {
 	}
 }
 
+func TestSerializeTypedNilNullableTypeReturnsError(t *testing.T) {
+	t.Parallel()
+
+	var schema *jsonx.ObjectType
+	_, err := jsonx.Serialize(schema)
+
+	if !errors.Is(err, jsonx.ErrUnknownType) {
+		t.Fatalf("expected ErrUnknownType for typed nil nullable-capable schema, got %v", err)
+	}
+}
+
 func TestSerializeArrayItemErrorIsReturned(t *testing.T) {
 	t.Parallel()
 

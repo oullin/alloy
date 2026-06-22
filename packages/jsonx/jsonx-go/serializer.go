@@ -205,17 +205,17 @@ func serializeObjectFields(t *ObjectType, attrs map[string]any) error {
 func isNullable(t any) bool {
 	switch v := t.(type) {
 	case *ArrayType:
-		return v.TypeBuilder.isNullable()
+		return v != nil && v.TypeBuilder.isNullable()
 	case *BooleanType:
-		return v.TypeBuilder.isNullable()
+		return v != nil && v.TypeBuilder.isNullable()
 	case *IntegerType:
-		return v.TypeBuilder.isNullable()
+		return v != nil && v.TypeBuilder.isNullable()
 	case *NumberType:
-		return v.TypeBuilder.isNullable()
+		return v != nil && v.TypeBuilder.isNullable()
 	case *ObjectType:
-		return v.TypeBuilder.isNullable()
+		return v != nil && v.TypeBuilder.isNullable()
 	case *StringType:
-		return v.TypeBuilder.isNullable()
+		return v != nil && v.TypeBuilder.isNullable()
 	default:
 		return false
 	}
@@ -224,17 +224,17 @@ func isNullable(t any) bool {
 func isRequiredProp(t SchemaType) bool {
 	switch v := t.(type) {
 	case *ArrayType:
-		return v.TypeBuilder.isRequired()
+		return v != nil && v.TypeBuilder.isRequired()
 	case *BooleanType:
-		return v.TypeBuilder.isRequired()
+		return v != nil && v.TypeBuilder.isRequired()
 	case *IntegerType:
-		return v.TypeBuilder.isRequired()
+		return v != nil && v.TypeBuilder.isRequired()
 	case *NumberType:
-		return v.TypeBuilder.isRequired()
+		return v != nil && v.TypeBuilder.isRequired()
 	case *ObjectType:
-		return v.TypeBuilder.isRequired()
+		return v != nil && v.TypeBuilder.isRequired()
 	case *StringType:
-		return v.TypeBuilder.isRequired()
+		return v != nil && v.TypeBuilder.isRequired()
 	default:
 		return false
 	}
