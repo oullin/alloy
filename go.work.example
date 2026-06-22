@@ -15,6 +15,8 @@ use (
 	./packages/httpx/httpx-go
 	./packages/money/money-go
 	./packages/queue/queue-go
+	./packages/router/routegen-go
+	./packages/router/routing-go
 	./packages/session/session-go
 	./packages/str/str-go
 	./packages/tempo/tempo-go
