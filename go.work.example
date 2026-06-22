@@ -12,6 +12,7 @@ use (
 	./packages/events/events-go
 	./packages/filesystem/filesystem-go
 	./packages/hashing/hashing-go
+	./packages/httppreview/httppreview-go
 	./packages/httpx/httpx-go
 	./packages/money/money-go
 	./packages/queue/queue-go
