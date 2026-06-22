@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"sync"
 
 	contract "github.com/oullin/alloy/contracts/hashing"
 	"golang.org/x/crypto/argon2"
@@ -15,6 +16,7 @@ type keyFunc func(password, salt []byte, time, memory uint32, threads uint8, key
 
 // ArgonHasher hashes values using the argon2i algorithm.
 type ArgonHasher struct {
+	mu        sync.RWMutex
 	memory    uint32
 	time      uint32
 	threads   uint8
@@ -164,27 +166,79 @@ func (h *ArgonHasher) VerifyConfiguration(hashedValue string) bool {
 		return false
 	}
 
-	return params.memory <= h.memory && params.time <= h.time && params.threads <= h.threads
+	memory, time, threads := h.params()
+
+	return params.memory <= memory && params.time <= time && params.threads <= threads
 }
 
-func (h *ArgonHasher) SetMemory(memory uint32) { h.memory = memory }
+func (h *ArgonHasher) SetMemory(memory uint32) {
+	if memory == 0 {
+		return
+	}
 
-func (h *ArgonHasher) SetTime(time uint32) { h.time = time }
+	h.mu.Lock()
 
-func (h *ArgonHasher) SetThreads(threads uint8) { h.threads = threads }
+	defer h.mu.Unlock()
 
-func (h *ArgonHasher) Memory() uint32 { return h.memory }
+	h.memory = memory
+}
 
-func (h *ArgonHasher) Time() uint32 { return h.time }
+func (h *ArgonHasher) SetTime(time uint32) {
+	if time == 0 {
+		return
+	}
 
-func (h *ArgonHasher) Threads() uint8 { return h.threads }
+	h.mu.Lock()
+
+	defer h.mu.Unlock()
+
+	h.time = time
+}
+
+func (h *ArgonHasher) SetThreads(threads uint8) {
+	if threads == 0 {
+		return
+	}
+
+	h.mu.Lock()
+
+	defer h.mu.Unlock()
+
+	h.threads = threads
+}
+
+func (h *ArgonHasher) Memory() uint32 {
+	h.mu.RLock()
+
+	defer h.mu.RUnlock()
+
+	return h.memory
+}
+
+func (h *ArgonHasher) Time() uint32 {
+	h.mu.RLock()
+
+	defer h.mu.RUnlock()
+
+	return h.time
+}
+
+func (h *ArgonHasher) Threads() uint8 {
+	h.mu.RLock()
+
+	defer h.mu.RUnlock()
+
+	return h.threads
+}
 
 func (h *ArgonHasher) isUsingCorrectAlgorithm(hashedValue string) bool {
 	return strings.HasPrefix(hashedValue, "$"+h.algorithm+"$")
 }
 
 func (h *ArgonHasher) params(options ...map[string]any) (uint32, uint32, uint8) {
+	h.mu.RLock()
 	memory, time, threads := h.memory, h.time, h.threads
+	h.mu.RUnlock()
 
 	if len(options) > 0 {
 		if v, ok := toUint32(options[0]["memory"]); ok {
@@ -223,19 +277,19 @@ func parseArgonHash(encoded string) (argonParams, error) {
 
 	_, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &time, &threads)
 
-	if err != nil {
+	if err != nil || memory == 0 || time == 0 || threads == 0 {
 		return argonParams{}, ErrInvalidHash
 	}
 
 	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
 
-	if err != nil {
+	if err != nil || len(salt) == 0 {
 		return argonParams{}, ErrInvalidHash
 	}
 
 	hash, err := base64.RawStdEncoding.DecodeString(parts[5])
 
-	if err != nil {
+	if err != nil || len(hash) == 0 {
 		return argonParams{}, ErrInvalidHash
 	}
 
@@ -270,10 +324,18 @@ func applyArgonOpts(h *ArgonHasher, opts map[string]any) {
 func toUint32(v any) (uint32, bool) {
 	switch val := v.(type) {
 	case uint32:
-		return val, true
+		return val, val > 0
 	case int:
+		if val <= 0 {
+			return 0, false
+		}
+
 		return uint32(val), true
 	case int64:
+		if val <= 0 {
+			return 0, false
+		}
+
 		return uint32(val), true
 	default:
 		return 0, false
@@ -283,10 +345,18 @@ func toUint32(v any) (uint32, bool) {
 func toUint8(v any) (uint8, bool) {
 	switch val := v.(type) {
 	case uint8:
-		return val, true
+		return val, val > 0
 	case int:
+		if val <= 0 {
+			return 0, false
+		}
+
 		return uint8(val), true
 	case int64:
+		if val <= 0 {
+			return 0, false
+		}
+
 		return uint8(val), true
 	default:
 		return 0, false

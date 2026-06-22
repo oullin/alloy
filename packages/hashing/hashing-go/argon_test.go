@@ -3,6 +3,7 @@ package hashing_test
 import (
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/oullin/alloy/hashing"
@@ -233,6 +234,80 @@ func TestArgon2iCheckEmptyHash(t *testing.T) {
 	if ok {
 		t.Fatal("expected false for empty hash")
 	}
+}
+
+func TestArgon2iRejectsEmptyDecodedSaltAndHash(t *testing.T) {
+	t.Parallel()
+
+	h := hashing.NewArgonHasher()
+	ok, err := h.Check("password", "$argon2i$v=19$m=1024,t=2,p=2$$")
+
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+
+	if ok {
+		t.Fatal("expected false for empty decoded salt and hash")
+	}
+}
+
+func TestArgon2iRejectsZeroParameters(t *testing.T) {
+	t.Parallel()
+
+	h := hashing.NewArgonHasher()
+	ok, err := h.Check("password", "$argon2i$v=19$m=0,t=0,p=0$c2FsdA$aGFzaA")
+
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+
+	if ok {
+		t.Fatal("expected false for zero parameters")
+	}
+}
+
+func TestArgon2iMakeIgnoresZeroOptions(t *testing.T) {
+	t.Parallel()
+
+	h := hashing.NewArgonHasher(map[string]any{"memory": 0, "time": 0, "threads": 0})
+	hash, err := h.Make("password", map[string]any{"memory": 0, "time": 0, "threads": 0})
+
+	if err != nil {
+		t.Fatalf("Make: %v", err)
+	}
+
+	info, err := h.Info(hash)
+
+	if err != nil {
+		t.Fatalf("Info: %v", err)
+	}
+
+	if info.Options["memory"] != uint32(1024) || info.Options["time"] != uint32(2) || info.Options["threads"] != uint8(2) {
+		t.Fatalf("expected default options, got %#v", info.Options)
+	}
+}
+
+func TestArgon2iConcurrentSettersAndReaders(t *testing.T) {
+	t.Parallel()
+
+	h := hashing.NewArgonHasher()
+
+	var wg sync.WaitGroup
+
+	for i := range 8 {
+		wg.Add(1)
+
+		go func(i int) {
+			defer wg.Done()
+
+			h.SetMemory(uint32(1024 + i))
+			h.SetTime(uint32(1 + i))
+			h.SetThreads(uint8(1 + i))
+			_, _, _ = h.Memory(), h.Time(), h.Threads()
+		}(i)
+	}
+
+	wg.Wait()
 }
 
 func TestArgon2iVerifyAlgorithm(t *testing.T) {
