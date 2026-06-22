@@ -1,0 +1,12 @@
+{
+  "extends": "../../infra/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["node"],
+    "paths": {
+      "#console/*": ["./src/*"],
+      "#console/prompts/*": ["./src/prompts/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "vitest.config.ts"]
+}

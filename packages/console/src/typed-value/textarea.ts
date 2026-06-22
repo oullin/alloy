@@ -1,0 +1,1 @@
+export const TEXTAREA_CONTENT_WIDTH = 60;

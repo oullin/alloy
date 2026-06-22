@@ -3,11 +3,11 @@ package multisteps_test
 import (
 	"context"
 	"errors"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/concurrency"
 	"github.com/oullin/alloy/workflow/multisteps"
 )
 
@@ -71,7 +71,7 @@ func TestRun_SignupDAG_SyncThenAsyncFanOut(t *testing.T) {
 		})),
 	)
 
-	eng := multisteps.NewEngine(multisteps.WithDriver(concurrency.NewGoroutineDriver(0)))
+	eng := multisteps.NewEngine(multisteps.WithDriver(newGoroutineDriver(0)))
 
 	res, err := eng.Run(context.Background(), wf, map[string]any{"name": "Jane"})
 
@@ -293,7 +293,7 @@ func TestRun_AsyncFailFastCancelsSiblings(t *testing.T) {
 		}),
 	)
 
-	eng := multisteps.NewEngine(multisteps.WithDriver(concurrency.NewGoroutineDriver(0)))
+	eng := multisteps.NewEngine(multisteps.WithDriver(newGoroutineDriver(0)))
 
 	_, err := eng.Run(context.Background(), wf, nil)
 
@@ -322,7 +322,7 @@ func TestRun_ContinueOnErrorLetsSiblingsComplete(t *testing.T) {
 	)
 
 	eng := multisteps.NewEngine(
-		multisteps.WithDriver(concurrency.NewGoroutineDriver(0)),
+		multisteps.WithDriver(newGoroutineDriver(0)),
 		multisteps.WithContinueOnError(),
 	)
 
@@ -353,7 +353,7 @@ func TestRun_SyncDriverDeterministicOrdering(t *testing.T) {
 		}),
 	)
 
-	eng := multisteps.NewEngine(multisteps.WithDriver(concurrency.NewSyncDriver()))
+	eng := multisteps.NewEngine(multisteps.WithDriver(newSyncDriver()))
 
 	if _, err := eng.Run(context.Background(), wf, nil); err != nil {
 		t.Fatalf("run: %v", err)
@@ -362,4 +362,89 @@ func TestRun_SyncDriverDeterministicOrdering(t *testing.T) {
 	if len(order) != 2 || order[0] != "a" || order[1] != "b" {
 		t.Fatalf("expected deterministic order [a b], got %v", order)
 	}
+}
+
+type syncDriver struct{}
+
+func newSyncDriver() multisteps.Driver {
+	return &syncDriver{}
+}
+
+func (d *syncDriver) Run(ctx context.Context, tasks []multisteps.Task) ([]any, error) {
+	results := make([]any, len(tasks))
+	for i, task := range tasks {
+		if err := ctx.Err(); err != nil {
+			return results, err
+		}
+		val, err := task()
+		if err != nil {
+			return results, err
+		}
+		results[i] = val
+	}
+	return results, nil
+}
+
+type goroutineDriver struct {
+	maxConcurrency int
+}
+
+func newGoroutineDriver(maxConcurrency int) multisteps.Driver {
+	return &goroutineDriver{maxConcurrency: maxConcurrency}
+}
+
+func (d *goroutineDriver) Run(ctx context.Context, tasks []multisteps.Task) ([]any, error) {
+	if len(tasks) == 0 {
+		return nil, nil
+	}
+	results := make([]any, len(tasks))
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	var (
+		wg       sync.WaitGroup
+		once     sync.Once
+		firstErr error
+		sem      chan struct{}
+		mu       sync.Mutex
+	)
+
+	if d.maxConcurrency > 0 {
+		sem = make(chan struct{}, d.maxConcurrency)
+	}
+
+	for i, task := range tasks {
+		wg.Add(1)
+		go func(idx int, fn multisteps.Task) {
+			defer wg.Done()
+			if sem != nil {
+				select {
+				case sem <- struct{}{}:
+					defer func() { <-sem }()
+				case <-ctx.Done():
+					once.Do(func() { firstErr = ctx.Err() })
+					return
+				}
+			}
+			if ctx.Err() != nil {
+				return
+			}
+			val, err := fn()
+			if err != nil {
+				once.Do(func() {
+					firstErr = err
+					cancel()
+				})
+				return
+			}
+			mu.Lock()
+			results[idx] = val
+			mu.Unlock()
+		}(i, task)
+	}
+	wg.Wait()
+	if firstErr != nil {
+		return results, firstErr
+	}
+	return results, nil
 }

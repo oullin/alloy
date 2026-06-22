@@ -10,6 +10,7 @@ export default defineConfig({
 			'@alloy/infra': repoPath('./infra/src'),
 			'@alloy/tempo': repoPath('./packages/tempo/tempo-ts/src'),
 			'@alloy/tempo-tests': repoPath('./packages/tempo/tempo-ts/tests/src'),
+			'@alloy/console': repoPath('./packages/console/src'),
 		},
 	},
 	test: {
