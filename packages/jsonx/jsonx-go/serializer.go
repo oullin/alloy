@@ -11,25 +11,55 @@ func Serialize(t any) (map[string]any, error) {
 
 	switch v := t.(type) {
 	case *ArrayType:
+		if v == nil {
+			return nil, fmt.Errorf("%w: %T", ErrUnknownType, t)
+		}
+
 		typeName = "array"
 		serializeBase(&v.TypeBuilder, attrs)
-		serializeArrayFields(v, attrs)
+
+		if err := serializeArrayFields(v, attrs); err != nil {
+			return nil, err
+		}
 	case *BooleanType:
+		if v == nil {
+			return nil, fmt.Errorf("%w: %T", ErrUnknownType, t)
+		}
+
 		typeName = "boolean"
 		serializeBase(&v.TypeBuilder, attrs)
 	case *IntegerType:
+		if v == nil {
+			return nil, fmt.Errorf("%w: %T", ErrUnknownType, t)
+		}
+
 		typeName = "integer"
 		serializeBase(&v.TypeBuilder, attrs)
 		serializeIntegerFields(v, attrs)
 	case *NumberType:
+		if v == nil {
+			return nil, fmt.Errorf("%w: %T", ErrUnknownType, t)
+		}
+
 		typeName = "number"
 		serializeBase(&v.TypeBuilder, attrs)
 		serializeNumberFields(v, attrs)
 	case *ObjectType:
+		if v == nil {
+			return nil, fmt.Errorf("%w: %T", ErrUnknownType, t)
+		}
+
 		typeName = "object"
 		serializeBase(&v.TypeBuilder, attrs)
-		serializeObjectFields(v, attrs)
+
+		if err := serializeObjectFields(v, attrs); err != nil {
+			return nil, err
+		}
 	case *StringType:
+		if v == nil {
+			return nil, fmt.Errorf("%w: %T", ErrUnknownType, t)
+		}
+
 		typeName = "string"
 		serializeBase(&v.TypeBuilder, attrs)
 		serializeStringFields(v, attrs)
@@ -110,7 +140,7 @@ func serializeNumberFields(t *NumberType, attrs map[string]any) {
 	}
 }
 
-func serializeArrayFields(t *ArrayType, attrs map[string]any) {
+func serializeArrayFields(t *ArrayType, attrs map[string]any) error {
 	if t.minItems != nil {
 		attrs["minItems"] = *t.minItems
 	}
@@ -123,7 +153,7 @@ func serializeArrayFields(t *ArrayType, attrs map[string]any) {
 		items, err := Serialize(t.items)
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		attrs["items"] = items
@@ -132,15 +162,17 @@ func serializeArrayFields(t *ArrayType, attrs map[string]any) {
 	if t.uniqueItems != nil {
 		attrs["uniqueItems"] = *t.uniqueItems
 	}
+
+	return nil
 }
 
-func serializeObjectFields(t *ObjectType, attrs map[string]any) {
+func serializeObjectFields(t *ObjectType, attrs map[string]any) error {
 	if t.additionalProperties != nil {
 		attrs["additionalProperties"] = *t.additionalProperties
 	}
 
 	if len(t.properties) == 0 {
-		return
+		return nil
 	}
 
 	properties := make(map[string]any, len(t.properties))
@@ -151,7 +183,7 @@ func serializeObjectFields(t *ObjectType, attrs map[string]any) {
 		serialized, err := Serialize(prop)
 
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		properties[key] = serialized
@@ -166,6 +198,8 @@ func serializeObjectFields(t *ObjectType, attrs map[string]any) {
 	if len(required) > 0 {
 		attrs["required"] = required
 	}
+
+	return nil
 }
 
 func isNullable(t any) bool {

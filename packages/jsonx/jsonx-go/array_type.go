@@ -46,9 +46,13 @@ func (t *ArrayType) Unique(unique ...bool) *ArrayType {
 		v = unique[0]
 	}
 
-	if v {
-		t.uniqueItems = &v
+	if !v {
+		t.uniqueItems = nil
+
+		return t
 	}
+
+	t.uniqueItems = &v
 
 	return t
 }

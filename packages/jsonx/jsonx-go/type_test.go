@@ -207,6 +207,28 @@ func TestNullableFalseDoesNotMakeNullable(t *testing.T) {
 	assertEqual(t, result["type"], "string")
 }
 
+func TestNullableFalseClearsNullable(t *testing.T) {
+	t.Parallel()
+
+	schema := jsonx.String().Nullable().Nullable(false)
+	result := schema.ToMap()
+
+	assertEqual(t, result["type"], "string")
+}
+
+func TestRequiredFalseClearsRequired(t *testing.T) {
+	t.Parallel()
+
+	schema := jsonx.Object(map[string]jsonx.SchemaType{
+		"name": jsonx.String().Required().Required(false),
+	})
+	result := schema.ToMap()
+
+	if _, ok := result["required"]; ok {
+		t.Fatalf("expected required to be cleared, got %v", result["required"])
+	}
+}
+
 func TestNestedObjectWithNullableProperty(t *testing.T) {
 	t.Parallel()
 

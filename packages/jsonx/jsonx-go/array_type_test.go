@@ -86,6 +86,17 @@ func TestArrayCombineUniqueWithMinAndMax(t *testing.T) {
 	assertEqual(t, result["uniqueItems"], true)
 }
 
+func TestArrayUniqueFalseClearsUniqueItems(t *testing.T) {
+	t.Parallel()
+
+	schema := jsonx.Array().Unique().Unique(false)
+	result := schema.ToMap()
+
+	if _, ok := result["uniqueItems"]; ok {
+		t.Fatalf("expected uniqueItems to be cleared, got %v", result["uniqueItems"])
+	}
+}
+
 func TestArrayEnum(t *testing.T) {
 	t.Parallel()
 

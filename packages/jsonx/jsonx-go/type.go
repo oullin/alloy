@@ -28,9 +28,13 @@ func (b *TypeBuilder[T]) Required(required ...bool) *T {
 		v = required[0]
 	}
 
-	if v {
-		b.required = &v
+	if !v {
+		b.required = nil
+
+		return b.self
 	}
+
+	b.required = &v
 
 	return b.self
 }
@@ -43,9 +47,13 @@ func (b *TypeBuilder[T]) Nullable(nullable ...bool) *T {
 		v = nullable[0]
 	}
 
-	if v {
-		b.nullable = &v
+	if !v {
+		b.nullable = nil
+
+		return b.self
 	}
+
+	b.nullable = &v
 
 	return b.self
 }
