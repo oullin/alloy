@@ -29,20 +29,23 @@ type Binding struct {
 	scoped  bool
 }
 
+type resolutionState struct {
+	buildStack []string
+	with       []map[string]any
+}
+
 // Container is a inversion-of-control container. It manages
 // service bindings, resolution, contextual bindings, tagging, extension,
 // lifecycle callbacks, and method invocation. All methods are safe for
 // concurrent use.
 type Container struct {
-	mu sync.RWMutex
+	mu *sync.RWMutex
 
 	bindings        map[string]Binding
 	instances       map[string]any
 	aliases         map[string]string
 	abstractAliases map[string][]string
 	resolved        map[string]bool
-	buildStack      []string
-	with            []map[string]any
 	contextual      map[string]map[string]any
 	tags            map[string][]string
 	extenders       map[string][]ExtenderFunc
@@ -55,11 +58,13 @@ type Container struct {
 	resolvCbs       map[string][]BindingCallback
 	globalAfterCbs  []BindingCallback
 	afterCbs        map[string][]BindingCallback
+	resolution      *resolutionState
 }
 
 // New creates an empty, fully initialized Container.
 func New() *Container {
 	return &Container{
+		mu:              &sync.RWMutex{},
 		bindings:        make(map[string]Binding),
 		instances:       make(map[string]any),
 		aliases:         make(map[string]string),
@@ -163,13 +168,13 @@ func (c *Container) Instance(abstract string, instance any) any {
 
 // Make resolves the given abstract from the container.
 func (c *Container) Make(abstract string) (any, error) {
-	return c.resolve(abstract, nil)
+	return c.resolve(abstract, nil, c.activeResolution())
 }
 
 // MakeWith resolves the given abstract, passing parameters to the factory via
 // the parameter override stack.
 func (c *Container) MakeWith(abstract string, parameters map[string]any) (any, error) {
-	return c.resolve(abstract, parameters)
+	return c.resolve(abstract, parameters, c.activeResolution())
 }
 
 // Build executes the given factory directly. It is useful for one-off
@@ -182,7 +187,7 @@ func (c *Container) Build(factory Factory) (any, error) {
 // ErrNotBound (PSR-11 parity).
 func (c *Container) Get(abstract string) (any, error) {
 	if c.Has(abstract) {
-		return c.resolve(abstract, nil)
+		return c.resolve(abstract, nil, c.activeResolution())
 	}
 
 	return nil, fmt.Errorf("%w: %q", ErrNotBound, abstract)
@@ -197,7 +202,7 @@ func (c *Container) FactoryFunc(abstract string) func() (any, error) {
 }
 
 // resolve is the core resolution engine.
-func (c *Container) resolve(abstract string, parameters map[string]any) (any, error) {
+func (c *Container) resolve(abstract string, parameters map[string]any, state *resolutionState) (any, error) {
 	c.mu.Lock()
 
 	original := abstract
@@ -208,10 +213,10 @@ func (c *Container) resolve(abstract string, parameters map[string]any) (any, er
 	beforeSpecific := slices.Clone(c.beforeCbs[abstract])
 
 	// Check contextual binding first (takes precedence over cached instances).
-	concrete := c.getContextualConcrete(abstract)
+	concrete := c.getContextualConcrete(state, abstract)
 
 	if concrete == nil && original != abstract {
-		concrete = c.getContextualConcrete(original)
+		concrete = c.getContextualConcrete(state, original)
 	}
 
 	// Check for cached instance when no parameters are given and no
@@ -248,11 +253,8 @@ func (c *Container) resolve(abstract string, parameters map[string]any) (any, er
 	}
 
 	// Circular dependency detection.
-	if slices.Contains(c.buildStack, abstract) {
-		// Snapshot the stack while still holding the lock; otherwise
-		// the deferred fmt.Errorf read would race with concurrent
-		// resolve() calls mutating c.buildStack at lines 265/283.
-		stackSnapshot := slices.Clone(c.buildStack)
+	if slices.Contains(state.buildStack, abstract) {
+		stackSnapshot := slices.Clone(state.buildStack)
 		c.mu.Unlock()
 
 		return nil, fmt.Errorf("%w: %q (build stack: %v)", ErrCircularDependency, abstract, stackSnapshot)
@@ -266,29 +268,30 @@ func (c *Container) resolve(abstract string, parameters map[string]any) (any, er
 	afterGlobal := slices.Clone(c.globalAfterCbs)
 	afterSpecific := slices.Clone(c.afterCbs[abstract])
 
-	c.buildStack = append(c.buildStack, abstract)
+	state.buildStack = append(state.buildStack, abstract)
 
 	// Always push parameters (even nil) so nested Make calls get their own
 	// scope and don't inherit the parent's parameters.
-	c.with = append(c.with, parameters)
+	state.with = append(state.with, parameters)
+	resolver := c.withResolution(state)
 
 	c.mu.Unlock()
 
-	fireBeforeCallbacks(beforeGlobal, abstract, parameters, c)
-	fireBeforeCallbacks(beforeSpecific, abstract, parameters, c)
+	fireBeforeCallbacks(beforeGlobal, abstract, parameters, resolver)
+	fireBeforeCallbacks(beforeSpecific, abstract, parameters, resolver)
 
 	// Execute factory.
-	instance, err := factory(c)
+	instance, err := factory(resolver)
 
 	c.mu.Lock()
 
 	// Pop build stack.
-	if len(c.buildStack) > 0 {
-		c.buildStack = c.buildStack[:len(c.buildStack)-1]
+	if len(state.buildStack) > 0 {
+		state.buildStack = state.buildStack[:len(state.buildStack)-1]
 	}
 
-	if len(c.with) > 0 {
-		c.with = c.with[:len(c.with)-1]
+	if len(state.with) > 0 {
+		state.with = state.with[:len(state.with)-1]
 	}
 
 	c.mu.Unlock()
@@ -299,7 +302,7 @@ func (c *Container) resolve(abstract string, parameters map[string]any) (any, er
 
 	// Apply extenders.
 	for _, ext := range extenders {
-		instance, err = ext(instance, c)
+		instance, err = ext(instance, resolver)
 
 		if err != nil {
 			return nil, err
@@ -318,12 +321,12 @@ func (c *Container) resolve(abstract string, parameters map[string]any) (any, er
 	c.mu.Unlock()
 
 	// Fire resolving callbacks.
-	fireCallbacks(resolvGlobal, instance, c)
-	fireCallbacks(resolvSpecific, instance, c)
+	fireCallbacks(resolvGlobal, instance, resolver)
+	fireCallbacks(resolvSpecific, instance, resolver)
 
 	// Fire after-resolving callbacks.
-	fireCallbacks(afterGlobal, instance, c)
-	fireCallbacks(afterSpecific, instance, c)
+	fireCallbacks(afterGlobal, instance, resolver)
+	fireCallbacks(afterSpecific, instance, resolver)
 
 	return instance, nil
 }
@@ -331,15 +334,13 @@ func (c *Container) resolve(abstract string, parameters map[string]any) (any, er
 // Parameters returns the current parameter override map from the top of the
 // with stack. Factories can call this to access parameters passed via MakeWith.
 func (c *Container) Parameters() map[string]any {
-	c.mu.RLock()
+	state := c.activeResolution()
 
-	defer c.mu.RUnlock()
-
-	if len(c.with) == 0 {
+	if len(state.with) == 0 {
 		return nil
 	}
 
-	return c.with[len(c.with)-1]
+	return state.with[len(state.with)-1]
 }
 
 // ---------- Aliases ----------
@@ -454,15 +455,13 @@ func (c *Container) IsShared(abstract string) bool {
 // CurrentlyResolving returns the abstract at the top of the build stack, or an
 // empty string if nothing is being resolved.
 func (c *Container) CurrentlyResolving() string {
-	c.mu.RLock()
+	state := c.activeResolution()
 
-	defer c.mu.RUnlock()
-
-	if len(c.buildStack) == 0 {
+	if len(state.buildStack) == 0 {
 		return ""
 	}
 
-	return c.buildStack[len(c.buildStack)-1]
+	return state.buildStack[len(state.buildStack)-1]
 }
 
 // ---------- Tagging ----------
@@ -687,13 +686,13 @@ func (c *Container) AddContextualBinding(concrete, abstract string, implementati
 }
 
 // getContextualConcrete looks up a contextual binding for the given abstract
-// based on the current build stack. Caller must hold the lock.
-func (c *Container) getContextualConcrete(abstract string) any {
-	if len(c.buildStack) == 0 {
+// based on the current resolution state. Caller must hold the lock.
+func (c *Container) getContextualConcrete(state *resolutionState, abstract string) any {
+	if len(state.buildStack) == 0 {
 		return nil
 	}
 
-	current := c.buildStack[len(c.buildStack)-1]
+	current := state.buildStack[len(state.buildStack)-1]
 
 	if bindings, ok := c.contextual[current]; ok {
 		if impl, ok := bindings[abstract]; ok {
@@ -798,8 +797,6 @@ func (c *Container) Flush() {
 	c.aliases = make(map[string]string)
 	c.abstractAliases = make(map[string][]string)
 	c.resolved = make(map[string]bool)
-	c.buildStack = nil
-	c.with = nil
 	c.contextual = make(map[string]map[string]any)
 	c.tags = make(map[string][]string)
 	c.extenders = make(map[string][]ExtenderFunc)
@@ -858,6 +855,25 @@ func SetInstance(c *Container) {
 }
 
 // ---------- Internal Helpers ----------
+
+func (c *Container) activeResolution() *resolutionState {
+	if c.resolution != nil {
+		return c.resolution
+	}
+
+	return &resolutionState{}
+}
+
+func (c *Container) withResolution(state *resolutionState) *Container {
+	if c.resolution == state {
+		return c
+	}
+
+	resolver := *c
+	resolver.resolution = state
+
+	return &resolver
+}
 
 // dropStale removes the cached instance and alias entries for the given
 // abstract. Caller must hold the write lock.

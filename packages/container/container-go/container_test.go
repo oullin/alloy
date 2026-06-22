@@ -2,6 +2,7 @@ package container_test
 
 import (
 	"errors"
+	"sync"
 	"testing"
 
 	"github.com/oullin/alloy/container"
@@ -239,14 +240,15 @@ func TestContainerIsPassedToResolvers(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
+	c.Instance("dependency", "shared")
 	c.Bind("something", func(cc *container.Container) (any, error) {
-		return cc, nil
+		return cc.Make("dependency")
 	}, false)
 
 	v, _ := c.Make("something")
 
-	if v != c {
-		t.Fatal("expected container to be passed to factory")
+	if v != "shared" {
+		t.Fatalf("expected resolver to access container bindings, got %v", v)
 	}
 }
 
@@ -299,6 +301,55 @@ func TestMakeWithParameters(t *testing.T) {
 
 	if v != "Hello, Taylor" {
 		t.Fatalf("expected Hello, Taylor, got %v", v)
+	}
+}
+
+func TestConcurrentMakeWithParametersAreIsolated(t *testing.T) {
+	t.Parallel()
+
+	c := newContainer()
+	release := make(chan struct{})
+
+	c.Bind("value", func(cc *container.Container) (any, error) {
+		params := cc.Parameters()
+		<-release
+
+		return params["name"], nil
+	}, false)
+
+	var wg sync.WaitGroup
+	results := make(chan string, 2)
+
+	for _, name := range []string{"Taylor", "Dayle"} {
+		wg.Add(1)
+
+		go func(name string) {
+			defer wg.Done()
+
+			v, err := c.MakeWith("value", map[string]any{"name": name})
+
+			if err != nil {
+				t.Errorf("MakeWith(%q): %v", name, err)
+
+				return
+			}
+
+			results <- v.(string)
+		}(name)
+	}
+
+	close(release)
+	wg.Wait()
+	close(results)
+
+	seen := map[string]bool{}
+
+	for result := range results {
+		seen[result] = true
+	}
+
+	if !seen["Taylor"] || !seen["Dayle"] {
+		t.Fatalf("expected isolated parameters, got %#v", seen)
 	}
 }
 
