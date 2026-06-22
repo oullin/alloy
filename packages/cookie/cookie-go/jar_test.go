@@ -6,56 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/container"
 	"github.com/oullin/alloy/cookie"
 )
 
 func defaultOpts() cookie.Options {
 	return cookie.Options{Path: "/", HTTPOnly: cookie.BoolPtr(true), SameSite: cookie.SameSiteLax}
-}
-
-func TestCookieServiceProviderBindsFreshJarInstances(t *testing.T) {
-	t.Parallel()
-
-	app := container.New()
-	provider := cookie.NewCookieServiceProvider(app, defaultOpts())
-	provider.Register()
-
-	firstValue, err := app.Make("cookie")
-
-	if err != nil {
-		t.Fatalf("make first cookie jar: %v", err)
-	}
-
-	secondValue, err := app.Make("cookie")
-
-	if err != nil {
-		t.Fatalf("make second cookie jar: %v", err)
-	}
-
-	first, ok := firstValue.(*cookie.Jar)
-
-	if !ok {
-		t.Fatalf("expected first value to be *cookie.Jar, got %T", firstValue)
-	}
-
-	second, ok := secondValue.(*cookie.Jar)
-
-	if !ok {
-		t.Fatalf("expected second value to be *cookie.Jar, got %T", secondValue)
-	}
-
-	if first == second {
-		t.Fatal("expected provider to return a fresh jar for each resolution")
-	}
-
-	if err := first.QueueMake("session", "one", cookie.Options{}); err != nil {
-		t.Fatalf("queue first cookie: %v", err)
-	}
-
-	if second.HasQueued("session") {
-		t.Fatal("expected queued cookies to stay isolated between jar instances")
-	}
 }
 
 // ---------------------------------------------------------------------------

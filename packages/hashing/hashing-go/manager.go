@@ -2,20 +2,18 @@ package hashing
 
 import (
 	"strings"
-
-	contract "github.com/oullin/alloy/contracts/hashing"
 )
 
 // HashManager provides driver-based hashing.
 type HashManager struct {
 	defaultDriver Driver
-	drivers       map[Driver]contract.Hasher
+	drivers       map[Driver]Hasher
 }
 
-var _ contract.Hasher = (*HashManager)(nil)
+var _ Hasher = (*HashManager)(nil)
 
 // NewManager creates a HashManager with the given default driver and driver map.
-func NewManager(defaultDriver Driver, drivers map[Driver]contract.Hasher) *HashManager {
+func NewManager(defaultDriver Driver, drivers map[Driver]Hasher) *HashManager {
 	return &HashManager{
 		defaultDriver: defaultDriver,
 		drivers:       drivers,
@@ -23,11 +21,11 @@ func NewManager(defaultDriver Driver, drivers map[Driver]contract.Hasher) *HashM
 }
 
 // Info returns metadata about a hashed value using the default driver.
-func (m *HashManager) Info(hashedValue string) (contract.HashInfo, error) {
+func (m *HashManager) Info(hashedValue string) (HashInfo, error) {
 	d, err := m.Driver()
 
 	if err != nil {
-		return contract.HashInfo{}, err
+		return HashInfo{}, err
 	}
 
 	return d.Info(hashedValue)
@@ -95,7 +93,7 @@ func (m *HashManager) VerifyConfiguration(hashedValue string) bool {
 }
 
 // Driver returns the hasher for the given driver name, or the default if no name is given.
-func (m *HashManager) Driver(name ...Driver) (contract.Hasher, error) {
+func (m *HashManager) Driver(name ...Driver) (Hasher, error) {
 	n := m.defaultDriver
 
 	if len(name) > 0 {

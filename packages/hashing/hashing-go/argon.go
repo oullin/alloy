@@ -8,7 +8,6 @@ import (
 	"strings"
 	"sync"
 
-	contract "github.com/oullin/alloy/contracts/hashing"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -67,7 +66,7 @@ const (
 	argonHashLen        uint32 = 32
 )
 
-var _ contract.Hasher = (*ArgonHasher)(nil)
+var _ Hasher = (*ArgonHasher)(nil)
 
 func NewArgonHasher(opts ...map[string]any) *ArgonHasher {
 	h := &ArgonHasher{
@@ -86,14 +85,14 @@ func NewArgonHasher(opts ...map[string]any) *ArgonHasher {
 	return h
 }
 
-func (h *ArgonHasher) Info(hashedValue string) (contract.HashInfo, error) {
+func (h *ArgonHasher) Info(hashedValue string) (HashInfo, error) {
 	params, err := parseArgonHash(hashedValue)
 
 	if err != nil {
-		return contract.HashInfo{}, err
+		return HashInfo{}, err
 	}
 
-	return contract.HashInfo{
+	return HashInfo{
 		Algorithm: params.algorithm,
 		Options: map[string]any{
 			"memory":  params.memory,

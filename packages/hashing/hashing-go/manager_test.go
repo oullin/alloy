@@ -4,12 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	contract "github.com/oullin/alloy/contracts/hashing"
 	"github.com/oullin/alloy/hashing"
 )
 
 func newTestManager() *hashing.HashManager {
-	return hashing.NewManager(hashing.DriverBcrypt, map[hashing.Driver]contract.Hasher{
+	return hashing.NewManager(hashing.DriverBcrypt, map[hashing.Driver]hashing.Hasher{
 		hashing.DriverBcrypt:   hashing.NewBcryptHasher(map[string]any{"rounds": 4}),
 		hashing.DriverArgon2i:  hashing.NewArgonHasher(map[string]any{"time": 1, "memory": 1024}),
 		hashing.DriverArgon2id: hashing.NewArgon2IdHasher(map[string]any{"time": 1, "memory": 1024}),
@@ -187,7 +186,7 @@ func TestManagerCustomDriver(t *testing.T) {
 	t.Parallel()
 
 	custom := hashing.NewBcryptHasher(map[string]any{"rounds": 4})
-	m := hashing.NewManager("custom", map[hashing.Driver]contract.Hasher{
+	m := hashing.NewManager("custom", map[hashing.Driver]hashing.Hasher{
 		"custom": custom,
 	})
 

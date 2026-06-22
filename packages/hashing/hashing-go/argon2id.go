@@ -1,7 +1,6 @@
 package hashing
 
 import (
-	contract "github.com/oullin/alloy/contracts/hashing"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -10,7 +9,7 @@ type Argon2IdHasher struct {
 	ArgonHasher
 }
 
-var _ contract.Hasher = (*Argon2IdHasher)(nil)
+var _ Hasher = (*Argon2IdHasher)(nil)
 
 // NewArgon2IdHasher creates an Argon2IdHasher. Recognised option keys are
 // the same as NewArgonHasher: "memory", "time", "threads", "verify".

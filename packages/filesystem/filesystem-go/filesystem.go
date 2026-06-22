@@ -14,14 +14,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	contract "github.com/oullin/alloy/contracts/filesystem"
 )
 
 // Filesystem provides local filesystem operations.
 type Filesystem struct{}
-
-var _ contract.Filesystem = (*Filesystem)(nil)
 
 // New creates a Filesystem instance.
 func New() *Filesystem {

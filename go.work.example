@@ -6,8 +6,10 @@ use (
 	./packages/collection/collect-go
 	./packages/concurrency/concurrency-go
 	./packages/config/config-go
-	./packages/container/container-go
-	./packages/contracts/contracts-go
+	./packages/cookie/cookie-go
+	./packages/encryption/encryption-go
+	./packages/filesystem/filesystem-go
+	./packages/hashing/hashing-go
 	./packages/money/money-go
 	./packages/str/str-go
 	./packages/tempo/tempo-go

@@ -30,11 +30,7 @@ export const parseOutputTableRows = (value: unknown): TableOptions['rows'] | nul
 	return parsed.data;
 };
 
-export const resolveTableFormArguments = (
-	headersOrOptions: TableOptions | string[] = [],
-	rowsOrName: TableOptions['rows'] | string | null = null,
-	name?: string,
-): ResolvedTableFormArguments => {
+export const resolveTableFormArguments = (headersOrOptions: TableOptions | string[] = [], rowsOrName: TableOptions['rows'] | string | null = null, name?: string): ResolvedTableFormArguments => {
 	if (isTableOptions(headersOrOptions)) {
 		return {
 			kind: 'options',

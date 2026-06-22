@@ -26,13 +26,7 @@ export const initialDataTableSelection = <T>(rows: Array<VisibleDataTableRow<T>>
 	return Math.max(0, selected);
 };
 
-export const dataTableSelectionResult = <T>(
-	rows: Array<VisibleDataTableRow<T>>,
-	selected: number,
-	submitted: boolean,
-	cancelled = false,
-	frame?: string,
-): DataTableSelectionReadResult<T> => ({
+export const dataTableSelectionResult = <T>(rows: Array<VisibleDataTableRow<T>>, selected: number, submitted: boolean, cancelled = false, frame?: string): DataTableSelectionReadResult<T> => ({
 	cancelled,
 	frame,
 	rows,

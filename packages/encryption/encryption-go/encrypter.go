@@ -8,8 +8,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-
-	contract "github.com/oullin/alloy/contracts/encryption"
 )
 
 // payload is the JSON structure of an encrypted value.
@@ -28,8 +26,8 @@ type Encrypter struct {
 }
 
 var (
-	_ contract.Encrypter       = (*Encrypter)(nil)
-	_ contract.StringEncrypter = (*Encrypter)(nil)
+	_ EncrypterContract       = (*Encrypter)(nil)
+	_ StringEncrypterContract = (*Encrypter)(nil)
 )
 
 // NewEncrypter creates an Encrypter after validating the key length matches the cipher.

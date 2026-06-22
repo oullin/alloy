@@ -31,11 +31,7 @@ export const executeNotificationCommand = (command: NotificationCommand): boolea
 	return result.status === 0;
 };
 
-export const availableNotificationCommands = (
-	targetPlatform: NotificationPlatform,
-	commands: NotificationCommand[],
-	exists: (bin: string) => boolean = commandExists,
-): NotificationCommand[] => {
+export const availableNotificationCommands = (targetPlatform: NotificationPlatform, commands: NotificationCommand[], exists: (bin: string) => boolean = commandExists): NotificationCommand[] => {
 	const parsedCommands = parseNotificationCommands(commands);
 
 	if (targetPlatform !== 'linux') {

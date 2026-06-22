@@ -3,7 +3,6 @@ package hashing
 import (
 	"strings"
 
-	contract "github.com/oullin/alloy/contracts/hashing"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,7 +18,7 @@ const (
 	bcryptMaxBytes      = 72
 )
 
-var _ contract.Hasher = (*BcryptHasher)(nil)
+var _ Hasher = (*BcryptHasher)(nil)
 
 // NewBcryptHasher creates a BcryptHasher. Recognised option keys:
 // "rounds" (int), "verify" (bool), "limit" (int).
@@ -48,14 +47,14 @@ func NewBcryptHasher(opts ...map[string]any) *BcryptHasher {
 }
 
 // Info returns metadata about a bcrypt hashed value.
-func (h *BcryptHasher) Info(hashedValue string) (contract.HashInfo, error) {
+func (h *BcryptHasher) Info(hashedValue string) (HashInfo, error) {
 	cost, err := bcrypt.Cost([]byte(hashedValue))
 
 	if err != nil {
-		return contract.HashInfo{}, ErrInvalidHash
+		return HashInfo{}, ErrInvalidHash
 	}
 
-	return contract.HashInfo{
+	return HashInfo{
 		Algorithm: "bcrypt",
 		Options: map[string]any{
 			"rounds": cost,

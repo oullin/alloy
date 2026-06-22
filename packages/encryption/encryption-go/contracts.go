@@ -1,7 +1,7 @@
 package encryption
 
-// Encrypter encrypts and decrypts values.
-type Encrypter interface {
+// EncrypterContract encrypts and decrypts values.
+type EncrypterContract interface {
 	Encrypt(value any, serialize bool) (string, error)
 	Decrypt(payload string, unserialize bool) (any, error)
 	GetKey() string
@@ -9,8 +9,8 @@ type Encrypter interface {
 	GetPreviousKeys() []string
 }
 
-// StringEncrypter encrypts and decrypts strings without serialization.
-type StringEncrypter interface {
+// StringEncrypterContract encrypts and decrypts strings without serialization.
+type StringEncrypterContract interface {
 	EncryptString(value string) (string, error)
 	DecryptString(payload string) (string, error)
 }
