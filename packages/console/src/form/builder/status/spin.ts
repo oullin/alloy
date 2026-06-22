@@ -7,12 +7,7 @@ export function spinFormStep<T>(this: FormBuilder, callback: () => MaybePromise<
 
 export function spinFormStep<T>(this: FormBuilder, message: string, callback: () => MaybePromise<T>, name?: string): FormBuilder;
 
-export function spinFormStep<T>(
-	this: FormBuilder,
-	callbackOrMessage: (() => MaybePromise<T>) | string,
-	messageOrCallback: string | (() => MaybePromise<T>) = '',
-	name?: string,
-): FormBuilder {
+export function spinFormStep<T>(this: FormBuilder, callbackOrMessage: (() => MaybePromise<T>) | string, messageOrCallback: string | (() => MaybePromise<T>) = '', name?: string): FormBuilder {
 	const resolved = resolveSpinFormArguments(callbackOrMessage, messageOrCallback, name);
 
 	if (resolved.kind === 'message') {

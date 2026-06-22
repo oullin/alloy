@@ -6,15 +6,7 @@ import type { Logger, TaskDefinition } from '#console/status';
 
 export function taskFormStep<T>(this: FormBuilder, definition: TaskDefinition<T>, name?: string): FormBuilder;
 
-export function taskFormStep<T>(
-	this: FormBuilder,
-	label: string,
-	callback: (logger: Logger) => MaybePromise<T>,
-	limit?: number,
-	keepSummary?: boolean,
-	subLabel?: string,
-	name?: string,
-): FormBuilder;
+export function taskFormStep<T>(this: FormBuilder, label: string, callback: (logger: Logger) => MaybePromise<T>, limit?: number, keepSummary?: boolean, subLabel?: string, name?: string): FormBuilder;
 
 export function taskFormStep<T>(
 	this: FormBuilder,

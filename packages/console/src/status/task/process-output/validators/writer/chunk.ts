@@ -15,11 +15,7 @@ export const parseProcessOutputChunk = (chunk: string | Uint8Array, encoding?: B
 	return parsed.success ? parsed.data : Buffer.from(chunk).toString(encoding);
 };
 
-export const resolveProcessOutputWrite = (
-	chunk: string | Uint8Array,
-	encodingOrCallback?: BufferEncoding | ProcessOutputCallback,
-	callback?: ProcessOutputCallback,
-): ResolvedProcessOutputWrite => {
+export const resolveProcessOutputWrite = (chunk: string | Uint8Array, encodingOrCallback?: BufferEncoding | ProcessOutputCallback, callback?: ProcessOutputCallback): ResolvedProcessOutputWrite => {
 	const encoding = parseProcessOutputEncoding(encodingOrCallback);
 
 	return {
