@@ -212,7 +212,7 @@ func (tempo Tempo) ToObject() Object {
 	}
 }
 
-func (tempo Tempo) ToMap() map[string]interface{} {
+func (tempo Tempo) ToMap() map[string]any {
 	return formatting.ToMap(tempo)
 }
 

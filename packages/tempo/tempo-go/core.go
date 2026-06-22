@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -388,13 +389,7 @@ func (tempo Tempo) DaysInMonth() int {
 func (tempo Tempo) IsWeekend() bool {
 	weekday := tempo.local().Weekday()
 
-	for _, weekendDay := range tempo.settingsSnapshot().WeekendDays {
-		if weekday == weekendDay {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(tempo.settingsSnapshot().WeekendDays, weekday)
 }
 
 func (tempo Tempo) IsSunday() bool {

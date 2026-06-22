@@ -68,7 +68,7 @@ func Times[T any](number int, callback func(int) T) *Collection[T] {
 
 	items := make([]T, number)
 
-	for i := 0; i < number; i++ {
+	for i := range number {
 		items[i] = callback(i + 1)
 	}
 

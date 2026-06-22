@@ -2,6 +2,7 @@ package collectible
 
 import (
 	"iter"
+	"maps"
 
 	"github.com/oullin/alloy/collection/support"
 )
@@ -48,9 +49,7 @@ func FromPairs[K comparable, V any](pairs ...support.Pair[K, V]) *Collection[K, 
 func (m *Collection[K, V]) All() map[K]V {
 	result := make(map[K]V, len(m.items))
 
-	for k, v := range m.items {
-		result[k] = v
-	}
+	maps.Copy(result, m.items)
 
 	return result
 }

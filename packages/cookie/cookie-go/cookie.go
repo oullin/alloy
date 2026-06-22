@@ -21,7 +21,9 @@ type Options struct {
 }
 
 // BoolPtr returns a pointer to v, useful for setting Options boolean fields.
-func BoolPtr(v bool) *bool { return &v }
+//
+//go:fix inline
+func BoolPtr(v bool) *bool { return new(v) }
 
 const (
 	SameSiteDefault = http.SameSiteDefaultMode
@@ -34,7 +36,7 @@ const (
 func DefaultOptions() Options {
 	return Options{
 		Path:     "/",
-		HTTPOnly: BoolPtr(true),
+		HTTPOnly: new(true),
 		SameSite: SameSiteLax,
 	}
 }

@@ -131,7 +131,7 @@ func (mutable *MutableTempo) ToObject() Object {
 	return mutable.Tempo().ToObject()
 }
 
-func (mutable *MutableTempo) ToMap() map[string]interface{} {
+func (mutable *MutableTempo) ToMap() map[string]any {
 	return formatting.ToMap(mutable)
 }
 

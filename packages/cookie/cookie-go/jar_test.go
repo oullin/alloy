@@ -10,7 +10,7 @@ import (
 )
 
 func defaultOpts() cookie.Options {
-	return cookie.Options{Path: "/", HTTPOnly: cookie.BoolPtr(true), SameSite: cookie.SameSiteLax}
+	return cookie.Options{Path: "/", HTTPOnly: new(true), SameSite: cookie.SameSiteLax}
 }
 
 // ---------------------------------------------------------------------------
@@ -46,8 +46,8 @@ func TestMakeWithAllOptions(t *testing.T) {
 		Path:     "/path",
 		Domain:   "example.com",
 		MaxAge:   600,
-		Secure:   cookie.BoolPtr(true),
-		HTTPOnly: cookie.BoolPtr(false),
+		Secure:   new(true),
+		HTTPOnly: new(false),
 		SameSite: cookie.SameSiteStrict,
 	}
 
@@ -112,7 +112,7 @@ func TestMakeRawDoesNotSetHTTPRawField(t *testing.T) {
 	t.Parallel()
 
 	opts := defaultOpts()
-	opts.Raw = cookie.BoolPtr(true)
+	opts.Raw = new(true)
 
 	c := cookie.Make("token", "abc=123", opts)
 
@@ -130,7 +130,7 @@ func TestJarSetDefaultsRoundTrip(t *testing.T) {
 
 	j := cookie.NewJar(defaultOpts())
 
-	newOpts := cookie.Options{Path: "/app", Domain: "test.com", Secure: cookie.BoolPtr(true)}
+	newOpts := cookie.Options{Path: "/app", Domain: "test.com", Secure: new(true)}
 	j.SetDefaults(newOpts)
 
 	got := j.Defaults()
@@ -144,7 +144,7 @@ func TestJarMakeInheritsDefaults(t *testing.T) {
 	t.Parallel()
 
 	opts := defaultOpts()
-	opts.Secure = cookie.BoolPtr(true)
+	opts.Secure = new(true)
 	j := cookie.NewJar(opts)
 
 	c := j.Make("x", "y", cookie.Options{})
@@ -191,7 +191,7 @@ func TestJarMakeSecureNilInheritsDefault(t *testing.T) {
 
 	// When opts.Secure is nil, the default is inherited.
 	opts := defaultOpts()
-	opts.Secure = cookie.BoolPtr(true)
+	opts.Secure = new(true)
 	j := cookie.NewJar(opts)
 
 	c := j.Make("x", "y", cookie.Options{})
@@ -207,10 +207,10 @@ func TestJarMakeSecureOverrideToFalse(t *testing.T) {
 	// When opts.Secure is explicitly false, it overrides the default.
 	// This matches the upstream testCookiesCanSetSecureOptionUsingDefaultPathAndDomain.
 	opts := defaultOpts()
-	opts.Secure = cookie.BoolPtr(true)
+	opts.Secure = new(true)
 	j := cookie.NewJar(opts)
 
-	c := j.Make("x", "y", cookie.Options{Secure: cookie.BoolPtr(false)})
+	c := j.Make("x", "y", cookie.Options{Secure: new(false)})
 
 	if c.Secure {
 		t.Fatal("expected Secure=false (explicit override)")

@@ -65,7 +65,7 @@ func (c *Currency) DbValue() (driver.Value, error) {
 }
 
 // DbScan implements sql.Scanner to deserialize a Currency from a string value read from a database
-func (c *Currency) DbScan(src interface{}) error {
+func (c *Currency) DbScan(src any) error {
 	if c == nil {
 		return exception.ErrCurrencyNotFound
 	}

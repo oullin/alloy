@@ -1,5 +1,7 @@
 package collectible
 
+import "maps"
+
 // Merge returns a new collection with the given map merged in. Existing keys
 // are overwritten by the incoming values.
 func (m *Collection[K, V]) Merge(items map[K]V) *Collection[K, V] {
@@ -7,9 +9,7 @@ func (m *Collection[K, V]) Merge(items map[K]V) *Collection[K, V] {
 	newKeys := make([]K, len(m.keys))
 	copy(newKeys, m.keys)
 
-	for k, v := range m.items {
-		result[k] = v
-	}
+	maps.Copy(result, m.items)
 
 	for k, v := range items {
 		if _, exists := result[k]; !exists {
@@ -29,9 +29,7 @@ func (m *Collection[K, V]) Union(items map[K]V) *Collection[K, V] {
 	newKeys := make([]K, len(m.keys))
 	copy(newKeys, m.keys)
 
-	for k, v := range m.items {
-		result[k] = v
-	}
+	maps.Copy(result, m.items)
 
 	for k, v := range items {
 		if _, exists := result[k]; !exists {

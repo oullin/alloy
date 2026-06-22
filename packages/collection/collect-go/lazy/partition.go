@@ -8,11 +8,7 @@ func (lc *Collection[T]) Take(limit int) *Collection[T] {
 	if limit < 0 {
 		// For negative take, we need to eagerly evaluate
 		items := lc.All()
-		start := len(items) + limit
-
-		if start < 0 {
-			start = 0
-		}
+		start := max(len(items)+limit, 0)
 
 		return From(items[start:])
 	}
@@ -274,7 +270,7 @@ func (lc *Collection[T]) Pad(size int, value T) *Collection[T] {
 			padCount := absSize - len(items)
 
 			if padCount > 0 {
-				for i := 0; i < padCount; i++ {
+				for range padCount {
 					if !yield(value) {
 						return
 					}

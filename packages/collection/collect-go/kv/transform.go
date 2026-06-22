@@ -1,5 +1,7 @@
 package kv
 
+import "maps"
+
 // Dot flattens a nested map into a single-level map with dot-notated keys.
 // An optional prefix is prepended to each key.
 func Dot(items map[string]any, prepend ...string) map[string]any {
@@ -114,14 +116,10 @@ func PrependKeysWith[V any](items map[string]V, prefix string) map[string]V {
 func Replace(items map[string]any, replacements ...map[string]any) map[string]any {
 	result := make(map[string]any, len(items))
 
-	for k, v := range items {
-		result[k] = v
-	}
+	maps.Copy(result, items)
 
 	for _, replacement := range replacements {
-		for k, v := range replacement {
-			result[k] = v
-		}
+		maps.Copy(result, replacement)
 	}
 
 	return result

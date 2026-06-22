@@ -3,6 +3,7 @@ package collection
 import (
 	"encoding/json"
 	"errors"
+	"maps"
 	"reflect"
 	"sort"
 	"strings"
@@ -716,9 +717,7 @@ func TestInventoryParityDiffIntersectCollapseAndSortKeys(t *testing.T) {
 	collapsed := map[string]int{}
 
 	for _, group := range keyedGroups {
-		for key, value := range group {
-			collapsed[key] = value
-		}
+		maps.Copy(collapsed, group)
 	}
 
 	if !reflect.DeepEqual(collapsed, map[string]int{"first": 1, "second": 2}) {

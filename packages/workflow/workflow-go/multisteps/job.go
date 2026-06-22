@@ -2,6 +2,7 @@ package multisteps
 
 import (
 	"context"
+	"maps"
 	"time"
 )
 
@@ -71,9 +72,7 @@ func newJob(name string, handler JobHandler, async bool, opts ...JobOption) JobS
 // Response, or Literal — see variable.go.
 func Args(m A) JobOption {
 	return func(s *JobSpec) {
-		for key, value := range m {
-			s.args[key] = value
-		}
+		maps.Copy(s.args, m)
 	}
 }
 

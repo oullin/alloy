@@ -2,6 +2,7 @@ package str
 
 import (
 	"bytes"
+	"maps"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -75,9 +76,7 @@ func mergeMarkdownOptions(options []map[string]any) map[string]any {
 	}
 
 	if len(options) > 0 {
-		for k, v := range options[0] {
-			merged[k] = v
-		}
+		maps.Copy(merged, options[0])
 	}
 
 	return merged

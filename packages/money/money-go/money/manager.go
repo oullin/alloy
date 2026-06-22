@@ -220,7 +220,7 @@ func (mm *Manager) Split(m *Money, n int) ([]*Money, error) {
 
 	ms := make([]*Money, n)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		ms[i] = mm.Create(quotient, m.currency.Code)
 	}
 

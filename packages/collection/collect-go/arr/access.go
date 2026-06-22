@@ -123,11 +123,7 @@ func Sole[T any](items []T, callbacks ...func(T, int) bool) (T, error) {
 // A positive limit takes from the front; a negative limit takes from the end.
 func Take[T any](items []T, limit int) []T {
 	if limit < 0 {
-		start := len(items) + limit
-
-		if start < 0 {
-			start = 0
-		}
+		start := max(len(items)+limit, 0)
 
 		result := make([]T, len(items)-start)
 		copy(result, items[start:])

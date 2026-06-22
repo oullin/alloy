@@ -1,5 +1,7 @@
 package kv
 
+import "maps"
+
 // Only returns a new map containing only the specified keys.
 func Only(items map[string]any, keys ...string) map[string]any {
 	result := make(map[string]any)
@@ -17,9 +19,7 @@ func Only(items map[string]any, keys ...string) map[string]any {
 func Except(items map[string]any, keys ...string) map[string]any {
 	result := make(map[string]any, len(items))
 
-	for k, v := range items {
-		result[k] = v
-	}
+	maps.Copy(result, items)
 
 	for _, key := range keys {
 		delete(result, key)

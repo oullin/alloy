@@ -2002,10 +2002,8 @@ export class TempoImmutable {
 		});
 
 		const diff = this.startOfDay().diffInDays(reference.startOfDay());
-
 		const key: CalendarFormatKey =
 			diff === 0 ? 'sameDay' : diff === 1 ? 'nextDay' : diff > 1 && diff < 7 ? 'nextWeek' : diff === -1 ? 'lastDay' : diff < -1 && diff > -7 ? 'lastWeek' : 'sameElse';
-
 		const defaults = calendarFormatDefaults();
 
 		return this.format(formats[key] ?? defaults[key]);

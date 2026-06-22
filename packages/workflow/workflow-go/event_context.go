@@ -1,6 +1,10 @@
 package workflow
 
-import "github.com/oullin/alloy/workflow/events"
+import (
+	"maps"
+
+	"github.com/oullin/alloy/workflow/events"
+)
 
 func (w *Workflow[T]) baseEvent(subject T, transition Transition, marking Marking, context map[string]any) events.Base[T] {
 	return events.Base[T]{
@@ -23,9 +27,7 @@ func cloneContext(src map[string]any) map[string]any {
 
 	out := make(map[string]any, len(src))
 
-	for key, value := range src {
-		out[key] = value
-	}
+	maps.Copy(out, src)
 
 	return out
 }
@@ -51,9 +53,7 @@ func cloneMarkingMap(src map[string]int) map[string]int {
 
 	out := make(map[string]int, len(src))
 
-	for place, count := range src {
-		out[place] = count
-	}
+	maps.Copy(out, src)
 
 	return out
 }

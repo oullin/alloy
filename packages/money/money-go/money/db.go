@@ -71,7 +71,7 @@ func (m *Money) Value() (driver.Value, error) {
 
 // Scan implements sql.Scanner to deserialize a Money instance from a DBMoneyValueSeparator-separated string,
 // for example, "amount|currency_code"
-func (m *Money) Scan(src interface{}) error {
+func (m *Money) Scan(src any) error {
 	if m == nil {
 		return fmt.Errorf("cannot scan nil Money")
 	}

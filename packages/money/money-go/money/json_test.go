@@ -40,7 +40,7 @@ func TestJSONSetMarshal(t *testing.T) {
 		t.Fatalf("Marshal failed: %v", err)
 	}
 
-	var result map[string]interface{}
+	var result map[string]any
 
 	if err := json.Unmarshal(data, &result); err != nil {
 		t.Fatalf("Unmarshal result failed: %v", err)
@@ -114,63 +114,53 @@ func TestJSONParserThreadSafety(t *testing.T) {
 	var wg sync.WaitGroup
 	iterations := 100
 
-	for i := 0; i < iterations; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range iterations {
+		wg.Go(func() {
 
 			if err := parser.SetMarshal(parser.defaultMarshalJSON); err != nil {
 				t.Errorf("SetMarshal() unexpected error: %v", err)
 			}
-		}()
+		})
 	}
 
-	for i := 0; i < iterations; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range iterations {
+		wg.Go(func() {
 
 			if err := parser.SetUnmarshal(parser.defaultUnmarshalJSON); err != nil {
 				t.Errorf("SetUnmarshal() unexpected error: %v", err)
 			}
-		}()
+		})
 	}
 
-	for i := 0; i < iterations; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range iterations {
+		wg.Go(func() {
 
 			if err := parser.SetCurrency(parser.defaultJSONCurrency); err != nil {
 				t.Errorf("SetCurrency() unexpected error: %v", err)
 			}
-		}()
+		})
 	}
 
-	for i := 0; i < iterations; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range iterations {
+		wg.Go(func() {
 
 			m := NewManager().Create(1000, currency.SGD)
 
 			if _, err := parser.Marshal(*m); err != nil {
 				t.Errorf("Marshal() unexpected error: %v", err)
 			}
-		}()
+		})
 	}
 
-	for i := 0; i < iterations; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range iterations {
+		wg.Go(func() {
 
 			var m Money
 
 			if err := parser.Unmarshal(&m, []byte(`{"amount": 1000, "currency": "SGD"}`)); err != nil {
 				t.Errorf("Unmarshal() unexpected error: %v", err)
 			}
-		}()
+		})
 	}
 
 	wg.Wait()
@@ -200,7 +190,7 @@ func TestJSONParserRestore(t *testing.T) {
 	data, err = parser.Marshal(*m)
 	testutil.TestRequireNoErr(t, err)
 
-	var result map[string]interface{}
+	var result map[string]any
 
 	if err = json.Unmarshal(data, &result); err != nil {
 		t.Fatalf("Unmarshal result failed: %v", err)
@@ -316,7 +306,7 @@ func TestNewJsonWithParser(t *testing.T) {
 			t.Fatalf("Marshal failed: %v", err)
 		}
 
-		var result map[string]interface{}
+		var result map[string]any
 
 		err = json.Unmarshal(data, &result)
 
@@ -389,7 +379,7 @@ func TestNewJsonWithParser(t *testing.T) {
 			t.Fatalf("Marshal failed: %v", err)
 		}
 
-		var result map[string]interface{}
+		var result map[string]any
 
 		err = json.Unmarshal(data, &result)
 

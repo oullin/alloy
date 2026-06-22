@@ -129,10 +129,10 @@ func ToObject[T core.Bearer[T]](bearer T) Object {
 	}
 }
 
-func ToMap[T core.Bearer[T]](bearer T) map[string]interface{} {
+func ToMap[T core.Bearer[T]](bearer T) map[string]any {
 	object := ToObject(bearer)
 
-	return map[string]interface{}{
+	return map[string]any{
 		"year":          object.Year,
 		"month":         object.Month,
 		"day":           object.Day,

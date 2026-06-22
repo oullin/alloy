@@ -351,7 +351,7 @@ func TestManagerConcurrency(t *testing.T) {
 	// Test that multiple goroutines can use the same manager safely
 	var wg sync.WaitGroup
 
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		amount := int64(i * 100)
 		wg.Add(1)
 		go func(amount int64) {

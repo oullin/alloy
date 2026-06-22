@@ -10,6 +10,7 @@
 package boundaries
 
 import (
+	"slices"
 	"time"
 
 	"github.com/oullin/alloy/tempo/arithmetic"
@@ -320,13 +321,7 @@ func isWeekend[T core.Bearer[T]](bearer T, weekendDays []time.Weekday) bool {
 	state := bearer.State()
 	weekday := state.Value.In(state.Location).Weekday()
 
-	for _, day := range weekendDays {
-		if weekday == day {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(weekendDays, weekday)
 }
 
 func abs(value int) int {

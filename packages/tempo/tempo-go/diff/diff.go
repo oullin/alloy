@@ -17,6 +17,7 @@ package diff
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -199,13 +200,7 @@ func InWeekdays[T core.Bearer[T]](bearer T, other core.State, weekendDays []time
 		state := item.State()
 		weekday := state.Value.In(state.Location).Weekday()
 
-		for _, day := range weekendDays {
-			if weekday == day {
-				return false
-			}
-		}
-
-		return true
+		return !slices.Contains(weekendDays, weekday)
 	}, options...)
 }
 
@@ -214,13 +209,7 @@ func InWeekendDays[T core.Bearer[T]](bearer T, other core.State, weekendDays []t
 		state := item.State()
 		weekday := state.Value.In(state.Location).Weekday()
 
-		for _, day := range weekendDays {
-			if weekday == day {
-				return true
-			}
-		}
-
-		return false
+		return slices.Contains(weekendDays, weekday)
 	}, options...)
 }
 

@@ -10,6 +10,7 @@
 package arithmetic
 
 import (
+	"slices"
 	"time"
 
 	"github.com/oullin/alloy/tempo/core"
@@ -196,11 +197,5 @@ func SubDuration[T core.Bearer[T]](bearer T, dur duration.Duration, monthsOverfl
 }
 
 func isWeekend(weekday time.Weekday, weekendDays []time.Weekday) bool {
-	for _, day := range weekendDays {
-		if weekday == day {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(weekendDays, weekday)
 }

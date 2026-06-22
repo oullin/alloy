@@ -201,7 +201,7 @@ func TestRegistry_ConcurrentAddAndGet(t *testing.T) {
 	done := make(chan struct{})
 
 	go func() {
-		for i := 0; i < 100; i++ {
+		for range 100 {
 			reg.Add(registry.Entry[*Subscription]{
 				Name:     "subscription",
 				Workflow: sm,
@@ -212,7 +212,7 @@ func TestRegistry_ConcurrentAddAndGet(t *testing.T) {
 		close(done)
 	}()
 
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		reg.Get(&Subscription{}, "subscription")
 	}
 

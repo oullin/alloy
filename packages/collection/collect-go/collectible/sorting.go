@@ -1,15 +1,16 @@
 package collectible
 
-import "sort"
+import (
+	"maps"
+	"sort"
+)
 
 // SortKeys returns a new collection with string keys sorted in ascending
 // order.
 func SortKeys[V any](m *Collection[string, V]) *Collection[string, V] {
 	result := make(map[string]V, len(m.items))
 
-	for k, v := range m.items {
-		result[k] = v
-	}
+	maps.Copy(result, m.items)
 
 	newKeys := make([]string, len(m.keys))
 	copy(newKeys, m.keys)
@@ -24,9 +25,7 @@ func SortKeys[V any](m *Collection[string, V]) *Collection[string, V] {
 func SortKeysDesc[V any](m *Collection[string, V]) *Collection[string, V] {
 	result := make(map[string]V, len(m.items))
 
-	for k, v := range m.items {
-		result[k] = v
-	}
+	maps.Copy(result, m.items)
 
 	newKeys := make([]string, len(m.keys))
 	copy(newKeys, m.keys)
@@ -41,9 +40,7 @@ func SortKeysDesc[V any](m *Collection[string, V]) *Collection[string, V] {
 func (m *Collection[K, V]) SortKeysUsing(less func(K, K) bool) *Collection[K, V] {
 	result := make(map[K]V, len(m.items))
 
-	for k, v := range m.items {
-		result[k] = v
-	}
+	maps.Copy(result, m.items)
 
 	newKeys := make([]K, len(m.keys))
 	copy(newKeys, m.keys)
