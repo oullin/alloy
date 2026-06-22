@@ -1,6 +1,8 @@
 package filesystem_test
 
 import (
+	"errors"
+	iofs "io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -509,6 +511,34 @@ func TestMoveDirectoryOverwrite(t *testing.T) {
 
 	if string(data) != "new" {
 		t.Fatalf("expected 'new', got %q", string(data))
+	}
+}
+
+func TestMoveDirectoryWithoutOverwriteRefusesExistingDestination(t *testing.T) {
+	t.Parallel()
+
+	fs := newFilesystem()
+	dir := t.TempDir()
+	src := filepath.Join(dir, "src")
+	dst := filepath.Join(dir, "dst")
+
+	writeFile(t, filepath.Join(src, "file.txt"), "src")
+	writeFile(t, filepath.Join(dst, "file.txt"), "dst")
+
+	err := fs.MoveDirectory(src, dst)
+
+	if !errors.Is(err, iofs.ErrExist) {
+		t.Fatalf("expected ErrExist, got %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(dst, "file.txt"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(data) != "dst" {
+		t.Fatalf("expected destination to be preserved, got %q", string(data))
 	}
 }
 

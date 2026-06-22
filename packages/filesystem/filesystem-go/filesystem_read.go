@@ -3,8 +3,10 @@ package filesystem
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"iter"
 	"os"
+	"strings"
 )
 
 // Get reads the entire contents of a file.
@@ -77,10 +79,25 @@ func (f *Filesystem) Lines(path string) (iter.Seq[string], error) {
 
 		defer file.Close()
 
-		scanner := bufio.NewScanner(file)
+		reader := bufio.NewReader(file)
 
-		for scanner.Scan() {
-			if !yield(scanner.Text()) {
+		for {
+			line, err := reader.ReadString('\n')
+
+			if len(line) > 0 {
+				line = strings.TrimSuffix(line, "\n")
+				line = strings.TrimSuffix(line, "\r")
+
+				if !yield(line) {
+					return
+				}
+			}
+
+			if err == io.EOF {
+				return
+			}
+
+			if err != nil {
 				return
 			}
 		}

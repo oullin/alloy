@@ -146,10 +146,16 @@ func (f *Filesystem) MoveDirectory(from, to string, overwrite ...bool) error {
 		shouldOverwrite = overwrite[0]
 	}
 
-	if shouldOverwrite {
+	if _, err := os.Stat(to); err == nil {
+		if !shouldOverwrite {
+			return fs.ErrExist
+		}
+
 		if err := os.RemoveAll(to); err != nil {
 			return err
 		}
+	} else if !os.IsNotExist(err) {
+		return err
 	}
 
 	// Try atomic rename first.

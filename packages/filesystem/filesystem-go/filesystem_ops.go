@@ -31,29 +31,42 @@ func (f *Filesystem) Copy(path, target string) error {
 		return err
 	}
 
-	defer src.Close()
-
 	info, err := src.Stat()
 
 	if err != nil {
+		_ = src.Close()
+
 		return err
 	}
 
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		_ = src.Close()
+
 		return err
 	}
 
 	dst, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, info.Mode())
 
 	if err != nil {
+		_ = src.Close()
+
 		return err
 	}
 
-	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		_ = dst.Close()
+		_ = src.Close()
 
-	_, err = io.Copy(dst, src)
+		return err
+	}
 
-	return err
+	if err := dst.Close(); err != nil {
+		_ = src.Close()
+
+		return err
+	}
+
+	return src.Close()
 }
 
 // Link creates a symbolic link.

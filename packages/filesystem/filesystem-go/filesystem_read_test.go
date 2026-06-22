@@ -3,6 +3,7 @@ package filesystem_test
 import (
 	"errors"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/oullin/alloy/filesystem"
@@ -194,6 +195,37 @@ func TestLinesEmptyFile(t *testing.T) {
 
 	if len(lines) != 0 {
 		t.Fatalf("expected 0 lines, got %d", len(lines))
+	}
+}
+
+func TestLinesHandlesLongLines(t *testing.T) {
+	t.Parallel()
+
+	fs := newFilesystem()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "long.txt")
+	longLine := strings.Repeat("a", 128*1024)
+
+	writeFile(t, path, longLine+"\nshort")
+
+	seq, err := fs.Lines(path)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var lines []string
+
+	for line := range seq {
+		lines = append(lines, line)
+	}
+
+	if len(lines) != 2 {
+		t.Fatalf("expected 2 lines, got %d", len(lines))
+	}
+
+	if lines[0] != longLine || lines[1] != "short" {
+		t.Fatal("unexpected lines from long-line file")
 	}
 }
 

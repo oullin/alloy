@@ -78,7 +78,7 @@ func (f *Filesystem) ReplaceInFile(search, replace, path string) error {
 
 	content := strings.ReplaceAll(string(data), search, replace)
 
-	return os.WriteFile(path, []byte(content), 0o644)
+	return f.Replace(path, []byte(content))
 }
 
 // Prepend prepends data to the beginning of a file. If the file does not
@@ -98,7 +98,7 @@ func (f *Filesystem) Prepend(path string, data []byte) error {
 	combined = append(combined, data...)
 	combined = append(combined, existing...)
 
-	return os.WriteFile(path, combined, 0o644)
+	return f.Replace(path, combined)
 }
 
 // Append appends data to the end of a file.
@@ -113,9 +113,12 @@ func (f *Filesystem) Append(path string, data []byte) error {
 		return err
 	}
 
-	defer file.Close()
+	_, writeErr := file.Write(data)
+	closeErr := file.Close()
 
-	_, err = file.Write(data)
+	if writeErr != nil {
+		return writeErr
+	}
 
-	return err
+	return closeErr
 }
