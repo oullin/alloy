@@ -212,6 +212,38 @@ func TestEncryptCookiesEncryptsResponse(t *testing.T) {
 	}
 }
 
+func TestEncryptCookiesEncryptsResponseOnlyOnce(t *testing.T) {
+	t.Parallel()
+
+	mw := cookie.NewEncryptCookies(stubEncrypter{})
+
+	h := mw.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{Name: "session", Value: "abc123"})
+		w.WriteHeader(http.StatusOK)
+
+		if _, err := w.Write([]byte("first")); err != nil {
+			t.Fatalf("write first chunk: %v", err)
+		}
+
+		if _, err := w.Write([]byte("second")); err != nil {
+			t.Fatalf("write second chunk: %v", err)
+		}
+	}))
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	cookies := rec.Result().Cookies()
+
+	if len(cookies) != 1 {
+		t.Fatalf("expected one cookie, got %d", len(cookies))
+	}
+
+	if cookies[0].Value != "enc:abc123" {
+		t.Fatalf("expected value to be encrypted once, got %q", cookies[0].Value)
+	}
+}
+
 func TestEncryptCookiesEncryptsMultipleResponseCookies(t *testing.T) {
 	t.Parallel()
 

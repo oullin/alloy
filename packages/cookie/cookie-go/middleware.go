@@ -24,8 +24,9 @@ type EncryptCookies struct {
 // encryptingResponseWriter intercepts Set-Cookie headers and encrypts values.
 type encryptingResponseWriter struct {
 	http.ResponseWriter
-	enc    Encrypter
-	except map[string]bool
+	enc       Encrypter
+	except    map[string]bool
+	encrypted bool
 }
 
 // AttachQueued is middleware that flushes a Jar's queued cookies onto the
@@ -106,6 +107,12 @@ func (w *encryptingResponseWriter) Write(b []byte) (int, error) {
 }
 
 func (w *encryptingResponseWriter) encryptResponseCookies() {
+	if w.encrypted {
+		return
+	}
+
+	w.encrypted = true
+
 	header := w.Header()
 	cookies := header["Set-Cookie"]
 

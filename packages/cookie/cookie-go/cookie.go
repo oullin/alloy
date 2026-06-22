@@ -17,7 +17,7 @@ type Options struct {
 	Secure   *bool
 	HTTPOnly *bool
 	SameSite http.SameSite
-	Raw      *bool // do not URL-encode the value
+	Raw      *bool // retained for source compatibility; net/http ignores it when serializing responses
 }
 
 // BoolPtr returns a pointer to v, useful for setting Options boolean fields.
@@ -56,10 +56,6 @@ func Make(name, value string, opts Options) *http.Cookie {
 
 	if opts.HTTPOnly != nil {
 		c.HttpOnly = *opts.HTTPOnly
-	}
-
-	if opts.Raw != nil && *opts.Raw {
-		c.Raw = name + "=" + value
 	}
 
 	return c

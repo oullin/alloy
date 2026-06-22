@@ -2,14 +2,60 @@ package cookie_test
 
 import (
 	"net/http"
+	"slices"
 	"testing"
 	"time"
 
+	"github.com/oullin/alloy/container"
 	"github.com/oullin/alloy/cookie"
 )
 
 func defaultOpts() cookie.Options {
 	return cookie.Options{Path: "/", HTTPOnly: cookie.BoolPtr(true), SameSite: cookie.SameSiteLax}
+}
+
+func TestCookieServiceProviderBindsFreshJarInstances(t *testing.T) {
+	t.Parallel()
+
+	app := container.New()
+	provider := cookie.NewCookieServiceProvider(app, defaultOpts())
+	provider.Register()
+
+	firstValue, err := app.Make("cookie")
+
+	if err != nil {
+		t.Fatalf("make first cookie jar: %v", err)
+	}
+
+	secondValue, err := app.Make("cookie")
+
+	if err != nil {
+		t.Fatalf("make second cookie jar: %v", err)
+	}
+
+	first, ok := firstValue.(*cookie.Jar)
+
+	if !ok {
+		t.Fatalf("expected first value to be *cookie.Jar, got %T", firstValue)
+	}
+
+	second, ok := secondValue.(*cookie.Jar)
+
+	if !ok {
+		t.Fatalf("expected second value to be *cookie.Jar, got %T", secondValue)
+	}
+
+	if first == second {
+		t.Fatal("expected provider to return a fresh jar for each resolution")
+	}
+
+	if err := first.QueueMake("session", "one", cookie.Options{}); err != nil {
+		t.Fatalf("queue first cookie: %v", err)
+	}
+
+	if second.HasQueued("session") {
+		t.Fatal("expected queued cookies to stay isolated between jar instances")
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -107,7 +153,7 @@ func TestForget(t *testing.T) {
 	}
 }
 
-func TestMakeRaw(t *testing.T) {
+func TestMakeRawDoesNotSetHTTPRawField(t *testing.T) {
 	t.Parallel()
 
 	opts := defaultOpts()
@@ -115,8 +161,8 @@ func TestMakeRaw(t *testing.T) {
 
 	c := cookie.Make("token", "abc=123", opts)
 
-	if c.Raw != "token=abc=123" {
-		t.Fatalf("expected raw string, got %q", c.Raw)
+	if c.Raw != "" {
+		t.Fatalf("expected empty raw field because net/http ignores it on output, got %q", c.Raw)
 	}
 }
 
@@ -374,6 +420,22 @@ func TestJarQueuedWithoutPathReturnsRootPath(t *testing.T) {
 	}
 }
 
+func TestJarQueuedWithoutPathUsesDeterministicFallback(t *testing.T) {
+	t.Parallel()
+
+	j := cookie.NewJar(cookie.Options{Path: "/first"})
+	j.Queue(&http.Cookie{Name: "foo", Value: "bar", Path: "/b"})
+	j.Queue(&http.Cookie{Name: "foo", Value: "baz", Path: "/a"})
+
+	for range 25 {
+		c := j.Queued("foo")
+
+		if c == nil || c.Path != "/b" {
+			t.Fatalf("expected deterministic lexicographic fallback /b, got %+v", c)
+		}
+	}
+}
+
 func TestJarQueuedReturnsNilForMissing(t *testing.T) {
 	t.Parallel()
 
@@ -610,6 +672,31 @@ func TestJarGetQueued(t *testing.T) {
 
 	if len(cookies) != 3 {
 		t.Fatalf("expected 3 cookies, got %d", len(cookies))
+	}
+}
+
+func TestJarGetQueuedIsDeterministic(t *testing.T) {
+	t.Parallel()
+
+	j := cookie.NewJar(defaultOpts())
+	j.Queue(&http.Cookie{Name: "foo", Value: "bar", Path: "/b"})
+	j.Queue(&http.Cookie{Name: "foo", Value: "rab", Path: "/a"})
+	j.Queue(&http.Cookie{Name: "baz", Value: "qux", Path: "/path"})
+
+	for range 25 {
+		cookies := j.GetQueued()
+
+		got := make([]string, 0, len(cookies))
+
+		for _, c := range cookies {
+			got = append(got, c.Name+":"+c.Path)
+		}
+
+		want := []string{"baz:/path", "foo:/a", "foo:/b"}
+
+		if !slices.Equal(got, want) {
+			t.Fatalf("expected deterministic queue order %v, got %v", want, got)
+		}
 	}
 }
 

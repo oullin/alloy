@@ -2,6 +2,7 @@ package cookie
 
 import (
 	"net/http"
+	"slices"
 	"sync"
 )
 
@@ -146,18 +147,21 @@ func (j *Jar) Queued(name string, path ...string) *http.Cookie {
 	}
 
 	// Prefer the root-path entry when no path is specified, matching
-	// the upstream behaviour. Fall back to any entry if "/" is absent.
+	// the upstream behaviour. Fall back to a deterministic path order if
+	// "/" is absent because Go map iteration order is randomized.
 	if c, ok := bucket["/"]; ok {
 		return c
 	}
 
-	var last *http.Cookie
+	paths := make([]string, 0, len(bucket))
 
-	for _, c := range bucket {
-		last = c
+	for queuedPath := range bucket {
+		paths = append(paths, queuedPath)
 	}
 
-	return last
+	slices.Sort(paths)
+
+	return bucket[paths[len(paths)-1]]
 }
 
 // GetQueued returns all queued cookies in a flat slice.
@@ -168,9 +172,26 @@ func (j *Jar) GetQueued() []*http.Cookie {
 
 	var cookies []*http.Cookie
 
-	for _, bucket := range j.queued {
-		for _, c := range bucket {
-			cookies = append(cookies, c)
+	names := make([]string, 0, len(j.queued))
+
+	for name := range j.queued {
+		names = append(names, name)
+	}
+
+	slices.Sort(names)
+
+	for _, name := range names {
+		bucket := j.queued[name]
+		paths := make([]string, 0, len(bucket))
+
+		for queuedPath := range bucket {
+			paths = append(paths, queuedPath)
+		}
+
+		slices.Sort(paths)
+
+		for _, queuedPath := range paths {
+			cookies = append(cookies, bucket[queuedPath])
 		}
 	}
 

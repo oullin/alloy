@@ -15,11 +15,11 @@ func NewCookieServiceProvider(app *container.Container, defaults Options) *Cooki
 	return &CookieServiceProvider{app: app, defaults: defaults}
 }
 
-// Register binds the cookie jar as a singleton under "cookie".
+// Register binds a fresh cookie jar factory under "cookie".
 func (p *CookieServiceProvider) Register() {
-	p.app.Singleton("cookie", func(_ *container.Container) (any, error) {
+	p.app.Bind("cookie", func(_ *container.Container) (any, error) {
 		return NewJar(p.defaults), nil
-	})
+	}, false)
 }
 
 // Provides returns the abstract keys registered by this provider.
