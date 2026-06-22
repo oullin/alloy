@@ -24,10 +24,10 @@ export function textFormStep(
 	placeholder = '',
 	defaultValue = '',
 	required: TextPromptOptions['required'] = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 ): FormBuilder {
 	const resolved = resolveTextFormArguments(optionsOrLabel, placeholder, defaultValue, required, validate, hint, name, transform);
 

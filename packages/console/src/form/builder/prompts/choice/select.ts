@@ -26,11 +26,11 @@ export function selectFormStep<T>(
 	optionsOrName?: ChoiceOptions<T> | string,
 	defaultValue?: T,
 	scroll = 5,
-	validate: SelectPromptOptions<T>['validate'] = undefined,
+	validate?: SelectPromptOptions<T>['validate'],
 	hint = '',
 	required: boolean | string = true,
 	name?: string,
-	transform: SelectPromptOptions<T>['transform'] = undefined,
+	transform?: SelectPromptOptions<T>['transform'],
 	info: SelectPromptOptions<T>['info'] = '',
 ): FormBuilder {
 	const resolved = resolveSelectFormArguments(optionsOrLabel, optionsOrName, defaultValue, scroll, validate, hint, required, name, transform, info);

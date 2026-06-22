@@ -24,9 +24,9 @@ export async function datatable<T = unknown>(
 	label = '',
 	hint = '',
 	required: DataTablePromptOptions<T>['required'] = false,
-	validate: DataTablePromptOptions<T>['validate'] = undefined,
-	transform: DataTablePromptOptions<T>['transform'] = undefined,
-	filter: DataTablePromptOptions<T>['filter'] = undefined,
+	validate?: DataTablePromptOptions<T>['validate'],
+	transform?: DataTablePromptOptions<T>['transform'],
+	filter?: DataTablePromptOptions<T>['filter'],
 ): Promise<T | number> {
 	const parsedOptions = parseDataTablePromptOptions<T>(optionsOrHeaders, rows, scroll, label, hint, required, validate, transform, filter);
 	const options = normalizeDataTablePromptOptions(parsedOptions);

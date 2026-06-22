@@ -21,10 +21,10 @@ export async function search<T>(
 	source?: ChoiceOptions<T> | ((query: string) => Promise<ChoiceOptions<T>> | ChoiceOptions<T>),
 	placeholder = '',
 	scroll = 5,
-	validate: SearchPromptOptions<T>['validate'] = undefined,
+	validate?: SearchPromptOptions<T>['validate'],
 	hint = '',
 	required: SearchPromptOptions<T>['required'] = true,
-	transform: SearchPromptOptions<T>['transform'] = undefined,
+	transform?: SearchPromptOptions<T>['transform'],
 	info: SearchPromptOptions<T>['info'] = '',
 ): Promise<T> {
 	return runSearchPrompt(normalizeSearchPromptOptions(optionsOrLabel, source, placeholder, scroll, validate, hint, required, transform, info));

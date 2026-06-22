@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { applyTypedKey, Key } from '#console/index';
 import { visibleLineWindow } from '#console/typed-value/lines';
 

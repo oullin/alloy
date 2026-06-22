@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { EventEmitter } from 'node:events';
 import { createMemoryOutput, Progress, progress, withPromptEnvironment } from '#console/index';
 

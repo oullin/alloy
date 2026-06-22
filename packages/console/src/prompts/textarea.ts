@@ -20,10 +20,10 @@ export async function textarea(
 	placeholder = '',
 	defaultValue = '',
 	required: boolean | string = false,
-	validate: TextareaPromptOptions['validate'] = undefined,
+	validate?: TextareaPromptOptions['validate'],
 	hint = '',
 	rows = 5,
-	transform: TextareaPromptOptions['transform'] = undefined,
+	transform?: TextareaPromptOptions['transform'],
 ): Promise<string> {
 	const options = normalizeTextareaPromptOptions({
 		defaultValue,

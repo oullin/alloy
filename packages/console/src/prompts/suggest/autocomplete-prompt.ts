@@ -26,9 +26,9 @@ export async function autocomplete(
 	placeholder = '',
 	defaultValue = '',
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 	info: SuggestOptions['info'] = '',
 ): Promise<string> {
 	const options = isSuggestPromptLabel(message)

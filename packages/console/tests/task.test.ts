@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, task, withPromptEnvironment } from '#console/index';
 import { eraseRenderedFrame, renderedFrameLineCount } from '#console/status/frame';
 import { renderTaskFrame } from '#console/status/task/render';

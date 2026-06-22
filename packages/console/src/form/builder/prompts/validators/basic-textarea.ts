@@ -11,11 +11,11 @@ export const resolveTextareaFormArguments = (
 	placeholder = '',
 	defaultValue = '',
 	required: TextareaPromptOptions['required'] = false,
-	validate: TextareaPromptOptions['validate'] = undefined,
+	validate?: TextareaPromptOptions['validate'],
 	hint = '',
 	rows = 5,
 	name?: string,
-	transform: TextareaPromptOptions['transform'] = undefined,
+	transform?: TextareaPromptOptions['transform'],
 ): ResolvedTextareaFormArguments => {
 	if (isBasicPromptOptions(optionsOrLabel)) {
 		return {

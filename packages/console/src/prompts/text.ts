@@ -19,9 +19,9 @@ export async function text(
 	placeholder = '',
 	defaultValue = '',
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 ): Promise<string> {
 	return runTextPrompt(
 		normalizeTextPromptOptions({

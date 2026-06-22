@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 import { createMemoryOutput, notificationCommand, notificationCommands, notify, notifyForPlatform, withPromptEnvironment } from '#console/index';
 import type { NotificationCommand } from '#console/index';
 

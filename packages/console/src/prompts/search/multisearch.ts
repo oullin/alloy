@@ -22,9 +22,9 @@ export async function multisearch<T>(
 	placeholder = '',
 	scroll = 5,
 	required: MultiSearchPromptOptions<T>['required'] = false,
-	validate: MultiSearchPromptOptions<T>['validate'] = undefined,
+	validate?: MultiSearchPromptOptions<T>['validate'],
 	hint = 'Use the space bar to select options.',
-	transform: MultiSearchPromptOptions<T>['transform'] = undefined,
+	transform?: MultiSearchPromptOptions<T>['transform'],
 	info: MultiSearchPromptOptions<T>['info'] = '',
 ): Promise<T[]> {
 	return runMultiSearchPrompt(normalizeMultiSearchPromptOptions(optionsOrLabel, source, placeholder, scroll, required, validate, hint, transform, info));

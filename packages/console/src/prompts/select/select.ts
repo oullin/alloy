@@ -21,10 +21,10 @@ export async function select<T>(
 	source?: ChoiceOptions<T>,
 	defaultValue?: T,
 	scroll = 5,
-	validate: SelectPromptOptions<T>['validate'] = undefined,
+	validate?: SelectPromptOptions<T>['validate'],
 	hint = '',
 	required: SelectPromptOptions<T>['required'] = true,
-	transform: SelectPromptOptions<T>['transform'] = undefined,
+	transform?: SelectPromptOptions<T>['transform'],
 	info: SelectPromptOptions<T>['info'] = '',
 ): Promise<T> {
 	return runSelectPrompt(

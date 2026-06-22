@@ -28,13 +28,13 @@ export const resolveNumberFormArguments = (
 	placeholder = '',
 	defaultValue: number | string = '',
 	required: NumberPromptOptions['required'] = false,
-	validate: NumberPromptOptions['validate'] = undefined,
+	validate?: NumberPromptOptions['validate'],
 	hint = '',
 	min?: number,
 	max?: number,
 	step?: number,
 	name?: string,
-	transform: NumberPromptOptions['transform'] = undefined,
+	transform?: NumberPromptOptions['transform'],
 	argumentCount = 0,
 ): ResolvedNumberFormArguments => {
 	if (isBasicPromptOptions(optionsOrLabel)) {

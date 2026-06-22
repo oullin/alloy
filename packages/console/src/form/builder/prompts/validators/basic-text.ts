@@ -11,10 +11,10 @@ export const resolveTextFormArguments = (
 	placeholder = '',
 	defaultValue = '',
 	required: TextPromptOptions['required'] = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 ): ResolvedTextFormArguments => {
 	if (isBasicPromptOptions(optionsOrLabel)) {
 		return {
@@ -42,10 +42,10 @@ export const resolvePasswordFormArguments = (
 	optionsOrLabel: TextPromptOptions | string,
 	placeholder = '',
 	required: TextPromptOptions['required'] = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 ): ResolvedTextFormArguments => {
 	if (isBasicPromptOptions(optionsOrLabel)) {
 		return {

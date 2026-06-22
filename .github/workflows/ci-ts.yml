@@ -14,6 +14,6 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - run: pnpm exec task ts:typecheck
-      - run: pnpm exec task ts:test
-      - run: pnpm exec task ts:build
+      - run: vp check
+      - run: vp test
+      - run: vp pack

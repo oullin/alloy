@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, spin, withPromptEnvironment } from '#console/index';
 import { renderSpinnerFrame, spinnerFrame } from '#console/status/spinner/render';
 

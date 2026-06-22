@@ -27,13 +27,13 @@ export function numberFormStep(
 	placeholder = '',
 	defaultValue: number | string = '',
 	required: NumberPromptOptions['required'] = false,
-	validate: NumberPromptOptions['validate'] = undefined,
+	validate?: NumberPromptOptions['validate'],
 	hint = '',
 	min?: number,
 	max?: number,
 	step?: number,
 	name?: string,
-	transform: NumberPromptOptions['transform'] = undefined,
+	transform?: NumberPromptOptions['transform'],
 ): FormBuilder {
 	const resolved = resolveNumberFormArguments(optionsOrLabel, placeholder, defaultValue, required, validate, hint, min, max, step, name, transform, arguments.length);
 

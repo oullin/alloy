@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { confirm, createMemoryOutput, createScriptedInput, form, Key, outro, Stream, text, withPromptEnvironment } from '#console/index';
 
 describe('form builder', () => {
@@ -102,6 +102,41 @@ describe('form builder', () => {
 
 		expect(responses[0]).toBe('C');
 		expect(responses[1]).toBe('D');
+	});
+
+	it('clears responses of reverted steps to prevent state leaks', async () => {
+		const output = createMemoryOutput();
+		const runHistory: any[] = [];
+
+		const responses = await withPromptEnvironment(
+			{
+				input: createScriptedInput(['A', Key.enter, 'B', Key.ctrlU, Key.backspace, 'C', Key.enter, 'D', Key.enter]),
+				output,
+				error: output,
+				interactive: true,
+			},
+			() =>
+				form()
+					.text('First', '', '', false, undefined, '', 'first')
+					.add(
+						(res) => {
+							runHistory.push({ ...res });
+
+							return 'side-effect';
+						},
+						'side',
+						true,
+					)
+					.text('Second', '', '', false, undefined, '', 'second')
+					.submit(),
+		);
+
+		expect(responses.first).toBe('C');
+		expect(responses.second).toBe('D');
+		expect(responses.side).toBe('side-effect');
+
+		expect(runHistory[0]).toEqual({ first: 'A' });
+		expect(runHistory[1]).toEqual({ first: 'C' });
 	});
 
 	it('reuses numeric previous responses when reverting prompt builder steps', async () => {
@@ -943,7 +978,7 @@ describe('form builder', () => {
 						false,
 						undefined,
 						(value) => String(value).toUpperCase(),
-						(query, row) => !Array.isArray(row) && row.Tag === query,
+						(query, row: any) => !Array.isArray(row) && row.Tag === query,
 						'project',
 					)
 					.submit(),

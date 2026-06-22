@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { autocomplete, createMemoryOutput, createScriptedInput, Key, parseAnsiText, suggest, withPromptEnvironment } from '#console/index';
 
 const runSuggest = async (keys: string[], options: string[] | ((query: string) => string[])): Promise<{ output: string; result: string }> => {

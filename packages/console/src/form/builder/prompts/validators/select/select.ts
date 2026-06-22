@@ -11,11 +11,11 @@ export const resolveSelectFormArguments = <T>(
 	choicesOrName?: ChoiceOptions<T> | string,
 	defaultValue?: T,
 	scroll = 5,
-	validate: SelectPromptOptions<T>['validate'] = undefined,
+	validate?: SelectPromptOptions<T>['validate'],
 	hint = '',
 	required: boolean | string = true,
 	name?: string,
-	transform: SelectPromptOptions<T>['transform'] = undefined,
+	transform?: SelectPromptOptions<T>['transform'],
 	info: SelectPromptOptions<T>['info'] = '',
 ): ResolvedSelectFormArguments<T> => {
 	if (isSelectPromptOptions(optionsOrLabel)) {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { parseAnsiSegments, parseAnsiText, truncate, visibleWidth, wrap } from '#console/index';
 
 describe('string utilities', () => {

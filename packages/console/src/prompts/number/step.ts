@@ -8,16 +8,19 @@ const clamp = (value: number, min?: number, max?: number): number => {
 	return max === undefined ? clampedMin : Math.min(max, clampedMin);
 };
 
-export const numberStep = (step?: number): number => {
-	return parseNumberStep(step);
+export const numberStep = (step?: number, integer?: boolean): number => {
+	return parseNumberStep(step, integer);
 };
 
 export const steppedNumberValue = (value: string, direction: 1 | -1, options: NumberInputOptions): string => {
-	const step = numberStep(options.step);
+	const step = numberStep(options.step, options.integer);
 	const numeric = parseNumericValue(value);
 
 	if (value === '') {
-		return String(direction === 1 ? (options.min ?? 1) : (options.max ?? 0));
+		const startValue = direction === 1 ? (options.min ?? 1) : (options.max ?? 0);
+		const clampedValue = options.min !== undefined ? Math.max(options.min, startValue) : startValue;
+
+		return String(options.max !== undefined ? Math.min(options.max, clampedValue) : clampedValue);
 	}
 
 	if (numeric === null) {

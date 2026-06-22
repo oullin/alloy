@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:tempo-ts": "vitest run src/tempo-ts.test.ts",
+    "test": "vp test run --passWithNoTests",
+    "test:tempo-ts": "vp test run src/tempo-ts.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

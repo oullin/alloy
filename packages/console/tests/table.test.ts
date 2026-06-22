@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, createScriptedInput, datatable, form, Key, parseAnsiText, table, visibleWidth, withPromptEnvironment } from '#console/index';
 
 describe('table output', () => {
@@ -198,7 +198,7 @@ describe('data table prompt', () => {
 					false,
 					undefined,
 					undefined,
-					(query, row) => !Array.isArray(row) && row.Tag === query,
+					(query, row: any) => !Array.isArray(row) && row.Tag === query,
 				),
 		);
 
@@ -354,7 +354,7 @@ describe('data table prompt', () => {
 			() =>
 				datatable({
 					message: 'Pick project',
-					filter: (query, row) => !Array.isArray(row) && row.Tag === query,
+					filter: (query, row: any) => !Array.isArray(row) && row.Tag === query,
 					rows: [
 						{ Name: 'Alpha', Tag: 'fast', value: 'alpha' },
 						{ Name: 'Beta', Tag: 'slow', value: 'beta' },

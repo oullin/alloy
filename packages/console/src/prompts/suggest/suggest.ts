@@ -27,9 +27,9 @@ export async function suggest(
 	defaultValue = '',
 	scroll = 5,
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 	info: SuggestOptions['info'] = '',
 ): Promise<string> {
 	const options = suggestOptions(message, source, placeholder, defaultValue, scroll, required, validate, hint, transform, info);

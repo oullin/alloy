@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, parseAnsiText, stream, withPromptEnvironment } from '#console/index';
 import { streamFadeStyles } from '#console/status/stream/fade';
 import { renderStreamFrame } from '#console/status/stream/render';

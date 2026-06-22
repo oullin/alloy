@@ -3,7 +3,7 @@ import { parseTableOptions, tableRowCells } from '#console/output/validators/tab
 import { renderTable } from '#console/theme';
 import type { TableOptions } from '#console/types';
 
-export const table = (headersOrOptions: TableOptions | string[] = [], rows: TableOptions['rows'] | null = null): void => {
+export const table = (headersOrOptions: TableOptions | string[] | TableOptions['rows'] = [], rows: TableOptions['rows'] | null = null): void => {
 	const options = parseTableOptions(headersOrOptions, rows);
 	const normalizedRows = options.rows.map((row) => tableRowCells(row, options.headers));
 

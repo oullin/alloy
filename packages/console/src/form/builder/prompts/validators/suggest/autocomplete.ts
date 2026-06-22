@@ -13,10 +13,10 @@ export const resolveAutocompleteFormArguments = (
 	placeholder = '',
 	defaultValue = '',
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 	info: SuggestOptions['info'] = '',
 ): ResolvedAutocompleteFormArguments => {
 	if (isSuggestPromptOptions(optionsOrLabel)) {

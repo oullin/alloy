@@ -32,9 +32,9 @@ export const resolveDataTableFormArguments = <T>(
 	label = '',
 	hint = '',
 	required: DataTablePromptOptions<T>['required'] = false,
-	validate: DataTablePromptOptions<T>['validate'] = undefined,
-	transform: DataTablePromptOptions<T>['transform'] = undefined,
-	filter: DataTablePromptOptions<T>['filter'] = undefined,
+	validate?: DataTablePromptOptions<T>['validate'],
+	transform?: DataTablePromptOptions<T>['transform'],
+	filter?: DataTablePromptOptions<T>['filter'],
 	name?: string,
 ): ResolvedDataTableFormArguments<T> => {
 	if (isDataTablePromptOptions<T>(optionsOrHeaders)) {

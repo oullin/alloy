@@ -3,6 +3,7 @@
   "references": [
     { "path": "./infra" },
     { "path": "./packages/tempo/tempo-ts" },
-    { "path": "./packages/tempo/tempo-ts/tests" }
+    { "path": "./packages/tempo/tempo-ts/tests" },
+    { "path": "./packages/console" }
   ]
 }

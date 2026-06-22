@@ -45,7 +45,7 @@ export const parseNumberInput = (input: unknown, options: Pick<NumberPromptOptio
 	}
 
 	if (options.max !== undefined && numeric > options.max) {
-		return { error: `Must be less than ${options.max}` };
+		return { error: `Must be at most ${options.max}` };
 	}
 
 	return { value: options.integer === false ? numeric : Math.trunc(numeric) };

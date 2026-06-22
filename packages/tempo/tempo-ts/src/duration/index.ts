@@ -1,4 +1,5 @@
 import type { DurationInput, DurationLike, DurationObject, TimeUnit } from '#types';
+
 import { assertFiniteNumber, fixedUnitMilliseconds, isoDurationPattern, millisecondsPerDay, millisecondsPerHour, millisecondsPerMinute, millisecondsPerSecond, normalizeUnit, pad } from '#calendar';
 
 export const durationFromInput = (input: DurationInput): TempoDuration => (input instanceof TempoDuration ? input : typeof input === 'string' ? TempoDuration.parse(input) : new TempoDuration(input));

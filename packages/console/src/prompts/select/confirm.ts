@@ -21,9 +21,9 @@ export async function confirm(
 	yes = 'Yes',
 	no = 'No',
 	required: boolean | string = false,
-	validate: ConfirmPromptOptions['validate'] = undefined,
+	validate?: ConfirmPromptOptions['validate'],
 	hint = '',
-	transform: ConfirmPromptOptions['transform'] = undefined,
+	transform?: ConfirmPromptOptions['transform'],
 ): Promise<boolean> {
 	return runConfirmPrompt(normalizeConfirmPromptOptions(message, defaultValue, yes, no, required, validate, hint, transform, confirmHasDefault(message, arguments.length, defaultValue)));
 }

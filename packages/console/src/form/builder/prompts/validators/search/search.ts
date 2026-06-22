@@ -11,11 +11,11 @@ export const resolveSearchFormArguments = <T>(
 	sourceOrName?: SearchPromptOptions<T>['options'] | string,
 	placeholder = '',
 	scroll = 5,
-	validate: SearchPromptOptions<T>['validate'] = undefined,
+	validate?: SearchPromptOptions<T>['validate'],
 	hint = '',
 	required: SearchPromptOptions<T>['required'] = true,
 	name?: string,
-	transform: SearchPromptOptions<T>['transform'] = undefined,
+	transform?: SearchPromptOptions<T>['transform'],
 	info: SearchPromptOptions<T>['info'] = '',
 ): ResolvedSearchFormArguments<T> => {
 	if (isSearchPromptOptions(optionsOrLabel)) {

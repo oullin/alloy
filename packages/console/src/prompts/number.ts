@@ -22,12 +22,12 @@ export async function number(
 	placeholder = '',
 	defaultValue: number | string = '',
 	required: boolean | string = false,
-	validate: NumberPromptOptions['validate'] = undefined,
+	validate?: NumberPromptOptions['validate'],
 	hint = '',
-	min: number | undefined = undefined,
-	max: number | undefined = undefined,
-	step: number | undefined = undefined,
-	transform: NumberPromptOptions['transform'] = undefined,
+	min?: number,
+	max?: number,
+	step?: number,
+	transform?: NumberPromptOptions['transform'],
 ): Promise<number | string> {
 	const options = normalizeNumberPromptOptions({
 		defaultValue,

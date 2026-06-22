@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, createScriptedInput, Key, parseAnsiText, PromptValidationError, text, withPromptEnvironment } from '#console/index';
 
 describe('text prompt', () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { alert, createMemoryOutput, error, grid, info, intro, note, outro, parseAnsiText, table, warning, withPromptEnvironment } from '#console/index';
 import { renderGrid } from '#console/output/grid';
 

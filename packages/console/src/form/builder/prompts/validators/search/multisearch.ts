@@ -12,10 +12,10 @@ export const resolveMultiSearchFormArguments = <T>(
 	placeholder = '',
 	scroll = 5,
 	required: MultiSearchPromptOptions<T>['required'] = false,
-	validate: MultiSearchPromptOptions<T>['validate'] = undefined,
+	validate?: MultiSearchPromptOptions<T>['validate'],
 	hint = 'Use the space bar to select options.',
 	name?: string,
-	transform: MultiSearchPromptOptions<T>['transform'] = undefined,
+	transform?: MultiSearchPromptOptions<T>['transform'],
 	info: MultiSearchPromptOptions<T>['info'] = '',
 ): ResolvedMultiSearchFormArguments<T> => {
 	if (isSearchPromptOptions(optionsOrLabel)) {

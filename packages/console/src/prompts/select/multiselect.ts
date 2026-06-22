@@ -22,9 +22,9 @@ export async function multiselect<T>(
 	defaultValue: T[] = [],
 	scroll = 5,
 	required: MultiSelectPromptOptions<T>['required'] = false,
-	validate: MultiSelectPromptOptions<T>['validate'] = undefined,
+	validate?: MultiSelectPromptOptions<T>['validate'],
 	hint = 'Use the space bar to select options.',
-	transform: MultiSelectPromptOptions<T>['transform'] = undefined,
+	transform?: MultiSelectPromptOptions<T>['transform'],
 	info: MultiSelectPromptOptions<T>['info'] = '',
 ): Promise<T[]> {
 	return runMultiSelectPrompt(normalizeMultiSelectPromptOptions(optionsOrLabel, source, defaultValue, scroll, required, validate, hint, transform, info));

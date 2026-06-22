@@ -3,7 +3,7 @@ import { joinedInfoDetails, resolveInfo } from '#console/concerns/info';
 import { renderSearchBody } from '#console/prompts/search/render-body';
 import { renderBox } from '#console/theme/box';
 import { cyan, dim, red, strikethrough } from '#console/theme/styles';
-import type { Choice, MultiSearchPromptOptions, SearchPromptOptions } from '#console/types';
+import type { Choice, SearchPromptOptions } from '#console/types';
 
 export const renderSearchChoices = <T>(
 	message: string,
@@ -14,7 +14,7 @@ export const renderSearchChoices = <T>(
 	marked: Set<number> = new Set(),
 	selectedLabels: string[] = [],
 	scroll?: number,
-	info?: SearchPromptOptions<T>['info'] | MultiSearchPromptOptions<T>['info'],
+	info?: SearchPromptOptions<T>['info'],
 	showSelectedSummary = false,
 	placeholder = '',
 ): string => {

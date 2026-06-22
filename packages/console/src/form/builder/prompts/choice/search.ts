@@ -26,11 +26,11 @@ export function searchFormStep<T>(
 	options?: SearchPromptOptions<T>['options'] | string,
 	placeholder = '',
 	scroll = 5,
-	validate: SearchPromptOptions<T>['validate'] = undefined,
+	validate?: SearchPromptOptions<T>['validate'],
 	hint = '',
 	required: SearchPromptOptions<T>['required'] = true,
 	name?: string,
-	transform: SearchPromptOptions<T>['transform'] = undefined,
+	transform?: SearchPromptOptions<T>['transform'],
 	info: SearchPromptOptions<T>['info'] = '',
 ): FormBuilder {
 	const resolved = resolveSearchFormArguments(optionsOrLabel, options, placeholder, scroll, validate, hint, required, name, transform, info);

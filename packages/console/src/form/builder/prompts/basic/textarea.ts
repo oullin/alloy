@@ -25,11 +25,11 @@ export function textareaFormStep(
 	placeholder = '',
 	defaultValue = '',
 	required: TextareaPromptOptions['required'] = false,
-	validate: TextareaPromptOptions['validate'] = undefined,
+	validate?: TextareaPromptOptions['validate'],
 	hint = '',
 	rows = 5,
 	name?: string,
-	transform: TextareaPromptOptions['transform'] = undefined,
+	transform?: TextareaPromptOptions['transform'],
 ): FormBuilder {
 	const resolved = resolveTextareaFormArguments(optionsOrLabel, placeholder, defaultValue, required, validate, hint, rows, name, transform);
 

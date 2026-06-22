@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, createScriptedInput, Key, multisearch, parseAnsiText, PromptValidationError, search, withPromptEnvironment } from '#console/index';
 import type { SearchPromptOptions } from '#console/index';
 
@@ -822,7 +822,7 @@ describe('multisearch prompt', () => {
 			() =>
 				multisearch({
 					message: 'Favorite colors?',
-					options: (value) => {
+					options: (value): Record<string, string> => {
 						if (value === '') {
 							return { green: 'Green' };
 						}

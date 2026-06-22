@@ -1,5 +1,5 @@
 import { dirname, join } from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite-plus';
 import { fileURLToPath } from 'node:url';
 
 const packagePath = dirname(fileURLToPath(import.meta.url));

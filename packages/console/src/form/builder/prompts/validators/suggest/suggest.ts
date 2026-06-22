@@ -14,10 +14,10 @@ export const resolveSuggestFormArguments = (
 	defaultValue = '',
 	scroll = 5,
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 	info: SuggestOptions['info'] = '',
 ): ResolvedSuggestFormArguments => {
 	if (isSuggestPromptOptions(optionsOrLabel)) {

@@ -30,10 +30,10 @@ export function suggestFormStep(
 	defaultValue = '',
 	scroll = 5,
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 	info: SuggestOptions['info'] = '',
 ): FormBuilder {
 	const resolved = resolveSuggestFormArguments(optionsOrLabel, options, placeholder, defaultValue, scroll, required, validate, hint, name, transform, info);

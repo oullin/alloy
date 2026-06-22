@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { confirm, createMemoryOutput, createScriptedInput, Key, multiselect, parseAnsiText, PromptValidationError, select, withPromptEnvironment } from '#console/index';
 import type { SelectPromptOptions } from '#console/index';
 

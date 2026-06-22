@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { createMemoryOutput, withPromptEnvironment } from '#console/environment';
 import { createScriptedInput } from '#console/environment/scripted-input';
 import { Key } from '#console/key';

@@ -14,9 +14,9 @@ export const suggestOptions = (
 	defaultValue = '',
 	scroll = 5,
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 	info: SuggestOptions['info'] = '',
 ): SuggestOptions => {
 	if (isSuggestPromptLabel(message)) {

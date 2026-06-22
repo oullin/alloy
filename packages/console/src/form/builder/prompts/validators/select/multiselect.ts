@@ -12,10 +12,10 @@ export const resolveMultiSelectFormArguments = <T>(
 	defaultValue: T[] = [],
 	scroll = 5,
 	required: boolean | string = false,
-	validate: MultiSelectPromptOptions<T>['validate'] = undefined,
+	validate?: MultiSelectPromptOptions<T>['validate'],
 	hint = 'Use the space bar to select options.',
 	name?: string,
-	transform: MultiSelectPromptOptions<T>['transform'] = undefined,
+	transform?: MultiSelectPromptOptions<T>['transform'],
 	info: MultiSelectPromptOptions<T>['info'] = '',
 ): ResolvedMultiSelectFormArguments<T> => {
 	if (isSelectPromptOptions(optionsOrLabel)) {

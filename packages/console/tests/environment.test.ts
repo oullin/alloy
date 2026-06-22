@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { EventEmitter } from 'node:events';
 import { configurePrompts, createMemoryOutput, createScriptedInput, promptEnvironment, withPromptEnvironment } from '#console/environment';
 import { readRawKey } from '#console/environment/raw-key';

@@ -26,10 +26,10 @@ help:
 	@pnpm exec task --list
 
 format:
-	@pnpm exec task format
+	@vp run format
 
 format-all:
-	@pnpm exec task format-all
+	@vp run format-all
 
 go-test:
 	$(DOCKER_RUN) $(TASK) go:test

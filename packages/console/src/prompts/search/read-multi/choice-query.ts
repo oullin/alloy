@@ -16,8 +16,18 @@ export const createMultiSearchChoiceQuery = <T>(options: MultiSearchPromptOption
 	let query: TypedValueState = { cursor: 0, value: '' };
 	let choices: Array<Choice<T>> = initialChoices;
 
+	let activeQueryValue = '';
+
 	const resolveChoices = async (): Promise<void> => {
-		choices = await resolveSearchChoices(options.options, query.value);
+		const currentQuery = query.value;
+
+		activeQueryValue = currentQuery;
+
+		const resolved = await resolveSearchChoices(options.options, currentQuery);
+
+		if (activeQueryValue === currentQuery) {
+			choices = resolved;
+		}
 	};
 
 	return {

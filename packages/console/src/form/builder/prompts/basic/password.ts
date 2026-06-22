@@ -22,10 +22,10 @@ export function passwordFormStep(
 	optionsOrLabel: TextPromptOptions | string,
 	placeholder = '',
 	required: TextPromptOptions['required'] = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 ): FormBuilder {
 	const resolved = resolvePasswordFormArguments(optionsOrLabel, placeholder, required, validate, hint, name, transform);
 

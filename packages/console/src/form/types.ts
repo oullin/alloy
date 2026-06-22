@@ -1,7 +1,7 @@
 import type { MaybePromise } from '#console/types';
 
-export interface FormResponses extends Array<unknown> {
-	[name: string]: unknown;
+export interface FormResponses {
+	[name: string | number]: unknown;
 }
 
 export type FormStepCondition = boolean | ((responses: FormResponses) => MaybePromise<boolean>);

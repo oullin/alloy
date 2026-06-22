@@ -17,9 +17,9 @@ export async function password(
 	message: string | TextPromptOptions,
 	placeholder = '',
 	required: boolean | string = false,
-	validate: TextPromptOptions['validate'] = undefined,
+	validate?: TextPromptOptions['validate'],
 	hint = '',
-	transform: TextPromptOptions['transform'] = undefined,
+	transform?: TextPromptOptions['transform'],
 ): Promise<string> {
 	return runPasswordPrompt(
 		normalizePasswordPromptOptions({

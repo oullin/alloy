@@ -26,10 +26,10 @@ export function confirmFormStep(
 	yes = 'Yes',
 	no = 'No',
 	required: boolean | string = false,
-	validate: ConfirmPromptOptions['validate'] = undefined,
+	validate?: ConfirmPromptOptions['validate'],
 	hint = '',
 	name?: string,
-	transform: ConfirmPromptOptions['transform'] = undefined,
+	transform?: ConfirmPromptOptions['transform'],
 ): FormBuilder {
 	const resolved = resolveConfirmFormArguments(optionsOrLabel, defaultValueOrName, yes, no, required, validate, hint, name, transform);
 

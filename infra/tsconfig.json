@@ -1,7 +1,6 @@
 {
   "extends": ["./tsconfig/base.json", "./tsconfig/infra.json"],
   "compilerOptions": {
-    "baseUrl": ".",
     "types": ["node"]
   },
   "include": ["src/**/*.ts", "package.json"]
