@@ -158,16 +158,18 @@ func (m *AttachQueued) Wrap(next http.Handler) http.Handler {
 
 func (w *queueingResponseWriter) flush() {
 	if w.flushed {
+		w.jar.Flush()
+
 		return
 	}
 
 	w.flushed = true
 
+	defer w.jar.Flush()
+
 	for _, c := range w.jar.GetQueued() {
 		http.SetCookie(w.ResponseWriter, c)
 	}
-
-	w.jar.Flush()
 }
 
 func (w *queueingResponseWriter) WriteHeader(code int) {

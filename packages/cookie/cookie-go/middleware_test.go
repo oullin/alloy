@@ -16,6 +16,10 @@ type stubEncrypter struct{}
 // failEncrypter always fails on encrypt.
 type failEncrypter struct{}
 
+type countingEncrypter struct {
+	count int
+}
+
 func (s stubEncrypter) Encrypt(v string) (string, error) { return "enc:" + v, nil }
 func (s stubEncrypter) Decrypt(v string) (string, error) {
 	if !strings.HasPrefix(v, "enc:") {
@@ -27,6 +31,12 @@ func (s stubEncrypter) Decrypt(v string) (string, error) {
 
 func (f failEncrypter) Encrypt(string) (string, error)   { return "", errors.New("encrypt fail") }
 func (f failEncrypter) Decrypt(v string) (string, error) { return v, nil }
+func (e *countingEncrypter) Encrypt(v string) (string, error) {
+	e.count++
+
+	return "enc:" + v, nil
+}
+func (e *countingEncrypter) Decrypt(v string) (string, error) { return v, nil }
 
 // ---------------------------------------------------------------------------
 // EncryptCookies — request decryption
@@ -215,7 +225,8 @@ func TestEncryptCookiesEncryptsResponse(t *testing.T) {
 func TestEncryptCookiesEncryptsResponseOnlyOnce(t *testing.T) {
 	t.Parallel()
 
-	mw := cookie.NewEncryptCookies(stubEncrypter{})
+	enc := &countingEncrypter{}
+	mw := cookie.NewEncryptCookies(enc)
 
 	h := mw.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{Name: "session", Value: "abc123"})
@@ -241,6 +252,10 @@ func TestEncryptCookiesEncryptsResponseOnlyOnce(t *testing.T) {
 
 	if cookies[0].Value != "enc:abc123" {
 		t.Fatalf("expected value to be encrypted once, got %q", cookies[0].Value)
+	}
+
+	if enc.count != 1 {
+		t.Fatalf("expected one encryption call, got %d", enc.count)
 	}
 }
 
@@ -431,6 +446,34 @@ func TestAttachQueuedFlushesJar(t *testing.T) {
 
 	if len(j.GetQueued()) != 0 {
 		t.Fatalf("expected empty queue, got %d", len(j.GetQueued()))
+	}
+}
+
+func TestAttachQueuedDiscardsCookiesQueuedAfterHeadersFlush(t *testing.T) {
+	t.Parallel()
+
+	j := cookie.NewJar(defaultOpts())
+	mw := cookie.NewAttachQueued(j)
+
+	h := mw.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+
+		if err := j.Queue(&http.Cookie{Name: "late", Value: "token"}); err != nil {
+			t.Fatalf("queue late cookie: %v", err)
+		}
+	}))
+
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	if j.HasQueued("late") {
+		t.Fatal("expected late queued cookie to be discarded after headers flush")
+	}
+
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "late" {
+			t.Fatal("did not expect late queued cookie after headers were already sent")
+		}
 	}
 }
 
