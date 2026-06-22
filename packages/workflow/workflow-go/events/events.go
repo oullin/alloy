@@ -4,6 +4,8 @@
 // this dispatcher to that one via a thin adapter when needed.
 package events
 
+import "maps"
+
 // Transition snapshot used inside event payloads.
 type Transition struct {
 	Name string
@@ -74,9 +76,7 @@ func (e Base[T]) Transition() Transition { return e.Step }
 func (e Base[T]) Marking() map[string]int {
 	out := make(map[string]int, len(e.Tokens))
 
-	for place, count := range e.Tokens {
-		out[place] = count
-	}
+	maps.Copy(out, e.Tokens)
 
 	return out
 }
@@ -84,9 +84,7 @@ func (e Base[T]) Marking() map[string]int {
 func (e Base[T]) Context() map[string]any {
 	out := make(map[string]any, len(e.Ctx))
 
-	for key, value := range e.Ctx {
-		out[key] = value
-	}
+	maps.Copy(out, e.Ctx)
 
 	return out
 }

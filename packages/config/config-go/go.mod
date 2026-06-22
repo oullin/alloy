@@ -1,6 +1,6 @@
 module github.com/oullin/alloy/config
 
-go 1.26.0
+go 1.26.4
 
 require (
 	github.com/oullin/alloy/collection v0.0.0

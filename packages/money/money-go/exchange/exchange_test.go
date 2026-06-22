@@ -422,12 +422,12 @@ func TestConcurrentAccess(t *testing.T) {
 	errChan := make(chan error, numWriters+numReaders)
 
 	// Start concurrent writers
-	for i := 0; i < numWriters; i++ {
+	for i := range numWriters {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 
-			for j := 0; j < iterations; j++ {
+			for j := range iterations {
 				base := currencies[j%len(currencies)]
 				counter := currencies[(j+1)%len(currencies)]
 				rate := float64(id+1) / float64(j+1)
@@ -442,12 +442,12 @@ func TestConcurrentAccess(t *testing.T) {
 	}
 
 	// Start concurrent readers
-	for i := 0; i < numReaders; i++ {
+	for i := range numReaders {
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 
-			for j := 0; j < iterations; j++ {
+			for j := range iterations {
 				base := currencies[j%len(currencies)]
 				counter := currencies[(j+1)%len(currencies)]
 
@@ -498,13 +498,13 @@ func TestConcurrentSameInnerMap(t *testing.T) {
 	errChan := make(chan error, numGoroutines*2)
 
 	// Half writers, half readers - all targeting the same base currency's inner map
-	for i := 0; i < numGoroutines/2; i++ {
+	for i := range numGoroutines / 2 {
 		// Writers
 		wg.Add(1)
 		go func(id int) {
 			defer wg.Done()
 
-			for j := 0; j < iterations; j++ {
+			for j := range iterations {
 				counter := currencies[j%len(currencies)]
 				rate := float64(id+1) / float64(j+1)
 
@@ -521,7 +521,7 @@ func TestConcurrentSameInnerMap(t *testing.T) {
 		go func(id int) {
 			defer wg.Done()
 
-			for j := 0; j < iterations; j++ {
+			for j := range iterations {
 				counter := currencies[j%len(currencies)]
 
 				_, err := e.GetRate(baseCurrency, counter)

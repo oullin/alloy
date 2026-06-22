@@ -2,6 +2,7 @@ package multisteps
 
 import (
 	"context"
+	"maps"
 	"sync"
 )
 
@@ -163,7 +164,6 @@ func (e *Engine) runAsyncWave(ctx context.Context, g *compiledGraph, state *runS
 	var failOnce sync.Once
 
 	for i, name := range names {
-		i, name := i, name
 
 		tasks[i] = func() (any, error) {
 			value, err := e.invokeJob(groupCtx, g, state, name)
@@ -303,9 +303,7 @@ func (e *Engine) invokeJob(ctx context.Context, g *compiledGraph, state *runStat
 func newRunState(g *compiledGraph, vars map[string]any) *runState {
 	v := make(map[string]any, len(vars))
 
-	for key, value := range vars {
-		v[key] = value
-	}
+	maps.Copy(v, vars)
 
 	return &runState{
 		graph:     g,
@@ -323,9 +321,7 @@ func (s *runState) responsesSnapshot() map[string]any {
 
 	out := make(map[string]any, len(s.responses))
 
-	for key, value := range s.responses {
-		out[key] = value
-	}
+	maps.Copy(out, s.responses)
 
 	return out
 }
@@ -401,9 +397,7 @@ func (s *runState) result() Result {
 
 	responses := make(map[string]any, len(s.responses))
 
-	for key, value := range s.responses {
-		responses[key] = value
-	}
+	maps.Copy(responses, s.responses)
 
 	skipped := make([]string, 0, len(s.skipped))
 

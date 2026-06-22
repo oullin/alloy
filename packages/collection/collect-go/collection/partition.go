@@ -11,11 +11,7 @@ func (c *Collection[T]) Chunk(size int) [][]T {
 	chunks := make([][]T, 0)
 
 	for i := 0; i < len(c.items); i += size {
-		end := i + size
-
-		if end > len(c.items) {
-			end = len(c.items)
-		}
+		end := min(i+size, len(c.items))
 
 		chunk := make([]T, end-i)
 		copy(chunk, c.items[i:end])
@@ -58,7 +54,7 @@ func (c *Collection[T]) Split(numberOfGroups int) [][]T {
 	groups := make([][]T, 0, numberOfGroups)
 	groupSize := float64(len(c.items)) / float64(numberOfGroups)
 
-	for i := 0; i < numberOfGroups; i++ {
+	for i := range numberOfGroups {
 		start := int(math.Round(float64(i) * groupSize))
 		end := int(math.Round(float64(i+1) * groupSize))
 
@@ -116,11 +112,7 @@ func (c *Collection[T]) Sliding(size int, steps ...int) [][]T {
 // An optional length limits how many items are returned.
 func (c *Collection[T]) Slice(offset int, lengths ...int) *Collection[T] {
 	if offset < 0 {
-		offset = len(c.items) + offset
-
-		if offset < 0 {
-			offset = 0
-		}
+		offset = max(len(c.items)+offset, 0)
 	}
 
 	if offset >= len(c.items) {
@@ -165,22 +157,14 @@ func (c *Collection[T]) Splice(offset int, lengths ...int) *Collection[T] {
 	}
 
 	if offset < 0 {
-		offset = len(c.items) + offset
-
-		if offset < 0 {
-			offset = 0
-		}
+		offset = max(len(c.items)+offset, 0)
 	}
 
 	if offset >= len(c.items) {
 		return Empty[T]()
 	}
 
-	end := offset + length
-
-	if end > len(c.items) {
-		end = len(c.items)
-	}
+	end := min(offset+length, len(c.items))
 
 	removed := make([]T, end-offset)
 	copy(removed, c.items[offset:end])
@@ -193,18 +177,10 @@ func (c *Collection[T]) Splice(offset int, lengths ...int) *Collection[T] {
 // It returns the removed items.
 func (c *Collection[T]) SpliceReplace(offset, length int, replacement []T) *Collection[T] {
 	if offset < 0 {
-		offset = len(c.items) + offset
-
-		if offset < 0 {
-			offset = 0
-		}
+		offset = max(len(c.items)+offset, 0)
 	}
 
-	end := offset + length
-
-	if end > len(c.items) {
-		end = len(c.items)
-	}
+	end := min(offset+length, len(c.items))
 
 	removed := make([]T, end-offset)
 	copy(removed, c.items[offset:end])

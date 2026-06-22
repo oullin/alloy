@@ -103,7 +103,7 @@ func (c *Collection[T]) Multiply(multiplier int) *Collection[T] {
 
 	result := make([]T, 0, len(c.items)*multiplier)
 
-	for i := 0; i < multiplier; i++ {
+	for range multiplier {
 		result = append(result, c.items...)
 	}
 

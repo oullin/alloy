@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 	"sync"
 	"unicode"
@@ -280,13 +281,13 @@ func StrAfter(subject, search string) string {
 		return subject
 	}
 
-	idx := strings.Index(subject, search)
+	_, after, ok := strings.Cut(subject, search)
 
-	if idx == -1 {
+	if !ok {
 		return subject
 	}
 
-	return subject[idx+len(search):]
+	return after
 }
 
 func StrAfterLast(subject, search string) string {
@@ -308,13 +309,13 @@ func StrBefore(subject, search string) string {
 		return subject
 	}
 
-	idx := strings.Index(subject, search)
+	before, _, ok := strings.Cut(subject, search)
 
-	if idx == -1 {
+	if !ok {
 		return subject
 	}
 
-	return subject[:idx]
+	return before
 }
 
 func StrBeforeLast(subject, search string) string {
@@ -690,13 +691,7 @@ func StrIsUrl(value string, protocols ...string) bool {
 	}
 
 	if len(protocols) > 0 {
-		for _, p := range protocols {
-			if u.Scheme == p {
-				return true
-			}
-		}
-
-		return false
+		return slices.Contains(protocols, u.Scheme)
 	}
 
 	return true
@@ -863,13 +858,13 @@ func StrReplaceFirst(search, replace, subject string) string {
 		return subject
 	}
 
-	idx := strings.Index(subject, search)
+	before, after, ok := strings.Cut(subject, search)
 
-	if idx == -1 {
+	if !ok {
 		return subject
 	}
 
-	return subject[:idx] + replace + subject[idx+len(search):]
+	return before + replace + after
 }
 
 func StrReplaceLast(search, replace, subject string) string {
@@ -1262,13 +1257,13 @@ func StrPosition(haystack, needle string, offset ...int) (int, bool) {
 	}
 
 	sub := string(runes[off:])
-	idx := strings.Index(sub, needle)
+	before, _, ok := strings.Cut(sub, needle)
 
-	if idx == -1 {
+	if !ok {
 		return -1, false
 	}
 
-	return off + utf8.RuneCountInString(sub[:idx]), true
+	return off + utf8.RuneCountInString(before), true
 }
 
 func StrSubstr(str string, start int, length ...int) string {
@@ -1924,21 +1919,4 @@ func (s *StringBuilder) Markdown(options ...map[string]any) *StringBuilder {
 }
 func (s *StringBuilder) InlineMarkdown(options ...map[string]any) *StringBuilder {
 	return &StringBuilder{value: StrInlineMarkdown(s.value, options...)}
-}
-
-// min/max helpers (go 1.21+ has these as builtins, but keeping for clarity)
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-
-	return b
 }

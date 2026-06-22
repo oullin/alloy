@@ -1,6 +1,10 @@
 package lazy
 
-import "github.com/oullin/alloy/collection/support"
+import (
+	"slices"
+
+	"github.com/oullin/alloy/collection/support"
+)
 
 // First returns the first element matching the optional predicate.
 // If no predicate is given, it returns the first element.
@@ -268,13 +272,7 @@ func (lc *Collection[T]) Has(index int) bool {
 
 // HasAny reports whether any of the given indices exist in the collection.
 func (lc *Collection[T]) HasAny(indices ...int) bool {
-	for _, idx := range indices {
-		if lc.Has(idx) {
-			return true
-		}
-	}
-
-	return false
+	return slices.ContainsFunc(indices, lc.Has)
 }
 
 // HasSole reports whether exactly one item matches the optional predicate.

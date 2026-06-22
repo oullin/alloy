@@ -35,7 +35,7 @@ func TestPow10i64Money(t testing.TB, exp int) int64 {
 
 	n := int64(1)
 
-	for i := 0; i < exp; i++ {
+	for range exp {
 		n *= 10
 	}
 

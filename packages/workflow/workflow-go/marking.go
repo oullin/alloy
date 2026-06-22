@@ -1,6 +1,9 @@
 package workflow
 
-import "sort"
+import (
+	"maps"
+	"sort"
+)
 
 // Marking tracks active places and token counts.
 type Marking struct {
@@ -24,9 +27,7 @@ func NewMarking(places ...string) Marking {
 func (m Marking) Clone() Marking {
 	cloned := Marking{Places: make(map[string]int, len(m.Places))}
 
-	for place, count := range m.Places {
-		cloned.Places[place] = count
-	}
+	maps.Copy(cloned.Places, m.Places)
 
 	return cloned
 }

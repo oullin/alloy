@@ -26,7 +26,7 @@ func TestMoney_Value(t *testing.T) {
 func TestMoney_Scan(t *testing.T) {
 	tests := []struct {
 		name       string
-		input      interface{}
+		input      any
 		wantAmount int64
 		wantCode   string
 		wantErr    bool
@@ -137,7 +137,7 @@ func TestCurrency_Scan(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		input    interface{}
+		input    any
 		wantCode string
 		wantErr  bool
 	}{
@@ -305,9 +305,9 @@ func TestSetDBMoneyValueSeparator_ThreadSafety(t *testing.T) {
 	iterations := 1000
 
 	// Concurrent readers
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go func() {
-			for j := 0; j < iterations; j++ {
+			for range iterations {
 				sep := GetDBMoneyValueSeparator()
 				// Separator should always be a valid value (not empty)
 				if sep == "" {
@@ -329,9 +329,9 @@ func TestSetDBMoneyValueSeparator_ThreadSafety(t *testing.T) {
 	// Concurrent writers
 	separators := []string{"|", ",", ":", ";", "-"}
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		go func(sep string) {
-			for j := 0; j < iterations; j++ {
+			for range iterations {
 				err := SetDBMoneyValueSeparator(sep)
 
 				if err != nil {
@@ -344,7 +344,7 @@ func TestSetDBMoneyValueSeparator_ThreadSafety(t *testing.T) {
 	}
 
 	// Wait for all goroutines to complete
-	for i := 0; i < 15; i++ {
+	for range 15 {
 		<-done
 	}
 

@@ -148,7 +148,7 @@ func (c *Collection[T]) ShiftMany(count int) *Collection[T] {
 	// Reslicing in-place avoids the O(N) alloc+copy that a new slice would require.
 	var zero T
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		c.items[i] = zero
 	}
 

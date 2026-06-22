@@ -1,6 +1,9 @@
 package workflow
 
-import "fmt"
+import (
+	"fmt"
+	"maps"
+)
 
 // DefinitionBuilder constructs a Definition programmatically.
 type DefinitionBuilder struct {
@@ -106,9 +109,7 @@ func (b *DefinitionBuilder) Build() (*Definition, error) {
 				transition.Metadata = map[string]any{}
 			}
 
-			for key, value := range metadata {
-				transition.Metadata[key] = value
-			}
+			maps.Copy(transition.Metadata, metadata)
 
 			definition.Transitions[i] = transition
 		}

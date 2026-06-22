@@ -3,6 +3,7 @@ package currency
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 	"testing"
 
@@ -240,7 +241,7 @@ func TestCurrenciesMapFromConcurrency(t *testing.T) {
 	// Prepare test data - each goroutine gets different data to try to initialize with
 	testDatasets := make([]*map[string]*Currency, numGoroutines)
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		code := fmt.Sprintf("C%d", i)
 		testDatasets[i] = &map[string]*Currency{code: {Code: code}}
 	}
@@ -252,7 +253,7 @@ func TestCurrenciesMapFromConcurrency(t *testing.T) {
 	// Launch goroutines concurrently
 	var wg sync.WaitGroup
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		wg.Add(1)
 		go func(idx int) {
 			defer wg.Done()
@@ -302,15 +303,7 @@ func TestCurrenciesMapFromConcurrency(t *testing.T) {
 		t.Fatal("singleton dataset is nil")
 	}
 
-	foundMatch := false
-
-	for _, testData := range testDatasets {
-		if firstDataset == testData {
-			foundMatch = true
-
-			break
-		}
-	}
+	foundMatch := slices.Contains(testDatasets, firstDataset)
 
 	if !foundMatch {
 		t.Fatal("singleton dataset doesn't match any of the input datasets")
@@ -519,7 +512,7 @@ func TestDbValue(t *testing.T) {
 func TestDbScan(t *testing.T) {
 	tests := []struct {
 		name           string
-		input          interface{}
+		input          any
 		wantErr        bool
 		wantCode       string
 		wantNumeric    string

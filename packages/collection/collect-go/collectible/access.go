@@ -1,5 +1,7 @@
 package collectible
 
+import "slices"
+
 // Get returns the value for the given key. The second return value indicates
 // whether the key was found. An optional default may be provided.
 func (m *Collection[K, V]) Get(key K, defaults ...V) (V, bool) {
@@ -25,13 +27,7 @@ func (m *Collection[K, V]) Has(key K) bool {
 
 // HasAny reports whether any of the given keys exist in the collection.
 func (m *Collection[K, V]) HasAny(keys ...K) bool {
-	for _, k := range keys {
-		if m.Has(k) {
-			return true
-		}
-	}
-
-	return false
+	return slices.ContainsFunc(keys, m.Has)
 }
 
 // Contains reports whether any item in the collection satisfies the predicate.

@@ -127,7 +127,7 @@ func intSliceFromStrings(values []string) []int {
 	result := make([]int, 0, len(values))
 
 	for _, value := range values {
-		for _, field := range strings.Split(value, ",") {
+		for field := range strings.SplitSeq(value, ",") {
 			trimmed := strings.TrimSpace(field)
 
 			if trimmed == "" {

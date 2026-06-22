@@ -146,11 +146,7 @@ func CrossJoin[T any](c *Collection[T], others ...[]T) *Collection[[]T] {
 // Combine pairs of keys from this collection with values from the given slice,
 // returning a collection of Pair values.
 func Combine[K any, V any](keys *Collection[K], values []V) *Collection[support.Pair[K, V]] {
-	minLen := len(keys.items)
-
-	if len(values) < minLen {
-		minLen = len(values)
-	}
+	minLen := min(len(values), len(keys.items))
 
 	result := make([]support.Pair[K, V], minLen)
 
