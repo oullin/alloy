@@ -10,6 +10,6 @@
     "sourceMap": true,
     "tsBuildInfoFile": "../../infra/.cache/tsbuild/console-build.tsbuildinfo"
   },
-  "exclude": ["dist", "tests", "vite.config.ts"],
+  "exclude": ["dist", "tests"],
   "include": ["src/**/*.ts"]
 }
