@@ -2,16 +2,24 @@ package events
 
 import (
 	"context"
-	"reflect"
 	"sync"
 )
+
+type deferredEventsContextKey struct{}
+
+type deferredEvents struct {
+	mu       sync.Mutex
+	all      bool
+	names    map[string]struct{}
+	captured []any
+}
 
 // EventDispatcher is the concrete implementation of the Dispatcher contract.
 type EventDispatcher struct {
 	mu                         sync.RWMutex
 	listeners                  map[string][]Listener
 	wildcards                  map[string][]Listener
-	wildcardCache              map[string][]Listener
+	wildcardCache              sync.Map
 	pushed                     map[string][]any
 	queueResolver              QueueResolver
 	transactionManagerResolver TransactionManagerResolver
@@ -20,10 +28,9 @@ type EventDispatcher struct {
 // NewDispatcher creates an EventDispatcher.
 func NewDispatcher() *EventDispatcher {
 	return &EventDispatcher{
-		listeners:     make(map[string][]Listener),
-		wildcards:     make(map[string][]Listener),
-		wildcardCache: make(map[string][]Listener),
-		pushed:        make(map[string][]any),
+		listeners: make(map[string][]Listener),
+		wildcards: make(map[string][]Listener),
+		pushed:    make(map[string][]any),
 	}
 }
 
@@ -39,7 +46,7 @@ func (d *EventDispatcher) Listen(events any, listeners ...Listener) {
 
 		if isWildcardPattern(name) {
 			d.wildcards[name] = append(d.wildcards[name], listeners...)
-			d.wildcardCache = make(map[string][]Listener) // invalidate cache.
+			d.wildcardCache.Clear()
 		} else {
 			d.listeners[name] = append(d.listeners[name], listeners...)
 		}
@@ -142,7 +149,7 @@ func (d *EventDispatcher) Forget(event any) {
 
 	delete(d.listeners, name)
 	delete(d.wildcards, name)
-	d.wildcardCache = make(map[string][]Listener)
+	d.wildcardCache.Clear()
 }
 
 // ForgetPushed clears all pushed/deferred events.
@@ -235,59 +242,24 @@ func (d *EventDispatcher) Defer(ctx context.Context, callback func(ctx context.C
 		deferSet[e] = struct{}{}
 	}
 
-	deferAll := len(events) == 0
-
-	captured := make(map[string][]any)
-	captureMu := &sync.Mutex{}
-
-	// Deep-copy original listeners and replace matched entries with capture stubs.
-	d.mu.Lock()
-
-	original := make(map[string][]Listener, len(d.listeners))
-
-	for k, v := range d.listeners {
-		original[k] = v
+	deferred := &deferredEvents{
+		all:   len(events) == 0,
+		names: deferSet,
 	}
 
-	for name := range d.listeners {
-		_, inSet := deferSet[name]
-
-		if !deferAll && !inSet {
-			continue
-		}
-
-		d.listeners[name] = []Listener{
-			func(ctx context.Context, event any) (any, error) {
-				n := eventName(event)
-				captureMu.Lock()
-				captured[n] = append(captured[n], event)
-				captureMu.Unlock()
-
-				return nil, nil
-			},
-		}
-	}
-
-	d.mu.Unlock()
-
-	// Run the callback.
-	err := callback(ctx)
-
-	// Restore original listeners.
-	d.mu.Lock()
-	d.listeners = original
-	d.mu.Unlock()
+	err := callback(context.WithValue(ctx, deferredEventsContextKey{}, deferred))
 
 	if err != nil {
 		return err
 	}
 
-	// Flush captured events.
-	for _, evts := range captured {
-		for _, e := range evts {
-			if _, dispatchErr := d.Dispatch(ctx, e); dispatchErr != nil {
-				return dispatchErr
-			}
+	deferred.mu.Lock()
+	captured := append([]any(nil), deferred.captured...)
+	deferred.mu.Unlock()
+
+	for _, event := range captured {
+		if _, dispatchErr := d.Dispatch(ctx, event); dispatchErr != nil {
+			return dispatchErr
 		}
 	}
 
@@ -296,6 +268,20 @@ func (d *EventDispatcher) Defer(ctx context.Context, callback func(ctx context.C
 
 // dispatch is the core dispatch logic shared by Dispatch and Until.
 func (d *EventDispatcher) dispatch(ctx context.Context, event any, halt bool) ([]any, error) {
+	name := eventName(event)
+
+	if deferred, ok := ctx.Value(deferredEventsContextKey{}).(*deferredEvents); ok {
+		_, inSet := deferred.names[name]
+
+		if deferred.all || inSet {
+			deferred.mu.Lock()
+			deferred.captured = append(deferred.captured, event)
+			deferred.mu.Unlock()
+
+			return nil, nil
+		}
+	}
+
 	listeners := d.GetListeners(event)
 
 	var responses []any
@@ -355,8 +341,8 @@ func (d *EventDispatcher) hasWildcardMatch(name string) bool {
 // resolveWildcardListeners returns all wildcard listeners matching the name.
 // Must be called under at least d.mu.RLock.
 func (d *EventDispatcher) resolveWildcardListeners(name string) []Listener {
-	if cached, ok := d.wildcardCache[name]; ok {
-		return cached
+	if cached, ok := d.wildcardCache.Load(name); ok {
+		return cached.([]Listener)
 	}
 
 	var matched []Listener
@@ -367,18 +353,7 @@ func (d *EventDispatcher) resolveWildcardListeners(name string) []Listener {
 		}
 	}
 
-	// Note: cannot write to wildcardCache under RLock. Callers that need
-	// caching should call under a full Lock or accept the repeated scan.
-	// For simplicity we skip write here. The cache is populated on Listen.
+	d.wildcardCache.Store(name, matched)
 
 	return matched
-}
-
-// eventNameFromType returns the string event name for a reflect.Type.
-func eventNameFromType(t reflect.Type) string {
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-
-	return t.String()
 }

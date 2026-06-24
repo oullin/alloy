@@ -18,14 +18,14 @@ func matchesWildcard(pattern, name string) bool {
 
 	for i, pp := range patternParts {
 		if pp == "*" {
+			// A wildcard cannot match if there is no corresponding segment.
+			if i >= len(nameParts) {
+				return false
+			}
+
 			// A trailing wildcard matches all remaining segments.
 			if i == len(patternParts)-1 {
 				return true
-			}
-
-			// A non-trailing wildcard matches exactly one segment.
-			if i >= len(nameParts) {
-				return false
 			}
 
 			continue

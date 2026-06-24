@@ -343,6 +343,72 @@ func TestForgetWildcard(t *testing.T) {
 	}
 }
 
+func TestForgetWildcardInvalidatesResolvedListeners(t *testing.T) {
+	t.Parallel()
+
+	d := events.NewDispatcher()
+	ctx := context.Background()
+
+	var calls atomic.Int64
+
+	d.Listen("order.*", func(ctx context.Context, event any) (any, error) {
+		calls.Add(1)
+
+		return nil, nil
+	})
+
+	if _, err := d.Dispatch(ctx, "order.created"); err != nil {
+		t.Fatal(err)
+	}
+
+	d.Forget("order.*")
+
+	if _, err := d.Dispatch(ctx, "order.created"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := calls.Load(); got != 1 {
+		t.Fatalf("expected forgotten wildcard listener not to be reused, got %d calls", got)
+	}
+}
+
+func TestWildcardCacheInvalidatesAfterListen(t *testing.T) {
+	t.Parallel()
+
+	d := events.NewDispatcher()
+	ctx := context.Background()
+
+	var first, second atomic.Int64
+
+	d.Listen("order.*", func(ctx context.Context, event any) (any, error) {
+		first.Add(1)
+
+		return nil, nil
+	})
+
+	if _, err := d.Dispatch(ctx, "order.created"); err != nil {
+		t.Fatal(err)
+	}
+
+	d.Listen("order.*", func(ctx context.Context, event any) (any, error) {
+		second.Add(1)
+
+		return nil, nil
+	})
+
+	if _, err := d.Dispatch(ctx, "order.created"); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := first.Load(); got != 2 {
+		t.Fatalf("expected first wildcard listener twice, got %d", got)
+	}
+
+	if got := second.Load(); got != 1 {
+		t.Fatalf("expected second wildcard listener after cache invalidation, got %d", got)
+	}
+}
+
 func TestPushAndFlush(t *testing.T) {
 	t.Parallel()
 
@@ -710,6 +776,88 @@ func TestDeferCallbackError(t *testing.T) {
 
 	if err != testErr {
 		t.Fatalf("expected %v, got %v", testErr, err)
+	}
+}
+
+func TestDeferDoesNotCaptureDispatchOutsideCallbackContext(t *testing.T) {
+	t.Parallel()
+
+	d := events.NewDispatcher()
+	ctx := context.Background()
+
+	var calls atomic.Int64
+
+	d.Listen("order.created", func(ctx context.Context, event any) (any, error) {
+		calls.Add(1)
+
+		return nil, nil
+	})
+
+	err := d.Defer(ctx, func(deferredCtx context.Context) error {
+		if _, dispatchErr := d.Dispatch(deferredCtx, "order.created"); dispatchErr != nil {
+			return dispatchErr
+		}
+
+		if got := calls.Load(); got != 0 {
+			t.Fatalf("expected deferred callback dispatch to be captured, got %d calls", got)
+		}
+
+		if _, dispatchErr := d.Dispatch(ctx, "order.created"); dispatchErr != nil {
+			return dispatchErr
+		}
+
+		if got := calls.Load(); got != 1 {
+			t.Fatalf("expected base-context dispatch to run immediately, got %d calls", got)
+		}
+
+		return nil
+	}, "order.created")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := calls.Load(); got != 2 {
+		t.Fatalf("expected captured event to flush after callback, got %d calls", got)
+	}
+}
+
+func TestDeferPreservesListenersRegisteredDuringCallback(t *testing.T) {
+	t.Parallel()
+
+	d := events.NewDispatcher()
+	ctx := context.Background()
+
+	var original, registered atomic.Int64
+
+	d.Listen("order.created", func(ctx context.Context, event any) (any, error) {
+		original.Add(1)
+
+		return nil, nil
+	})
+
+	err := d.Defer(ctx, func(ctx context.Context) error {
+		d.Listen("order.created", func(ctx context.Context, event any) (any, error) {
+			registered.Add(1)
+
+			return nil, nil
+		})
+
+		_, dispatchErr := d.Dispatch(ctx, "order.created")
+
+		return dispatchErr
+	}, "order.created")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got := original.Load(); got != 1 {
+		t.Fatalf("expected original listener to receive flushed event, got %d", got)
+	}
+
+	if got := registered.Load(); got != 1 {
+		t.Fatalf("expected listener registered during Defer to be preserved, got %d", got)
 	}
 }
 

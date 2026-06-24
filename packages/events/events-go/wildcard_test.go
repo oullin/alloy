@@ -29,6 +29,7 @@ func TestMatchesWildcard(t *testing.T) {
 
 		// No match.
 		{"order.*", "user.created", false},
+		{"order.*", "order", false},
 		{"order.created", "order.shipped", false},
 
 		// Exact match (no wildcard).
