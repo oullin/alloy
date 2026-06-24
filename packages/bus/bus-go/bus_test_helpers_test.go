@@ -285,6 +285,22 @@ func (c *mockCacheStore) Put(_ context.Context, key, value string, ttlSeconds in
 	return nil
 }
 
+func (c *mockCacheStore) Add(_ context.Context, key, value string, ttlSeconds int) (bool, error) {
+	c.mu.Lock()
+
+	defer c.mu.Unlock()
+
+	c.calls = append(c.calls, mockCacheCall{Method: "Add", Key: key, Value: value, TTL: ttlSeconds})
+
+	if c.data[key] != "" {
+		return false, nil
+	}
+
+	c.data[key] = value
+
+	return true, nil
+}
+
 func (c *mockCacheStore) Forget(_ context.Context, key string) error {
 	c.mu.Lock()
 

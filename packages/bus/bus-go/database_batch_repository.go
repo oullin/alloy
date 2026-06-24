@@ -42,6 +42,12 @@ type DatabaseBatchRepository struct {
 	table string
 }
 
+type lockedBatchCounts struct {
+	PendingJobs  int
+	FailedJobs   int
+	FailedJobIDs []string
+}
+
 // NewDatabaseBatchRepository creates a DatabaseBatchRepository.
 func NewDatabaseBatchRepository(db DBExecutor, table string) *DatabaseBatchRepository {
 	if table == "" {
@@ -156,6 +162,38 @@ func (r *DatabaseBatchRepository) IncrementTotalJobs(ctx context.Context, id str
 
 // DecrementPendingJobs decrements the pending job count and returns updated counts.
 func (r *DatabaseBatchRepository) DecrementPendingJobs(ctx context.Context, id string) (*UpdatedBatchJobCounts, error) {
+	if txDB, ok := r.db.(DBTransactor); ok {
+		var counts *UpdatedBatchJobCounts
+
+		err := r.withTransaction(ctx, txDB, func(txRepo *DatabaseBatchRepository) error {
+			locked, err := txRepo.lockCounts(ctx, id)
+
+			if err != nil {
+				return err
+			}
+
+			locked.PendingJobs--
+
+			query := fmt.Sprintf(
+				"UPDATE %s SET pending_jobs = ? WHERE id = ?",
+				r.table,
+			)
+
+			if _, err = txRepo.db.ExecContext(ctx, query, locked.PendingJobs, id); err != nil {
+				return fmt.Errorf("bus: decrement pending jobs: %w", err)
+			}
+
+			counts = &UpdatedBatchJobCounts{
+				PendingJobs: locked.PendingJobs,
+				FailedJobs:  locked.FailedJobs,
+			}
+
+			return nil
+		})
+
+		return counts, err
+	}
+
 	query := fmt.Sprintf(
 		"UPDATE %s SET pending_jobs = pending_jobs - 1 WHERE id = ?",
 		r.table,
@@ -170,7 +208,46 @@ func (r *DatabaseBatchRepository) DecrementPendingJobs(ctx context.Context, id s
 
 // IncrementFailedJobs increments the failed job count and appends the job ID.
 func (r *DatabaseBatchRepository) IncrementFailedJobs(ctx context.Context, id string, failedJobID string) (*UpdatedBatchJobCounts, error) {
-	// Fetch current failed_job_ids, append, and update.
+	if txDB, ok := r.db.(DBTransactor); ok {
+		var counts *UpdatedBatchJobCounts
+
+		err := r.withTransaction(ctx, txDB, func(txRepo *DatabaseBatchRepository) error {
+			locked, err := txRepo.lockCounts(ctx, id)
+
+			if err != nil {
+				return err
+			}
+
+			locked.PendingJobs--
+			locked.FailedJobs++
+			locked.FailedJobIDs = append(locked.FailedJobIDs, failedJobID)
+
+			updatedJSON, err := json.Marshal(locked.FailedJobIDs)
+
+			if err != nil {
+				return fmt.Errorf("bus: marshal failed_job_ids: %w", err)
+			}
+
+			updateQuery := fmt.Sprintf(
+				"UPDATE %s SET failed_jobs = ?, pending_jobs = ?, failed_job_ids = ? WHERE id = ?",
+				r.table,
+			)
+
+			if _, err = txRepo.db.ExecContext(ctx, updateQuery, locked.FailedJobs, locked.PendingJobs, string(updatedJSON), id); err != nil {
+				return fmt.Errorf("bus: increment failed jobs: %w", err)
+			}
+
+			counts = &UpdatedBatchJobCounts{
+				PendingJobs: locked.PendingJobs,
+				FailedJobs:  locked.FailedJobs,
+			}
+
+			return nil
+		})
+
+		return counts, err
+	}
+
 	var failedIDsJSON string
 
 	query := fmt.Sprintf("SELECT failed_job_ids FROM %s WHERE id = ?", r.table)
@@ -290,6 +367,47 @@ func (r *DatabaseBatchRepository) Transaction(ctx context.Context, fn func(Batch
 // is handled internally by the Transaction method.
 func (r *DatabaseBatchRepository) RollBack(_ context.Context) error {
 	return nil
+}
+
+func (r *DatabaseBatchRepository) withTransaction(ctx context.Context, txDB DBTransactor, fn func(*DatabaseBatchRepository) error) error {
+	tx, err := txDB.BeginTx(ctx, nil)
+
+	if err != nil {
+		return fmt.Errorf("bus: begin transaction: %w", err)
+	}
+
+	txRepo := &DatabaseBatchRepository{db: tx, table: r.table}
+
+	if err = fn(txRepo); err != nil {
+		_ = tx.Rollback()
+
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("bus: commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (r *DatabaseBatchRepository) lockCounts(ctx context.Context, id string) (*lockedBatchCounts, error) {
+	query := fmt.Sprintf("SELECT pending_jobs, failed_jobs, failed_job_ids FROM %s WHERE id = ? FOR UPDATE", r.table)
+
+	var (
+		counts        lockedBatchCounts
+		failedIDsJSON string
+	)
+
+	if err := r.db.QueryRowContext(ctx, query, id).Scan(&counts.PendingJobs, &counts.FailedJobs, &failedIDsJSON); err != nil {
+		return nil, fmt.Errorf("bus: lock batch counts: %w", err)
+	}
+
+	if err := json.Unmarshal([]byte(failedIDsJSON), &counts.FailedJobIDs); err != nil {
+		counts.FailedJobIDs = []string{}
+	}
+
+	return &counts, nil
 }
 
 func (r *DatabaseBatchRepository) fetchCounts(ctx context.Context, id string) (*UpdatedBatchJobCounts, error) {

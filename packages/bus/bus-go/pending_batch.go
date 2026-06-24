@@ -198,7 +198,7 @@ func (p *PendingBatch) Dispatch(ctx context.Context) (*Batch, error) {
 	for _, job := range p.jobs {
 		if err = p.dispatcher.DispatchToQueue(ctx, job); err != nil {
 			if p.batchRepo != nil {
-				_ = p.batchRepo.Delete(ctx, batch.ID)
+				_ = p.batchRepo.Cancel(ctx, batch.ID)
 			}
 
 			return nil, err
@@ -260,7 +260,7 @@ func (p *PendingBatch) DispatchAfterResponse(ctx context.Context) (*Batch, error
 	for _, job := range p.jobs {
 		if err = p.dispatcher.DispatchAfterResponse(ctx, job); err != nil {
 			if p.batchRepo != nil {
-				_ = p.batchRepo.Delete(ctx, batch.ID)
+				_ = p.batchRepo.Cancel(ctx, batch.ID)
 			}
 
 			return nil, err

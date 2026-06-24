@@ -9,6 +9,7 @@ import (
 type CacheStore interface {
 	Get(ctx context.Context, key string) (string, error)
 	Put(ctx context.Context, key, value string, ttlSeconds int) error
+	Add(ctx context.Context, key, value string, ttlSeconds int) (bool, error)
 	Forget(ctx context.Context, key string) error
 }
 
@@ -24,21 +25,15 @@ func NewUniqueLock(cache CacheStore) *UniqueLock {
 
 // Acquire attempts to acquire the lock for the given key. Returns true on success.
 func (l *UniqueLock) Acquire(ctx context.Context, key string, ttl time.Duration) bool {
-	// Use a conditional put: only set if not already set.
-	// We attempt to get first; if already set, lock is taken.
-	existing, _ := l.cache.Get(ctx, l.key(key))
-
-	if existing != "" {
-		return false
-	}
-
 	ttlSeconds := int(ttl.Seconds())
 
-	if ttlSeconds == 0 {
+	if ttlSeconds <= 0 {
 		ttlSeconds = 3600
 	}
 
-	return l.cache.Put(ctx, l.key(key), "1", ttlSeconds) == nil
+	ok, err := l.cache.Add(ctx, l.key(key), "1", ttlSeconds)
+
+	return err == nil && ok
 }
 
 // Release releases the lock for the given key.

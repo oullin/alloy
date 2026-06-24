@@ -97,12 +97,6 @@ func (r *DynamoBatchRepository) Get(ctx context.Context, id string) (*Batch, err
 
 // Store persists a new batch.
 func (r *DynamoBatchRepository) Store(ctx context.Context, batch *Batch) error {
-	failedIDs, err := json.Marshal(batch.FailedJobIDs)
-
-	if err != nil {
-		return fmt.Errorf("bus: marshal failed_job_ids: %w", err)
-	}
-
 	opts, err := json.Marshal(batch.Options)
 
 	if err != nil {
@@ -116,7 +110,7 @@ func (r *DynamoBatchRepository) Store(ctx context.Context, batch *Batch) error {
 		"total_jobs":     batch.TotalJobs,
 		"pending_jobs":   batch.PendingJobs,
 		"failed_jobs":    batch.FailedJobs,
-		"failed_job_ids": string(failedIDs),
+		"failed_job_ids": append([]string(nil), batch.FailedJobIDs...),
 		"options":        string(opts),
 		"created_at":     batch.CreatedAt.Unix(),
 	}
@@ -180,32 +174,14 @@ func (r *DynamoBatchRepository) DecrementPendingJobs(ctx context.Context, id str
 
 // IncrementFailedJobs increments the failed job count and appends the job ID.
 func (r *DynamoBatchRepository) IncrementFailedJobs(ctx context.Context, id string, failedJobID string) (*UpdatedBatchJobCounts, error) {
-	// First fetch current failed_job_ids.
-	batch, err := r.Get(ctx, id)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if batch == nil {
-		return nil, fmt.Errorf("bus: batch %s not found", id)
-	}
-
-	failedIDs := append(batch.FailedJobIDs, failedJobID)
-	failedJSON, err := json.Marshal(failedIDs)
-
-	if err != nil {
-		return nil, fmt.Errorf("bus: marshal failed_job_ids: %w", err)
-	}
-
 	key := map[string]any{
 		"application": r.applicationName,
 		"id":          id,
 	}
 
-	err = r.client.UpdateItem(ctx, r.table, key,
-		"SET failed_jobs = failed_jobs + :one, pending_jobs = pending_jobs - :one, failed_job_ids = :ids",
-		map[string]any{":one": 1, ":ids": string(failedJSON)},
+	err := r.client.UpdateItem(ctx, r.table, key,
+		"SET failed_jobs = failed_jobs + :one, pending_jobs = pending_jobs - :one, failed_job_ids = list_append(if_not_exists(failed_job_ids, :empty_list), :new_ids)",
+		map[string]any{":one": 1, ":empty_list": []string{}, ":new_ids": []string{failedJobID}},
 	)
 
 	if err != nil {
@@ -312,17 +288,41 @@ func (r *DynamoBatchRepository) itemToBatch(item map[string]any) (*Batch, error)
 		b.TotalJobs = int(v)
 	}
 
+	if v, ok := item["total_jobs"].(int); ok {
+		b.TotalJobs = v
+	}
+
 	if v, ok := item["pending_jobs"].(float64); ok {
 		b.PendingJobs = int(v)
+	}
+
+	if v, ok := item["pending_jobs"].(int); ok {
+		b.PendingJobs = v
 	}
 
 	if v, ok := item["failed_jobs"].(float64); ok {
 		b.FailedJobs = int(v)
 	}
 
+	if v, ok := item["failed_jobs"].(int); ok {
+		b.FailedJobs = v
+	}
+
 	if v, ok := item["failed_job_ids"].(string); ok {
 		if err := json.Unmarshal([]byte(v), &b.FailedJobIDs); err != nil {
 			b.FailedJobIDs = []string{}
+		}
+	}
+
+	if v, ok := item["failed_job_ids"].([]string); ok {
+		b.FailedJobIDs = append([]string(nil), v...)
+	}
+
+	if v, ok := item["failed_job_ids"].([]any); ok {
+		for _, id := range v {
+			if s, ok := id.(string); ok {
+				b.FailedJobIDs = append(b.FailedJobIDs, s)
+			}
 		}
 	}
 

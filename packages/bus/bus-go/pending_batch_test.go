@@ -328,7 +328,7 @@ func TestPendingBatchSetsBatchIDOnBatchableJobs(t *testing.T) {
 	}
 }
 
-func TestPendingBatchDeletesBatchOnDispatchFailure(t *testing.T) {
+func TestPendingBatchCancelsBatchOnDispatchFailure(t *testing.T) {
 	repo := newMockBatchRepo()
 	q := newMockQueue()
 	q.pushErr = errTestFailure
@@ -343,7 +343,11 @@ func TestPendingBatchDeletesBatchOnDispatchFailure(t *testing.T) {
 		t.Error("expected error from dispatch failure")
 	}
 
-	if !repo.hasCalled("Delete:") {
-		t.Error("expected repo.Delete to be called when dispatch fails after store")
+	if !repo.hasCalled("Cancel:") {
+		t.Error("expected repo.Cancel to be called when dispatch fails after store")
+	}
+
+	if repo.hasCalled("Delete:") {
+		t.Error("expected repo.Delete not to be called when dispatch fails after store")
 	}
 }

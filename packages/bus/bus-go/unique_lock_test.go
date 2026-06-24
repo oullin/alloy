@@ -2,6 +2,8 @@ package bus_test
 
 import (
 	"context"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -16,11 +18,11 @@ func TestUniqueLockAcquireSuccess(t *testing.T) {
 		t.Error("expected Acquire to succeed on empty cache")
 	}
 
-	// Verify cache.Put was called with correct key and TTL.
+	// Verify cache.Add was called with correct key and TTL.
 	found := false
 
 	for _, call := range cache.calls {
-		if call.Method == "Put" && call.Key == "unique_lock:my-job" && call.TTL == 60 {
+		if call.Method == "Add" && call.Key == "unique_lock:my-job" && call.TTL == 60 {
 			found = true
 
 			break
@@ -28,7 +30,7 @@ func TestUniqueLockAcquireSuccess(t *testing.T) {
 	}
 
 	if !found {
-		t.Error("expected cache.Put to be called with key 'unique_lock:my-job' and TTL 60")
+		t.Error("expected cache.Add to be called with key 'unique_lock:my-job' and TTL 60")
 	}
 }
 
@@ -50,7 +52,7 @@ func TestUniqueLockAcquireDefaultTTL(t *testing.T) {
 	lock.Acquire(context.Background(), "key", 0)
 
 	for _, call := range cache.calls {
-		if call.Method == "Put" && call.TTL != 3600 {
+		if call.Method == "Add" && call.TTL != 3600 {
 			t.Errorf("expected default TTL 3600, got %d", call.TTL)
 		}
 	}
@@ -88,12 +90,36 @@ func TestUniqueLockKeyPrefix(t *testing.T) {
 	lock.Acquire(context.Background(), "foo", 30*time.Second)
 
 	for _, call := range cache.calls {
-		if call.Method == "Get" && call.Key != "unique_lock:foo" {
+		if call.Method == "Add" && call.Key != "unique_lock:foo" {
 			t.Errorf("expected key 'unique_lock:foo', got %q", call.Key)
 		}
+	}
+}
 
-		if call.Method == "Put" && call.Key != "unique_lock:foo" {
-			t.Errorf("expected key 'unique_lock:foo', got %q", call.Key)
-		}
+func TestUniqueLockAcquireOnlyOneConcurrentAcquirer(t *testing.T) {
+	cache := newMockCacheStore()
+	lock := bus.NewUniqueLock(cache)
+
+	var (
+		wg        sync.WaitGroup
+		successes int32
+	)
+
+	for range 20 {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			if lock.Acquire(context.Background(), "concurrent-job", 60*time.Second) {
+				atomic.AddInt32(&successes, 1)
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	if successes != 1 {
+		t.Fatalf("expected exactly one successful acquire, got %d", successes)
 	}
 }

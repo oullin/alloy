@@ -79,6 +79,21 @@ func TestPendingChainEmptyError(t *testing.T) {
 	}
 }
 
+func TestPendingChainDispatchErrorsWhenFirstJobCannotAcceptChain(t *testing.T) {
+	d := bus.NewDispatcher(nil, nil)
+	first := struct{ Value string }{Value: "first"}
+
+	d.Map(first, func(_ context.Context, cmd any) (any, error) {
+		return cmd, nil
+	})
+
+	chain := bus.NewPendingChain(d, []any{first, &chainJob{Value: "second"}})
+
+	if _, err := chain.Dispatch(context.Background()); err == nil {
+		t.Fatal("expected error when first job cannot accept remaining chain jobs")
+	}
+}
+
 func TestPendingChainCatchCallbacks(t *testing.T) {
 	d := bus.NewDispatcher(nil, nil)
 
@@ -138,5 +153,14 @@ func TestPendingChainDispatchAfterResponseEmptyError(t *testing.T) {
 
 	if err == nil {
 		t.Error("expected error for empty chain")
+	}
+}
+
+func TestPendingChainDispatchAfterResponseErrorsWhenFirstJobCannotAcceptChain(t *testing.T) {
+	d := bus.NewDispatcher(nil, nil)
+	chain := bus.NewPendingChain(d, []any{struct{ Value string }{Value: "first"}, &chainJob{Value: "second"}})
+
+	if err := chain.DispatchAfterResponse(context.Background()); err == nil {
+		t.Fatal("expected error when first job cannot accept remaining chain jobs")
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"io"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -61,6 +63,40 @@ type mockDynamicResult struct {
 	fn func() int64
 }
 
+type lockingBatchDriver struct{}
+
+type lockingBatchConn struct {
+	state *lockingBatchDriverState
+}
+
+type lockingBatchTx struct {
+	state *lockingBatchDriverState
+}
+
+type lockingBatchRows struct {
+	columns []string
+	values  []driver.Value
+	read    bool
+}
+
+type lockingBatchStmt struct{}
+
+type lockingBatchDriverState struct {
+	mu        sync.Mutex
+	pending   int
+	failed    int
+	failedIDs []string
+	queries   []string
+	commits   int
+	rollbacks int
+}
+
+var sqlLockingState = &lockingBatchDriverState{}
+
+func init() {
+	sql.Register("alloy-bus-locking-test", lockingBatchDriver{})
+}
+
 func newMockDBExecutor() *mockDBExecutor {
 	return &mockDBExecutor{
 		execResult: &mockResult{rowsAffected: 1},
@@ -87,6 +123,153 @@ func (db *mockDBExecutor) QueryRowContext(_ context.Context, query string, args 
 
 func (r *mockResult) LastInsertId() (int64, error) { return r.lastID, nil }
 func (r *mockResult) RowsAffected() (int64, error) { return r.rowsAffected, nil }
+
+func (d lockingBatchDriver) Open(_ string) (driver.Conn, error) {
+	return &lockingBatchConn{state: sqlLockingState}, nil
+}
+
+func (c *lockingBatchConn) Prepare(_ string) (driver.Stmt, error) {
+	return lockingBatchStmt{}, nil
+}
+
+func (c *lockingBatchConn) Close() error {
+	return nil
+}
+
+func (c *lockingBatchConn) Begin() (driver.Tx, error) {
+	return &lockingBatchTx{state: c.state}, nil
+}
+
+func (c *lockingBatchConn) BeginTx(_ context.Context, _ driver.TxOptions) (driver.Tx, error) {
+	return &lockingBatchTx{state: c.state}, nil
+}
+
+func (c *lockingBatchConn) ExecContext(_ context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
+	c.state.mu.Lock()
+
+	defer c.state.mu.Unlock()
+
+	c.state.queries = append(c.state.queries, query)
+
+	if strings.Contains(query, "SET pending_jobs = ? WHERE id = ?") {
+		c.state.pending = namedInt(args[0])
+	}
+
+	if strings.Contains(query, "SET failed_jobs = ?, pending_jobs = ?, failed_job_ids = ?") {
+		c.state.failed = namedInt(args[0])
+		c.state.pending = namedInt(args[1])
+
+		if v, ok := args[2].Value.(string); ok {
+			_ = json.Unmarshal([]byte(v), &c.state.failedIDs)
+		}
+	}
+
+	return driver.RowsAffected(1), nil
+}
+
+func (c *lockingBatchConn) QueryContext(_ context.Context, query string, _ []driver.NamedValue) (driver.Rows, error) {
+	c.state.mu.Lock()
+
+	defer c.state.mu.Unlock()
+
+	c.state.queries = append(c.state.queries, query)
+
+	failedIDs, _ := json.Marshal(c.state.failedIDs)
+
+	return &lockingBatchRows{
+		columns: []string{"pending_jobs", "failed_jobs", "failed_job_ids"},
+		values:  []driver.Value{int64(c.state.pending), int64(c.state.failed), string(failedIDs)},
+	}, nil
+}
+
+func (tx *lockingBatchTx) Commit() error {
+	tx.state.mu.Lock()
+
+	defer tx.state.mu.Unlock()
+
+	tx.state.commits++
+
+	return nil
+}
+
+func (tx *lockingBatchTx) Rollback() error {
+	tx.state.mu.Lock()
+
+	defer tx.state.mu.Unlock()
+
+	tx.state.rollbacks++
+
+	return nil
+}
+
+func (r *lockingBatchRows) Columns() []string {
+	return r.columns
+}
+
+func (r *lockingBatchRows) Close() error {
+	return nil
+}
+
+func (r *lockingBatchRows) Next(dest []driver.Value) error {
+	if r.read {
+		return io.EOF
+	}
+
+	copy(dest, r.values)
+	r.read = true
+
+	return nil
+}
+
+func (lockingBatchStmt) Close() error {
+	return nil
+}
+
+func (lockingBatchStmt) NumInput() int {
+	return -1
+}
+
+func (lockingBatchStmt) Exec(_ []driver.Value) (driver.Result, error) {
+	return driver.RowsAffected(0), nil
+}
+
+func (lockingBatchStmt) Query(_ []driver.Value) (driver.Rows, error) {
+	return &lockingBatchRows{}, nil
+}
+
+func (s *lockingBatchDriverState) reset(pending, failed int, failedIDs []string) {
+	s.mu.Lock()
+
+	defer s.mu.Unlock()
+
+	s.pending = pending
+	s.failed = failed
+	s.failedIDs = append([]string(nil), failedIDs...)
+	s.queries = nil
+	s.commits = 0
+	s.rollbacks = 0
+}
+
+func namedInt(value driver.NamedValue) int {
+	switch v := value.Value.(type) {
+	case int64:
+		return int(v)
+	case int:
+		return v
+	default:
+		return 0
+	}
+}
+
+func hasQuery(queries []string, needle string) bool {
+	for _, query := range queries {
+		if strings.Contains(query, needle) {
+			return true
+		}
+	}
+
+	return false
+}
 
 func TestDatabaseBatchRepositoryStore(t *testing.T) {
 	db := newMockDBExecutor()
@@ -210,6 +393,90 @@ func TestDatabaseBatchRepositoryIncrementTotalJobs(t *testing.T) {
 
 	if db.execCalls[0].Args[0] != 3 {
 		t.Errorf("expected amount 3, got %v", db.execCalls[0].Args[0])
+	}
+}
+
+func TestDatabaseBatchRepositoryDecrementPendingJobsLocksRow(t *testing.T) {
+	sqlLockingState.reset(2, 0, nil)
+
+	db, err := sql.Open("alloy-bus-locking-test", "")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer db.Close()
+
+	repo := bus.NewDatabaseBatchRepository(db, "job_batches")
+
+	counts, err := repo.DecrementPendingJobs(context.Background(), "batch-1")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if counts.PendingJobs != 1 || counts.FailedJobs != 0 {
+		t.Fatalf("expected counts pending=1 failed=0, got pending=%d failed=%d", counts.PendingJobs, counts.FailedJobs)
+	}
+
+	sqlLockingState.mu.Lock()
+
+	defer sqlLockingState.mu.Unlock()
+
+	if sqlLockingState.pending != 1 {
+		t.Fatalf("expected stored pending count 1, got %d", sqlLockingState.pending)
+	}
+
+	if sqlLockingState.commits != 1 || sqlLockingState.rollbacks != 0 {
+		t.Fatalf("expected one commit and no rollbacks, got commits=%d rollbacks=%d", sqlLockingState.commits, sqlLockingState.rollbacks)
+	}
+
+	if !hasQuery(sqlLockingState.queries, "FOR UPDATE") {
+		t.Fatalf("expected row lock query, got %v", sqlLockingState.queries)
+	}
+}
+
+func TestDatabaseBatchRepositoryIncrementFailedJobsLocksRowAndAppendsID(t *testing.T) {
+	sqlLockingState.reset(2, 1, []string{"failed-1"})
+
+	db, err := sql.Open("alloy-bus-locking-test", "")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer db.Close()
+
+	repo := bus.NewDatabaseBatchRepository(db, "job_batches")
+
+	counts, err := repo.IncrementFailedJobs(context.Background(), "batch-1", "failed-2")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if counts.PendingJobs != 1 || counts.FailedJobs != 2 {
+		t.Fatalf("expected counts pending=1 failed=2, got pending=%d failed=%d", counts.PendingJobs, counts.FailedJobs)
+	}
+
+	sqlLockingState.mu.Lock()
+
+	defer sqlLockingState.mu.Unlock()
+
+	if sqlLockingState.pending != 1 || sqlLockingState.failed != 2 {
+		t.Fatalf("expected stored pending=1 failed=2, got pending=%d failed=%d", sqlLockingState.pending, sqlLockingState.failed)
+	}
+
+	if len(sqlLockingState.failedIDs) != 2 || sqlLockingState.failedIDs[0] != "failed-1" || sqlLockingState.failedIDs[1] != "failed-2" {
+		t.Fatalf("expected appended failed IDs, got %v", sqlLockingState.failedIDs)
+	}
+
+	if sqlLockingState.commits != 1 || sqlLockingState.rollbacks != 0 {
+		t.Fatalf("expected one commit and no rollbacks, got commits=%d rollbacks=%d", sqlLockingState.commits, sqlLockingState.rollbacks)
+	}
+
+	if !hasQuery(sqlLockingState.queries, "FOR UPDATE") {
+		t.Fatalf("expected row lock query, got %v", sqlLockingState.queries)
 	}
 }
 

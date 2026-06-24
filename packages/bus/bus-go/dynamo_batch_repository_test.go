@@ -13,12 +13,13 @@ import (
 
 // mockDynamoClient implements bus.DynamoClient for testing.
 type mockDynamoClient struct {
-	mu     sync.Mutex
-	items  map[string]map[string]any // keyed by "app:id"
-	putErr error
-	getErr error
-	updErr error
-	delErr error
+	mu             sync.Mutex
+	items          map[string]map[string]any // keyed by "app:id"
+	lastUpdateExpr string
+	putErr         error
+	getErr         error
+	updErr         error
+	delErr         error
 }
 
 func newMockDynamoClient() *mockDynamoClient {
@@ -56,7 +57,7 @@ func (c *mockDynamoClient) GetItem(_ context.Context, _ string, key map[string]a
 	return c.items[c.itemKey(key)], nil
 }
 
-func (c *mockDynamoClient) UpdateItem(_ context.Context, _ string, key map[string]any, _ string, values map[string]any) error {
+func (c *mockDynamoClient) UpdateItem(_ context.Context, _ string, key map[string]any, update string, values map[string]any) error {
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -65,10 +66,36 @@ func (c *mockDynamoClient) UpdateItem(_ context.Context, _ string, key map[strin
 		return c.updErr
 	}
 
+	c.lastUpdateExpr = update
+
 	k := c.itemKey(key)
 	item, ok := c.items[k]
 
 	if !ok {
+		return nil
+	}
+
+	if update == "SET total_jobs = total_jobs + :amount, pending_jobs = pending_jobs + :amount" {
+		amount, _ := values[":amount"].(int)
+		item["total_jobs"] = numberValue(item["total_jobs"]) + amount
+		item["pending_jobs"] = numberValue(item["pending_jobs"]) + amount
+
+		return nil
+	}
+
+	if update == "SET pending_jobs = pending_jobs - :one" {
+		amount, _ := values[":one"].(int)
+		item["pending_jobs"] = numberValue(item["pending_jobs"]) - amount
+
+		return nil
+	}
+
+	if update == "SET failed_jobs = failed_jobs + :one, pending_jobs = pending_jobs - :one, failed_job_ids = list_append(if_not_exists(failed_job_ids, :empty_list), :new_ids)" {
+		amount, _ := values[":one"].(int)
+		item["failed_jobs"] = numberValue(item["failed_jobs"]) + amount
+		item["pending_jobs"] = numberValue(item["pending_jobs"]) - amount
+		item["failed_job_ids"] = append(stringListValue(item["failed_job_ids"]), values[":new_ids"].([]string)...)
+
 		return nil
 	}
 
@@ -78,6 +105,36 @@ func (c *mockDynamoClient) UpdateItem(_ context.Context, _ string, key map[strin
 	}
 
 	return nil
+}
+
+func numberValue(value any) int {
+	switch v := value.(type) {
+	case int:
+		return v
+	case float64:
+		return int(v)
+	default:
+		return 0
+	}
+}
+
+func stringListValue(value any) []string {
+	switch v := value.(type) {
+	case []string:
+		return append([]string(nil), v...)
+	case []any:
+		items := make([]string, 0, len(v))
+
+		for _, item := range v {
+			if s, ok := item.(string); ok {
+				items = append(items, s)
+			}
+		}
+
+		return items
+	default:
+		return nil
+	}
 }
 
 func (c *mockDynamoClient) DeleteItem(_ context.Context, _ string, key map[string]any) error {
@@ -151,6 +208,16 @@ func TestDynamoRepoStore(t *testing.T) {
 	if item["name"] != "dynamo-test" {
 		t.Errorf("expected name 'dynamo-test', got %v", item["name"])
 	}
+
+	failedIDs, ok := item["failed_job_ids"].([]string)
+
+	if !ok {
+		t.Fatalf("expected failed_job_ids to be stored as []string, got %T", item["failed_job_ids"])
+	}
+
+	if len(failedIDs) != 1 || failedIDs[0] != "j1" {
+		t.Fatalf("expected failed_job_ids [j1], got %v", failedIDs)
+	}
 }
 
 func TestDynamoRepoGet(t *testing.T) {
@@ -187,6 +254,32 @@ func TestDynamoRepoGet(t *testing.T) {
 
 	if batch.TotalJobs != 10 {
 		t.Errorf("expected TotalJobs 10, got %d", batch.TotalJobs)
+	}
+}
+
+func TestDynamoRepoGetReadsFailedJobIDsList(t *testing.T) {
+	client := newMockDynamoClient()
+	repo := bus.NewDynamoBatchRepository(client, "myapp", "batches", nil, "")
+
+	client.items["myapp:batch-1"] = map[string]any{
+		"id":             "batch-1",
+		"name":           "test",
+		"total_jobs":     float64(10),
+		"pending_jobs":   float64(3),
+		"failed_jobs":    float64(1),
+		"failed_job_ids": []any{"failed-1", "failed-2"},
+		"options":        "{}",
+		"created_at":     float64(time.Now().Unix()),
+	}
+
+	batch, err := repo.Get(context.Background(), "batch-1")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(batch.FailedJobIDs) != 2 || batch.FailedJobIDs[0] != "failed-1" || batch.FailedJobIDs[1] != "failed-2" {
+		t.Fatalf("expected failed job IDs from list, got %v", batch.FailedJobIDs)
 	}
 }
 
@@ -338,6 +431,44 @@ func TestDynamoRepoIncrementTotalJobs(t *testing.T) {
 
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestDynamoRepoIncrementFailedJobsAppendsFailedJobIDAtomically(t *testing.T) {
+	client := newMockDynamoClient()
+	client.items["myapp:batch-1"] = map[string]any{
+		"application":    "myapp",
+		"id":             "batch-1",
+		"total_jobs":     float64(3),
+		"pending_jobs":   float64(2),
+		"failed_jobs":    float64(1),
+		"failed_job_ids": []string{"failed-1"},
+	}
+
+	repo := bus.NewDynamoBatchRepository(client, "myapp", "batches", nil, "")
+
+	counts, err := repo.IncrementFailedJobs(context.Background(), "batch-1", "failed-2")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if counts.PendingJobs != 1 || counts.FailedJobs != 2 {
+		t.Fatalf("expected counts pending=1 failed=2, got pending=%d failed=%d", counts.PendingJobs, counts.FailedJobs)
+	}
+
+	client.mu.Lock()
+
+	defer client.mu.Unlock()
+
+	if client.lastUpdateExpr != "SET failed_jobs = failed_jobs + :one, pending_jobs = pending_jobs - :one, failed_job_ids = list_append(if_not_exists(failed_job_ids, :empty_list), :new_ids)" {
+		t.Fatalf("expected atomic list_append update, got %q", client.lastUpdateExpr)
+	}
+
+	failedIDs := client.items["myapp:batch-1"]["failed_job_ids"].([]string)
+
+	if len(failedIDs) != 2 || failedIDs[0] != "failed-1" || failedIDs[1] != "failed-2" {
+		t.Fatalf("expected appended failed job IDs, got %v", failedIDs)
 	}
 }
 

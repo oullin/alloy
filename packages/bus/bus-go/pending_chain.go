@@ -47,7 +47,11 @@ func (c *PendingChain) Dispatch(ctx context.Context) (any, error) {
 		return nil, fmt.Errorf("bus: cannot dispatch an empty chain")
 	}
 
-	first := c.prepareFirstJob()
+	first, err := c.prepareFirstJob()
+
+	if err != nil {
+		return nil, err
+	}
 
 	return c.dispatcher.Dispatch(ctx, first)
 }
@@ -58,18 +62,24 @@ func (c *PendingChain) DispatchAfterResponse(ctx context.Context) error {
 		return fmt.Errorf("bus: cannot dispatch an empty chain")
 	}
 
-	first := c.prepareFirstJob()
+	first, err := c.prepareFirstJob()
+
+	if err != nil {
+		return err
+	}
 
 	return c.dispatcher.DispatchAfterResponse(ctx, first)
 }
 
-func (c *PendingChain) prepareFirstJob() any {
+func (c *PendingChain) prepareFirstJob() (any, error) {
 	first := c.jobs[0]
 	remaining := c.jobs[1:]
 
 	// If the first job has a Queueable, configure it.
 	if q, ok := first.(interface{ Chain(jobs ...any) *Queueable }); ok {
 		q.Chain(remaining...)
+	} else if len(remaining) > 0 {
+		return nil, fmt.Errorf("bus: first chained job cannot accept remaining jobs")
 	}
 
 	if c.connection != "" {
@@ -93,5 +103,5 @@ func (c *PendingChain) prepareFirstJob() any {
 		}
 	}
 
-	return first
+	return first, nil
 }
