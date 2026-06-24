@@ -35,6 +35,7 @@ const (
 func NewTrustProxies(proxies []string, headers int) *TrustProxies {
 	trustAll := false
 	trustedIPs := make(map[string]struct{})
+
 	var trustedNets []*net.IPNet
 
 	for _, p := range proxies {
