@@ -8,6 +8,7 @@ use (
 	./packages/config/config-go
 	./packages/cookie/cookie-go
 	./packages/encryption/encryption-go
+	./packages/events/events-go
 	./packages/filesystem/filesystem-go
 	./packages/hashing/hashing-go
 	./packages/httpx/httpx-go

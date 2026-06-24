@@ -14,27 +14,45 @@ import (
 type CheckResponseForModifications struct{}
 
 // NewCheckResponseForModifications creates the middleware.
+
+// Wrap returns an http.Handler that checks ETags and modification times.
+
+// Only apply to safe methods.
+
+// Capture the response metadata and body without importing httptest in production code.
+
+// Generate ETag if not present.
+
+// Check If-None-Match.
+
+// Check If-Modified-Since.
+
+// Forward the full response.
+
+type bufferedResponseWriter struct {
+	HeaderMap http.Header
+	Body      bytes.Buffer
+	Code      int
+}
+
 func NewCheckResponseForModifications() *CheckResponseForModifications {
 	return &CheckResponseForModifications{}
 }
 
-// Wrap returns an http.Handler that checks ETags and modification times.
 func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Only apply to safe methods.
+
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			next.ServeHTTP(w, r)
 
 			return
 		}
 
-		// Capture the response metadata and body without importing httptest in production code.
 		rec := newBufferedResponseWriter()
 		next.ServeHTTP(rec, r)
 
 		body := rec.Body.Bytes()
 
-		// Generate ETag if not present.
 		etag := rec.Header().Get("ETag")
 
 		if etag == "" && len(body) > 0 {
@@ -43,7 +61,6 @@ func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 			rec.Header().Set("ETag", etag)
 		}
 
-		// Check If-None-Match.
 		if ifNoneMatch := r.Header.Get("If-None-Match"); ifNoneMatch != "" && etag != "" {
 			if ifNoneMatch == etag {
 				copyHeaders(w, rec)
@@ -53,7 +70,6 @@ func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 			}
 		}
 
-		// Check If-Modified-Since.
 		if ims := r.Header.Get("If-Modified-Since"); ims != "" {
 			if lastMod := rec.Header().Get("Last-Modified"); lastMod != "" {
 				imsTime, err1 := time.Parse(http.TimeFormat, ims)
@@ -68,17 +84,10 @@ func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 			}
 		}
 
-		// Forward the full response.
 		copyHeaders(w, rec)
 		w.WriteHeader(rec.Code)
 		w.Write(body)
 	})
-}
-
-type bufferedResponseWriter struct {
-	HeaderMap http.Header
-	Body      bytes.Buffer
-	Code      int
 }
 
 func newBufferedResponseWriter() *bufferedResponseWriter {
