@@ -52,12 +52,20 @@ func (m *Manager) SetDriverConfig(driverName string, config map[string]any) *Man
 
 // Driver creates (or returns a cached) Store for the given driver name.
 func (m *Manager) Driver(ctx context.Context, driverName string) (*Store, error) {
+	m.mu.RLock()
+	store, ok := m.stores[driverName]
+	m.mu.RUnlock()
+
+	if ok {
+		return store, nil
+	}
+
 	m.mu.Lock()
 
 	defer m.mu.Unlock()
 
-	if s, ok := m.stores[driverName]; ok {
-		return s, nil
+	if store, ok = m.stores[driverName]; ok {
+		return store, nil
 	}
 
 	creator, ok := m.drivers[driverName]
@@ -78,7 +86,7 @@ func (m *Manager) Driver(ctx context.Context, driverName string) (*Store, error)
 		return nil, fmt.Errorf("session: open driver %q: %w", driverName, err)
 	}
 
-	store := New(m.name, handler)
+	store = New(m.name, handler)
 	m.stores[driverName] = store
 
 	return store, nil

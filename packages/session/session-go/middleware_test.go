@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/oullin/alloy/session"
 	"github.com/oullin/alloy/session/handlers"
@@ -42,6 +43,33 @@ func TestStartSessionWritesCookie(t *testing.T) {
 
 	if !found {
 		t.Error("expected session cookie to be set")
+	}
+}
+
+func TestStartSessionMergesPartialConfigWithDefaults(t *testing.T) {
+	h := handlers.NewArrayHandler()
+	mw := session.StartSession(h, session.StartSessionConfig{
+		Lifetime: time.Minute,
+	})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})).ServeHTTP(rr, req)
+
+	cookies := rr.Result().Cookies()
+
+	if len(cookies) != 1 {
+		t.Fatalf("expected one session cookie, got %d", len(cookies))
+	}
+
+	if cookies[0].Name != "session" {
+		t.Fatalf("expected default cookie name session, got %q", cookies[0].Name)
+	}
+
+	if cookies[0].MaxAge != 60 {
+		t.Fatalf("expected caller lifetime to be preserved as max-age 60, got %d", cookies[0].MaxAge)
 	}
 }
 

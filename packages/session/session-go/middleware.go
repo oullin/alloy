@@ -41,6 +41,36 @@ func defaultConfig() StartSessionConfig {
 	}
 }
 
+func mergeConfig(cfg StartSessionConfig) StartSessionConfig {
+	defaults := defaultConfig()
+
+	if cfg.CookieName != "" {
+		defaults.CookieName = cfg.CookieName
+	}
+
+	if cfg.Lifetime != 0 {
+		defaults.Lifetime = cfg.Lifetime
+	}
+
+	if cfg.Secure {
+		defaults.Secure = cfg.Secure
+	}
+
+	if cfg.SameSite != 0 {
+		defaults.SameSite = cfg.SameSite
+	}
+
+	if cfg.GCProbability != 0 {
+		defaults.GCProbability = cfg.GCProbability
+	}
+
+	if cfg.GCMaxLifetime != 0 {
+		defaults.GCMaxLifetime = cfg.GCMaxLifetime
+	}
+
+	return defaults
+}
+
 func (w *sessionResponseWriter) WriteHeader(code int) {
 	w.flush()
 	w.ResponseWriter.WriteHeader(code)
@@ -73,9 +103,7 @@ func (w *sessionResponseWriter) flush() {
 // StartSession is HTTP middleware that manages the full session lifecycle for
 // each request: read → start → handle → save → write cookie.
 func StartSession(handler Handler, cfg StartSessionConfig) func(http.Handler) http.Handler {
-	if cfg.CookieName == "" {
-		cfg = defaultConfig()
-	}
+	cfg = mergeConfig(cfg)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

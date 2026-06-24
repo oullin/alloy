@@ -38,19 +38,19 @@ func (h *ArrayHandler) Open(_ context.Context, _, _ string) error {
 func (h *ArrayHandler) Close(_ context.Context) error { return nil }
 
 func (h *ArrayHandler) Read(_ context.Context, id string) (string, error) {
-	h.mu.RLock()
+	h.mu.Lock()
+
+	defer h.mu.Unlock()
+
 	record, ok := h.sessions[id]
 	lifetime := h.maxLifetime
-	h.mu.RUnlock()
 
 	if !ok {
 		return "", nil
 	}
 
 	if lifetime > 0 && time.Since(record.writtenAt) > time.Duration(lifetime)*time.Second {
-		h.mu.Lock()
 		delete(h.sessions, id)
-		h.mu.Unlock()
 
 		return "", nil
 	}

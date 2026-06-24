@@ -229,8 +229,6 @@ func (s *Store) Push(key string, value any) {
 
 	if sl, ok := existing.([]any); ok {
 		s.attributes[key] = append(sl, value)
-	} else {
-		s.attributes[key] = []any{existing, value}
 	}
 }
 
