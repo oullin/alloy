@@ -163,6 +163,12 @@ func TestDeferredDriverFlushErrorStopsEarly(t *testing.T) {
 	if calls != 1 {
 		t.Errorf("expected 1 call before error, got %d", calls)
 	}
+
+	n, _ := drv.Size(context.Background(), "q")
+
+	if n != 2 {
+		t.Errorf("expected failed and remaining jobs to be restored, got %d", n)
+	}
 }
 
 func TestDeferredDriverFlushNilDispatcher(t *testing.T) {

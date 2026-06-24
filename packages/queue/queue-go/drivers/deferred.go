@@ -154,9 +154,13 @@ func (d *DeferredDriver) Flush(ctx context.Context) error {
 	d.deferred = nil
 	d.mu.Unlock()
 
-	for _, entry := range entries {
+	for i, entry := range entries {
 		if d.dispatcher != nil {
 			if err := d.dispatcher(ctx, entry); err != nil {
+				d.mu.Lock()
+				d.deferred = append(entries[i:], d.deferred...)
+				d.mu.Unlock()
+
 				return err
 			}
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,15 +14,23 @@ import (
 // --- Mock Redis Client ---
 
 type mockRedisClient struct {
-	mu      sync.Mutex
-	lists   map[string][]string
-	sorted  map[string][]sortedEntry
-	pushErr error
+	mu        sync.Mutex
+	lists     map[string][]string
+	sorted    map[string][]sortedEntry
+	evalCalls []mockEvalCall
+	pushErr   error
+	evalErr   error
 }
 
 type sortedEntry struct {
 	score  float64
 	member string
+}
+
+type mockEvalCall struct {
+	Script string
+	Keys   []string
+	Args   []any
 }
 
 // --- Mock DB Execer ---
@@ -35,6 +44,7 @@ type mockDBExecer struct {
 	mu         sync.Mutex
 	rows       []*mockDBRow
 	rowIndex   int
+	rowCalls   []mockExecCall
 	execCalls  []mockExecCall
 	execErr    error
 	queryRows  []*mockDBRow // rows returned by the next Query call
@@ -195,6 +205,63 @@ func (c *mockRedisClient) ZRem(_ context.Context, key string, members ...any) er
 	return nil
 }
 
+func (c *mockRedisClient) Eval(_ context.Context, script string, keys []string, args ...any) (any, error) {
+	c.mu.Lock()
+
+	defer c.mu.Unlock()
+
+	c.evalCalls = append(c.evalCalls, mockEvalCall{Script: script, Keys: append([]string(nil), keys...), Args: append([]any(nil), args...)})
+
+	if c.evalErr != nil {
+		return nil, c.evalErr
+	}
+
+	if len(keys) < 2 || len(args) == 0 {
+		return int64(0), nil
+	}
+
+	max, ok := evalScore(args[0])
+
+	if !ok {
+		return int64(0), nil
+	}
+
+	var due []string
+
+	var remaining []sortedEntry
+
+	for _, entry := range c.sorted[keys[0]] {
+		if entry.score <= max {
+			due = append(due, entry.member)
+
+			continue
+		}
+
+		remaining = append(remaining, entry)
+	}
+
+	c.sorted[keys[0]] = remaining
+
+	for _, member := range due {
+		c.lists[keys[1]] = append([]string{member}, c.lists[keys[1]]...)
+	}
+
+	return int64(len(due)), nil
+}
+
+func evalScore(value any) (float64, bool) {
+	switch v := value.(type) {
+	case int64:
+		return float64(v), true
+	case int:
+		return float64(v), true
+	case float64:
+		return v, true
+	default:
+		return 0, false
+	}
+}
+
 func (c *mockRedisClient) LLen(_ context.Context, key string) (int64, error) {
 	c.mu.Lock()
 
@@ -264,10 +331,12 @@ func (db *mockDBExecer) addErrorRow(err error) {
 	db.rows = append(db.rows, &mockDBRow{err: err})
 }
 
-func (db *mockDBExecer) QueryRow(_ context.Context, _ string, _ ...any) drivers.DBRow {
+func (db *mockDBExecer) QueryRow(_ context.Context, query string, args ...any) drivers.DBRow {
 	db.mu.Lock()
 
 	defer db.mu.Unlock()
+
+	db.rowCalls = append(db.rowCalls, mockExecCall{Query: query, Args: args})
 
 	if db.rowIndex >= len(db.rows) {
 		return &mockDBRow{err: errors.New("no rows")}
@@ -275,6 +344,15 @@ func (db *mockDBExecer) QueryRow(_ context.Context, _ string, _ ...any) drivers.
 
 	row := db.rows[db.rowIndex]
 	db.rowIndex++
+
+	if strings.Contains(query, "attempts=attempts+1") && len(row.values) >= 3 {
+		switch v := row.values[2].(type) {
+		case int:
+			row.values[2] = v + 1
+		case int64:
+			row.values[2] = v + 1
+		}
+	}
 
 	return row
 }

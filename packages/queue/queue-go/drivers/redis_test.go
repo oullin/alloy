@@ -144,6 +144,14 @@ func TestRedisDriverPopMigratesDueDelayedJobs(t *testing.T) {
 		t.Errorf("expected 'due-payload', got %q", job.Payload())
 	}
 
+	if len(client.evalCalls) != 1 {
+		t.Fatalf("expected delayed migration to use one Lua Eval call, got %d", len(client.evalCalls))
+	}
+
+	if got := client.evalCalls[0].Keys; len(got) != 2 || got[0] != "queues:default:delayed" || got[1] != "queues:default" {
+		t.Fatalf("unexpected Eval keys: %v", got)
+	}
+
 	n, _ := client.ZCard(context.Background(), "queues:default:delayed")
 
 	if n != 0 {

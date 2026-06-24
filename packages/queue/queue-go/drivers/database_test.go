@@ -112,13 +112,14 @@ func TestDatabaseDriverPopReservesJob(t *testing.T) {
 		t.Errorf("expected attempts 1, got %d", job.Attempts())
 	}
 
-	// Should have called UPDATE to reserve.
-	if len(db.execCalls) != 1 {
-		t.Fatalf("expected 1 exec call for reservation, got %d", len(db.execCalls))
+	if len(db.rowCalls) != 1 {
+		t.Fatalf("expected 1 atomic reservation query, got %d", len(db.rowCalls))
 	}
 
-	if !strings.Contains(db.execCalls[0].Query, "UPDATE") {
-		t.Errorf("expected UPDATE query, got %q", db.execCalls[0].Query)
+	query := db.rowCalls[0].Query
+
+	if !strings.Contains(query, "UPDATE") || !strings.Contains(query, "FOR UPDATE SKIP LOCKED") || !strings.Contains(query, "RETURNING") {
+		t.Errorf("expected atomic UPDATE ... FOR UPDATE SKIP LOCKED ... RETURNING query, got %q", query)
 	}
 }
 
@@ -133,6 +134,21 @@ func TestDatabaseDriverPopEmptyReturnsErrNoJob(t *testing.T) {
 
 	if !errors.Is(err, queue.ErrNoJob) {
 		t.Fatalf("expected ErrNoJob, got %v", err)
+	}
+}
+
+func TestDatabaseDriverPopPropagatesReservationError(t *testing.T) {
+	t.Parallel()
+
+	db := newMockDBExecer()
+	wantErr := errors.New("database unavailable")
+	db.addErrorRow(wantErr)
+	drv := drivers.NewDatabaseDriver(db, "jobs", "database")
+
+	_, err := drv.Pop(context.Background(), "default")
+
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("expected reservation error, got %v", err)
 	}
 }
 

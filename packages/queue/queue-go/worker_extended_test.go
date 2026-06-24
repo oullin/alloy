@@ -580,6 +580,10 @@ func (c *workerRedisClient) ZRangeByScore(_ context.Context, _ string, _, _ floa
 
 func (c *workerRedisClient) ZRem(_ context.Context, _ string, _ ...any) error { return nil }
 
+func (c *workerRedisClient) Eval(_ context.Context, _ string, _ []string, _ ...any) (any, error) {
+	return int64(0), nil
+}
+
 func (c *workerRedisClient) LLen(_ context.Context, key string) (int64, error) {
 	c.mu.Lock()
 
