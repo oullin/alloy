@@ -272,8 +272,7 @@ func (p *FileFailedJobProvider) read() ([]fileRecord, error) {
 	var jobs []fileRecord
 
 	if err := json.Unmarshal(data, &jobs); err != nil {
-		// Upstream silently treats malformed JSON as empty.
-		return nil, nil
+		return nil, err
 	}
 
 	return jobs, nil

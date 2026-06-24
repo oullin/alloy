@@ -60,9 +60,9 @@ func TestAvailableAndUnReservedJobsArePopped(t *testing.T) {
 		t.Fatal("Pop returned nil, want a job")
 	}
 
-	// Pop issues exactly one UPDATE to reserve the row.
-	if got := countExecs(db, "UPDATE"); got != 1 {
-		t.Errorf("UPDATE exec count: got %d, want 1", got)
+	// Pop issues one atomic UPDATE...RETURNING query to reserve the row.
+	if got := countRowQueries(db, "UPDATE"); got != 1 {
+		t.Errorf("UPDATE row query count: got %d, want 1", got)
 	}
 }
 
@@ -92,8 +92,8 @@ func TestPoppedJobsIncrementAttempts(t *testing.T) {
 	// assert the SQL that would make that true.
 	var sawIncrement bool
 
-	for _, c := range db.execCalls {
-		if strings.Contains(c.Query, "attempts=attempts+1") {
+	for _, c := range db.rowCalls {
+		if strings.Contains(c.Query, "attempts=attempts+1") && strings.Contains(c.Query, "RETURNING") {
 			sawIncrement = true
 
 			break
@@ -101,7 +101,7 @@ func TestPoppedJobsIncrementAttempts(t *testing.T) {
 	}
 
 	if !sawIncrement {
-		t.Errorf("no UPDATE with attempts=attempts+1 in exec calls: %+v", db.execCalls)
+		t.Errorf("no atomic UPDATE with attempts=attempts+1 in row calls: %+v", db.rowCalls)
 	}
 }
 
@@ -277,6 +277,18 @@ func countExecs(db *mockDBExecer, keyword string) int {
 	var n int
 
 	for _, c := range db.execCalls {
+		if strings.HasPrefix(strings.TrimSpace(c.Query), keyword) {
+			n++
+		}
+	}
+
+	return n
+}
+
+func countRowQueries(db *mockDBExecer, keyword string) int {
+	var n int
+
+	for _, c := range db.rowCalls {
 		if strings.HasPrefix(strings.TrimSpace(c.Query), keyword) {
 			n++
 		}

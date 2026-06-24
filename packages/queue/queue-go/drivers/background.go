@@ -122,5 +122,10 @@ func (d *BackgroundDriver) ReservedJobs(ctx context.Context, queueName string) (
 
 func (d *BackgroundDriver) spawn() {
 	cmd := exec.Command(d.command, d.args...) //nolint:gosec
-	_ = cmd.Start()
+
+	if err := cmd.Start(); err == nil {
+		go func() {
+			_ = cmd.Wait()
+		}()
+	}
 }

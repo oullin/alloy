@@ -21,6 +21,8 @@ type RedisClient interface {
 	ZRangeByScore(ctx context.Context, key string, min, max float64) ([]string, error)
 	// ZRem removes members from a sorted set.
 	ZRem(ctx context.Context, key string, members ...any) error
+	// Eval runs a Lua script atomically.
+	Eval(ctx context.Context, script string, keys []string, args ...any) (any, error)
 	// LLen returns the length of a list.
 	LLen(ctx context.Context, key string) (int64, error)
 	// ZCard returns the cardinality of a sorted set.
@@ -96,15 +98,21 @@ type RedisDriver struct {
 // (an opening `{` followed by a `}` with at least one character in between).
 // Ref: @bedrock/code-0276
 
-// NewRedisDriver creates a RedisDriver.
-
-// Migrate any delayed jobs that are now due.
-
-// Already popped.
-
-// Redis queue does not keep a reserved set by default.
-
 type redisJob struct{ BaseJob }
+
+const migrateDueLua = `
+local jobs = redis.call('zrangebyscore', KEYS[1], '-inf', ARGV[1])
+
+for i, job in ipairs(jobs) do
+	redis.call('lpush', KEYS[2], job)
+end
+
+if #jobs > 0 then
+	redis.call('zrem', KEYS[1], unpack(jobs))
+end
+
+return #jobs
+`
 
 func (d *RedisDriver) SetClusterClient(cluster bool) {
 	v := cluster
@@ -404,21 +412,7 @@ func (d *RedisDriver) snapshotsFromPayloads(queueName string, raws []string, res
 }
 
 func (d *RedisDriver) migrateDue(ctx context.Context, queueName string) {
-	now := float64(time.Now().Unix())
-	due, err := d.client.ZRangeByScore(ctx, d.delayedKey(queueName), 0, now)
-
-	if err != nil || len(due) == 0 {
-		return
-	}
-
-	members := make([]any, len(due))
-
-	for i, m := range due {
-		members[i] = m
-		_ = d.client.LPush(ctx, d.queueKey(queueName), m)
-	}
-
-	_ = d.client.ZRem(ctx, d.delayedKey(queueName), members...)
+	_, _ = d.client.Eval(ctx, migrateDueLua, []string{d.delayedKey(queueName), d.queueKey(queueName)}, time.Now().Unix())
 }
 
 func (d *RedisDriver) queueKey(q string) string   { return d.getRedisKey(q) }

@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -79,12 +80,9 @@ type DatabaseDriver struct {
 	locker     DatabasePopLockProvider
 }
 
-// NewDatabaseDriver creates a DatabaseDriver.
-
-// Reserve the job.
-
 type dbJob struct{ BaseJob }
 
+// NewDatabaseDriver creates a DatabaseDriver.
 func NewDatabaseDriver(db DBExecer, table, connection string) *DatabaseDriver {
 	if table == "" {
 		table = "jobs"
@@ -164,8 +162,12 @@ func (d *DatabaseDriver) PushMultiple(ctx context.Context, queueName string, pay
 func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
 	now := time.Now().Unix()
 	row := d.db.QueryRow(ctx,
-		fmt.Sprintf("SELECT id, payload, attempts FROM %s WHERE queue=$1 AND reserved_at IS NULL AND available_at<=$2 ORDER BY id ASC LIMIT 1", d.table),
-		queueName, now,
+		fmt.Sprintf(
+			"UPDATE %s SET reserved_at=$1, attempts=attempts+1 WHERE id = (SELECT id FROM %s WHERE queue=$2 AND reserved_at IS NULL AND available_at<=$1 ORDER BY id ASC FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING id, payload, attempts",
+			d.table,
+			d.table,
+		),
+		now, queueName,
 	)
 
 	var id int64
@@ -175,20 +177,19 @@ func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 	var attempts int
 
 	if err := row.Scan(&id, &payload, &attempts); err != nil {
-		return nil, queue.ErrNoJob
-	}
+		if isNoJobRowError(err) {
+			return nil, queue.ErrNoJob
+		}
 
-	_ = d.db.Exec(ctx,
-		fmt.Sprintf("UPDATE %s SET reserved_at=$1, attempts=attempts+1 WHERE id=$2", d.table),
-		now, id,
-	)
+		return nil, err
+	}
 
 	job := &dbJob{
 		BaseJob: BaseJob{
 			id:       fmt.Sprintf("%d", id),
 			payload:  []byte(payload),
 			queue:    queueName,
-			attempts: attempts + 1,
+			attempts: attempts,
 		},
 	}
 	job.releaseFunc = func(delay time.Duration) error {
@@ -221,6 +222,10 @@ func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 	}
 
 	return job, nil
+}
+
+func isNoJobRowError(err error) bool {
+	return err == sql.ErrNoRows || strings.Contains(strings.ToLower(err.Error()), "no rows")
 }
 
 func (d *DatabaseDriver) Size(ctx context.Context, queueName string) (int64, error) {

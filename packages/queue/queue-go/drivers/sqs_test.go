@@ -108,13 +108,14 @@ func TestSQSDriverPopError(t *testing.T) {
 	t.Parallel()
 
 	client := newMockSQSClient()
-	client.receiveErr = errors.New("network error")
+	wantErr := errors.New("network error")
+	client.receiveErr = wantErr
 	drv := drivers.NewSQSDriver(client, map[string]string{"default": "https://sqs/default"}, "sqs")
 
 	_, err := drv.Pop(context.Background(), "default")
 
-	if !errors.Is(err, queue.ErrNoJob) {
-		t.Fatalf("expected ErrNoJob, got %v", err)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("expected receive error, got %v", err)
 	}
 }
 

@@ -339,3 +339,23 @@ func TestCreatePayloadForIncludesBatchID(t *testing.T) {
 		t.Errorf("raw batchId: got %v, want batch-123", decoded.Data["batchId"])
 	}
 }
+
+func TestCreatePayloadForDoesNotMutateCallerDataWhenAddingBatchID(t *testing.T) {
+	t.Parallel()
+
+	data := map[string]any{"subject": "hi"}
+
+	p, _, err := queue.CreatePayloadFor("database", "default", sampleJob{}, data, queue.JobOptions{BatchID: "batch-123"})
+
+	if err != nil {
+		t.Fatalf("CreatePayloadFor: %v", err)
+	}
+
+	if _, ok := data["batchId"]; ok {
+		t.Fatalf("caller data was mutated: %+v", data)
+	}
+
+	if p.Data["batchId"] != "batch-123" || p.Data["subject"] != "hi" {
+		t.Fatalf("payload data mismatch: %+v", p.Data)
+	}
+}

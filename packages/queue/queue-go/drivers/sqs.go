@@ -185,7 +185,11 @@ func (d *SQSDriver) PushMultiple(ctx context.Context, queueName string, payloads
 func (d *SQSDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
 	msgs, err := d.client.ReceiveMessage(ctx, d.url(queueName), 1, 20)
 
-	if err != nil || len(msgs) == 0 {
+	if err != nil {
+		return nil, err
+	}
+
+	if len(msgs) == 0 {
 		return nil, queue.ErrNoJob
 	}
 

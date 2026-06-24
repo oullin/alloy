@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -95,6 +96,22 @@ func TestCanRetrieveAllFailedJobs(t *testing.T) {
 
 	if all[1].ID != j1.uuid {
 		t.Fatalf("all[1]=%q want %q", all[1].ID, j1.uuid)
+	}
+}
+
+func TestMalformedFailedJobFileReturnsError(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "failed.json")
+
+	if err := os.WriteFile(path, []byte("{malformed"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	p := failed.NewFileFailedJobProvider(path, 0)
+
+	if _, err := p.All(); err == nil {
+		t.Fatal("expected malformed JSON error")
 	}
 }
 

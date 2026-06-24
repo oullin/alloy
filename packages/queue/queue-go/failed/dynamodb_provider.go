@@ -109,11 +109,21 @@ func (p *DynamoDbFailedJobProvider) All() ([]FailedJob, error) {
 		return nil, nil
 	}
 
-	items, ok := itemsAny.([]map[string]any)
+	var items []map[string]any
 
-	if !ok {
+	switch v := itemsAny.(type) {
+	case []map[string]any:
+		items = v
+	case []any:
+		for _, itemAny := range v {
+			if item, ok := itemAny.(map[string]any); ok {
+				items = append(items, item)
+			}
+		}
+	default:
 		return nil, nil
 	}
+
 	// Sort by failed_at descending, matching the upstream sortByDesc.
 	sort.SliceStable(items, func(i, j int) bool {
 		return dynNumber(items[i], "failed_at") > dynNumber(items[j], "failed_at")

@@ -145,6 +145,38 @@ func TestDynamoCanRetrieveAllFailedJobs(t *testing.T) {
 	}
 }
 
+func TestDynamoCanRetrieveAllFailedJobsFromDecodedJSONArray(t *testing.T) {
+	t.Parallel()
+	timeNow := time.Now().Unix()
+	fake := &fakeDynamoClient{
+		queryResp: map[string]any{
+			"Items": []any{
+				map[string]any{
+					"application": map[string]any{"S": "application"},
+					"uuid":        map[string]any{"S": "uuid"},
+					"connection":  map[string]any{"S": "connection"},
+					"queue":       map[string]any{"S": "queue"},
+					"payload":     map[string]any{"S": "payload"},
+					"exception":   map[string]any{"S": "exception"},
+					"failed_at":   map[string]any{"N": strconv.FormatInt(timeNow, 10)},
+					"expires_at":  map[string]any{"N": strconv.FormatInt(timeNow, 10)},
+				},
+			},
+		},
+	}
+	p := failed.NewDynamoDbFailedJobProvider(fake, "application", "table")
+
+	all, err := p.All()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(all) != 1 || all[0].ID != "uuid" {
+		t.Fatalf("unexpected failed jobs: %+v", all)
+	}
+}
+
 // Ref: @bedrock/code-0362
 func TestDynamoASingleJobCanBeFound(t *testing.T) {
 	t.Parallel()
