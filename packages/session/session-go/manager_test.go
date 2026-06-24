@@ -3,6 +3,8 @@ package session_test
 import (
 	"context"
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/oullin/alloy/session"
@@ -133,5 +135,37 @@ func TestManagerMultipleDrivers(t *testing.T) {
 
 	if sa == sb {
 		t.Error("expected different store instances for different drivers")
+	}
+}
+
+func TestManagerDriverConcurrentCreationOnlyRunsOnce(t *testing.T) {
+	m := session.NewManager("test")
+
+	var created int32
+
+	m.Extend("array", func(config map[string]any) (session.Handler, error) {
+		atomic.AddInt32(&created, 1)
+
+		return handlers.NewArrayHandler(), nil
+	})
+
+	var wg sync.WaitGroup
+
+	for range 20 {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			if _, err := m.Driver(context.Background(), "array"); err != nil {
+				t.Errorf("Driver returned error: %v", err)
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	if created != 1 {
+		t.Fatalf("expected driver creator to run once, got %d", created)
 	}
 }

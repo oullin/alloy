@@ -19,11 +19,13 @@ func (s *EncryptedStore) Put(key string, value any) {
 	if str, ok := value.(string); ok {
 		encrypted, err := s.enc.Encrypt(str)
 
-		if err == nil {
-			s.Store.Put(key, encrypted)
-
+		if err != nil {
 			return
 		}
+
+		s.Store.Put(key, encrypted)
+
+		return
 	}
 
 	s.Store.Put(key, value)
@@ -36,6 +38,10 @@ func (s *EncryptedStore) Get(key string, fallback any) any {
 	if str, ok := raw.(string); ok {
 		if plain, err := s.enc.Decrypt(str); err == nil {
 			return plain
+		}
+
+		if s.Store.Exists(key) {
+			return fallback
 		}
 	}
 

@@ -634,6 +634,17 @@ func TestStorePush(t *testing.T) {
 	}
 }
 
+func TestStorePushDoesNotConvertScalarAttribute(t *testing.T) {
+	s := newStore()
+	s.Put("name", "alice")
+
+	s.Push("name", "bob")
+
+	if got := s.Get("name", nil); got != "alice" {
+		t.Fatalf("expected scalar attribute to remain unchanged, got %v", got)
+	}
+}
+
 func TestStoreToken(t *testing.T) {
 	s := newStore()
 

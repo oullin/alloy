@@ -11,28 +11,24 @@ type Encrypter interface {
 	Decrypt(ciphertext string) (string, error)
 }
 
-// EncryptingHandler wraps another Handler and encrypts/decrypts all payloads.
-type EncryptingHandler struct {
-	inner Encrypter
-	wrap  interface {
-		Open(ctx context.Context, path, name string) error
-		Close(ctx context.Context) error
-		Read(ctx context.Context, id string) (string, error)
-		Write(ctx context.Context, id, data string) error
-		Destroy(ctx context.Context, id string) error
-		GC(ctx context.Context, maxLifetime int) error
-	}
-}
-
-// NewEncryptingHandler creates an EncryptingHandler wrapping the given handler.
-func NewEncryptingHandler(wrap interface {
+// Handler is the storage contract wrapped by EncryptingHandler.
+type Handler interface {
 	Open(ctx context.Context, path, name string) error
 	Close(ctx context.Context) error
 	Read(ctx context.Context, id string) (string, error)
 	Write(ctx context.Context, id, data string) error
 	Destroy(ctx context.Context, id string) error
 	GC(ctx context.Context, maxLifetime int) error
-}, enc Encrypter) *EncryptingHandler {
+}
+
+// EncryptingHandler wraps another Handler and encrypts/decrypts all payloads.
+type EncryptingHandler struct {
+	inner Encrypter
+	wrap  Handler
+}
+
+// NewEncryptingHandler creates an EncryptingHandler wrapping the given handler.
+func NewEncryptingHandler(wrap Handler, enc Encrypter) *EncryptingHandler {
 	return &EncryptingHandler{inner: enc, wrap: wrap}
 }
 

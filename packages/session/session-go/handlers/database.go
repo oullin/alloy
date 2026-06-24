@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -40,6 +43,10 @@ type DatabaseHandler struct {
 // NewDatabaseHandler creates a DatabaseHandler using the given connection.
 // table is the sessions table name (e.g. "sessions").
 func NewDatabaseHandler(db DBConn, table string) *DatabaseHandler {
+	if !isValidTableName(table) {
+		table = "sessions"
+	}
+
 	return &DatabaseHandler{db: db, table: table}
 }
 
@@ -58,7 +65,7 @@ func (h *DatabaseHandler) Open(_ context.Context, _, _ string) error { return ni
 func (h *DatabaseHandler) Close(_ context.Context) error { return nil }
 
 func (h *DatabaseHandler) Read(ctx context.Context, id string) (string, error) {
-	query := "SELECT payload FROM " + h.table + " WHERE id = $1"
+	query := h.query("SELECT payload FROM %s WHERE id = $1")
 	row := h.db.QueryRow(ctx, query, id)
 
 	var payload string
@@ -66,8 +73,11 @@ func (h *DatabaseHandler) Read(ctx context.Context, id string) (string, error) {
 	err := row.Scan(&payload)
 
 	if err != nil {
-		// No row found — return empty string (not an error for sessions).
-		return "", nil
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+
+		return "", err
 	}
 
 	h.exists = true
@@ -80,23 +90,43 @@ func (h *DatabaseHandler) Write(ctx context.Context, id, data string) error {
 
 	if h.exists {
 		return h.db.Exec(ctx,
-			"UPDATE "+h.table+" SET user_id=$1, ip_address=$2, user_agent=$3, payload=$4, last_activity=$5 WHERE id=$6",
+			h.query("UPDATE %s SET user_id=$1, ip_address=$2, user_agent=$3, payload=$4, last_activity=$5 WHERE id=$6"),
 			h.userID, h.ipAddress, h.userAgent, data, now, id,
 		)
 	}
 
 	return h.db.Exec(ctx,
-		"INSERT INTO "+h.table+" (id, user_id, ip_address, user_agent, payload, last_activity) VALUES ($1,$2,$3,$4,$5,$6)",
+		h.query("INSERT INTO %s (id, user_id, ip_address, user_agent, payload, last_activity) VALUES ($1,$2,$3,$4,$5,$6)"),
 		id, h.userID, h.ipAddress, h.userAgent, data, now,
 	)
 }
 
 func (h *DatabaseHandler) Destroy(ctx context.Context, id string) error {
-	return h.db.Exec(ctx, "DELETE FROM "+h.table+" WHERE id=$1", id)
+	return h.db.Exec(ctx, h.query("DELETE FROM %s WHERE id=$1"), id)
 }
 
 func (h *DatabaseHandler) GC(ctx context.Context, maxLifetime int) error {
 	cutoff := time.Now().Unix() - int64(maxLifetime)
 
-	return h.db.Exec(ctx, "DELETE FROM "+h.table+" WHERE last_activity < $1", cutoff)
+	return h.db.Exec(ctx, h.query("DELETE FROM %s WHERE last_activity < $1"), cutoff)
+}
+
+func (h *DatabaseHandler) query(format string) string {
+	return fmt.Sprintf(format, h.table)
+}
+
+func isValidTableName(table string) bool {
+	if table == "" {
+		return false
+	}
+
+	for _, r := range table {
+		if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_' {
+			continue
+		}
+
+		return false
+	}
+
+	return true
 }
