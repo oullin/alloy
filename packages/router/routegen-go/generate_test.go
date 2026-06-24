@@ -886,6 +886,7 @@ func TestBuildURLTemplate(t *testing.T) {
 	}{
 		{"/contacts", "`/contacts`"},
 		{"/contacts/{contact}", "`/contacts/${encodeURIComponent(String(params.contact))}`"},
+		{"/contacts/{contact?}", "`/contacts/${encodeURIComponent(String(params.contact))}`"},
 		{"/contacts/{contact}/notes/{note}", "`/contacts/${encodeURIComponent(String(params.contact))}/notes/${encodeURIComponent(String(params.note))}`"},
 	}
 

@@ -317,7 +317,7 @@ func buildParamSignature(params []string, ts bool) string {
 // buildURLTemplate converts "/contacts/{contact}" to "`/contacts/${encodeURIComponent(String(params.contact))}`.
 func buildURLTemplate(pattern string) string {
 	result := paramRegex.ReplaceAllStringFunc(pattern, func(match string) string {
-		name := match[1 : len(match)-1]
+		name := strings.TrimSuffix(match[1:len(match)-1], "?")
 
 		return "${encodeURIComponent(String(params." + name + "))}"
 	})

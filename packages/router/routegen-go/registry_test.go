@@ -308,6 +308,21 @@ func TestRouteParams(t *testing.T) {
 	}
 }
 
+func TestRouteParamsIncludesOptionalParameters(t *testing.T) {
+	t.Parallel()
+
+	route := Route{Pattern: "/contacts/{contact}/notes/{note?}"}
+	params := route.Params()
+
+	if len(params) != 2 {
+		t.Fatalf("expected 2 params, got %d", len(params))
+	}
+
+	if params[0] != "contact" || params[1] != "note" {
+		t.Errorf("expected [contact, note], got %v", params)
+	}
+}
+
 func TestRouteParamsNone(t *testing.T) {
 	t.Parallel()
 

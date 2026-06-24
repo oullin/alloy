@@ -2,6 +2,7 @@ package routegen
 
 import (
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/oullin/alloy/routing"
@@ -140,8 +141,7 @@ func defaultString(defaults map[string]any, name string) string {
 	case string:
 		return s
 	case int:
-		return strings.TrimRight(strings.TrimRight(
-			strings.TrimSuffix(string(rune('0'+s)), "0"), "."), "")
+		return strconv.Itoa(s)
 	default:
 		return ""
 	}

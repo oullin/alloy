@@ -4,13 +4,17 @@
 // they can be wrapped trivially by the bedrock pipeline package in M11.
 package middleware
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oullin/alloy/routing"
+)
 
 // BindingRouter is the minimum router surface SubstituteBindings touches.
 // Both [routing.Router] and any future test fake satisfy it.
 type BindingRouter interface {
-	SubstituteBindings(route any) error
-	SubstituteImplicitBindings(route any) error
+	SubstituteBindings(route *routing.Route) error
+	SubstituteImplicitBindings(route *routing.Route) error
 }
 
 // SubstituteBindings is the middleware that runs explicit and implicit route
@@ -36,11 +40,17 @@ func (s *SubstituteBindings) Handle(request any, route any, next func(any) any) 
 		return nil, fmt.Errorf("substitute bindings: no route on request")
 	}
 
-	if err := s.Router.SubstituteBindings(route); err != nil {
+	routingRoute, ok := route.(*routing.Route)
+
+	if !ok {
+		return nil, fmt.Errorf("substitute bindings: expected *routing.Route, got %T", route)
+	}
+
+	if err := s.Router.SubstituteBindings(routingRoute); err != nil {
 		return nil, err
 	}
 
-	if err := s.Router.SubstituteImplicitBindings(route); err != nil {
+	if err := s.Router.SubstituteImplicitBindings(routingRoute); err != nil {
 		return nil, err
 	}
 

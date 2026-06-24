@@ -109,6 +109,10 @@ func applyRouteParameters(r *http.Request, route *routing.Route) {
 }
 
 func writeRoutingResponse(w http.ResponseWriter, response *routing.HTTPResponse) error {
+	if response == nil {
+		return httpx.NewResponse(w).NoContent()
+	}
+
 	status := normalizeStatus(response.Status, http.StatusOK)
 	resp := httpx.NewResponse(w).Status(status)
 	applyHeaderValues(resp, response.Headers)
@@ -180,7 +184,13 @@ func shouldWriteJSON(value any) bool {
 		return false
 	}
 
-	switch reflect.TypeOf(value).Kind() {
+	t := reflect.TypeOf(value)
+
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	switch t.Kind() {
 	case reflect.Map, reflect.Slice, reflect.Array, reflect.Struct:
 		return true
 	default:

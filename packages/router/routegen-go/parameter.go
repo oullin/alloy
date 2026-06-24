@@ -121,7 +121,7 @@ func optionalNames(params []Param) []string {
 
 	for _, p := range params {
 		if p.Optional {
-			names = append(names, p.Name)
+			names = append(names, p.SafeName())
 		}
 	}
 

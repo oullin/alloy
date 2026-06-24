@@ -368,15 +368,16 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 
 		if len(params) == 1 {
 			p := params[0]
+			safeName := p.SafeName()
 			b.WriteString(fmt.Sprintf(
 				"    if (typeof %s === 'string' || typeof %s === 'number') {\n        %s = { %s: %s }\n    }\n",
-				args, args, args, p.Name, args,
+				args, args, args, safeName, args,
 			))
 
 			if p.Key != "" {
 				b.WriteString(fmt.Sprintf(
 					"    if (typeof %s === 'object' && !Array.isArray(%s) && %s in %s) {\n        %s = { %s: %s.%s }\n    }\n",
-					args, args, jsonString(p.Key), args, args, p.Name, args, p.Key,
+					args, args, jsonString(p.Key), args, args, safeName, args, p.Key,
 				))
 			}
 		}
@@ -384,7 +385,7 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 		b.WriteString(fmt.Sprintf("    if (Array.isArray(%s)) {\n        %s = {\n", args, args))
 
 		for i, p := range params {
-			b.WriteString(fmt.Sprintf("            %s: %s[%d],\n", p.Name, args, i))
+			b.WriteString(fmt.Sprintf("            %s: %s[%d],\n", p.SafeName(), args, i))
 		}
 
 		b.WriteString("        }\n    }\n")
@@ -413,6 +414,8 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 		b.WriteString(fmt.Sprintf("    const %s = {\n", parsed))
 
 		for _, p := range params {
+			safeName := p.SafeName()
+
 			if p.Key != "" {
 
 				defaultPart := ""
@@ -423,10 +426,10 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 
 				b.WriteString(fmt.Sprintf(
 					"        %s: typeof %s%s.%s === 'object'\n            ? %s%s.%s.%s\n            : %s%s.%s%s,\n",
-					p.Name,
-					args, optMark, p.Name,
-					args, optMark, p.Name, p.Key,
-					args, optMark, p.Name, defaultPart,
+					safeName,
+					args, optMark, safeName,
+					args, optMark, safeName, p.Key,
+					args, optMark, safeName, defaultPart,
 				))
 			} else {
 				defaultPart := ""
@@ -435,7 +438,7 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 					defaultPart = fmt.Sprintf(" ?? %s", jsonString(p.Default))
 				}
 
-				b.WriteString(fmt.Sprintf("        %s: %s%s.%s%s,\n", p.Name, args, optMark, p.Name, defaultPart))
+				b.WriteString(fmt.Sprintf("        %s: %s%s.%s%s,\n", safeName, args, optMark, safeName, defaultPart))
 			}
 		}
 
@@ -447,12 +450,12 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 			if p.Optional {
 				b.WriteString(fmt.Sprintf(
 					"        .replace(%s, %s.%s?.toString() ?? '')\n",
-					jsonString(p.Placeholder()), parsed, p.Name,
+					jsonString(p.Placeholder()), parsed, p.SafeName(),
 				))
 			} else {
 				b.WriteString(fmt.Sprintf(
 					"        .replace(%s, %s.%s.toString())\n",
-					jsonString(p.Placeholder()), parsed, p.Name,
+					jsonString(p.Placeholder()), parsed, p.SafeName(),
 				))
 			}
 

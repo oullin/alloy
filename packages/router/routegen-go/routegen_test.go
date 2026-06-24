@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/oullin/alloy/routegen"
+	"github.com/oullin/alloy/routing"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -317,6 +318,29 @@ func TestCamelCaseRouteParameterGeneration(t *testing.T) {
 	assertContains(t, content, `.replace("{userProfile}", parsedArgs.userProfile.toString())`)
 }
 
+func TestHyphenatedRouteParameterGenerationUsesSafeNames(t *testing.T) {
+	t.Parallel()
+
+	routes := []*routegen.RouteInfo{
+		{
+			URI:        "/profiles/{user-profile}",
+			Methods:    []string{"get", "head"},
+			Controller: "App\\Http\\Controllers\\HyphenatedRouteParameterController@show",
+			Params:     []routegen.Param{{Name: "user-profile", Key: "uuid"}},
+		},
+	}
+
+	dir := generateTo(t, routes, routegen.Options{})
+	content := readFile(t, dir, "actions/App/Http/Controllers/HyphenatedRouteParameterController.ts")
+
+	assertContains(t, content, `url: "/profiles/{user-profile}"`)
+	assertContains(t, content, `{ userProfile: args }`)
+	assertContains(t, content, `userProfile: typeof args.userProfile === 'object'`)
+	assertContains(t, content, `args.userProfile.uuid`)
+	assertContains(t, content, `.replace("{user-profile}", parsedArgs.userProfile.toString())`)
+	assertNotContains(t, content, `args.user-profile`)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // KeyController tests
 // ─────────────────────────────────────────────────────────────────────────────
@@ -588,6 +612,26 @@ func TestUrlDefaultsControllerGeneration(t *testing.T) {
 	assertContains(t, content, `?? "en"`)
 	// URI shows optional marker because locale has a default.
 	assertContains(t, content, `{locale?}`)
+}
+
+func TestFromRouteCollectionKeepsMultiDigitIntegerDefaults(t *testing.T) {
+	t.Parallel()
+
+	router := routing.NewRouter(nil, nil)
+	router.Get("/archive/{year}", func() {}).Defaults("year", 2026)
+	routes := routegen.FromRouteCollection(router.GetRoutes(), routegen.AdapterOptions{})
+
+	if len(routes) != 1 {
+		t.Fatalf("expected 1 route, got %d", len(routes))
+	}
+
+	if len(routes[0].Params) != 1 {
+		t.Fatalf("expected 1 param, got %d", len(routes[0].Params))
+	}
+
+	if routes[0].Params[0].Default != "2026" {
+		t.Fatalf("default = %q, want 2026", routes[0].Params[0].Default)
+	}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

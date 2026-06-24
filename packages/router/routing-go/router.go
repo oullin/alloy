@@ -807,11 +807,14 @@ func (r *Router) SubstituteBindings(route *Route) error {
 }
 
 // SubstituteImplicitBindings delegates to [ImplicitRouteBinding.ResolveForRoute].
-//
-// dependencyResolver is the type-keyed lookup the resolver uses to
-// instantiate model parameters; M11 wires in the bedrock container adapter.
-func (r *Router) SubstituteImplicitBindings(route *Route, dependencyResolver DependencyContainer) error {
-	if dependencyResolver == nil {
+func (r *Router) SubstituteImplicitBindings(route *Route) error {
+	if route == nil || r.container == nil {
+		return nil
+	}
+
+	dependencyResolver, ok := r.container.(DependencyContainer)
+
+	if !ok {
 		return nil
 	}
 

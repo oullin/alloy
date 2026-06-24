@@ -206,6 +206,50 @@ func TestNewHandlerWritesJSONResponse(t *testing.T) {
 	}
 }
 
+func TestNewHandlerWritesPointerStructAsJSON(t *testing.T) {
+	t.Parallel()
+
+	type payload struct {
+		Name string `json:"name"`
+	}
+
+	router := routing.NewRouter(nil, nil)
+	router.Get("/json-pointer", func() any {
+		return &payload{Name: "taylor"}
+	})
+
+	rec := perform(router, http.MethodGet, "/json-pointer")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+
+	if rec.Header().Get("Content-Type") != "application/json" {
+		t.Fatalf("Content-Type = %q, want application/json", rec.Header().Get("Content-Type"))
+	}
+
+	if strings.TrimSpace(rec.Body.String()) != `{"name":"taylor"}` {
+		t.Fatalf("body = %q, want JSON object", rec.Body.String())
+	}
+}
+
+func TestNewHandlerWritesNilRoutingHTTPResponseAsNoContent(t *testing.T) {
+	t.Parallel()
+
+	router := routing.NewRouter(nil, nil)
+	router.Get("/nil-response", func() any {
+		var response *routing.HTTPResponse
+
+		return response
+	})
+
+	rec := perform(router, http.MethodGet, "/nil-response")
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusNoContent)
+	}
+}
+
 func TestNewHandlerDispatchesHTTPHandlerFunc(t *testing.T) {
 	t.Parallel()
 
