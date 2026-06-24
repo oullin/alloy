@@ -54,6 +54,6 @@ if [ ! -s "${tmp}" ]; then
 	exit 0
 fi
 
-xargs -0 docker-compose run --rm -T \
+xargs -0 bash infra/scripts/tasks/docker-compose-run.sh \
 	--user "$(id -u):$(id -g)" \
 	fmt format < "${tmp}"

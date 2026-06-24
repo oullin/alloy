@@ -10,6 +10,7 @@ use (
 	./packages/encryption/encryption-go
 	./packages/filesystem/filesystem-go
 	./packages/hashing/hashing-go
+	./packages/httpx/httpx-go
 	./packages/money/money-go
 	./packages/str/str-go
 	./packages/tempo/tempo-go

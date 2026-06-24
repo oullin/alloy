@@ -11,7 +11,9 @@ export GO_BIN_VOLUME
 export GO_MOD_VOLUME
 export GO_BUILD_VOLUME
 
-DOCKER_RUN := docker-compose run --rm -T app
+VP := ./node_modules/.bin/vp
+DOCKER_COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then printf 'docker-compose'; else printf 'docker compose'; fi)
+DOCKER_RUN := $(DOCKER_COMPOSE) run --rm -T app
 TASK := sh -lc 'apk add --no-cache bash git >/dev/null && git config --global --add safe.directory /workspace && export PATH=/go/bin:/usr/local/go/bin:$$PATH; go install github.com/go-task/task/v3/cmd/task@$(TASK_VERSION) && task "$$@"' task
 
 export FMT_IMAGE ?= ghcr.io/oullin/go-fmt:v0.4.1-full
@@ -19,17 +21,17 @@ export PWD := $(shell pwd)
 
 .DEFAULT_GOAL := help
 
-# Task owns orchestration. Make keeps existing commands working and mirrors the
-# Dockerised DockTUI path for Go and formatting tasks.
+# Vite+ owns orchestration. Make keeps existing commands working, including the
+# Docker-backed formatter task defined in vite.config.ts.
 .PHONY: help format format-all go-test go\:test FORCE
 help:
-	@pnpm exec task --list
+	@$(VP) --help
 
 format:
-	@vp run format
+	@$(VP) run format
 
 format-all:
-	@vp run format-all
+	@$(VP) run format-all
 
 go-test:
 	$(DOCKER_RUN) $(TASK) go:test
@@ -41,6 +43,6 @@ Makefile:
 	@:
 
 %: FORCE
-	@pnpm exec task $@
+	@$(VP) run $@
 
 FORCE:
