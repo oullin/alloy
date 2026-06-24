@@ -238,3 +238,29 @@ func TestJsonResponseEncodingOptions(t *testing.T) {
 		t.Fatalf("unexpected body: %s", rec.Body.String())
 	}
 }
+
+func TestJsonResponseEscapeHTML(t *testing.T) {
+	t.Parallel()
+
+	rec := httptest.NewRecorder()
+	resp := httpx.NewJsonResponse(rec, map[string]string{"html": "<script>"}, http.StatusOK, httpx.JsonOptions{EscapeHTML: true})
+
+	resp.Send()
+
+	if rec.Body.String() != `{"html":"\u003cscript\u003e"}` {
+		t.Fatalf("expected escaped HTML characters, got %s", rec.Body.String())
+	}
+}
+
+func TestJsonResponseWithoutEscapeHTML(t *testing.T) {
+	t.Parallel()
+
+	rec := httptest.NewRecorder()
+	resp := httpx.NewJsonResponse(rec, map[string]string{"html": "<script>"}, http.StatusOK)
+
+	resp.Send()
+
+	if rec.Body.String() != `{"html":"<script>"}` {
+		t.Fatalf("expected unescaped HTML characters, got %s", rec.Body.String())
+	}
+}

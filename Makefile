@@ -1,6 +1,7 @@
 SHELL := /bin/bash
 
 GO_IMAGE ?= golang:1.26.4-alpine
+TASK_VERSION ?= latest
 GO_BIN_VOLUME ?= alloy-go-bin
 GO_MOD_VOLUME ?= alloy-go-mod
 GO_BUILD_VOLUME ?= alloy-go-build
@@ -11,6 +12,9 @@ export GO_MOD_VOLUME
 export GO_BUILD_VOLUME
 
 VP := ./node_modules/.bin/vp
+DOCKER_COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then printf 'docker-compose'; else printf 'docker compose'; fi)
+DOCKER_RUN := $(DOCKER_COMPOSE) run --rm -T app
+TASK := sh -lc 'apk add --no-cache bash git >/dev/null && git config --global --add safe.directory /workspace && export PATH=/go/bin:/usr/local/go/bin:$$PATH; go install github.com/go-task/task/v3/cmd/task@$(TASK_VERSION) && task "$$@"' task
 
 export FMT_IMAGE ?= ghcr.io/oullin/go-fmt:v0.4.1-full
 export PWD := $(shell pwd)
@@ -30,10 +34,10 @@ format-all:
 	@$(VP) run format-all
 
 go-test:
-	@$(VP) run go:test
+	$(DOCKER_RUN) $(TASK) go:test
 
 go\:test:
-	@$(VP) run go:test
+	$(DOCKER_RUN) $(TASK) go:test
 
 Makefile:
 	@:

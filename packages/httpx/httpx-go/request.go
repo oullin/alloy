@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -111,7 +112,7 @@ func (r *Request) Path() string {
 
 // PathInfo returns the request path used by routing validators.
 func (r *Request) PathInfo() string {
-	return r.Path()
+	return r.DecodedPath()
 }
 
 // DecodedPath returns the URL-decoded request path used for route parameter binding.
@@ -176,8 +177,8 @@ func (r *Request) IP() string {
 
 	host := r.raw.RemoteAddr
 
-	if idx := strings.LastIndex(host, ":"); idx != -1 {
-		host = host[:idx]
+	if splitHost, _, err := net.SplitHostPort(host); err == nil {
+		return splitHost
 	}
 
 	return host

@@ -615,6 +615,48 @@ func TestPendingRequestThrowOnFailureNotOnSuccess(t *testing.T) {
 	}
 }
 
+func TestPendingRequestRetriesFailedResponse(t *testing.T) {
+	t.Parallel()
+
+	attempts := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		attempts++
+
+		if attempts == 1 {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("failed"))
+
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("recovered"))
+	}))
+
+	defer server.Close()
+
+	resp, err := client.NewFactory().PendingRequest().
+		Retry(2, time.Millisecond).
+		Get(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error after retry: %v", err)
+	}
+
+	if attempts != 2 {
+		t.Fatalf("expected 2 attempts, got %d", attempts)
+	}
+
+	if resp.Status() != http.StatusOK {
+		t.Fatalf("expected final 200 response, got %d", resp.Status())
+	}
+
+	if resp.Body() != "recovered" {
+		t.Fatalf("expected recovered response, got %s", resp.Body())
+	}
+}
+
 func TestPendingRequestThrowWithCallback(t *testing.T) {
 	t.Parallel()
 

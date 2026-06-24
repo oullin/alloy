@@ -449,6 +449,9 @@ func (p *PendingRequest) send(method, requestURL string, data any) (*Response, e
 	transport := p.buildTransport()
 
 	for attempt := 0; attempt < p.retries; attempt++ {
+		resp = nil
+		lastErr = nil
+
 		if attempt > 0 {
 			time.Sleep(p.retryDelay)
 		}

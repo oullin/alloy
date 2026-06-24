@@ -48,7 +48,14 @@ export const renderSubmittedDataTableFrame = <T>(message: string, headers: strin
 	promptEnvironment().output.write(`${message}\n${display}\n`);
 };
 
-export const renderCancelledDataTableFrame = <T>(message: string, headers: string[], rows: Array<VisibleDataTableRow<T>>, selected: number, mode: DataTableSearchMode, query: string): void => {
+export const renderCancelledDataTableFrame = <T>(
+	message: string,
+	headers: string[],
+	rows: Array<VisibleDataTableRow<T>>,
+	selected: number,
+	mode: DataTableSearchMode,
+	query: string,
+): void => {
 	const outputRows = renderCancelledDataTableRows(headers, rows, selected);
 	const querySuffix = mode === 'search' || query.length > 0 ? ` ${query}` : '';
 

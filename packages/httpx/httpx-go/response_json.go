@@ -1,9 +1,11 @@
 package httpx
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // JsonOptions controls JSON encoding behaviour.
@@ -173,10 +175,27 @@ func (r *JsonResponse) GetOriginal() any {
 // encode marshals data to JSON using the configured options.
 func (r *JsonResponse) encode() ([]byte, error) {
 	if r.options.Indent {
-		return json.MarshalIndent(r.data, "", "    ")
+		var buf bytes.Buffer
+		encoder := json.NewEncoder(&buf)
+		encoder.SetEscapeHTML(r.options.EscapeHTML)
+		encoder.SetIndent("", "    ")
+
+		if err := encoder.Encode(r.data); err != nil {
+			return nil, err
+		}
+
+		return []byte(strings.TrimSuffix(buf.String(), "\n")), nil
 	}
 
-	return json.Marshal(r.data)
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetEscapeHTML(r.options.EscapeHTML)
+
+	if err := encoder.Encode(r.data); err != nil {
+		return nil, err
+	}
+
+	return []byte(strings.TrimSuffix(buf.String(), "\n")), nil
 }
 
 // FromJsonString creates a JsonResponse from a raw JSON string.
