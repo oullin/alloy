@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -45,7 +46,7 @@ func (e *StreamedEvent) String() string {
 // StreamEvents writes a series of server-sent events from the channel to the
 // http.ResponseWriter. It sets the appropriate SSE headers, flushes after each
 // event, and returns when the channel is closed or the client disconnects.
-func StreamEvents(w http.ResponseWriter, events <-chan StreamedEvent) error {
+func StreamEvents(ctx context.Context, w http.ResponseWriter, events <-chan StreamedEvent) error {
 	flusher, ok := w.(http.Flusher)
 
 	if !ok {
@@ -58,35 +59,51 @@ func StreamEvents(w http.ResponseWriter, events <-chan StreamedEvent) error {
 	w.WriteHeader(http.StatusOK)
 	flusher.Flush()
 
-	ctx := http.NewResponseController(w)
-	_ = ctx // keep for potential future use
-
-	for event := range events {
-		_, err := fmt.Fprint(w, event.String())
-
-		if err != nil {
-			return err
-		}
-
-		flusher.Flush()
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
-	return nil
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case event, ok := <-events:
+			if !ok {
+				return nil
+			}
+
+			_, err := fmt.Fprint(w, event.String())
+
+			if err != nil {
+				return err
+			}
+
+			flusher.Flush()
+		}
+	}
 }
 
 // StreamEventsFunc writes server-sent events produced by a callback function.
 // The callback receives a send function; call it for each event. Return from
 // the callback to end the stream.
-func StreamEventsFunc(w http.ResponseWriter, fn func(send func(StreamedEvent))) error {
+func StreamEventsFunc(ctx context.Context, w http.ResponseWriter, fn func(send func(StreamedEvent))) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	ch := make(chan StreamedEvent)
 
 	go func() {
 		defer close(ch)
 
 		fn(func(event StreamedEvent) {
-			ch <- event
+			select {
+			case <-ctx.Done():
+				return
+			case ch <- event:
+			}
 		})
 	}()
 
-	return StreamEvents(w, ch)
+	return StreamEvents(ctx, w, ch)
 }

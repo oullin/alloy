@@ -16,9 +16,11 @@ import (
 // TrustProxies validates that proxy-related headers (X-Forwarded-*) only come
 // from trusted proxy IPs. Untrusted headers are stripped.
 type TrustProxies struct {
-	proxies  []string
-	headers  int
-	trustAll bool
+	proxies     []string
+	headers     int
+	trustAll    bool
+	trustedIPs  map[string]struct{}
+	trustedNets []*net.IPNet
 }
 
 const (
@@ -32,6 +34,8 @@ const (
 // NewTrustProxies creates the middleware. Pass "*" as a proxy to trust all.
 func NewTrustProxies(proxies []string, headers int) *TrustProxies {
 	trustAll := false
+	trustedIPs := make(map[string]struct{})
+	var trustedNets []*net.IPNet
 
 	for _, p := range proxies {
 		if p == "*" || p == "**" {
@@ -39,12 +43,24 @@ func NewTrustProxies(proxies []string, headers int) *TrustProxies {
 
 			break
 		}
+
+		if strings.Contains(p, "/") {
+			_, cidr, err := net.ParseCIDR(p)
+
+			if err == nil {
+				trustedNets = append(trustedNets, cidr)
+			}
+		} else {
+			trustedIPs[p] = struct{}{}
+		}
 	}
 
 	return &TrustProxies{
-		proxies:  proxies,
-		headers:  headers,
-		trustAll: trustAll,
+		proxies:     proxies,
+		headers:     headers,
+		trustAll:    trustAll,
+		trustedIPs:  trustedIPs,
+		trustedNets: trustedNets,
 	}
 }
 
@@ -80,16 +96,14 @@ func (m *TrustProxies) isTrustedProxy(r *http.Request) bool {
 	}
 
 	remoteIP := extractIP(r.RemoteAddr)
+	ip := net.ParseIP(remoteIP)
 
-	for _, proxy := range m.proxies {
-		if strings.Contains(proxy, "/") {
-			// CIDR range.
-			_, cidr, err := net.ParseCIDR(proxy)
+	if _, ok := m.trustedIPs[remoteIP]; ok {
+		return true
+	}
 
-			if err == nil && cidr.Contains(net.ParseIP(remoteIP)) {
-				return true
-			}
-		} else if proxy == remoteIP {
+	for _, cidr := range m.trustedNets {
+		if ip != nil && cidr.Contains(ip) {
 			return true
 		}
 	}

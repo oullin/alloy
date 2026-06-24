@@ -90,6 +90,10 @@ func (m *HandleCors) handlePreflight(w http.ResponseWriter, r *http.Request) {
 func (m *HandleCors) isAllowedOrigin(origin string) bool {
 	for _, allowed := range m.opts.AllowedOrigins {
 		if allowed == "*" {
+			if m.opts.AllowCredentials {
+				continue
+			}
+
 			return true
 		}
 

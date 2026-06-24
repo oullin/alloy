@@ -34,7 +34,7 @@ func parseDigestChallenge(header string) *digestChallenge {
 	challenge := &digestChallenge{}
 	params := header[len("Digest "):]
 
-	for _, param := range strings.Split(params, ",") {
+	for _, param := range splitDigestParams(params) {
 		param = strings.TrimSpace(param)
 		parts := strings.SplitN(param, "=", 2)
 
@@ -60,6 +60,36 @@ func parseDigestChallenge(header string) *digestChallenge {
 	}
 
 	return challenge
+}
+
+func splitDigestParams(params string) []string {
+	var parts []string
+	var current strings.Builder
+	inQuotes := false
+	escaped := false
+
+	for _, r := range params {
+		switch {
+		case escaped:
+			current.WriteRune(r)
+			escaped = false
+		case r == '\\':
+			current.WriteRune(r)
+			escaped = true
+		case r == '"':
+			current.WriteRune(r)
+			inQuotes = !inQuotes
+		case r == ',' && !inQuotes:
+			parts = append(parts, current.String())
+			current.Reset()
+		default:
+			current.WriteRune(r)
+		}
+	}
+
+	parts = append(parts, current.String())
+
+	return parts
 }
 
 // computeDigestResponse computes the Digest authentication response hash.

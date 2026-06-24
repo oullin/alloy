@@ -160,6 +160,21 @@ func TestFactoryRecorded(t *testing.T) {
 	}
 }
 
+func TestFactoryRecordedReturnsCopy(t *testing.T) {
+	t.Parallel()
+
+	factory := client.NewFactory().Fake()
+
+	factory.PendingRequest().Get("http://example.com/a")
+
+	recorded := factory.Recorded()
+	recorded[0] = client.RecordedRequest{}
+
+	if factory.Recorded()[0].Request == nil {
+		t.Fatal("expected Recorded to return a copy")
+	}
+}
+
 func TestFactoryRecordedWithFilter(t *testing.T) {
 	t.Parallel()
 

@@ -1,15 +1,19 @@
 package client
 
 import (
+	"crypto/tls"
+	"net"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 )
 
 // Factory is the central hub for creating PendingRequest instances and managing
 // test fakes, stubs and request recording.
 type Factory struct {
 	mu               sync.Mutex
+	transportMu      sync.Mutex
 	baseURL          string
 	globalMiddleware []Middleware
 	recording        bool
@@ -19,6 +23,12 @@ type Factory struct {
 	sequences        map[string]*ResponseSequence
 	preventStray     bool
 	dispatcher       *EventDispatcher
+	transports       map[transportKey]*http.Transport
+}
+
+type transportKey struct {
+	connectTimeout string
+	skipTLSVerify  bool
 }
 
 // RecordedRequest holds a recorded outbound request and its response.
@@ -34,7 +44,8 @@ type StubCallback func(req *http.Request) *http.Response
 // NewFactory creates a new Factory.
 func NewFactory() *Factory {
 	return &Factory{
-		sequences: make(map[string]*ResponseSequence),
+		sequences:  make(map[string]*ResponseSequence),
+		transports: make(map[transportKey]*http.Transport),
 	}
 }
 
@@ -182,7 +193,10 @@ func (f *Factory) Recorded(filter ...func(RecordedRequest) bool) []RecordedReque
 	defer f.mu.Unlock()
 
 	if len(filter) == 0 {
-		return f.recorded
+		copied := make([]RecordedRequest, len(f.recorded))
+		copy(copied, f.recorded)
+
+		return copied
 	}
 
 	var result []RecordedRequest
@@ -194,6 +208,39 @@ func (f *Factory) Recorded(filter ...func(RecordedRequest) bool) []RecordedReque
 	}
 
 	return result
+}
+
+func (f *Factory) transportFor(connectTimeout time.Duration, skipTLSVerify bool) *http.Transport {
+	f.transportMu.Lock()
+
+	defer f.transportMu.Unlock()
+
+	key := transportKey{
+		connectTimeout: connectTimeout.String(),
+		skipTLSVerify:  skipTLSVerify,
+	}
+
+	if transport, ok := f.transports[key]; ok {
+		return transport
+	}
+
+	transport := &http.Transport{}
+
+	if connectTimeout > 0 {
+		transport.DialContext = (&net.Dialer{
+			Timeout: connectTimeout,
+		}).DialContext
+	}
+
+	if skipTLSVerify {
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true, //nolint:gosec // intentional user opt-in
+		}
+	}
+
+	f.transports[key] = transport
+
+	return transport
 }
 
 // AssertSent asserts that at least one request matches the callback.

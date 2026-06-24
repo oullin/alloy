@@ -70,6 +70,50 @@ func TestDigestAuth(t *testing.T) {
 	}
 }
 
+func TestDigestAuthParsesQuotedCommaValues(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		auth := r.Header.Get("Authorization")
+
+		if !strings.HasPrefix(auth, "Digest ") {
+			w.Header().Set("WWW-Authenticate",
+				`Digest realm="My, Realm", nonce="abc,123", qop="auth", opaque="xyz,789"`)
+			w.WriteHeader(http.StatusUnauthorized)
+
+			return
+		}
+
+		if !strings.Contains(auth, `realm="My, Realm"`) {
+			t.Fatalf("expected quoted comma realm in digest response, got %s", auth)
+		}
+
+		if !strings.Contains(auth, `nonce="abc,123"`) {
+			t.Fatalf("expected quoted comma nonce in digest response, got %s", auth)
+		}
+
+		if !strings.Contains(auth, `opaque="xyz,789"`) {
+			t.Fatalf("expected quoted comma opaque in digest response, got %s", auth)
+		}
+
+		w.Write([]byte("authenticated"))
+	}))
+
+	defer server.Close()
+
+	resp, err := client.NewFactory().PendingRequest().
+		WithDigestAuth("admin", "secret").
+		Get(server.URL)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resp.Body() != "authenticated" {
+		t.Fatalf("expected authenticated, got %s", resp.Body())
+	}
+}
+
 func TestDigestAuthNotTriggeredOnNon401(t *testing.T) {
 	t.Parallel()
 

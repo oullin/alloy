@@ -14,6 +14,7 @@ import (
 	"net/http/httptrace"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -510,30 +511,49 @@ func (p *PendingRequest) send(method, requestURL string, data any) (*Response, e
 		} else if resp == nil {
 			// Attach httptrace for handler stats.
 			var dnsStart, connectStart, tlsStart, reqStart time.Time
+			var statsMu sync.Mutex
 			stats := make(map[string]any)
 			reqStart = time.Now()
 
 			trace := &httptrace.ClientTrace{
 				DNSStart: func(info httptrace.DNSStartInfo) {
+					statsMu.Lock()
+					defer statsMu.Unlock()
+
 					dnsStart = time.Now()
 				},
 				DNSDone: func(info httptrace.DNSDoneInfo) {
+					statsMu.Lock()
+					defer statsMu.Unlock()
+
 					if !dnsStart.IsZero() {
 						stats["dns_ms"] = float64(time.Since(dnsStart).Milliseconds())
 					}
 				},
 				ConnectStart: func(network, addr string) {
+					statsMu.Lock()
+					defer statsMu.Unlock()
+
 					connectStart = time.Now()
 				},
 				ConnectDone: func(network, addr string, err error) {
+					statsMu.Lock()
+					defer statsMu.Unlock()
+
 					if !connectStart.IsZero() {
 						stats["connect_ms"] = float64(time.Since(connectStart).Milliseconds())
 					}
 				},
 				TLSHandshakeStart: func() {
+					statsMu.Lock()
+					defer statsMu.Unlock()
+
 					tlsStart = time.Now()
 				},
 				TLSHandshakeDone: func(state tls.ConnectionState, err error) {
+					statsMu.Lock()
+					defer statsMu.Unlock()
+
 					if !tlsStart.IsZero() {
 						stats["tls_ms"] = float64(time.Since(tlsStart).Milliseconds())
 					}
@@ -545,7 +565,15 @@ func (p *PendingRequest) send(method, requestURL string, data any) (*Response, e
 			// Execute through middleware chain.
 			rawResp, err := transport(traceReq)
 
+			statsMu.Lock()
 			stats["total_ms"] = float64(time.Since(reqStart).Milliseconds())
+			statsSnapshot := make(map[string]any, len(stats))
+
+			for key, value := range stats {
+				statsSnapshot[key] = value
+			}
+
+			statsMu.Unlock()
 
 			if err != nil {
 				lastErr = &ConnectionError{URL: fullURL, Err: err}
@@ -563,7 +591,7 @@ func (p *PendingRequest) send(method, requestURL string, data any) (*Response, e
 			}
 
 			resp = NewResponse(rawResp)
-			resp.SetStats(stats)
+			resp.SetStats(statsSnapshot)
 		}
 
 		// Write response body to sink if configured.
@@ -737,21 +765,11 @@ func (p *PendingRequest) encodeMultipart(data any) ([]byte, string, error) {
 func (p *PendingRequest) buildTransport() RoundTripFunc {
 	// Configure custom transport when connect timeout or TLS skip is needed.
 	if p.connectTimeout > 0 || p.skipTLSVerify {
-		transport := &http.Transport{}
-
-		if p.connectTimeout > 0 {
-			transport.DialContext = (&net.Dialer{
-				Timeout: p.connectTimeout,
-			}).DialContext
+		if p.factory != nil {
+			p.httpClient.Transport = p.factory.transportFor(p.connectTimeout, p.skipTLSVerify)
+		} else {
+			p.httpClient.Transport = buildConfiguredTransport(p.connectTimeout, p.skipTLSVerify)
 		}
-
-		if p.skipTLSVerify {
-			transport.TLSClientConfig = &tls.Config{
-				InsecureSkipVerify: true, //nolint:gosec // intentional user opt-in
-			}
-		}
-
-		p.httpClient.Transport = transport
 	}
 
 	base := RoundTripFunc(func(req *http.Request) (*http.Response, error) {
@@ -771,6 +789,24 @@ func (p *PendingRequest) buildTransport() RoundTripFunc {
 	}
 
 	return chain
+}
+
+func buildConfiguredTransport(connectTimeout time.Duration, skipTLSVerify bool) *http.Transport {
+	transport := &http.Transport{}
+
+	if connectTimeout > 0 {
+		transport.DialContext = (&net.Dialer{
+			Timeout: connectTimeout,
+		}).DialContext
+	}
+
+	if skipTLSVerify {
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true, //nolint:gosec // intentional user opt-in
+		}
+	}
+
+	return transport
 }
 
 func basicAuth(user, password string) string {

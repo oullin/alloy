@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"time"
 )
 
@@ -28,15 +28,14 @@ func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 			return
 		}
 
-		// Capture the response.
-		rec := httptest.NewRecorder()
+		// Capture the response metadata and body without importing httptest in production code.
+		rec := newBufferedResponseWriter()
 		next.ServeHTTP(rec, r)
 
-		result := rec.Result()
 		body := rec.Body.Bytes()
 
 		// Generate ETag if not present.
-		etag := result.Header.Get("ETag")
+		etag := rec.Header().Get("ETag")
 
 		if etag == "" && len(body) > 0 {
 			hash := sha256.Sum256(body)
@@ -56,7 +55,7 @@ func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 
 		// Check If-Modified-Since.
 		if ims := r.Header.Get("If-Modified-Since"); ims != "" {
-			if lastMod := result.Header.Get("Last-Modified"); lastMod != "" {
+			if lastMod := rec.Header().Get("Last-Modified"); lastMod != "" {
 				imsTime, err1 := time.Parse(http.TimeFormat, ims)
 				lmTime, err2 := time.Parse(http.TimeFormat, lastMod)
 
@@ -76,7 +75,32 @@ func (m *CheckResponseForModifications) Wrap(next http.Handler) http.Handler {
 	})
 }
 
-func copyHeaders(w http.ResponseWriter, rec *httptest.ResponseRecorder) {
+type bufferedResponseWriter struct {
+	HeaderMap http.Header
+	Body      bytes.Buffer
+	Code      int
+}
+
+func newBufferedResponseWriter() *bufferedResponseWriter {
+	return &bufferedResponseWriter{
+		HeaderMap: make(http.Header),
+		Code:      http.StatusOK,
+	}
+}
+
+func (w *bufferedResponseWriter) Header() http.Header {
+	return w.HeaderMap
+}
+
+func (w *bufferedResponseWriter) Write(body []byte) (int, error) {
+	return w.Body.Write(body)
+}
+
+func (w *bufferedResponseWriter) WriteHeader(statusCode int) {
+	w.Code = statusCode
+}
+
+func copyHeaders(w http.ResponseWriter, rec *bufferedResponseWriter) {
 	for k, vals := range rec.Header() {
 		for _, v := range vals {
 			w.Header().Add(k, v)

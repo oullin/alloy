@@ -1,6 +1,7 @@
 package httpx_test
 
 import (
+	"context"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -94,7 +95,7 @@ func TestStreamEvents(t *testing.T) {
 	events <- httpx.StreamedEvent{Data: "third"}
 	close(events)
 
-	err := httpx.StreamEvents(rec, events)
+	err := httpx.StreamEvents(context.Background(), rec, events)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -128,7 +129,7 @@ func TestStreamEventsFunc(t *testing.T) {
 
 	rec := httptest.NewRecorder()
 
-	err := httpx.StreamEventsFunc(rec, func(send func(httpx.StreamedEvent)) {
+	err := httpx.StreamEventsFunc(context.Background(), rec, func(send func(httpx.StreamedEvent)) {
 		send(httpx.StreamedEvent{Event: "ping", Data: "1"})
 		send(httpx.StreamedEvent{Event: "ping", Data: "2"})
 	})
@@ -141,5 +142,20 @@ func TestStreamEventsFunc(t *testing.T) {
 
 	if !strings.Contains(body, "data: 1") || !strings.Contains(body, "data: 2") {
 		t.Fatal("expected both events in body")
+	}
+}
+
+func TestStreamEventsStopsWhenContextCancelled(t *testing.T) {
+	t.Parallel()
+
+	rec := httptest.NewRecorder()
+	events := make(chan httpx.StreamedEvent)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := httpx.StreamEvents(ctx, rec, events)
+
+	if err == nil {
+		t.Fatal("expected cancellation error")
 	}
 }

@@ -133,6 +133,29 @@ func TestCorsWithCredentials(t *testing.T) {
 	}
 }
 
+func TestCorsWildcardWithCredentialsDoesNotAllowAnyOrigin(t *testing.T) {
+	t.Parallel()
+
+	handler := middleware.NewHandleCors(middleware.CorsOptions{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	}).Wrap(okHandler)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Origin", "http://evil.example")
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Header().Get("Access-Control-Allow-Origin") != "" {
+		t.Fatal("expected no allowed origin when wildcard is paired with credentials")
+	}
+
+	if rec.Header().Get("Access-Control-Allow-Credentials") != "" {
+		t.Fatal("expected no credentials header for disallowed wildcard origin")
+	}
+}
+
 func TestCorsExposedHeaders(t *testing.T) {
 	t.Parallel()
 
