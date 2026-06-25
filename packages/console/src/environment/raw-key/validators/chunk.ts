@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const bufferChunkSchema = z.custom<Buffer>(Buffer.isBuffer);
+const bufferChunkSchema = z.custom<Buffer>((chunk): chunk is Buffer => Buffer.isBuffer(chunk));
 
 const rawKeyChunkTextSchema = z.union([z.string(), bufferChunkSchema.transform((chunk) => chunk.toString('utf8'))]);
 

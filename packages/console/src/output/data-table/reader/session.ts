@@ -54,7 +54,7 @@ export const createDataTableReaderSession = <T>(options: DataTableReadOptions<T>
 			return state.query();
 		},
 		render,
-		rows: state.rows,
+		rows: () => state.rows(),
 		selected() {
 			return state.selected();
 		},

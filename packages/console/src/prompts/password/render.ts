@@ -1,12 +1,13 @@
 import { promptEnvironment } from '#console/environment';
 import { renderBox } from '#console/theme/box';
 import { cyan, dim, red, strikethrough } from '#console/theme/styles';
+import { characterLength } from '#console/typed-value/characters';
 import { valueWithCursor } from '#console/typed-value/cursor';
 import type { PasswordInputOptions } from '#console/prompts/password/types';
 
-export const maskPassword = (value: string): string => '•'.repeat([...value].length);
+export const maskPassword = (value: string): string => '•'.repeat(characterLength(value));
 
-export const passwordLength = (value: string): number => [...value].length;
+export const passwordLength = (value: string): number => characterLength(value);
 
 const passwordDisplay = (value: string, cursor: number, options: PasswordInputOptions): string => {
 	return value.length > 0 ? valueWithCursor(maskPassword(value), cursor) : dim(options.placeholder ?? '');

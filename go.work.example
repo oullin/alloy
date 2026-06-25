@@ -3,10 +3,12 @@ go 1.26.4
 toolchain go1.26.4
 
 use (
+	./packages/auth/auth-go
 	./packages/bus/bus-go
+	./packages/cache/cache-go
 	./packages/collection/collect-go
-	./packages/concurrency/concurrency-go
 	./packages/config/config-go
+	./packages/container/container-go
 	./packages/cookie/cookie-go
 	./packages/encryption/encryption-go
 	./packages/events/events-go

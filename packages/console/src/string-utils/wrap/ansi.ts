@@ -1,7 +1,8 @@
 import { ansiCloseSequence, parseAnsiSegments } from '#console/string-utils/ansi';
+import { characters as stringCharacters } from '#console/typed-value/characters';
 import type { AnsiSegment } from '#console/string-utils/ansi';
 
-const codedCharacters = (value: string): AnsiSegment[] => parseAnsiSegments(value).flatMap((segment) => [...segment.text].map((text) => ({ text, codes: segment.codes })));
+const codedCharacters = (value: string): AnsiSegment[] => parseAnsiSegments(value).flatMap((segment) => stringCharacters(segment.text).map((text) => ({ text, codes: segment.codes })));
 
 export const restoreAnsiWrappedLines = (value: string, plainLines: string[]): string[] => {
 	const characters = codedCharacters(value);
@@ -13,7 +14,7 @@ export const restoreAnsiWrappedLines = (value: string, plainLines: string[]): st
 		let line = '';
 		let activeCodes = '';
 
-		for (const plainCharacter of [...plainLine]) {
+		for (const plainCharacter of stringCharacters(plainLine)) {
 			while (characterIndex < characters.length && characters[characterIndex]?.text !== plainCharacter) {
 				if (characters[characterIndex]?.text === ' ') {
 					characterIndex += 1;

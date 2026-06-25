@@ -11,5 +11,5 @@ export const readDataTableSelection = async <T>(options: DataTableReadOptions<T>
 		return readDataTableFallbackSelection(options, headers);
 	}
 
-	return readDataTableSelectionInteractive(environment.input.readKey, options, headers);
+	return readDataTableSelectionInteractive(async () => environment.input.readKey?.() ?? null, options, headers);
 };
