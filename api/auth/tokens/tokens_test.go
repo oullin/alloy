@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 	"github.com/oullin/alloy/auth/httpx"
 	"github.com/oullin/alloy/auth/tokens"
 	"github.com/oullin/alloy/auth/user"
-	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type stubUserProvider struct {

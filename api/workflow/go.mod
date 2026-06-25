@@ -7,6 +7,7 @@ require github.com/oullin/alloy/config v0.0.0
 require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/oullin/alloy/api/contracts v0.0.0
 	github.com/oullin/alloy/collection v0.0.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
@@ -25,3 +26,5 @@ replace (
 	github.com/oullin/alloy/collection => ../collection
 	github.com/oullin/alloy/config => ../config
 )
+
+replace github.com/oullin/alloy/api/contracts => ../contracts

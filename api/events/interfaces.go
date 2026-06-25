@@ -1,79 +1,42 @@
 package events
 
-import (
-	"context"
-	"time"
-)
+import cevents "github.com/oullin/alloy/api/contracts/events"
 
 // Listener handles an event. The returned value is collected by Dispatch and
 // used by Until to halt on the first non-nil response.
-type Listener func(ctx context.Context, event any) (any, error)
+type Listener = cevents.Listener
 
 // Subscriber registers one or more event-listener mappings on a dispatcher.
-type Subscriber interface {
-	Subscribe(dispatcher Dispatcher)
-}
+type Subscriber = cevents.Subscriber
 
 // Dispatcher dispatches domain events and manages listeners.
-type Dispatcher interface {
-	Listen(events any, listeners ...Listener)
-	HasListeners(event any) bool
-	HasWildcardListeners(event any) bool
-	Subscribe(subscriber Subscriber)
-	Until(ctx context.Context, event any) (any, error)
-	Dispatch(ctx context.Context, event any) ([]any, error)
-	Push(ctx context.Context, event any)
-	Flush(ctx context.Context, event string) error
-	Forget(event any)
-	ForgetPushed()
-	GetListeners(event any) []Listener
-}
+type Dispatcher = cevents.Dispatcher
 
 // ShouldQueue is a marker interface. Events or listener wrappers implementing
 // this are dispatched to the queue backend instead of executing inline.
-type ShouldQueue interface {
-	ShouldQueue()
-}
+type ShouldQueue = cevents.ShouldQueue
 
 // ShouldDispatchAfterCommit is a marker interface for events that should be
 // deferred until the active database transaction commits.
-type ShouldDispatchAfterCommit interface {
-	ShouldDispatchAfterCommit()
-}
+type ShouldDispatchAfterCommit = cevents.ShouldDispatchAfterCommit
 
 // ShouldHandleEventsAfterCommit is a marker interface for listeners that
 // should defer execution until the active database transaction commits.
-type ShouldHandleEventsAfterCommit interface {
-	ShouldHandleEventsAfterCommit()
-}
+type ShouldHandleEventsAfterCommit = cevents.ShouldHandleEventsAfterCommit
 
 // TransactionManager allows the dispatcher to defer events until a database
 // transaction commits.
-type TransactionManager interface {
-	AfterCommit(fn func())
-}
+type TransactionManager = cevents.TransactionManager
 
 // QueueResolver creates a queue-like backend on demand for dispatching
 // queued listeners.
-type QueueResolver func() QueueBackend
+type QueueResolver = cevents.QueueResolver
 
 // TransactionManagerResolver creates a TransactionManager on demand.
-type TransactionManagerResolver func() TransactionManager
+type TransactionManagerResolver = cevents.TransactionManagerResolver
 
 // QueueBackend is the minimal interface required to push listener jobs.
-type QueueBackend interface {
-	Push(queue string, payload []byte) error
-	PushDelayed(queue string, payload []byte, delay time.Duration) error
-}
+type QueueBackend = cevents.QueueBackend
 
 // ListenerOptions configures a queued listener.
-type ListenerOptions struct {
-	Connection    string
-	Backend       string
-	Delay         time.Duration
-	Tries         int
-	MaxExceptions int
-	Timeout       time.Duration
-	Backoff       []time.Duration
-	AfterCommit   *bool
-}
+type ListenerOptions = cevents.ListenerOptions

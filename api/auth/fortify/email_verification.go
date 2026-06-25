@@ -3,7 +3,7 @@ package fortify
 import (
 	"net/http"
 
-	cauth "github.com/oullin/alloy/contracts/auth"
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 )
 
 // NewVerificationNotificationHandler sends the current user a verification link.

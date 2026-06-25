@@ -3,16 +3,12 @@ package workflow
 import (
 	"fmt"
 
+	cworkflow "github.com/oullin/alloy/api/contracts/workflow"
 	"github.com/oullin/alloy/workflow/events"
 )
 
 // Sink is the optional structured logger interface the engine writes to.
-type Sink interface {
-	Debug(msg string, args ...any)
-	Info(msg string, args ...any)
-	Warn(msg string, args ...any)
-	Error(msg string, args ...any)
-}
+type Sink = cworkflow.Sink
 
 // Engine is the public Petri-Net workflow contract.
 type Engine[T any] interface {

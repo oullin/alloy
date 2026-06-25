@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
+	cauth "github.com/oullin/alloy/api/contracts/auth"
+	cevents "github.com/oullin/alloy/api/contracts/auth/events"
+	clog "github.com/oullin/alloy/api/contracts/auth/log"
 	authevents "github.com/oullin/alloy/auth/events"
-	cauth "github.com/oullin/alloy/contracts/auth"
-	cevents "github.com/oullin/alloy/contracts/auth/events"
-	clog "github.com/oullin/alloy/contracts/auth/log"
 )
 
 // ErrResetLinkThrottled is returned when a reset link was requested too recently.

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	cauth "github.com/oullin/alloy/contracts/auth"
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 )
 
 // Ability is a function that determines whether a user can perform an action.

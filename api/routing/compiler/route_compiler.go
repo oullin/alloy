@@ -4,22 +4,15 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	ccompiler "github.com/oullin/alloy/api/contracts/routing/compiler"
 )
 
 // SourceRoute is the minimum surface a compilable route must expose.
 //
 // The concrete [routing.Route] type implements this interface. Tests can
 // substitute their own implementation without pulling in the full Route type.
-type SourceRoute interface {
-	// Path returns the route URI pattern (e.g. "/users/{user}").
-	Path() string
-	// Host returns the host pattern, or the empty string if none.
-	Host() string
-	// Requirements returns parameter regex requirements keyed by name.
-	Requirements() map[string]string
-	// HasDefault reports whether the named parameter has a default value.
-	HasDefault(name string) bool
-}
+type SourceRoute = ccompiler.SourceRoute
 
 // Separators are the characters that may serve as a separator immediately
 // before an optional variable.

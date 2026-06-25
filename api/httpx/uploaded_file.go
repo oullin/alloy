@@ -11,13 +11,13 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	chttpx "github.com/oullin/alloy/api/contracts/httpx"
 )
 
 // FileStore abstracts file storage for uploaded files. Implementations may
 // write to local disk, S3, GCS, or any other backend.
-type FileStore interface {
-	Put(path string, contents io.Reader) error
-}
+type FileStore = chttpx.FileStore
 
 // UploadedFile represents a file received via a multipart upload.
 type UploadedFile struct {

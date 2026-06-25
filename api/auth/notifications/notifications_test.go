@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 	"github.com/oullin/alloy/auth/notifications"
-	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type recordingMailer struct {

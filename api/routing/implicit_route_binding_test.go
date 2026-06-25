@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/routing/contracts"
+	contracts "github.com/oullin/alloy/api/contracts/routing"
 )
 
 // tests/Routing/ImplicitRouteBindingTest.php that don't depend on Orm.

@@ -1,6 +1,10 @@
 package routing
 
-import "fmt"
+import (
+	"fmt"
+
+	crouting "github.com/oullin/alloy/api/contracts/routing"
+)
 
 // RedirectResponse is a minimal redirect-response value type used by the
 // routing port. The bedrock httpx package supplies a richer type that the
@@ -23,14 +27,7 @@ type RedirectResponse struct {
 
 // SessionStore is the minimum session surface Redirector touches.
 // httpx.SessionStore narrowly.
-type SessionStore interface {
-	Flash(key string, value any)
-	GetOldInput(key, fallback string) string
-	HasOldInput(key string) bool
-	FlashInput(input map[string]any)
-	Get(key string, fallback any) any
-	Put(key string, value any)
-}
+type SessionStore = crouting.RedirectSessionStore
 
 // Ref: @bedrock/code-0329
 // [RedirectResponse] values for the various redirect verbs (To, Away, Secure,

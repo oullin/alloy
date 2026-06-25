@@ -1,10 +1,10 @@
 package routing
 
+import crouting "github.com/oullin/alloy/api/contracts/routing"
+
 // ViewFactory is the minimum surface ViewController needs from the bedrock
 // view layer. The service provider in M11 wires in a real implementation.
-type ViewFactory interface {
-	Make(view string, data map[string]any) any
-}
+type ViewFactory = crouting.ViewFactory
 
 // ViewController is the invokable controller used by [Router.View]. It
 // renders the named view with the supplied data, merging in any extra route

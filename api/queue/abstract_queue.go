@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	cqueue "github.com/oullin/alloy/api/contracts/queue"
 )
 
 // Ref: @bedrock/code-0268
@@ -24,9 +26,7 @@ import (
 
 // Namer is implemented by job values that want to override the default
 // reflect-based display name.
-type Namer interface {
-	QueueDisplayName() string
-}
+type Namer = cqueue.Namer
 
 // AfterCommitMarker is implemented by jobs that should be dispatched
 // only after the surrounding database transaction has committed. The
@@ -35,17 +35,13 @@ type Namer interface {
 // on a higher-level transaction package.
 //
 // Ref: @bedrock/code-0197
-type AfterCommitMarker interface {
-	QueueAfterCommit() bool
-}
+type AfterCommitMarker = cqueue.AfterCommitMarker
 
 // BeforeCommitMarker is the inverse of AfterCommitMarker: a job that
 // Ref: @bedrock/code-0196
 // override. Step 14 wires the full decision tree; today the type exists
 // so drivers and tests can reference it.
-type BeforeCommitMarker interface {
-	QueueBeforeCommit() bool
-}
+type BeforeCommitMarker = cqueue.BeforeCommitMarker
 
 // DisplayName returns the display name for a job value.
 //

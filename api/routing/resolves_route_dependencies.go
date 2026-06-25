@@ -3,6 +3,8 @@ package routing
 import (
 	"reflect"
 	"strconv"
+
+	crouting "github.com/oullin/alloy/api/contracts/routing"
 )
 
 // same name. It performs reflection-based parameter resolution for both
@@ -22,12 +24,7 @@ type ResolvesRouteDependencies struct {
 // can look up typed parameters by their reflect.Type. The bedrock container
 // has [DependencyContainer.Make] but lacks reflection-based binding; the
 // concrete adapter in M11 will wrap container.App.
-type DependencyContainer interface {
-	// MakeFor resolves an instance of the requested type. It is the Go
-	// counterpart to PHP's $container->make($className), keyed by reflect.Type
-	// rather than a string class name.
-	MakeFor(t reflect.Type) (any, error)
-}
+type DependencyContainer = crouting.DependencyContainer
 
 // Bind wires the resolver to a container.
 

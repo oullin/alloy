@@ -1,7 +1,6 @@
 package contracts
 
-// Ref: @bedrock/code-0294
-type ControllerDispatcher interface {
-	Dispatch(route any, controller any, method string) (any, error)
-	GetMiddleware(controller any, method string) []any
-}
+import crouting "github.com/oullin/alloy/api/contracts/routing"
+
+// ControllerDispatcher dispatches controller route actions.
+type ControllerDispatcher = crouting.ControllerDispatcher

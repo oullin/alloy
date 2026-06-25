@@ -7,7 +7,7 @@ package matching
 import (
 	"regexp"
 
-	"github.com/oullin/alloy/routing/compiler"
+	crouting "github.com/oullin/alloy/api/contracts/routing"
 )
 
 // MatchableRoute is the surface a Route must expose so matching/* validators
@@ -16,25 +16,13 @@ import (
 // Ref: @bedrock/code-0332
 // use an interface so the matching package has no import cycle on the parent
 // routing package.
-type MatchableRoute interface {
-	Methods() []string
-	HttpOnly() bool
-	Secure() bool
-	Compiled() *compiler.CompiledRoute
-}
+type MatchableRoute = crouting.MatchableRoute
 
 // MatchableRequest is the surface a Request must expose for matching.
-type MatchableRequest interface {
-	Method() string
-	Host() string
-	PathInfo() string
-	Secure() bool
-}
+type MatchableRequest = crouting.MatchableRequest
 
 // Ref: @bedrock/code-0318
-type ValidatorInterface interface {
-	Matches(route MatchableRoute, request MatchableRequest) bool
-}
+type ValidatorInterface = crouting.ValidatorInterface
 
 // All returns the four standard validators in the order the upstream Router
 // applies them: URI, Method, Scheme, Host. The order matters: cheaper checks

@@ -3,26 +3,22 @@ package routing
 import (
 	"fmt"
 	"strings"
+
+	crouting "github.com/oullin/alloy/api/contracts/routing"
 )
 
 // BindingContainer is the minimum container surface RouteBinding needs to
 // resolve a class-based binding. The bedrock packages/container App
 // satisfies this via its Make method.
-type BindingContainer interface {
-	Make(abstract string) (any, error)
-}
+type BindingContainer = crouting.BindingContainer
 
 // BindingResolver is a callback that converts a raw URL value (and the
-type BindingResolver func(value string, route any) (any, error)
+type BindingResolver = crouting.BindingResolver
 
 // ModelInstance is the surface a user-defined model type must expose so
 // [ForModel] can resolve it.
 // Model that route-model-binding actually depends on.
-type ModelInstance interface {
-	ResolveRouteBinding(value, field string) (any, error)
-	ResolveSoftDeletableRouteBinding(value, field string) (any, error)
-	IsSoftDeletable() bool
-}
+type ModelInstance = crouting.ModelInstance
 
 // RouteBinding is a parity-named wrapper for the static helpers below. PHP
 // callers reach the helpers through `RouteBinding::forCallback($c, $binder)`;

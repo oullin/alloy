@@ -2,7 +2,7 @@ package passkeys
 
 import (
 	"github.com/go-webauthn/webauthn/webauthn"
-	cauth "github.com/oullin/alloy/contracts/auth"
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 )
 
 // User adapts Alloy auth users to the WebAuthn user interface.

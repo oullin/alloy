@@ -9,6 +9,7 @@ use (
 	./collection
 	./config
 	./container
+	./contracts
 	./cookie
 	./encryption
 	./events

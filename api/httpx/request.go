@@ -5,25 +5,16 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	chttpx "github.com/oullin/alloy/api/contracts/httpx"
 )
 
 // SessionStore is the minimal session interface that httpx needs. Types such as
 // session.Store satisfy it implicitly via Go structural typing.
-type SessionStore interface {
-	Get(key string, fallback any) any
-	Put(key string, value any)
-	Flash(key string, value any)
-	GetOldInput(key string, fallback any) any
-	HasOldInput(key string) bool
-	FlashInput(values map[string]any)
-	Remove(key string) any
-}
+type SessionStore = chttpx.SessionStore
 
 // RouteResolver provides route information for the current request.
-type RouteResolver interface {
-	CurrentRouteName() string
-	CurrentRouteAction() string
-}
+type RouteResolver = chttpx.RouteResolver
 
 // Request wraps *http.Request with accessor methods for input,
 // headers, content negotiation, flash data and more. It can be constructed from

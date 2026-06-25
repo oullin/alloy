@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
+	cauth "github.com/oullin/alloy/api/contracts/auth"
+	"github.com/oullin/alloy/api/contracts/auth/events"
 	"github.com/oullin/alloy/auth/errorsx"
 	"github.com/oullin/alloy/auth/security"
-	cauth "github.com/oullin/alloy/contracts/auth"
-	"github.com/oullin/alloy/contracts/auth/events"
 	"github.com/oullin/alloy/cookie"
 
 	authevents "github.com/oullin/alloy/auth/events"

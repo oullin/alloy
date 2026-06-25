@@ -1,6 +1,10 @@
 package routing
 
-import "reflect"
+import (
+	"reflect"
+
+	crouting "github.com/oullin/alloy/api/contracts/routing"
+)
 
 // RouteSignatureParameters extracts the parameter list of a route action's
 // underlying callable, optionally filtered by a type predicate.
@@ -38,9 +42,7 @@ type SignatureParameter struct {
 // BackedEnum is the sentinel interface that user-defined backed enums must
 // implement to participate in implicit route binding.
 // BackedEnum interface in surface.
-type BackedEnum interface {
-	BackingValue() string
-}
+type BackedEnum = crouting.BackedEnum
 
 func (RouteSignatureParameters) FromAction(action *Action, conditions map[string]any) []SignatureParameter {
 	if action == nil || action.Uses == nil {

@@ -1,7 +1,6 @@
 package cookie
 
+import ccookie "github.com/oullin/alloy/api/contracts/cookie"
+
 // Encrypter encrypts and decrypts cookie values.
-type Encrypter interface {
-	Encrypt(plaintext string) (string, error)
-	Decrypt(ciphertext string) (string, error)
-}
+type Encrypter = ccookie.Encrypter

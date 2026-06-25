@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 	"github.com/oullin/alloy/auth/events"
 	"github.com/oullin/alloy/auth/internal/authtest"
 	"github.com/oullin/alloy/auth/security"
 	"github.com/oullin/alloy/auth/sessionx"
 	"github.com/oullin/alloy/auth/user"
-	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // --- SessionGuard: User resolution ---

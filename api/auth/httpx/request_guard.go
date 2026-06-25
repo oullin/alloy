@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 
-	cauth "github.com/oullin/alloy/contracts/auth"
+	cauth "github.com/oullin/alloy/api/contracts/auth"
 )
 
 // Callback resolves the authenticated user from a request.

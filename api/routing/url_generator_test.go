@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/routing/contracts"
+	contracts "github.com/oullin/alloy/api/contracts/routing"
 )
 
 // Ref: @bedrock/code-0399

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	cmiddleware "github.com/oullin/alloy/api/contracts/routing/middleware"
 	"github.com/oullin/alloy/routing/exceptions"
 )
 
@@ -8,9 +9,7 @@ import (
 //
 // It narrowly matches httpx.Request's HasValidSignatureWhileIgnoring; the real
 // httpx request will satisfy this in M11.
-type SignatureValidator interface {
-	HasValidSignatureWhileIgnoring(ignore []string, absolute bool) bool
-}
+type SignatureValidator = cmiddleware.SignatureValidator
 
 // ValidateSignature is the middleware form of [routing.UrlGenerator]'s signed
 // URL check. It rejects requests whose signature does not match.

@@ -1,10 +1,9 @@
 package workflow
 
+import cworkflow "github.com/oullin/alloy/api/contracts/workflow"
+
 // TransitionBlocker carries a reason a guard rejected a transition.
-type TransitionBlocker struct {
-	Message string
-	Code    string
-}
+type TransitionBlocker = cworkflow.TransitionBlocker
 
 type TransitionBlockerList struct {
 	blockers []TransitionBlocker

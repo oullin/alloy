@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	crouting "github.com/oullin/alloy/api/contracts/routing"
 	"github.com/oullin/alloy/routing/matching"
 )
 
@@ -12,9 +13,7 @@ import (
 //
 // Ref: @bedrock/code-0194
 // packages/events Dispatcher satisfies this; tests can supply a noop.
-type EventDispatcher interface {
-	Dispatch(event any)
-}
+type EventDispatcher = crouting.EventDispatcher
 
 // noopEvents is the zero-value dispatcher used when none is supplied.
 type noopEvents struct{}

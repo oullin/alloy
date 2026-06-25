@@ -6,25 +6,15 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	cmiddleware "github.com/oullin/alloy/api/contracts/routing/middleware"
 )
 
 // RateLimiter is the surface ThrottleRequests needs from a rate limiter.
 //
 // Ref: @bedrock/code-0191
 // supplies a real implementation; an in-memory default is provided below.
-type RateLimiter interface {
-	// TooManyAttempts reports whether key has already exceeded maxAttempts.
-	TooManyAttempts(key string, maxAttempts int) bool
-	// Hit increments the attempt counter and returns the new count. The
-	// counter resets after decay seconds.
-	Hit(key string, decay int) int
-	// AvailableIn returns the number of seconds before the bucket frees up.
-	AvailableIn(key string) int
-	// RetriesLeft returns the remaining attempts before throttling.
-	RetriesLeft(key string, maxAttempts int) int
-	// Clear resets the counter for key.
-	Clear(key string)
-}
+type RateLimiter = cmiddleware.RateLimiter
 
 // Ref: @bedrock/code-0322
 // Configure it via [NewThrottleRequests], then call Handle with the request,
@@ -39,11 +29,7 @@ type ThrottleRequests struct {
 // ThrottleRequest is the surface ThrottleRequests needs from the request to
 // build the bucket key. The IP address is used by default; a logged-in user
 // id (when available) takes precedence.
-type ThrottleRequest interface {
-	IP() string
-	UserID() string
-	Path() string
-}
+type ThrottleRequest = cmiddleware.ThrottleRequest
 
 // TooManyRequestsError is returned when the bucket is exhausted.
 type TooManyRequestsError struct {

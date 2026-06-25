@@ -4,24 +4,18 @@ import (
 	"context"
 	"maps"
 	"sync"
+
+	cmultisteps "github.com/oullin/alloy/api/contracts/workflow/multisteps"
 )
 
 // Task is a unit of concurrent work.
-type Task func() (any, error)
+type Task = cmultisteps.Task
 
 // Driver defines the concurrency backend contract.
-type Driver interface {
-	Run(ctx context.Context, tasks []Task) ([]any, error)
-}
+type Driver = cmultisteps.Driver
 
 // Result captures the outcome of a workflow run.
-type Result struct {
-	// Responses maps job name -> handler return value (or nil for skipped jobs).
-	Responses map[string]any
-	// Skipped lists jobs that did not execute because their WithRunIf predicate
-	// returned false.
-	Skipped []string
-}
+type Result = cmultisteps.Result
 
 // Engine executes compiled workflows.
 type Engine struct {

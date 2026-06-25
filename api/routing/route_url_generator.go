@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/oullin/alloy/routing/contracts"
+	contracts "github.com/oullin/alloy/api/contracts/routing"
 )
 
 // RouteUrlGenerator builds a URL for a single named route by substituting
@@ -23,14 +23,7 @@ type RouteUrlGenerator struct {
 // URLRequest is the minimum surface UrlGenerator needs from a request.
 //
 // httpx.Request will satisfy this in M11; tests provide a fake.
-type URLRequest interface {
-	Scheme() string // "http" or "https"
-	Host() string   // host[:port]
-	URL() string    // full URL incl. query
-	Path() string   // request path without leading slash, or "/"
-	Query(name string) string
-	QueryString() string
-}
+type URLRequest = contracts.URLRequest
 
 // NewRouteUrlGenerator returns a route URL generator bound to a parent
 // [UrlGenerator] and the current request.

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/oullin/alloy/routing/contracts"
+	contracts "github.com/oullin/alloy/api/contracts/routing"
 	"github.com/oullin/alloy/routing/exceptions"
 )
 

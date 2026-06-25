@@ -4,20 +4,15 @@ import (
 	"crypto/subtle"
 	"net/http"
 	"strings"
+
+	csession "github.com/oullin/alloy/api/contracts/session"
 )
 
 // CSRFStore is the session surface required by VerifyCSRFToken.
-type CSRFStore interface {
-	Token() string
-}
+type CSRFStore = csession.CSRFStore
 
 // VerifyCSRFConfig configures CSRF request verification.
-type VerifyCSRFConfig struct {
-	Except       []string
-	HeaderName   string
-	FormField    string
-	VerifyOrigin bool
-}
+type VerifyCSRFConfig = csession.VerifyCSRFConfig
 
 // VerifyCSRFToken rejects unsafe requests whose submitted token does not match
 // the session token. It accepts tokens from a form field, X-CSRF-Token, or the
