@@ -38,7 +38,7 @@ func TestWorkerLifecycleEventFields(t *testing.T) {
 func TestQueuePackageReExportsWorkerEvents(t *testing.T) {
 	t.Parallel()
 
-	// The golang/queue/events.go file re-aliases events.* under the
+	// The api/queue/events.go file re-aliases events.* under the
 	// queue.* namespace for ergonomic callers. Verify each alias still
 	// resolves to the same underlying struct.
 	var (

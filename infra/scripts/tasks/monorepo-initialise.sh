@@ -5,11 +5,11 @@ ROOT_PATH="$(git rev-parse --show-toplevel)"
 
 cd "${ROOT_PATH}"
 
-if [ ! -f golang/go.work ]; then
-	cp golang/go.work.example golang/go.work
+if [ ! -f api/go.work ]; then
+	cp api/go.work.example api/go.work
 fi
 
 (
-	cd golang
+	cd api
 	go work sync
 )

@@ -97,14 +97,14 @@ func TestControllerDispatcher(t *testing.T) {
 		d := NewControllerDispatcher(nil)
 		ctrl := &userController{}
 		r := NewRoute("GET", "/tags/{tag}", "userController@ShowTagged")
-		_, _ = r.Bind(fakeRequest{path: "/tags/golang"})
+		_, _ = r.Bind(fakeRequest{path: "/tags/api"})
 		got, err := d.Dispatch(r, ctrl, "ShowTagged")
 
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if got != "tagged:golang" {
+		if got != "tagged:api" {
 			t.Errorf("got %v", got)
 		}
 	})

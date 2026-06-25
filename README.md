@@ -8,9 +8,9 @@ The public API is branded as Tempo across both runtimes.
 
 - `packages/tempo/tempo-ts`: TypeScript package.
 - `packages/tempo/tempo-ts/tests`: TypeScript acceptance tests.
-- `golang`: Go workspace containing all Go modules.
-- `golang/tempo`: Go Tempo module.
-- `golang/routing/generator`: TypeScript route helper generator folded into the routing module.
+- `api`: Go workspace containing all API modules.
+- `api/tempo`: Go Tempo module.
+- `api/routing/generator`: TypeScript route helper generator folded into the routing module.
 - `infra`: repo automation, Task scripts, cache paths, and TypeScript config exports.
 
 ## Checks
