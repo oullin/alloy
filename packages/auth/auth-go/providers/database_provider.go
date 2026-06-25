@@ -3,6 +3,7 @@ package providers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	cauth "github.com/oullin/alloy/auth/contracts/auth"
 )
@@ -34,6 +35,10 @@ type DatabaseUserProvider struct {
 // NewDatabaseUserProvider creates a DatabaseUserProvider.
 // table is the users table name. rowMapper converts a row map to Authenticatable.
 func NewDatabaseUserProvider(db DBQuerier, table string, hasher cauth.PasswordHasher, rowMapper RowMapper) *DatabaseUserProvider {
+	if !isSafeIdentifier(table) {
+		table = "users"
+	}
+
 	return &DatabaseUserProvider{
 		db:        db,
 		table:     table,
@@ -75,6 +80,10 @@ func (p *DatabaseUserProvider) RetrieveByCredentials(ctx context.Context, creden
 			continue
 		}
 
+		if !isSafeIdentifier(k) {
+			return nil, fmt.Errorf("auth: unsafe credential field %q", k)
+		}
+
 		if i > 1 {
 			query += " AND "
 		}
@@ -98,6 +107,34 @@ func (p *DatabaseUserProvider) ValidateCredentials(ctx context.Context, user cau
 	}
 
 	return p.hasher.Check(ctx, plain, user.GetAuthPassword())
+}
+
+func isSafeIdentifier(identifier string) bool {
+	if identifier == "" {
+		return false
+	}
+
+	parts := strings.Split(identifier, ".")
+
+	for _, part := range parts {
+		if part == "" {
+			return false
+		}
+
+		for i, r := range part {
+			if r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r == '_' {
+				continue
+			}
+
+			if i > 0 && r >= '0' && r <= '9' {
+				continue
+			}
+
+			return false
+		}
+	}
+
+	return true
 }
 
 func (p *DatabaseUserProvider) RehashPasswordIfRequired(ctx context.Context, user cauth.Authenticatable, credentials map[string]string, force bool) error {

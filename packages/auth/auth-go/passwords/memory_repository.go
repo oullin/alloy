@@ -2,12 +2,15 @@ package passwords
 
 import (
 	"context"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"sync"
 	"time"
 )
 
 type tokenEntry struct {
-	token     string
+	tokenHash string
 	createdAt time.Time
 }
 
@@ -37,7 +40,7 @@ func (r *MemoryRepository) Create(_ context.Context, email string) (string, erro
 
 	defer r.mu.Unlock()
 
-	r.tokens[email] = tokenEntry{token: token, createdAt: time.Now()}
+	r.tokens[email] = tokenEntry{tokenHash: hashToken(token), createdAt: time.Now()}
 
 	return token, nil
 }
@@ -57,7 +60,7 @@ func (r *MemoryRepository) Exists(_ context.Context, email, token string) bool {
 		return false
 	}
 
-	return entry.token == token
+	return tokensMatch(entry.tokenHash, token)
 }
 
 func (r *MemoryRepository) RecentlyCreated(_ context.Context, email string, within time.Duration) bool {
@@ -72,6 +75,22 @@ func (r *MemoryRepository) RecentlyCreated(_ context.Context, email string, with
 	}
 
 	return time.Since(entry.createdAt) <= within
+}
+
+func hashToken(token string) string {
+	sum := sha256.Sum256([]byte(token))
+
+	return hex.EncodeToString(sum[:])
+}
+
+func tokensMatch(storedHash, token string) bool {
+	if storedHash == "" || token == "" {
+		return false
+	}
+
+	candidate := hashToken(token)
+
+	return subtle.ConstantTimeCompare([]byte(storedHash), []byte(candidate)) == 1
 }
 
 func (r *MemoryRepository) Delete(_ context.Context, email string) error {

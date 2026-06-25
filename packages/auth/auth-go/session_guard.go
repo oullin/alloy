@@ -30,6 +30,7 @@ type SessionGuard struct {
 	viaRemember      bool
 	remCookieName    string
 	rememberDuration time.Duration
+	rememberCookie   http.Cookie
 	events           events.Dispatcher
 }
 
@@ -51,6 +52,11 @@ func NewSessionGuard(
 		hasher:           hasher,
 		remCookieName:    name + "_remember",
 		rememberDuration: 5 * 365 * 24 * time.Hour,
+		rememberCookie: http.Cookie{
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		},
 	}
 }
 
@@ -299,6 +305,10 @@ func (g *SessionGuard) Once(ctx context.Context, credentials map[string]string) 
 
 // Login logs in the given user, optionally setting a remember-me cookie.
 func (g *SessionGuard) Login(ctx context.Context, user cauth.Authenticatable, remember bool) error {
+	if err := g.session.Migrate(ctx, false); err != nil {
+		return err
+	}
+
 	g.session.Put(sessionKey, user.GetAuthIdentifier())
 
 	if remember {
@@ -307,13 +317,16 @@ func (g *SessionGuard) Login(ctx context.Context, user cauth.Authenticatable, re
 		}
 
 		if g.cookies != nil {
-			g.cookies.Queue(&http.Cookie{
-				Name:     g.remCookieName,
-				Value:    fmt.Sprintf("%s|%s|%s", user.GetAuthIdentifier(), user.GetRememberToken(), HashPasswordForCookie(user.GetAuthPassword())),
-				Path:     "/",
-				MaxAge:   int(g.rememberDuration.Seconds()),
-				HttpOnly: true,
-			})
+			cookie, duration := g.rememberCookieConfig()
+			cookie.Name = g.remCookieName
+			cookie.Value = fmt.Sprintf("%s|%s|%s", user.GetAuthIdentifier(), user.GetRememberToken(), HashPasswordForCookie(user.GetAuthPassword()))
+			cookie.MaxAge = int(duration.Seconds())
+
+			if cookie.Path == "" {
+				cookie.Path = "/"
+			}
+
+			_ = g.cookies.Queue(&cookie)
 		}
 	}
 
@@ -325,6 +338,14 @@ func (g *SessionGuard) Login(ctx context.Context, user cauth.Authenticatable, re
 	g.dispatch(ctx, authevents.Authenticated{Guard: g.name, User: user})
 
 	return nil
+}
+
+func (g *SessionGuard) rememberCookieConfig() (http.Cookie, time.Duration) {
+	g.mu.RLock()
+
+	defer g.mu.RUnlock()
+
+	return g.rememberCookie, g.rememberDuration
 }
 
 // HashPasswordForCookie returns the first 10 characters of the SHA1 hash of the
@@ -600,6 +621,35 @@ func (g *SessionGuard) SetRememberDuration(minutes int) {
 	defer g.mu.Unlock()
 
 	g.rememberDuration = time.Duration(minutes) * time.Minute
+}
+
+// SetRememberCookie configures the non-value attributes used for remember-me
+// cookies. Name, Value, MaxAge, and Expires are controlled by the guard.
+func (g *SessionGuard) SetRememberCookie(cookie http.Cookie) {
+	g.mu.Lock()
+
+	defer g.mu.Unlock()
+
+	next := g.rememberCookie
+
+	if cookie.Path != "" {
+		next.Path = cookie.Path
+	}
+
+	if cookie.Domain != "" {
+		next.Domain = cookie.Domain
+	}
+
+	if cookie.SameSite != 0 {
+		next.SameSite = cookie.SameSite
+	}
+
+	if cookie.Secure {
+		next.Secure = true
+	}
+
+	next.HttpOnly = true
+	g.rememberCookie = next
 }
 
 func (g *SessionGuard) refreshRememberToken(ctx context.Context, user cauth.Authenticatable) error {

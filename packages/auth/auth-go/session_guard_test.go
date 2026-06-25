@@ -349,6 +349,23 @@ func TestSessionGuardLoginStoresIdentifierInSession(t *testing.T) {
 	}
 }
 
+func TestSessionGuardLoginMigratesSessionBeforeStoringUser(t *testing.T) {
+	user := auth.NewGenericUser(map[string]any{"id": "42", "password": "pw"})
+	provider := &stubProvider{users: map[string]cauth.Authenticatable{"42": user}}
+	sess := newStubSession()
+	guard := auth.NewSessionGuard("web", provider, sess, nil, nil)
+
+	_ = guard.Login(context.Background(), user, false)
+
+	if sess.migrateCalls != 1 {
+		t.Fatalf("session migrate calls = %d, want 1", sess.migrateCalls)
+	}
+
+	if len(sess.migrateDestroy) != 1 || sess.migrateDestroy[0] {
+		t.Fatalf("session migrate destroy flags = %v, want [false]", sess.migrateDestroy)
+	}
+}
+
 func TestSessionGuardLoginFiresLoginEvent(t *testing.T) {
 	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "pw"})
 	provider := &stubProvider{users: map[string]cauth.Authenticatable{"1": user}}
@@ -405,6 +422,14 @@ func TestSessionGuardLoginQueuesCookieWhenRemembering(t *testing.T) {
 
 	if cookies.queued[0].Name != "web_remember" {
 		t.Errorf("cookie name = %q, want %q", cookies.queued[0].Name, "web_remember")
+	}
+
+	if !cookies.queued[0].HttpOnly {
+		t.Error("remember cookie should be HttpOnly")
+	}
+
+	if cookies.queued[0].SameSite != http.SameSiteLaxMode {
+		t.Errorf("remember cookie SameSite = %v, want Lax", cookies.queued[0].SameSite)
 	}
 }
 
@@ -1196,5 +1221,48 @@ func TestSessionGuardSetRememberDuration(t *testing.T) {
 
 	if cookies.queued[0].MaxAge != 3600 {
 		t.Errorf("MaxAge = %d, want 3600", cookies.queued[0].MaxAge)
+	}
+}
+
+func TestSessionGuardSetRememberCookie(t *testing.T) {
+	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "pw"})
+	provider := &stubProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	sess := newStubSession()
+	cookies := &stubCookieManager{}
+	guard := auth.NewSessionGuard("web", provider, sess, cookies, nil)
+
+	guard.SetRememberCookie(http.Cookie{
+		Path:     "/admin",
+		Domain:   "example.com",
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	_ = guard.Login(context.Background(), user, true)
+
+	if len(cookies.queued) == 0 {
+		t.Fatal("expected remember cookie")
+	}
+
+	cookie := cookies.queued[0]
+
+	if cookie.Path != "/admin" {
+		t.Errorf("Path = %q, want /admin", cookie.Path)
+	}
+
+	if cookie.Domain != "example.com" {
+		t.Errorf("Domain = %q, want example.com", cookie.Domain)
+	}
+
+	if !cookie.Secure {
+		t.Error("Secure = false, want true")
+	}
+
+	if !cookie.HttpOnly {
+		t.Error("HttpOnly should remain true")
+	}
+
+	if cookie.SameSite != http.SameSiteStrictMode {
+		t.Errorf("SameSite = %v, want Strict", cookie.SameSite)
 	}
 }

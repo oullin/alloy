@@ -22,7 +22,9 @@ type stubProvider struct {
 
 // stubSession is a minimal in-memory SessionStore.
 type stubSession struct {
-	data map[string]any
+	data           map[string]any
+	migrateCalls   int
+	migrateDestroy []bool
 }
 
 // stubCookieManager is a minimal in-memory CookieManager.
@@ -126,7 +128,12 @@ func (s *stubSession) Forget(keys ...string) {
 	}
 }
 
-func (s *stubSession) Migrate(_ context.Context, _ bool) error { return nil }
+func (s *stubSession) Migrate(_ context.Context, destroy bool) error {
+	s.migrateCalls++
+	s.migrateDestroy = append(s.migrateDestroy, destroy)
+
+	return nil
+}
 
 func (m *stubCookieManager) Queue(cookie *http.Cookie) error {
 	m.queued = append(m.queued, cookie)
