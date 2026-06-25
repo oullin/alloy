@@ -1,0 +1,25 @@
+go 1.26.4
+
+toolchain go1.26.4
+
+use (
+	./auth
+	./bus
+	./cache
+	./collection
+	./config
+	./container
+	./cookie
+	./encryption
+	./events
+	./filesystem
+	./hashing
+	./httpx
+	./money
+	./queue
+	./routing
+	./session
+	./str
+	./tempo
+	./workflow
+)

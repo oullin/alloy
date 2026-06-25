@@ -4,10 +4,12 @@ set -euo pipefail
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 
 cd "${ROOT_PATH}"
-if [ -f go.work ]; then
-	echo "go.work already exists; refusing to overwrite." >&2
-	exit 1
+
+if [ ! -f golang/go.work ]; then
+	cp golang/go.work.example golang/go.work
 fi
 
-cp go.work.example go.work
-go work sync
+(
+	cd golang
+	go work sync
+)
