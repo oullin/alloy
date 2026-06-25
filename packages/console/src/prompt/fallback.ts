@@ -2,20 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { parseFallbackHandler, resolveFallbackCondition } from '#console/prompt/validators/fallback';
 import type { MaybePromise } from '#console/types';
 
-export type PromptFallbackKind =
-	| 'autocomplete'
-	| 'confirm'
-	| 'datatable'
-	| 'multisearch'
-	| 'multiselect'
-	| 'number'
-	| 'password'
-	| 'pause'
-	| 'search'
-	| 'select'
-	| 'suggest'
-	| 'text'
-	| 'textarea';
+export type PromptFallbackKind = 'autocomplete' | 'confirm' | 'datatable' | 'multisearch' | 'multiselect' | 'number' | 'password' | 'pause' | 'search' | 'select' | 'suggest' | 'text' | 'textarea';
 
 export type PromptFallbackHandler<TOptions = unknown, TResult = unknown> = (options: TOptions) => MaybePromise<TResult>;
 

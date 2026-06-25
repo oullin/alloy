@@ -1,0 +1,14 @@
+{
+  "name": "@alloy/cache-go",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "sh -c 'mkdir -p ../../../infra/.cache/turbo/dist/cache && go build ./... && touch ../../../infra/.cache/turbo/dist/cache/.build-stamp'",
+    "dev": "go test -race ./... -count=1",
+    "test": "go test -race ./...",
+    "test:coverage": "sh -c 'mkdir -p ../../../infra/.cache/coverage/go/cache && go test -race ./... -coverprofile=../../../infra/.cache/coverage/go/cache/coverage.out'",
+    "typecheck": "go test ./... -run '^$'",
+    "fmt": "echo gofmt handled by root go-fmt sweep",
+    "fmt:check": "sh -c 'test -z \"$(gofmt -l .)\"'"
+  }
+}

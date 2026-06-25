@@ -9,6 +9,12 @@ import (
 	cauth "github.com/oullin/alloy/auth/contracts/auth"
 )
 
+type providerDB struct {
+	query string
+}
+
+type providerRow struct{}
+
 func TestDatabaseUserProviderRejectsUnsafeCredentialField(t *testing.T) {
 	provider := NewDatabaseUserProvider(&providerDB{}, "users", auth.NewBcryptHasher(4), nil)
 
@@ -34,10 +40,6 @@ func TestDatabaseUserProviderFallsBackWhenTableNameIsUnsafe(t *testing.T) {
 	}
 }
 
-type providerDB struct {
-	query string
-}
-
 func (db *providerDB) QueryRow(_ context.Context, query string, _ ...any) DBRow {
 	db.query = query
 
@@ -49,8 +51,6 @@ func (db *providerDB) Exec(_ context.Context, query string, _ ...any) error {
 
 	return nil
 }
-
-type providerRow struct{}
 
 func (providerRow) Scan(_ ...any) error {
 	return nil

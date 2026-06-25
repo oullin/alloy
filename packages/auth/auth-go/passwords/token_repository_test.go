@@ -6,6 +6,17 @@ import (
 	"time"
 )
 
+type tokenSQLDB struct {
+	query     string
+	email     string
+	token     string
+	createdAt time.Time
+}
+
+type tokenSQLRow struct {
+	db *tokenSQLDB
+}
+
 func TestMemoryRepositoryStoresTokenHash(t *testing.T) {
 	repo := NewMemoryRepository(time.Hour)
 
@@ -72,13 +83,6 @@ func TestSQLRepositoryFallsBackWhenTableNameIsUnsafe(t *testing.T) {
 	}
 }
 
-type tokenSQLDB struct {
-	query     string
-	email     string
-	token     string
-	createdAt time.Time
-}
-
 func (db *tokenSQLDB) QueryRow(_ context.Context, query string, args ...any) SQLRow {
 	db.query = query
 
@@ -92,10 +96,6 @@ func (db *tokenSQLDB) Exec(_ context.Context, query string, args ...any) error {
 	db.createdAt, _ = args[2].(time.Time)
 
 	return nil
-}
-
-type tokenSQLRow struct {
-	db *tokenSQLDB
 }
 
 func (r tokenSQLRow) Scan(dest ...any) error {
