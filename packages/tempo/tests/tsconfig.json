@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../infra/tsconfig/base.json",
+  "extends": "../../../infra/tsconfig/base.json",
   "compilerOptions": {
     "composite": false,
     "noEmit": true,

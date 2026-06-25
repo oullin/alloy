@@ -17,7 +17,7 @@ const packageRoot = resolve(repoRoot, 'packages');
 
 export const workspaceAliases = (): Record<string, string> => ({
 	'@alloy/infra': resolve(infraRoot, 'src'),
-	'@alloy/tempo': resolve(packageRoot, 'tempo-ts', 'src'),
-	'@alloy/tempo-tests': resolve(packageRoot, 'tempo-ts', 'tests', 'src'),
+	'@alloy/tempo': resolve(packageRoot, 'tempo', 'src'),
+	'@alloy/tempo-tests': resolve(packageRoot, 'tempo', 'tests', 'src'),
 	'@alloy/console': resolve(packageRoot, 'console', 'src'),
 });

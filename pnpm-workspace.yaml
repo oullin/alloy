@@ -1,7 +1,7 @@
 packages:
-  - "packages/*/*"
   - "packages/console"
-  - "packages/tempo/tempo-ts/tests"
+  - "packages/tempo"
+  - "packages/tempo/tests"
   - "infra"
   - "infra/*"
 

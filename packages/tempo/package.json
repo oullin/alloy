@@ -21,7 +21,7 @@
     "build": "vp pack",
     "lint": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "pnpm build",
-    "test": "pnpm --filter @alloy/tempo-acceptance test:tempo-ts",
+    "test": "pnpm --filter @alloy/tempo-acceptance test:tempo",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

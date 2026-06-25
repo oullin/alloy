@@ -63,9 +63,21 @@ go test -race ./...
 pnpm workspace packages are defined in `pnpm-workspace.yaml`. The main package
 surfaces are:
 
-- `@alloy/tempo` in `packages/tempo/tempo-ts`.
-- `@alloy/tempo-acceptance` in `packages/tempo/tempo-ts/tests`.
+- `@alloy/tempo` in `packages/tempo`.
+- `@alloy/tempo-acceptance` in `packages/tempo/tests`.
 - `@alloy/console` in `packages/console`.
 - `@alloy/infra` in `infra`.
 
-Path aliases and packaging are configured in `vite.config.ts`.
+Package paths should match the package family directly; avoid language suffixes
+such as `*-ts` in directory names. Acceptance-test packages live below the
+package they validate, as `packages/tempo/tests` does for `@alloy/tempo`.
+
+Path aliases and packaging are configured in `vite.config.ts`. The Tempo package
+build uses `packages/tempo/src/index.ts`, `packages/tempo/tsconfig.json`, and
+emits to `packages/tempo/dist`.
+
+Tempo acceptance tests can be run through the package script:
+
+```sh
+pnpm --filter @alloy/tempo-acceptance test:tempo
+```

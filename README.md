@@ -14,12 +14,15 @@ TypeScript package (`@alloy/tempo`).
 - `api`: Go workspace containing the Alloy API modules.
 - `api/tempo`: Go Tempo module.
 - `api/collection`: Go collection utilities and package docs.
-- `packages/tempo/tempo-ts`: TypeScript Tempo package.
-- `packages/tempo/tempo-ts/tests`: TypeScript Tempo acceptance tests.
+- `packages/tempo`: TypeScript Tempo package.
+- `packages/tempo/tests`: TypeScript Tempo acceptance tests.
 - `packages/console`: TypeScript terminal UI helpers.
 - `infra`: repo automation, cache paths, scripts, and shared TypeScript config.
 - `vite.config.ts`: Vite+ orchestration for checks, tests, packaging, and custom tasks.
 - `docker-compose.yml`: container definitions for Go execution and formatting.
+
+TypeScript packages live directly at their package directory under `packages/`.
+Do not add language suffixes such as `*-ts` to package paths.
 
 ## Requirements
 
@@ -45,6 +48,12 @@ pnpm exec vp test
 pnpm exec vp pack
 pnpm exec vp run go:test
 pnpm exec vp run format-all
+```
+
+Tempo-specific acceptance coverage can also be run directly:
+
+```sh
+pnpm --filter @alloy/tempo-acceptance test:tempo
 ```
 
 The root package scripts are aliases for the main TypeScript checks:
@@ -86,4 +95,4 @@ formatter commands.
 - [Development workflow](docs/development.md)
 - [Go Tempo](api/tempo/README.md)
 - [Go Collection](api/collection/README.md)
-- [TypeScript Tempo](packages/tempo/tempo-ts/README.md)
+- [TypeScript Tempo](packages/tempo/README.md)

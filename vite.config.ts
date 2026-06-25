@@ -13,11 +13,11 @@ export default defineConfig({
 			},
 			{
 				find: '@alloy/tempo',
-				replacement: repoPath('./packages/tempo/tempo-ts/src'),
+				replacement: repoPath('./packages/tempo/src'),
 			},
 			{
 				find: '@alloy/tempo-tests',
-				replacement: repoPath('./packages/tempo/tempo-ts/tests/src'),
+				replacement: repoPath('./packages/tempo/tests/src'),
 			},
 			{
 				find: '@alloy/console',
@@ -35,9 +35,9 @@ export default defineConfig({
 		globals: false,
 	},
 	pack: {
-		entry: [repoPath('./packages/tempo/tempo-ts/src/index.ts')],
-		tsconfig: './packages/tempo/tempo-ts/tsconfig.json',
-		outDir: './packages/tempo/tempo-ts/dist',
+		entry: [repoPath('./packages/tempo/src/index.ts')],
+		tsconfig: './packages/tempo/tsconfig.json',
+		outDir: './packages/tempo/dist',
 		dts: true,
 		format: ['esm'],
 		clean: true,
