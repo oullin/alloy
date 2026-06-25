@@ -36,44 +36,44 @@ export { Tempo, TempoImmutable } from '#core';
 export { TempoInterval, TempoPeriod } from '#ranges';
 export { TempoFactory } from '#factory';
 
-export const now = Tempo.now;
+export const now: typeof Tempo.now = (options) => Tempo.now(options);
 
-export const today = Tempo.today;
+export const today: typeof Tempo.today = (options) => Tempo.today(options);
 
-export const tomorrow = Tempo.tomorrow;
+export const tomorrow: typeof Tempo.tomorrow = (options) => Tempo.tomorrow(options);
 
-export const yesterday = Tempo.yesterday;
+export const yesterday: typeof Tempo.yesterday = (options) => Tempo.yesterday(options);
 
-export const parse = Tempo.parse;
+export const parse: typeof Tempo.parse = (input, options) => Tempo.parse(input, options);
 
-export const fromJSON = Tempo.fromJSON;
+export const fromJSON: typeof Tempo.fromJSON = (input, options) => Tempo.fromJSON(input, options);
 
-export const min = Tempo.min;
+export const min: typeof Tempo.min = (...items) => Tempo.min(...items);
 
-export const max = Tempo.max;
+export const max: typeof Tempo.max = (...items) => Tempo.max(...items);
 
-export const average = Tempo.average;
+export const average: typeof Tempo.average = (start, end) => Tempo.average(start, end);
 
-export const fromFormat = Tempo.fromFormat;
+export const fromFormat: typeof Tempo.fromFormat = (input, pattern, options) => Tempo.fromFormat(input, pattern, options);
 
-export const create = Tempo.create;
+export const create: typeof Tempo.create = (components, options) => Tempo.create(components, options);
 
-export const createNormalized = Tempo.createNormalized;
+export const createNormalized: typeof Tempo.createNormalized = (components, options) => Tempo.createNormalized(components, options);
 
-export const fromDate = Tempo.fromDate;
+export const fromDate: typeof Tempo.fromDate = (year, month, day, options) => Tempo.fromDate(year, month, day, options);
 
-export const fromTime = Tempo.fromTime;
+export const fromTime: typeof Tempo.fromTime = (hour, minute, second, millisecond, options) => Tempo.fromTime(hour, minute, second, millisecond, options);
 
-export const fromTimeString = Tempo.fromTimeString;
+export const fromTimeString: typeof Tempo.fromTimeString = (time, options) => Tempo.fromTimeString(time, options);
 
-export const fromObject = Tempo.fromObject;
+export const fromObject: typeof Tempo.fromObject = (components) => Tempo.fromObject(components);
 
-export const fromTimestamp = Tempo.fromTimestamp;
+export const fromTimestamp: typeof Tempo.fromTimestamp = (timestamp, options) => Tempo.fromTimestamp(timestamp, options);
 
-export const fromTimestampMs = Tempo.fromTimestampMs;
+export const fromTimestampMs: typeof Tempo.fromTimestampMs = (timestamp, options) => Tempo.fromTimestampMs(timestamp, options);
 
-export const createDuration = TempoDuration.from;
+export const createDuration: typeof TempoDuration.from = (input) => TempoDuration.from(input);
 
-export const parseDuration = TempoDuration.parse;
+export const parseDuration: typeof TempoDuration.parse = (input) => TempoDuration.parse(input);
 
-export const createFactory = TempoFactory.create;
+export const createFactory: typeof TempoFactory.create = (options) => TempoFactory.create(options);

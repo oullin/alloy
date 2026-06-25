@@ -208,8 +208,8 @@ describe('task helper', () => {
 
 	it('restores process output writers after task callbacks finish', async () => {
 		const output = createMemoryOutput();
-		const stdoutWrite = process.stdout.write;
-		const stderrWrite = process.stderr.write;
+		const stdoutWrite = Reflect.get(process.stdout, 'write') as typeof process.stdout.write;
+		const stderrWrite = Reflect.get(process.stderr, 'write') as typeof process.stderr.write;
 
 		await withPromptEnvironment({ output, error: output }, async () => {
 			await task('Running...', () => {
@@ -217,8 +217,8 @@ describe('task helper', () => {
 			});
 		});
 
-		expect(process.stdout.write).toBe(stdoutWrite);
-		expect(process.stderr.write).toBe(stderrWrite);
+		expect(Reflect.get(process.stdout, 'write')).toBe(stdoutWrite);
+		expect(Reflect.get(process.stderr, 'write')).toBe(stderrWrite);
 	});
 
 	it('updates task labels through the logger', async () => {

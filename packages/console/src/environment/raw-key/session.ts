@@ -4,9 +4,9 @@ import type { RawKeyInputMode } from '#console/environment/raw-key/mode';
 import type { RawKeyInput } from '#console/environment/raw-key/types';
 
 type RawKeySessionHandlers = {
-	onData(chunk: unknown): void;
-	onEnd(): void;
-	onError(error: Error): void;
+	onData: (chunk: unknown) => void;
+	onEnd: () => void;
+	onError: (error: Error) => void;
 };
 
 export const createRawKeySession = (input: RawKeyInput, mode: RawKeyInputMode, resolve: (value: null | string) => void, reject: (reason?: unknown) => void): RawKeySessionHandlers => {
@@ -63,7 +63,7 @@ export const createRawKeySession = (input: RawKeyInput, mode: RawKeyInputMode, r
 	};
 
 	const handlers: RawKeySessionHandlers = {
-		onData(chunk) {
+		onData: (chunk) => {
 			try {
 				buffer += parseRawKeyChunkText(chunk);
 			} catch (error) {
@@ -82,10 +82,10 @@ export const createRawKeySession = (input: RawKeyInput, mode: RawKeyInputMode, r
 			escapeTimer = setTimeout(resolveBufferedKey, 25);
 			escapeTimer.unref?.();
 		},
-		onEnd() {
+		onEnd: () => {
 			resolveWithCleanup(buffer.length > 0 ? normalizeRawKey(buffer) : null);
 		},
-		onError(error) {
+		onError: (error) => {
 			rejectWithCleanup(error);
 		},
 	};

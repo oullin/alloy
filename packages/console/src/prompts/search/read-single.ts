@@ -11,5 +11,5 @@ export const readSearchChoice = async <T>(options: SearchReadOptions<T>, attempt
 		return { cancelled: false, submitted: false, submittedLabel: '', value: await lineSearchValue(options) };
 	}
 
-	return readSearchChoiceInteractive(environment.input.readKey, options, attempt);
+	return readSearchChoiceInteractive(async () => environment.input.readKey?.() ?? null, options, attempt);
 };

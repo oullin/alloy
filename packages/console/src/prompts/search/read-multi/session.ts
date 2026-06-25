@@ -46,7 +46,7 @@ export const createMultiSearchReaderSession = async <T>(options: MultiSearchProm
 		query() {
 			return state.query();
 		},
-		render: frame.render,
+		render: () => frame.render(),
 		selected() {
 			return state.selected();
 		},

@@ -21,5 +21,5 @@ export const readSelectedChoice = async <T>(
 		return readSelectedChoiceLineMode(message, choices, defaultValue, hasDefault, hint);
 	}
 
-	return readSelectedChoiceInteractive(environment.input.readKey, message, choices, defaultValue, hasDefault, scroll, info);
+	return readSelectedChoiceInteractive(async () => environment.input.readKey?.() ?? null, message, choices, defaultValue, hasDefault, scroll, info);
 };

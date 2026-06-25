@@ -1,4 +1,4 @@
-export const characters = (value: string): string[] => [...value];
+export const characters = (value: string): string[] => Array.from(value);
 
 export const fromCharacters = (value: string[]): string => value.join('');
 
@@ -11,7 +11,7 @@ export const isPrintable = (key: string): boolean => {
 		return false;
 	}
 
-	return [...key].every((character) => {
+	return characters(key).every((character) => {
 		const code = character.codePointAt(0) ?? 0;
 
 		return code >= 32 && code !== 127;

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { confirm, createMemoryOutput, createScriptedInput, form, Key, outro, Stream, text, withPromptEnvironment } from '#console/index';
 
+const testLabel = (value: unknown, fallback: string): string => (typeof value === 'string' ? value : fallback);
+
 describe('form builder', () => {
 	it('runs chained steps and returns positional responses', async () => {
 		const output = createMemoryOutput();
@@ -33,7 +35,7 @@ describe('form builder', () => {
 			() =>
 				form()
 					.text('Name', '', '', false, undefined, '', 'name')
-					.add((values, previous, name) => `${name ?? 'missing'}:${previous ?? 'new'}:Hello ${values.name}`, 'greeting')
+					.add((values, previous, name) => `${testLabel(name, 'missing')}:${testLabel(previous, 'new')}:Hello ${testLabel(values.name, '')}`, 'greeting')
 					.submit(),
 		);
 

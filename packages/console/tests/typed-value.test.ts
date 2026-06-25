@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { applyTypedKey, Key } from '#console/index';
+import { characterLength } from '#console/typed-value/characters';
 import { visibleLineWindow } from '#console/typed-value/lines';
 
 const apply = (keys: string[]): string => {
@@ -79,14 +80,14 @@ describe('typed value editing', () => {
 	});
 
 	it('deletes the previous word after non-BMP characters', () => {
-		expect(applyMultilineState('😀 hello', [...'😀 hello'].length, [Key.optionBackspace])).toEqual({
+		expect(applyMultilineState('😀 hello', characterLength('😀 hello'), [Key.optionBackspace])).toEqual({
 			cursor: 2,
 			value: '😀 ',
 		});
 	});
 
 	it('deletes the previous punctuation group as a word boundary', () => {
-		expect(applyMultilineState('hello --', [...'hello --'].length, [Key.optionBackspace])).toEqual({
+		expect(applyMultilineState('hello --', characterLength('hello --'), [Key.optionBackspace])).toEqual({
 			cursor: 6,
 			value: 'hello ',
 		});

@@ -1,11 +1,11 @@
-import { fromCharacters } from '#console/typed-value/characters';
+import { characters, fromCharacters } from '#console/typed-value/characters';
 import { currentLine, lineRanges } from '#console/typed-value/line-ranges';
 import { parseTypedValueCursor } from '#console/typed-value/validators/cursor';
 import { parseTypedValueRows } from '#console/typed-value/validators/rows';
 import type { VisibleLineWindow } from '#console/typed-value/lines/types';
 
 export const visibleLineWindow = (value: string, cursor: number, rows: number | undefined, width?: number): VisibleLineWindow => {
-	const valueCharacters = [...value];
+	const valueCharacters = characters(value);
 	const ranges = lineRanges(valueCharacters, width);
 	const visibleCursor = parseTypedValueCursor(cursor, valueCharacters.length);
 	const visibleRows = parseTypedValueRows(rows);

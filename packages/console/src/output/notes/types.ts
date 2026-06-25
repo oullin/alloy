@@ -1,1 +1,1 @@
-export type NoteType = 'alert' | 'error' | 'info' | 'intro' | 'outro' | 'warning' | string;
+export type NoteType = 'alert' | 'error' | 'info' | 'intro' | 'outro' | 'warning' | (string & {});

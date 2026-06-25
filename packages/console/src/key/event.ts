@@ -4,7 +4,7 @@ import { firstKeyValue, keyValueFromName } from '#console/key/event/value';
 import { parseKeyboardEvent } from '#console/key/validators/event';
 import type { KeyboardEventLike, KeyName } from '#console/key/types';
 
-export const keyFromEvent = (event: KeyboardEventLike): KeyName | string => {
+export const keyFromEvent = (event: KeyboardEventLike): KeyName | (string & {}) => {
 	const parsedEvent = parseKeyboardEvent(event);
 
 	if (parsedEvent.ctrl && parsedEvent.name) {
