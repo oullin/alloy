@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vp test run --passWithNoTests",
-    "test:tempo-ts": "vp test run src/tempo-ts.test.ts",
+    "test:tempo": "vp test run src/tempo.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

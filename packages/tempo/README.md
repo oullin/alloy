@@ -1,5 +1,9 @@
 # Tempo TypeScript
 
+The TypeScript package lives in `packages/tempo` and publishes as
+`@alloy/tempo`. Acceptance tests for this package live in
+`packages/tempo/tests` and expose the `test:tempo` script.
+
 Tempo extension points are plain composables. Keep reusable behavior in normal
 functions that accept and return Tempo values:
 

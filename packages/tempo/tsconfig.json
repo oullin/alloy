@@ -1,0 +1,11 @@
+{
+  "extends": "../../infra/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "../../infra/.cache/typescript/tempo/dist",
+    "tsBuildInfoFile": "../../infra/.cache/typescript/tempo/tsconfig.tsbuildinfo",
+    "paths": {
+      "#*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
