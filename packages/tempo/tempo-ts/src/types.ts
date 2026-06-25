@@ -37,29 +37,7 @@ export type ComparisonUnit = 'millisecond' | BoundaryUnit;
 
 export type TimeZoneNameStyle = NonNullable<Intl.DateTimeFormatOptions['timeZoneName']>;
 
-export type WeekdayInput =
-	| 0
-	| 1
-	| 2
-	| 3
-	| 4
-	| 5
-	| 6
-	| 7
-	| 'sunday'
-	| 'monday'
-	| 'tuesday'
-	| 'wednesday'
-	| 'thursday'
-	| 'friday'
-	| 'saturday'
-	| 'sun'
-	| 'mon'
-	| 'tue'
-	| 'wed'
-	| 'thu'
-	| 'fri'
-	| 'sat';
+export type WeekdayInput = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 'sunday' | 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
 
 export type TempoOptions = {
 	readonly fallbackLocale?: string;

@@ -1,19 +1,8 @@
 import type { DurationInput, DurationLike, DurationObject, TimeUnit } from '#types';
 
-import {
-	assertFiniteNumber,
-	fixedUnitMilliseconds,
-	isoDurationPattern,
-	millisecondsPerDay,
-	millisecondsPerHour,
-	millisecondsPerMinute,
-	millisecondsPerSecond,
-	normalizeUnit,
-	pad,
-} from '#calendar';
+import { assertFiniteNumber, fixedUnitMilliseconds, isoDurationPattern, millisecondsPerDay, millisecondsPerHour, millisecondsPerMinute, millisecondsPerSecond, normalizeUnit, pad } from '#calendar';
 
-export const durationFromInput = (input: DurationInput): TempoDuration =>
-	input instanceof TempoDuration ? input : typeof input === 'string' ? TempoDuration.parse(input) : new TempoDuration(input);
+export const durationFromInput = (input: DurationInput): TempoDuration => (input instanceof TempoDuration ? input : typeof input === 'string' ? TempoDuration.parse(input) : new TempoDuration(input));
 
 export class TempoDuration {
 	readonly years: number;
@@ -232,11 +221,9 @@ export class TempoDuration {
 		const dateParts = [value.years === 0 ? '' : `${value.years}Y`, value.months === 0 ? '' : `${value.months}M`, value.days === 0 ? '' : `${value.days}D`].join('');
 		const secondValue = value.milliseconds === 0 ? String(value.seconds) : `${value.seconds}.${pad(value.milliseconds, 3)}`;
 
-		const timeParts = [
-			value.hours === 0 ? '' : `${value.hours}H`,
-			value.minutes === 0 ? '' : `${value.minutes}M`,
-			value.seconds === 0 && value.milliseconds === 0 ? '' : `${secondValue}S`,
-		].join('');
+		const timeParts = [value.hours === 0 ? '' : `${value.hours}H`, value.minutes === 0 ? '' : `${value.minutes}M`, value.seconds === 0 && value.milliseconds === 0 ? '' : `${secondValue}S`].join(
+			'',
+		);
 
 		return `${sign}P${dateParts}${timeParts === '' ? '' : `T${timeParts}`}`;
 	}
@@ -250,9 +237,7 @@ export class TempoDuration {
 	}
 
 	private totalMilliseconds(): number {
-		return (
-			(this.weeks * 7 + this.days) * millisecondsPerDay + this.hours * millisecondsPerHour + this.minutes * millisecondsPerMinute + this.seconds * millisecondsPerSecond + this.milliseconds
-		);
+		return (this.weeks * 7 + this.days) * millisecondsPerDay + this.hours * millisecondsPerHour + this.minutes * millisecondsPerMinute + this.seconds * millisecondsPerSecond + this.milliseconds;
 	}
 
 	private direction(): 1 | -1 {
