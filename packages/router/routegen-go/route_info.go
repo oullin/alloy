@@ -5,7 +5,7 @@ import (
 )
 
 // RouteInfo contains all route metadata required for TypeScript generation.
-// It is intentionally decoupled from the bedrock routing package so the
+// It is intentionally decoupled from the Alloy routing package so the
 // generator can be used without a live Router (e.g. from JSON manifests).
 type RouteInfo struct {
 	// URI is the raw route URI pattern as registered (e.g. "/posts/{post}").

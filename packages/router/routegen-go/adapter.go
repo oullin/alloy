@@ -8,7 +8,7 @@ import (
 	"github.com/oullin/alloy/routing"
 )
 
-// AdapterOptions configures how bedrock routes are converted to RouteInfo.
+// AdapterOptions configures how Alloy routes are converted to RouteInfo.
 type AdapterOptions struct {
 	// AppURL is the base application URL (e.g. "http://localhost:8000/v2").
 	// When set, its path component is prepended to all generated URIs,
@@ -19,7 +19,7 @@ type AdapterOptions struct {
 	ForcedScheme string
 }
 
-// FromRouteCollection converts a bedrock RouteCollectionInterface into a slice
+// FromRouteCollection converts an Alloy RouteCollectionInterface into a slice
 // of RouteInfo values suitable for passing to Generate.
 //
 // implementation, extracting controller metadata, parameters, defaults, and
