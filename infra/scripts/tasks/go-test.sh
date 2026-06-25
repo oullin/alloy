@@ -3,15 +3,22 @@ set -euo pipefail
 
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 
-cd "${ROOT_PATH}"
+API_PATH="${ROOT_PATH}/api"
+GO_WORK_PATH="${API_PATH}/go.work"
 
-# Every Go module lives at packages/<domain>/<domain>-go and owns a go.mod.
+# Every Go module under api owns a go.mod.
 while IFS= read -r -d '' gomod; do
 	module_dir="$(dirname "${gomod}")"
 	echo "==> ${module_dir#"${ROOT_PATH}/"}"
 	(
 		cd "${module_dir}"
-		GOWORK=off go vet ./...
-		GOWORK=off go test -race ./...
+		export GOWORK="${GO_WORK_PATH}"
+		if [[ "$(go env GOWORK)" != "${GO_WORK_PATH}" ]]; then
+			echo "go workspace resolution is not using ${GO_WORK_PATH}" >&2
+			exit 1
+		fi
+		go list -m github.com/oullin/alloy/api/contracts >/dev/null
+		go vet ./...
+		go test -race ./...
 	)
-done < <(find "${ROOT_PATH}/packages" -mindepth 3 -maxdepth 3 -name go.mod -print0 | sort -z)
+done < <(find "${API_PATH}" -mindepth 2 -name go.mod -print0 | sort -z)

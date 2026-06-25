@@ -37,10 +37,6 @@ importers:
         specifier: 4.1.9
         version: 4.1.9(@types/node@25.9.3)(@vitest/browser-preview@4.1.9)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
 
-  packages/collection/collect-go: {}
-
-  packages/config/config-go: {}
-
   packages/console:
     dependencies:
       '@opentui/core':
@@ -66,12 +62,6 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/money/money-go: {}
-
-  packages/str/str-go: {}
-
-  packages/tempo/tempo-go: {}
-
   packages/tempo/tempo-ts:
     devDependencies:
       typescript:
@@ -90,8 +80,6 @@ importers:
       vitest:
         specifier: 4.1.9
         version: 4.1.9(@types/node@25.9.3)(@vitest/browser-preview@4.1.9)(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
-
-  packages/workflow/workflow-go: {}
 
 packages:
 
