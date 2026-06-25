@@ -85,7 +85,7 @@ func RequirePassword(session SessionStore, timeout time.Duration, confirmPath st
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			const key = "auth.password_confirmed_at"
-			confirmedAt, _ := session.Get(key, int64(0)).(int64)
+			confirmedAt := sessionTimestamp(session.Get(key, int64(0)))
 			threshold := time.Now().Add(-timeout).Unix()
 
 			if confirmedAt < threshold {
@@ -96,6 +96,47 @@ func RequirePassword(session SessionStore, timeout time.Duration, confirmPath st
 
 			next.ServeHTTP(w, r)
 		})
+	}
+}
+
+func sessionTimestamp(value any) int64 {
+	const maxInt64 = uint64(1<<63 - 1)
+
+	switch v := value.(type) {
+	case int64:
+		return v
+	case int:
+		return int64(v)
+	case int32:
+		return int64(v)
+	case int16:
+		return int64(v)
+	case int8:
+		return int64(v)
+	case uint:
+		if uint64(v) > maxInt64 {
+			return 0
+		}
+
+		return int64(v)
+	case uint64:
+		if v > maxInt64 {
+			return 0
+		}
+
+		return int64(v)
+	case uint32:
+		return int64(v)
+	case uint16:
+		return int64(v)
+	case uint8:
+		return int64(v)
+	case float64:
+		return int64(v)
+	case float32:
+		return int64(v)
+	default:
+		return 0
 	}
 }
 
@@ -112,18 +153,31 @@ func AuthenticateWithBasicAuth(provider cauth.UserProvider, hasher cauth.Passwor
 				return
 			}
 
-			user, err := provider.RetrieveByCredentials(r.Context(), map[string]string{"email": username})
+			var (
+				user  cauth.Authenticatable
+				match bool
+				err   error
+			)
 
-			if err != nil || user == nil {
-				w.Header().Set("WWW-Authenticate", `Basic realm="restricted"`)
-				http.Error(w, "unauthorized", http.StatusUnauthorized)
+			Timebox(75*time.Millisecond, func() {
+				user, err = provider.RetrieveByCredentials(r.Context(), map[string]string{"email": username})
 
-				return
-			}
+				passwordHash := ""
 
-			match, err := hasher.Check(r.Context(), password, user.GetAuthPassword())
+				if err == nil && user != nil {
+					passwordHash = user.GetAuthPassword()
+				}
 
-			if err != nil || !match {
+				var checkErr error
+
+				match, checkErr = hasher.Check(r.Context(), password, passwordHash)
+
+				if err == nil {
+					err = checkErr
+				}
+			})
+
+			if err != nil || user == nil || !match {
 				w.Header().Set("WWW-Authenticate", `Basic realm="restricted"`)
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 

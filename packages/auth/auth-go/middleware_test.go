@@ -22,6 +22,24 @@ type verifiedUser struct {
 	verified bool
 }
 
+type trackingHasher struct {
+	checks int
+}
+
+func (h *trackingHasher) Hash(context.Context, string) (string, error) {
+	return "", nil
+}
+
+func (h *trackingHasher) Check(context.Context, string, string) (bool, error) {
+	h.checks++
+
+	return false, nil
+}
+
+func (h *trackingHasher) NeedsRehash(string) bool {
+	return false
+}
+
 func TestEnsureAuthenticatedRejects(t *testing.T) {
 	provider := &stubProvider{users: map[string]cauth.Authenticatable{}}
 	guard := auth.NewTokenGuard("api", provider)
@@ -273,6 +291,24 @@ func TestRequirePasswordAllowsRecentlyConfirmed(t *testing.T) {
 	}
 }
 
+func TestRequirePasswordAcceptsJSONNumericTimestamp(t *testing.T) {
+	sess := newStubSession()
+	sess.Put("auth.password_confirmed_at", float64(time.Now().Unix()))
+
+	mw := auth.RequirePassword(sess, 30*time.Minute, "/confirm-password")
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/settings", nil)
+	mw(inner).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("expected 200, got %d", rr.Code)
+	}
+}
+
 func TestRequirePasswordRedirectsWhenExpired(t *testing.T) {
 	sess := newStubSession()
 	sess.Put("auth.password_confirmed_at", time.Now().Add(-1*time.Hour).Unix())
@@ -288,6 +324,24 @@ func TestRequirePasswordRedirectsWhenExpired(t *testing.T) {
 
 	if rr.Code != http.StatusFound {
 		t.Errorf("expected 302, got %d", rr.Code)
+	}
+}
+
+func TestRequirePasswordAcceptsIntTimestamp(t *testing.T) {
+	sess := newStubSession()
+	sess.Put("auth.password_confirmed_at", int(time.Now().Unix()))
+
+	mw := auth.RequirePassword(sess, 30*time.Minute, "/confirm-password")
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/settings", nil)
+	mw(inner).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Errorf("expected 200, got %d", rr.Code)
 	}
 }
 
@@ -362,6 +416,29 @@ func TestAuthenticateWithBasicAuthRejectsWrongPassword(t *testing.T) {
 
 	if rr.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", rr.Code)
+	}
+}
+
+func TestAuthenticateWithBasicAuthChecksDummyPasswordWhenUserMissing(t *testing.T) {
+	provider := &stubProvider{users: map[string]cauth.Authenticatable{}}
+	hasher := &trackingHasher{}
+
+	mw := auth.AuthenticateWithBasicAuth(provider, hasher)
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.SetBasicAuth("missing@test.com", "secret")
+	mw(inner).ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401, got %d", rr.Code)
+	}
+
+	if hasher.checks != 1 {
+		t.Fatalf("hasher checks = %d, want 1", hasher.checks)
 	}
 }
 

@@ -287,6 +287,31 @@ func TestBrokerSendResetLinkUsingExecutesCallbackInsteadOfNotification(t *testin
 	}
 }
 
+func TestBrokerSendResetLinkReturnsErrorWhenNotificationUnsupported(t *testing.T) {
+	user := &resetUser{
+		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		email:       "test@example.com",
+	}
+	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	repo := &incompatibleTokenRepository{}
+	dispatcher := &brokerDispatcher{}
+	broker := passwords.NewBroker(provider, repo, time.Hour).WithEventDispatcher(dispatcher)
+
+	err := broker.SendResetLink(context.Background(), "test@example.com")
+
+	if !errors.Is(err, passwords.ErrResetNotificationUnsupported) {
+		t.Fatalf("SendResetLink error = %v, want ErrResetNotificationUnsupported", err)
+	}
+
+	if repo.createCalls != 0 {
+		t.Fatalf("repository Create calls = %d, want 0", repo.createCalls)
+	}
+
+	if len(dispatcher.events) != 0 {
+		t.Fatalf("expected no dispatched events, got %d", len(dispatcher.events))
+	}
+}
+
 func TestBrokerSendResetLinkWithThrottleRequiresRecentTokenRepository(t *testing.T) {
 	user := &notifyingResetUser{resetUser: &resetUser{
 		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),

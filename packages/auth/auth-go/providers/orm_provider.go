@@ -17,6 +17,8 @@ type ModelQuery interface {
 	FindByCredentials(ctx context.Context, credentials map[string]string) (cauth.Authenticatable, error)
 	// UpdateToken stores a new remember token for the given user.
 	UpdateToken(ctx context.Context, user cauth.Authenticatable, token string) error
+	// UpdatePassword stores a new password hash for the given user.
+	UpdatePassword(ctx context.Context, user cauth.Authenticatable, passwordHash string) error
 }
 
 // ORMUserProvider retrieves users via an injected ORM ModelQuery interface.
@@ -92,10 +94,5 @@ func (p *ORMUserProvider) RehashPasswordIfRequired(ctx context.Context, user cau
 		return err
 	}
 
-	// Store the new hash — requires a model-level update; we use UpdateToken as a
-	// proxy for any single-field update. Concrete implementations should override
-	// this behaviour via a more specific model method.
-	_ = hash
-
-	return nil
+	return p.model.UpdatePassword(ctx, user, hash)
 }

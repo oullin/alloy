@@ -18,6 +18,8 @@ import (
 
 // ErrThrottleRepositoryUnsupported is returned when reset-link throttling
 // is configured with a token repository that cannot report recent tokens.
+// ErrResetNotificationUnsupported is returned when no callback is supplied and
+// the user cannot send their own password reset notification.
 
 // TokenRepository stores and validates password reset tokens.
 type TokenRepository interface {
@@ -58,6 +60,8 @@ var (
 	ErrResetLinkThrottled = errors.New("passwords: token recently created")
 
 	ErrThrottleRepositoryUnsupported = errors.New("passwords: throttle requires RecentTokenRepository")
+
+	ErrResetNotificationUnsupported = errors.New("passwords: reset notification unsupported")
 )
 
 // NewBroker creates a Broker. expiry is the token lifetime.
@@ -142,6 +146,12 @@ func (b *Broker) SendResetLinkUsing(ctx context.Context, email string, callback 
 		}
 	}
 
+	sender, canSendNotification := user.(cauth.PasswordResetNotificationSender)
+
+	if callback == nil && !canSendNotification {
+		return ErrResetNotificationUnsupported
+	}
+
 	token, err := b.tokens.Create(ctx, email)
 
 	if err != nil {
@@ -152,7 +162,7 @@ func (b *Broker) SendResetLinkUsing(ctx context.Context, email string, callback 
 		return callback(ctx, user, token)
 	}
 
-	if sender, ok := user.(cauth.PasswordResetNotificationSender); ok {
+	if canSendNotification {
 		sender.SendPasswordResetNotification(ctx, token)
 	}
 
