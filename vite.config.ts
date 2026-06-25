@@ -56,7 +56,7 @@ export default defineConfig({
 	run: {
 		tasks: {
 			format: { command: 'bash infra/scripts/tasks/format-files.sh changed', cache: false },
-			'format-all': { command: 'bash infra/scripts/tasks/docker-compose-run.sh fmt format-all && vp check --fix', cache: false },
+			'format-all': { command: 'bash infra/scripts/tasks/docker-compose-run.sh fmt format-all && vp fmt', cache: false },
 			'go:test': { command: 'bash infra/scripts/tasks/go-test.sh', cache: false },
 			'monorepo:initialise': { command: 'bash infra/scripts/tasks/monorepo-initialise.sh', cache: false },
 		},
