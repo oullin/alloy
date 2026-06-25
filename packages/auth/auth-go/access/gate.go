@@ -352,10 +352,11 @@ func (g *Gate) callPolicyMethod(ctx context.Context, user cauth.Authenticatable,
 
 	// Check for a Before method first.
 	if before := pv.MethodByName("Before"); before.IsValid() {
+		bt := before.Type()
 		results := before.Call([]reflect.Value{
-			reflect.ValueOf(ctx),
-			reflect.ValueOf(user),
-			reflect.ValueOf(ability),
+			reflectValueFor(ctx, bt.In(0)),
+			reflectValueFor(user, bt.In(1)),
+			reflectValueFor(ability, bt.In(2)),
 		})
 
 		if len(results) == 2 {
@@ -383,14 +384,14 @@ func (g *Gate) callPolicyMethod(ctx context.Context, user cauth.Authenticatable,
 	switch mt.NumIn() {
 	case 3: // (ctx, user, model)
 		results = method.Call([]reflect.Value{
-			reflect.ValueOf(ctx),
-			reflect.ValueOf(user),
-			reflect.ValueOf(model),
+			reflectValueFor(ctx, mt.In(0)),
+			reflectValueFor(user, mt.In(1)),
+			reflectValueFor(model, mt.In(2)),
 		})
 	case 2: // (ctx, user)
 		results = method.Call([]reflect.Value{
-			reflect.ValueOf(ctx),
-			reflect.ValueOf(user),
+			reflectValueFor(ctx, mt.In(0)),
+			reflectValueFor(user, mt.In(1)),
 		})
 	default:
 		return false, false
@@ -401,6 +402,24 @@ func (g *Gate) callPolicyMethod(ctx context.Context, user cauth.Authenticatable,
 	}
 
 	return false, false
+}
+
+func reflectValueFor(value any, target reflect.Type) reflect.Value {
+	if value == nil {
+		return reflect.Zero(target)
+	}
+
+	v := reflect.ValueOf(value)
+
+	if v.Type().AssignableTo(target) {
+		return v
+	}
+
+	if v.Type().ConvertibleTo(target) {
+		return v.Convert(target)
+	}
+
+	return reflect.Zero(target)
 }
 
 func capitalizeFirst(s string) string {

@@ -20,6 +20,8 @@ type testPolicy struct{}
 
 type testPolicyWithBefore struct{}
 
+type nilUserPolicy struct{}
+
 func (u *testUser) GetAuthIdentifierName() string { return "id" }
 func (u *testUser) GetAuthIdentifier() string     { return u.id }
 func (u *testUser) GetAuthPasswordName() string   { return "password" }
@@ -47,6 +49,18 @@ func (p *testPolicyWithBefore) Before(_ context.Context, _ cauth.Authenticatable
 
 func (p *testPolicyWithBefore) View(_ context.Context, _ cauth.Authenticatable, _ any) bool {
 	return true
+}
+
+func (p *nilUserPolicy) Before(_ context.Context, user cauth.Authenticatable, ability string) (bool, bool) {
+	if ability == "before" && user == nil {
+		return true, true
+	}
+
+	return false, false
+}
+
+func (p *nilUserPolicy) View(_ context.Context, user cauth.Authenticatable, _ *testModel) bool {
+	return user == nil
 }
 
 func userResolver(user cauth.Authenticatable) func(context.Context) cauth.Authenticatable {
@@ -206,6 +220,21 @@ func TestGatePolicyBeforeMethodOverrides(t *testing.T) {
 	// "view" falls through Before and uses the View method.
 	if !g.Check(context.Background(), "view", model) {
 		t.Error("View should be allowed when Before does not handle")
+	}
+}
+
+func TestGatePolicyAllowsNilUser(t *testing.T) {
+	g := access.New(userResolver(nil))
+	g.RegisterPolicy("*access_test.testModel", &nilUserPolicy{})
+
+	model := &testModel{Name: "test"}
+
+	if !g.Check(context.Background(), "view", model) {
+		t.Error("policy View should receive nil user without panicking")
+	}
+
+	if !g.Check(context.Background(), "before", model) {
+		t.Error("policy Before should receive nil user without panicking")
 	}
 }
 

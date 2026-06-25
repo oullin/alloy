@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -65,6 +66,22 @@ func TestSessionGuardUserIsSetToRetrievedUser(t *testing.T) {
 	}
 }
 
+func TestSessionGuardUserReturnsRetrieveByIDError(t *testing.T) {
+	provider := &stubProvider{
+		users:           map[string]cauth.Authenticatable{},
+		retrieveByIDErr: errStubProvider,
+	}
+	sess := newStubSession()
+	sess.Put("_auth_user", "1")
+	guard := auth.NewSessionGuard("web", provider, sess, nil, nil)
+
+	_, err := guard.User(context.Background())
+
+	if !errors.Is(err, errStubProvider) {
+		t.Fatalf("User error = %v, want %v", err, errStubProvider)
+	}
+}
+
 func TestSessionGuardUserUsesRememberCookieIfItExists(t *testing.T) {
 	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "pw"})
 	user.SetRememberToken("recaller")
@@ -88,6 +105,27 @@ func TestSessionGuardUserUsesRememberCookieIfItExists(t *testing.T) {
 
 	if !guard.ViaRemember(context.Background()) {
 		t.Error("expected ViaRemember() to be true")
+	}
+}
+
+func TestSessionGuardUserReturnsRetrieveByTokenError(t *testing.T) {
+	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "pw"})
+	user.SetRememberToken("recaller")
+	provider := &stubProvider{
+		users:              map[string]cauth.Authenticatable{"1": user},
+		retrieveByTokenErr: errStubProvider,
+	}
+	sess := newStubSession()
+	guard := auth.NewSessionGuard("web", provider, sess, nil, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.AddCookie(&http.Cookie{Name: "web_remember", Value: "1|recaller|" + auth.HashPasswordForCookie("pw")})
+	guard.SetRequest(req)
+
+	_, err := guard.User(context.Background())
+
+	if !errors.Is(err, errStubProvider) {
+		t.Fatalf("User error = %v, want %v", err, errStubProvider)
 	}
 }
 
@@ -361,8 +399,8 @@ func TestSessionGuardLoginMigratesSessionBeforeStoringUser(t *testing.T) {
 		t.Fatalf("session migrate calls = %d, want 1", sess.migrateCalls)
 	}
 
-	if len(sess.migrateDestroy) != 1 || sess.migrateDestroy[0] {
-		t.Fatalf("session migrate destroy flags = %v, want [false]", sess.migrateDestroy)
+	if len(sess.migrateDestroy) != 1 || !sess.migrateDestroy[0] {
+		t.Fatalf("session migrate destroy flags = %v, want [true]", sess.migrateDestroy)
 	}
 }
 

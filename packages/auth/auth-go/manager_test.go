@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"sync"
@@ -17,7 +18,9 @@ import (
 
 // stubProvider is a test UserProvider backed by a map.
 type stubProvider struct {
-	users map[string]cauth.Authenticatable
+	users              map[string]cauth.Authenticatable
+	retrieveByIDErr    error
+	retrieveByTokenErr error
 }
 
 // stubSession is a minimal in-memory SessionStore.
@@ -40,10 +43,18 @@ type recordingDispatcher struct {
 }
 
 func (p *stubProvider) RetrieveByID(_ context.Context, id string) (cauth.Authenticatable, error) {
+	if p.retrieveByIDErr != nil {
+		return nil, p.retrieveByIDErr
+	}
+
 	return p.users[id], nil
 }
 
 func (p *stubProvider) RetrieveByToken(_ context.Context, id string, token string) (cauth.Authenticatable, error) {
+	if p.retrieveByTokenErr != nil {
+		return nil, p.retrieveByTokenErr
+	}
+
 	u := p.users[id]
 
 	if u == nil || u.GetRememberToken() != token {
@@ -371,6 +382,8 @@ func TestTimeboxDoesNotDelayLongOperations(t *testing.T) {
 		t.Errorf("Timebox should have taken at least the fn duration: %v", elapsed)
 	}
 }
+
+var errStubProvider = errors.New("stub provider error")
 
 // --- BcryptHasher ---
 

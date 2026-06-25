@@ -2,6 +2,8 @@ package providers
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -93,6 +95,10 @@ func (p *DatabaseUserProvider) RetrieveByCredentials(ctx context.Context, creden
 		i++
 	}
 
+	if len(args) == 0 {
+		return nil, fmt.Errorf("auth: credentials must include at least one queryable field")
+	}
+
 	query += " LIMIT 1"
 	row := p.db.QueryRow(ctx, query, args...)
 
@@ -174,7 +180,11 @@ func (p *DatabaseUserProvider) mapRow(row DBRow) (cauth.Authenticatable, error) 
 	var dest map[string]any
 
 	if err := row.Scan(&dest); err != nil {
-		return nil, nil // Row not found.
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, err
 	}
 
 	return p.rowMapper(dest), nil

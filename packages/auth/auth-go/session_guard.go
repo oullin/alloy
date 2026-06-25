@@ -127,7 +127,11 @@ func (g *SessionGuard) User(ctx context.Context) (cauth.Authenticatable, error) 
 	if ok && id != "" {
 		user, err := g.provider.RetrieveByID(ctx, id)
 
-		if err == nil && user != nil {
+		if err != nil {
+			return nil, err
+		}
+
+		if user != nil {
 			g.user = user
 			g.dispatch(ctx, authevents.Authenticated{Guard: g.name, User: user})
 
@@ -143,7 +147,11 @@ func (g *SessionGuard) User(ctx context.Context) (cauth.Authenticatable, error) 
 			if rec != nil && rec.Valid() {
 				user, err := g.provider.RetrieveByToken(ctx, rec.ID(), rec.Token())
 
-				if err == nil && user != nil {
+				if err != nil {
+					return nil, err
+				}
+
+				if user != nil {
 					// Validate the password hash segment if present.
 					if rec.Hash() != "" && rec.Hash() != HashPasswordForCookie(user.GetAuthPassword()) {
 						return nil, nil
@@ -305,7 +313,7 @@ func (g *SessionGuard) Once(ctx context.Context, credentials map[string]string) 
 
 // Login logs in the given user, optionally setting a remember-me cookie.
 func (g *SessionGuard) Login(ctx context.Context, user cauth.Authenticatable, remember bool) error {
-	if err := g.session.Migrate(ctx, false); err != nil {
+	if err := g.session.Migrate(ctx, true); err != nil {
 		return err
 	}
 
