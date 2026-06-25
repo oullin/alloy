@@ -1,0 +1,10 @@
+{
+  "extends": "../../infra/tsconfig/base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "#money/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

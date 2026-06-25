@@ -1,0 +1,13 @@
+{
+	"extends": "../../infra/tsconfig/base.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "../../infra/.cache/tsbuild/workflow.tsbuildinfo",
+		"types": ["node"],
+		"paths": {
+			"@alloy/workflow": ["./src/index.ts"],
+			"@alloy/workflow/*": ["./src/*"],
+			"#workflow/*": ["./src/*"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"]
+}

@@ -16,12 +16,28 @@ export default defineConfig({
 				replacement: repoPath('./packages/tempo/src'),
 			},
 			{
+				find: '@alloy/money',
+				replacement: repoPath('./packages/money/src'),
+			},
+			{
+				find: /^#money\/(.+)$/u,
+				replacement: repoPath('./packages/money/src/$1'),
+			},
+			{
 				find: '@alloy/tempo-tests',
 				replacement: repoPath('./packages/tempo/tests/src'),
 			},
 			{
 				find: '@alloy/console',
 				replacement: repoPath('./packages/console/src'),
+			},
+			{
+				find: '@alloy/workflow',
+				replacement: repoPath('./packages/workflow/src'),
+			},
+			{
+				find: /^@alloy\/workflow\/(.+)$/u,
+				replacement: repoPath('./packages/workflow/src/$1'),
 			},
 			{
 				find: /^#console\/(.+)$/u,

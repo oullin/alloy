@@ -1,7 +1,9 @@
 packages:
   - "packages/console"
+  - "packages/money"
   - "packages/tempo"
   - "packages/tempo/tests"
+  - "packages/workflow"
   - "infra"
   - "infra/*"
 
