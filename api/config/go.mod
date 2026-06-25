@@ -2,12 +2,7 @@ module github.com/oullin/alloy/config
 
 go 1.26.4
 
-require (
-	github.com/oullin/alloy/collection v0.0.0
-	github.com/spf13/viper v1.21.0
-)
-
-replace github.com/oullin/alloy/collection => ../collection
+require github.com/spf13/viper v1.21.0
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
