@@ -1,24 +1,17 @@
 package auth
 
-// ServiceFactory creates a service from the configured container.
-type ServiceFactory func(ServiceContainer) (any, error)
-
-// ServiceContainer is the minimal container surface required by AuthServiceProvider.
-type ServiceContainer interface {
-	Singleton(abstract string, factory ServiceFactory)
-	Make(abstract string) (any, error)
-}
+import "github.com/oullin/alloy/container"
 
 // AuthServiceProvider registers the authentication manager into the container.
 type AuthServiceProvider struct {
-	app          ServiceContainer
+	app          *container.Container
 	defaultGuard string
 	onBoot       func(*Manager)
 }
 
 // NewAuthServiceProvider constructs the provider.
 // defaultGuard is the name of the guard to use by default (e.g. "session").
-func NewAuthServiceProvider(app ServiceContainer, defaultGuard string) *AuthServiceProvider {
+func NewAuthServiceProvider(app *container.Container, defaultGuard string) *AuthServiceProvider {
 	return &AuthServiceProvider{app: app, defaultGuard: defaultGuard}
 }
 
@@ -33,7 +26,7 @@ func (p *AuthServiceProvider) WithBoot(fn func(*Manager)) *AuthServiceProvider {
 
 // Register binds the auth manager as a singleton under "auth".
 func (p *AuthServiceProvider) Register() {
-	p.app.Singleton("auth", func(_ ServiceContainer) (any, error) {
+	p.app.Singleton("auth", func(_ *container.Container) (any, error) {
 		return NewManager(p.defaultGuard), nil
 	})
 }
