@@ -2,6 +2,7 @@ packages:
   - "packages/console"
   - "packages/tempo"
   - "packages/tempo/tests"
+  - "packages/expose-routes"
   - "infra"
   - "infra/*"
 

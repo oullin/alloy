@@ -1,4 +1,4 @@
-package generator
+package expose
 
 import (
 	"crypto/md5"
@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-// generator holds the mutable state accumulated during a single Generate call.
-type generator struct {
+// emitter holds the mutable state accumulated during a single Generate call.
+type emitter struct {
 	opts    Options
 	content map[string][]string            // abs path → ordered content chunks
 	imports map[string]map[string][]string // abs path → importFrom → identifiers
@@ -142,15 +142,15 @@ type nsNode map[string]interface{} // either nsNode (subtree) or []*RouteInfo (l
 
 type nameNode map[string]interface{}
 
-func newGenerator(opts Options) *generator {
-	return &generator{
+func newEmitter(opts Options) *emitter {
+	return &emitter{
 		opts:    opts,
 		content: make(map[string][]string),
 		imports: make(map[string]map[string][]string),
 	}
 }
 
-func (g *generator) generateActions(routes []*RouteInfo, base string) {
+func (g *emitter) generateActions(routes []*RouteInfo, base string) {
 
 	var controlled []*RouteInfo
 
@@ -171,7 +171,7 @@ func (g *generator) generateActions(routes []*RouteInfo, base string) {
 	g.writeBarrelFiles(base, byNS)
 }
 
-func (g *generator) writeControllerFile(path, ns string, routes []*RouteInfo) {
+func (g *emitter) writeControllerFile(path, ns string, routes []*RouteInfo) {
 
 	byMethod := groupByJsMethod(routes)
 
@@ -256,17 +256,17 @@ func (g *generator) writeControllerFile(path, ns string, routes []*RouteInfo) {
 	}
 }
 
-func (g *generator) writeMethodExport(path string, r *RouteInfo, shouldExport bool) {
+func (g *emitter) writeMethodExport(path string, r *RouteInfo, shouldExport bool) {
 	method := r.JsMethod()
 	g.appendContent(path, g.renderMethod(method, r, shouldExport))
 }
 
-func (g *generator) writeNamedMethodExport(path string, r *RouteInfo) {
+func (g *emitter) writeNamedMethodExport(path string, r *RouteInfo) {
 	method := r.NamedMethod()
 	g.appendContent(path, g.renderMethod(method, r, true))
 }
 
-func (g *generator) writeMultiRouteExport(path string, routes []*RouteInfo, shouldExport bool) {
+func (g *emitter) writeMultiRouteExport(path string, routes []*RouteInfo, shouldExport bool) {
 	method := routes[0].JsMethod()
 
 	var dictEntries []string
@@ -295,7 +295,7 @@ func (g *generator) writeMultiRouteExport(path string, routes []*RouteInfo, shou
 	))
 }
 
-func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool) string {
+func (g *emitter) renderMethod(method string, r *RouteInfo, shouldExport bool) string {
 	verbs := r.Verbs()
 
 	if len(verbs) == 0 {
@@ -497,7 +497,7 @@ func (g *generator) renderMethod(method string, r *RouteInfo, shouldExport bool)
 	return b.String()
 }
 
-func (g *generator) renderFormHelpers(method string, r *RouteInfo, params []Param, verbs []Verb) string {
+func (g *emitter) renderFormHelpers(method string, r *RouteInfo, params []Param, verbs []Verb) string {
 	if len(verbs) == 0 {
 		return ""
 	}
@@ -568,7 +568,7 @@ func (g *generator) renderFormHelpers(method string, r *RouteInfo, params []Para
 	return b.String()
 }
 
-func (g *generator) functionArgs(method string, params []Param, opts string) string {
+func (g *emitter) functionArgs(method string, params []Param, opts string) string {
 	if len(params) == 0 {
 		return opts + "?: RouteQueryOptions"
 	}
@@ -630,7 +630,7 @@ func (g *generator) functionArgs(method string, params []Param, opts string) str
 	return fmt.Sprintf("%s%s: %s,\n%s?: RouteQueryOptions", args, optMark, unionType, opts)
 }
 
-func (g *generator) writeBarrelFiles(base string, byNS map[string][]*RouteInfo) {
+func (g *emitter) writeBarrelFiles(base string, byNS map[string][]*RouteInfo) {
 
 	tree := buildNamespaceTree(byNS)
 	g.writeBarrelNode(base, "", tree)
@@ -657,7 +657,7 @@ func buildNamespaceTree(byNS map[string][]*RouteInfo) nsNode {
 	return root
 }
 
-func (g *generator) writeBarrelNode(base, parent string, node nsNode) {
+func (g *emitter) writeBarrelNode(base, parent string, node nsNode) {
 	if len(node) == 0 {
 		return
 	}
@@ -725,7 +725,7 @@ func (g *generator) writeBarrelNode(base, parent string, node nsNode) {
 	}
 }
 
-func (g *generator) generateRoutes(routes []*RouteInfo, base string) {
+func (g *emitter) generateRoutes(routes []*RouteInfo, base string) {
 
 	byName := make(map[string]*RouteInfo)
 
@@ -772,7 +772,7 @@ func buildNameTree(byName map[string]*RouteInfo) nameNode {
 }
 
 // writeNameBarrelNode writes barrel index.ts files for routes/ directory.
-func (g *generator) writeNameBarrelNode(base, prefix string, node nameNode, byName map[string]*RouteInfo) {
+func (g *emitter) writeNameBarrelNode(base, prefix string, node nameNode, byName map[string]*RouteInfo) {
 	children := sortedKeys3(node)
 
 	if len(children) == 0 {
@@ -844,8 +844,8 @@ func (g *generator) writeNameBarrelNode(base, prefix string, node nameNode, byNa
 // Import management
 // ─────────────────────────────────────────────────────────────────────────────
 
-// appendCommonImports adds the routegen runtime imports to a file's import map.
-func (g *generator) appendCommonImports(path, namespace string, routes []*RouteInfo) {
+// appendCommonImports adds the expose runtime imports to a file's import map.
+func (g *emitter) appendCommonImports(path, namespace string, routes []*RouteInfo) {
 	imports := []string{"queryParams", "type RouteQueryOptions", "type RouteDefinition"}
 
 	if g.opts.WithForm {
@@ -876,7 +876,7 @@ outer:
 	// Compute the relative import path depth.
 	dotCount := strings.Count(namespace, ".")
 	ups := strings.Repeat("/..", dotCount+1)
-	importFrom := "." + ups + "/routegen"
+	importFrom := "." + ups + "/" + g.opts.runtimeDirectory()
 
 	if g.imports[path] == nil {
 		g.imports[path] = make(map[string][]string)
@@ -889,16 +889,16 @@ outer:
 // Content management
 // ─────────────────────────────────────────────────────────────────────────────
 
-func (g *generator) appendContent(path, content string) {
+func (g *emitter) appendContent(path, content string) {
 	g.content[path] = append(g.content[path], content)
 }
 
-func (g *generator) prependContent(path, content string) {
+func (g *emitter) prependContent(path, content string) {
 	g.content[path] = append([]string{content}, g.content[path]...)
 }
 
 // flush writes all accumulated content to disk, prepending imports.
-func (g *generator) flush(base string) error {
+func (g *emitter) flush(base string) error {
 	for path, chunks := range g.content {
 		var b strings.Builder
 

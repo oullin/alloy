@@ -20,4 +20,5 @@ export const workspaceAliases = (): Record<string, string> => ({
 	'@alloy/tempo': resolve(packageRoot, 'tempo', 'src'),
 	'@alloy/tempo-tests': resolve(packageRoot, 'tempo', 'tests', 'src'),
 	'@alloy/console': resolve(packageRoot, 'console', 'src'),
+	'@alloy/expose-routes': resolve(packageRoot, 'expose-routes', 'src'),
 });

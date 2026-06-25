@@ -1,0 +1,29 @@
+{
+  "name": "@alloy/expose-routes",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "imports": {
+    "#*": "./src/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "vp pack src/index.ts --tsconfig tsconfig.json --out-dir dist --dts --clean",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vp test run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

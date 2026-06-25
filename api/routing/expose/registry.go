@@ -1,4 +1,4 @@
-package generator
+package expose
 
 import (
 	"encoding/json"
@@ -94,9 +94,9 @@ func (r *Registry) URL(name string, params map[string]string) string {
 	r.mu.RUnlock()
 
 	if !ok {
-		log.Printf("routegen: unknown route %q, returning fallback", name)
+		log.Printf("expose: unknown route %q, returning fallback", name)
 
-		return "#!routegen:unknown-route"
+		return "#!expose:unknown-route"
 	}
 
 	result := route.Pattern
@@ -118,7 +118,7 @@ func (r *Registry) Handle(name string, handler http.Handler, mux *http.ServeMux)
 	r.mu.RUnlock()
 
 	if !ok {
-		log.Printf("routegen: Handle: unknown route %q, skipping", name)
+		log.Printf("expose: Handle: unknown route %q, skipping", name)
 
 		return
 	}

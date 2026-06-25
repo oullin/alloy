@@ -1,4 +1,4 @@
-package generator
+package expose
 
 import (
 	"bytes"
@@ -167,11 +167,11 @@ func TestURLUnknownRoute(t *testing.T) {
 
 	url := reg.URL("nonexistent", nil)
 
-	if url != "#!routegen:unknown-route" {
-		t.Errorf("expected #!routegen:unknown-route, got %s", url)
+	if url != "#!expose:unknown-route" {
+		t.Errorf("expected #!expose:unknown-route, got %s", url)
 	}
 
-	if !strings.Contains(buf.String(), `routegen: unknown route "nonexistent"`) {
+	if !strings.Contains(buf.String(), `expose: unknown route "nonexistent"`) {
 		t.Errorf("expected warning log, got %q", buf.String())
 	}
 }
@@ -399,7 +399,7 @@ func TestHandle_UnknownRoute_Skips(t *testing.T) {
 
 	reg.Handle("nonexistent", http.NotFoundHandler(), mux)
 
-	if !strings.Contains(buf.String(), "routegen: Handle: unknown route") {
+	if !strings.Contains(buf.String(), "expose: Handle: unknown route") {
 		t.Errorf("expected warning log, got %q", buf.String())
 	}
 }

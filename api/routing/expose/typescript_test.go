@@ -1,4 +1,4 @@
-package generator
+package expose
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 // TestSafeMethod verifies that SafeMethod produces the same output as
 // TypeScript::safeMethod() from the PHP implementation, covering all edge
-// cases exercised by the upstream RouteGen test suite.
+// cases exercised by the upstream Expose test suite.
 func TestSafeMethod(t *testing.T) {
 	t.Parallel()
 

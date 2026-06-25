@@ -4,6 +4,7 @@
     { "path": "./infra" },
     { "path": "./packages/tempo" },
     { "path": "./packages/tempo/tests" },
-    { "path": "./packages/console" }
+    { "path": "./packages/console" },
+    { "path": "./packages/expose-routes" }
   ]
 }
