@@ -63,8 +63,8 @@ func TestPendingChainOnConnectionOnQueue(t *testing.T) {
 		t.Errorf("expected connection 'redis', got %q", j1.Connection)
 	}
 
-	if j1.Queue != "high" {
-		t.Errorf("expected queue 'high', got %q", j1.Queue)
+	if j1.Backend != "high" {
+		t.Errorf("expected queue 'high', got %q", j1.Backend)
 	}
 }
 

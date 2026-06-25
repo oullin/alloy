@@ -3,7 +3,7 @@ package currency
 // Provider defines the interface for providing currency information.
 type Provider interface {
 	// Get returns the currency configuration.
-	Get() Currency
+	Get() Definition
 	// GetCode returns the currency code.
 	GetCode() string
 	// GetSymbols returns the list of available currency symbols.
@@ -19,8 +19,8 @@ func (m DefaultProvider) GetCode() string {
 }
 
 // Get returns the default currency configuration (SGD).
-func (m DefaultProvider) Get() Currency {
-	return Currency{
+func (m DefaultProvider) Get() Definition {
+	return Definition{
 		Decimal:     ".",
 		Thousand:    ",",
 		Code:        m.GetCode(),

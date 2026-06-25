@@ -28,8 +28,8 @@ func TestChainedBatchFromPendingBatch(t *testing.T) {
 		t.Errorf("expected connection 'redis', got %q", restored.Connection())
 	}
 
-	if restored.Queue() != "high" {
-		t.Errorf("expected queue 'high', got %q", restored.Queue())
+	if restored.Backend() != "high" {
+		t.Errorf("expected queue 'high', got %q", restored.Backend())
 	}
 
 	if !restored.AllowsFailures() {

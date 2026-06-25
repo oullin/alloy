@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
 	"github.com/oullin/alloy/auth/passwords"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // RegisterUser creates a user from a headless registration request.
-type RegisterUser func(ctx context.Context, input RegisterInput) (cauth.Authenticatable, error)
+type RegisterUser func(ctx context.Context, input RegisterInput) (cauth.User, error)
 
 // ResetLinkSender sends password reset links without exposing the delivery
 // mechanism to HTTP handlers.
@@ -33,16 +33,16 @@ type PasswordConfirmationSession interface {
 }
 
 // ProfileUpdater persists user profile changes.
-type ProfileUpdater func(ctx context.Context, user cauth.Authenticatable, input map[string]any) error
+type ProfileUpdater func(ctx context.Context, user cauth.User, input map[string]any) error
 
 // PasswordUpdater persists a newly-hashed user password.
-type PasswordUpdater func(ctx context.Context, user cauth.Authenticatable, hashedPassword string) error
+type PasswordUpdater func(ctx context.Context, user cauth.User, hashedPassword string) error
 
 // PasswordSessionInvalidator revokes sessions or credentials after password changes.
-type PasswordSessionInvalidator func(ctx context.Context, user cauth.Authenticatable) error
+type PasswordSessionInvalidator func(ctx context.Context, user cauth.User) error
 
 // TwoFactorUpdater persists changes to a user's two-factor state.
-type TwoFactorUpdater func(ctx context.Context, user cauth.TwoFactorAuthenticatable) error
+type TwoFactorUpdater func(ctx context.Context, user cauth.TwoFactorUser) error
 
 // CurrentSessionID resolves the active browser session ID for a request.
 type CurrentSessionID func(r *http.Request) string
@@ -51,7 +51,7 @@ type CurrentSessionID func(r *http.Request) string
 type PasskeySessionKey func(r *http.Request) string
 
 // PasskeyUserResolver resolves a user by application user ID after passkey login.
-type PasskeyUserResolver func(ctx context.Context, userID string) (cauth.Authenticatable, error)
+type PasskeyUserResolver func(ctx context.Context, userID string) (cauth.User, error)
 
 // LoginLimiter tracks failed login attempts and lockouts.
 type LoginLimiter interface {

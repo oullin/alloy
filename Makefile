@@ -34,10 +34,10 @@ format-all:
 	@$(VP) run format-all
 
 go-test:
-	$(DOCKER_RUN) $(TASK) go:test
+	@$(VP) run go:test
 
 go\:test:
-	$(DOCKER_RUN) $(TASK) go:test
+	@$(VP) run go:test
 
 Makefile:
 	@:

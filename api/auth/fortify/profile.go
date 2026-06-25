@@ -3,7 +3,7 @@ package fortify
 import (
 	"net/http"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // NewUpdateProfileHandler delegates profile persistence to the application.

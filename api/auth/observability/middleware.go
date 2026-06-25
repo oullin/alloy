@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
-	clog "github.com/oullin/alloy/auth/contracts/log"
+	cauth "github.com/oullin/alloy/contracts/auth"
+	clog "github.com/oullin/alloy/contracts/auth/log"
 )
 
 // RequestIDResolver returns the request id for a request.
 type RequestIDResolver func(r *http.Request) string
 
 // Middleware enriches the request context and emits structured request logs.
-func Middleware(logger clog.Logger, guard cauth.Guard, resolve RequestIDResolver) func(http.Handler) http.Handler {
+func Middleware(logger clog.Sink, guard cauth.Guard, resolve RequestIDResolver) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()

@@ -256,9 +256,9 @@ func TestFailoverDriverInspectionFallsThroughOnError(t *testing.T) {
 	d1 := &stubInspector{connection: "d1", err: errors.New("d1 broken")}
 	d2 := &stubInspector{
 		connection: "d2",
-		pending:    []queue.InspectedJob{{ID: 99, Queue: "default"}},
-		delayed:    []queue.InspectedJob{{ID: 100, Queue: "default"}},
-		reserved:   []queue.InspectedJob{{ID: 101, Queue: "default"}},
+		pending:    []queue.InspectedJob{{ID: 99, Backend: "default"}},
+		delayed:    []queue.InspectedJob{{ID: 100, Backend: "default"}},
+		reserved:   []queue.InspectedJob{{ID: 101, Backend: "default"}},
 	}
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 	ctx := context.Background()

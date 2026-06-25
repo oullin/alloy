@@ -13,7 +13,7 @@ import (
 	"github.com/oullin/alloy/queue"
 )
 
-// signalingQueue is a minimal Queue that returns ErrNoJob from every
+// signalingQueue is a minimal Backend that returns ErrNoJob from every
 // Pop so the worker stays in its idle/sleep loop, giving the test a
 // stable window in which to send SIGUSR2 / SIGCONT and assert on the
 // dispatched events.
@@ -142,7 +142,7 @@ func TestWorkerEmitsPauseResumeEventsOnSignals(t *testing.T) {
 
 	pausing, _ := containsEvent[queue.WorkerPausing](rec.snapshot())
 
-	if pausing.ConnectionName != "test-connection" || pausing.Queue != "default" || pausing.WorkerName != "test-worker" {
+	if pausing.ConnectionName != "test-connection" || pausing.Backend != "default" || pausing.WorkerName != "test-worker" {
 		t.Errorf("WorkerPausing fields: got %+v", pausing)
 	}
 
@@ -160,7 +160,7 @@ func TestWorkerEmitsPauseResumeEventsOnSignals(t *testing.T) {
 
 	resuming, _ := containsEvent[queue.WorkerResuming](rec.snapshot())
 
-	if resuming.ConnectionName != "test-connection" || resuming.Queue != "default" || resuming.WorkerName != "test-worker" {
+	if resuming.ConnectionName != "test-connection" || resuming.Backend != "default" || resuming.WorkerName != "test-worker" {
 		t.Errorf("WorkerResuming fields: got %+v", resuming)
 	}
 

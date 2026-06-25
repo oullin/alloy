@@ -17,7 +17,7 @@ func WithTimezone(name string) Option {
 	}
 }
 
-func WithRuntime(runtime Runtime) Option {
+func WithRuntime(runtime Context) Option {
 	return func(cfg *config) error {
 		cfg.runtime = runtime
 
@@ -119,7 +119,7 @@ func WithStrictMode(enabled bool) Option {
 	}
 }
 
-func WithTestNow(input Tempo) Option {
+func WithTestNow(input Time) Option {
 	return func(cfg *config) error {
 		value := input
 		cfg.settings.TestNow = &value
@@ -212,7 +212,7 @@ func ConfigStrictMode(enabled bool) ConfigOption {
 	}
 }
 
-func ConfigTestNow(input Tempo) ConfigOption {
+func ConfigTestNow(input Time) ConfigOption {
 	return func(cfg *Config) error {
 		value := input
 		cfg.Settings.TestNow = &value

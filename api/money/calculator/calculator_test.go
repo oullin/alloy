@@ -140,7 +140,7 @@ func TestAllocate(t *testing.T) {
 	c := NewCalculator()
 	tests := []struct {
 		name          string
-		calc          *Calculator
+		calc          *Engine
 		amount        Amount
 		ration, scale int64
 		want          Amount
@@ -244,7 +244,7 @@ func TestRound(t *testing.T) {
 	c := NewCalculator()
 	tests := []struct {
 		name     string
-		calc     *Calculator
+		calc     *Engine
 		amount   Amount
 		exponent int
 		want     Amount
@@ -274,20 +274,20 @@ func TestRound(t *testing.T) {
 }
 
 func TestCalculatorNilReceiverBranches(t *testing.T) {
-	var c *Calculator
+	var c *Engine
 
 	if got := c.Absolute(10); got != 0 {
-		t.Fatalf("(*Calculator)(nil).Absolute(10) = %d, want 0", got)
+		t.Fatalf("(*Engine)(nil).Absolute(10) = %d, want 0", got)
 	}
 
 	if got := c.Negative(10); got != 0 {
-		t.Fatalf("(*Calculator)(nil).Negative(10) = %d, want 0", got)
+		t.Fatalf("(*Engine)(nil).Negative(10) = %d, want 0", got)
 	}
 
 	got, err := c.SafeMultiply(2, 3)
 
 	if err != nil || got != 0 {
-		t.Fatalf("(*Calculator)(nil).SafeMultiply(2,3) = (%d,%v), want (0,nil)", got, err)
+		t.Fatalf("(*Engine)(nil).SafeMultiply(2,3) = (%d,%v), want (0,nil)", got, err)
 	}
 }
 

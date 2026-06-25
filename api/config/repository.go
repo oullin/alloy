@@ -315,7 +315,7 @@ func (r *Repository) Array(key string, fallback ...[]any) ([]any, error) {
 // Collection returns the value for key wrapped in Alloy's slice collection.
 // An error wrapping ErrInvalidType is returned when the stored value is not a
 // []any.
-func (r *Repository) Collection(key string, fallback ...[]any) (*collection.Collection[any], error) {
+func (r *Repository) Collection(key string, fallback ...[]any) (*collection.List[any], error) {
 	items, err := r.Array(key, fallback...)
 
 	if err != nil {

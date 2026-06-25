@@ -11,23 +11,23 @@ import (
 	"time"
 
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/oullin/alloy/auth"
-	"github.com/oullin/alloy/auth/browsersessions"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	"github.com/oullin/alloy/auth/browserx"
 	"github.com/oullin/alloy/auth/fortify"
 	"github.com/oullin/alloy/auth/passkeys"
 	"github.com/oullin/alloy/auth/passwords"
 	"github.com/oullin/alloy/auth/teams"
 	patokens "github.com/oullin/alloy/auth/tokens"
 	"github.com/oullin/alloy/auth/twofactor"
+	"github.com/oullin/alloy/auth/user"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type stubStatefulGuard struct {
-	user               cauth.Authenticatable
+	user               cauth.User
 	attemptOK          bool
 	attemptCredentials map[string]string
 	attemptRemember    bool
-	loginUser          cauth.Authenticatable
+	loginUser          cauth.User
 	loggedOut          bool
 }
 
@@ -46,13 +46,13 @@ type resetUser struct {
 }
 
 type verifiableUser struct {
-	*auth.GenericUser
+	*user.GenericUser
 	verified bool
 	notified bool
 }
 
 type twoFactorUser struct {
-	*auth.GenericUser
+	*user.GenericUser
 	enabled       bool
 	secret        string
 	recoveryCodes []string
@@ -281,11 +281,11 @@ func TestLoginHandlerClearsLimiterOnSuccess(t *testing.T) {
 }
 
 func TestRegisterHandlerCreatesUserAndCanAutoLogin(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "secret"})
+	user := user.NewGenericUser(map[string]any{"id": "1", "password": "secret"})
 	guard := &stubStatefulGuard{}
 
 	var got fortify.RegisterInput
-	handler := fortify.NewRegisterHandler(func(_ context.Context, input fortify.RegisterInput) (cauth.Authenticatable, error) {
+	handler := fortify.NewRegisterHandler(func(_ context.Context, input fortify.RegisterInput) (cauth.User, error) {
 		got = input
 
 		return user, nil
@@ -362,7 +362,7 @@ func TestResetPasswordHandlerRejectsConfirmationMismatch(t *testing.T) {
 }
 
 func TestVerificationNotificationHandlerSendsForUnverifiedUser(t *testing.T) {
-	user := &verifiableUser{GenericUser: auth.NewGenericUser(map[string]any{"id": "1"})}
+	user := &verifiableUser{GenericUser: user.NewGenericUser(map[string]any{"id": "1"})}
 	guard := &stubStatefulGuard{user: user}
 	handler := fortify.NewVerificationNotificationHandler(guard)
 
@@ -378,7 +378,7 @@ func TestVerificationNotificationHandlerSendsForUnverifiedUser(t *testing.T) {
 }
 
 func TestVerifyEmailHandlerRequiresInjectedVerifier(t *testing.T) {
-	user := &verifiableUser{GenericUser: auth.NewGenericUser(map[string]any{"id": "1"})}
+	user := &verifiableUser{GenericUser: user.NewGenericUser(map[string]any{"id": "1"})}
 	guard := &stubStatefulGuard{user: user}
 
 	t.Run("missing verifier", func(t *testing.T) {
@@ -411,7 +411,7 @@ func TestVerifyEmailHandlerRequiresInjectedVerifier(t *testing.T) {
 }
 
 func TestConfirmPasswordHandlerStoresConfirmationTimestamp(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "hashed"})
+	user := user.NewGenericUser(map[string]any{"id": "1", "password": "hashed"})
 	guard := &stubStatefulGuard{user: user}
 	session := &stubConfirmationSession{values: map[string]any{}}
 	handler := fortify.NewConfirmPasswordHandler(guard, &stubHasher{checkOK: true}, session)
@@ -428,12 +428,12 @@ func TestConfirmPasswordHandlerStoresConfirmationTimestamp(t *testing.T) {
 }
 
 func TestUpdatePasswordHandlerHashesPersistsAndUpdatesUser(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "old-hash"})
+	user := user.NewGenericUser(map[string]any{"id": "1", "password": "old-hash"})
 	guard := &stubStatefulGuard{user: user}
 	hasher := &stubHasher{checkOK: true, hash: "new-hash"}
 
 	var persisted string
-	handler := fortify.NewUpdatePasswordHandler(guard, hasher, func(_ context.Context, got cauth.Authenticatable, hash string) error {
+	handler := fortify.NewUpdatePasswordHandler(guard, hasher, func(_ context.Context, got cauth.User, hash string) error {
 		if got != user {
 			t.Fatal("unexpected user passed to updater")
 		}
@@ -459,10 +459,10 @@ func TestUpdatePasswordHandlerHashesPersistsAndUpdatesUser(t *testing.T) {
 }
 
 func TestUpdatePasswordHandlerRunsSessionInvalidators(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "old-hash"})
+	user := user.NewGenericUser(map[string]any{"id": "1", "password": "old-hash"})
 	guard := &stubStatefulGuard{user: user}
 	called := false
-	handler := fortify.NewUpdatePasswordHandler(guard, &stubHasher{checkOK: true, hash: "new-hash"}, nil, func(_ context.Context, got cauth.Authenticatable) error {
+	handler := fortify.NewUpdatePasswordHandler(guard, &stubHasher{checkOK: true, hash: "new-hash"}, nil, func(_ context.Context, got cauth.User) error {
 		called = got == user
 
 		return nil
@@ -480,7 +480,7 @@ func TestUpdatePasswordHandlerRunsSessionInvalidators(t *testing.T) {
 }
 
 func TestAPITokenHandlersCreateListAndRevokeTokens(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 	guard := &stubStatefulGuard{user: user}
 	repo := patokens.NewMemoryRepository()
 	issuer := patokens.NewIssuer(repo)
@@ -533,10 +533,10 @@ func TestAPITokenHandlersCreateListAndRevokeTokens(t *testing.T) {
 }
 
 func TestTwoFactorHandlersEnableConfirmRegenerateAndDisable(t *testing.T) {
-	user := &twoFactorUser{GenericUser: auth.NewGenericUser(map[string]any{"id": "1"})}
+	user := &twoFactorUser{GenericUser: user.NewGenericUser(map[string]any{"id": "1"})}
 	guard := &stubStatefulGuard{user: user}
 	persistCalls := 0
-	persist := func(_ context.Context, _ cauth.TwoFactorAuthenticatable) error {
+	persist := func(_ context.Context, _ cauth.TwoFactorUser) error {
 		persistCalls++
 
 		return nil
@@ -608,13 +608,13 @@ func TestTwoFactorHandlersEnableConfirmRegenerateAndDisable(t *testing.T) {
 }
 
 func TestBrowserSessionHandlersListRevokeAndRevokeOther(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 	guard := &stubStatefulGuard{user: user}
-	repo := browsersessions.NewMemoryRepository(
-		browsersessions.Session{ID: "current", UserID: "1", IPAddress: "127.0.0.1", UserAgent: "Current", LastActiveAt: time.Now()},
-		browsersessions.Session{ID: "other", UserID: "1", IPAddress: "127.0.0.2", UserAgent: "Other", LastActiveAt: time.Now()},
+	repo := browserx.NewMemoryRepository(
+		browserx.Session{ID: "current", UserID: "1", IPAddress: "127.0.0.1", UserAgent: "Current", LastActiveAt: time.Now()},
+		browserx.Session{ID: "other", UserID: "1", IPAddress: "127.0.0.2", UserAgent: "Other", LastActiveAt: time.Now()},
 	)
-	service := browsersessions.NewService(repo)
+	service := browserx.NewService(repo)
 	current := func(*http.Request) string { return "current" }
 
 	list := fortify.NewListBrowserSessionsHandler(guard, service, current)
@@ -656,7 +656,7 @@ func TestBrowserSessionHandlersListRevokeAndRevokeOther(t *testing.T) {
 
 func TestPasskeyOptionHandlersStoreServerSideSessions(t *testing.T) {
 	service, sessions := newPasskeyService(t)
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 	guard := &stubStatefulGuard{user: user}
 	key := func(*http.Request) string { return "ceremony" }
 
@@ -696,7 +696,7 @@ func TestPasskeyOptionHandlersStoreServerSideSessions(t *testing.T) {
 }
 
 func TestTeamHandlersCreateListSwitchAndManageMembers(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "owner"})
+	user := user.NewGenericUser(map[string]any{"id": "owner"})
 	guard := &stubStatefulGuard{user: user}
 	service := teams.NewService(teams.NewMemoryRepository(), []teams.Role{{
 		Name:        "admin",
@@ -801,9 +801,9 @@ func newPasskeyService(t *testing.T) (*passkeys.Service, *passkeys.MemorySession
 	return service, sessions
 }
 
-func (g *stubStatefulGuard) User(context.Context) (cauth.Authenticatable, error) { return g.user, nil }
-func (g *stubStatefulGuard) Check(context.Context) bool                          { return g.user != nil }
-func (g *stubStatefulGuard) Guest(context.Context) bool                          { return g.user == nil }
+func (g *stubStatefulGuard) User(context.Context) (cauth.User, error) { return g.user, nil }
+func (g *stubStatefulGuard) Check(context.Context) bool               { return g.user != nil }
+func (g *stubStatefulGuard) Guest(context.Context) bool               { return g.user == nil }
 func (g *stubStatefulGuard) ID(context.Context) any {
 	if g.user == nil {
 		return nil
@@ -819,16 +819,16 @@ func (g *stubStatefulGuard) Attempt(_ context.Context, credentials map[string]st
 	return g.attemptOK
 }
 func (g *stubStatefulGuard) Once(context.Context, map[string]string) bool { return g.attemptOK }
-func (g *stubStatefulGuard) Login(_ context.Context, user cauth.Authenticatable, _ bool) error {
+func (g *stubStatefulGuard) Login(_ context.Context, user cauth.User, _ bool) error {
 	g.loginUser = user
 	g.user = user
 
 	return nil
 }
-func (g *stubStatefulGuard) LoginUsingID(context.Context, string, bool) (cauth.Authenticatable, error) {
+func (g *stubStatefulGuard) LoginUsingID(context.Context, string, bool) (cauth.User, error) {
 	return g.user, nil
 }
-func (g *stubStatefulGuard) OnceUsingID(context.Context, string) (cauth.Authenticatable, error) {
+func (g *stubStatefulGuard) OnceUsingID(context.Context, string) (cauth.User, error) {
 	return g.user, nil
 }
 func (g *stubStatefulGuard) ViaRemember(context.Context) bool { return false }

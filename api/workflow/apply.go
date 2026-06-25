@@ -3,7 +3,7 @@ package workflow
 import "fmt"
 
 // Apply fires the named transition for the subject and returns the new marking.
-func (w *Workflow[T]) Apply(subject T, transitionName string, context map[string]any) (Marking, error) {
+func (w *Machine[T]) Apply(subject T, transitionName string, context map[string]any) (Marking, error) {
 	w.logDebug("applying transition", "transition", transitionName, "workflow", w.name)
 
 	transition, next, err := w.prepareApply(subject, transitionName, context)
@@ -37,7 +37,7 @@ func (w *Workflow[T]) Apply(subject T, transitionName string, context map[string
 	return next, nil
 }
 
-func (w *Workflow[T]) prepareApply(subject T, transitionName string, context map[string]any) (Transition, Marking, error) {
+func (w *Machine[T]) prepareApply(subject T, transitionName string, context map[string]any) (Transition, Marking, error) {
 	transition, ok := w.definition.Transition(transitionName)
 
 	if !ok {

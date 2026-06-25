@@ -1,8 +1,8 @@
-// Package runtime carries the per-Tempo locale, fallback locale and
+// Package runtime carries the per-Time locale, fallback locale and
 // optional translator that drive locale-aware rendering. It is split
-// out of the tempo umbrella so feature packages can depend on Runtime
+// out of the tempo umbrella so feature packages can depend on Context
 // without pulling in the rest of tempo, and so applications can build
-// and pass Runtime values directly.
+// and pass Context values directly.
 package runtime
 
 import "strings"
@@ -15,16 +15,16 @@ type Translator interface {
 	Translate(key string, replacements map[string]string) (string, bool)
 }
 
-type Runtime struct {
+type Context struct {
 	locale         string
 	fallbackLocale string
 	translator     Translator
 }
 
-type Option func(*Runtime)
+type Option func(*Context)
 
-func New(options ...Option) Runtime {
-	runtime := Runtime{locale: "en-US", fallbackLocale: "en-US"}
+func New(options ...Option) Context {
+	runtime := Context{locale: "en-US", fallbackLocale: "en-US"}
 
 	for _, option := range options {
 		option(&runtime)
@@ -34,7 +34,7 @@ func New(options ...Option) Runtime {
 }
 
 func Locale(locale string) Option {
-	return func(runtime *Runtime) {
+	return func(runtime *Context) {
 		if strings.TrimSpace(locale) != "" {
 			runtime.locale = locale
 		}
@@ -42,7 +42,7 @@ func Locale(locale string) Option {
 }
 
 func FallbackLocale(locale string) Option {
-	return func(runtime *Runtime) {
+	return func(runtime *Context) {
 		if strings.TrimSpace(locale) != "" {
 			runtime.fallbackLocale = locale
 		}
@@ -50,12 +50,12 @@ func FallbackLocale(locale string) Option {
 }
 
 func WithTranslator(translator Translator) Option {
-	return func(runtime *Runtime) {
+	return func(runtime *Context) {
 		runtime.translator = translator
 	}
 }
 
-func (runtime Runtime) With(options ...Option) Runtime {
+func (runtime Context) With(options ...Option) Context {
 	next := runtime
 
 	for _, option := range options {
@@ -65,15 +65,15 @@ func (runtime Runtime) With(options ...Option) Runtime {
 	return next
 }
 
-func (runtime Runtime) Locale() string { return runtime.locale }
+func (runtime Context) Locale() string { return runtime.locale }
 
-func (runtime Runtime) FallbackLocale() string { return runtime.fallbackLocale }
+func (runtime Context) FallbackLocale() string { return runtime.fallbackLocale }
 
-func (runtime Runtime) HasTranslator() bool { return runtime.translator != nil }
+func (runtime Context) HasTranslator() bool { return runtime.translator != nil }
 
-func (runtime Runtime) Translator() Translator { return runtime.translator }
+func (runtime Context) Translator() Translator { return runtime.translator }
 
-func (runtime Runtime) Message(key string) (any, bool) {
+func (runtime Context) Message(key string) (any, bool) {
 	if runtime.translator != nil {
 		if value, ok := runtime.translator.Message(key); ok {
 			return value, true
@@ -92,7 +92,7 @@ func (runtime Runtime) Message(key string) (any, bool) {
 	}
 }
 
-func (runtime Runtime) Translate(key string, replacements map[string]string) (string, bool) {
+func (runtime Context) Translate(key string, replacements map[string]string) (string, bool) {
 	if runtime.translator != nil {
 		if value, ok := runtime.translator.Translate(key, replacements); ok {
 			return value, true

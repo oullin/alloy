@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// Queue defines the interface for a queue backend.
-type Queue interface {
+// Backend defines the interface for a queue backend.
+type Backend interface {
 	// Push adds a job payload to the queue.
 	Push(ctx context.Context, queue string, payload []byte) (string, error)
 	// PushDelayed adds a delayed job to the queue.
@@ -27,7 +27,7 @@ type Queue interface {
 	ConnectionName() string
 }
 
-// Connector creates a Queue from a configuration map.
+// Connector creates a Backend from a configuration map.
 type Connector interface {
-	Connect(config map[string]any) (Queue, error)
+	Connect(config map[string]any) (Backend, error)
 }

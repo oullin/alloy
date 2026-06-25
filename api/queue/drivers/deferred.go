@@ -10,7 +10,7 @@ import (
 
 // DeferredEntry holds a deferred job payload.
 type DeferredEntry struct {
-	Queue   string
+	Backend string
 	Payload []byte
 	After   time.Time
 }
@@ -35,7 +35,7 @@ func (d *DeferredDriver) Push(_ context.Context, queueName string, payload []byt
 
 	defer d.mu.Unlock()
 
-	d.deferred = append(d.deferred, DeferredEntry{Queue: queueName, Payload: payload, After: time.Now()})
+	d.deferred = append(d.deferred, DeferredEntry{Backend: queueName, Payload: payload, After: time.Now()})
 
 	return "", nil
 }
@@ -45,7 +45,7 @@ func (d *DeferredDriver) PushDelayed(_ context.Context, queueName string, payloa
 
 	defer d.mu.Unlock()
 
-	d.deferred = append(d.deferred, DeferredEntry{Queue: queueName, Payload: payload, After: time.Now().Add(delay)})
+	d.deferred = append(d.deferred, DeferredEntry{Backend: queueName, Payload: payload, After: time.Now().Add(delay)})
 
 	return "", nil
 }
@@ -56,7 +56,7 @@ func (d *DeferredDriver) PushMultiple(_ context.Context, queueName string, paylo
 	defer d.mu.Unlock()
 
 	for _, p := range payloads {
-		d.deferred = append(d.deferred, DeferredEntry{Queue: queueName, Payload: p, After: time.Now()})
+		d.deferred = append(d.deferred, DeferredEntry{Backend: queueName, Payload: p, After: time.Now()})
 	}
 
 	return make([]string, len(payloads)), nil
@@ -94,13 +94,13 @@ func (d *DeferredDriver) QueueNames(_ context.Context) ([]string, error) {
 	var out []string
 
 	for _, e := range d.deferred {
-		if _, ok := seen[e.Queue]; ok {
+		if _, ok := seen[e.Backend]; ok {
 			continue
 		}
 
-		seen[e.Queue] = struct{}{}
+		seen[e.Backend] = struct{}{}
 
-		out = append(out, e.Queue)
+		out = append(out, e.Backend)
 	}
 
 	return out, nil
@@ -132,12 +132,12 @@ func (d *DeferredDriver) snapshots(queueName string, include func(DeferredEntry)
 	var out []queue.InspectedJob
 
 	for _, e := range d.deferred {
-		if e.Queue != queueName || !include(e) {
+		if e.Backend != queueName || !include(e) {
 			continue
 		}
 
 		out = append(out, queue.InspectedJob{
-			Queue:       e.Queue,
+			Backend:     e.Backend,
 			Connection:  d.connection,
 			Payload:     e.Payload,
 			AvailableAt: e.After,

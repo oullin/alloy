@@ -132,8 +132,8 @@ func (p *PendingBatch) WithOption(key string, value any) *PendingBatch {
 // Connection returns the configured connection.
 func (p *PendingBatch) Connection() string { return p.connection }
 
-// Queue returns the configured queue.
-func (p *PendingBatch) Queue() string { return p.queue }
+// Backend returns the configured queue.
+func (p *PendingBatch) Backend() string { return p.queue }
 
 // GetName returns the batch name.
 func (p *PendingBatch) GetName() string { return p.name }

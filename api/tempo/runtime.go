@@ -2,11 +2,11 @@ package tempo
 
 import "github.com/oullin/alloy/tempo/runtime"
 
-type Runtime = runtime.Runtime
+type Context = runtime.Context
 
 type RuntimeOption = runtime.Option
 
-func NewRuntime(options ...RuntimeOption) Runtime {
+func NewRuntime(options ...RuntimeOption) Context {
 	return runtime.New(options...)
 }
 

@@ -8,20 +8,20 @@ import (
 	"github.com/oullin/alloy/money/exception"
 )
 
-type Parser struct {
+type Reader struct {
 	iso *currency.ISOCodePattern
 }
 
-// NewParser creates a new Parser with the default ISOCodePattern.
-func NewParser() *Parser {
-	return &Parser{
+// NewParser creates a new Reader with the default ISOCodePattern.
+func NewParser() *Reader {
+	return &Reader{
 		iso: currency.NewISOCodePattern(),
 	}
 }
 
-// NewParserWith creates a new Parser with a custom ISOCodePattern.
-func NewParserWith(iso *currency.ISOCodePattern) *Parser {
-	return &Parser{
+// NewParserWith creates a new Reader with a custom ISOCodePattern.
+func NewParserWith(iso *currency.ISOCodePattern) *Reader {
+	return &Reader{
 		iso: iso,
 	}
 }
@@ -31,7 +31,7 @@ func NewParserWith(iso *currency.ISOCodePattern) *Parser {
 //
 // Note: Comma-only inputs like "10,50" are treated as thousands of separators (parses as 1050).
 // For European decimal comma notation, use ParseAmountWithDecimalComma instead.
-func (p *Parser) ParseAmount(input string, defaultCurrency ...string) (float64, string, error) {
+func (p *Reader) ParseAmount(input string, defaultCurrency ...string) (float64, string, error) {
 	if p == nil {
 		return 0, "", exception.ErrParserNotProvided
 	}
@@ -65,7 +65,7 @@ func (p *Parser) ParseAmount(input string, defaultCurrency ...string) (float64, 
 //
 // Note: This method treats comma-only inputs as decimal separators, not thousands of separators.
 // Mixed separator inputs (e.g. "1.234,56") are still handled intelligently.
-func (p *Parser) ParseAmountWithDecimalComma(input string, defaultCurrency ...string) (float64, string, error) {
+func (p *Reader) ParseAmountWithDecimalComma(input string, defaultCurrency ...string) (float64, string, error) {
 	if p == nil {
 		return 0, "", exception.ErrParserNotProvided
 	}
@@ -96,13 +96,13 @@ func (p *Parser) ParseAmountWithDecimalComma(input string, defaultCurrency ...st
 
 // ParseDecimal parses just a numeric amount string and returns it as a float64
 // Comma-only inputs are treated as thousands of separators (e.g., "1,000" = 1000).
-func (p *Parser) ParseDecimal(amount string) (float64, error) {
+func (p *Reader) ParseDecimal(amount string) (float64, error) {
 	return p.parseNumericString(amount, false)
 }
 
 // ParseDecimalWithComma parses a numeric amount string treating commas as decimal separators.
 // This is useful for European-style decimal notation (e.g. "10,50" parses as 10.50).
-func (p *Parser) ParseDecimalWithComma(amount string) (float64, error) {
+func (p *Reader) ParseDecimalWithComma(amount string) (float64, error) {
 	return p.parseNumericString(amount, true)
 }
 
@@ -113,7 +113,7 @@ func (p *Parser) ParseDecimalWithComma(amount string) (float64, error) {
 //   - Comma-only (e.g. "1,000" or "10,50"): Behaviour depends on useDecimalComma parameter
 //   - useDecimalComma=false: Treated as thousands separator (default) - "10,50" = 1050
 //   - useDecimalComma=true: Treated as decimal separator - "10,50" = 10.50
-func (p *Parser) parseNumericString(input string, useDecimalComma bool) (float64, error) {
+func (p *Reader) parseNumericString(input string, useDecimalComma bool) (float64, error) {
 	if p == nil {
 		return 0, exception.ErrParserNotProvided
 	}
@@ -167,7 +167,7 @@ func (p *Parser) parseNumericString(input string, useDecimalComma bool) (float64
 }
 
 // validThousandsGrouping ensures the integer portion uses 1-3 leading digits followed by 3-digit groups.
-func (p *Parser) validThousandsGrouping(input, thousandsSep, decimalSep string) (bool, error) {
+func (p *Reader) validThousandsGrouping(input, thousandsSep, decimalSep string) (bool, error) {
 	if p == nil {
 		return false, exception.ErrParserNotProvided
 	}
@@ -212,7 +212,7 @@ func (p *Parser) validThousandsGrouping(input, thousandsSep, decimalSep string) 
 // currency symbols or ISO codes from the input string.
 // It returns the modified input string (with currency removed), the detected currency,
 // and an error if no currency is specified.
-func (p *Parser) extractCurrency(input string, defaultCurrency ...string) (string, string, error) {
+func (p *Reader) extractCurrency(input string, defaultCurrency ...string) (string, string, error) {
 	if p == nil || p.iso == nil {
 		return "", "", exception.ErrParserInvalidState
 	}
@@ -264,7 +264,7 @@ func (p *Parser) extractCurrency(input string, defaultCurrency ...string) (strin
 }
 
 // ParseStringSign extracts the sign from an amount string and returns the cleaned string and sign indicator.
-func (p *Parser) ParseStringSign(amount string) (string, bool, error) {
+func (p *Reader) ParseStringSign(amount string) (string, bool, error) {
 	if p == nil {
 		return "", false, exception.ErrParserNotProvided
 	}
@@ -283,7 +283,7 @@ func (p *Parser) ParseStringSign(amount string) (string, bool, error) {
 
 // ParseDecimalParts splits a decimal string into integer and decimal parts.
 // Returns the integer part, decimal part, and any error.
-func (p *Parser) ParseDecimalParts(amount string) (string, string, error) {
+func (p *Reader) ParseDecimalParts(amount string) (string, string, error) {
 	if p == nil {
 		return "", "", exception.ErrParserNotProvided
 	}
@@ -310,7 +310,7 @@ func (p *Parser) ParseDecimalParts(amount string) (string, string, error) {
 }
 
 // ValidateAndPadDecimal validates the decimal part doesn't exceed a fraction and pads it to match a currency fraction.
-func (p *Parser) ValidateAndPadDecimal(decimalPart string, fraction int) (string, error) {
+func (p *Reader) ValidateAndPadDecimal(decimalPart string, fraction int) (string, error) {
 	if p == nil {
 		return "", exception.ErrParserNotProvided
 	}
@@ -328,7 +328,7 @@ func (p *Parser) ValidateAndPadDecimal(decimalPart string, fraction int) (string
 }
 
 // ParseAmountString parses a string amount into an int64 value according to a currency fraction.
-func (p *Parser) ParseAmountString(amount string, fraction int, negative bool) (int64, error) {
+func (p *Reader) ParseAmountString(amount string, fraction int, negative bool) (int64, error) {
 	if p == nil {
 		return 0, exception.ErrParserNotProvided
 	}

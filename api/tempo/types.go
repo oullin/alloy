@@ -28,7 +28,9 @@ type Object struct {
 	Weekday       int
 }
 
-type Duration = duration.Duration
+type Duration = duration.Span
+
+type Span = duration.Span
 
 type DiffOptions struct {
 	Absolute bool
@@ -37,7 +39,7 @@ type DiffOptions struct {
 
 // HumanDiffOptions aliases the equivalent type in the config package so
 // env-loaded defaults and runtime overrides share a single shape. Settings
-// cannot be aliased the same way — it carries TestNow *Tempo, which would
+// cannot be aliased the same way — it carries TestNow *Time, which would
 // create an import cycle if pushed down into config/.
 type HumanDiffOptions = configpkg.HumanDiffOptions
 
@@ -48,13 +50,13 @@ type Settings struct {
 	MidDayAt       int
 	MonthsOverflow bool
 	StrictMode     bool
-	TestNow        *Tempo
+	TestNow        *Time
 	Timezone       string
 	WeekendDays    []time.Weekday
 	YearsOverflow  bool
 }
 
-type Serializer func(Tempo) string
+type Serializer func(Time) string
 
 type ConfigOption func(*Config) error
 
@@ -74,38 +76,38 @@ type Option func(*config) error
 
 type config struct {
 	location       *time.Location
-	runtime        Runtime
+	runtime        Context
 	settings       Settings
 	serializer     Serializer
 	toStringFormat string
 }
 
-type Tempo struct {
+type Time struct {
 	value          time.Time
 	location       *time.Location
-	runtime        Runtime
+	runtime        Context
 	settings       Settings
 	serializer     Serializer
 	toStringFormat string
 }
 
-type MutableTempo struct {
+type MutableTime struct {
 	value          time.Time
 	location       *time.Location
-	runtime        Runtime
+	runtime        Context
 	settings       Settings
 	serializer     Serializer
 	toStringFormat string
 }
 
 type Interval struct {
-	Start Tempo
-	End   Tempo
+	Start Time
+	End   Time
 }
 
 type Period struct {
-	Start      Tempo
-	End        Tempo
+	Start      Time
+	End        Time
 	Step       Duration
 	IncludeEnd bool
 }
@@ -113,7 +115,7 @@ type Period struct {
 type Factory struct {
 	clock          factory.Clock
 	location       *time.Location
-	runtime        Runtime
+	runtime        Context
 	settings       Settings
 	serializer     Serializer
 	toStringFormat string

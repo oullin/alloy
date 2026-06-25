@@ -10,11 +10,11 @@ import (
 
 type Converter struct {
 	currencies *currency.Manager
-	exchange   *exchange.Exchange
+	exchange   *exchange.Rates
 }
 
 // NewConverter creates a new Converter with pre-loaded exchange rates
-func NewConverter(currencies *currency.Manager, ex *exchange.Exchange) (*Converter, error) {
+func NewConverter(currencies *currency.Manager, ex *exchange.Rates) (*Converter, error) {
 	if currencies == nil {
 		return nil, exception.ErrNoCurrencyManager
 	}
@@ -29,8 +29,8 @@ func NewConverter(currencies *currency.Manager, ex *exchange.Exchange) (*Convert
 	}, nil
 }
 
-// Convert converts a Money object to another currency using the pre-loaded exchange rates
-func (c *Converter) Convert(money *Money, toCurrency string) (*Money, error) {
+// Convert converts a Value object to another currency using the pre-loaded exchange rates
+func (c *Converter) Convert(money *Value, toCurrency string) (*Value, error) {
 	if c == nil || c.exchange == nil || c.exchange.IsInvalid() {
 		return nil, exception.ErrInvalidExchangeRate
 	}
@@ -69,14 +69,14 @@ func (c *Converter) Convert(money *Money, toCurrency string) (*Money, error) {
 		return nil, err
 	}
 
-	return &Money{
+	return &Value{
 		amount:   convertedAmount,
 		currency: target,
 	}, nil
 }
 
-// ConvertWithRate converts a Money object to another currency using a specific rate
-func (c *Converter) ConvertWithRate(money *Money, toCurrency string, rate float64) (*Money, error) {
+// ConvertWithRate converts a Value object to another currency using a specific rate
+func (c *Converter) ConvertWithRate(money *Value, toCurrency string, rate float64) (*Value, error) {
 	if c == nil || c.exchange == nil || c.exchange.IsInvalid() {
 		return nil, exception.ErrInvalidExchangeRate
 	}
@@ -114,7 +114,7 @@ func (c *Converter) ConvertWithRate(money *Money, toCurrency string, rate float6
 		return nil, err
 	}
 
-	return &Money{
+	return &Value{
 		amount:   convertedAmount,
 		currency: target,
 	}, nil

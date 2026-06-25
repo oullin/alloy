@@ -137,7 +137,7 @@ func TestRegistry_LookupBySubjectAndName(t *testing.T) {
 
 	reg.Add(registry.Entry[*Subscription]{
 		Name:     "subscription",
-		Workflow: sm,
+		Machine:  sm,
 		Supports: func(s *Subscription) bool { return s != nil },
 	})
 
@@ -204,7 +204,7 @@ func TestRegistry_ConcurrentAddAndGet(t *testing.T) {
 		for range 100 {
 			reg.Add(registry.Entry[*Subscription]{
 				Name:     "subscription",
-				Workflow: sm,
+				Machine:  sm,
 				Supports: func(*Subscription) bool { return true },
 			})
 		}

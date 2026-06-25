@@ -10,21 +10,21 @@ import (
 
 // FailoverDriver tries each driver in order; reads from the first that succeeds,
 // writes to the first that accepts the push. On a fallthrough the driver emits
-// a QueueFailedOver event through the configured EventEmitter (if any) so
+// a FailedOver event through the configured EventEmitter (if any) so
 // operators can alert on backend degradation.
 type FailoverDriver struct {
-	drivers    []queue.Queue
+	drivers    []queue.Backend
 	connection string
 	emitter    queue.EventEmitter
 }
 
 // NewFailoverDriver creates a FailoverDriver. drivers are tried in order.
-func NewFailoverDriver(connection string, drivers ...queue.Queue) *FailoverDriver {
+func NewFailoverDriver(connection string, drivers ...queue.Backend) *FailoverDriver {
 	return &FailoverDriver{drivers: drivers, connection: connection}
 }
 
 // SetEmitter installs an EventEmitter the driver will use to dispatch
-// QueueFailedOver events. Passing nil disables emission.
+// FailedOver events. Passing nil disables emission.
 // constructor-injected Events\Dispatcher that the upstream FailoverQueue
 // receives.
 func (d *FailoverDriver) SetEmitter(e queue.EventEmitter) *FailoverDriver {
@@ -33,9 +33,9 @@ func (d *FailoverDriver) SetEmitter(e queue.EventEmitter) *FailoverDriver {
 	return d
 }
 
-// emitFailover dispatches a QueueFailedOver event for a fallthrough
+// emitFailover dispatches a FailedOver event for a fallthrough
 // from one driver to the next. It is a no-op when the emitter is nil.
-func (d *FailoverDriver) emitFailover(from, to queue.Queue, err error) {
+func (d *FailoverDriver) emitFailover(from, to queue.Backend, err error) {
 	if d.emitter == nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (d *FailoverDriver) emitFailover(from, to queue.Queue, err error) {
 		toName = to.ConnectionName()
 	}
 
-	d.emitter.Emit(events.QueueFailedOver{From: fromName, To: toName, Err: err})
+	d.emitter.Emit(events.FailedOver{From: fromName, To: toName, Err: err})
 }
 
 func (d *FailoverDriver) Push(ctx context.Context, queueName string, payload []byte) (string, error) {
@@ -176,7 +176,7 @@ func (d *FailoverDriver) ReservedSize(ctx context.Context, queueName string) (in
 func (d *FailoverDriver) ConnectionName() string { return d.connection }
 
 // QueueNames returns the union of queue names reported by every
-// wrapped driver that implements QueueNamer. Drivers without the
+// wrapped driver that implements BackendNamer. Drivers without the
 // optional contract are skipped. Duplicates are de-duplicated while
 // preserving first-seen order.
 func (d *FailoverDriver) QueueNames(ctx context.Context) ([]string, error) {
@@ -185,7 +185,7 @@ func (d *FailoverDriver) QueueNames(ctx context.Context) ([]string, error) {
 	var out []string
 
 	for _, drv := range d.drivers {
-		namer, ok := drv.(queue.QueueNamer)
+		namer, ok := drv.(queue.BackendNamer)
 
 		if !ok {
 			continue

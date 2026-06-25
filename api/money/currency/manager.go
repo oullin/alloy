@@ -9,7 +9,7 @@ import (
 type Manager struct {
 	currencies      *Map
 	symbols         *[]Symbol
-	defaultCurrency *Currency
+	defaultCurrency *Definition
 }
 
 // NewManager creates a new Manager instance using the DefaultProvider.
@@ -41,8 +41,8 @@ func NewManagerWith(metal Provider) *Manager {
 }
 
 // NewManagerFor creates a new Manager instance with a specific provider and an initial dataset of currencies.
-func NewManagerFor(curr Provider, dataset *map[string]*Currency) (*Manager, error) {
-	var targetCurrency Currency
+func NewManagerFor(curr Provider, dataset *map[string]*Definition) (*Manager, error) {
+	var targetCurrency Definition
 
 	if curr != nil {
 		targetCurrency = curr.Get()
@@ -67,7 +67,7 @@ func NewManagerFor(curr Provider, dataset *map[string]*Currency) (*Manager, erro
 }
 
 // FindByCode searches for a currency by its ISO 4217 code.
-func (cm *Manager) FindByCode(code string) *Currency {
+func (cm *Manager) FindByCode(code string) *Definition {
 	if cm == nil || cm.currencies == nil {
 		return nil
 	}
@@ -76,7 +76,7 @@ func (cm *Manager) FindByCode(code string) *Currency {
 }
 
 // FindByNumericCode returns the currency given the numeric code defined in ISO-4271.
-func (cm *Manager) FindByNumericCode(code string) *Currency {
+func (cm *Manager) FindByNumericCode(code string) *Definition {
 	if cm == nil || cm.currencies == nil {
 		return nil
 	}
@@ -91,7 +91,7 @@ func (cm *Manager) FindByNumericCode(code string) *Currency {
 }
 
 // Add adds a new currency to the manager.
-func (cm *Manager) Add(currency *Currency) *Currency {
+func (cm *Manager) Add(currency *Definition) *Definition {
 	if cm == nil || currency == nil || cm.currencies == nil || cm.currencies.dataset == nil {
 		return nil
 	}
@@ -110,12 +110,12 @@ func (cm *Manager) Add(currency *Currency) *Currency {
 }
 
 // AddFrom creates and adds a new currency to the manager using the provided details.
-func (cm *Manager) AddFrom(code, Grapheme, Template, Decimal, Thousand, NumericCode string, Fraction int) *Currency {
+func (cm *Manager) AddFrom(code, Grapheme, Template, Decimal, Thousand, NumericCode string, Fraction int) *Definition {
 	if cm == nil {
 		return nil
 	}
 
-	currency := &Currency{
+	currency := &Definition{
 		Code:        strings.ToUpper(code),
 		Grapheme:    Grapheme,
 		Template:    Template,
@@ -129,7 +129,7 @@ func (cm *Manager) AddFrom(code, Grapheme, Template, Decimal, Thousand, NumericC
 }
 
 // GetDefault returns the default currency of the manager.
-func (cm *Manager) GetDefault() *Currency {
+func (cm *Manager) GetDefault() *Definition {
 	if cm == nil {
 		return nil
 	}
@@ -147,7 +147,7 @@ func (cm *Manager) GetSymbols() *[]Symbol {
 }
 
 // Resolve tries to find a currency by code and falls back to the default currency.
-func (cm *Manager) Resolve(code string) *Currency {
+func (cm *Manager) Resolve(code string) *Definition {
 	if cm == nil {
 		return nil
 	}

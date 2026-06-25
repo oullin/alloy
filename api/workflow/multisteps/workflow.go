@@ -10,11 +10,11 @@ type WorkflowDef struct {
 	compiled *compiledGraph
 }
 
-// Workflow declares a named workflow composed of the given JobSpecs.
+// Machine declares a named workflow composed of the given JobSpecs.
 //
 // Job order in the variadic list does not dictate execution order — that's
 // derived from the DAG of Response() dependencies and explicit DependsOn edges.
-func Workflow(name string, jobs ...JobSpec) *WorkflowDef {
+func Machine(name string, jobs ...JobSpec) *WorkflowDef {
 	return &WorkflowDef{
 		name: name,
 		jobs: append([]JobSpec(nil), jobs...),

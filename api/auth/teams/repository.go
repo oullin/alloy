@@ -8,7 +8,7 @@ import (
 // Repository persists teams and memberships.
 type Repository interface {
 	CreateTeam(ctx context.Context, team Team) (Team, error)
-	TeamsForUser(ctx context.Context, userID string) ([]Team, error)
+	ForUser(ctx context.Context, userID string) ([]Team, error)
 	FindTeam(ctx context.Context, teamID string) (Team, error)
 	AddMember(ctx context.Context, member Member) error
 	UpdateMemberRole(ctx context.Context, teamID, userID, role string) error

@@ -20,12 +20,12 @@ type JSONRawData struct {
 	Currency string      `json:"currency"`
 }
 
-// JSON handles go's JSON marshalling and unmarshalling of Money values.
+// JSON handles go's JSON marshalling and unmarshalling of Value values.
 type JSON struct {
 	mutex     sync.RWMutex
-	unmarshal func(*Money, []byte) error
-	marshal   func(Money) ([]byte, error)
-	currency  func() (*currency.Currency, error)
+	unmarshal func(*Value, []byte) error
+	marshal   func(Value) ([]byte, error)
+	currency  func() (*currency.Definition, error)
 }
 
 func ensureJSONProvided(j *JSON) error {
@@ -49,9 +49,9 @@ func NewJson() *JSON {
 
 // NewJsonWithParser creates a new JSON parser with custom functions.
 func NewJsonWithParser(
-	unmarshal func(*Money, []byte) error,
-	marshal func(Money) ([]byte, error),
-	currency func() (*currency.Currency, error),
+	unmarshal func(*Value, []byte) error,
+	marshal func(Value) ([]byte, error),
+	currency func() (*currency.Definition, error),
 ) *JSON {
 	j := NewJson()
 
@@ -71,7 +71,7 @@ func NewJsonWithParser(
 }
 
 // Marshal marshals the money instance using the configured marshal function.
-func (j *JSON) Marshal(m Money) ([]byte, error) {
+func (j *JSON) Marshal(m Value) ([]byte, error) {
 	if err := ensureJSONProvided(j); err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (j *JSON) Marshal(m Money) ([]byte, error) {
 }
 
 // Unmarshal unmarshals the payload into the provided money instance.
-func (j *JSON) Unmarshal(m *Money, b []byte) error {
+func (j *JSON) Unmarshal(m *Value, b []byte) error {
 	if err := ensureJSONProvided(j); err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (j *JSON) Unmarshal(m *Money, b []byte) error {
 }
 
 // SetUnmarshal sets the custom unmarshal function.
-func (j *JSON) SetUnmarshal(fn func(*Money, []byte) error) error {
+func (j *JSON) SetUnmarshal(fn func(*Value, []byte) error) error {
 	if err := ensureJSONProvided(j); err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (j *JSON) SetUnmarshal(fn func(*Money, []byte) error) error {
 }
 
 // SetMarshal sets the custom marshal function.
-func (j *JSON) SetMarshal(fn func(Money) ([]byte, error)) error {
+func (j *JSON) SetMarshal(fn func(Value) ([]byte, error)) error {
 	if err := ensureJSONProvided(j); err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (j *JSON) SetMarshal(fn func(Money) ([]byte, error)) error {
 }
 
 // SetCurrency sets the custom currency function.
-func (j *JSON) SetCurrency(fn func() (*currency.Currency, error)) error {
+func (j *JSON) SetCurrency(fn func() (*currency.Definition, error)) error {
 	if err := ensureJSONProvided(j); err != nil {
 		return err
 	}
@@ -151,12 +151,12 @@ func (j *JSON) SetCurrency(fn func() (*currency.Currency, error)) error {
 	return nil
 }
 
-func (j *JSON) defaultMarshalJSON(m Money) ([]byte, error) {
+func (j *JSON) defaultMarshalJSON(m Value) ([]byte, error) {
 	if err := ensureJSONProvided(j); err != nil {
 		return nil, err
 	}
 
-	if m == (Money{}) {
+	if m == (Value{}) {
 		m = *NewManager().Create(0, "")
 	}
 
@@ -181,7 +181,7 @@ func (j *JSON) defaultMarshalJSON(m Money) ([]byte, error) {
 	})
 }
 
-func (j *JSON) defaultUnmarshalJSON(m *Money, b []byte) error {
+func (j *JSON) defaultUnmarshalJSON(m *Value, b []byte) error {
 	if err := ensureJSONProvided(j); err != nil {
 		return err
 	}
@@ -280,11 +280,11 @@ func (j *JSON) defaultUnmarshalJSON(m *Money, b []byte) error {
 		return err
 	}
 
-	var parsed Money
+	var parsed Value
 
 	// If the currency is empty or whitespace, use the default currency
 	if strings.TrimSpace(raw.Currency) == "" {
-		parsed = Money{amount: amount, currency: curr}
+		parsed = Value{amount: amount, currency: curr}
 	} else if parsed, err = j.getUnmarshalJSONMoney(amount, raw); err != nil {
 		return err
 	}
@@ -294,9 +294,9 @@ func (j *JSON) defaultUnmarshalJSON(m *Money, b []byte) error {
 	return nil
 }
 
-func (j *JSON) getUnmarshalJSONMoney(amount int64, raw JSONRawData) (Money, error) {
+func (j *JSON) getUnmarshalJSONMoney(amount int64, raw JSONRawData) (Value, error) {
 	if err := ensureJSONProvided(j); err != nil {
-		return Money{}, err
+		return Value{}, err
 	}
 
 	curr := currency.NewCurrenciesMap().FindByCode(
@@ -304,16 +304,16 @@ func (j *JSON) getUnmarshalJSONMoney(amount int64, raw JSONRawData) (Money, erro
 	)
 
 	if curr == nil {
-		return Money{}, exception.ErrCurrencyNotFound
+		return Value{}, exception.ErrCurrencyNotFound
 	}
 
-	return Money{
+	return Value{
 		amount:   amount,
 		currency: curr,
 	}, nil
 }
 
-func (j *JSON) defaultJSONCurrency() (*currency.Currency, error) {
+func (j *JSON) defaultJSONCurrency() (*currency.Definition, error) {
 	if err := ensureJSONProvided(j); err != nil {
 		return nil, err
 	}

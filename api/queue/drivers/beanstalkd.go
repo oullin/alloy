@@ -226,7 +226,7 @@ func (d *BeanstalkdDriver) PendingJobs(ctx context.Context, queueName string) ([
 
 	return []queue.InspectedJob{{
 		ID:         int64(id),
-		Queue:      d.resolveTube(queueName),
+		Backend:    d.resolveTube(queueName),
 		Connection: d.connection,
 		Payload:    body,
 	}}, nil
@@ -248,7 +248,7 @@ func (d *BeanstalkdDriver) DelayedJobs(ctx context.Context, queueName string) ([
 
 	return []queue.InspectedJob{{
 		ID:         int64(id),
-		Queue:      d.resolveTube(queueName),
+		Backend:    d.resolveTube(queueName),
 		Connection: d.connection,
 		Payload:    body,
 	}}, nil

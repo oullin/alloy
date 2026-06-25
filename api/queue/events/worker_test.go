@@ -10,9 +10,9 @@ import (
 func TestWorkerLifecycleEventFields(t *testing.T) {
 	t.Parallel()
 
-	starting := events.WorkerStarting{ConnectionName: "redis", Queue: "default", WorkerName: "w1"}
+	starting := events.WorkerStarting{ConnectionName: "redis", Backend: "default", WorkerName: "w1"}
 
-	if starting.ConnectionName != "redis" || starting.Queue != "default" || starting.WorkerName != "w1" {
+	if starting.ConnectionName != "redis" || starting.Backend != "default" || starting.WorkerName != "w1" {
 		t.Errorf("WorkerStarting fields not preserved: %+v", starting)
 	}
 
@@ -22,15 +22,15 @@ func TestWorkerLifecycleEventFields(t *testing.T) {
 		t.Errorf("WorkerStopping fields not preserved: %+v", stopping)
 	}
 
-	pausing := events.WorkerPausing{ConnectionName: "redis", Queue: "default", WorkerName: "w1"}
+	pausing := events.WorkerPausing{ConnectionName: "redis", Backend: "default", WorkerName: "w1"}
 
-	if pausing.ConnectionName != "redis" || pausing.Queue != "default" || pausing.WorkerName != "w1" {
+	if pausing.ConnectionName != "redis" || pausing.Backend != "default" || pausing.WorkerName != "w1" {
 		t.Errorf("WorkerPausing fields not preserved: %+v", pausing)
 	}
 
-	resuming := events.WorkerResuming{ConnectionName: "redis", Queue: "default", WorkerName: "w1"}
+	resuming := events.WorkerResuming{ConnectionName: "redis", Backend: "default", WorkerName: "w1"}
 
-	if resuming.ConnectionName != "redis" || resuming.Queue != "default" || resuming.WorkerName != "w1" {
+	if resuming.ConnectionName != "redis" || resuming.Backend != "default" || resuming.WorkerName != "w1" {
 		t.Errorf("WorkerResuming fields not preserved: %+v", resuming)
 	}
 }

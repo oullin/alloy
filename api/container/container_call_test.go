@@ -12,7 +12,7 @@ func TestCallInvokesCallable(t *testing.T) {
 
 	c := newContainer()
 
-	v, err := c.Call(func(cc *container.Container, _ map[string]any) (any, error) {
+	v, err := c.Call(func(cc *container.App, _ map[string]any) (any, error) {
 		return "called", nil
 	}, nil)
 
@@ -30,7 +30,7 @@ func TestCallPassesParameters(t *testing.T) {
 
 	c := newContainer()
 
-	v, err := c.Call(func(_ *container.Container, params map[string]any) (any, error) {
+	v, err := c.Call(func(_ *container.App, params map[string]any) (any, error) {
 		return params["greeting"], nil
 	}, map[string]any{"greeting": "hello"})
 
@@ -49,7 +49,7 @@ func TestCallWithContainerDependencies(t *testing.T) {
 	c := newContainer()
 	c.Instance("name", "Taylor")
 
-	v, err := c.Call(func(cc *container.Container, _ map[string]any) (any, error) {
+	v, err := c.Call(func(cc *container.App, _ map[string]any) (any, error) {
 		return cc.Make("name")
 	}, nil)
 
@@ -67,7 +67,7 @@ func TestCallReturnsError(t *testing.T) {
 
 	c := newContainer()
 
-	_, err := c.Call(func(_ *container.Container, _ map[string]any) (any, error) {
+	_, err := c.Call(func(_ *container.App, _ map[string]any) (any, error) {
 		return nil, errors.New("oops")
 	}, nil)
 
@@ -82,7 +82,7 @@ func TestWrapReturnsDeferredClosure(t *testing.T) {
 	c := newContainer()
 
 	count := 0
-	wrapped := c.Wrap(func(_ *container.Container, _ map[string]any) (any, error) {
+	wrapped := c.Wrap(func(_ *container.App, _ map[string]any) (any, error) {
 		count++
 
 		return count, nil
@@ -109,7 +109,7 @@ func TestBindMethodAndCallMethodBinding(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.BindMethod("App@handle", func(_ *container.Container, params map[string]any) (any, error) {
+	c.BindMethod("App@handle", func(_ *container.App, params map[string]any) (any, error) {
 		return params["_instance"], nil
 	})
 
@@ -133,7 +133,7 @@ func TestHasMethodBinding(t *testing.T) {
 		t.Fatal("should not have binding")
 	}
 
-	c.BindMethod("App@handle", func(_ *container.Container, _ map[string]any) (any, error) {
+	c.BindMethod("App@handle", func(_ *container.App, _ map[string]any) (any, error) {
 		return nil, nil
 	})
 

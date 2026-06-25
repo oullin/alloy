@@ -843,8 +843,8 @@ func TestInventoryParityConditionalsNullFiltersAndPagination(t *testing.T) {
 	}
 
 	defaultedEmpty := Empty[int]().WhenEmpty(
-		func(c *Collection[int]) *Collection[int] { return c.Push(1) },
-		func(c *Collection[int]) *Collection[int] { return c.Push(99) },
+		func(c *List[int]) *List[int] { return c.Push(1) },
+		func(c *List[int]) *List[int] { return c.Push(99) },
 	)
 
 	if got := defaultedEmpty.All(); !reflect.DeepEqual(got, []int{1}) {
@@ -852,8 +852,8 @@ func TestInventoryParityConditionalsNullFiltersAndPagination(t *testing.T) {
 	}
 
 	defaultedNotEmpty := values.WhenNotEmpty(
-		func(c *Collection[int]) *Collection[int] { return c.Take(1) },
-		func(c *Collection[int]) *Collection[int] { return c.Push(99) },
+		func(c *List[int]) *List[int] { return c.Take(1) },
+		func(c *List[int]) *List[int] { return c.Push(99) },
 	)
 
 	if got := defaultedNotEmpty.All(); !reflect.DeepEqual(got, []int{10}) {
@@ -861,8 +861,8 @@ func TestInventoryParityConditionalsNullFiltersAndPagination(t *testing.T) {
 	}
 
 	unlessDefault := values.Unless(true,
-		func(c *Collection[int]) *Collection[int] { return c.Push(99) },
-		func(c *Collection[int]) *Collection[int] { return c.Take(2) },
+		func(c *List[int]) *List[int] { return c.Push(99) },
+		func(c *List[int]) *List[int] { return c.Take(2) },
 	)
 
 	if got := unlessDefault.All(); !reflect.DeepEqual(got, []int{10, 20}) {
@@ -870,8 +870,8 @@ func TestInventoryParityConditionalsNullFiltersAndPagination(t *testing.T) {
 	}
 
 	unlessEmptyDefault := Empty[int]().UnlessEmpty(
-		func(c *Collection[int]) *Collection[int] { return c.Push(99) },
-		func(c *Collection[int]) *Collection[int] { return c.Push(2) },
+		func(c *List[int]) *List[int] { return c.Push(99) },
+		func(c *List[int]) *List[int] { return c.Push(2) },
 	)
 
 	if got := unlessEmptyDefault.All(); !reflect.DeepEqual(got, []int{2}) {
@@ -879,8 +879,8 @@ func TestInventoryParityConditionalsNullFiltersAndPagination(t *testing.T) {
 	}
 
 	unlessNotEmptyDefault := values.UnlessNotEmpty(
-		func(c *Collection[int]) *Collection[int] { return c.Push(99) },
-		func(c *Collection[int]) *Collection[int] { return c.Take(3) },
+		func(c *List[int]) *List[int] { return c.Push(99) },
+		func(c *List[int]) *List[int] { return c.Take(3) },
 	)
 
 	if got := unlessNotEmptyDefault.All(); !reflect.DeepEqual(got, []int{10, 20, 30}) {

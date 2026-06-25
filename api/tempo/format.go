@@ -8,11 +8,11 @@ import (
 	"github.com/oullin/alloy/tempo/formatting"
 )
 
-func (tempo Tempo) Format(pattern string) string {
+func (tempo Time) Format(pattern string) string {
 	return formatting.Format(tempo, pattern)
 }
 
-func (tempo Tempo) Ordinal(unit Unit) string {
+func (tempo Time) Ordinal(unit Unit) string {
 	switch normalizeUnit(unit) {
 	case Year:
 		return formatting.Ordinal(tempo.Year())
@@ -25,7 +25,7 @@ func (tempo Tempo) Ordinal(unit Unit) string {
 	}
 }
 
-func (tempo Tempo) Meridiem(lowercase bool) string {
+func (tempo Time) Meridiem(lowercase bool) string {
 	value := "AM"
 
 	if tempo.Hour() >= 12 {
@@ -39,115 +39,115 @@ func (tempo Tempo) Meridiem(lowercase bool) string {
 	return value
 }
 
-func (tempo Tempo) Week() int {
+func (tempo Time) Week() int {
 	return tempo.ISOWeekNumber()
 }
 
-func (tempo Tempo) WeekYear() int {
+func (tempo Time) WeekYear() int {
 	return tempo.ISOWeekYear()
 }
 
-func (tempo Tempo) WeeksInYear() int {
+func (tempo Time) WeeksInYear() int {
 	return tempo.WeeksInISOYear()
 }
 
-func (tempo Tempo) DaysFromStartOfWeek(weekStartsOn time.Weekday) int {
+func (tempo Time) DaysFromStartOfWeek(weekStartsOn time.Weekday) int {
 	return (int(tempo.local().Weekday()) - int(weekStartsOn) + 7) % 7
 }
 
-func (tempo Tempo) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) Tempo {
+func (tempo Time) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) Time {
 	return tempo.StartOfWeek(StartOfWeekOptions{WeekStartsOn: weekStartsOn}).AddDays(days)
 }
 
-func (tempo Tempo) DateString() string {
+func (tempo Time) DateString() string {
 	return formatting.DateString(tempo)
 }
 
-func (tempo Tempo) TimeString(precision ...TimeStringPrecision) string {
+func (tempo Time) TimeString(precision ...TimeStringPrecision) string {
 	return formatting.TimeString(tempo, selectedPrecision(precision) == MillisecondPrecision)
 }
 
-func (tempo Tempo) DateTimeString() string {
+func (tempo Time) DateTimeString() string {
 	return formatting.DateTimeString(tempo)
 }
 
-func (tempo Tempo) FormattedDateString() string {
+func (tempo Time) FormattedDateString() string {
 	return tempo.Format("MMM D, YYYY")
 }
 
-func (tempo Tempo) FormattedDayDateString() string {
+func (tempo Time) FormattedDayDateString() string {
 	return tempo.Format("ddd, MMM D, YYYY")
 }
 
-func (tempo Tempo) DayDateTimeString() string {
+func (tempo Time) DayDateTimeString() string {
 	return tempo.Format("ddd, MMM D, YYYY h:mm A")
 }
 
-func (tempo Tempo) DateTimeLocalString(precision ...TimeStringPrecision) string {
+func (tempo Time) DateTimeLocalString(precision ...TimeStringPrecision) string {
 	return tempo.DateString() + "T" + tempo.TimeString(precision...)
 }
 
-func (tempo Tempo) ISOString() string {
+func (tempo Time) ISOString() string {
 	return formatting.ISOString(tempo)
 }
 
-func (tempo Tempo) ISO8601String() string {
+func (tempo Time) ISO8601String() string {
 	return tempo.Format("YYYY-MM-DDTHH:mm:ssZ")
 }
 
-func (tempo Tempo) ISO8601ZuluString(precision ...TimeStringPrecision) string {
+func (tempo Time) ISO8601ZuluString(precision ...TimeStringPrecision) string {
 	return tempo.UTC().DateTimeLocalString(precision...) + "Z"
 }
 
-func (tempo Tempo) RFC3339String(precision ...TimeStringPrecision) string {
+func (tempo Time) RFC3339String(precision ...TimeStringPrecision) string {
 	return tempo.DateTimeLocalString(precision...) + tempo.OffsetString(":")
 }
 
-func (tempo Tempo) RFC7231String() string {
+func (tempo Time) RFC7231String() string {
 	return tempo.UTC().Format("ddd, DD MMM YYYY HH:mm:ss [GMT]")
 }
 
-func (tempo Tempo) RFC822String() string {
+func (tempo Time) RFC822String() string {
 	return tempo.Format("ddd, DD MMM YY HH:mm:ss ZZ")
 }
 
-func (tempo Tempo) RFC850String() string {
+func (tempo Time) RFC850String() string {
 	return tempo.Format("dddd, DD-MMM-YY HH:mm:ss ZZ")
 }
 
-func (tempo Tempo) RFC1036String() string {
+func (tempo Time) RFC1036String() string {
 	return tempo.RFC822String()
 }
 
-func (tempo Tempo) RFC1123String() string {
+func (tempo Time) RFC1123String() string {
 	return tempo.RSSString()
 }
 
-func (tempo Tempo) RFC2822String() string {
+func (tempo Time) RFC2822String() string {
 	return tempo.RSSString()
 }
 
-func (tempo Tempo) W3CString() string {
+func (tempo Time) W3CString() string {
 	return tempo.RFC3339String()
 }
 
-func (tempo Tempo) CookieString() string {
+func (tempo Time) CookieString() string {
 	return tempo.UTC().Format("ddd, DD-MMM-YYYY HH:mm:ss [GMT]")
 }
 
-func (tempo Tempo) AtomString() string {
+func (tempo Time) AtomString() string {
 	return tempo.RFC3339String()
 }
 
-func (tempo Tempo) RSSString() string {
+func (tempo Time) RSSString() string {
 	return tempo.Format("ddd, DD MMM YYYY HH:mm:ss ZZ")
 }
 
-func (tempo Tempo) UnixString() string {
+func (tempo Time) UnixString() string {
 	return strconv.FormatInt(tempo.Timestamp(), 10)
 }
 
-func (tempo Tempo) JSONSerialize() string {
+func (tempo Time) JSONSerialize() string {
 	if tempo.serializer != nil {
 		return tempo.serializer(tempo)
 	}
@@ -155,11 +155,11 @@ func (tempo Tempo) JSONSerialize() string {
 	return tempo.ISOString()
 }
 
-func (tempo Tempo) Serialize() string {
+func (tempo Time) Serialize() string {
 	return tempo.JSONSerialize()
 }
 
-func (tempo Tempo) String() string {
+func (tempo Time) String() string {
 	if tempo.toStringFormat != "" {
 		return tempo.Format(tempo.toStringFormat)
 	}
@@ -167,11 +167,11 @@ func (tempo Tempo) String() string {
 	return tempo.ISOString()
 }
 
-func (tempo Tempo) Time() time.Time {
+func (tempo Time) Time() time.Time {
 	return tempo.value
 }
 
-func (tempo Tempo) MarshalJSON() ([]byte, error) {
+func (tempo Time) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(tempo.JSONSerialize())), nil
 }
 
@@ -195,7 +195,7 @@ func parseSerializedJSON(data []byte, location *time.Location) (time.Time, *time
 	return parsed.UTC(), location, nil
 }
 
-func (tempo Tempo) ToObject() Object {
+func (tempo Time) ToObject() Object {
 	object := formatting.ToObject(tempo)
 
 	return Object{
@@ -212,10 +212,10 @@ func (tempo Tempo) ToObject() Object {
 	}
 }
 
-func (tempo Tempo) ToMap() map[string]any {
+func (tempo Time) ToMap() map[string]any {
 	return formatting.ToMap(tempo)
 }
 
-func (tempo Tempo) ToArray() [7]int {
+func (tempo Time) ToArray() [7]int {
 	return formatting.ToArray(tempo)
 }

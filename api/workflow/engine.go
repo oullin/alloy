@@ -6,8 +6,8 @@ import (
 	"github.com/oullin/alloy/workflow/events"
 )
 
-// Logger is the optional structured logger interface the engine writes to.
-type Logger interface {
+// Sink is the optional structured logger interface the engine writes to.
+type Sink interface {
 	Debug(msg string, args ...any)
 	Info(msg string, args ...any)
 	Warn(msg string, args ...any)
@@ -27,18 +27,18 @@ type Engine[T any] interface {
 	Apply(subject T, transition string, context map[string]any) (Marking, error)
 }
 
-// Workflow is the default Engine implementation.
-type Workflow[T any] struct {
+// Machine is the default Engine implementation.
+type Machine[T any] struct {
 	name       string
 	definition *Definition
 	store      MarkingStore[T]
 	dispatcher *events.Dispatcher[T]
 	metadata   *DefinitionMetadataStore
-	logger     Logger
+	logger     Sink
 }
 
-// New constructs a Workflow engine. A nil dispatcher yields an empty default.
-func New[T any](name string, definition *Definition, store MarkingStore[T], dispatcher *events.Dispatcher[T]) (*Workflow[T], error) {
+// New constructs a Machine engine. A nil dispatcher yields an empty default.
+func New[T any](name string, definition *Definition, store MarkingStore[T], dispatcher *events.Dispatcher[T]) (*Machine[T], error) {
 	if name == "" {
 		return nil, fmt.Errorf("workflow name is required")
 	}
@@ -59,7 +59,7 @@ func New[T any](name string, definition *Definition, store MarkingStore[T], disp
 		dispatcher = events.NewDispatcher[T]()
 	}
 
-	return &Workflow[T]{
+	return &Machine[T]{
 		name:       name,
 		definition: definition.Clone(),
 		store:      store,
@@ -68,43 +68,43 @@ func New[T any](name string, definition *Definition, store MarkingStore[T], disp
 	}, nil
 }
 
-func (w *Workflow[T]) SetLogger(logger Logger) {
+func (w *Machine[T]) SetLogger(logger Sink) {
 	w.logger = logger
 }
 
-func (w *Workflow[T]) logDebug(msg string, args ...any) {
+func (w *Machine[T]) logDebug(msg string, args ...any) {
 	if w.logger != nil {
 		w.logger.Debug(msg, args...)
 	}
 }
 
-func (w *Workflow[T]) logInfo(msg string, args ...any) {
+func (w *Machine[T]) logInfo(msg string, args ...any) {
 	if w.logger != nil {
 		w.logger.Info(msg, args...)
 	}
 }
 
-func (w *Workflow[T]) logError(msg string, args ...any) {
+func (w *Machine[T]) logError(msg string, args ...any) {
 	if w.logger != nil {
 		w.logger.Error(msg, args...)
 	}
 }
 
-func (w *Workflow[T]) Name() string { return w.name }
+func (w *Machine[T]) Name() string { return w.name }
 
-func (w *Workflow[T]) Definition() *Definition {
+func (w *Machine[T]) Definition() *Definition {
 	return w.definition.Clone()
 }
 
-func (w *Workflow[T]) MetadataStore() MetadataStore {
+func (w *Machine[T]) MetadataStore() MetadataStore {
 	return w.metadata
 }
 
-func (w *Workflow[T]) EventDispatcher() *events.Dispatcher[T] {
+func (w *Machine[T]) EventDispatcher() *events.Dispatcher[T] {
 	return w.dispatcher
 }
 
-func (w *Workflow[T]) GetMarking(subject T) (Marking, error) {
+func (w *Machine[T]) GetMarking(subject T) (Marking, error) {
 	marking, err := w.store.GetMarking(subject, w.definition)
 
 	if err != nil {

@@ -1,6 +1,6 @@
 // Package workflow provides a Petri-Net based workflow and state-machine engine.
 //
-// The root package exposes the engine (Workflow[T], NewStateMachine), definitions
+// The root package exposes the engine (Machine[T], NewStateMachine), definitions
 // (Definition, DefinitionBuilder, Transition, Place), and lifecycle events.
 //
 // Specialized helpers live in subpackages: audit (Trail recording), store

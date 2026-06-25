@@ -60,7 +60,7 @@ func TestSQLRepositoryListsAndFindsTeams(t *testing.T) {
 	db := &teamsSQLDB{teams: []Team{{ID: "1", Name: "Core", OwnerID: "owner", CreatedAt: now, UpdatedAt: now}}}
 	repo := NewSQLRepository(db, "auth.teams", "auth.team_members", "auth.current_teams")
 
-	found, err := repo.TeamsForUser(context.Background(), "owner")
+	found, err := repo.ForUser(context.Background(), "owner")
 
 	if err != nil {
 		t.Fatal(err)

@@ -7,7 +7,7 @@ import (
 )
 
 // Sort returns a new collection sorted using the provided comparison function.
-func (c *Collection[T]) Sort(less func(a, b T) bool) *Collection[T] {
+func (c *List[T]) Sort(less func(a, b T) bool) *List[T] {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
@@ -19,7 +19,7 @@ func (c *Collection[T]) Sort(less func(a, b T) bool) *Collection[T] {
 }
 
 // SortBy returns a new collection sorted in ascending order by the given key function.
-func SortBy[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) *Collection[T] {
+func SortBy[T any, K cmp.Ordered](c *List[T], keyFunc func(T) K) *List[T] {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
@@ -31,7 +31,7 @@ func SortBy[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) *Collecti
 }
 
 // SortByDesc returns a new collection sorted in descending order by the given key function.
-func SortByDesc[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) *Collection[T] {
+func SortByDesc[T any, K cmp.Ordered](c *List[T], keyFunc func(T) K) *List[T] {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
@@ -43,14 +43,14 @@ func SortByDesc[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) *Coll
 }
 
 // SortDesc returns a new collection sorted in descending order using the provided comparison function.
-func (c *Collection[T]) SortDesc(less func(a, b T) bool) *Collection[T] {
+func (c *List[T]) SortDesc(less func(a, b T) bool) *List[T] {
 	return c.Sort(func(a, b T) bool {
 		return less(b, a)
 	})
 }
 
 // Shuffle returns a new collection with items in random order.
-func (c *Collection[T]) Shuffle() *Collection[T] {
+func (c *List[T]) Shuffle() *List[T] {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
@@ -62,7 +62,7 @@ func (c *Collection[T]) Shuffle() *Collection[T] {
 }
 
 // Random returns a new collection with the specified number of randomly selected items.
-func (c *Collection[T]) Random(counts ...int) *Collection[T] {
+func (c *List[T]) Random(counts ...int) *List[T] {
 	count := 1
 
 	if len(counts) > 0 {

@@ -8,7 +8,7 @@ import (
 
 // Delete removes one or more files. Returns an error if any file cannot
 // be removed.
-func (f *Filesystem) Delete(paths ...string) error {
+func (f *Local) Delete(paths ...string) error {
 	for _, path := range paths {
 		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
 			return err
@@ -19,12 +19,12 @@ func (f *Filesystem) Delete(paths ...string) error {
 }
 
 // Move moves a file from path to target.
-func (f *Filesystem) Move(path, target string) error {
+func (f *Local) Move(path, target string) error {
 	return os.Rename(path, target)
 }
 
 // Copy copies a file from path to target.
-func (f *Filesystem) Copy(path, target string) error {
+func (f *Local) Copy(path, target string) error {
 	src, err := os.Open(path)
 
 	if err != nil {
@@ -70,12 +70,12 @@ func (f *Filesystem) Copy(path, target string) error {
 }
 
 // Link creates a symbolic link.
-func (f *Filesystem) Link(target, link string) error {
+func (f *Local) Link(target, link string) error {
 	return os.Symlink(target, link)
 }
 
 // RelativeLink creates a relative symbolic link.
-func (f *Filesystem) RelativeLink(target, link string) error {
+func (f *Local) RelativeLink(target, link string) error {
 	linkDir := filepath.Dir(link)
 
 	rel, err := filepath.Rel(linkDir, target)

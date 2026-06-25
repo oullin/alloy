@@ -1,6 +1,6 @@
 // Package comparison exposes generic ordering and selection helpers that
-// work on any core.Bearer — both the immutable Tempo and the mutable
-// *MutableTempo — so before/after/same/clamp/min/max/closest/farthest
+// work on any core.Bearer — both the immutable Time and the mutable
+// *MutableTime — so before/after/same/clamp/min/max/closest/farthest
 // live in one place.
 //
 // Comparison queries take a core.State for the right-hand side rather

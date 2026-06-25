@@ -45,17 +45,17 @@ type JobTimedOut = events.JobTimedOut
 
 type JobRetryRequested = events.JobRetryRequested
 
-// --- Queue state ------------------------------------------------------
+// --- Backend state ------------------------------------------------------
 
 type Looping = events.Looping
 
-type QueueBusy = events.QueueBusy
+type Busy = events.Busy
 
-type QueuePaused = events.QueuePaused
+type Paused = events.Paused
 
-type QueueResumed = events.QueueResumed
+type Resumed = events.Resumed
 
-type QueueFailedOver = events.QueueFailedOver
+type FailedOver = events.FailedOver
 
 // --- Worker lifecycle -------------------------------------------------
 

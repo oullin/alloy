@@ -13,7 +13,7 @@ const (
 	minTestInt64 = -maxTestInt64 - 1
 )
 
-func mustParse(t *testing.T, value string) tempo.Tempo {
+func mustParse(t *testing.T, value string) tempo.Time {
 	t.Helper()
 
 	parsed, err := tempo.Parse(value)
@@ -25,7 +25,7 @@ func mustParse(t *testing.T, value string) tempo.Tempo {
 	return parsed
 }
 
-func mustTimestampMs(t *testing.T, value int64) tempo.Tempo {
+func mustTimestampMs(t *testing.T, value int64) tempo.Time {
 	t.Helper()
 
 	parsed, err := tempo.FromTimestampMs(value)

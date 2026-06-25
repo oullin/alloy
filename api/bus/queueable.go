@@ -8,7 +8,7 @@ import (
 // Queueable embeds queue routing options into a command/job struct.
 type Queueable struct {
 	Connection          string
-	Queue               string
+	Backend             string
 	Delay               time.Duration
 	ChainJobs           []any
 	Middleware          []Pipe
@@ -59,7 +59,7 @@ func (q *Queueable) OnConnection(connection string) *Queueable {
 }
 
 func (q *Queueable) OnQueue(queue string) *Queueable {
-	q.Queue = queue
+	q.Backend = queue
 
 	return q
 }
@@ -100,7 +100,7 @@ func (q *Queueable) Through(pipes ...Pipe) *Queueable {
 	return q
 }
 
-func (q *Queueable) GetQueue() string { return q.Queue }
+func (q *Queueable) GetQueue() string { return q.Backend }
 
 func (q *Queueable) GetConnection() string { return q.Connection }
 
@@ -120,7 +120,7 @@ func (q *Queueable) AllOnConnection(connection string) *Queueable {
 }
 
 func (q *Queueable) AllOnQueue(queue string) *Queueable {
-	q.Queue = queue
+	q.Backend = queue
 	q.ChainQueue = queue
 
 	for _, job := range q.ChainJobs {

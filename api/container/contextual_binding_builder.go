@@ -1,10 +1,10 @@
 package container
 
 // ContextualBindingBuilder provides a fluent interface for defining contextual
-// bindings. It is created by Container.When and stores bindings that resolve
+// bindings. It is created by App.When and stores bindings that resolve
 // differently based on the consuming concrete type.
 type ContextualBindingBuilder struct {
-	container *Container
+	container *App
 	concrete  []string
 	needs     string
 }
@@ -27,7 +27,7 @@ func (b *ContextualBindingBuilder) Give(implementation any) {
 // GiveTagged provides all services tagged with the given tag as the
 // implementation. The tagged services are resolved into a slice.
 func (b *ContextualBindingBuilder) GiveTagged(tag string) {
-	b.Give(Factory(func(c *Container) (any, error) {
+	b.Give(Factory(func(c *App) (any, error) {
 		return c.Tagged(tag), nil
 	}))
 }
@@ -35,7 +35,7 @@ func (b *ContextualBindingBuilder) GiveTagged(tag string) {
 // GiveConfig provides a configuration value as the implementation. The
 // container must have a "config" binding that implements a Get method.
 func (b *ContextualBindingBuilder) GiveConfig(key string, fallback ...any) {
-	b.Give(Factory(func(c *Container) (any, error) {
+	b.Give(Factory(func(c *App) (any, error) {
 		cfg, err := c.Make("config")
 
 		if err != nil {

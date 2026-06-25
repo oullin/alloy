@@ -8,29 +8,29 @@ type Handler func(ctx context.Context, command any) (any, error)
 // Pipe is a middleware step.
 type Pipe func(ctx context.Context, command any, next Handler) (any, error)
 
-// Pipeline executes a command through a series of pipes.
-type Pipeline struct {
+// Chain executes a command through a series of pipes.
+type Chain struct {
 	pipes []Pipe
 }
 
-// New creates an empty Pipeline.
-func New() *Pipeline {
-	return &Pipeline{}
+// New creates an empty Chain.
+func New() *Chain {
+	return &Chain{}
 }
 
 // Through appends pipes to the pipeline.
-func (p *Pipeline) Through(pipes ...Pipe) *Pipeline {
+func (p *Chain) Through(pipes ...Pipe) *Chain {
 	p.pipes = append(p.pipes, pipes...)
 
 	return p
 }
 
 // Send executes the command through the pipeline and calls final as the terminal handler.
-func (p *Pipeline) Send(ctx context.Context, command any, final Handler) (any, error) {
+func (p *Chain) Send(ctx context.Context, command any, final Handler) (any, error) {
 	return p.build(0, final)(ctx, command)
 }
 
-func (p *Pipeline) build(index int, final Handler) Handler {
+func (p *Chain) build(index int, final Handler) Handler {
 	if index >= len(p.pipes) {
 		return final
 	}

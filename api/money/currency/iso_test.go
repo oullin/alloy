@@ -13,8 +13,8 @@ type stubProvider struct {
 	symbols []Symbol
 }
 
-func (s stubProvider) Get() Currency {
-	return Currency{
+func (s stubProvider) Get() Definition {
+	return Definition{
 		Code:        s.code,
 		Fraction:    2,
 		Grapheme:    "X$",
@@ -65,7 +65,7 @@ func TestISOCodePattern_NewWith_Errors(t *testing.T) {
 	defer func() { NewCurrenciesMapFrom = original }()
 
 	t.Run("nil provider", func(t *testing.T) {
-		_, err := NewISOCodePatternWith(nil, &map[string]*Currency{"SGD": {Code: "SGD"}})
+		_, err := NewISOCodePatternWith(nil, &map[string]*Definition{"SGD": {Code: "SGD"}})
 
 		if !errors.Is(err, exception.ErrNoConverterProvided) {
 			t.Fatalf("error = %v, want ErrNoConverterProvided", err)
@@ -81,7 +81,7 @@ func TestISOCodePattern_NewWith_Errors(t *testing.T) {
 	})
 
 	t.Run("empty dataset", func(t *testing.T) {
-		empty := map[string]*Currency{}
+		empty := map[string]*Definition{}
 		_, err := NewISOCodePatternWith(stubProvider{code: SGD}, &empty)
 
 		if !errors.Is(err, exception.ErrNoCurrencyMapDataset) {
@@ -91,13 +91,13 @@ func TestISOCodePattern_NewWith_Errors(t *testing.T) {
 
 	t.Run("dataset factory returns error", func(t *testing.T) {
 		orig := NewCurrenciesMapFrom
-		NewCurrenciesMapFrom = func(_ *map[string]*Currency) (Map, error) {
+		NewCurrenciesMapFrom = func(_ *map[string]*Definition) (Map, error) {
 			return Map{}, errors.New("boom")
 		}
 
 		defer func() { NewCurrenciesMapFrom = orig }()
 
-		data := map[string]*Currency{"SGD": {Code: "SGD"}}
+		data := map[string]*Definition{"SGD": {Code: "SGD"}}
 		_, err := NewISOCodePatternWith(stubProvider{code: SGD}, &data)
 
 		if !errors.Is(err, exception.ErrNoCurrencyMapDataset) {
@@ -112,7 +112,7 @@ func TestISOCodePatternWith_SortingAndPattern(t *testing.T) {
 
 	defer func() { NewCurrenciesMapFrom = original }()
 
-	data := map[string]*Currency{
+	data := map[string]*Definition{
 		"SGD": {Code: "SGD"},
 		"EUR": {Code: "EUR"},
 	}

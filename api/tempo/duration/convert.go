@@ -1,6 +1,6 @@
 package duration
 
-func (value *Duration) ToMap() map[string]int {
+func (value *Span) ToMap() map[string]int {
 	return map[string]int{
 		"years":        value.Years,
 		"quarters":     value.Quarters,
@@ -14,7 +14,7 @@ func (value *Duration) ToMap() map[string]int {
 	}
 }
 
-func (value *Duration) ToSlice() []int {
+func (value *Span) ToSlice() []int {
 	return []int{
 		value.Years,
 		value.Quarters,

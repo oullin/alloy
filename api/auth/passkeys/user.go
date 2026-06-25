@@ -2,12 +2,12 @@ package passkeys
 
 import (
 	"github.com/go-webauthn/webauthn/webauthn"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // User adapts Alloy auth users to the WebAuthn user interface.
 type User struct {
-	Auth        cauth.Authenticatable
+	Auth        cauth.User
 	Handle      []byte
 	Credentials []webauthn.Credential
 }

@@ -6,7 +6,7 @@ import "time"
 // Ref: @bedrock/code-0241
 type JobQueueing struct {
 	ConnectionName string
-	Queue          string
+	Backend        string
 	// Job is the original job value handed to the dispatcher — can be a
 	// struct, a string class name, or whatever the caller pushed.
 	Job     any
@@ -18,7 +18,7 @@ type JobQueueing struct {
 // Ref: @bedrock/code-0240
 type JobQueued struct {
 	ConnectionName string
-	Queue          string
+	Backend        string
 	// ID is the backend-specific identifier returned by the driver.
 	ID      any
 	Job     any

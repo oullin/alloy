@@ -45,13 +45,13 @@ func TestFlushClearsCallbacks(t *testing.T) {
 
 	var called bool
 
-	c.ResolvingAny(func(_ any, _ *container.Container) {
+	c.ResolvingAny(func(_ any, _ *container.App) {
 		called = true
 	})
 
 	c.Flush()
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -67,7 +67,7 @@ func TestFlushClearsMethodBindings(t *testing.T) {
 
 	c := container.New()
 
-	c.BindMethod("App@handle", func(_ *container.Container, _ map[string]any) (any, error) {
+	c.BindMethod("App@handle", func(_ *container.App, _ map[string]any) (any, error) {
 		return nil, nil
 	})
 
@@ -83,7 +83,7 @@ func TestFlushClearsTags(t *testing.T) {
 
 	c := container.New()
 
-	c.Bind("service", func(_ *container.Container) (any, error) { return "s", nil }, false)
+	c.Bind("service", func(_ *container.App) (any, error) { return "s", nil }, false)
 	c.Tag([]string{"service"}, "tag")
 
 	c.Flush()

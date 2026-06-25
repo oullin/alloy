@@ -9,7 +9,7 @@ import (
 
 // Put writes contents to a file, creating it if necessary.
 // An optional file mode can be provided; defaults to 0644.
-func (f *Filesystem) Put(path string, contents []byte, mode ...fs.FileMode) error {
+func (f *Local) Put(path string, contents []byte, mode ...fs.FileMode) error {
 	perm := fs.FileMode(0o644)
 
 	if len(mode) > 0 {
@@ -25,7 +25,7 @@ func (f *Filesystem) Put(path string, contents []byte, mode ...fs.FileMode) erro
 
 // Replace atomically writes content to a file using a temporary file
 // and rename. An optional file mode can be provided.
-func (f *Filesystem) Replace(path string, content []byte, mode ...fs.FileMode) error {
+func (f *Local) Replace(path string, content []byte, mode ...fs.FileMode) error {
 	perm := fs.FileMode(0o644)
 
 	if len(mode) > 0 {
@@ -69,7 +69,7 @@ func (f *Filesystem) Replace(path string, content []byte, mode ...fs.FileMode) e
 }
 
 // ReplaceInFile replaces all occurrences of search with replace in the file.
-func (f *Filesystem) ReplaceInFile(search, replace, path string) error {
+func (f *Local) ReplaceInFile(search, replace, path string) error {
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -83,7 +83,7 @@ func (f *Filesystem) ReplaceInFile(search, replace, path string) error {
 
 // Prepend prepends data to the beginning of a file. If the file does not
 // exist, it is created with only the given data.
-func (f *Filesystem) Prepend(path string, data []byte) error {
+func (f *Local) Prepend(path string, data []byte) error {
 	existing, err := os.ReadFile(path)
 
 	if err != nil {
@@ -102,7 +102,7 @@ func (f *Filesystem) Prepend(path string, data []byte) error {
 }
 
 // Append appends data to the end of a file.
-func (f *Filesystem) Append(path string, data []byte) error {
+func (f *Local) Append(path string, data []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}

@@ -2,8 +2,8 @@ package duration
 
 import "time"
 
-func (value *Duration) Plus(other Duration) Duration {
-	return Duration{
+func (value *Span) Plus(other Span) Span {
+	return Span{
 		Years:        value.Years + other.Years,
 		Quarters:     value.Quarters + other.Quarters,
 		Months:       value.Months + other.Months,
@@ -16,12 +16,12 @@ func (value *Duration) Plus(other Duration) Duration {
 	}
 }
 
-func (value *Duration) Minus(other Duration) Duration {
+func (value *Span) Minus(other Span) Span {
 	return value.Plus(other.Negated())
 }
 
-func (value *Duration) Negated() Duration {
-	return Duration{
+func (value *Span) Negated() Span {
+	return Span{
 		Years:        -value.Years,
 		Quarters:     -value.Quarters,
 		Months:       -value.Months,
@@ -34,8 +34,8 @@ func (value *Duration) Negated() Duration {
 	}
 }
 
-func (value *Duration) Abs() Duration {
-	return Duration{
+func (value *Span) Abs() Span {
+	return Span{
 		Years:        absInt(value.Years),
 		Quarters:     absInt(value.Quarters),
 		Months:       absInt(value.Months),
@@ -48,7 +48,7 @@ func (value *Duration) Abs() Duration {
 	}
 }
 
-func (value *Duration) Normalize() Duration {
+func (value *Span) Normalize() Span {
 	sign := value.direction()
 	absolute := value.Abs()
 	milliseconds := absolute.Milliseconds
@@ -64,7 +64,7 @@ func (value *Duration) Normalize() Duration {
 	years := absolute.Years + months/12
 	months %= 12
 
-	return Duration{
+	return Span{
 		Years:        sign * years,
 		Months:       sign * months,
 		Days:         sign * days,
@@ -75,7 +75,7 @@ func (value *Duration) Normalize() Duration {
 	}
 }
 
-func (value *Duration) Total(unit Unit) float64 {
+func (value *Span) Total(unit Unit) float64 {
 	milliseconds := value.totalMilliseconds()
 
 	if fixed, ok := FixedUnitDuration(unit); ok {
@@ -96,19 +96,19 @@ func (value *Duration) Total(unit Unit) float64 {
 	}
 }
 
-func (value *Duration) IsZero() bool {
-	return *value == (Duration{})
+func (value *Span) IsZero() bool {
+	return *value == (Span{})
 }
 
-func (value *Duration) IsPositive() bool {
+func (value *Span) IsPositive() bool {
 	return !value.IsZero() && value.direction() > 0
 }
 
-func (value *Duration) IsNegative() bool {
+func (value *Span) IsNegative() bool {
 	return value.direction() < 0
 }
 
-func (value *Duration) totalMilliseconds() int64 {
+func (value *Span) totalMilliseconds() int64 {
 	return int64(value.Weeks*7+value.Days)*int64((24*time.Hour)/time.Millisecond) +
 		int64(value.Hours)*int64(time.Hour/time.Millisecond) +
 		int64(value.Minutes)*int64(time.Minute/time.Millisecond) +
@@ -116,7 +116,7 @@ func (value *Duration) totalMilliseconds() int64 {
 		int64(value.Milliseconds)
 }
 
-func (value *Duration) direction() int {
+func (value *Span) direction() int {
 	values := []int{
 		value.Years,
 		value.Quarters,

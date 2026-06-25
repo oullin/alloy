@@ -51,7 +51,7 @@ func TestCallQueuedListener_WithOptions(t *testing.T) {
 
 	q := events.NewCallQueuedListener("L", nil).WithOptions(events.ListenerOptions{
 		Connection:    "redis",
-		Queue:         "high",
+		Backend:       "high",
 		Delay:         5 * time.Second,
 		Tries:         3,
 		MaxExceptions: 2,

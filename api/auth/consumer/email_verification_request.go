@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // EmailVerificationRequest handles email verification logic for the current user.
 type EmailVerificationRequest struct {
-	user cauth.Authenticatable
+	user cauth.User
 }
 
 // NewEmailVerificationRequest creates a request for the given user.
-func NewEmailVerificationRequest(user cauth.Authenticatable) *EmailVerificationRequest {
+func NewEmailVerificationRequest(user cauth.User) *EmailVerificationRequest {
 	return &EmailVerificationRequest{user: user}
 }
 

@@ -1081,7 +1081,7 @@ func TestJoin(t *testing.T) {
 func TestWhen(t *testing.T) {
 	c := New(1, 2, 3)
 
-	result := c.When(true, func(c *Collection[int]) *Collection[int] {
+	result := c.When(true, func(c *List[int]) *List[int] {
 		return c.Push(4)
 	})
 
@@ -1090,7 +1090,7 @@ func TestWhen(t *testing.T) {
 	}
 
 	c2 := New(1, 2, 3)
-	result2 := c2.When(false, func(c *Collection[int]) *Collection[int] {
+	result2 := c2.When(false, func(c *List[int]) *List[int] {
 		return c.Push(4)
 	})
 
@@ -1101,7 +1101,7 @@ func TestWhen(t *testing.T) {
 
 func TestUnless(t *testing.T) {
 	c := New(1, 2, 3)
-	result := c.Unless(false, func(c *Collection[int]) *Collection[int] {
+	result := c.Unless(false, func(c *List[int]) *List[int] {
 		return c.Push(4)
 	})
 
@@ -1489,7 +1489,7 @@ func TestRandom(t *testing.T) {
 func TestTap(t *testing.T) {
 	c := New(1, 2, 3)
 	tapped := false
-	result := c.Tap(func(c *Collection[int]) {
+	result := c.Tap(func(c *List[int]) {
 		tapped = true
 	})
 
@@ -1504,7 +1504,7 @@ func TestTap(t *testing.T) {
 
 func TestPipe(t *testing.T) {
 	c := New(1, 2, 3)
-	result := Pipe(c, func(c *Collection[int]) int {
+	result := Pipe(c, func(c *List[int]) int {
 		return Sum(c)
 	})
 
@@ -1516,10 +1516,10 @@ func TestPipe(t *testing.T) {
 func TestPipeThrough(t *testing.T) {
 	c := New(1, 2, 3)
 	result := PipeThrough(c,
-		func(c *Collection[int]) *Collection[int] {
+		func(c *List[int]) *List[int] {
 			return c.Filter(func(item int, _ int) bool { return item > 1 })
 		},
-		func(c *Collection[int]) *Collection[int] {
+		func(c *List[int]) *List[int] {
 			return c.Push(10)
 		},
 	)
@@ -1684,7 +1684,7 @@ func TestModeTie(t *testing.T) {
 
 func TestWhenEmpty(t *testing.T) {
 	empty := Empty[int]()
-	result := empty.WhenEmpty(func(c *Collection[int]) *Collection[int] {
+	result := empty.WhenEmpty(func(c *List[int]) *List[int] {
 		return c.Push(1, 2, 3)
 	})
 
@@ -1696,7 +1696,7 @@ func TestWhenEmpty(t *testing.T) {
 func TestWhenNotEmpty(t *testing.T) {
 	c := New(1, 2, 3)
 	called := false
-	c.WhenNotEmpty(func(c *Collection[int]) *Collection[int] {
+	c.WhenNotEmpty(func(c *List[int]) *List[int] {
 		called = true
 
 		return c
@@ -1985,7 +1985,7 @@ func TestEachSpread(t *testing.T) {
 
 func TestPipeInto(t *testing.T) {
 	c := New(1, 2, 3)
-	result := PipeInto(c, func(col *Collection[int]) int {
+	result := PipeInto(c, func(col *List[int]) int {
 		return col.Count()
 	})
 
@@ -1996,7 +1996,7 @@ func TestPipeInto(t *testing.T) {
 
 func TestUnlessEmpty(t *testing.T) {
 	c := New(1, 2)
-	result := c.UnlessEmpty(func(col *Collection[int]) *Collection[int] {
+	result := c.UnlessEmpty(func(col *List[int]) *List[int] {
 		col.Push(3)
 
 		return col
@@ -2008,7 +2008,7 @@ func TestUnlessEmpty(t *testing.T) {
 
 	empty := Empty[int]()
 	called := false
-	empty.UnlessEmpty(func(col *Collection[int]) *Collection[int] {
+	empty.UnlessEmpty(func(col *List[int]) *List[int] {
 		called = true
 
 		return col
@@ -2021,7 +2021,7 @@ func TestUnlessEmpty(t *testing.T) {
 
 func TestUnlessNotEmpty(t *testing.T) {
 	empty := Empty[int]()
-	result := empty.UnlessNotEmpty(func(col *Collection[int]) *Collection[int] {
+	result := empty.UnlessNotEmpty(func(col *List[int]) *List[int] {
 		return col.Push(1, 2, 3)
 	})
 
@@ -2031,7 +2031,7 @@ func TestUnlessNotEmpty(t *testing.T) {
 
 	c := New(1, 2)
 	called := false
-	c.UnlessNotEmpty(func(col *Collection[int]) *Collection[int] {
+	c.UnlessNotEmpty(func(col *List[int]) *List[int] {
 		called = true
 
 		return col
@@ -2198,11 +2198,11 @@ func TestMaxEmpty(t *testing.T) {
 
 func TestWhenFalseWithDefault(t *testing.T) {
 	c := New(1, 2, 3)
-	result := c.When(false, func(col *Collection[int]) *Collection[int] {
+	result := c.When(false, func(col *List[int]) *List[int] {
 		col.Push(4)
 
 		return col
-	}, func(col *Collection[int]) *Collection[int] {
+	}, func(col *List[int]) *List[int] {
 		col.Push(99)
 
 		return col

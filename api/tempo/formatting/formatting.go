@@ -1,6 +1,6 @@
 // Package formatting exposes generic time-string rendering helpers that
-// work on any core.Bearer — both the immutable Tempo and the mutable
-// *MutableTempo — so Format, ToObject and the projection helpers share
+// work on any core.Bearer — both the immutable Time and the mutable
+// *MutableTime — so Format, ToObject and the projection helpers share
 // a single implementation.
 //
 // The package depends only on core, duration and calendar — never on

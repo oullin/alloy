@@ -15,7 +15,7 @@ func assertEqual(t *testing.T, label string, got string, want string) {
 	}
 }
 
-func mustTempo(t *testing.T, value tempo.Tempo, err error) tempo.Tempo {
+func mustTempo(t *testing.T, value tempo.Time, err error) tempo.Time {
 	t.Helper()
 
 	if err != nil {
@@ -538,7 +538,7 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	assertEqual(t, "Timespan()", instance.AddDays(2).Timespan(instance), "in 2 days")
 
 	if !instance.IsImmutable() || instance.IsMutable() {
-		t.Fatalf("Tempo mutability predicates = immutable:%t mutable:%t, want true/false", instance.IsImmutable(), instance.IsMutable())
+		t.Fatalf("Time mutability predicates = immutable:%t mutable:%t, want true/false", instance.IsImmutable(), instance.IsMutable())
 	}
 
 	assertEqual(t, "AvoidMutation().ISOString()", instance.AvoidMutation().ISOString(), "2024-05-15T12:34:56.789Z")
@@ -552,14 +552,14 @@ func TestExplicitSettersHandleZeroValues(t *testing.T) {
 	mutable := tempo.NewMutable(instance)
 
 	if mutable.IsImmutable() || !mutable.IsMutable() {
-		t.Fatalf("MutableTempo mutability predicates = immutable:%t mutable:%t, want false/true", mutable.IsImmutable(), mutable.IsMutable())
+		t.Fatalf("MutableTime mutability predicates = immutable:%t mutable:%t, want false/true", mutable.IsImmutable(), mutable.IsMutable())
 	}
 
-	assertEqual(t, "MutableTempo.AvoidMutation().ISOString()", mutable.AvoidMutation().ISOString(), "2024-05-15T12:34:56.789Z")
-	assertEqual(t, "MutableTempo.Cast().ISOString()", mutable.Cast().ISOString(), "2024-05-15T12:34:56.789Z")
-	assertEqual(t, "MutableTempo.Tempoize().DateString()", mutable.Tempoize(instance.AddDays(1)).DateString(), "2024-05-16")
+	assertEqual(t, "MutableTime.AvoidMutation().ISOString()", mutable.AvoidMutation().ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "MutableTime.Cast().ISOString()", mutable.Cast().ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "MutableTime.Tempoize().DateString()", mutable.Tempoize(instance.AddDays(1)).DateString(), "2024-05-16")
 
 	if got := mutable.NowWithSameTz().Timezone(); got != "UTC" {
-		t.Fatalf("MutableTempo.NowWithSameTz().Timezone() = %q, want UTC", got)
+		t.Fatalf("MutableTime.NowWithSameTz().Timezone() = %q, want UTC", got)
 	}
 }

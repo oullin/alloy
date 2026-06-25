@@ -254,8 +254,8 @@ func TestDispatchToQueueDefaultQueueName(t *testing.T) {
 		t.Fatalf("expected 1 push, got %d", len(q.pushes))
 	}
 
-	if q.pushes[0].Queue != "default" {
-		t.Errorf("expected queue name 'default', got %q", q.pushes[0].Queue)
+	if q.pushes[0].Backend != "default" {
+		t.Errorf("expected queue name 'default', got %q", q.pushes[0].Backend)
 	}
 }
 
@@ -279,8 +279,8 @@ func TestDispatchToQueueCustomQueueName(t *testing.T) {
 		t.Fatalf("expected 1 push, got %d", len(q.pushes))
 	}
 
-	if q.pushes[0].Queue != "emails" {
-		t.Errorf("expected queue name 'emails', got %q", q.pushes[0].Queue)
+	if q.pushes[0].Backend != "emails" {
+		t.Errorf("expected queue name 'emails', got %q", q.pushes[0].Backend)
 	}
 }
 

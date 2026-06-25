@@ -6,7 +6,7 @@ import (
 )
 
 // Currency returns the currency of the money object.
-func (m *Money) Currency() (*currency.Currency, error) {
+func (m *Value) Currency() (*currency.Definition, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return nil, err
 	}
@@ -15,7 +15,7 @@ func (m *Money) Currency() (*currency.Currency, error) {
 }
 
 // Amount returns the integer amount of the money object.
-func (m *Money) Amount() (int64, error) {
+func (m *Value) Amount() (int64, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return 0, err
 	}
@@ -23,8 +23,8 @@ func (m *Money) Amount() (int64, error) {
 	return m.amount, nil
 }
 
-// AssertSameCurrency returns an error if the provided Money object does not have the same currency.
-func (m *Money) AssertSameCurrency(om *Money) error {
+// AssertSameCurrency returns an error if the provided Value object does not have the same currency.
+func (m *Value) AssertSameCurrency(om *Value) error {
 	if err := ensureMoneyProvided(m); err != nil {
 		return err
 	}
@@ -46,8 +46,8 @@ func (m *Money) AssertSameCurrency(om *Money) error {
 	return nil
 }
 
-// SameCurrency checks if the provided Money object has the same currency.
-func (m *Money) SameCurrency(om *Money) (bool, error) {
+// SameCurrency checks if the provided Value object has the same currency.
+func (m *Value) SameCurrency(om *Value) (bool, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return false, err
 	}
@@ -59,9 +59,9 @@ func (m *Money) SameCurrency(om *Money) (bool, error) {
 	return m.currency.Equals(om.currency), nil
 }
 
-// CompareAmount compares the amount of two Money objects.
+// CompareAmount compares the amount of two Value objects.
 // Returns 1 if m > om, -1 if m < om, 0 if equal.
-func (m *Money) CompareAmount(om *Money) (int, error) {
+func (m *Value) CompareAmount(om *Value) (int, error) {
 	if err := m.AssertSameCurrency(om); err != nil {
 		return 0, err
 	}
@@ -76,8 +76,8 @@ func (m *Money) CompareAmount(om *Money) (int, error) {
 	return 0, nil
 }
 
-// Equals checks if the amount of the provided Money object is equal to this one.
-func (m *Money) Equals(om *Money) (bool, error) {
+// Equals checks if the amount of the provided Value object is equal to this one.
+func (m *Value) Equals(om *Value) (bool, error) {
 	result, err := m.CompareAmount(om)
 
 	if err != nil {
@@ -87,8 +87,8 @@ func (m *Money) Equals(om *Money) (bool, error) {
 	return result == 0, nil
 }
 
-// GreaterThan checks if the amount is greater than the provided Money object.
-func (m *Money) GreaterThan(om *Money) (bool, error) {
+// GreaterThan checks if the amount is greater than the provided Value object.
+func (m *Value) GreaterThan(om *Value) (bool, error) {
 	result, err := m.CompareAmount(om)
 
 	if err != nil {
@@ -98,8 +98,8 @@ func (m *Money) GreaterThan(om *Money) (bool, error) {
 	return result == 1, nil
 }
 
-// GreaterThanOrEqual checks if the amount is greater than or equal to the provided Money object.
-func (m *Money) GreaterThanOrEqual(om *Money) (bool, error) {
+// GreaterThanOrEqual checks if the amount is greater than or equal to the provided Value object.
+func (m *Value) GreaterThanOrEqual(om *Value) (bool, error) {
 	result, err := m.CompareAmount(om)
 
 	if err != nil {
@@ -109,8 +109,8 @@ func (m *Money) GreaterThanOrEqual(om *Money) (bool, error) {
 	return result >= 0, nil
 }
 
-// LessThan checks if the amount is less than the provided Money object.
-func (m *Money) LessThan(om *Money) (bool, error) {
+// LessThan checks if the amount is less than the provided Value object.
+func (m *Value) LessThan(om *Value) (bool, error) {
 	result, err := m.CompareAmount(om)
 
 	if err != nil {
@@ -120,8 +120,8 @@ func (m *Money) LessThan(om *Money) (bool, error) {
 	return result == -1, nil
 }
 
-// LessThanOrEqual checks if the amount is less than or equal to the provided Money object.
-func (m *Money) LessThanOrEqual(om *Money) (bool, error) {
+// LessThanOrEqual checks if the amount is less than or equal to the provided Value object.
+func (m *Value) LessThanOrEqual(om *Value) (bool, error) {
 	result, err := m.CompareAmount(om)
 
 	if err != nil {
@@ -132,7 +132,7 @@ func (m *Money) LessThanOrEqual(om *Money) (bool, error) {
 }
 
 // IsZero checks if the amount is zero.
-func (m *Money) IsZero() (bool, error) {
+func (m *Value) IsZero() (bool, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return false, err
 	}
@@ -141,7 +141,7 @@ func (m *Money) IsZero() (bool, error) {
 }
 
 // IsPositive checks if the amount is positive.
-func (m *Money) IsPositive() (bool, error) {
+func (m *Value) IsPositive() (bool, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return false, err
 	}
@@ -150,7 +150,7 @@ func (m *Money) IsPositive() (bool, error) {
 }
 
 // IsNegative checks if the amount is negative.
-func (m *Money) IsNegative() (bool, error) {
+func (m *Value) IsNegative() (bool, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return false, err
 	}
@@ -159,7 +159,7 @@ func (m *Money) IsNegative() (bool, error) {
 }
 
 // Display returns the formatted string representation of the money.
-func (m *Money) Display() (string, error) {
+func (m *Value) Display() (string, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return "", err
 	}
@@ -173,8 +173,8 @@ func (m *Money) Display() (string, error) {
 	return c.Formatter().Format(m.amount), nil
 }
 
-// AsMajorUnits lets represent Money struct as subunits (float64) in a given Currency value
-func (m *Money) AsMajorUnits() (float64, error) {
+// AsMajorUnits lets represent Value struct as subunits (float64) in a given Currency value
+func (m *Value) AsMajorUnits() (float64, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return 0, err
 	}
@@ -196,7 +196,7 @@ func (m *Money) AsMajorUnits() (float64, error) {
 //	if m.amount < om.amount returns (-1, nil)
 //
 // If CompareAmount moneys from distinct currency, return (m.amount, ErrCurrencyMismatch)
-func (m *Money) Compare(om *Money) (int, error) {
+func (m *Value) Compare(om *Value) (int, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return 0, err
 	}
@@ -211,7 +211,7 @@ func (m *Money) Compare(om *Money) (int, error) {
 }
 
 // UnmarshalJSON is an implementation of json.Unmarshaller
-func (m *Money) UnmarshalJSON(b []byte) error {
+func (m *Value) UnmarshalJSON(b []byte) error {
 	if m == nil {
 		return exception.ErrNoMoneyProvided
 	}
@@ -220,7 +220,7 @@ func (m *Money) UnmarshalJSON(b []byte) error {
 }
 
 // MarshalJSON is an implementation of json.Marshaller
-func (m *Money) MarshalJSON() ([]byte, error) {
+func (m *Value) MarshalJSON() ([]byte, error) {
 	if m == nil {
 		return nil, exception.ErrNoMoneyProvided
 	}
@@ -228,7 +228,7 @@ func (m *Money) MarshalJSON() ([]byte, error) {
 	return NewJson().Marshal(*m)
 }
 
-func ensureMoneyProvided(m *Money) error {
+func ensureMoneyProvided(m *Value) error {
 	if m == nil {
 		return exception.ErrNoMoneyProvided
 	}

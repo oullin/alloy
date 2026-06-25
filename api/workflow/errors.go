@@ -8,7 +8,7 @@ import (
 
 // TransitionError reports a transition that could not fire.
 type TransitionError struct {
-	Workflow   string
+	Machine    string
 	Transition string
 	Blockers   []TransitionBlocker
 }
@@ -17,7 +17,7 @@ var ErrTransitionNotFound = errors.New("transition not found")
 
 func (e *TransitionError) Error() string {
 	if len(e.Blockers) == 0 {
-		return fmt.Sprintf("cannot apply transition %q on workflow %q", e.Transition, e.Workflow)
+		return fmt.Sprintf("cannot apply transition %q on workflow %q", e.Transition, e.Machine)
 	}
 
 	messages := make([]string, 0, len(e.Blockers))
@@ -29,7 +29,7 @@ func (e *TransitionError) Error() string {
 	return fmt.Sprintf(
 		"cannot apply transition %q on workflow %q: %s",
 		e.Transition,
-		e.Workflow,
+		e.Machine,
 		strings.Join(messages, "; "),
 	)
 }

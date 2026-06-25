@@ -28,17 +28,17 @@ type DatabaseFailedJobProvider struct {
 // their drivers.DBExecer in a bespoke store implementing intStore; see
 // package docs for the contract.
 
-// Log implements FailedJobProvider.
+// Log implements Provider.
 
-// IDs implements FailedJobProvider.
+// IDs implements Provider.
 
-// All implements FailedJobProvider.
+// All implements Provider.
 
-// Find implements FailedJobProvider.
+// Find implements Provider.
 
-// Forget implements FailedJobProvider.
+// Forget implements Provider.
 
-// Flush implements FailedJobProvider.
+// Flush implements Provider.
 
 // Count implements Countable.
 
@@ -50,7 +50,7 @@ type record struct {
 	ID         int64
 	UUID       string
 	Connection string
-	Queue      string
+	Backend    string
 	Payload    string
 	Exception  string
 	FailedAt   time.Time
@@ -62,8 +62,8 @@ type record struct {
 type intStore interface {
 	Insert(ctx context.Context, r record) (string, error)
 	IDs(ctx context.Context, queueFilter string) []string
-	All(ctx context.Context) []FailedJob
-	Find(ctx context.Context, id string) *FailedJob
+	All(ctx context.Context) []Job
+	Find(ctx context.Context, id string) *Job
 	Forget(ctx context.Context, id string) bool
 	Flush(ctx context.Context, hours int, now time.Time)
 	Prune(ctx context.Context, before time.Time) int64
@@ -95,7 +95,7 @@ func NewDatabaseFailedJobProvider(table string) *DatabaseFailedJobProvider {
 func (p *DatabaseFailedJobProvider) Log(connection, queue, payload string, exception error) (string, error) {
 	return p.store.Insert(context.Background(), record{
 		Connection: connection,
-		Queue:      queue,
+		Backend:    queue,
 		Payload:    payload,
 		Exception:  errString(exception),
 		FailedAt:   p.now(),
@@ -106,11 +106,11 @@ func (p *DatabaseFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	return p.store.IDs(context.Background(), queueFilter), nil
 }
 
-func (p *DatabaseFailedJobProvider) All() ([]FailedJob, error) {
+func (p *DatabaseFailedJobProvider) All() ([]Job, error) {
 	return p.store.All(context.Background()), nil
 }
 
-func (p *DatabaseFailedJobProvider) Find(id string) (*FailedJob, error) {
+func (p *DatabaseFailedJobProvider) Find(id string) (*Job, error) {
 	return p.store.Find(context.Background(), id), nil
 }
 
@@ -169,7 +169,7 @@ func (s *memoryStore) IDs(_ context.Context, queueFilter string) []string {
 	out := []string{}
 
 	for _, r := range rows {
-		if queueFilter != "" && r.Queue != queueFilter {
+		if queueFilter != "" && r.Backend != queueFilter {
 			continue
 		}
 
@@ -187,13 +187,13 @@ func (s *memoryStore) idOf(r record) string {
 	return strconv.FormatInt(r.ID, 10)
 }
 
-func (s *memoryStore) All(_ context.Context) []FailedJob {
+func (s *memoryStore) All(_ context.Context) []Job {
 	s.mu.Lock()
 
 	defer s.mu.Unlock()
 
 	rows := s.sorted()
-	out := make([]FailedJob, 0, len(rows))
+	out := make([]Job, 0, len(rows))
 
 	for _, r := range rows {
 		out = append(out, s.toFailed(r))
@@ -202,12 +202,12 @@ func (s *memoryStore) All(_ context.Context) []FailedJob {
 	return out
 }
 
-func (s *memoryStore) toFailed(r record) FailedJob {
-	return FailedJob{
+func (s *memoryStore) toFailed(r record) Job {
+	return Job{
 		ID:         s.idOf(r),
 		UUID:       r.UUID,
 		Connection: r.Connection,
-		Queue:      r.Queue,
+		Backend:    r.Backend,
 		Payload:    r.Payload,
 		Exception:  r.Exception,
 		FailedAt:   r.FailedAt,
@@ -218,7 +218,7 @@ func (s *memoryStore) matchID(r record, id string) bool {
 	return s.idOf(r) == id
 }
 
-func (s *memoryStore) Find(_ context.Context, id string) *FailedJob {
+func (s *memoryStore) Find(_ context.Context, id string) *Job {
 	s.mu.Lock()
 
 	defer s.mu.Unlock()
@@ -309,7 +309,7 @@ func (s *memoryStore) Count(_ context.Context, connection, queueFilter string) i
 			continue
 		}
 
-		if queueFilter != "" && r.Queue != queueFilter {
+		if queueFilter != "" && r.Backend != queueFilter {
 			continue
 		}
 

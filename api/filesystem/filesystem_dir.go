@@ -10,7 +10,7 @@ import (
 // Files returns the files in the given directory (non-recursive by default).
 // When hidden is true (or omitted), hidden files (starting with ".") are included.
 // When hidden is explicitly set to false, hidden files are excluded.
-func (f *Filesystem) Files(directory string, hidden ...bool) ([]string, error) {
+func (f *Local) Files(directory string, hidden ...bool) ([]string, error) {
 	includeHidden := false
 
 	if len(hidden) > 0 {
@@ -41,7 +41,7 @@ func (f *Filesystem) Files(directory string, hidden ...bool) ([]string, error) {
 }
 
 // AllFiles returns all files in the directory tree recursively.
-func (f *Filesystem) AllFiles(directory string, hidden ...bool) ([]string, error) {
+func (f *Local) AllFiles(directory string, hidden ...bool) ([]string, error) {
 	includeHidden := false
 
 	if len(hidden) > 0 {
@@ -76,7 +76,7 @@ func (f *Filesystem) AllFiles(directory string, hidden ...bool) ([]string, error
 }
 
 // Directories returns the directories in the given directory (non-recursive).
-func (f *Filesystem) Directories(directory string) ([]string, error) {
+func (f *Local) Directories(directory string) ([]string, error) {
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {
@@ -95,7 +95,7 @@ func (f *Filesystem) Directories(directory string) ([]string, error) {
 }
 
 // AllDirectories returns all directories in the directory tree recursively.
-func (f *Filesystem) AllDirectories(directory string) ([]string, error) {
+func (f *Local) AllDirectories(directory string) ([]string, error) {
 	var dirs []string
 
 	err := filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
@@ -115,7 +115,7 @@ func (f *Filesystem) AllDirectories(directory string) ([]string, error) {
 
 // EnsureDirectoryExists creates the directory if it does not already exist.
 // The default mode is 0755.
-func (f *Filesystem) EnsureDirectoryExists(path string, mode ...fs.FileMode) error {
+func (f *Local) EnsureDirectoryExists(path string, mode ...fs.FileMode) error {
 	perm := fs.FileMode(0o755)
 
 	if len(mode) > 0 {
@@ -127,7 +127,7 @@ func (f *Filesystem) EnsureDirectoryExists(path string, mode ...fs.FileMode) err
 
 // MakeDirectory creates a directory. The default mode is 0755.
 // By default it creates parent directories recursively.
-func (f *Filesystem) MakeDirectory(path string, mode ...fs.FileMode) error {
+func (f *Local) MakeDirectory(path string, mode ...fs.FileMode) error {
 	perm := fs.FileMode(0o755)
 
 	if len(mode) > 0 {
@@ -139,7 +139,7 @@ func (f *Filesystem) MakeDirectory(path string, mode ...fs.FileMode) error {
 
 // MoveDirectory moves a directory from one location to another.
 // When overwrite is true, any existing destination directory is removed first.
-func (f *Filesystem) MoveDirectory(from, to string, overwrite ...bool) error {
+func (f *Local) MoveDirectory(from, to string, overwrite ...bool) error {
 	shouldOverwrite := false
 
 	if len(overwrite) > 0 {
@@ -172,7 +172,7 @@ func (f *Filesystem) MoveDirectory(from, to string, overwrite ...bool) error {
 }
 
 // CopyDirectory recursively copies a directory and its contents.
-func (f *Filesystem) CopyDirectory(directory, destination string) error {
+func (f *Local) CopyDirectory(directory, destination string) error {
 	info, err := os.Stat(directory)
 
 	if err != nil {
@@ -206,7 +206,7 @@ func (f *Filesystem) CopyDirectory(directory, destination string) error {
 
 // DeleteDirectory removes a directory and all of its contents.
 // When preserve is true, the directory itself is kept but its contents are removed.
-func (f *Filesystem) DeleteDirectory(directory string, preserve ...bool) error {
+func (f *Local) DeleteDirectory(directory string, preserve ...bool) error {
 	info, err := os.Stat(directory)
 
 	if err != nil {
@@ -236,7 +236,7 @@ func (f *Filesystem) DeleteDirectory(directory string, preserve ...bool) error {
 
 // DeleteDirectories removes all subdirectories within the given directory,
 // leaving files intact.
-func (f *Filesystem) DeleteDirectories(directory string) error {
+func (f *Local) DeleteDirectories(directory string) error {
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {
@@ -255,11 +255,11 @@ func (f *Filesystem) DeleteDirectories(directory string) error {
 }
 
 // CleanDirectory removes all contents of a directory but keeps the directory.
-func (f *Filesystem) CleanDirectory(directory string) error {
+func (f *Local) CleanDirectory(directory string) error {
 	return f.cleanDir(directory)
 }
 
-func (f *Filesystem) cleanDir(directory string) error {
+func (f *Local) cleanDir(directory string) error {
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {

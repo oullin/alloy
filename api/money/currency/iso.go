@@ -13,7 +13,7 @@ import (
 type ISOCodePattern struct {
 	currencies              *Map
 	symbols                 *[]Symbol
-	defaultCurrency         *Currency
+	defaultCurrency         *Definition
 	symbolsLongestFirst     *[]Symbol
 	symbolsLongestFirstOnce sync.Once
 	isoCodePatternOnce      sync.Once
@@ -36,7 +36,7 @@ func NewISOCodePattern() *ISOCodePattern {
 }
 
 // NewISOCodePatternWith creates a new ISOCodePattern instance with a custom provider and dataset.
-func NewISOCodePatternWith(provider Provider, dataset *map[string]*Currency) (*ISOCodePattern, error) {
+func NewISOCodePatternWith(provider Provider, dataset *map[string]*Definition) (*ISOCodePattern, error) {
 	if provider == nil {
 		return nil, exception.ErrNoConverterProvided
 	}

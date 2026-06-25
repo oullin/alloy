@@ -4,34 +4,34 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/auth"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	"github.com/oullin/alloy/auth/user"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type ormQuery struct {
-	updatedUser cauth.Authenticatable
+	updatedUser cauth.User
 	updatedHash string
 }
 
 type ormHasher struct{}
 
-func (q *ormQuery) FindByID(context.Context, string) (cauth.Authenticatable, error) {
+func (q *ormQuery) FindByID(context.Context, string) (cauth.User, error) {
 	return nil, nil
 }
 
-func (q *ormQuery) FindByToken(context.Context, string, string) (cauth.Authenticatable, error) {
+func (q *ormQuery) FindByToken(context.Context, string, string) (cauth.User, error) {
 	return nil, nil
 }
 
-func (q *ormQuery) FindByCredentials(context.Context, map[string]string) (cauth.Authenticatable, error) {
+func (q *ormQuery) FindByCredentials(context.Context, map[string]string) (cauth.User, error) {
 	return nil, nil
 }
 
-func (q *ormQuery) UpdateToken(context.Context, cauth.Authenticatable, string) error {
+func (q *ormQuery) UpdateToken(context.Context, cauth.User, string) error {
 	return nil
 }
 
-func (q *ormQuery) UpdatePassword(_ context.Context, user cauth.Authenticatable, passwordHash string) error {
+func (q *ormQuery) UpdatePassword(_ context.Context, user cauth.User, passwordHash string) error {
 	q.updatedUser = user
 	q.updatedHash = passwordHash
 
@@ -53,7 +53,7 @@ func (ormHasher) NeedsRehash(string) bool {
 func TestORMUserProviderRehashPasswordStoresNewHash(t *testing.T) {
 	query := &ormQuery{}
 	provider := NewORMUserProvider(query, ormHasher{})
-	user := auth.NewGenericUser(map[string]any{"id": "1", "password": "old-hash"})
+	user := user.NewGenericUser(map[string]any{"id": "1", "password": "old-hash"})
 
 	err := provider.RehashPasswordIfRequired(context.Background(), user, map[string]string{
 		"password": "secret",

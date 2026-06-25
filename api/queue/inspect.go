@@ -13,7 +13,7 @@ import (
 //
 // LogicException("Not supported") for the same scenarios.
 
-// QueueNamer is the optional contract a Queue implementation satisfies
+// BackendNamer is the optional contract a Backend implementation satisfies
 // when it can enumerate the queue names that currently exist on its
 // connection. The manager-level cross-queue inspection helpers
 // (AllPendingJobs / AllDelayedJobs / AllReservedJobs) require this
@@ -25,11 +25,11 @@ import (
 //
 // added alongside allReservedJobs/allDelayedJobs/allPendingJobs in
 // Upstream 13.8.0.
-type QueueNamer interface {
+type BackendNamer interface {
 	QueueNames(ctx context.Context) ([]string, error)
 }
 
-// JobInspector is the optional contract a Queue implementation
+// JobInspector is the optional contract a Backend implementation
 // satisfies when it can return read-only snapshots of jobs currently
 // sitting on a named queue without consuming them. The three methods
 // mirror the per-state inspection methods upstream exposes on the queue

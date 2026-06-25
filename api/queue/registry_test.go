@@ -147,7 +147,7 @@ func TestHandlerRegistryRegisterForParsesTags(t *testing.T) {
 		t.Errorf("MaxTries: got %d, want 7", entry.Options.MaxTries)
 	}
 
-	if entry.Options.Queue != "high" {
-		t.Errorf("Queue: got %q, want high", entry.Options.Queue)
+	if entry.Options.Backend != "high" {
+		t.Errorf("Backend: got %q, want high", entry.Options.Backend)
 	}
 }

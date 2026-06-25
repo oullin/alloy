@@ -6,115 +6,115 @@ import (
 	"github.com/oullin/alloy/tempo/formatting"
 )
 
-func (mutable *MutableTempo) DateString() string {
+func (mutable *MutableTime) DateString() string {
 	return formatting.DateString(mutable)
 }
 
-func (mutable *MutableTempo) TimeString(precision ...TimeStringPrecision) string {
+func (mutable *MutableTime) TimeString(precision ...TimeStringPrecision) string {
 	return formatting.TimeString(mutable, selectedPrecision(precision) == MillisecondPrecision)
 }
 
-func (mutable *MutableTempo) DateTimeString() string {
+func (mutable *MutableTime) DateTimeString() string {
 	return formatting.DateTimeString(mutable)
 }
 
-func (mutable *MutableTempo) FormattedDateString() string {
-	return mutable.Tempo().FormattedDateString()
+func (mutable *MutableTime) FormattedDateString() string {
+	return mutable.Immutable().FormattedDateString()
 }
 
-func (mutable *MutableTempo) FormattedDayDateString() string {
-	return mutable.Tempo().FormattedDayDateString()
+func (mutable *MutableTime) FormattedDayDateString() string {
+	return mutable.Immutable().FormattedDayDateString()
 }
 
-func (mutable *MutableTempo) DayDateTimeString() string {
-	return mutable.Tempo().DayDateTimeString()
+func (mutable *MutableTime) DayDateTimeString() string {
+	return mutable.Immutable().DayDateTimeString()
 }
 
-func (mutable *MutableTempo) DateTimeLocalString(precision ...TimeStringPrecision) string {
-	return mutable.Tempo().DateTimeLocalString(precision...)
+func (mutable *MutableTime) DateTimeLocalString(precision ...TimeStringPrecision) string {
+	return mutable.Immutable().DateTimeLocalString(precision...)
 }
 
-func (mutable *MutableTempo) ISOString() string {
+func (mutable *MutableTime) ISOString() string {
 	return formatting.ISOString(mutable)
 }
 
-func (mutable *MutableTempo) ISO8601String() string {
-	return mutable.Tempo().ISO8601String()
+func (mutable *MutableTime) ISO8601String() string {
+	return mutable.Immutable().ISO8601String()
 }
 
-func (mutable *MutableTempo) ISO8601ZuluString(precision ...TimeStringPrecision) string {
-	return mutable.Tempo().ISO8601ZuluString(precision...)
+func (mutable *MutableTime) ISO8601ZuluString(precision ...TimeStringPrecision) string {
+	return mutable.Immutable().ISO8601ZuluString(precision...)
 }
 
-func (mutable *MutableTempo) RFC3339String(precision ...TimeStringPrecision) string {
-	return mutable.Tempo().RFC3339String(precision...)
+func (mutable *MutableTime) RFC3339String(precision ...TimeStringPrecision) string {
+	return mutable.Immutable().RFC3339String(precision...)
 }
 
-func (mutable *MutableTempo) RFC7231String() string {
-	return mutable.Tempo().RFC7231String()
+func (mutable *MutableTime) RFC7231String() string {
+	return mutable.Immutable().RFC7231String()
 }
 
-func (mutable *MutableTempo) RFC822String() string {
-	return mutable.Tempo().RFC822String()
+func (mutable *MutableTime) RFC822String() string {
+	return mutable.Immutable().RFC822String()
 }
 
-func (mutable *MutableTempo) RFC850String() string {
-	return mutable.Tempo().RFC850String()
+func (mutable *MutableTime) RFC850String() string {
+	return mutable.Immutable().RFC850String()
 }
 
-func (mutable *MutableTempo) RFC1036String() string {
-	return mutable.Tempo().RFC1036String()
+func (mutable *MutableTime) RFC1036String() string {
+	return mutable.Immutable().RFC1036String()
 }
 
-func (mutable *MutableTempo) RFC1123String() string {
-	return mutable.Tempo().RFC1123String()
+func (mutable *MutableTime) RFC1123String() string {
+	return mutable.Immutable().RFC1123String()
 }
 
-func (mutable *MutableTempo) RFC2822String() string {
-	return mutable.Tempo().RFC2822String()
+func (mutable *MutableTime) RFC2822String() string {
+	return mutable.Immutable().RFC2822String()
 }
 
-func (mutable *MutableTempo) W3CString() string {
-	return mutable.Tempo().W3CString()
+func (mutable *MutableTime) W3CString() string {
+	return mutable.Immutable().W3CString()
 }
 
-func (mutable *MutableTempo) CookieString() string {
-	return mutable.Tempo().CookieString()
+func (mutable *MutableTime) CookieString() string {
+	return mutable.Immutable().CookieString()
 }
 
-func (mutable *MutableTempo) AtomString() string {
-	return mutable.Tempo().AtomString()
+func (mutable *MutableTime) AtomString() string {
+	return mutable.Immutable().AtomString()
 }
 
-func (mutable *MutableTempo) RSSString() string {
-	return mutable.Tempo().RSSString()
+func (mutable *MutableTime) RSSString() string {
+	return mutable.Immutable().RSSString()
 }
 
-func (mutable *MutableTempo) UnixString() string {
-	return mutable.Tempo().UnixString()
+func (mutable *MutableTime) UnixString() string {
+	return mutable.Immutable().UnixString()
 }
 
-func (mutable *MutableTempo) JSONSerialize() string {
-	return mutable.Tempo().JSONSerialize()
+func (mutable *MutableTime) JSONSerialize() string {
+	return mutable.Immutable().JSONSerialize()
 }
 
-func (mutable *MutableTempo) Serialize() string {
-	return mutable.Tempo().Serialize()
+func (mutable *MutableTime) Serialize() string {
+	return mutable.Immutable().Serialize()
 }
 
-func (mutable *MutableTempo) String() string {
-	return mutable.Tempo().String()
+func (mutable *MutableTime) String() string {
+	return mutable.Immutable().String()
 }
 
-func (mutable *MutableTempo) Time() time.Time {
+func (mutable *MutableTime) Time() time.Time {
 	return mutable.value
 }
 
-func (mutable *MutableTempo) MarshalJSON() ([]byte, error) {
-	return mutable.Tempo().MarshalJSON()
+func (mutable *MutableTime) MarshalJSON() ([]byte, error) {
+	return mutable.Immutable().MarshalJSON()
 }
 
-func (mutable *MutableTempo) UnmarshalJSON(data []byte) error {
+func (mutable *MutableTime) UnmarshalJSON(data []byte) error {
 	value, location, err := parseSerializedJSON(data, mutable.location)
 
 	if err != nil {
@@ -127,46 +127,46 @@ func (mutable *MutableTempo) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (mutable *MutableTempo) ToObject() Object {
-	return mutable.Tempo().ToObject()
+func (mutable *MutableTime) ToObject() Object {
+	return mutable.Immutable().ToObject()
 }
 
-func (mutable *MutableTempo) ToMap() map[string]any {
+func (mutable *MutableTime) ToMap() map[string]any {
 	return formatting.ToMap(mutable)
 }
 
-func (mutable *MutableTempo) ToArray() [7]int {
+func (mutable *MutableTime) ToArray() [7]int {
 	return formatting.ToArray(mutable)
 }
 
-func (mutable *MutableTempo) Format(pattern string) string {
+func (mutable *MutableTime) Format(pattern string) string {
 	return formatting.Format(mutable, pattern)
 }
 
-func (mutable *MutableTempo) Ordinal(unit Unit) string {
-	return mutable.Tempo().Ordinal(unit)
+func (mutable *MutableTime) Ordinal(unit Unit) string {
+	return mutable.Immutable().Ordinal(unit)
 }
 
-func (mutable *MutableTempo) Meridiem(lowercase bool) string {
-	return mutable.Tempo().Meridiem(lowercase)
+func (mutable *MutableTime) Meridiem(lowercase bool) string {
+	return mutable.Immutable().Meridiem(lowercase)
 }
 
-func (mutable *MutableTempo) Week() int {
-	return mutable.Tempo().Week()
+func (mutable *MutableTime) Week() int {
+	return mutable.Immutable().Week()
 }
 
-func (mutable *MutableTempo) WeekYear() int {
-	return mutable.Tempo().WeekYear()
+func (mutable *MutableTime) WeekYear() int {
+	return mutable.Immutable().WeekYear()
 }
 
-func (mutable *MutableTempo) WeeksInYear() int {
-	return mutable.Tempo().WeeksInYear()
+func (mutable *MutableTime) WeeksInYear() int {
+	return mutable.Immutable().WeeksInYear()
 }
 
-func (mutable *MutableTempo) DaysFromStartOfWeek(weekStartsOn time.Weekday) int {
-	return mutable.Tempo().DaysFromStartOfWeek(weekStartsOn)
+func (mutable *MutableTime) DaysFromStartOfWeek(weekStartsOn time.Weekday) int {
+	return mutable.Immutable().DaysFromStartOfWeek(weekStartsOn)
 }
 
-func (mutable *MutableTempo) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SetDaysFromStartOfWeek(days, weekStartsOn))
+func (mutable *MutableTime) SetDaysFromStartOfWeek(days int, weekStartsOn time.Weekday) *MutableTime {
+	return mutable.replace(mutable.Immutable().SetDaysFromStartOfWeek(days, weekStartsOn))
 }

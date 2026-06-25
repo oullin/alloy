@@ -6,7 +6,7 @@ import (
 	"github.com/oullin/alloy/container/contracts/provider"
 )
 
-// Application wraps Container and manages service provider lifecycle,
+// Application wraps App and manages service provider lifecycle,
 // in the order they are added; Boot is called after all registrations.
 //
 // Two optional capabilities extend the lifecycle:
@@ -18,21 +18,21 @@ import (
 //     RegisterMany topologically sorts deps before calling Register.
 //
 // Deferred resolution is an Application-level feature: code that bypasses
-// the Application and calls Container.Make directly will see ErrNotBound
+// the Application and calls App.Make directly will see ErrNotBound
 // for keys whose providers have not yet been flushed. This is intentional —
-// it keeps the Container itself free of provider lifecycle concerns.
+// it keeps the App itself free of provider lifecycle concerns.
 type Application struct {
-	*Container
+	*App
 	providers     []provider.ServiceProvider
 	deferredByKey map[string]provider.ServiceProvider
 	registered    map[provider.ServiceProvider]bool
 	booted        bool
 }
 
-// NewApplication creates an Application backed by a fresh Container.
+// NewApplication creates an Application backed by a fresh App.
 func NewApplication() *Application {
 	return &Application{
-		Container:     New(),
+		App:           New(),
 		deferredByKey: make(map[string]provider.ServiceProvider),
 		registered:    make(map[provider.ServiceProvider]bool),
 	}
@@ -124,12 +124,12 @@ func (a *Application) flushDeferredFor(abstract string) {
 }
 
 // Make resolves an abstract through the container, flushing any deferred
-// provider that claims the key first. This shadows Container.Make so
+// provider that claims the key first. This shadows App.Make so
 // callers that hold an *Application get deferred resolution automatically.
 func (a *Application) Make(abstract string) (any, error) {
 	a.flushDeferredFor(abstract)
 
-	return a.Container.Make(abstract)
+	return a.App.Make(abstract)
 }
 
 // MakeWith is the parameterised counterpart of Make. It also flushes any
@@ -137,14 +137,14 @@ func (a *Application) Make(abstract string) (any, error) {
 func (a *Application) MakeWith(abstract string, parameters map[string]any) (any, error) {
 	a.flushDeferredFor(abstract)
 
-	return a.Container.MakeWith(abstract, parameters)
+	return a.App.MakeWith(abstract, parameters)
 }
 
 // Get is the PSR-11 alias of Make. Same deferred-flush behaviour.
 func (a *Application) Get(abstract string) (any, error) {
 	a.flushDeferredFor(abstract)
 
-	return a.Container.Get(abstract)
+	return a.App.Get(abstract)
 }
 
 // RegisterMany calls Register on each provider, topologically sorted by

@@ -10,7 +10,7 @@ import (
 	"github.com/oullin/alloy/queue"
 )
 
-// mockQueue implements queue.Queue for testing.
+// mockQueue implements queue.Backend for testing.
 type mockQueue struct {
 	mu       sync.Mutex
 	pushes   []mockPush
@@ -20,7 +20,7 @@ type mockQueue struct {
 }
 
 type mockPush struct {
-	Queue   string
+	Backend string
 	Payload []byte
 }
 
@@ -78,7 +78,7 @@ func (q *mockQueue) Push(_ context.Context, queueName string, payload []byte) (s
 		return "", q.pushErr
 	}
 
-	q.pushes = append(q.pushes, mockPush{Queue: queueName, Payload: payload})
+	q.pushes = append(q.pushes, mockPush{Backend: queueName, Payload: payload})
 	q.delays = append(q.delays, 0)
 
 	return fmt.Sprintf("job-%d", len(q.pushes)), nil
@@ -93,7 +93,7 @@ func (q *mockQueue) PushDelayed(_ context.Context, queueName string, payload []b
 		return "", q.pushErr
 	}
 
-	q.pushes = append(q.pushes, mockPush{Queue: queueName, Payload: payload})
+	q.pushes = append(q.pushes, mockPush{Backend: queueName, Payload: payload})
 	q.delays = append(q.delays, delay)
 
 	return fmt.Sprintf("job-%d", len(q.pushes)), nil

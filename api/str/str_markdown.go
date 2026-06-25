@@ -11,11 +11,11 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-// StrMarkdown converts the given CommonMark Markdown string to HTML.
+// Markdown converts the given CommonMark Markdown string to HTML.
 // Options map keys:
 //   - "html_input": "strip" (default) or "allow" — controls raw HTML in input
 //   - "allow_unsafe_links": bool — whether to allow unsafe links (default false)
-func StrMarkdown(str string, options ...map[string]any) string {
+func Markdown(str string, options ...map[string]any) string {
 	opts := mergeMarkdownOptions(options)
 
 	unsafe := false
@@ -50,10 +50,10 @@ func StrMarkdown(str string, options ...map[string]any) string {
 	return buf.String()
 }
 
-// StrInlineMarkdown converts the given CommonMark Markdown string to inline HTML.
-// Unlike StrMarkdown, the wrapping <p> tag is removed for single-line content.
-func StrInlineMarkdown(str string, options ...map[string]any) string {
-	result := StrMarkdown(str, options...)
+// InlineMarkdown converts the given CommonMark Markdown string to inline HTML.
+// Unlike Markdown, the wrapping <p> tag is removed for single-line content.
+func InlineMarkdown(str string, options ...map[string]any) string {
+	result := Markdown(str, options...)
 
 	// Remove wrapping <p> tags for inline content
 	result = strings.TrimSpace(result)

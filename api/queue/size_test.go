@@ -9,7 +9,7 @@ import (
 	"github.com/oullin/alloy/queue"
 )
 
-// memoryQueue is a minimal in-memory Queue used only by the SizeTest
+// memoryQueue is a minimal in-memory Backend used only by the SizeTest
 // port. It tracks per-queue-name pending counts — enough to assert the
 // behaviour QueueSizeTest cares about without pulling in a full driver.
 type memoryQueue struct {
@@ -67,7 +67,7 @@ func (m *memoryQueue) ConnectionName() string                              { ret
 
 // Ref: @bedrock/code-0372
 // Upstream dispatches jobs via dispatch()/onQueue() and inspects
-// Queue::size(). Go has no facade/dispatch helper, so the port pushes
+// Backend::size(). Go has no facade/dispatch helper, so the port pushes
 // directly onto a memoryQueue and asserts the same per-queue counts.
 // Behaviour under assertion (zero-before-push, split between default
 // and Q2) is identical to the PHP test.

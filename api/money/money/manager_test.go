@@ -289,7 +289,7 @@ func TestManagerGetCurrencyManager(t *testing.T) {
 
 func TestManagerWithCustomCurrencyManager(t *testing.T) {
 	// Create a custom currency manager with a custom dataset
-	customCurrency := &currency.Currency{
+	customCurrency := &currency.Definition{
 		Code:        "TST",
 		Grapheme:    "T$",
 		Template:    "1 $",
@@ -299,7 +299,7 @@ func TestManagerWithCustomCurrencyManager(t *testing.T) {
 		Fraction:    2,
 	}
 
-	dataset := map[string]*currency.Currency{
+	dataset := map[string]*currency.Definition{
 		"TST": customCurrency,
 	}
 

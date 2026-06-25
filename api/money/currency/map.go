@@ -11,8 +11,8 @@ import (
 // Map holds a reference to the active currency configuration.
 // It uses a pointer to the map to ensure inexpensive copying of the struct.
 type Map struct {
-	fallback *Currency
-	dataset  *map[string]*Currency
+	fallback *Definition
+	dataset  *map[string]*Definition
 }
 
 // NewCurrenciesMap returns the singleton instance of Map.
@@ -23,7 +23,7 @@ var NewCurrenciesMap = func() func() Map {
 	// These variables live forever but are ONLY accessible inside this block.
 	var once sync.Once
 
-	var singleton *map[string]*Currency
+	var singleton *map[string]*Definition
 	// -------------------------------
 
 	return func() Map {
@@ -58,12 +58,12 @@ var NewCurrenciesMapFrom = createCurrenciesMapFromFactory()
 //
 // This factory is extracted to allow test code to create fresh instances
 // without duplicating the singleton implementation logic.
-func createCurrenciesMapFromFactory() func(inputData *map[string]*Currency) (Map, error) {
+func createCurrenciesMapFromFactory() func(inputData *map[string]*Definition) (Map, error) {
 	var mu sync.Mutex
 
-	var singleton *map[string]*Currency
+	var singleton *map[string]*Definition
 
-	return func(inputData *map[string]*Currency) (Map, error) {
+	return func(inputData *map[string]*Definition) (Map, error) {
 		mu.Lock()
 
 		defer mu.Unlock()
@@ -88,7 +88,7 @@ func createCurrenciesMapFromFactory() func(inputData *map[string]*Currency) (Map
 
 // Get safely retrieves a currency by its code.
 // Returns nil if the currency is not found.
-func (cm Map) Get(code string) *Currency {
+func (cm Map) Get(code string) *Definition {
 	if cm.dataset == nil {
 		return nil
 	}
@@ -126,7 +126,7 @@ func (cm Map) HasInvalidState() (bool, error) {
 }
 
 // FindByCode case-insensitively searches for a currency by its code.
-func (cm Map) FindByCode(code string) *Currency {
+func (cm Map) FindByCode(code string) *Definition {
 	if cm.dataset == nil {
 		return nil
 	}

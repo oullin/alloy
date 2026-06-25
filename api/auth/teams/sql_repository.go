@@ -82,7 +82,7 @@ func (r *SQLRepository) CreateTeam(ctx context.Context, team Team) (Team, error)
 	return team, nil
 }
 
-func (r *SQLRepository) TeamsForUser(ctx context.Context, userID string) ([]Team, error) {
+func (r *SQLRepository) ForUser(ctx context.Context, userID string) ([]Team, error) {
 	rows, err := r.db.Query(ctx,
 		"SELECT t.id, t.name, t.owner_id, t.created_at, t.updated_at FROM "+r.teamsTable+" t "+
 			"INNER JOIN "+r.membersTable+" m ON m.team_id = t.id WHERE m.user_id = $1",

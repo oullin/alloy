@@ -23,19 +23,19 @@ func NewPauseResumer(store PauseStore, emitter EventEmitter) *PauseResumer {
 }
 
 // Pause marks (connection, queue) as paused indefinitely and emits a
-// QueuePaused event with a nil TTL.
+// Paused event with a nil TTL.
 func (p *PauseResumer) Pause(connection, queue string) error {
 	if err := p.store.Pause(pauseKey(connection, queue)); err != nil {
 		return err
 	}
 
-	p.emit(events.QueuePaused{ConnectionName: connection, Queue: queue, TTL: nil})
+	p.emit(events.Paused{ConnectionName: connection, Backend: queue, TTL: nil})
 
 	return nil
 }
 
 // PauseFor marks (connection, queue) as paused until now+ttl and emits
-// a QueuePaused event whose TTL is non-nil and equal to ttl.
+// a Paused event whose TTL is non-nil and equal to ttl.
 func (p *PauseResumer) PauseFor(connection, queue string, ttl time.Duration) error {
 	if err := p.store.PauseFor(pauseKey(connection, queue), ttl); err != nil {
 		return err
@@ -43,19 +43,19 @@ func (p *PauseResumer) PauseFor(connection, queue string, ttl time.Duration) err
 
 	d := ttl
 
-	p.emit(events.QueuePaused{ConnectionName: connection, Queue: queue, TTL: &d})
+	p.emit(events.Paused{ConnectionName: connection, Backend: queue, TTL: &d})
 
 	return nil
 }
 
 // Resume removes any pause state for (connection, queue) and emits a
-// QueueResumed event.
+// Resumed event.
 func (p *PauseResumer) Resume(connection, queue string) error {
 	if err := p.store.Resume(pauseKey(connection, queue)); err != nil {
 		return err
 	}
 
-	p.emit(events.QueueResumed{ConnectionName: connection, Queue: queue})
+	p.emit(events.Resumed{ConnectionName: connection, Backend: queue})
 
 	return nil
 }

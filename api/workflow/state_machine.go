@@ -6,10 +6,10 @@ import (
 	"github.com/oullin/alloy/workflow/events"
 )
 
-// StateMachine is a Workflow constrained to a single active place and
+// StateMachine is a Machine constrained to a single active place and
 // single-target transitions — the classic state-machine shape.
 type StateMachine[T any] struct {
-	*Workflow[T]
+	*Machine[T]
 }
 
 // NewStateMachine validates state-machine invariants then constructs the engine.
@@ -34,5 +34,5 @@ func NewStateMachine[T any](name string, definition *Definition, store MarkingSt
 		return nil, err
 	}
 
-	return &StateMachine[T]{Workflow: engine}, nil
+	return &StateMachine[T]{Machine: engine}, nil
 }

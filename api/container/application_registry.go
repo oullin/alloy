@@ -20,9 +20,9 @@ func SetApp(app *Application) {
 	application = app
 }
 
-// App returns the process-wide Application. Panics if SetApp has not been
+// Global returns the process-wide Application. Panics if SetApp has not been
 // called.
-func App() *Application {
+func Global() *Application {
 	applicationMu.RLock()
 
 	defer applicationMu.RUnlock()
@@ -45,12 +45,12 @@ func HasApp() bool {
 
 // Make resolves an abstract from the global application.
 func Make(abstract string) (any, error) {
-	return App().Make(abstract)
+	return Global().Make(abstract)
 }
 
 // MustMake resolves an abstract from the global application or panics.
 func MustMake(abstract string) any {
-	v, err := App().Make(abstract)
+	v, err := Global().Make(abstract)
 
 	if err != nil {
 		panic(fmt.Sprintf("container: MustMake(%q): %v", abstract, err))
@@ -82,7 +82,7 @@ func TryResolve[T any](abstract string) (T, error) {
 		return zero, fmt.Errorf("container: no Application installed")
 	}
 
-	raw, err := App().Make(abstract)
+	raw, err := Global().Make(abstract)
 
 	if err != nil {
 		return zero, err

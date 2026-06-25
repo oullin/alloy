@@ -75,7 +75,7 @@ func TestRun_SignupDAG_SyncThenAsyncFanOut(t *testing.T) {
 		return map[string]any{"notified": uid}, nil
 	}
 
-	wf := multisteps.Workflow("signup",
+	wf := multisteps.Machine("signup",
 		multisteps.Sync("create", create, multisteps.Args(multisteps.A{
 			"name": multisteps.Variable("name"),
 		})),
@@ -126,7 +126,7 @@ func TestRun_ResponseFieldOnStruct(t *testing.T) {
 		Name string
 	}
 
-	wf := multisteps.Workflow("struct-resp",
+	wf := multisteps.Machine("struct-resp",
 		multisteps.Sync("create", func(in multisteps.JobInput) (any, error) {
 			return Account{ID: "abc", Name: "Jane"}, nil
 		}),
@@ -151,7 +151,7 @@ func TestRun_ResponseFieldOnStruct(t *testing.T) {
 func TestRun_RetryUntilSuccess(t *testing.T) {
 	var attempts int32
 
-	wf := multisteps.Workflow("retry",
+	wf := multisteps.Machine("retry",
 		multisteps.Sync("flaky", func(in multisteps.JobInput) (any, error) {
 			n := atomic.AddInt32(&attempts, 1)
 
@@ -179,7 +179,7 @@ func TestRun_RetryUntilSuccess(t *testing.T) {
 }
 
 func TestRun_RetryExhaustedWrapsInWorkflowError(t *testing.T) {
-	wf := multisteps.Workflow("fail",
+	wf := multisteps.Machine("fail",
 		multisteps.Sync("broken", func(in multisteps.JobInput) (any, error) {
 			return nil, errors.New("permanent")
 		}, multisteps.WithRetry(2, time.Millisecond, time.Second)),
@@ -205,7 +205,7 @@ func TestRun_RetryExhaustedWrapsInWorkflowError(t *testing.T) {
 func TestRun_RunIfSkipsAndDownstreamProceeds(t *testing.T) {
 	var notifyRan bool
 
-	wf := multisteps.Workflow("conditional",
+	wf := multisteps.Machine("conditional",
 		multisteps.Sync("create", func(in multisteps.JobInput) (any, error) {
 			return map[string]any{"id": "u1"}, nil
 		}),
@@ -243,7 +243,7 @@ func TestRun_RunIfSkipsAndDownstreamProceeds(t *testing.T) {
 }
 
 func TestCompile_DetectsCycle(t *testing.T) {
-	wf := multisteps.Workflow("cyclic",
+	wf := multisteps.Machine("cyclic",
 		multisteps.Sync("a", func(multisteps.JobInput) (any, error) { return nil, nil },
 			multisteps.DependsOn("b")),
 		multisteps.Sync("b", func(multisteps.JobInput) (any, error) { return nil, nil },
@@ -264,7 +264,7 @@ func TestCompile_DetectsCycle(t *testing.T) {
 }
 
 func TestCompile_RejectsDanglingResponseRef(t *testing.T) {
-	wf := multisteps.Workflow("dangling",
+	wf := multisteps.Machine("dangling",
 		multisteps.Sync("a", func(multisteps.JobInput) (any, error) { return nil, nil },
 			multisteps.Args(multisteps.A{"x": multisteps.Response("ghost", "id")})),
 	)
@@ -279,7 +279,7 @@ func TestRun_AsyncFailFastCancelsSiblings(t *testing.T) {
 
 	slowEntered := make(chan struct{})
 
-	wf := multisteps.Workflow("failfast",
+	wf := multisteps.Machine("failfast",
 		multisteps.Async("fast", func(in multisteps.JobInput) (any, error) {
 			select {
 			case <-slowEntered:
@@ -319,7 +319,7 @@ func TestRun_AsyncFailFastCancelsSiblings(t *testing.T) {
 func TestRun_ContinueOnErrorLetsSiblingsComplete(t *testing.T) {
 	var completed atomic.Bool
 
-	wf := multisteps.Workflow("lenient",
+	wf := multisteps.Machine("lenient",
 		multisteps.Async("fast", func(in multisteps.JobInput) (any, error) {
 			return nil, errors.New("boom")
 		}),
@@ -350,7 +350,7 @@ func TestRun_ContinueOnErrorLetsSiblingsComplete(t *testing.T) {
 func TestRun_SyncDriverDeterministicOrdering(t *testing.T) {
 	var order []string
 
-	wf := multisteps.Workflow("ordered",
+	wf := multisteps.Machine("ordered",
 		multisteps.Async("a", func(multisteps.JobInput) (any, error) {
 			order = append(order, "a")
 

@@ -16,10 +16,10 @@ import (
 //
 // The helpers cover:
 //
-//   - DisplayName   → Queue::getDisplayName
+//   - DisplayName   → Backend::getDisplayName
 //   - NewUUIDv4     → Str::uuid (upstream leans on ramsey/uuid)
-//   - CreatePayloadFor → Queue::createPayload (+ createPayloadUsing hooks)
-//   - ShouldDispatchAfterCommit → Queue::shouldDispatchAfterCommit (lightweight
+//   - CreatePayloadFor → Backend::createPayload (+ createPayloadUsing hooks)
+//   - ShouldDispatchAfterCommit → Backend::shouldDispatchAfterCommit (lightweight
 //     version; the full transaction-aware wiring lands in Step 14).
 
 // Namer is implemented by job values that want to override the default

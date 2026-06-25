@@ -12,7 +12,7 @@ import (
 // The Go API differs from the upstream in one ergonomic way: the handler
 // that runs every job is injected at construction time rather than
 // resolved from a container per-push. This keeps the existing bedrock
-// Queue interface (Push takes raw []byte) usable as-is and matches
+// Backend interface (Push takes raw []byte) usable as-is and matches
 // the upstream semantics when a single handler is effectively registered
 // for the connection.
 //

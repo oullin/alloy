@@ -8,19 +8,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/auth"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	"github.com/oullin/alloy/auth/httpx"
 	"github.com/oullin/alloy/auth/tokens"
+	"github.com/oullin/alloy/auth/user"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type stubUserProvider struct {
-	users map[string]cauth.Authenticatable
+	users map[string]cauth.User
 }
 
 func TestIssuerStoresHashAndReturnsPlainTextOnce(t *testing.T) {
 	repo := tokens.NewMemoryRepository()
 	issuer := tokens.NewIssuer(repo)
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 
 	created, err := issuer.CreateToken(context.Background(), user, "CLI", []string{"deploy"}, nil)
 
@@ -54,7 +55,7 @@ func TestIssuerStoresHashAndReturnsPlainTextOnce(t *testing.T) {
 func TestFindByPlainTextTokenRejectsInvalidExpiredAndRevokedTokens(t *testing.T) {
 	repo := tokens.NewMemoryRepository()
 	issuer := tokens.NewIssuer(repo)
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 
 	created, err := issuer.CreateToken(context.Background(), user, "CLI", []string{"deploy"}, nil)
 
@@ -111,20 +112,20 @@ func TestTokenAbilities(t *testing.T) {
 func TestAuthenticateBearerTokenSetsUserAndCurrentToken(t *testing.T) {
 	repo := tokens.NewMemoryRepository()
 	issuer := tokens.NewIssuer(repo)
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 	created, err := issuer.CreateToken(context.Background(), user, "CLI", []string{"deploy"}, nil)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	provider := &stubUserProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &stubUserProvider{users: map[string]cauth.User{"1": user}}
 	middleware := tokens.AuthenticateBearerToken(repo, provider)
 	called := false
 	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		called = true
 
-		if auth.UserFromContext(r.Context()) != user {
+		if httpx.UserFromContext(r.Context()) != user {
 			t.Fatal("expected user in context")
 		}
 
@@ -176,26 +177,26 @@ func TestRequireAbility(t *testing.T) {
 	}
 }
 
-func (p *stubUserProvider) RetrieveByID(_ context.Context, id string) (cauth.Authenticatable, error) {
+func (p *stubUserProvider) RetrieveByID(_ context.Context, id string) (cauth.User, error) {
 	return p.users[id], nil
 }
 
-func (p *stubUserProvider) RetrieveByToken(context.Context, string, string) (cauth.Authenticatable, error) {
+func (p *stubUserProvider) RetrieveByToken(context.Context, string, string) (cauth.User, error) {
 	return nil, nil
 }
 
-func (p *stubUserProvider) RetrieveByCredentials(context.Context, map[string]string) (cauth.Authenticatable, error) {
+func (p *stubUserProvider) RetrieveByCredentials(context.Context, map[string]string) (cauth.User, error) {
 	return nil, nil
 }
 
-func (p *stubUserProvider) UpdateRememberToken(context.Context, cauth.Authenticatable, string) error {
+func (p *stubUserProvider) UpdateRememberToken(context.Context, cauth.User, string) error {
 	return nil
 }
 
-func (p *stubUserProvider) ValidateCredentials(context.Context, cauth.Authenticatable, map[string]string) (bool, error) {
+func (p *stubUserProvider) ValidateCredentials(context.Context, cauth.User, map[string]string) (bool, error) {
 	return false, nil
 }
 
-func (p *stubUserProvider) RehashPasswordIfRequired(context.Context, cauth.Authenticatable, map[string]string, bool) error {
+func (p *stubUserProvider) RehashPasswordIfRequired(context.Context, cauth.User, map[string]string, bool) error {
 	return nil
 }

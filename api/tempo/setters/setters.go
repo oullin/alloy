@@ -1,6 +1,6 @@
 // Package setters exposes generic field-replacement helpers that work on
-// any core.Bearer — both the immutable Tempo and the mutable
-// *MutableTempo — so SetYear/SetMonth/SetDay/SetTime and friends share a
+// any core.Bearer — both the immutable Time and the mutable
+// *MutableTime — so SetYear/SetMonth/SetDay/SetTime and friends share a
 // single implementation.
 //
 // Field setters operate in the bearer's current location and emit a

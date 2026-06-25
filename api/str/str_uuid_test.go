@@ -8,10 +8,10 @@ import (
 // Ref: @alloy/code-0380
 func TestStrUuid(t *testing.T) {
 	// NOT parallel — UUID tests may conflict with freeze
-	uuid := StrUuid()
+	uuid := Uuid()
 
-	if !StrIsUuid(uuid) {
-		t.Errorf("StrUuid() = %q is not a valid UUID", uuid)
+	if !IsUuid(uuid) {
+		t.Errorf("Uuid() = %q is not a valid UUID", uuid)
 	}
 }
 
@@ -22,7 +22,7 @@ func TestStrFreezeUuids(t *testing.T) {
 
 	defer cleanup()
 
-	if got := StrUuid(); got != "frozen-uuid" {
+	if got := Uuid(); got != "frozen-uuid" {
 		t.Errorf("FreezeUuids: expected 'frozen-uuid', got %q", got)
 	}
 }
@@ -31,11 +31,11 @@ func TestStrFreezeUuids(t *testing.T) {
 func TestStrFreezeUuidsCleanup(t *testing.T) {
 	// NOT parallel — modifies global UUID state
 	cleanup := FreezeUuids(func() string { return "frozen" })
-	frozen := StrUuid()
+	frozen := Uuid()
 	cleanup()
 
 	// After cleanup, should generate real UUIDs again
-	normal := StrUuid()
+	normal := Uuid()
 
 	if normal == "frozen" && frozen != normal {
 		// This is fine — just verify cleanup runs
@@ -57,22 +57,22 @@ func TestStrUuidSequence(t *testing.T) {
 
 	defer cleanup()
 
-	if got := StrUuid(); got != "first-uuid" {
+	if got := Uuid(); got != "first-uuid" {
 		t.Errorf("sequence[0] = %q", got)
 	}
 
-	if got := StrUuid(); got != "second-uuid" {
+	if got := Uuid(); got != "second-uuid" {
 		t.Errorf("sequence[1] = %q", got)
 	}
 
 	cleanup()
 	cleanup = CreateUuidsUsingSequence([]string{"only-uuid"}, func() string { return "fallback-uuid" })
 
-	if got := StrUuid(); got != "only-uuid" {
+	if got := Uuid(); got != "only-uuid" {
 		t.Errorf("fallback sequence first value = %q", got)
 	}
 
-	if got := StrUuid(); got != "fallback-uuid" {
+	if got := Uuid(); got != "fallback-uuid" {
 		t.Errorf("fallback value = %q", got)
 	}
 }
@@ -85,7 +85,7 @@ func TestStrFreezeUlids(t *testing.T) {
 
 	defer cleanup()
 
-	if got := StrUlid(); got != "FROZENULID00000000000000000" {
+	if got := Ulid(); got != "FROZENULID00000000000000000" {
 		t.Errorf("FreezeUlids: expected frozen ULID, got %q", got)
 	}
 }
@@ -102,11 +102,11 @@ func TestStrUlidSequence(t *testing.T) {
 
 	defer cleanup()
 
-	if got := StrUlid(); got != seq[0] {
+	if got := Ulid(); got != seq[0] {
 		t.Errorf("sequence[0] = %q", got)
 	}
 
-	if got := StrUlid(); got != seq[1] {
+	if got := Ulid(); got != seq[1] {
 		t.Errorf("sequence[1] = %q", got)
 	}
 
@@ -115,11 +115,11 @@ func TestStrUlidSequence(t *testing.T) {
 		return "FALLBACKULID000000000000"
 	})
 
-	if got := StrUlid(); got != "ONLYULID0000000000000000" {
+	if got := Ulid(); got != "ONLYULID0000000000000000" {
 		t.Errorf("fallback sequence first value = %q", got)
 	}
 
-	if got := StrUlid(); got != "FALLBACKULID000000000000" {
+	if got := Ulid(); got != "FALLBACKULID000000000000" {
 		t.Errorf("fallback value = %q", got)
 	}
 }
@@ -131,20 +131,20 @@ func TestStrCreateUuidsNormally(t *testing.T) {
 	cleanup := FreezeUuids(func() string { return "frozen" })
 	cleanup() // restore immediately
 
-	uuid := StrUuid()
+	uuid := Uuid()
 
 	if uuid == "frozen" {
 		t.Error("after CreateUuidsNormally, should generate real UUIDs")
 	}
 
-	if !StrIsUuid(uuid) {
+	if !IsUuid(uuid) {
 		t.Errorf("should be valid UUID, got %q", uuid)
 	}
 
 	ulidCleanup := FreezeUlids(func() string { return "FROZENULID00000000000000000" })
 	ulidCleanup()
 
-	ulid := StrUlid()
+	ulid := Ulid()
 
 	if ulid == "FROZENULID00000000000000000" {
 		t.Error("after ULID cleanup, should generate real ULIDs")
@@ -158,17 +158,17 @@ func TestStrCreateUuidsNormally(t *testing.T) {
 // Ref: @alloy/code-0380
 func TestStrOrderedUuid(t *testing.T) {
 	// NOT parallel — may interfere with UUID freeze tests
-	uuid := StrOrderedUuid()
+	uuid := OrderedUuid()
 
-	if !StrIsUuid(uuid) {
-		t.Errorf("StrOrderedUuid() = %q is not a valid UUID", uuid)
+	if !IsUuid(uuid) {
+		t.Errorf("OrderedUuid() = %q is not a valid UUID", uuid)
 	}
 }
 
 // Ref: @alloy/code-0380
 func TestStrUlid(t *testing.T) {
 	// NOT parallel
-	ulid := StrUlid()
+	ulid := Ulid()
 
 	if len(ulid) != 26 {
 		t.Errorf("ULID length should be 26, got %d (%q)", len(ulid), ulid)
@@ -186,7 +186,7 @@ func TestStrResetFactoryState(t *testing.T) {
 	CreateUuidsUsing(func() string { return "custom" })
 	ResetFactoryState()
 
-	uuid := StrUuid()
+	uuid := Uuid()
 
 	if uuid == "custom" {
 		t.Error("after ResetFactoryState, UUID factory should be reset")

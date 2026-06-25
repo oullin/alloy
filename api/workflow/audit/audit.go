@@ -9,7 +9,7 @@ import (
 
 // Entry is one recorded transition.
 type Entry[T any] struct {
-	Workflow   string
+	Machine    string
 	Transition string
 	Subject    T
 	Marking    workflow.Marking
@@ -36,7 +36,7 @@ func (t *Trail[T]) Attach(workflowName string, dispatcher *events.Dispatcher[T])
 		}
 
 		t.Entries = append(t.Entries, Entry[T]{
-			Workflow:   completed.WorkflowName(),
+			Machine:    completed.WorkflowName(),
 			Transition: completed.Transition().Name,
 			Subject:    completed.Subject(),
 			Marking:    workflow.Marking{Places: completed.Marking()},

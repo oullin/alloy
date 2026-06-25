@@ -262,14 +262,14 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("marshal tempo: %v", err)
 	}
 
-	assertEqual(t, "json.Marshal(Tempo)", string(tempoJSON), `"2024-05-15T12:34:56.789Z"`)
+	assertEqual(t, "json.Marshal(Time)", string(tempoJSON), `"2024-05-15T12:34:56.789Z"`)
 	mutableJSON, err := json.Marshal(tempo.NewMutable(instance))
 
 	if err != nil {
 		t.Fatalf("marshal mutable tempo: %v", err)
 	}
 
-	assertEqual(t, "json.Marshal(MutableTempo)", string(mutableJSON), `"2024-05-15T12:34:56.789Z"`)
+	assertEqual(t, "json.Marshal(MutableTime)", string(mutableJSON), `"2024-05-15T12:34:56.789Z"`)
 	durationValue := tempo.Duration{Days: 1, Hours: 2}
 	durationJSON, err := json.Marshal(&durationValue)
 
@@ -287,13 +287,13 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 
 	assertEqual(t, "FromSerialized().ISOString()", fromSerialized.ISOString(), "2024-05-15T12:34:56.789Z")
 
-	var decodedMutable tempo.MutableTempo
+	var decodedMutable tempo.MutableTime
 
 	if err := json.Unmarshal(tempoJSON, &decodedMutable); err != nil {
 		t.Fatalf("unmarshal mutable tempo: %v", err)
 	}
 
-	assertEqual(t, "json.Unmarshal(MutableTempo)", decodedMutable.ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "json.Unmarshal(MutableTime)", decodedMutable.ISOString(), "2024-05-15T12:34:56.789Z")
 
 	existingMutable := tempo.NewMutable(instance).WithRuntime(tempo.NewRuntime(tempo.RuntimeLocale("es-ES")))
 
@@ -301,10 +301,10 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("unmarshal existing mutable tempo: %v", err)
 	}
 
-	assertEqual(t, "json.Unmarshal(existing MutableTempo)", existingMutable.ISOString(), "2024-05-15T12:34:56.789Z")
+	assertEqual(t, "json.Unmarshal(existing MutableTime)", existingMutable.ISOString(), "2024-05-15T12:34:56.789Z")
 
-	if got := existingMutable.Runtime().Locale(); got != "es-ES" {
-		t.Fatalf("json.Unmarshal(existing MutableTempo) runtime locale = %q, want es-ES", got)
+	if got := existingMutable.Context().Locale(); got != "es-ES" {
+		t.Fatalf("json.Unmarshal(existing MutableTime) runtime locale = %q, want es-ES", got)
 	}
 
 	var decodedDuration tempo.Duration
@@ -332,7 +332,7 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	assertEqual(t, "DayName()", instance.DayName(), "Wednesday")
 	assertEqual(t, "ShortMonthName()", instance.ShortMonthName(), "May")
 	assertEqual(t, "TranslateNumber()", instance.TranslateNumber(1234), "1234")
-	assertEqual(t, "Translate()", instance.Translate("Hello :name", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	assertEqual(t, "Translate()", instance.Translate("Hello :name", map[string]string{"name": "Time"}), "Hello Time")
 
 	if _, err := tempo.Parse("not a date"); err == nil {
 		t.Fatalf("Parse(invalid) error = nil, want error")
@@ -345,7 +345,7 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 	}
 
 	assertEqual(t, "String() formatted", formattedString.String(), "2024-05-15")
-	serialized, err := tempo.Parse("2024-05-15T12:34:56.789Z", tempo.WithSerializer(func(value tempo.Tempo) string {
+	serialized, err := tempo.Parse("2024-05-15T12:34:56.789Z", tempo.WithSerializer(func(value tempo.Time) string {
 		return value.DateString()
 	}))
 
@@ -359,7 +359,7 @@ func TestNamedSerializationAndMapConversion(t *testing.T) {
 		t.Fatalf("marshal hooked tempo: %v", err)
 	}
 
-	assertEqual(t, "json.Marshal(hooked Tempo)", string(hookedJSON), `"2024-05-15"`)
-	dateOnly := func(value tempo.Tempo) string { return value.DateString() }
+	assertEqual(t, "json.Marshal(hooked Time)", string(hookedJSON), `"2024-05-15"`)
+	dateOnly := func(value tempo.Time) string { return value.DateString() }
 	assertEqual(t, "composable dateOnly", dateOnly(instance), "2024-05-15")
 }

@@ -1,7 +1,7 @@
-# Tempo Go
+# Time Go
 
-Tempo exposes a root package (`github.com/oullin/alloy/tempo`) that wires
-methods onto `Tempo` / `*MutableTempo` and a set of feature packages
+Time exposes a root package (`github.com/oullin/alloy/tempo`) that wires
+methods onto `Time` / `*MutableTime` and a set of feature packages
 that hold reusable mechanics behind a generic `core.Bearer[T]` contract.
 Every feature package — `arithmetic`, `boundaries`, `comparison`,
 `setters`, `diff`, `formatting` — exports plain functions you can call
@@ -19,15 +19,15 @@ import (
 	tempo "github.com/oullin/alloy/tempo"
 )
 
-func DateOnly(value tempo.Tempo) string {
+func DateOnly(value tempo.Time) string {
 	return formatting.DateString(value)
 }
 
-func NextBusinessDay(value tempo.Tempo) tempo.Tempo {
+func NextBusinessDay(value tempo.Time) tempo.Time {
 	return boundaries.NextWeekday(value, []time.Weekday{time.Saturday, time.Sunday})
 }
 
-func ShiftDays(value *tempo.MutableTempo, days int) *tempo.MutableTempo {
+func ShiftDays(value *tempo.MutableTime, days int) *tempo.MutableTime {
 	return arithmetic.AddDays(value, days)
 }
 ```
@@ -68,10 +68,10 @@ value, err := factory.Parse("2024-05-15")
   `formatting/` – generic Bearer-based feature implementations.
 - `interval/`, `period/` – the time-span helpers used by
   `tempo.Interval` and `tempo.Period`.
-- `runtime/` – `Runtime`, `Translator`, locale/fallback/translator
+- `runtime/` – `Context`, `Translator`, locale/fallback/translator
   options.
 - `factory/`, `parser/`, `config/` – lower-level construction and
   configuration mechanics.
 - module root – the application entrypoint that wires methods onto
-  `Tempo` and `*MutableTempo`, exposes `Parse`, `NewFactory`,
+  `Time` and `*MutableTime`, exposes `Parse`, `NewFactory`,
   `NewRuntime`, and the public value/configuration surface.

@@ -2,7 +2,7 @@ package duration
 
 type Unit string
 
-type Duration struct {
+type Span struct {
 	Years        int
 	Quarters     int
 	Months       int

@@ -18,22 +18,22 @@ import (
 
 // Casing caches (camel, studly, snake)
 
-// StrAfter returns the portion of the string after the first occurrence of search.
+// After returns the portion of the string after the first occurrence of search.
 // If search is not found, the full subject is returned.
 
-// StrAfterLast returns the portion after the last occurrence of search.
+// AfterLast returns the portion after the last occurrence of search.
 
-// StrBefore returns the portion before the first occurrence of search.
+// Before returns the portion before the first occurrence of search.
 
-// StrBeforeLast returns the portion before the last occurrence of search.
+// BeforeLast returns the portion before the last occurrence of search.
 
-// StrBetween returns the portion between from and to.
+// Between returns the portion between from and to.
 
-// StrBetweenFirst returns the smallest portion between from and to.
+// BetweenFirst returns the smallest portion between from and to.
 
-// StrCamel converts a string to camelCase.
+// Camel converts a string to camelCase.
 
-// StrStudly converts a string to StudlyCase (PascalCase).
+// Studly converts a string to StudlyCase (PascalCase).
 
 // Replace common separators with spaces, then title-case
 
@@ -41,19 +41,19 @@ import (
 
 // Replace hyphens, underscores with spaces
 
-// StrPascal converts a string to PascalCase (alias for Studly).
+// Pascal converts a string to PascalCase (alias for Studly).
 
-// StrSnake converts a string to snake_case.
+// Snake converts a string to snake_case.
 
 // Insert separator before uppercase letters that follow lowercase or digits
 
-// StrKebab converts a string to kebab-case.
+// Kebab converts a string to kebab-case.
 
-// StrTitle converts a string to Title Case.
+// Title converts a string to Title Case.
 
 //nolint:staticcheck
 
-// StrHeadline converts a string to Headline Case.
+// Headline converts a string to Headline Case.
 // Each word is capitalized, separating camelCase and underscored strings.
 
 // Handle camelCase by inserting spaces
@@ -62,156 +62,156 @@ import (
 
 // Title case each word
 
-// StrApa converts a string to APA title case.
+// Apa converts a string to APA title case.
 
 // APA: lowercase articles, conjunctions, short prepositions
 
 // Capitalize
 
-// StrUcfirst uppercases the first character of the string.
+// Ucfirst uppercases the first character of the string.
 
-// StrLcfirst lowercases the first character of the string.
+// Lcfirst lowercases the first character of the string.
 
-// StrUcwords uppercases the first character of each word.
+// Ucwords uppercases the first character of each word.
 
 //nolint:staticcheck
 
 // Word-boundary title case with custom separators
 
-// StrUcsplit splits a string by uppercase characters.
+// Ucsplit splits a string by uppercase characters.
 
-// StrContains determines if the haystack contains the given needle(s).
+// Contains determines if the haystack contains the given needle(s).
 // Case-sensitive by default.
 
-// StrContainsAll determines if the haystack contains all given needles.
+// ContainsAll determines if the haystack contains all given needles.
 
-// StrDoesntContain determines if the haystack does not contain the given needle(s).
+// DoesntContain determines if the haystack does not contain the given needle(s).
 
-// StrStartsWith determines if the subject starts with the given prefix(es).
+// StartsWith determines if the subject starts with the given prefix(es).
 
-// StrDoesntStartWith determines if the subject does not start with any of the given values.
+// DoesntStartWith determines if the subject does not start with any of the given values.
 
-// StrEndsWith determines if the subject ends with the given suffix(es).
+// EndsWith determines if the subject ends with the given suffix(es).
 
-// StrDoesntEndWith determines if the subject does not end with any of the given values.
+// DoesntEndWith determines if the subject does not end with any of the given values.
 
-// StrIs determines if the value matches the given pattern.
+// Is determines if the value matches the given pattern.
 // An asterisk (*) may be used as a wildcard value.
 
 // Convert glob pattern to regex
 
-// StrIsMatch determines if the value matches any of the given patterns (regex).
+// IsMatch determines if the value matches any of the given patterns (regex).
 
-// StrIsAscii determines if a string is 7-bit ASCII.
+// IsAscii determines if a string is 7-bit ASCII.
 
-// StrIsJson determines if the given string is valid JSON.
+// IsJson determines if the given string is valid JSON.
 
-// StrIsUrl determines if the given string is a valid URL.
+// IsUrl determines if the given string is a valid URL.
 
-// StrIsUuid determines if the given string is a valid UUID.
+// IsUuid determines if the given string is a valid UUID.
 
-// StrIsUlid determines if the given string is a valid ULID.
+// IsUlid determines if the given string is a valid ULID.
 
-// StrLength returns the length of the string in runes (characters).
+// Length returns the length of the string in runes (characters).
 
-// StrLimit truncates the string to the given number of characters.
+// Limit truncates the string to the given number of characters.
 
-// StrWords limits the number of words in a string.
+// Words limits the number of words in a string.
 
 // Split preserving spaces around words
 
-// StrLower converts the string to lowercase.
+// Lower converts the string to lowercase.
 
-// StrUpper converts the string to uppercase.
+// Upper converts the string to uppercase.
 
-// StrReverse reverses the string (UTF-8 aware).
+// Reverse reverses the string (UTF-8 aware).
 
-// StrReplace replaces occurrences of search in subject with replace.
+// Replace replaces occurrences of search in subject with replace.
 
-// StrReplaceArray replaces each search occurrence with the next value from replacements.
+// ReplaceArray replaces each search occurrence with the next value from replacements.
 
-// StrReplaceFirst replaces the first occurrence of search in subject.
+// ReplaceFirst replaces the first occurrence of search in subject.
 
-// StrReplaceLast replaces the last occurrence of search in subject.
+// ReplaceLast replaces the last occurrence of search in subject.
 
-// StrReplaceStart replaces the search value if it appears at the start of subject.
+// ReplaceStart replaces the search value if it appears at the start of subject.
 
-// StrReplaceEnd replaces the search value if it appears at the end of subject.
+// ReplaceEnd replaces the search value if it appears at the end of subject.
 
-// StrReplaceMatches replaces all occurrences of a regex pattern in subject.
+// ReplaceMatches replaces all occurrences of a regex pattern in subject.
 
-// StrRemove removes all occurrences of search from subject.
+// Remove removes all occurrences of search from subject.
 
-// StrRepeat repeats the string the given number of times.
+// Repeat repeats the string the given number of times.
 
-// StrSquish removes all extra blank space (including between words).
+// Squish removes all extra blank space (including between words).
 
-// StrDeduplicate replaces consecutive occurrences of characters with a single instance.
+// Deduplicate replaces consecutive occurrences of characters with a single instance.
 
-// StrTrim removes leading and trailing whitespace (or given chars).
+// Trim removes leading and trailing whitespace (or given chars).
 
-// StrLtrim removes leading whitespace (or given chars).
+// Ltrim removes leading whitespace (or given chars).
 
-// StrRtrim removes trailing whitespace (or given chars).
+// Rtrim removes trailing whitespace (or given chars).
 
-// StrStart prepends a single instance of value to the subject
+// Start prepends a single instance of value to the subject
 // if it does not already start with it.
 
-// StrFinish appends a single instance of cap to value
+// Finish appends a single instance of cap to value
 // if it does not already end with it.
 
-// StrWrap wraps the string with the given strings.
+// Wrap wraps the string with the given strings.
 
-// StrUnwrap removes the given prefix and suffix from the string.
+// Unwrap removes the given prefix and suffix from the string.
 
-// StrChopStart removes a single leading occurrence of needle (or the first matching needle).
+// ChopStart removes a single leading occurrence of needle (or the first matching needle).
 
-// StrChopEnd removes a single trailing occurrence of needle (or the first matching needle).
+// ChopEnd removes a single trailing occurrence of needle (or the first matching needle).
 
-// StrMask replaces a portion of the string with a repeated character.
+// Mask replaces a portion of the string with a repeated character.
 
-// StrExcerpt returns a string excerpt around the given phrase.
+// Excerpt returns a string excerpt around the given phrase.
 
-// StrMatch returns the first regex match in subject.
+// Match returns the first regex match in subject.
 
-// StrMatchAll returns all regex matches in subject.
+// MatchAll returns all regex matches in subject.
 
-// StrNumbers extracts all numeric characters from the string.
+// Numbers extracts all numeric characters from the string.
 
-// StrPadBoth pads the string on both sides to the given length.
+// PadBoth pads the string on both sides to the given length.
 
-// StrPadLeft pads the left side of the string to the given length.
+// PadLeft pads the left side of the string to the given length.
 
-// StrPadRight pads the right side of the string to the given length.
+// PadRight pads the right side of the string to the given length.
 
-// StrPosition finds the position of needle in haystack.
+// Position finds the position of needle in haystack.
 // Returns the byte position and whether it was found.
 
-// StrSubstr returns a substring from start for the given length.
+// Substr returns a substring from start for the given length.
 
-// StrSubstrCount counts the occurrences of needle in haystack.
+// SubstrCount counts the occurrences of needle in haystack.
 
-// StrSubstrReplace replaces a portion of the string.
+// SubstrReplace replaces a portion of the string.
 
-// StrSwap swaps multiple keyword pairs in the subject.
+// Swap swaps multiple keyword pairs in the subject.
 
 // Build patterns ordered by length (longer first to avoid partial replacements)
 
-// StrTake returns the first n characters, or from the end if n is negative.
+// Take returns the first n characters, or from the end if n is negative.
 
 // negative: from end
 
-// StrWordCount counts the number of words in the string.
+// WordCount counts the number of words in the string.
 
-// StrWordWrap wraps the string to the given number of characters.
+// WordWrap wraps the string to the given number of characters.
 
-// StrToBase64 encodes the string to base64.
+// ToBase64 encodes the string to base64.
 
-// StrFromBase64 decodes a base64-encoded string.
+// FromBase64 decodes a base64-encoded string.
 
 // Try URL-safe base64
 
-// StrSlug generates a URL-friendly slug from the given string.
+// Slug generates a URL-friendly slug from the given string.
 
 // Convert to ASCII
 
@@ -221,20 +221,20 @@ import (
 
 // Remove leading/trailing separators and deduplicate
 
-// StrAscii transliterates the string to its closest ASCII representation.
+// Ascii transliterates the string to its closest ASCII representation.
 
 // Unknown non-ASCII chars are dropped (like the upstream behavior)
 
-// StrTransliterate converts the string to its closest ASCII form.
+// Transliterate converts the string to its closest ASCII form.
 
-// StrInitials returns the initials of the given name.
+// Initials returns the initials of the given name.
 
-// StrCharAt returns the character at the given index (UTF-8 aware).
+// CharAt returns the character at the given index (UTF-8 aware).
 
-// StrParseCallback parses a "Class@method" or "Class::method" callback string.
+// ParseCallback parses a "Class@method" or "Class::method" callback string.
 // Returns [class, method].
 
-// StrRandom generates a random alphanumeric string of the given length.
+// Random generates a random alphanumeric string of the given length.
 
 // fallback used when sequence exhausted
 
@@ -244,11 +244,11 @@ import (
 
 // CreateRandomStringsNormally resets random string generation to default.
 
-// StrPassword generates a secure random password.
+// Password generates a secure random password.
 
 // FlushCache clears the casing caches.
 
-// StrConvertCase converts the string case using the given mode.
+// ConvertCase converts the string case using the given mode.
 
 // MB_CASE_UPPER
 
@@ -257,11 +257,11 @@ import (
 // MB_CASE_TITLE
 //nolint:staticcheck
 
-// Of creates a new StringBuilder for fluent string manipulation.
+// Of creates a new Builder for fluent string manipulation.
 
-// StringBuilder provides a fluent interface for string manipulation.
+// Builder provides a fluent interface for string manipulation.
 // Ref: @alloy/code-0354
-type StringBuilder struct {
+type Builder struct {
 	value string
 }
 
@@ -276,7 +276,7 @@ var (
 	snakeCache  sync.Map
 )
 
-func StrAfter(subject, search string) string {
+func After(subject, search string) string {
 	if search == "" {
 		return subject
 	}
@@ -290,7 +290,7 @@ func StrAfter(subject, search string) string {
 	return after
 }
 
-func StrAfterLast(subject, search string) string {
+func AfterLast(subject, search string) string {
 	if search == "" {
 		return subject
 	}
@@ -304,7 +304,7 @@ func StrAfterLast(subject, search string) string {
 	return subject[idx+len(search):]
 }
 
-func StrBefore(subject, search string) string {
+func Before(subject, search string) string {
 	if search == "" {
 		return subject
 	}
@@ -318,7 +318,7 @@ func StrBefore(subject, search string) string {
 	return before
 }
 
-func StrBeforeLast(subject, search string) string {
+func BeforeLast(subject, search string) string {
 	if search == "" {
 		return subject
 	}
@@ -332,34 +332,34 @@ func StrBeforeLast(subject, search string) string {
 	return subject[:idx]
 }
 
-func StrBetween(subject, from, to string) string {
+func Between(subject, from, to string) string {
 	if from == "" || to == "" {
 		return subject
 	}
 
-	return StrBeforeLast(StrAfter(subject, from), to)
+	return BeforeLast(After(subject, from), to)
 }
 
-func StrBetweenFirst(subject, from, to string) string {
+func BetweenFirst(subject, from, to string) string {
 	if from == "" || to == "" {
 		return subject
 	}
 
-	return StrBefore(StrAfter(subject, from), to)
+	return Before(After(subject, from), to)
 }
 
-func StrCamel(value string) string {
+func Camel(value string) string {
 	if cached, ok := camelCache.Load(value); ok {
 		return cached.(string)
 	}
 
-	result := strLcfirst(StrStudly(value))
+	result := strLcfirst(Studly(value))
 	camelCache.Store(value, result)
 
 	return result
 }
 
-func StrStudly(value string) string {
+func Studly(value string) string {
 	if cached, ok := studlyCache.Load(value); ok {
 		return cached.(string)
 	}
@@ -389,11 +389,11 @@ func studlySplit(value string) []string {
 	return strings.Fields(value)
 }
 
-func StrPascal(value string) string {
-	return StrStudly(value)
+func Pascal(value string) string {
+	return Studly(value)
 }
 
-func StrSnake(value string, delimiter ...string) string {
+func Snake(value string, delimiter ...string) string {
 	sep := "_"
 
 	if len(delimiter) > 0 {
@@ -431,15 +431,15 @@ func StrSnake(value string, delimiter ...string) string {
 	return res
 }
 
-func StrKebab(value string) string {
-	return StrSnake(value, "-")
+func Kebab(value string) string {
+	return Snake(value, "-")
 }
 
-func StrTitle(value string) string {
+func Title(value string) string {
 	return strings.Title(strings.ToLower(value))
 }
 
-func StrHeadline(value string) string {
+func Headline(value string) string {
 
 	re := regexp.MustCompile(`([a-z])([A-Z])`)
 	value = re.ReplaceAllString(value, "$1 $2")
@@ -460,7 +460,7 @@ func StrHeadline(value string) string {
 	return strings.Join(words, " ")
 }
 
-func StrApa(value string) string {
+func Apa(value string) string {
 
 	minors := map[string]bool{
 		"a": true, "an": true, "the": true,
@@ -488,7 +488,7 @@ func StrApa(value string) string {
 	return strings.Join(words, " ")
 }
 
-func StrUcfirst(value string) string {
+func Ucfirst(value string) string {
 	if value == "" {
 		return value
 	}
@@ -498,7 +498,7 @@ func StrUcfirst(value string) string {
 	return string(unicode.ToUpper(r)) + value[size:]
 }
 
-func StrLcfirst(value string) string {
+func Lcfirst(value string) string {
 	return strLcfirst(value)
 }
 
@@ -512,7 +512,7 @@ func strLcfirst(value string) string {
 	return string(unicode.ToLower(r)) + value[size:]
 }
 
-func StrUcwords(value string, separators ...string) string {
+func Ucwords(value string, separators ...string) string {
 	seps := " \t\r\n\f\v"
 
 	if len(separators) > 0 {
@@ -538,7 +538,7 @@ func StrUcwords(value string, separators ...string) string {
 	return string(runes)
 }
 
-func StrUcsplit(value string) []string {
+func Ucsplit(value string) []string {
 	re := regexp.MustCompile(`(?m)[A-Z][^A-Z]*`)
 	matches := re.FindAllString(value, -1)
 
@@ -549,7 +549,7 @@ func StrUcsplit(value string) []string {
 	return matches
 }
 
-func StrContains(haystack string, needles ...string) bool {
+func Contains(haystack string, needles ...string) bool {
 	for _, needle := range needles {
 		if needle == "" || strings.Contains(haystack, needle) {
 			return true
@@ -559,7 +559,7 @@ func StrContains(haystack string, needles ...string) bool {
 	return false
 }
 
-func StrContainsAll(haystack string, needles []string) bool {
+func ContainsAll(haystack string, needles []string) bool {
 	for _, needle := range needles {
 		if !strings.Contains(haystack, needle) {
 			return false
@@ -569,11 +569,11 @@ func StrContainsAll(haystack string, needles []string) bool {
 	return true
 }
 
-func StrDoesntContain(haystack string, needles ...string) bool {
-	return !StrContains(haystack, needles...)
+func DoesntContain(haystack string, needles ...string) bool {
+	return !Contains(haystack, needles...)
 }
 
-func StrStartsWith(subject string, prefixes ...string) bool {
+func StartsWith(subject string, prefixes ...string) bool {
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(subject, prefix) {
 			return true
@@ -583,11 +583,11 @@ func StrStartsWith(subject string, prefixes ...string) bool {
 	return false
 }
 
-func StrDoesntStartWith(subject string, prefixes ...string) bool {
-	return !StrStartsWith(subject, prefixes...)
+func DoesntStartWith(subject string, prefixes ...string) bool {
+	return !StartsWith(subject, prefixes...)
 }
 
-func StrEndsWith(subject string, suffixes ...string) bool {
+func EndsWith(subject string, suffixes ...string) bool {
 	for _, suffix := range suffixes {
 		if strings.HasSuffix(subject, suffix) {
 			return true
@@ -597,11 +597,11 @@ func StrEndsWith(subject string, suffixes ...string) bool {
 	return false
 }
 
-func StrDoesntEndWith(subject string, suffixes ...string) bool {
-	return !StrEndsWith(subject, suffixes...)
+func DoesntEndWith(subject string, suffixes ...string) bool {
+	return !EndsWith(subject, suffixes...)
 }
 
-func StrIs(pattern, value string, ignoreCase ...bool) bool {
+func Is(pattern, value string, ignoreCase ...bool) bool {
 	ci := len(ignoreCase) > 0 && ignoreCase[0]
 
 	if ci {
@@ -647,7 +647,7 @@ func globToRegex(pattern string) string {
 	return sb.String()
 }
 
-func StrIsMatch(patterns []string, value string) bool {
+func IsMatch(patterns []string, value string) bool {
 	for _, pattern := range patterns {
 		matched, err := regexp.MatchString(pattern, value)
 
@@ -659,7 +659,7 @@ func StrIsMatch(patterns []string, value string) bool {
 	return false
 }
 
-func StrIsAscii(value string) bool {
+func IsAscii(value string) bool {
 	for _, r := range value {
 		if r > 127 {
 			return false
@@ -669,7 +669,7 @@ func StrIsAscii(value string) bool {
 	return true
 }
 
-func StrIsJson(value string) bool {
+func IsJson(value string) bool {
 	if value == "" {
 		return false
 	}
@@ -679,7 +679,7 @@ func StrIsJson(value string) bool {
 	return json.Unmarshal([]byte(value), &v) == nil
 }
 
-func StrIsUrl(value string, protocols ...string) bool {
+func IsUrl(value string, protocols ...string) bool {
 	u, err := url.ParseRequestURI(value)
 
 	if err != nil {
@@ -697,7 +697,7 @@ func StrIsUrl(value string, protocols ...string) bool {
 	return true
 }
 
-func StrIsUuid(value string, version ...int) bool {
+func IsUuid(value string, version ...int) bool {
 	re := regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 
 	if !re.MatchString(value) {
@@ -715,7 +715,7 @@ func StrIsUuid(value string, version ...int) bool {
 	return int(value[14]-'0') == version[0]
 }
 
-func StrIsUlid(value string) bool {
+func IsUlid(value string) bool {
 	if len(value) != 26 {
 		return false
 	}
@@ -725,11 +725,11 @@ func StrIsUlid(value string) bool {
 	return re.MatchString(strings.ToUpper(value))
 }
 
-func StrLength(value string) int {
+func Length(value string) int {
 	return utf8.RuneCountInString(value)
 }
 
-func StrLimit(value string, limit int, end ...string) string {
+func Limit(value string, limit int, end ...string) string {
 	suffix := "..."
 
 	if len(end) > 0 {
@@ -745,7 +745,7 @@ func StrLimit(value string, limit int, end ...string) string {
 	return string(runes[:limit]) + suffix
 }
 
-func StrWords(value string, words int, end ...string) string {
+func Words(value string, words int, end ...string) string {
 	suffix := "..."
 
 	if len(end) > 0 {
@@ -773,15 +773,15 @@ func StrWords(value string, words int, end ...string) string {
 	return leading + strings.Join(wordList[:words], " ") + suffix
 }
 
-func StrLower(value string) string {
+func Lower(value string) string {
 	return strings.ToLower(value)
 }
 
-func StrUpper(value string) string {
+func Upper(value string) string {
 	return strings.ToUpper(value)
 }
 
-func StrReverse(value string) string {
+func Reverse(value string) string {
 	runes := []rune(value)
 
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
@@ -791,7 +791,7 @@ func StrReverse(value string) string {
 	return string(runes)
 }
 
-func StrReplace(search, replace any, subject string, caseSensitive ...bool) string {
+func Replace(search, replace any, subject string, caseSensitive ...bool) string {
 	cs := len(caseSensitive) == 0 || caseSensitive[0]
 
 	doReplace := func(s, r string) string {
@@ -830,7 +830,7 @@ func StrReplace(search, replace any, subject string, caseSensitive ...bool) stri
 	return subject
 }
 
-func StrReplaceArray(search string, replacements []string, subject string) string {
+func ReplaceArray(search string, replacements []string, subject string) string {
 	idx := 0
 
 	for {
@@ -853,7 +853,7 @@ func StrReplaceArray(search string, replacements []string, subject string) strin
 	return subject
 }
 
-func StrReplaceFirst(search, replace, subject string) string {
+func ReplaceFirst(search, replace, subject string) string {
 	if search == "" {
 		return subject
 	}
@@ -867,7 +867,7 @@ func StrReplaceFirst(search, replace, subject string) string {
 	return before + replace + after
 }
 
-func StrReplaceLast(search, replace, subject string) string {
+func ReplaceLast(search, replace, subject string) string {
 	if search == "" {
 		return subject
 	}
@@ -881,7 +881,7 @@ func StrReplaceLast(search, replace, subject string) string {
 	return subject[:idx] + replace + subject[idx+len(search):]
 }
 
-func StrReplaceStart(search, replace, subject string) string {
+func ReplaceStart(search, replace, subject string) string {
 	if search == "" || strings.HasPrefix(subject, search) {
 		return replace + subject[len(search):]
 	}
@@ -889,7 +889,7 @@ func StrReplaceStart(search, replace, subject string) string {
 	return subject
 }
 
-func StrReplaceEnd(search, replace, subject string) string {
+func ReplaceEnd(search, replace, subject string) string {
 	if search != "" && strings.HasSuffix(subject, search) {
 		return subject[:len(subject)-len(search)] + replace
 	}
@@ -897,7 +897,7 @@ func StrReplaceEnd(search, replace, subject string) string {
 	return subject
 }
 
-func StrReplaceMatches(pattern, replace, subject string, limit ...int) string {
+func ReplaceMatches(pattern, replace, subject string, limit ...int) string {
 	re, err := regexp.Compile(pattern)
 
 	if err != nil {
@@ -927,21 +927,21 @@ func StrReplaceMatches(pattern, replace, subject string, limit ...int) string {
 	})
 }
 
-func StrRemove(search any, subject string, caseSensitive ...bool) string {
-	return StrReplace(search, "", subject, caseSensitive...)
+func Remove(search any, subject string, caseSensitive ...bool) string {
+	return Replace(search, "", subject, caseSensitive...)
 }
 
-func StrRepeat(str string, times int) string {
+func Repeat(str string, times int) string {
 	return strings.Repeat(str, times)
 }
 
-func StrSquish(value string) string {
+func Squish(value string) string {
 	re := regexp.MustCompile(`\s+`)
 
 	return strings.TrimSpace(re.ReplaceAllString(value, " "))
 }
 
-func StrDeduplicate(str string, characters ...string) string {
+func Deduplicate(str string, characters ...string) string {
 	chars := " "
 
 	if len(characters) > 0 {
@@ -956,7 +956,7 @@ func StrDeduplicate(str string, characters ...string) string {
 	return str
 }
 
-func StrTrim(value string, chars ...string) string {
+func Trim(value string, chars ...string) string {
 	if len(chars) > 0 {
 		return strings.Trim(value, chars[0])
 	}
@@ -964,7 +964,7 @@ func StrTrim(value string, chars ...string) string {
 	return strings.TrimSpace(value)
 }
 
-func StrLtrim(value string, chars ...string) string {
+func Ltrim(value string, chars ...string) string {
 	if len(chars) > 0 {
 		return strings.TrimLeft(value, chars[0])
 	}
@@ -972,7 +972,7 @@ func StrLtrim(value string, chars ...string) string {
 	return strings.TrimLeftFunc(value, unicode.IsSpace)
 }
 
-func StrRtrim(value string, chars ...string) string {
+func Rtrim(value string, chars ...string) string {
 	if len(chars) > 0 {
 		return strings.TrimRight(value, chars[0])
 	}
@@ -980,7 +980,7 @@ func StrRtrim(value string, chars ...string) string {
 	return strings.TrimRightFunc(value, unicode.IsSpace)
 }
 
-func StrStart(value, prefix string) string {
+func Start(value, prefix string) string {
 	if strings.HasPrefix(value, prefix) {
 		return value
 	}
@@ -988,7 +988,7 @@ func StrStart(value, prefix string) string {
 	return prefix + value
 }
 
-func StrFinish(value, cap string) string {
+func Finish(value, cap string) string {
 	if strings.HasSuffix(value, cap) {
 		return value
 	}
@@ -996,7 +996,7 @@ func StrFinish(value, cap string) string {
 	return value + cap
 }
 
-func StrWrap(value, before string, after ...string) string {
+func Wrap(value, before string, after ...string) string {
 	a := before
 
 	if len(after) > 0 {
@@ -1006,7 +1006,7 @@ func StrWrap(value, before string, after ...string) string {
 	return before + value + a
 }
 
-func StrUnwrap(value, before, after string) string {
+func Unwrap(value, before, after string) string {
 	if after == "" {
 		after = before
 	}
@@ -1022,7 +1022,7 @@ func StrUnwrap(value, before, after string) string {
 	return value
 }
 
-func StrChopStart(subject string, needles ...string) string {
+func ChopStart(subject string, needles ...string) string {
 	for _, needle := range needles {
 		if strings.HasPrefix(subject, needle) {
 			return subject[len(needle):]
@@ -1032,7 +1032,7 @@ func StrChopStart(subject string, needles ...string) string {
 	return subject
 }
 
-func StrChopEnd(subject string, needles ...string) string {
+func ChopEnd(subject string, needles ...string) string {
 	for _, needle := range needles {
 		if strings.HasSuffix(subject, needle) {
 			return subject[:len(subject)-len(needle)]
@@ -1042,7 +1042,7 @@ func StrChopEnd(subject string, needles ...string) string {
 	return subject
 }
 
-func StrMask(str, character string, index int, length ...int) string {
+func Mask(str, character string, index int, length ...int) string {
 	runes := []rune(str)
 	runeCount := len(runes)
 
@@ -1069,7 +1069,7 @@ func StrMask(str, character string, index int, length ...int) string {
 	return string(runes)
 }
 
-func StrExcerpt(text, phrase string, radius int, omission ...string) string {
+func Excerpt(text, phrase string, radius int, omission ...string) string {
 	om := "..."
 
 	if len(omission) > 0 {
@@ -1121,7 +1121,7 @@ func StrExcerpt(text, phrase string, radius int, omission ...string) string {
 	return sb.String()
 }
 
-func StrMatch(pattern, subject string) string {
+func Match(pattern, subject string) string {
 	re, err := regexp.Compile(pattern)
 
 	if err != nil {
@@ -1141,7 +1141,7 @@ func StrMatch(pattern, subject string) string {
 	return match[0]
 }
 
-func StrMatchAll(pattern, subject string) []string {
+func MatchAll(pattern, subject string) []string {
 	re, err := regexp.Compile(pattern)
 
 	if err != nil {
@@ -1163,7 +1163,7 @@ func StrMatchAll(pattern, subject string) []string {
 	return result
 }
 
-func StrNumbers(value string) string {
+func Numbers(value string) string {
 	var sb strings.Builder
 
 	for _, r := range value {
@@ -1175,7 +1175,7 @@ func StrNumbers(value string) string {
 	return sb.String()
 }
 
-func StrPadBoth(value string, length int, pad ...string) string {
+func PadBoth(value string, length int, pad ...string) string {
 	padStr := " "
 
 	if len(pad) > 0 {
@@ -1195,7 +1195,7 @@ func StrPadBoth(value string, length int, pad ...string) string {
 	return strPad(padStr, leftPad) + value + strPad(padStr, rightPad)
 }
 
-func StrPadLeft(value string, length int, pad ...string) string {
+func PadLeft(value string, length int, pad ...string) string {
 	padStr := " "
 
 	if len(pad) > 0 {
@@ -1212,7 +1212,7 @@ func StrPadLeft(value string, length int, pad ...string) string {
 	return strPad(padStr, total) + value
 }
 
-func StrPadRight(value string, length int, pad ...string) string {
+func PadRight(value string, length int, pad ...string) string {
 	padStr := " "
 
 	if len(pad) > 0 {
@@ -1239,7 +1239,7 @@ func strPad(pad string, n int) string {
 	return string([]rune(repeated)[:n])
 }
 
-func StrPosition(haystack, needle string, offset ...int) (int, bool) {
+func Position(haystack, needle string, offset ...int) (int, bool) {
 	off := 0
 
 	if len(offset) > 0 {
@@ -1266,7 +1266,7 @@ func StrPosition(haystack, needle string, offset ...int) (int, bool) {
 	return off + utf8.RuneCountInString(before), true
 }
 
-func StrSubstr(str string, start int, length ...int) string {
+func Substr(str string, start int, length ...int) string {
 	runes := []rune(str)
 	runeLen := len(runes)
 
@@ -1301,7 +1301,7 @@ func StrSubstr(str string, start int, length ...int) string {
 	return string(runes[start:end])
 }
 
-func StrSubstrCount(haystack, needle string, offset ...int) int {
+func SubstrCount(haystack, needle string, offset ...int) int {
 	if needle == "" {
 		return 0
 	}
@@ -1325,7 +1325,7 @@ func StrSubstrCount(haystack, needle string, offset ...int) int {
 	return strings.Count(haystack, needle)
 }
 
-func StrSubstrReplace(str, replace string, offset int, length ...int) string {
+func SubstrReplace(str, replace string, offset int, length ...int) string {
 	runes := []rune(str)
 	runeLen := len(runes)
 
@@ -1357,7 +1357,7 @@ func StrSubstrReplace(str, replace string, offset int, length ...int) string {
 	return string(result)
 }
 
-func StrSwap(m map[string]string, subject string) string {
+func Swap(m map[string]string, subject string) string {
 	if len(m) == 0 {
 		return subject
 	}
@@ -1369,7 +1369,7 @@ func StrSwap(m map[string]string, subject string) string {
 	return subject
 }
 
-func StrTake(str string, n int) string {
+func Take(str string, n int) string {
 	runes := []rune(str)
 
 	if n >= 0 {
@@ -1389,11 +1389,11 @@ func StrTake(str string, n int) string {
 	return string(runes[start:])
 }
 
-func StrWordCount(str string) int {
+func WordCount(str string) int {
 	return len(strings.Fields(str))
 }
 
-func StrWordWrap(str string, width int, breakStr ...string) string {
+func WordWrap(str string, width int, breakStr ...string) string {
 	brk := "\n"
 
 	if len(breakStr) > 0 {
@@ -1423,11 +1423,11 @@ func StrWordWrap(str string, width int, breakStr ...string) string {
 	return strings.Join(lines, brk)
 }
 
-func StrToBase64(value string) string {
+func ToBase64(value string) string {
 	return base64.StdEncoding.EncodeToString([]byte(value))
 }
 
-func StrFromBase64(value string) (string, error) {
+func FromBase64(value string) (string, error) {
 	decoded, err := base64.StdEncoding.DecodeString(value)
 
 	if err != nil {
@@ -1442,14 +1442,14 @@ func StrFromBase64(value string) (string, error) {
 	return string(decoded), nil
 }
 
-func StrSlug(title string, separator ...string) string {
+func Slug(title string, separator ...string) string {
 	sep := "-"
 
 	if len(separator) > 0 {
 		sep = separator[0]
 	}
 
-	title = StrAscii(title)
+	title = Ascii(title)
 	title = strings.ToLower(title)
 
 	title = strings.ReplaceAll(title, "@", sep+"at"+sep)
@@ -1467,7 +1467,7 @@ func StrSlug(title string, separator ...string) string {
 	return title
 }
 
-func StrAscii(value string, language ...string) string {
+func Ascii(value string, language ...string) string {
 	var sb strings.Builder
 
 	for _, r := range value {
@@ -1486,7 +1486,7 @@ func StrAscii(value string, language ...string) string {
 	return sb.String()
 }
 
-func StrTransliterate(str string, unknown ...string) string {
+func Transliterate(str string, unknown ...string) string {
 	unk := "?"
 
 	if len(unknown) > 0 {
@@ -1512,7 +1512,7 @@ func StrTransliterate(str string, unknown ...string) string {
 	return sb.String()
 }
 
-func StrInitials(name string, delimiter ...string) string {
+func Initials(name string, delimiter ...string) string {
 	sep := ""
 
 	if len(delimiter) > 0 {
@@ -1531,7 +1531,7 @@ func StrInitials(name string, delimiter ...string) string {
 	return strings.Join(initials, sep)
 }
 
-func StrCharAt(subject string, index int) string {
+func CharAt(subject string, index int) string {
 	runes := []rune(subject)
 
 	if index < 0 {
@@ -1545,7 +1545,7 @@ func StrCharAt(subject string, index int) string {
 	return string(runes[index])
 }
 
-func StrParseCallback(callback string, def ...string) [2]string {
+func ParseCallback(callback string, def ...string) [2]string {
 	d := ""
 
 	if len(def) > 0 {
@@ -1561,7 +1561,7 @@ func StrParseCallback(callback string, def ...string) [2]string {
 	return [2]string{callback, d}
 }
 
-func StrRandom(length ...int) string {
+func Random(length ...int) string {
 	l := 16
 
 	if len(length) > 0 {
@@ -1631,7 +1631,7 @@ func CreateRandomStringsNormally() {
 	randomMu.Unlock()
 }
 
-func StrPassword(length ...int) (string, error) {
+func Password(length ...int) (string, error) {
 	l := 32
 
 	if len(length) > 0 {
@@ -1666,7 +1666,7 @@ func FlushCache() {
 	snakeCache.Clear()
 }
 
-func StrConvertCase(str string, mode int) string {
+func ConvertCase(str string, mode int) string {
 	switch mode {
 	case 0:
 		return strings.ToUpper(str)
@@ -1679,244 +1679,244 @@ func StrConvertCase(str string, mode int) string {
 	}
 }
 
-func Of(value string) *StringBuilder {
-	return &StringBuilder{value: value}
+func Of(value string) *Builder {
+	return &Builder{value: value}
 }
 
-func (s *StringBuilder) String() string { return s.value }
-func (s *StringBuilder) Value() string  { return s.value }
+func (s *Builder) String() string { return s.value }
+func (s *Builder) Value() string  { return s.value }
 
-func (s *StringBuilder) After(search string) *StringBuilder {
-	return &StringBuilder{value: StrAfter(s.value, search)}
+func (s *Builder) After(search string) *Builder {
+	return &Builder{value: After(s.value, search)}
 }
-func (s *StringBuilder) AfterLast(search string) *StringBuilder {
-	return &StringBuilder{value: StrAfterLast(s.value, search)}
+func (s *Builder) AfterLast(search string) *Builder {
+	return &Builder{value: AfterLast(s.value, search)}
 }
-func (s *StringBuilder) Before(search string) *StringBuilder {
-	return &StringBuilder{value: StrBefore(s.value, search)}
+func (s *Builder) Before(search string) *Builder {
+	return &Builder{value: Before(s.value, search)}
 }
-func (s *StringBuilder) BeforeLast(search string) *StringBuilder {
-	return &StringBuilder{value: StrBeforeLast(s.value, search)}
+func (s *Builder) BeforeLast(search string) *Builder {
+	return &Builder{value: BeforeLast(s.value, search)}
 }
-func (s *StringBuilder) Between(from, to string) *StringBuilder {
-	return &StringBuilder{value: StrBetween(s.value, from, to)}
+func (s *Builder) Between(from, to string) *Builder {
+	return &Builder{value: Between(s.value, from, to)}
 }
-func (s *StringBuilder) BetweenFirst(from, to string) *StringBuilder {
-	return &StringBuilder{value: StrBetweenFirst(s.value, from, to)}
+func (s *Builder) BetweenFirst(from, to string) *Builder {
+	return &Builder{value: BetweenFirst(s.value, from, to)}
 }
-func (s *StringBuilder) Camel() *StringBuilder {
-	return &StringBuilder{value: StrCamel(s.value)}
+func (s *Builder) Camel() *Builder {
+	return &Builder{value: Camel(s.value)}
 }
-func (s *StringBuilder) Studly() *StringBuilder {
-	return &StringBuilder{value: StrStudly(s.value)}
+func (s *Builder) Studly() *Builder {
+	return &Builder{value: Studly(s.value)}
 }
-func (s *StringBuilder) Pascal() *StringBuilder {
-	return &StringBuilder{value: StrPascal(s.value)}
+func (s *Builder) Pascal() *Builder {
+	return &Builder{value: Pascal(s.value)}
 }
-func (s *StringBuilder) Snake(delimiter ...string) *StringBuilder {
-	return &StringBuilder{value: StrSnake(s.value, delimiter...)}
+func (s *Builder) Snake(delimiter ...string) *Builder {
+	return &Builder{value: Snake(s.value, delimiter...)}
 }
-func (s *StringBuilder) Kebab() *StringBuilder {
-	return &StringBuilder{value: StrKebab(s.value)}
+func (s *Builder) Kebab() *Builder {
+	return &Builder{value: Kebab(s.value)}
 }
-func (s *StringBuilder) Lower() *StringBuilder {
-	return &StringBuilder{value: StrLower(s.value)}
+func (s *Builder) Lower() *Builder {
+	return &Builder{value: Lower(s.value)}
 }
-func (s *StringBuilder) Upper() *StringBuilder {
-	return &StringBuilder{value: StrUpper(s.value)}
+func (s *Builder) Upper() *Builder {
+	return &Builder{value: Upper(s.value)}
 }
-func (s *StringBuilder) Title() *StringBuilder {
-	return &StringBuilder{value: StrTitle(s.value)}
+func (s *Builder) Title() *Builder {
+	return &Builder{value: Title(s.value)}
 }
-func (s *StringBuilder) Headline() *StringBuilder {
-	return &StringBuilder{value: StrHeadline(s.value)}
+func (s *Builder) Headline() *Builder {
+	return &Builder{value: Headline(s.value)}
 }
-func (s *StringBuilder) Apa() *StringBuilder {
-	return &StringBuilder{value: StrApa(s.value)}
+func (s *Builder) Apa() *Builder {
+	return &Builder{value: Apa(s.value)}
 }
-func (s *StringBuilder) Ucfirst() *StringBuilder {
-	return &StringBuilder{value: StrUcfirst(s.value)}
+func (s *Builder) Ucfirst() *Builder {
+	return &Builder{value: Ucfirst(s.value)}
 }
-func (s *StringBuilder) Lcfirst() *StringBuilder {
-	return &StringBuilder{value: StrLcfirst(s.value)}
+func (s *Builder) Lcfirst() *Builder {
+	return &Builder{value: Lcfirst(s.value)}
 }
-func (s *StringBuilder) Slug(separator ...string) *StringBuilder {
-	return &StringBuilder{value: StrSlug(s.value, separator...)}
+func (s *Builder) Slug(separator ...string) *Builder {
+	return &Builder{value: Slug(s.value, separator...)}
 }
-func (s *StringBuilder) Contains(needles ...string) bool {
-	return StrContains(s.value, needles...)
+func (s *Builder) Contains(needles ...string) bool {
+	return Contains(s.value, needles...)
 }
-func (s *StringBuilder) ContainsAll(needles []string) bool {
-	return StrContainsAll(s.value, needles)
+func (s *Builder) ContainsAll(needles []string) bool {
+	return ContainsAll(s.value, needles)
 }
-func (s *StringBuilder) StartsWith(prefixes ...string) bool {
-	return StrStartsWith(s.value, prefixes...)
+func (s *Builder) StartsWith(prefixes ...string) bool {
+	return StartsWith(s.value, prefixes...)
 }
-func (s *StringBuilder) EndsWith(suffixes ...string) bool {
-	return StrEndsWith(s.value, suffixes...)
+func (s *Builder) EndsWith(suffixes ...string) bool {
+	return EndsWith(s.value, suffixes...)
 }
-func (s *StringBuilder) Is(pattern string, ignoreCase ...bool) bool {
-	return StrIs(pattern, s.value, ignoreCase...)
+func (s *Builder) Is(pattern string, ignoreCase ...bool) bool {
+	return Is(pattern, s.value, ignoreCase...)
 }
-func (s *StringBuilder) ClassBasename() *StringBuilder {
+func (s *Builder) ClassBasename() *Builder {
 	name := strings.Trim(s.value, "\\/")
 
 	if idx := strings.LastIndexAny(name, "\\/"); idx >= 0 {
 		name = name[idx+1:]
 	}
 
-	return &StringBuilder{value: name}
+	return &Builder{value: name}
 }
-func (s *StringBuilder) IsMatch(patterns ...string) bool {
-	return StrIsMatch(patterns, s.value)
+func (s *Builder) IsMatch(patterns ...string) bool {
+	return IsMatch(patterns, s.value)
 }
-func (s *StringBuilder) IsAscii() bool { return StrIsAscii(s.value) }
-func (s *StringBuilder) IsJson() bool  { return StrIsJson(s.value) }
-func (s *StringBuilder) IsUrl(protocols ...string) bool {
-	return StrIsUrl(s.value, protocols...)
+func (s *Builder) IsAscii() bool { return IsAscii(s.value) }
+func (s *Builder) IsJson() bool  { return IsJson(s.value) }
+func (s *Builder) IsUrl(protocols ...string) bool {
+	return IsUrl(s.value, protocols...)
 }
-func (s *StringBuilder) IsUuid(version ...int) bool {
-	return StrIsUuid(s.value, version...)
+func (s *Builder) IsUuid(version ...int) bool {
+	return IsUuid(s.value, version...)
 }
-func (s *StringBuilder) IsUlid() bool     { return StrIsUlid(s.value) }
-func (s *StringBuilder) IsEmpty() bool    { return s.value == "" }
-func (s *StringBuilder) IsNotEmpty() bool { return s.value != "" }
-func (s *StringBuilder) Length() int      { return StrLength(s.value) }
-func (s *StringBuilder) Limit(limit int, end ...string) *StringBuilder {
-	return &StringBuilder{value: StrLimit(s.value, limit, end...)}
+func (s *Builder) IsUlid() bool     { return IsUlid(s.value) }
+func (s *Builder) IsEmpty() bool    { return s.value == "" }
+func (s *Builder) IsNotEmpty() bool { return s.value != "" }
+func (s *Builder) Length() int      { return Length(s.value) }
+func (s *Builder) Limit(limit int, end ...string) *Builder {
+	return &Builder{value: Limit(s.value, limit, end...)}
 }
-func (s *StringBuilder) Words(words int, end ...string) *StringBuilder {
-	return &StringBuilder{value: StrWords(s.value, words, end...)}
+func (s *Builder) Words(words int, end ...string) *Builder {
+	return &Builder{value: Words(s.value, words, end...)}
 }
-func (s *StringBuilder) Mask(character string, index int, length ...int) *StringBuilder {
-	return &StringBuilder{value: StrMask(s.value, character, index, length...)}
+func (s *Builder) Mask(character string, index int, length ...int) *Builder {
+	return &Builder{value: Mask(s.value, character, index, length...)}
 }
-func (s *StringBuilder) Match(pattern string) *StringBuilder {
-	return &StringBuilder{value: StrMatch(pattern, s.value)}
+func (s *Builder) Match(pattern string) *Builder {
+	return &Builder{value: Match(pattern, s.value)}
 }
-func (s *StringBuilder) MatchAll(pattern string) []string {
-	return StrMatchAll(pattern, s.value)
+func (s *Builder) MatchAll(pattern string) []string {
+	return MatchAll(pattern, s.value)
 }
-func (s *StringBuilder) Test(pattern string) bool {
+func (s *Builder) Test(pattern string) bool {
 	matched, err := regexp.MatchString(pattern, s.value)
 
 	return err == nil && matched
 }
-func (s *StringBuilder) Replace(search, replace any, caseSensitive ...bool) *StringBuilder {
-	return &StringBuilder{value: StrReplace(search, replace, s.value, caseSensitive...)}
+func (s *Builder) Replace(search, replace any, caseSensitive ...bool) *Builder {
+	return &Builder{value: Replace(search, replace, s.value, caseSensitive...)}
 }
-func (s *StringBuilder) ReplaceFirst(search, replace string) *StringBuilder {
-	return &StringBuilder{value: StrReplaceFirst(search, replace, s.value)}
+func (s *Builder) ReplaceFirst(search, replace string) *Builder {
+	return &Builder{value: ReplaceFirst(search, replace, s.value)}
 }
-func (s *StringBuilder) ReplaceLast(search, replace string) *StringBuilder {
-	return &StringBuilder{value: StrReplaceLast(search, replace, s.value)}
+func (s *Builder) ReplaceLast(search, replace string) *Builder {
+	return &Builder{value: ReplaceLast(search, replace, s.value)}
 }
-func (s *StringBuilder) ReplaceMatches(pattern, replace string) *StringBuilder {
-	return &StringBuilder{value: StrReplaceMatches(pattern, replace, s.value)}
+func (s *Builder) ReplaceMatches(pattern, replace string) *Builder {
+	return &Builder{value: ReplaceMatches(pattern, replace, s.value)}
 }
-func (s *StringBuilder) Remove(search any, caseSensitive ...bool) *StringBuilder {
-	return &StringBuilder{value: StrRemove(search, s.value, caseSensitive...)}
+func (s *Builder) Remove(search any, caseSensitive ...bool) *Builder {
+	return &Builder{value: Remove(search, s.value, caseSensitive...)}
 }
-func (s *StringBuilder) Reverse() *StringBuilder {
-	return &StringBuilder{value: StrReverse(s.value)}
+func (s *Builder) Reverse() *Builder {
+	return &Builder{value: Reverse(s.value)}
 }
-func (s *StringBuilder) Squish() *StringBuilder {
-	return &StringBuilder{value: StrSquish(s.value)}
+func (s *Builder) Squish() *Builder {
+	return &Builder{value: Squish(s.value)}
 }
-func (s *StringBuilder) Trim(chars ...string) *StringBuilder {
-	return &StringBuilder{value: StrTrim(s.value, chars...)}
+func (s *Builder) Trim(chars ...string) *Builder {
+	return &Builder{value: Trim(s.value, chars...)}
 }
-func (s *StringBuilder) Ltrim(chars ...string) *StringBuilder {
-	return &StringBuilder{value: StrLtrim(s.value, chars...)}
+func (s *Builder) Ltrim(chars ...string) *Builder {
+	return &Builder{value: Ltrim(s.value, chars...)}
 }
-func (s *StringBuilder) Rtrim(chars ...string) *StringBuilder {
-	return &StringBuilder{value: StrRtrim(s.value, chars...)}
+func (s *Builder) Rtrim(chars ...string) *Builder {
+	return &Builder{value: Rtrim(s.value, chars...)}
 }
-func (s *StringBuilder) Start(prefix string) *StringBuilder {
-	return &StringBuilder{value: StrStart(s.value, prefix)}
+func (s *Builder) Start(prefix string) *Builder {
+	return &Builder{value: Start(s.value, prefix)}
 }
-func (s *StringBuilder) Finish(cap string) *StringBuilder {
-	return &StringBuilder{value: StrFinish(s.value, cap)}
+func (s *Builder) Finish(cap string) *Builder {
+	return &Builder{value: Finish(s.value, cap)}
 }
-func (s *StringBuilder) Wrap(before string, after ...string) *StringBuilder {
-	return &StringBuilder{value: StrWrap(s.value, before, after...)}
+func (s *Builder) Wrap(before string, after ...string) *Builder {
+	return &Builder{value: Wrap(s.value, before, after...)}
 }
-func (s *StringBuilder) Unwrap(before, after string) *StringBuilder {
-	return &StringBuilder{value: StrUnwrap(s.value, before, after)}
+func (s *Builder) Unwrap(before, after string) *Builder {
+	return &Builder{value: Unwrap(s.value, before, after)}
 }
-func (s *StringBuilder) ChopStart(needles ...string) *StringBuilder {
-	return &StringBuilder{value: StrChopStart(s.value, needles...)}
+func (s *Builder) ChopStart(needles ...string) *Builder {
+	return &Builder{value: ChopStart(s.value, needles...)}
 }
-func (s *StringBuilder) ChopEnd(needles ...string) *StringBuilder {
-	return &StringBuilder{value: StrChopEnd(s.value, needles...)}
+func (s *Builder) ChopEnd(needles ...string) *Builder {
+	return &Builder{value: ChopEnd(s.value, needles...)}
 }
-func (s *StringBuilder) Substr(start int, length ...int) *StringBuilder {
-	return &StringBuilder{value: StrSubstr(s.value, start, length...)}
+func (s *Builder) Substr(start int, length ...int) *Builder {
+	return &Builder{value: Substr(s.value, start, length...)}
 }
-func (s *StringBuilder) Take(n int) *StringBuilder {
-	return &StringBuilder{value: StrTake(s.value, n)}
+func (s *Builder) Take(n int) *Builder {
+	return &Builder{value: Take(s.value, n)}
 }
-func (s *StringBuilder) PadLeft(length int, pad ...string) *StringBuilder {
-	return &StringBuilder{value: StrPadLeft(s.value, length, pad...)}
+func (s *Builder) PadLeft(length int, pad ...string) *Builder {
+	return &Builder{value: PadLeft(s.value, length, pad...)}
 }
-func (s *StringBuilder) PadRight(length int, pad ...string) *StringBuilder {
-	return &StringBuilder{value: StrPadRight(s.value, length, pad...)}
+func (s *Builder) PadRight(length int, pad ...string) *Builder {
+	return &Builder{value: PadRight(s.value, length, pad...)}
 }
-func (s *StringBuilder) PadBoth(length int, pad ...string) *StringBuilder {
-	return &StringBuilder{value: StrPadBoth(s.value, length, pad...)}
+func (s *Builder) PadBoth(length int, pad ...string) *Builder {
+	return &Builder{value: PadBoth(s.value, length, pad...)}
 }
-func (s *StringBuilder) Swap(m map[string]string) *StringBuilder {
-	return &StringBuilder{value: StrSwap(m, s.value)}
+func (s *Builder) Swap(m map[string]string) *Builder {
+	return &Builder{value: Swap(m, s.value)}
 }
-func (s *StringBuilder) Append(values ...string) *StringBuilder {
-	return &StringBuilder{value: s.value + strings.Join(values, "")}
+func (s *Builder) Append(values ...string) *Builder {
+	return &Builder{value: s.value + strings.Join(values, "")}
 }
-func (s *StringBuilder) Prepend(values ...string) *StringBuilder {
-	return &StringBuilder{value: strings.Join(values, "") + s.value}
+func (s *Builder) Prepend(values ...string) *Builder {
+	return &Builder{value: strings.Join(values, "") + s.value}
 }
-func (s *StringBuilder) Numbers() *StringBuilder {
-	return &StringBuilder{value: StrNumbers(s.value)}
+func (s *Builder) Numbers() *Builder {
+	return &Builder{value: Numbers(s.value)}
 }
-func (s *StringBuilder) Ascii(language ...string) *StringBuilder {
-	return &StringBuilder{value: StrAscii(s.value, language...)}
+func (s *Builder) Ascii(language ...string) *Builder {
+	return &Builder{value: Ascii(s.value, language...)}
 }
-func (s *StringBuilder) ToBase64() *StringBuilder {
-	return &StringBuilder{value: StrToBase64(s.value)}
+func (s *Builder) ToBase64() *Builder {
+	return &Builder{value: ToBase64(s.value)}
 }
-func (s *StringBuilder) FromBase64() (*StringBuilder, error) {
-	v, err := StrFromBase64(s.value)
+func (s *Builder) FromBase64() (*Builder, error) {
+	v, err := FromBase64(s.value)
 
-	return &StringBuilder{value: v}, err
+	return &Builder{value: v}, err
 }
-func (s *StringBuilder) Plural(count ...int) *StringBuilder {
-	return &StringBuilder{value: StrPlural(s.value, count...)}
+func (s *Builder) Plural(count ...int) *Builder {
+	return &Builder{value: Plural(s.value, count...)}
 }
-func (s *StringBuilder) PluralStudly(count ...int) *StringBuilder {
-	return &StringBuilder{value: StrPluralStudly(s.value, count...)}
+func (s *Builder) PluralStudly(count ...int) *Builder {
+	return &Builder{value: PluralStudly(s.value, count...)}
 }
-func (s *StringBuilder) PluralPascal(count ...int) *StringBuilder {
-	return &StringBuilder{value: StrPluralPascal(s.value, count...)}
+func (s *Builder) PluralPascal(count ...int) *Builder {
+	return &Builder{value: PluralPascal(s.value, count...)}
 }
-func (s *StringBuilder) Singular() *StringBuilder {
-	return &StringBuilder{value: StrSingular(s.value)}
+func (s *Builder) Singular() *Builder {
+	return &Builder{value: Singular(s.value)}
 }
-func (s *StringBuilder) Initials(delimiter ...string) *StringBuilder {
-	return &StringBuilder{value: StrInitials(s.value, delimiter...)}
+func (s *Builder) Initials(delimiter ...string) *Builder {
+	return &Builder{value: Initials(s.value, delimiter...)}
 }
-func (s *StringBuilder) WordCount() int { return StrWordCount(s.value) }
-func (s *StringBuilder) WordWrap(width int, breakStr ...string) *StringBuilder {
-	return &StringBuilder{value: StrWordWrap(s.value, width, breakStr...)}
+func (s *Builder) WordCount() int { return WordCount(s.value) }
+func (s *Builder) WordWrap(width int, breakStr ...string) *Builder {
+	return &Builder{value: WordWrap(s.value, width, breakStr...)}
 }
-func (s *StringBuilder) Excerpt(phrase string, radius int, omission ...string) *StringBuilder {
-	return &StringBuilder{value: StrExcerpt(s.value, phrase, radius, omission...)}
+func (s *Builder) Excerpt(phrase string, radius int, omission ...string) *Builder {
+	return &Builder{value: Excerpt(s.value, phrase, radius, omission...)}
 }
-func (s *StringBuilder) Ucsplit() []string { return StrUcsplit(s.value) }
-func (s *StringBuilder) Deduplicate(chars ...string) *StringBuilder {
-	return &StringBuilder{value: StrDeduplicate(s.value, chars...)}
+func (s *Builder) Ucsplit() []string { return Ucsplit(s.value) }
+func (s *Builder) Deduplicate(chars ...string) *Builder {
+	return &Builder{value: Deduplicate(s.value, chars...)}
 }
-func (s *StringBuilder) Markdown(options ...map[string]any) *StringBuilder {
-	return &StringBuilder{value: StrMarkdown(s.value, options...)}
+func (s *Builder) Markdown(options ...map[string]any) *Builder {
+	return &Builder{value: Markdown(s.value, options...)}
 }
-func (s *StringBuilder) InlineMarkdown(options ...map[string]any) *StringBuilder {
-	return &StringBuilder{value: StrInlineMarkdown(s.value, options...)}
+func (s *Builder) InlineMarkdown(options ...map[string]any) *Builder {
+	return &Builder{value: InlineMarkdown(s.value, options...)}
 }

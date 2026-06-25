@@ -13,7 +13,7 @@ import (
 
 // mockQueue wraps a real queue to control behavior in tests.
 type mockQueue struct {
-	queue.Queue
+	queue.Backend
 	jobs       []queue.Job
 	mu         sync.Mutex
 	popCount   int

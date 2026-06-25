@@ -16,8 +16,8 @@ type InspectedJob struct {
 	// database driver. May be zero when the backend does not expose a
 	// stable identifier.
 	ID int64
-	// Queue is the queue name the job lives on.
-	Queue string
+	// Backend is the queue name the job lives on.
+	Backend string
 	// Connection is the connection name the queue lives on. Drivers
 	// that can populate it should; callers should treat an empty
 	// string as "not reported by this driver".

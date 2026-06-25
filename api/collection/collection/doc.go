@@ -2,7 +2,7 @@
 //
 // The core type is:
 //
-//   - [Collection] — a generic wrapper around a slice with a rich set of chainable methods
+//   - [List] — a generic wrapper around a slice with a rich set of chainable methods
 //     for filtering, sorting, transforming, and aggregating data.
 //
 // # Related packages

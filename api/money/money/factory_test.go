@@ -11,7 +11,7 @@ func TestFactoryHelpers(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
 		name string
-		fn   func(int64) *Money
+		fn   func(int64) *Value
 		code string
 	}{
 		{name: "aed", fn: FromAED, code: currency.AED},

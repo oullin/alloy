@@ -13,11 +13,11 @@ func TestResolvingCallbackFired(t *testing.T) {
 
 	var called bool
 
-	c.Resolving("name", func(_ any, _ *container.Container) {
+	c.Resolving("name", func(_ any, _ *container.App) {
 		called = true
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -35,11 +35,11 @@ func TestResolvingCallbackReceivesInstance(t *testing.T) {
 
 	var received any
 
-	c.Resolving("name", func(instance any, _ *container.Container) {
+	c.Resolving("name", func(instance any, _ *container.App) {
 		received = instance
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -57,11 +57,11 @@ func TestAfterResolvingCallbackFired(t *testing.T) {
 
 	var called bool
 
-	c.AfterResolving("name", func(_ any, _ *container.Container) {
+	c.AfterResolving("name", func(_ any, _ *container.App) {
 		called = true
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -79,11 +79,11 @@ func TestBeforeResolvingCallbackFired(t *testing.T) {
 
 	var called bool
 
-	c.BeforeResolving("name", func(_ string, _ map[string]any, _ *container.Container) {
+	c.BeforeResolving("name", func(_ string, _ map[string]any, _ *container.App) {
 		called = true
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -101,11 +101,11 @@ func TestBeforeResolvingCallbackReceivesAbstract(t *testing.T) {
 
 	var receivedAbstract string
 
-	c.BeforeResolving("name", func(abstract string, _ map[string]any, _ *container.Container) {
+	c.BeforeResolving("name", func(abstract string, _ map[string]any, _ *container.App) {
 		receivedAbstract = abstract
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -123,12 +123,12 @@ func TestGlobalResolvingCallbackFired(t *testing.T) {
 
 	count := 0
 
-	c.ResolvingAny(func(_ any, _ *container.Container) {
+	c.ResolvingAny(func(_ any, _ *container.App) {
 		count++
 	})
 
-	c.Bind("a", func(_ *container.Container) (any, error) { return "a", nil }, false)
-	c.Bind("b", func(_ *container.Container) (any, error) { return "b", nil }, false)
+	c.Bind("a", func(_ *container.App) (any, error) { return "a", nil }, false)
+	c.Bind("b", func(_ *container.App) (any, error) { return "b", nil }, false)
 
 	c.Make("a") //nolint:errcheck
 	c.Make("b") //nolint:errcheck
@@ -145,12 +145,12 @@ func TestGlobalAfterResolvingCallbackFired(t *testing.T) {
 
 	count := 0
 
-	c.AfterResolvingAny(func(_ any, _ *container.Container) {
+	c.AfterResolvingAny(func(_ any, _ *container.App) {
 		count++
 	})
 
-	c.Bind("a", func(_ *container.Container) (any, error) { return "a", nil }, false)
-	c.Bind("b", func(_ *container.Container) (any, error) { return "b", nil }, false)
+	c.Bind("a", func(_ *container.App) (any, error) { return "a", nil }, false)
+	c.Bind("b", func(_ *container.App) (any, error) { return "b", nil }, false)
 
 	c.Make("a") //nolint:errcheck
 	c.Make("b") //nolint:errcheck
@@ -167,12 +167,12 @@ func TestGlobalBeforeResolvingCallbackFired(t *testing.T) {
 
 	count := 0
 
-	c.BeforeResolvingAny(func(_ string, _ map[string]any, _ *container.Container) {
+	c.BeforeResolvingAny(func(_ string, _ map[string]any, _ *container.App) {
 		count++
 	})
 
-	c.Bind("a", func(_ *container.Container) (any, error) { return "a", nil }, false)
-	c.Bind("b", func(_ *container.Container) (any, error) { return "b", nil }, false)
+	c.Bind("a", func(_ *container.App) (any, error) { return "a", nil }, false)
+	c.Bind("b", func(_ *container.App) (any, error) { return "b", nil }, false)
 
 	c.Make("a") //nolint:errcheck
 	c.Make("b") //nolint:errcheck
@@ -189,12 +189,12 @@ func TestResolvingCallbackOnlyForSpecificAbstract(t *testing.T) {
 
 	var calledFor string
 
-	c.Resolving("name", func(_ any, _ *container.Container) {
+	c.Resolving("name", func(_ any, _ *container.App) {
 		calledFor = "name"
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) { return "Taylor", nil }, false)
-	c.Bind("other", func(_ *container.Container) (any, error) { return "Other", nil }, false)
+	c.Bind("name", func(_ *container.App) (any, error) { return "Taylor", nil }, false)
+	c.Bind("other", func(_ *container.App) (any, error) { return "Other", nil }, false)
 
 	c.Make("other") //nolint:errcheck
 
@@ -216,11 +216,11 @@ func TestResolvingCallbackCalledOnceForSingleton(t *testing.T) {
 
 	count := 0
 
-	c.Resolving("name", func(_ any, _ *container.Container) {
+	c.Resolving("name", func(_ any, _ *container.App) {
 		count++
 	})
 
-	c.Singleton("name", func(_ *container.Container) (any, error) {
+	c.Singleton("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	})
 
@@ -237,7 +237,7 @@ func TestResolvingCallbacksCanBeAddedAfterFirstResolution(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -245,7 +245,7 @@ func TestResolvingCallbacksCanBeAddedAfterFirstResolution(t *testing.T) {
 
 	var called bool
 
-	c.Resolving("name", func(_ any, _ *container.Container) {
+	c.Resolving("name", func(_ any, _ *container.App) {
 		called = true
 	})
 
@@ -263,31 +263,31 @@ func TestCallbackFiringOrder(t *testing.T) {
 
 	var order []string
 
-	c.BeforeResolvingAny(func(_ string, _ map[string]any, _ *container.Container) {
+	c.BeforeResolvingAny(func(_ string, _ map[string]any, _ *container.App) {
 		order = append(order, "global-before")
 	})
 
-	c.BeforeResolving("name", func(_ string, _ map[string]any, _ *container.Container) {
+	c.BeforeResolving("name", func(_ string, _ map[string]any, _ *container.App) {
 		order = append(order, "specific-before")
 	})
 
-	c.ResolvingAny(func(_ any, _ *container.Container) {
+	c.ResolvingAny(func(_ any, _ *container.App) {
 		order = append(order, "global-resolving")
 	})
 
-	c.Resolving("name", func(_ any, _ *container.Container) {
+	c.Resolving("name", func(_ any, _ *container.App) {
 		order = append(order, "specific-resolving")
 	})
 
-	c.AfterResolvingAny(func(_ any, _ *container.Container) {
+	c.AfterResolvingAny(func(_ any, _ *container.App) {
 		order = append(order, "global-after")
 	})
 
-	c.AfterResolving("name", func(_ any, _ *container.Container) {
+	c.AfterResolving("name", func(_ any, _ *container.App) {
 		order = append(order, "specific-after")
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -320,13 +320,13 @@ func TestResolvingCallbacksWithAlias(t *testing.T) {
 
 	var called bool
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
 	c.Alias("name", "shortName")
 
-	c.Resolving("name", func(_ any, _ *container.Container) {
+	c.Resolving("name", func(_ any, _ *container.App) {
 		called = true
 	})
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // Service coordinates WebAuthn ceremonies.
@@ -28,7 +28,7 @@ func NewService(config *webauthn.Config, repo Repository, sessions SessionStore)
 }
 
 // BeginRegistration starts a passkey registration ceremony.
-func (s *Service) BeginRegistration(ctx context.Context, key string, user cauth.Authenticatable) (*protocol.CredentialCreation, error) {
+func (s *Service) BeginRegistration(ctx context.Context, key string, user cauth.User) (*protocol.CredentialCreation, error) {
 	waUser, err := s.user(ctx, user)
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (s *Service) BeginRegistration(ctx context.Context, key string, user cauth.
 }
 
 // FinishRegistration validates the response and stores the credential.
-func (s *Service) FinishRegistration(ctx context.Context, key string, user cauth.Authenticatable, r *http.Request) (*webauthn.Credential, error) {
+func (s *Service) FinishRegistration(ctx context.Context, key string, user cauth.User, r *http.Request) (*webauthn.Credential, error) {
 	waUser, err := s.user(ctx, user)
 
 	if err != nil {
@@ -93,14 +93,14 @@ func (s *Service) BeginDiscoverableLogin(ctx context.Context, key string) (*prot
 }
 
 // FinishPasskeyLogin validates a discoverable passkey login response.
-func (s *Service) FinishPasskeyLogin(ctx context.Context, key string, r *http.Request, resolveUser func(context.Context, string) (cauth.Authenticatable, error)) (cauth.Authenticatable, *webauthn.Credential, error) {
+func (s *Service) FinishPasskeyLogin(ctx context.Context, key string, r *http.Request, resolveUser func(context.Context, string) (cauth.User, error)) (cauth.User, *webauthn.Credential, error) {
 	session, err := s.sessions.Get(ctx, key)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var authenticated cauth.Authenticatable
+	var authenticated cauth.User
 	user, credential, err := s.webauthn.FinishPasskeyLogin(func(_, userHandle []byte) (webauthn.User, error) {
 		userID, err := s.repo.UserIDByHandle(ctx, userHandle)
 
@@ -138,7 +138,7 @@ func (s *Service) FinishPasskeyLogin(ctx context.Context, key string, r *http.Re
 	return authenticated, credential, nil
 }
 
-func (s *Service) user(ctx context.Context, user cauth.Authenticatable) (User, error) {
+func (s *Service) user(ctx context.Context, user cauth.User) (User, error) {
 	userID := user.GetAuthIdentifier()
 	handle, err := s.repo.GetOrCreateUserHandle(ctx, userID)
 

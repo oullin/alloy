@@ -6,14 +6,14 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/auth"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
-	clog "github.com/oullin/alloy/auth/contracts/log"
 	"github.com/oullin/alloy/auth/observability"
+	"github.com/oullin/alloy/auth/user"
+	cauth "github.com/oullin/alloy/contracts/auth"
+	clog "github.com/oullin/alloy/contracts/auth/log"
 )
 
 type staticGuard struct {
-	user cauth.Authenticatable
+	user cauth.User
 }
 
 type recordingLogger struct {
@@ -21,7 +21,7 @@ type recordingLogger struct {
 }
 
 func TestMiddlewareAddsRequestContextAndLogs(t *testing.T) {
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 	guard := staticGuard{user: user}
 	logger := &recordingLogger{}
 	middleware := observability.Middleware(logger, guard, func(*http.Request) string { return "req-1" })
@@ -58,9 +58,9 @@ func TestMiddlewareAddsRequestContextAndLogs(t *testing.T) {
 	}
 }
 
-func (g staticGuard) User(context.Context) (cauth.Authenticatable, error) { return g.user, nil }
-func (g staticGuard) Check(context.Context) bool                          { return g.user != nil }
-func (g staticGuard) Guest(context.Context) bool                          { return g.user == nil }
+func (g staticGuard) User(context.Context) (cauth.User, error) { return g.user, nil }
+func (g staticGuard) Check(context.Context) bool               { return g.user != nil }
+func (g staticGuard) Guest(context.Context) bool               { return g.user == nil }
 func (g staticGuard) ID(context.Context) any {
 	if g.user == nil {
 		return nil

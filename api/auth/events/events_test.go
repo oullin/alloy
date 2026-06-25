@@ -5,17 +5,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/auth"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
 	"github.com/oullin/alloy/auth/events"
+	"github.com/oullin/alloy/auth/user"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type resettableEventUser struct {
-	*auth.GenericUser
+	*user.GenericUser
 	email string
 }
 
-var _ cauth.ResettableAuthenticatable = (*resettableEventUser)(nil)
+var _ cauth.ResettableUser = (*resettableEventUser)(nil)
 
 func (u *resettableEventUser) GetEmailForPasswordReset() string { return u.email }
 
@@ -114,7 +114,7 @@ func TestPasswordResetFields(t *testing.T) {
 
 func TestPasswordResetLinkSentAcceptsResettableAuthenticatable(t *testing.T) {
 	user := &resettableEventUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}
 	e := events.PasswordResetLinkSent{User: user}

@@ -6,9 +6,9 @@ import (
 	"github.com/oullin/alloy/workflow/events"
 )
 
-func (w *Workflow[T]) baseEvent(subject T, transition Transition, marking Marking, context map[string]any) events.Base[T] {
+func (w *Machine[T]) baseEvent(subject T, transition Transition, marking Marking, context map[string]any) events.Base[T] {
 	return events.Base[T]{
-		Workflow:   w.name,
+		Machine:    w.name,
 		SubjectVal: subject,
 		Step: events.Transition{
 			Name: transition.Name,

@@ -30,10 +30,10 @@ func NewFactory(options ...Option) (Factory, error) {
 	}, nil
 }
 
-func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
+func NewFactoryWithTestNow(input Time, options ...Option) (Factory, error) {
 	cfg := config{
 		location:       input.location,
-		runtime:        input.Runtime(),
+		runtime:        input.Context(),
 		settings:       input.settingsSnapshot(),
 		serializer:     input.serializer,
 		toStringFormat: input.toStringFormat,
@@ -57,11 +57,11 @@ func NewFactoryWithTestNow(input Tempo, options ...Option) (Factory, error) {
 	}, nil
 }
 
-func (factory Factory) Now() Tempo {
+func (factory Factory) Now() Time {
 	return factory.newTempo(factory.clock.Now())
 }
 
-func (factory Factory) Runtime() Runtime {
+func (factory Factory) Context() Context {
 	if factory.runtime.Locale() == "" {
 		settings := factory.settingsSnapshot()
 
@@ -74,58 +74,58 @@ func (factory Factory) Runtime() Runtime {
 	return factory.runtime
 }
 
-func (factory Factory) WithRuntime(runtime Runtime) Factory {
+func (factory Factory) WithRuntime(runtime Context) Factory {
 	factory.runtime = runtime
 
 	return factory
 }
 
 func (factory Factory) WithTranslator(translator Translator) Factory {
-	factory.runtime = factory.Runtime().With(RuntimeTranslator(translator))
+	factory.runtime = factory.Context().With(RuntimeTranslator(translator))
 
 	return factory
 }
 
-func (factory Factory) Today() Tempo {
+func (factory Factory) Today() Time {
 	return factory.Now().StartOfDay()
 }
 
-func (factory Factory) Tomorrow() Tempo {
+func (factory Factory) Tomorrow() Time {
 	return factory.Today().AddDays(1)
 }
 
-func (factory Factory) Yesterday() Tempo {
+func (factory Factory) Yesterday() Time {
 	return factory.Today().SubDays(1)
 }
 
-func (factory Factory) ImmutableNow() Tempo {
+func (factory Factory) ImmutableNow() Time {
 	return factory.Now()
 }
 
-func (factory Factory) MutableNow() *MutableTempo {
+func (factory Factory) MutableNow() *MutableTime {
 	return NewMutable(factory.Now())
 }
 
-func (factory Factory) FromTime(value time.Time) Tempo {
+func (factory Factory) FromTime(value time.Time) Time {
 	return factory.newTempo(value)
 }
 
-func (factory Factory) Parse(input string) (Tempo, error) {
+func (factory Factory) Parse(input string) (Time, error) {
 	return factory.parser().Parse(input)
 }
 
-func (factory Factory) FromFormat(input string, pattern string) (Tempo, error) {
+func (factory Factory) FromFormat(input string, pattern string) (Time, error) {
 	return factory.parser().FromFormat(input, pattern)
 }
 
-func (factory Factory) Create(components Components) (Tempo, error) {
+func (factory Factory) Create(components Components) (Time, error) {
 	location := factory.location
 
 	if components.Timezone != "" {
 		nextLocation, err := loadLocation(components.Timezone)
 
 		if err != nil {
-			return Tempo{}, err
+			return Time{}, err
 		}
 
 		location = nextLocation
@@ -134,20 +134,20 @@ func (factory Factory) Create(components Components) (Tempo, error) {
 	value := timeFromComponents(components, location)
 
 	if !componentsMatchTime(components, value, location) {
-		return Tempo{}, errInvalidComponents
+		return Time{}, errInvalidComponents
 	}
 
 	return newTempoWithPolicy(value, location, factory.runtime, factory.settingsSnapshot(), factory.serializer, factory.toStringFormat), nil
 }
 
-func (factory Factory) CreateNormalized(components Components) (Tempo, error) {
+func (factory Factory) CreateNormalized(components Components) (Time, error) {
 	location := factory.location
 
 	if components.Timezone != "" {
 		nextLocation, err := loadLocation(components.Timezone)
 
 		if err != nil {
-			return Tempo{}, err
+			return Time{}, err
 		}
 
 		location = nextLocation
@@ -156,27 +156,27 @@ func (factory Factory) CreateNormalized(components Components) (Tempo, error) {
 	return newTempoWithPolicy(timeFromComponents(components, location), location, factory.runtime, factory.settingsSnapshot(), factory.serializer, factory.toStringFormat), nil
 }
 
-func (factory Factory) CreateFromDate(year int, month int, day int) (Tempo, error) {
+func (factory Factory) CreateFromDate(year int, month int, day int) (Time, error) {
 	return factory.Create(Components{Year: year, Month: month, Day: day})
 }
 
-func (factory Factory) CreateFromTime(hour int, minute int, second int, millisecond int) (Tempo, error) {
+func (factory Factory) CreateFromTime(hour int, minute int, second int, millisecond int) (Time, error) {
 	return factory.Today().SetTime(hour, minute, second, millisecond)
 }
 
-func (factory Factory) CreateFromTimeString(input string) (Tempo, error) {
+func (factory Factory) CreateFromTimeString(input string) (Time, error) {
 	return factory.Today().SetTimeFromTimeString(input)
 }
 
-func (factory Factory) FromObject(components Components) (Tempo, error) {
+func (factory Factory) FromObject(components Components) (Time, error) {
 	return factory.Create(components)
 }
 
-func (factory Factory) FromTimestamp(timestamp int64) Tempo {
+func (factory Factory) FromTimestamp(timestamp int64) Time {
 	return factory.newTempo(time.Unix(timestamp, 0))
 }
 
-func (factory Factory) FromTimestampMs(timestamp int64) Tempo {
+func (factory Factory) FromTimestampMs(timestamp int64) Time {
 	return factory.newTempo(time.UnixMilli(timestamp))
 }
 
@@ -184,7 +184,7 @@ func (factory Factory) settingsSnapshot() Settings {
 	return cloneSettings(normalizeSettings(factory.settings))
 }
 
-func (factory Factory) newTempo(value time.Time) Tempo {
+func (factory Factory) newTempo(value time.Time) Time {
 	return newTempoWithPolicy(value, factory.location, factory.runtime, factory.settingsSnapshot(), factory.serializer, factory.toStringFormat)
 }
 

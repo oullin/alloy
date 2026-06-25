@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/oullin/alloy/auth"
 	"github.com/oullin/alloy/auth/passkeys"
+	"github.com/oullin/alloy/auth/user"
 )
 
 func TestMemoryRepositoryCreatesStableUserHandle(t *testing.T) {
@@ -67,7 +67,7 @@ func TestMemoryRepositoryStoresAndUpdatesCredentials(t *testing.T) {
 
 func TestServiceBeginsRegistrationAndStoresSessionServerSide(t *testing.T) {
 	service, sessions := newTestService(t)
-	user := auth.NewGenericUser(map[string]any{"id": "1"})
+	user := user.NewGenericUser(map[string]any{"id": "1"})
 
 	options, err := service.BeginRegistration(context.Background(), "session-key", user)
 

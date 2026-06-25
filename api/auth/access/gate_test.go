@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/oullin/alloy/auth/access"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type testUser struct {
@@ -31,15 +31,15 @@ func (u *testUser) GetRememberToken() string      { return "" }
 func (u *testUser) SetRememberToken(_ string)     {}
 func (u *testUser) GetRememberTokenName() string  { return "remember_token" }
 
-func (p *testPolicy) View(_ context.Context, _ cauth.Authenticatable, _ any) bool {
+func (p *testPolicy) View(_ context.Context, _ cauth.User, _ any) bool {
 	return true
 }
 
-func (p *testPolicy) Delete(_ context.Context, _ cauth.Authenticatable, _ any) bool {
+func (p *testPolicy) Delete(_ context.Context, _ cauth.User, _ any) bool {
 	return false
 }
 
-func (p *testPolicyWithBefore) Before(_ context.Context, _ cauth.Authenticatable, ability string) (bool, bool) {
+func (p *testPolicyWithBefore) Before(_ context.Context, _ cauth.User, ability string) (bool, bool) {
 	if ability == "admin-only" {
 		return false, true
 	}
@@ -47,11 +47,11 @@ func (p *testPolicyWithBefore) Before(_ context.Context, _ cauth.Authenticatable
 	return false, false
 }
 
-func (p *testPolicyWithBefore) View(_ context.Context, _ cauth.Authenticatable, _ any) bool {
+func (p *testPolicyWithBefore) View(_ context.Context, _ cauth.User, _ any) bool {
 	return true
 }
 
-func (p *nilUserPolicy) Before(_ context.Context, user cauth.Authenticatable, ability string) (bool, bool) {
+func (p *nilUserPolicy) Before(_ context.Context, user cauth.User, ability string) (bool, bool) {
 	if ability == "before" && user == nil {
 		return true, true
 	}
@@ -59,19 +59,19 @@ func (p *nilUserPolicy) Before(_ context.Context, user cauth.Authenticatable, ab
 	return false, false
 }
 
-func (p *nilUserPolicy) View(_ context.Context, user cauth.Authenticatable, _ *testModel) bool {
+func (p *nilUserPolicy) View(_ context.Context, user cauth.User, _ *testModel) bool {
 	return user == nil
 }
 
-func userResolver(user cauth.Authenticatable) func(context.Context) cauth.Authenticatable {
-	return func(_ context.Context) cauth.Authenticatable { return user }
+func userResolver(user cauth.User) func(context.Context) cauth.User {
+	return func(_ context.Context) cauth.User { return user }
 }
 
 // --- Gate: Has ---
 
 func TestGateHasReturnsTrueForDefinedAbility(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 
@@ -92,10 +92,10 @@ func TestGateHasReturnsFalseForUndefinedAbility(t *testing.T) {
 
 func TestGateNoneReturnsTrueWhenAllDenied(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
-	g.Define("delete", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("delete", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -106,10 +106,10 @@ func TestGateNoneReturnsTrueWhenAllDenied(t *testing.T) {
 
 func TestGateNoneReturnsFalseWhenAnyAllowed(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
-	g.Define("delete", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("delete", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -160,10 +160,10 @@ func TestDenyIfReturnsAllowWhenFalse(t *testing.T) {
 
 func TestGateAbilitiesReturnsDefinedAbilities(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
-	g.Define("delete", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("delete", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -285,7 +285,7 @@ func TestGateForUserSharesPolicies(t *testing.T) {
 
 func TestGateCheckReturnsTrueForAllowedAbility(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 
@@ -296,7 +296,7 @@ func TestGateCheckReturnsTrueForAllowedAbility(t *testing.T) {
 
 func TestGateCheckReturnsFalseForDeniedAbility(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -307,10 +307,10 @@ func TestGateCheckReturnsFalseForDeniedAbility(t *testing.T) {
 
 func TestGateBeforeHookOverridesResult(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
-	g.Before(func(_ context.Context, _ cauth.Authenticatable, _ string, _ any) (bool, bool) {
+	g.Before(func(_ context.Context, _ cauth.User, _ string, _ any) (bool, bool) {
 		return true, true
 	})
 
@@ -322,10 +322,10 @@ func TestGateBeforeHookOverridesResult(t *testing.T) {
 func TestGateAfterHookIsCalled(t *testing.T) {
 	called := false
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
-	g.After(func(_ context.Context, _ cauth.Authenticatable, _ string, _ bool, _ any) {
+	g.After(func(_ context.Context, _ cauth.User, _ string, _ bool, _ any) {
 		called = true
 	})
 
@@ -338,10 +338,10 @@ func TestGateAfterHookIsCalled(t *testing.T) {
 
 func TestGateAnyReturnsTrueIfAnyAllowed(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
-	g.Define("view", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("view", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 
@@ -352,10 +352,10 @@ func TestGateAnyReturnsTrueIfAnyAllowed(t *testing.T) {
 
 func TestGateEveryReturnsFalseIfAnyDenied(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
-	g.Define("view", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("view", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 
@@ -366,7 +366,7 @@ func TestGateEveryReturnsFalseIfAnyDenied(t *testing.T) {
 
 func TestGateAuthorizeReturnsErrorWhenDenied(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -379,7 +379,7 @@ func TestGateAuthorizeReturnsErrorWhenDenied(t *testing.T) {
 
 func TestGateAuthorizeReturnsNilWhenAllowed(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 
@@ -392,7 +392,7 @@ func TestGateAuthorizeReturnsNilWhenAllowed(t *testing.T) {
 
 func TestGateDeniesReturnsTrueForDeniedAbility(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -406,7 +406,7 @@ func TestGateForUserUsesSpecifiedUser(t *testing.T) {
 	user2 := &testUser{id: "2"}
 
 	g := access.New(userResolver(user1))
-	g.Define("edit", func(_ context.Context, u cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, u cauth.User, _ any) (bool, error) {
 		return u.GetAuthIdentifier() == "2", nil
 	})
 
@@ -423,7 +423,7 @@ func TestGateForUserUsesSpecifiedUser(t *testing.T) {
 
 func TestGateInspectReturnsResponse(t *testing.T) {
 	g := access.New(userResolver(&testUser{id: "1"}))
-	g.Define("edit", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	g.Define("edit", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 

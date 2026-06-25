@@ -9,11 +9,11 @@ import (
 
 var durationPattern = regexp.MustCompile(`^(-)?P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$`)
 
-func Parse(input string) (Duration, error) {
+func Parse(input string) (Span, error) {
 	matches := durationPattern.FindStringSubmatch(input)
 
 	if matches == nil {
-		return Duration{}, fmt.Errorf("invalid tempo duration: %s", input)
+		return Span{}, fmt.Errorf("invalid tempo duration: %s", input)
 	}
 
 	sign := 1
@@ -29,14 +29,14 @@ func Parse(input string) (Duration, error) {
 		value, err := strconv.ParseFloat(matches[8], 64)
 
 		if err != nil {
-			return Duration{}, fmt.Errorf("invalid tempo duration seconds: %w", err)
+			return Span{}, fmt.Errorf("invalid tempo duration seconds: %w", err)
 		}
 
 		seconds = int(math.Trunc(value))
 		milliseconds = int(math.Round((value - math.Trunc(value)) * 1000))
 	}
 
-	parsed := Duration{
+	parsed := Span{
 		Years:        sign * mustInt(defaultString(matches[2], "0")),
 		Months:       sign * mustInt(defaultString(matches[3], "0")),
 		Weeks:        sign * mustInt(defaultString(matches[4], "0")),

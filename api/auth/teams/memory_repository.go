@@ -47,7 +47,7 @@ func (r *MemoryRepository) CreateTeam(_ context.Context, team Team) (Team, error
 	return team, nil
 }
 
-func (r *MemoryRepository) TeamsForUser(_ context.Context, userID string) ([]Team, error) {
+func (r *MemoryRepository) ForUser(_ context.Context, userID string) ([]Team, error) {
 	r.mu.RLock()
 
 	defer r.mu.RUnlock()

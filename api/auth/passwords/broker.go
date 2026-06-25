@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
-	cevents "github.com/oullin/alloy/auth/contracts/events"
-	clog "github.com/oullin/alloy/auth/contracts/log"
 	authevents "github.com/oullin/alloy/auth/events"
+	cauth "github.com/oullin/alloy/contracts/auth"
+	cevents "github.com/oullin/alloy/contracts/auth/events"
+	clog "github.com/oullin/alloy/contracts/auth/log"
 )
 
 // ErrResetLinkThrottled is returned when a reset link was requested too recently.
@@ -53,7 +53,7 @@ type Broker struct {
 	expiry   time.Duration
 	throttle time.Duration
 	events   cevents.Dispatcher
-	logger   clog.Logger
+	logger   clog.Sink
 }
 
 var (
@@ -85,7 +85,7 @@ func (b *Broker) WithEventDispatcher(dispatcher cevents.Dispatcher) *Broker {
 }
 
 // WithLogger configures the broker's diagnostic logger.
-func (b *Broker) WithLogger(logger clog.Logger) *Broker {
+func (b *Broker) WithLogger(logger clog.Sink) *Broker {
 	b.logger = logger
 
 	return b
@@ -97,7 +97,7 @@ func (b *Broker) SetEventDispatcher(dispatcher cevents.Dispatcher) {
 }
 
 // SetLogger configures the broker's diagnostic logger.
-func (b *Broker) SetLogger(logger clog.Logger) {
+func (b *Broker) SetLogger(logger clog.Sink) {
 	b.logger = logger
 }
 
@@ -219,7 +219,7 @@ func (b *Broker) GetRepository() TokenRepository {
 	return b.tokens
 }
 
-func (b *Broker) getUser(ctx context.Context, email string) (cauth.ResettableAuthenticatable, error) {
+func (b *Broker) getUser(ctx context.Context, email string) (cauth.ResettableUser, error) {
 	u, err := b.users.RetrieveByCredentials(ctx, map[string]string{"email": email})
 
 	if err != nil {
@@ -230,7 +230,7 @@ func (b *Broker) getUser(ctx context.Context, email string) (cauth.ResettableAut
 		return nil, errors.New("passwords: user not found")
 	}
 
-	crp, ok := u.(cauth.ResettableAuthenticatable)
+	crp, ok := u.(cauth.ResettableUser)
 
 	if !ok {
 		return nil, errors.New("passwords: user does not implement CanResetPassword")

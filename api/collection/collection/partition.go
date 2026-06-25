@@ -3,7 +3,7 @@ package collection
 import "math"
 
 // Chunk breaks the collection into multiple slices of the given size.
-func (c *Collection[T]) Chunk(size int) [][]T {
+func (c *List[T]) Chunk(size int) [][]T {
 	if size <= 0 {
 		return nil
 	}
@@ -23,7 +23,7 @@ func (c *Collection[T]) Chunk(size int) [][]T {
 
 // ChunkWhile breaks the collection into groups as long as the callback returns true.
 // A new group is started each time the callback returns false.
-func (c *Collection[T]) ChunkWhile(callback func(T, int, []T) bool) [][]T {
+func (c *List[T]) ChunkWhile(callback func(T, int, []T) bool) [][]T {
 	if len(c.items) == 0 {
 		return nil
 	}
@@ -46,7 +46,7 @@ func (c *Collection[T]) ChunkWhile(callback func(T, int, []T) bool) [][]T {
 }
 
 // Split breaks the collection into the given number of groups.
-func (c *Collection[T]) Split(numberOfGroups int) [][]T {
+func (c *List[T]) Split(numberOfGroups int) [][]T {
 	if len(c.items) == 0 || numberOfGroups <= 0 {
 		return nil
 	}
@@ -75,7 +75,7 @@ func (c *Collection[T]) Split(numberOfGroups int) [][]T {
 }
 
 // SplitIn splits the collection into groups, filling non-terminal groups.
-func (c *Collection[T]) SplitIn(numberOfGroups int) [][]T {
+func (c *List[T]) SplitIn(numberOfGroups int) [][]T {
 	if len(c.items) == 0 || numberOfGroups <= 0 {
 		return nil
 	}
@@ -86,7 +86,7 @@ func (c *Collection[T]) SplitIn(numberOfGroups int) [][]T {
 }
 
 // Sliding returns a sliding window view of the collection with the given window size and step.
-func (c *Collection[T]) Sliding(size int, steps ...int) [][]T {
+func (c *List[T]) Sliding(size int, steps ...int) [][]T {
 	step := 1
 
 	if len(steps) > 0 {
@@ -110,7 +110,7 @@ func (c *Collection[T]) Sliding(size int, steps ...int) [][]T {
 
 // Slice extracts a portion of the collection starting at the given offset.
 // An optional length limits how many items are returned.
-func (c *Collection[T]) Slice(offset int, lengths ...int) *Collection[T] {
+func (c *List[T]) Slice(offset int, lengths ...int) *List[T] {
 	if offset < 0 {
 		offset = max(len(c.items)+offset, 0)
 	}
@@ -149,7 +149,7 @@ func (c *Collection[T]) Slice(offset int, lengths ...int) *Collection[T] {
 
 // Splice removes and returns a slice of items starting at the given offset.
 // An optional length limits the number of items removed.
-func (c *Collection[T]) Splice(offset int, lengths ...int) *Collection[T] {
+func (c *List[T]) Splice(offset int, lengths ...int) *List[T] {
 	length := len(c.items) - offset
 
 	if len(lengths) > 0 {
@@ -175,7 +175,7 @@ func (c *Collection[T]) Splice(offset int, lengths ...int) *Collection[T] {
 
 // SpliceReplace removes a portion at the given offset and replaces it with the provided items.
 // It returns the removed items.
-func (c *Collection[T]) SpliceReplace(offset, length int, replacement []T) *Collection[T] {
+func (c *List[T]) SpliceReplace(offset, length int, replacement []T) *List[T] {
 	if offset < 0 {
 		offset = max(len(c.items)+offset, 0)
 	}
@@ -195,7 +195,7 @@ func (c *Collection[T]) SpliceReplace(offset, length int, replacement []T) *Coll
 
 // Take returns a new collection with the specified number of items from the front.
 // A negative limit takes from the end.
-func (c *Collection[T]) Take(limit int) *Collection[T] {
+func (c *List[T]) Take(limit int) *List[T] {
 	if limit < 0 {
 		return c.Slice(limit)
 	}
@@ -204,7 +204,7 @@ func (c *Collection[T]) Take(limit int) *Collection[T] {
 }
 
 // TakeUntil returns items from the start until the callback returns true.
-func (c *Collection[T]) TakeUntil(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) TakeUntil(callback func(T, int) bool) *List[T] {
 	result := make([]T, 0)
 
 	for i, item := range c.items {
@@ -219,19 +219,19 @@ func (c *Collection[T]) TakeUntil(callback func(T, int) bool) *Collection[T] {
 }
 
 // TakeWhile returns items from the start as long as the callback returns true.
-func (c *Collection[T]) TakeWhile(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) TakeWhile(callback func(T, int) bool) *List[T] {
 	return c.TakeUntil(func(item T, index int) bool {
 		return !callback(item, index)
 	})
 }
 
 // Skip returns a new collection with the first n items removed.
-func (c *Collection[T]) Skip(count int) *Collection[T] {
+func (c *List[T]) Skip(count int) *List[T] {
 	return c.Slice(count)
 }
 
 // SkipUntil skips items until the callback returns true, then returns the rest.
-func (c *Collection[T]) SkipUntil(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) SkipUntil(callback func(T, int) bool) *List[T] {
 	result := make([]T, 0)
 	found := false
 
@@ -249,14 +249,14 @@ func (c *Collection[T]) SkipUntil(callback func(T, int) bool) *Collection[T] {
 }
 
 // SkipWhile skips items as long as the callback returns true, then returns the rest.
-func (c *Collection[T]) SkipWhile(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) SkipWhile(callback func(T, int) bool) *List[T] {
 	return c.SkipUntil(func(item T, index int) bool {
 		return !callback(item, index)
 	})
 }
 
 // Nth returns a new collection containing every n-th element, starting at an optional offset.
-func (c *Collection[T]) Nth(step int, offsets ...int) *Collection[T] {
+func (c *List[T]) Nth(step int, offsets ...int) *List[T] {
 	if step <= 0 {
 		return Empty[T]()
 	}
@@ -277,14 +277,14 @@ func (c *Collection[T]) Nth(step int, offsets ...int) *Collection[T] {
 }
 
 // ForPage returns a subset of items for the given page number and page size.
-func (c *Collection[T]) ForPage(page, perPage int) *Collection[T] {
+func (c *List[T]) ForPage(page, perPage int) *List[T] {
 	offset := (page - 1) * perPage
 
 	return c.Slice(offset, perPage)
 }
 
 // Partition splits the collection into two: items that pass the predicate and items that do not.
-func (c *Collection[T]) Partition(callback func(T, int) bool) (*Collection[T], *Collection[T]) {
+func (c *List[T]) Partition(callback func(T, int) bool) (*List[T], *List[T]) {
 	pass := make([]T, 0)
 	fail := make([]T, 0)
 
@@ -300,7 +300,7 @@ func (c *Collection[T]) Partition(callback func(T, int) bool) (*Collection[T], *
 }
 
 // Concat returns a new collection with the given items appended.
-func (c *Collection[T]) Concat(items []T) *Collection[T] {
+func (c *List[T]) Concat(items []T) *List[T] {
 	result := make([]T, len(c.items)+len(items))
 	copy(result, c.items)
 	copy(result[len(c.items):], items)
@@ -309,13 +309,13 @@ func (c *Collection[T]) Concat(items []T) *Collection[T] {
 }
 
 // Merge returns a new collection with the given items merged in (appended).
-func (c *Collection[T]) Merge(items []T) *Collection[T] {
+func (c *List[T]) Merge(items []T) *List[T] {
 	return c.Concat(items)
 }
 
 // Pad pads the collection to the specified length with the given value.
 // A negative size pad on the left; a positive size pad on the right.
-func (c *Collection[T]) Pad(size int, value T) *Collection[T] {
+func (c *List[T]) Pad(size int, value T) *List[T] {
 	absSize := size
 
 	if absSize < 0 {

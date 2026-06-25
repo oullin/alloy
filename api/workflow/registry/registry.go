@@ -15,23 +15,23 @@ type SupportStrategy[T any] func(T) bool
 // Entry registers a workflow with an optional name and support predicate.
 type Entry[T any] struct {
 	Name     string
-	Workflow workflow.Engine[T]
+	Machine  workflow.Engine[T]
 	Supports SupportStrategy[T]
 }
 
-// Registry is a thread-safe set of workflow Entries.
-type Registry[T any] struct {
+// Store is a thread-safe set of workflow Entries.
+type Store[T any] struct {
 	mu      sync.RWMutex
 	entries []Entry[T]
 }
 
-func New[T any]() *Registry[T] {
-	return &Registry[T]{}
+func New[T any]() *Store[T] {
+	return &Store[T]{}
 }
 
-// Add registers a workflow entry. Nil-Workflow entries are ignored.
-func (r *Registry[T]) Add(entry Entry[T]) {
-	if entry.Workflow == nil {
+// Add registers a workflow entry. Nil-Machine entries are ignored.
+func (r *Store[T]) Add(entry Entry[T]) {
+	if entry.Machine == nil {
 		return
 	}
 
@@ -44,7 +44,7 @@ func (r *Registry[T]) Add(entry Entry[T]) {
 
 // Get returns the first workflow whose name matches (if provided) and whose
 // SupportStrategy accepts the subject.
-func (r *Registry[T]) Get(subject T, name string) (workflow.Engine[T], error) {
+func (r *Store[T]) Get(subject T, name string) (workflow.Engine[T], error) {
 	r.mu.RLock()
 
 	defer r.mu.RUnlock()
@@ -58,7 +58,7 @@ func (r *Registry[T]) Get(subject T, name string) (workflow.Engine[T], error) {
 			continue
 		}
 
-		return entry.Workflow, nil
+		return entry.Machine, nil
 	}
 
 	if name != "" {

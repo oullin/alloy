@@ -1,6 +1,6 @@
 // Package diff exposes generic temporal difference helpers that work on
-// any core.Bearer — both the immutable Tempo and the mutable
-// *MutableTempo — so Between/InDays/ForHumans share a single
+// any core.Bearer — both the immutable Time and the mutable
+// *MutableTime — so Between/InDays/ForHumans share a single
 // implementation.
 //
 // Read-only queries take a core.State for the right-hand side instead

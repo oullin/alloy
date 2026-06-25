@@ -3,7 +3,7 @@ package collection
 import "github.com/oullin/alloy/collection/support"
 
 // Diff returns the items in the collection that are not present in the given slice.
-func Diff[T comparable](c *Collection[T], items []T) *Collection[T] {
+func Diff[T comparable](c *List[T], items []T) *List[T] {
 	lookup := make(map[T]bool, len(items))
 
 	for _, item := range items {
@@ -22,7 +22,7 @@ func Diff[T comparable](c *Collection[T], items []T) *Collection[T] {
 }
 
 // DiffUsing returns items not present in the given slice, using a custom equality function.
-func (c *Collection[T]) DiffUsing(items []T, equals func(T, T) bool) *Collection[T] {
+func (c *List[T]) DiffUsing(items []T, equals func(T, T) bool) *List[T] {
 	result := make([]T, 0)
 
 	for _, item := range c.items {
@@ -45,7 +45,7 @@ func (c *Collection[T]) DiffUsing(items []T, equals func(T, T) bool) *Collection
 }
 
 // Intersect returns the items present in both the collection and the given slice.
-func Intersect[T comparable](c *Collection[T], items []T) *Collection[T] {
+func Intersect[T comparable](c *List[T], items []T) *List[T] {
 	lookup := make(map[T]bool, len(items))
 
 	for _, item := range items {
@@ -65,7 +65,7 @@ func Intersect[T comparable](c *Collection[T], items []T) *Collection[T] {
 
 // IntersectUsing returns items present in both the collection and the given slice,
 // using a custom equality function.
-func (c *Collection[T]) IntersectUsing(items []T, equals func(T, T) bool) *Collection[T] {
+func (c *List[T]) IntersectUsing(items []T, equals func(T, T) bool) *List[T] {
 	result := make([]T, 0)
 
 	for _, item := range c.items {
@@ -82,7 +82,7 @@ func (c *Collection[T]) IntersectUsing(items []T, equals func(T, T) bool) *Colle
 }
 
 // Zip merges the collection with each of the given slices element-by-element.
-func Zip[T any](c *Collection[T], others ...[]T) *Collection[[]T] {
+func Zip[T any](c *List[T], others ...[]T) *List[[]T] {
 	maxLen := len(c.items)
 
 	for _, o := range others {
@@ -121,7 +121,7 @@ func Zip[T any](c *Collection[T], others ...[]T) *Collection[[]T] {
 }
 
 // CrossJoin returns the cross-product of the collection with the given slices.
-func CrossJoin[T any](c *Collection[T], others ...[]T) *Collection[[]T] {
+func CrossJoin[T any](c *List[T], others ...[]T) *List[[]T] {
 	results := [][]T{{}}
 	allLists := append([][]T{c.items}, others...)
 
@@ -145,7 +145,7 @@ func CrossJoin[T any](c *Collection[T], others ...[]T) *Collection[[]T] {
 
 // Combine pairs of keys from this collection with values from the given slice,
 // returning a collection of Pair values.
-func Combine[K any, V any](keys *Collection[K], values []V) *Collection[support.Pair[K, V]] {
+func Combine[K any, V any](keys *List[K], values []V) *List[support.Pair[K, V]] {
 	minLen := min(len(values), len(keys.items))
 
 	result := make([]support.Pair[K, V], minLen)
@@ -158,7 +158,7 @@ func Combine[K any, V any](keys *Collection[K], values []V) *Collection[support.
 }
 
 // Collapse flattens a collection of slices into a single, flat collection.
-func Collapse[T any](c *Collection[[]T]) *Collection[T] {
+func Collapse[T any](c *List[[]T]) *List[T] {
 	result := make([]T, 0)
 
 	for _, items := range c.items {
@@ -169,8 +169,8 @@ func Collapse[T any](c *Collection[[]T]) *Collection[T] {
 }
 
 // GroupBy groups the collection's items by a key returned from the given function.
-func GroupBy[T any, K comparable](c *Collection[T], keyFunc func(T) K) map[K]*Collection[T] {
-	groups := make(map[K]*Collection[T])
+func GroupBy[T any, K comparable](c *List[T], keyFunc func(T) K) map[K]*List[T] {
+	groups := make(map[K]*List[T])
 
 	for _, item := range c.items {
 		key := keyFunc(item)
@@ -186,7 +186,7 @@ func GroupBy[T any, K comparable](c *Collection[T], keyFunc func(T) K) map[K]*Co
 }
 
 // KeyBy indexes the collection by a key returned from the given function.
-func KeyBy[T any, K comparable](c *Collection[T], keyFunc func(T) K) map[K]T {
+func KeyBy[T any, K comparable](c *List[T], keyFunc func(T) K) map[K]T {
 	result := make(map[K]T)
 
 	for _, item := range c.items {
@@ -197,7 +197,7 @@ func KeyBy[T any, K comparable](c *Collection[T], keyFunc func(T) K) map[K]T {
 }
 
 // CountBy counts how many items produce each key from the given function.
-func CountBy[T any, K comparable](c *Collection[T], keyFunc func(T) K) map[K]int {
+func CountBy[T any, K comparable](c *List[T], keyFunc func(T) K) map[K]int {
 	result := make(map[K]int)
 
 	for _, item := range c.items {
@@ -208,7 +208,7 @@ func CountBy[T any, K comparable](c *Collection[T], keyFunc func(T) K) map[K]int
 }
 
 // MapToDictionary maps each item to a key-value pair and groups values by key.
-func MapToDictionary[T any, K comparable, V any](c *Collection[T], callback func(T) (K, V)) map[K][]V {
+func MapToDictionary[T any, K comparable, V any](c *List[T], callback func(T) (K, V)) map[K][]V {
 	result := make(map[K][]V)
 
 	for _, item := range c.items {
@@ -220,12 +220,12 @@ func MapToDictionary[T any, K comparable, V any](c *Collection[T], callback func
 }
 
 // MapToGroups is an alias for MapToDictionary.
-func MapToGroups[T any, K comparable, V any](c *Collection[T], callback func(T) (K, V)) map[K][]V {
+func MapToGroups[T any, K comparable, V any](c *List[T], callback func(T) (K, V)) map[K][]V {
 	return MapToDictionary(c, callback)
 }
 
 // MapWithKeys maps each item to a key-value pair, returning a map.
-func MapWithKeys[T any, K comparable, V any](c *Collection[T], callback func(T) (K, V)) map[K]V {
+func MapWithKeys[T any, K comparable, V any](c *List[T], callback func(T) (K, V)) map[K]V {
 	result := make(map[K]V)
 
 	for _, item := range c.items {

@@ -9,7 +9,7 @@ import (
 // First returns the first element matching the optional predicate.
 // If no predicate is provided, the first element is returned.
 // The second return value indicates whether a match was found.
-func (c *Collection[T]) First(predicates ...func(T, int) bool) (T, bool) {
+func (c *List[T]) First(predicates ...func(T, int) bool) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -35,7 +35,7 @@ func (c *Collection[T]) First(predicates ...func(T, int) bool) (T, bool) {
 
 // FirstOrFail returns the first element matching the optional predicate,
 // or an ItemNotFoundError if no match is found.
-func (c *Collection[T]) FirstOrFail(predicates ...func(T, int) bool) (T, error) {
+func (c *List[T]) FirstOrFail(predicates ...func(T, int) bool) (T, error) {
 	item, ok := c.First(predicates...)
 
 	if !ok {
@@ -50,7 +50,7 @@ func (c *Collection[T]) FirstOrFail(predicates ...func(T, int) bool) (T, error) 
 // Last returns the last element matching the optional predicate.
 // If no predicate is provided, the last element is returned.
 // The second return value indicates whether a match was found.
-func (c *Collection[T]) Last(predicates ...func(T, int) bool) (T, bool) {
+func (c *List[T]) Last(predicates ...func(T, int) bool) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -77,8 +77,8 @@ func (c *Collection[T]) Last(predicates ...func(T, int) bool) (T, bool) {
 // Sole returns the only element matching the optional predicate.
 // It returns an ItemNotFoundError if no items match, or a MultipleItemsFoundError
 // if more than one item matches.
-func (c *Collection[T]) Sole(predicates ...func(T, int) bool) (T, error) {
-	var filtered *Collection[T]
+func (c *List[T]) Sole(predicates ...func(T, int) bool) (T, error) {
+	var filtered *List[T]
 
 	if len(predicates) == 0 || predicates[0] == nil {
 		filtered = c
@@ -102,8 +102,8 @@ func (c *Collection[T]) Sole(predicates ...func(T, int) bool) (T, error) {
 }
 
 // HasSole reports whether exactly one item matches the optional predicate.
-func (c *Collection[T]) HasSole(predicates ...func(T, int) bool) bool {
-	var filtered *Collection[T]
+func (c *List[T]) HasSole(predicates ...func(T, int) bool) bool {
+	var filtered *List[T]
 
 	if len(predicates) == 0 || predicates[0] == nil {
 		filtered = c
@@ -117,7 +117,7 @@ func (c *Collection[T]) HasSole(predicates ...func(T, int) bool) bool {
 // Get returns the item at the given index.
 // Negative indices count from the end. The second return value indicates
 // whether the index was within bounds. An optional default may be provided.
-func (c *Collection[T]) Get(index int, defaults ...T) (T, bool) {
+func (c *List[T]) Get(index int, defaults ...T) (T, bool) {
 	if index < 0 {
 		index = len(c.items) + index
 	}
@@ -137,7 +137,7 @@ func (c *Collection[T]) Get(index int, defaults ...T) (T, bool) {
 
 // GetOrPut returns the item at the given index if it exists.
 // Otherwise, it appends the value to the collection and returns it.
-func (c *Collection[T]) GetOrPut(index int, value T) T {
+func (c *List[T]) GetOrPut(index int, value T) T {
 	if index >= 0 && index < len(c.items) {
 		return c.items[index]
 	}
@@ -148,7 +148,7 @@ func (c *Collection[T]) GetOrPut(index int, value T) T {
 }
 
 // Contains reports whether any item in the collection satisfies the predicate.
-func (c *Collection[T]) Contains(predicate func(T, int) bool) bool {
+func (c *List[T]) Contains(predicate func(T, int) bool) bool {
 	for i, item := range c.items {
 		if predicate(item, i) {
 			return true
@@ -159,18 +159,18 @@ func (c *Collection[T]) Contains(predicate func(T, int) bool) bool {
 }
 
 // Some is an alias for Contains.
-func (c *Collection[T]) Some(predicate func(T, int) bool) bool {
+func (c *List[T]) Some(predicate func(T, int) bool) bool {
 	return c.Contains(predicate)
 }
 
 // DoesntContain reports whether no item in the collection satisfies the predicate.
-func (c *Collection[T]) DoesntContain(predicate func(T, int) bool) bool {
+func (c *List[T]) DoesntContain(predicate func(T, int) bool) bool {
 	return !c.Contains(predicate)
 }
 
 // Search returns the index of the first item satisfying the predicate.
 // The second return value indicates whether a match was found.
-func (c *Collection[T]) Search(predicate func(T, int) bool) (int, bool) {
+func (c *List[T]) Search(predicate func(T, int) bool) (int, bool) {
 	for i, item := range c.items {
 		if predicate(item, i) {
 			return i, true
@@ -181,7 +181,7 @@ func (c *Collection[T]) Search(predicate func(T, int) bool) (int, bool) {
 }
 
 // Before returns the item immediately before the first item matching the predicate.
-func (c *Collection[T]) Before(predicate func(T, int) bool) (T, bool) {
+func (c *List[T]) Before(predicate func(T, int) bool) (T, bool) {
 	for i, item := range c.items {
 		if predicate(item, i) {
 			if i == 0 {
@@ -200,7 +200,7 @@ func (c *Collection[T]) Before(predicate func(T, int) bool) (T, bool) {
 }
 
 // After returns the item immediately after the first item matching the predicate.
-func (c *Collection[T]) After(predicate func(T, int) bool) (T, bool) {
+func (c *List[T]) After(predicate func(T, int) bool) (T, bool) {
 	for i, item := range c.items {
 		if predicate(item, i) {
 			if i >= len(c.items)-1 {
@@ -220,7 +220,7 @@ func (c *Collection[T]) After(predicate func(T, int) bool) (T, bool) {
 
 // Has reports whether the given index exists in the collection.
 // Negative indices count from the end.
-func (c *Collection[T]) Has(index int) bool {
+func (c *List[T]) Has(index int) bool {
 	if index < 0 {
 		index = len(c.items) + index
 	}
@@ -229,12 +229,12 @@ func (c *Collection[T]) Has(index int) bool {
 }
 
 // HasAny reports whether any of the given indices exist in the collection.
-func (c *Collection[T]) HasAny(indices ...int) bool {
+func (c *List[T]) HasAny(indices ...int) bool {
 	return slices.ContainsFunc(indices, c.Has)
 }
 
 // Only returns a new collection containing only items at the given indices.
-func (c *Collection[T]) Only(indices ...int) *Collection[T] {
+func (c *List[T]) Only(indices ...int) *List[T] {
 	result := make([]T, 0, len(indices))
 
 	for _, idx := range indices {
@@ -247,7 +247,7 @@ func (c *Collection[T]) Only(indices ...int) *Collection[T] {
 }
 
 // Except returns a new collection excluding items at the given indices.
-func (c *Collection[T]) Except(indices ...int) *Collection[T] {
+func (c *List[T]) Except(indices ...int) *List[T] {
 	excludeSet := make(map[int]bool, len(indices))
 
 	for _, idx := range indices {
@@ -267,12 +267,12 @@ func (c *Collection[T]) Except(indices ...int) *Collection[T] {
 
 // Dot returns a shallow copy of the collection.
 // For typed Go slices, no dot-notation expansion is possible.
-func (c *Collection[T]) Dot() *Collection[T] {
+func (c *List[T]) Dot() *List[T] {
 	return c.Copy()
 }
 
 // Undot returns a shallow copy of the collection.
 // For typed Go slices, no dot-notation expansion is possible.
-func (c *Collection[T]) Undot() *Collection[T] {
+func (c *List[T]) Undot() *List[T] {
 	return c.Copy()
 }

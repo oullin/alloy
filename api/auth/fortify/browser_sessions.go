@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/auth/browsersessions"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	"github.com/oullin/alloy/auth/browserx"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type browserSessionResponse struct {
@@ -17,7 +17,7 @@ type browserSessionResponse struct {
 }
 
 // NewListBrowserSessionsHandler lists the current user's browser sessions.
-func NewListBrowserSessionsHandler(guard cauth.Guard, service *browsersessions.Service, current CurrentSessionID) http.HandlerFunc {
+func NewListBrowserSessionsHandler(guard cauth.Guard, service *browserx.Service, current CurrentSessionID) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := authenticatedUser(w, r, guard)
 
@@ -50,7 +50,7 @@ func NewListBrowserSessionsHandler(guard cauth.Guard, service *browsersessions.S
 }
 
 // NewRevokeBrowserSessionHandler revokes a single browser session.
-func NewRevokeBrowserSessionHandler(guard cauth.Guard, service *browsersessions.Service) http.HandlerFunc {
+func NewRevokeBrowserSessionHandler(guard cauth.Guard, service *browserx.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := authenticatedUser(w, r, guard)
 
@@ -89,7 +89,7 @@ func NewRevokeBrowserSessionHandler(guard cauth.Guard, service *browsersessions.
 }
 
 // NewRevokeOtherBrowserSessionsHandler revokes every other browser session.
-func NewRevokeOtherBrowserSessionsHandler(guard cauth.Guard, service *browsersessions.Service, current CurrentSessionID) http.HandlerFunc {
+func NewRevokeOtherBrowserSessionsHandler(guard cauth.Guard, service *browserx.Service, current CurrentSessionID) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := authenticatedUser(w, r, guard)
 
@@ -107,7 +107,7 @@ func NewRevokeOtherBrowserSessionsHandler(guard cauth.Guard, service *browserses
 	}
 }
 
-func authenticatedUser(w http.ResponseWriter, r *http.Request, guard cauth.Guard) (cauth.Authenticatable, bool) {
+func authenticatedUser(w http.ResponseWriter, r *http.Request, guard cauth.Guard) (cauth.User, bool) {
 	user, err := guard.User(r.Context())
 
 	if err != nil || user == nil {

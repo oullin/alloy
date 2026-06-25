@@ -149,7 +149,7 @@ func TestConverterNilCheck(t *testing.T) {
 func TestNewConverterInvalidExchange(t *testing.T) {
 	currencies := currency.NewManager()
 	// Test with Exchange that has nil rates map
-	invalidEx := &exchange.Exchange{}
+	invalidEx := &exchange.Rates{}
 
 	_, err := NewConverter(currencies, invalidEx)
 
@@ -590,7 +590,7 @@ func TestConvertRoundingBehavior(t *testing.T) {
 	}
 }
 
-func newTestConverter(t *testing.T, currencies *currency.Manager, ex *exchange.Exchange) *Converter {
+func newTestConverter(t *testing.T, currencies *currency.Manager, ex *exchange.Rates) *Converter {
 	t.Helper()
 
 	converter, err := NewConverter(currencies, ex)
@@ -641,8 +641,8 @@ func TestConverter_Convert_Coverage(t *testing.T) {
 		t.Errorf("ConvertWithRate() error message %q does not contain currency code", err.Error())
 	}
 
-	// Test Convert with Money having nil currency
-	badMoney := &Money{amount: 100, currency: nil}
+	// Test Convert with Value having nil currency
+	badMoney := &Value{amount: 100, currency: nil}
 	_, err = converter.Convert(badMoney, currency.EUR)
 
 	if err == nil {
@@ -674,7 +674,7 @@ func TestConverter_RealWorld_CommonCurrencies(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		from         *Money
+		from         *Value
 		toCurrency   string
 		rate         string
 		wantTol      int64

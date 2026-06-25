@@ -23,11 +23,11 @@ import (
 type lineageFixture struct{ names []string }
 
 const (
-	keyQueueRoutes      = "@bedrock\\Queue\\QueueRoutes"
-	keyBaseNotification = "@bedrock\\Tests\\Queue\\BaseNotification"
-	keyCustomTrait      = "@bedrock\\Tests\\Queue\\CustomTrait"
-	keyPaymentContract  = "@bedrock\\Tests\\Queue\\PaymentContract"
-	keySomeJob          = "@bedrock\\Tests\\Queue\\SomeJob"
+	keyQueueRoutes      = "@bedrock\\Backend\\QueueRoutes"
+	keyBaseNotification = "@bedrock\\Tests\\Backend\\BaseNotification"
+	keyCustomTrait      = "@bedrock\\Tests\\Backend\\CustomTrait"
+	keyPaymentContract  = "@bedrock\\Tests\\Backend\\PaymentContract"
+	keySomeJob          = "@bedrock\\Tests\\Backend\\SomeJob"
 )
 
 func (f lineageFixture) RouteLineage() []string { return f.names }
@@ -40,7 +40,7 @@ func newSomeJob() lineageFixture {
 // newFinanceNotification = `new FinanceNotification` (extends BaseNotification).
 func newFinanceNotification() lineageFixture {
 	return lineageFixture{names: []string{
-		"@bedrock\\Tests\\Queue\\FinanceNotification",
+		"@bedrock\\Tests\\Backend\\FinanceNotification",
 		keyBaseNotification,
 	}}
 }
@@ -48,7 +48,7 @@ func newFinanceNotification() lineageFixture {
 // newPayment = `new Payment` (implements PaymentContract).
 func newPayment() lineageFixture {
 	return lineageFixture{names: []string{
-		"@bedrock\\Tests\\Queue\\Payment",
+		"@bedrock\\Tests\\Backend\\Payment",
 		keyPaymentContract,
 	}}
 }

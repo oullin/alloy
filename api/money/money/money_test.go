@@ -486,7 +486,7 @@ func TestMarshalJSON(t *testing.T) {
 		t.Fatalf("MarshalJSON() = %s, want %s", string(data), `{"amount":1234,"currency":"SGD"}`)
 	}
 
-	var zero Money
+	var zero Value
 	zeroData, err := zero.MarshalJSON()
 
 	if err != nil {
@@ -501,7 +501,7 @@ func TestMarshalJSON(t *testing.T) {
 func TestUnmarshalJSON(t *testing.T) {
 	payload := []byte(`{"amount": 1234, "currency": "SGD"}`)
 
-	var m Money
+	var m Value
 
 	if err := json.Unmarshal(payload, &m); err != nil {
 		t.Fatalf("json.Unmarshal() unexpected error: %v", err)
@@ -511,7 +511,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		t.Fatalf("UnmarshalJSON() = (%d, %s), want (1234, SGD)", testutil.TestRequire(t, m.Amount), testutil.TestRequire(t, m.Currency).Code)
 	}
 
-	var empty Money
+	var empty Value
 
 	if err := json.Unmarshal([]byte(`{}`), &empty); err != nil {
 		t.Fatalf("json.Unmarshal() empty unexpected error: %v", err)
@@ -570,7 +570,7 @@ func TestCompareSameCurrency(t *testing.T) {
 }
 
 func TestUnmarshalJSONInvalidSyntax(t *testing.T) {
-	var m Money
+	var m Value
 	// Invalid JSON syntax
 	err := m.UnmarshalJSON([]byte(`{"amount": 123`))
 
@@ -584,7 +584,7 @@ func TestUnmarshalJSONInvalidSyntax(t *testing.T) {
 }
 
 func TestUnmarshalJSON_EdgeCases(t *testing.T) {
-	var m Money
+	var m Value
 
 	// Float amount logic (rounds to integer)
 	// 12.50 -> 13
@@ -674,7 +674,7 @@ func TestUnmarshalJSON_LargePrecision(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var m Money
+			var m Value
 			err := json.Unmarshal([]byte(tt.json), &m)
 
 			if err != nil {
@@ -714,7 +714,7 @@ func TestComparisons_Mismatch(t *testing.T) {
 }
 
 func TestMoneyNilReceiverErrors(t *testing.T) {
-	var m *Money
+	var m *Value
 	manager := NewManager()
 	tests := []struct {
 		name string
@@ -764,15 +764,15 @@ func TestMoneyNilOther(t *testing.T) {
 }
 
 func TestMoneyScanNilReceiver(t *testing.T) {
-	var m *Money
+	var m *Value
 
 	if err := m.Scan("10|SGD"); err == nil {
-		t.Fatal("expected error when scanning into nil Money")
+		t.Fatal("expected error when scanning into nil Value")
 	}
 }
 
 func TestMoneyCompareNilReceiver(t *testing.T) {
-	var m *Money
+	var m *Value
 
 	if _, err := m.Compare(testManager.Create(1, currency.SGD)); !errors.Is(err, exception.ErrNoMoneyProvided) {
 		t.Fatalf("Compare on nil receiver error = %v, want ErrNoMoneyProvided", err)
@@ -813,7 +813,7 @@ func TestMoneyConverterErrorPaths(t *testing.T) {
 		t.Fatal("expected error when currencies manager is nil")
 	}
 
-	invalidExchange := (*exchange.Exchange)(nil)
+	invalidExchange := (*exchange.Rates)(nil)
 
 	if _, err := NewConverter(currency.NewManager(), invalidExchange); !errors.Is(err, exception.ErrInvalidExchangeRate) {
 		t.Fatalf("NewConverter with invalid exchange error = %v, want ErrInvalidExchangeRate", err)
@@ -832,11 +832,11 @@ func TestMoneyConverterErrorPaths(t *testing.T) {
 func TestJSONNilParserAndSetters(t *testing.T) {
 	var parser *JSON
 
-	if _, err := parser.Marshal(Money{}); !errors.Is(err, exception.ErrNoJSONParserProvided) {
+	if _, err := parser.Marshal(Value{}); !errors.Is(err, exception.ErrNoJSONParserProvided) {
 		t.Fatalf("Marshal nil parser error = %v, want ErrNoJSONParserProvided", err)
 	}
 
-	if err := parser.Unmarshal(&Money{}, []byte(`{}`)); !errors.Is(err, exception.ErrNoJSONParserProvided) {
+	if err := parser.Unmarshal(&Value{}, []byte(`{}`)); !errors.Is(err, exception.ErrNoJSONParserProvided) {
 		t.Fatalf("Unmarshal nil parser error = %v, want ErrNoJSONParserProvided", err)
 	}
 
@@ -852,15 +852,15 @@ func TestJSONNilParserAndSetters(t *testing.T) {
 
 	var nilParser *JSON
 
-	if err := nilParser.SetUnmarshal(func(*Money, []byte) error { return nil }); !errors.Is(err, exception.ErrNoJSONParserProvided) {
+	if err := nilParser.SetUnmarshal(func(*Value, []byte) error { return nil }); !errors.Is(err, exception.ErrNoJSONParserProvided) {
 		t.Fatalf("SetUnmarshal nil parser error = %v, want ErrNoJSONParserProvided", err)
 	}
 
-	if err := nilParser.SetMarshal(func(Money) ([]byte, error) { return nil, nil }); !errors.Is(err, exception.ErrNoJSONParserProvided) {
+	if err := nilParser.SetMarshal(func(Value) ([]byte, error) { return nil, nil }); !errors.Is(err, exception.ErrNoJSONParserProvided) {
 		t.Fatalf("SetMarshal nil parser error = %v, want ErrNoJSONParserProvided", err)
 	}
 
-	if err := nilParser.SetCurrency(func() (*currency.Currency, error) { return nil, nil }); !errors.Is(err, exception.ErrNoJSONParserProvided) {
+	if err := nilParser.SetCurrency(func() (*currency.Definition, error) { return nil, nil }); !errors.Is(err, exception.ErrNoJSONParserProvided) {
 		t.Fatalf("SetCurrency nil parser error = %v, want ErrNoJSONParserProvided", err)
 	}
 }
@@ -886,7 +886,7 @@ func TestJSONDefaultCurrencyAndInvalidCode(t *testing.T) {
 func TestMoneyMarshalJSONErrorPropagation(t *testing.T) {
 	parser := NewJsonWithParser(
 		nil,
-		func(Money) ([]byte, error) { return nil, errors.New("boom") },
+		func(Value) ([]byte, error) { return nil, errors.New("boom") },
 		nil,
 	)
 
@@ -897,7 +897,7 @@ func TestMoneyMarshalJSONErrorPropagation(t *testing.T) {
 		t.Fatalf("unexpected setup error: %v", err)
 	}
 
-	parser.SetMarshal(func(Money) ([]byte, error) { return nil, errors.New("marshal failure") })
+	parser.SetMarshal(func(Value) ([]byte, error) { return nil, errors.New("marshal failure") })
 
 	if _, err := parser.Marshal(*m); err == nil {
 		t.Fatal("expected marshal error to propagate")
@@ -905,7 +905,7 @@ func TestMoneyMarshalJSONErrorPropagation(t *testing.T) {
 }
 
 func TestMoneyUnmarshalJSONInvalidNumberLiteral(t *testing.T) {
-	var m Money
+	var m Value
 	err := m.UnmarshalJSON([]byte(`{"amount": abc, "currency": "SGD"}`))
 
 	if !errors.Is(err, exception.ErrInvalidJSONUnmarshal) {
@@ -916,13 +916,13 @@ func TestMoneyUnmarshalJSONInvalidNumberLiteral(t *testing.T) {
 func TestJSONDefaultMarshalUnmarshalPaths(t *testing.T) {
 	var parser *JSON
 
-	if _, err := parser.defaultMarshalJSON(Money{}); !errors.Is(err, exception.ErrNoJSONParserProvided) {
+	if _, err := parser.defaultMarshalJSON(Value{}); !errors.Is(err, exception.ErrNoJSONParserProvided) {
 		t.Fatalf("defaultMarshalJSON nil parser error = %v, want ErrNoJSONParserProvided", err)
 	}
 
 	parser = NewJson()
 
-	var m Money
+	var m Value
 
 	if err := parser.defaultUnmarshalJSON(&m, []byte(`{"amount": 1.2.3, "currency": "SGD"}`)); !errors.Is(err, exception.ErrInvalidJSONUnmarshal) {
 		t.Fatalf("defaultUnmarshalJSON invalid number literal error = %v, want ErrInvalidJSONUnmarshal", err)
@@ -966,11 +966,11 @@ func TestAssertSameCurrencySuccess(t *testing.T) {
 func TestJSONCurrencyFunctionError(t *testing.T) {
 	parser := NewJson()
 
-	testutil.TestRequireNoErr(t, parser.SetCurrency(func() (*currency.Currency, error) {
+	testutil.TestRequireNoErr(t, parser.SetCurrency(func() (*currency.Definition, error) {
 		return nil, errors.New("boom")
 	}))
 
-	var m Money
+	var m Value
 
 	if err := parser.defaultUnmarshalJSON(&m, []byte(`{"amount": 10, "currency": "SGD"}`)); err == nil {
 		t.Fatal("expected error from currency function")
@@ -980,7 +980,7 @@ func TestJSONCurrencyFunctionError(t *testing.T) {
 func TestMoney_Display_Coverage(t *testing.T) {
 	t.Parallel()
 
-	m := &Money{amount: 100, currency: nil}
+	m := &Value{amount: 100, currency: nil}
 
 	if got, err := m.Display(); got != "" || err == nil {
 		t.Errorf("Display() with nil currency = (%q, %v), want empty string and error", got, err)
@@ -990,7 +990,7 @@ func TestMoney_Display_Coverage(t *testing.T) {
 func TestMoney_AsMajorUnits_Coverage(t *testing.T) {
 	t.Parallel()
 
-	m := &Money{amount: 100, currency: nil}
+	m := &Value{amount: 100, currency: nil}
 
 	if got, err := m.AsMajorUnits(); got != 0 || err == nil {
 		t.Errorf("AsMajorUnits() with nil currency = (%f, %v), want 0 and error", got, err)
@@ -1008,7 +1008,7 @@ func TestMoney_AssertSameCurrency_Coverage(t *testing.T) {
 	}
 
 	// Test with other money having nil currency
-	m2 := &Money{amount: 100, currency: nil}
+	m2 := &Value{amount: 100, currency: nil}
 
 	if err := m1.AssertSameCurrency(m2); err == nil {
 		t.Error("AssertSameCurrency(money with nil currency) should return error")

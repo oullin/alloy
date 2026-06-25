@@ -14,8 +14,8 @@ type stubDefault struct {
 	code string
 }
 
-func (s stubDefault) Get() Currency {
-	return Currency{
+func (s stubDefault) Get() Definition {
+	return Definition{
 		Code:        s.code,
 		Fraction:    1,
 		Grapheme:    "X",
@@ -60,7 +60,7 @@ func TestManagerForValidation(t *testing.T) {
 
 	t.Run("success with custom default", func(t *testing.T) {
 		def := stubDefault{code: "TST"}
-		data := map[string]*Currency{"FOO": {Code: "FOO"}}
+		data := map[string]*Definition{"FOO": {Code: "FOO"}}
 
 		manager, err := NewManagerFor(def, &data)
 
@@ -83,7 +83,7 @@ func TestManagerForValidation(t *testing.T) {
 
 		defer func() { NewCurrenciesMapFrom = original }()
 
-		data := map[string]*Currency{"BAD": nil}
+		data := map[string]*Definition{"BAD": nil}
 
 		if _, err := NewManagerFor(nil, &data); err == nil {
 			t.Fatal("expected error for invalid currency map state")
@@ -102,7 +102,7 @@ func TestManagerAndMapNilSafety(t *testing.T) {
 		t.Fatalf("nil manager AddFrom() = %v, want nil", res)
 	}
 
-	if res := manager.Add(&Currency{Code: "ANY"}); res != nil {
+	if res := manager.Add(&Definition{Code: "ANY"}); res != nil {
 		t.Fatalf("nil manager Add() = %v, want nil", res)
 	}
 
@@ -110,7 +110,7 @@ func TestManagerAndMapNilSafety(t *testing.T) {
 		t.Fatalf("nil manager FindByNumericCode() = %v, want nil", res)
 	}
 
-	empty := &Manager{currencies: &Map{dataset: &map[string]*Currency{}}}
+	empty := &Manager{currencies: &Map{dataset: &map[string]*Definition{}}}
 
 	if res := empty.FindByNumericCode("123"); res != nil {
 		t.Fatalf("empty dataset FindByNumericCode() = %v, want nil", res)
@@ -148,7 +148,7 @@ func TestCurrencyMapHelpers(t *testing.T) {
 		t.Fatal("IsNotEmpty() on nil dataset should be false")
 	}
 
-	data := map[string]*Currency{"SGD": {Code: "SGD"}}
+	data := map[string]*Definition{"SGD": {Code: "SGD"}}
 	withData := Map{dataset: &data}
 
 	if withData.IsEmpty() {
@@ -163,7 +163,7 @@ func TestCurrencyMapHelpers(t *testing.T) {
 		t.Fatalf("Get() returned %v, want SGD", cur)
 	}
 
-	if _, err := (Map{dataset: &map[string]*Currency{"BAD": nil}}).HasInvalidState(); err == nil {
+	if _, err := (Map{dataset: &map[string]*Definition{"BAD": nil}}).HasInvalidState(); err == nil {
 		t.Fatal("HasInvalidState() expected error on nil currency value")
 	}
 
@@ -181,15 +181,15 @@ func TestCurrencyMapHelpers(t *testing.T) {
 }
 
 func TestCurrencyGetNil(t *testing.T) {
-	var c *Currency
+	var c *Definition
 	got, err := c.Get()
 
 	if err == nil {
-		t.Fatal("Expected error for nil Currency Get(), got nil")
+		t.Fatal("Expected error for nil Definition Get(), got nil")
 	}
 
 	if got != nil {
-		t.Fatalf("nil Currency Get() = %v, want nil", got)
+		t.Fatalf("nil Definition Get() = %v, want nil", got)
 	}
 }
 
@@ -199,7 +199,7 @@ func TestCurrenciesMapFromSingletonReuse(t *testing.T) {
 
 	defer func() { NewCurrenciesMapFrom = original }()
 
-	data := map[string]*Currency{"ABC": {Code: "ABC"}}
+	data := map[string]*Definition{"ABC": {Code: "ABC"}}
 
 	first, err := NewCurrenciesMapFrom(&data)
 
@@ -207,7 +207,7 @@ func TestCurrenciesMapFromSingletonReuse(t *testing.T) {
 		t.Fatalf("unexpected error on first map creation: %v", err)
 	}
 
-	second, err := NewCurrenciesMapFrom(&map[string]*Currency{"IGNORED": {Code: "IGNORED"}})
+	second, err := NewCurrenciesMapFrom(&map[string]*Definition{"IGNORED": {Code: "IGNORED"}})
 
 	if err != nil {
 		t.Fatalf("unexpected error on singleton reuse: %v", err)
@@ -239,11 +239,11 @@ func TestCurrenciesMapFromConcurrency(t *testing.T) {
 	const numGoroutines = 100
 
 	// Prepare test data - each goroutine gets different data to try to initialize with
-	testDatasets := make([]*map[string]*Currency, numGoroutines)
+	testDatasets := make([]*map[string]*Definition, numGoroutines)
 
 	for i := range numGoroutines {
 		code := fmt.Sprintf("C%d", i)
-		testDatasets[i] = &map[string]*Currency{code: {Code: code}}
+		testDatasets[i] = &map[string]*Definition{code: {Code: code}}
 	}
 
 	// Channel to collect results
@@ -281,7 +281,7 @@ func TestCurrenciesMapFromConcurrency(t *testing.T) {
 	}
 
 	// Verify all goroutines got the same singleton instance
-	var firstDataset *map[string]*Currency
+	var firstDataset *map[string]*Definition
 	count := 0
 
 	for m := range results {
@@ -429,7 +429,7 @@ func TestGetDefault(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	// Valid currency
-	c := &Currency{Code: SGD, NumericCode: "702", Fraction: 2}
+	c := &Definition{Code: SGD, NumericCode: "702", Fraction: 2}
 	got, err := c.Get()
 
 	if err != nil {
@@ -448,8 +448,8 @@ func TestGet(t *testing.T) {
 		t.Errorf("Expected code %s, got %s", SGD, got.Code)
 	}
 
-	// Currency with custom code
-	c2 := &Currency{Code: "CUSTOM", Fraction: 3}
+	// Definition with custom code
+	c2 := &Definition{Code: "CUSTOM", Fraction: 3}
 	got2, err := c2.Get()
 
 	if err != nil {
@@ -613,7 +613,7 @@ func TestDbScan(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &Currency{}
+			c := &Definition{}
 			err := c.DbScan(tt.input)
 
 			if tt.wantErr {
@@ -659,7 +659,7 @@ func TestDbScan(t *testing.T) {
 
 func TestDbScanOverwrite(t *testing.T) {
 	// Test that DbScan overwrites existing currency data
-	c := &Currency{
+	c := &Definition{
 		Code:        "OLD",
 		NumericCode: "000",
 		Fraction:    0,
@@ -687,7 +687,7 @@ func TestDbScanOverwrite(t *testing.T) {
 
 func TestDbScanMultipleCalls(t *testing.T) {
 	// Test multiple consecutive scans
-	c := &Currency{}
+	c := &Definition{}
 
 	// First scan
 	err := c.DbScan(SGD)
@@ -721,7 +721,7 @@ func TestDbScanMultipleCalls(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for invalid code")
 	}
-	// Currency should still have EUR data after failed scan
+	// Definition should still have EUR data after failed scan
 	if c.Code != EUR {
 		t.Errorf("After failed scan: got %s, want %s (should not change)", c.Code, EUR)
 	}
@@ -766,7 +766,7 @@ func TestCurrencyManagerAndMap_CoveragePaths(t *testing.T) {
 	t.Run("Manager Add trims empty code", func(t *testing.T) {
 		manager := NewManager()
 
-		if got := manager.Add(&Currency{Code: "   "}); got != nil {
+		if got := manager.Add(&Definition{Code: "   "}); got != nil {
 			t.Fatalf("Add(empty code) = %#v, want nil", got)
 		}
 	})
@@ -781,7 +781,7 @@ func TestCurrencyManagerAndMap_CoveragePaths(t *testing.T) {
 	})
 
 	t.Run("Map GetCodes returns all keys", func(t *testing.T) {
-		data := map[string]*Currency{
+		data := map[string]*Definition{
 			"SGD": {Code: "SGD"},
 			"EUR": {Code: "EUR"},
 		}
@@ -797,7 +797,7 @@ func TestCurrencyManagerAndMap_CoveragePaths(t *testing.T) {
 
 func TestCurrencyDbValueAndScan_ErrorPaths(t *testing.T) {
 	t.Run("DbValue nil receiver", func(t *testing.T) {
-		var c *Currency
+		var c *Definition
 		_, err := c.DbValue()
 
 		if !errors.Is(err, exception.ErrCurrencyNotFound) {
@@ -806,7 +806,7 @@ func TestCurrencyDbValueAndScan_ErrorPaths(t *testing.T) {
 	})
 
 	t.Run("DbScan nil receiver", func(t *testing.T) {
-		var c *Currency
+		var c *Definition
 		err := c.DbScan("SGD")
 
 		if !errors.Is(err, exception.ErrCurrencyNotFound) {
@@ -815,7 +815,7 @@ func TestCurrencyDbValueAndScan_ErrorPaths(t *testing.T) {
 	})
 
 	t.Run("DbScan unsupported type", func(t *testing.T) {
-		var c Currency
+		var c Definition
 
 		if err := c.DbScan(123); err == nil {
 			t.Fatal("DbScan() expected error for unsupported type")
@@ -823,7 +823,7 @@ func TestCurrencyDbValueAndScan_ErrorPaths(t *testing.T) {
 	})
 
 	t.Run("DbScan invalid currency code", func(t *testing.T) {
-		var c Currency
+		var c Definition
 
 		if err := c.DbScan("INVALID"); err == nil {
 			t.Fatal("DbScan() expected error for invalid currency code")

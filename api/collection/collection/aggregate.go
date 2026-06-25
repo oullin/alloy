@@ -12,7 +12,7 @@ import (
 var ErrReduceSpreadLength = errors.New("collection: reduce spread callback must return the same number of values")
 
 // Median returns the median value of a float64 collection.
-func Median(c *Collection[float64]) float64 {
+func Median(c *List[float64]) float64 {
 	if len(c.items) == 0 {
 		return 0
 	}
@@ -32,14 +32,14 @@ func Median(c *Collection[float64]) float64 {
 }
 
 // MedianBy returns the median value extracted from each item by the given function.
-func MedianBy[T any](c *Collection[T], valueFunc func(T) float64) float64 {
+func MedianBy[T any](c *List[T], valueFunc func(T) float64) float64 {
 	return Median(Map(c, func(item T, _ int) float64 {
 		return valueFunc(item)
 	}))
 }
 
 // Mode returns the most frequently occurring values in the collection.
-func Mode[T comparable](c *Collection[T]) []T {
+func Mode[T comparable](c *List[T]) []T {
 	if len(c.items) == 0 {
 		return nil
 	}
@@ -67,7 +67,7 @@ func Mode[T comparable](c *Collection[T]) []T {
 }
 
 // ReduceSpread reduces a collection while carrying multiple accumulator values.
-func ReduceSpread[T any, R any](c *Collection[T], callback func([]R, T, int) []R, initial ...R) ([]R, error) {
+func ReduceSpread[T any, R any](c *List[T], callback func([]R, T, int) []R, initial ...R) ([]R, error) {
 	result := append([]R(nil), initial...)
 
 	for i, item := range c.items {
@@ -84,7 +84,7 @@ func ReduceSpread[T any, R any](c *Collection[T], callback func([]R, T, int) []R
 }
 
 // Sum returns the sum of all items in a numeric collection.
-func Sum[T support.Numeric](c *Collection[T]) T {
+func Sum[T support.Numeric](c *List[T]) T {
 	var total T
 
 	for _, item := range c.items {
@@ -95,7 +95,7 @@ func Sum[T support.Numeric](c *Collection[T]) T {
 }
 
 // SumBy returns the sum of values extracted from each item by the given function.
-func SumBy[T any, N support.Numeric](c *Collection[T], valueFunc func(T) N) N {
+func SumBy[T any, N support.Numeric](c *List[T], valueFunc func(T) N) N {
 	var total N
 
 	for _, item := range c.items {
@@ -106,7 +106,7 @@ func SumBy[T any, N support.Numeric](c *Collection[T], valueFunc func(T) N) N {
 }
 
 // Percentage returns the percentage of items matching the predicate.
-func Percentage[T any](c *Collection[T], predicate func(T, int) bool) (float64, bool) {
+func Percentage[T any](c *List[T], predicate func(T, int) bool) (float64, bool) {
 	if len(c.items) == 0 {
 		return 0, false
 	}
@@ -123,7 +123,7 @@ func Percentage[T any](c *Collection[T], predicate func(T, int) bool) (float64, 
 }
 
 // Avg returns the arithmetic mean of all items in a numeric collection.
-func Avg[T support.Numeric](c *Collection[T]) float64 {
+func Avg[T support.Numeric](c *List[T]) float64 {
 	if len(c.items) == 0 {
 		return 0
 	}
@@ -132,7 +132,7 @@ func Avg[T support.Numeric](c *Collection[T]) float64 {
 }
 
 // AvgBy returns the arithmetic mean of values extracted from each item by the given function.
-func AvgBy[T any, N support.Numeric](c *Collection[T], valueFunc func(T) N) float64 {
+func AvgBy[T any, N support.Numeric](c *List[T], valueFunc func(T) N) float64 {
 	if len(c.items) == 0 {
 		return 0
 	}
@@ -141,13 +141,13 @@ func AvgBy[T any, N support.Numeric](c *Collection[T], valueFunc func(T) N) floa
 }
 
 // Average is an alias for Avg.
-func Average[T support.Numeric](c *Collection[T]) float64 {
+func Average[T support.Numeric](c *List[T]) float64 {
 	return Avg(c)
 }
 
 // Min returns the minimum value in an ordered collection.
 // The second return value indicates whether the collection was non-empty.
-func Min[T cmp.Ordered](c *Collection[T]) (T, bool) {
+func Min[T cmp.Ordered](c *List[T]) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -167,7 +167,7 @@ func Min[T cmp.Ordered](c *Collection[T]) (T, bool) {
 
 // MinBy returns the item with the minimum key as determined by the given function.
 // The second return value indicates whether the collection was non-empty.
-func MinBy[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) (T, bool) {
+func MinBy[T any, K cmp.Ordered](c *List[T], keyFunc func(T) K) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -191,7 +191,7 @@ func MinBy[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) (T, bool) 
 
 // Max returns the maximum value in an ordered collection.
 // The second return value indicates whether the collection was non-empty.
-func Max[T cmp.Ordered](c *Collection[T]) (T, bool) {
+func Max[T cmp.Ordered](c *List[T]) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -211,7 +211,7 @@ func Max[T cmp.Ordered](c *Collection[T]) (T, bool) {
 
 // MaxBy returns the item with the maximum key as determined by the given function.
 // The second return value indicates whether the collection was non-empty.
-func MaxBy[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K) (T, bool) {
+func MaxBy[T any, K cmp.Ordered](c *List[T], keyFunc func(T) K) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 

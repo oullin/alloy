@@ -17,7 +17,7 @@ import (
 // NullDriver implements both contracts (returning nil/nil), so the
 // wrapper passes through the nil result rather than ErrNotSupported.
 
-// stubInspector is a queue.Queue that satisfies QueueNamer and
+// stubInspector is a queue.Backend that satisfies Namer and
 // JobInspector with canned return values. It lets us exercise the
 // happy-path delegation in wrappers (Background, Deferred, Failover).
 type stubInspector struct {
@@ -29,7 +29,7 @@ type stubInspector struct {
 	err        error
 }
 
-// noInspectorInner satisfies only the base Queue contract so the
+// noInspectorInner satisfies only the base Backend contract so the
 // wrappers fall to the ErrNotSupported branch.
 type noInspectorInner struct{ connection string }
 
@@ -272,9 +272,9 @@ func TestBackgroundDriverInspectionPropagatesResults(t *testing.T) {
 	inner := &stubInspector{
 		connection: "inner",
 		names:      []string{"default", "emails"},
-		pending:    []queue.InspectedJob{{ID: 1, Queue: "default"}},
-		delayed:    []queue.InspectedJob{{ID: 2, Queue: "default"}},
-		reserved:   []queue.InspectedJob{{ID: 3, Queue: "default"}},
+		pending:    []queue.InspectedJob{{ID: 1, Backend: "default"}},
+		delayed:    []queue.InspectedJob{{ID: 2, Backend: "default"}},
+		reserved:   []queue.InspectedJob{{ID: 3, Backend: "default"}},
 	}
 
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")

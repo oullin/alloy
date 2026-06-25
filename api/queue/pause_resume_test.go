@@ -232,18 +232,18 @@ func TestPauseDispatchesQueuePausedEvent(t *testing.T) {
 
 	_ = pr.Pause("redis", "default")
 
-	ev, ok := rec.last().(events.QueuePaused)
+	ev, ok := rec.last().(events.Paused)
 
 	if !ok {
-		t.Fatalf("expected QueuePaused event, got %T (%v)", rec.last(), rec.last())
+		t.Fatalf("expected Paused event, got %T (%v)", rec.last(), rec.last())
 	}
 
 	if ev.ConnectionName != "redis" {
 		t.Errorf("ConnectionName: got %q, want redis", ev.ConnectionName)
 	}
 
-	if ev.Queue != "default" {
-		t.Errorf("Queue: got %q, want default", ev.Queue)
+	if ev.Backend != "default" {
+		t.Errorf("Backend: got %q, want default", ev.Backend)
 	}
 
 	if ev.TTL != nil {
@@ -259,14 +259,14 @@ func TestPauseForDispatchesQueuePausedEventWithTTL(t *testing.T) {
 
 	_ = pr.PauseFor("redis", "emails", 60*time.Second)
 
-	ev, ok := rec.last().(events.QueuePaused)
+	ev, ok := rec.last().(events.Paused)
 
 	if !ok {
-		t.Fatalf("expected QueuePaused event, got %T", rec.last())
+		t.Fatalf("expected Paused event, got %T", rec.last())
 	}
 
-	if ev.ConnectionName != "redis" || ev.Queue != "emails" {
-		t.Errorf("ConnectionName/Queue: got %q/%q", ev.ConnectionName, ev.Queue)
+	if ev.ConnectionName != "redis" || ev.Backend != "emails" {
+		t.Errorf("ConnectionName/Backend: got %q/%q", ev.ConnectionName, ev.Backend)
 	}
 
 	if ev.TTL == nil {
@@ -286,18 +286,18 @@ func TestResumeDispatchesQueueResumedEvent(t *testing.T) {
 
 	_ = pr.Resume("database", "notifications")
 
-	ev, ok := rec.last().(events.QueueResumed)
+	ev, ok := rec.last().(events.Resumed)
 
 	if !ok {
-		t.Fatalf("expected QueueResumed event, got %T", rec.last())
+		t.Fatalf("expected Resumed event, got %T", rec.last())
 	}
 
 	if ev.ConnectionName != "database" {
 		t.Errorf("ConnectionName: got %q, want database", ev.ConnectionName)
 	}
 
-	if ev.Queue != "notifications" {
-		t.Errorf("Queue: got %q, want notifications", ev.Queue)
+	if ev.Backend != "notifications" {
+		t.Errorf("Backend: got %q, want notifications", ev.Backend)
 	}
 }
 

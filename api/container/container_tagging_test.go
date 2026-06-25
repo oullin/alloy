@@ -11,11 +11,11 @@ func TestTagAndTaggedResolvesAll(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("report-a", func(_ *container.Container) (any, error) {
+	c.Bind("report-a", func(_ *container.App) (any, error) {
 		return "a", nil
 	}, false)
 
-	c.Bind("report-b", func(_ *container.Container) (any, error) {
+	c.Bind("report-b", func(_ *container.App) (any, error) {
 		return "b", nil
 	}, false)
 
@@ -49,7 +49,7 @@ func TestMultipleTagsOnSameAbstract(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("service", func(_ *container.Container) (any, error) {
+	c.Bind("service", func(_ *container.App) (any, error) {
 		return "service", nil
 	}, false)
 
@@ -72,8 +72,8 @@ func TestTagAccumulatesAbstracts(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("a", func(_ *container.Container) (any, error) { return "a", nil }, false)
-	c.Bind("b", func(_ *container.Container) (any, error) { return "b", nil }, false)
+	c.Bind("a", func(_ *container.App) (any, error) { return "a", nil }, false)
+	c.Bind("b", func(_ *container.App) (any, error) { return "b", nil }, false)
 
 	c.Tag([]string{"a"}, "services")
 	c.Tag([]string{"b"}, "services")
@@ -90,7 +90,7 @@ func TestTaggedSkipsUnresolvableAbstracts(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("good", func(_ *container.Container) (any, error) {
+	c.Bind("good", func(_ *container.App) (any, error) {
 		return "good", nil
 	}, false)
 

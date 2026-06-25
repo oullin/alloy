@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (value *Duration) ISOString() string {
+func (value *Span) ISOString() string {
 	if value.IsZero() {
 		return "PT0S"
 	}
@@ -61,6 +61,6 @@ func (value *Duration) ISOString() string {
 	return result
 }
 
-func (value *Duration) String() string {
+func (value *Span) String() string {
 	return value.ISOString()
 }

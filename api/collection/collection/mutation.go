@@ -3,7 +3,7 @@ package collection
 import "fmt"
 
 // Put sets the item at the given index to the given value.
-func (c *Collection[T]) Put(index int, value T) *Collection[T] {
+func (c *List[T]) Put(index int, value T) *List[T] {
 	if index >= 0 && index < len(c.items) {
 		c.items[index] = value
 	}
@@ -13,7 +13,7 @@ func (c *Collection[T]) Put(index int, value T) *Collection[T] {
 
 // Pull removes and returns the item at the given index.
 // The second return value indicates whether the index was valid.
-func (c *Collection[T]) Pull(index int) (T, bool) {
+func (c *List[T]) Pull(index int) (T, bool) {
 	if index < 0 || index >= len(c.items) {
 		var zero T
 
@@ -27,32 +27,32 @@ func (c *Collection[T]) Pull(index int) (T, bool) {
 }
 
 // Push appends one or more items to the end of the collection.
-func (c *Collection[T]) Push(values ...T) *Collection[T] {
+func (c *List[T]) Push(values ...T) *List[T] {
 	c.items = append(c.items, values...)
 
 	return c
 }
 
 // Add appends a single item to the end of the collection.
-func (c *Collection[T]) Add(item T) *Collection[T] {
+func (c *List[T]) Add(item T) *List[T] {
 	return c.Push(item)
 }
 
 // Prepend adds an item to the beginning of the collection.
-func (c *Collection[T]) Prepend(value T) *Collection[T] {
+func (c *List[T]) Prepend(value T) *List[T] {
 	c.items = append([]T{value}, c.items...)
 
 	return c
 }
 
 // Unshift is an alias for Prepend.
-func (c *Collection[T]) Unshift(value T) *Collection[T] {
+func (c *List[T]) Unshift(value T) *List[T] {
 	return c.Prepend(value)
 }
 
 // Pop removes and returns the last item from the collection.
 // The second return value indicates whether the collection was non-empty.
-func (c *Collection[T]) Pop(counts ...int) (T, bool) {
+func (c *List[T]) Pop(counts ...int) (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -80,7 +80,7 @@ func (c *Collection[T]) Pop(counts ...int) (T, bool) {
 }
 
 // PopMany removes and returns the last n items from the collection.
-func (c *Collection[T]) PopMany(count int) *Collection[T] {
+func (c *List[T]) PopMany(count int) *List[T] {
 	if count >= len(c.items) {
 		popped := Collect(c.items)
 		c.items = make([]T, 0)
@@ -110,7 +110,7 @@ func (c *Collection[T]) PopMany(count int) *Collection[T] {
 
 // Shift removes and returns the first item from the collection.
 // The second return value indicates whether the collection was non-empty.
-func (c *Collection[T]) Shift() (T, bool) {
+func (c *List[T]) Shift() (T, bool) {
 	if len(c.items) == 0 {
 		var zero T
 
@@ -131,7 +131,7 @@ func (c *Collection[T]) Shift() (T, bool) {
 }
 
 // ShiftMany removes and returns the first n items from the collection.
-func (c *Collection[T]) ShiftMany(count int) *Collection[T] {
+func (c *List[T]) ShiftMany(count int) *List[T] {
 	if count >= len(c.items) {
 		shifted := Collect(c.items)
 		c.items = make([]T, 0)
@@ -158,7 +158,7 @@ func (c *Collection[T]) ShiftMany(count int) *Collection[T] {
 }
 
 // Forget removes an item from the collection by index, mutating the collection.
-func (c *Collection[T]) Forget(index int) *Collection[T] {
+func (c *List[T]) Forget(index int) *List[T] {
 	if index < 0 || index >= len(c.items) {
 		return c
 	}
@@ -169,7 +169,7 @@ func (c *Collection[T]) Forget(index int) *Collection[T] {
 }
 
 // Transform applies the callback to each item in place, mutating the collection.
-func (c *Collection[T]) Transform(callback func(T, int) T) *Collection[T] {
+func (c *List[T]) Transform(callback func(T, int) T) *List[T] {
 	for i, item := range c.items {
 		c.items[i] = callback(item, i)
 	}
@@ -178,7 +178,7 @@ func (c *Collection[T]) Transform(callback func(T, int) T) *Collection[T] {
 }
 
 // Ensure verifies that all items satisfy the given predicate, returning an error if any do not.
-func (c *Collection[T]) Ensure(predicate func(T) bool) error {
+func (c *List[T]) Ensure(predicate func(T) bool) error {
 	for _, item := range c.items {
 		if !predicate(item) {
 			return fmt.Errorf("collection item failed ensure check")

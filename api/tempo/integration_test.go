@@ -14,7 +14,7 @@ func assertEqual(t *testing.T, label string, got string, want string) {
 	}
 }
 
-func mustTempo(t *testing.T, value Tempo, err error) Tempo {
+func mustTempo(t *testing.T, value Time, err error) Time {
 	t.Helper()
 
 	if err != nil {
@@ -24,7 +24,7 @@ func mustTempo(t *testing.T, value Tempo, err error) Tempo {
 	return value
 }
 
-func mustMutable(t *testing.T, value *MutableTempo, err error) *MutableTempo {
+func mustMutable(t *testing.T, value *MutableTime, err error) *MutableTime {
 	t.Helper()
 
 	if err != nil {
@@ -681,7 +681,7 @@ func TestCompareDiffRoundAndFormat(t *testing.T) {
 		t.Fatalf("DiffInMicroseconds() = %d, want microsecond diff", got)
 	}
 
-	if got := base.DiffFiltered(earlier, func(item Tempo) bool { return item.IsWeekday() }); got != 1 {
+	if got := base.DiffFiltered(earlier, func(item Time) bool { return item.IsWeekday() }); got != 1 {
 		t.Fatalf("DiffFiltered(weekday) = %d, want 1", got)
 	}
 
@@ -959,7 +959,7 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 		t.Fatalf("Period.IsEmpty() = %v, %v, want false, nil", empty, err)
 	}
 
-	filtered, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Filter(func(value Tempo, _ int) bool {
+	filtered, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Filter(func(value Time, _ int) bool {
 		return value.Day() != 3
 	})
 
@@ -979,7 +979,7 @@ func TestIntervalsPeriodsAndMutableTempo(t *testing.T) {
 		t.Fatalf("Period.Filter() = %#v, want %#v", filteredDates, wantFilteredDates)
 	}
 
-	mapped, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Map(func(value Tempo, index int) Tempo {
+	mapped, err := start.PeriodUntil(periodEnd, PeriodOptions{Step: Duration{Days: 2}}).Map(func(value Time, index int) Time {
 		return value.AddDays(index)
 	})
 
@@ -1638,11 +1638,11 @@ func TestRangeClampAverageSelectionAndBoundaryPredicates(t *testing.T) {
 		t.Fatalf("millennium boundary helpers = false, want true")
 	}
 
-	if !(Tempo{value: time.UnixMilli(-8640000000000000), location: time.UTC}).IsStartOfTime() {
+	if !(Time{value: time.UnixMilli(-8640000000000000), location: time.UTC}).IsStartOfTime() {
 		t.Fatalf("IsStartOfTime() = false, want true")
 	}
 
-	if !(Tempo{value: time.UnixMilli(8640000000000000), location: time.UTC}).IsEndOfTime() {
+	if !(Time{value: time.UnixMilli(8640000000000000), location: time.UTC}).IsEndOfTime() {
 		t.Fatalf("IsEndOfTime() = false, want true")
 	}
 }

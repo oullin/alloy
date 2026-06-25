@@ -28,7 +28,7 @@ type FileFailedJobProvider struct {
 type fileRecord struct {
 	ID                string `json:"id"`
 	Connection        string `json:"connection"`
-	Queue             string `json:"queue"`
+	Backend           string `json:"queue"`
 	Payload           string `json:"payload"`
 	Exception         string `json:"exception"`
 	FailedAt          string `json:"failed_at"`
@@ -45,7 +45,7 @@ func NewFileFailedJobProvider(path string, limit int) *FileFailedJobProvider {
 	return &FileFailedJobProvider{path: path, limit: limit, now: time.Now}
 }
 
-// Log implements FailedJobProvider.
+// Log implements Provider.
 func (p *FileFailedJobProvider) Log(connection, queue, payload string, exception error) (string, error) {
 	p.mu.Lock()
 
@@ -62,7 +62,7 @@ func (p *FileFailedJobProvider) Log(connection, queue, payload string, exception
 	entry := fileRecord{
 		ID:                id,
 		Connection:        connection,
-		Queue:             queue,
+		Backend:           queue,
 		Payload:           payload,
 		Exception:         errString(exception),
 		FailedAt:          now.Format("2006-01-02 15:04:05"),
@@ -81,7 +81,7 @@ func (p *FileFailedJobProvider) Log(connection, queue, payload string, exception
 	return id, nil
 }
 
-// IDs implements FailedJobProvider.
+// IDs implements Provider.
 func (p *FileFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	p.mu.Lock()
 
@@ -96,7 +96,7 @@ func (p *FileFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	out := []string{}
 
 	for _, j := range jobs {
-		if queueFilter != "" && j.Queue != queueFilter {
+		if queueFilter != "" && j.Backend != queueFilter {
 			continue
 		}
 
@@ -106,8 +106,8 @@ func (p *FileFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	return out, nil
 }
 
-// All implements FailedJobProvider.
-func (p *FileFailedJobProvider) All() ([]FailedJob, error) {
+// All implements Provider.
+func (p *FileFailedJobProvider) All() ([]Job, error) {
 	p.mu.Lock()
 
 	defer p.mu.Unlock()
@@ -118,7 +118,7 @@ func (p *FileFailedJobProvider) All() ([]FailedJob, error) {
 		return nil, err
 	}
 
-	out := make([]FailedJob, 0, len(jobs))
+	out := make([]Job, 0, len(jobs))
 
 	for _, j := range jobs {
 		out = append(out, j.toFailedJob())
@@ -127,8 +127,8 @@ func (p *FileFailedJobProvider) All() ([]FailedJob, error) {
 	return out, nil
 }
 
-// Find implements FailedJobProvider.
-func (p *FileFailedJobProvider) Find(id string) (*FailedJob, error) {
+// Find implements Provider.
+func (p *FileFailedJobProvider) Find(id string) (*Job, error) {
 	p.mu.Lock()
 
 	defer p.mu.Unlock()
@@ -150,7 +150,7 @@ func (p *FileFailedJobProvider) Find(id string) (*FailedJob, error) {
 	return nil, nil
 }
 
-// Forget implements FailedJobProvider.
+// Forget implements Provider.
 func (p *FileFailedJobProvider) Forget(id string) (bool, error) {
 	p.mu.Lock()
 
@@ -182,7 +182,7 @@ func (p *FileFailedJobProvider) Forget(id string) (bool, error) {
 	return removed, nil
 }
 
-// Flush implements FailedJobProvider. It delegates to Prune using a
+// Flush implements Provider. It delegates to Prune using a
 func (p *FileFailedJobProvider) Flush(hours int) error {
 	cutoff := p.now().Add(-time.Duration(hours) * time.Hour)
 	_, err := p.Prune(cutoff)
@@ -244,7 +244,7 @@ func (p *FileFailedJobProvider) Count(connection, queueFilter string) (int64, er
 			continue
 		}
 
-		if queueFilter != "" && j.Queue != queueFilter {
+		if queueFilter != "" && j.Backend != queueFilter {
 			continue
 		}
 
@@ -292,14 +292,14 @@ func (p *FileFailedJobProvider) write(jobs []fileRecord) error {
 	return os.WriteFile(p.path, data, 0o644)
 }
 
-func (r fileRecord) toFailedJob() FailedJob {
+func (r fileRecord) toFailedJob() Job {
 	t := time.Unix(r.FailedAtTimestamp, 0)
 
-	return FailedJob{
+	return Job{
 		ID:         r.ID,
 		UUID:       r.ID,
 		Connection: r.Connection,
-		Queue:      r.Queue,
+		Backend:    r.Backend,
 		Payload:    r.Payload,
 		Exception:  r.Exception,
 		FailedAt:   t,

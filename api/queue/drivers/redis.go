@@ -383,7 +383,7 @@ func (d *RedisDriver) snapshotsFromPayloads(queueName string, raws []string, res
 
 	for _, raw := range raws {
 		job := queue.InspectedJob{
-			Queue:      queueName,
+			Backend:    queueName,
 			Connection: d.connection,
 			Payload:    []byte(raw),
 			ReservedAt: reservedAt,

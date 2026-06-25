@@ -3,8 +3,8 @@ package fortify
 import (
 	"net/http"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
 	"github.com/oullin/alloy/auth/passkeys"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // NewBeginPasskeyRegistrationHandler returns WebAuthn registration options.

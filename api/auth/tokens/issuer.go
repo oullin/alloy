@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // Issuer creates personal access tokens for authenticated users.
@@ -19,7 +19,7 @@ func NewIssuer(repo Repository) *Issuer {
 
 // CreateToken creates a hashed personal access token and returns its plaintext
 // form once.
-func (i *Issuer) CreateToken(ctx context.Context, user cauth.Authenticatable, name string, abilities []string, expiresAt *time.Time) (PlainTextToken, error) {
+func (i *Issuer) CreateToken(ctx context.Context, user cauth.User, name string, abilities []string, expiresAt *time.Time) (PlainTextToken, error) {
 	secret, err := GenerateSecret()
 
 	if err != nil {

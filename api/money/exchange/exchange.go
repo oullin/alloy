@@ -7,22 +7,22 @@ import (
 	"github.com/oullin/alloy/money/exception"
 )
 
-// Exchange provides currency conversion functionality.
+// Rates provides currency conversion functionality.
 // Safe for concurrent use by multiple goroutines.
-type Exchange struct {
+type Rates struct {
 	mu    sync.RWMutex
 	rates map[string]map[string]float64
 }
 
-// NewExchange creates a new Exchange instance.
-func NewExchange() *Exchange {
-	return &Exchange{
+// NewExchange creates a new Rates instance.
+func NewExchange() *Rates {
+	return &Rates{
 		rates: make(map[string]map[string]float64),
 	}
 }
 
-// IsValid checks if the Exchange is properly initialised with a valid rates map
-func (e *Exchange) IsValid() bool {
+// IsValid checks if the Rates is properly initialised with a valid rates map
+func (e *Rates) IsValid() bool {
 	if e == nil {
 		return false
 	}
@@ -34,13 +34,13 @@ func (e *Exchange) IsValid() bool {
 	return e.rates != nil && len(e.rates) > 0
 }
 
-// IsInvalid checks if the Exchange is not properly initialised or has no rates
-func (e *Exchange) IsInvalid() bool {
+// IsInvalid checks if the Rates is not properly initialised or has no rates
+func (e *Rates) IsInvalid() bool {
 	return !e.IsValid()
 }
 
 // AddRate adds or updates a conversion rate between two tables.
-func (e *Exchange) AddRate(baseCurrency, counterCurrency string, rate float64) error {
+func (e *Rates) AddRate(baseCurrency, counterCurrency string, rate float64) error {
 	if e == nil || rate <= 0 {
 		return exception.ErrInvalidExchangeRate
 	}
@@ -60,7 +60,7 @@ func (e *Exchange) AddRate(baseCurrency, counterCurrency string, rate float64) e
 
 // GetRate retrieves the conversion rate between two tables.
 // If a direct rate is not found, it attempts to use the inverse rate.
-func (e *Exchange) GetRate(baseCurrency, counterCurrency string) (float64, error) {
+func (e *Rates) GetRate(baseCurrency, counterCurrency string) (float64, error) {
 	if e == nil {
 		return -1, exception.ErrInvalidExchangeRate
 	}
@@ -90,7 +90,7 @@ func (e *Exchange) GetRate(baseCurrency, counterCurrency string) (float64, error
 }
 
 // ConvertAmount converts an amount from one currency to another using the stored exchange rates.
-func (e *Exchange) ConvertAmount(amount int64, fromCurrencyCode string, fromFraction int, toCurrencyCode string, toFraction int) (int64, error) {
+func (e *Rates) ConvertAmount(amount int64, fromCurrencyCode string, fromFraction int, toCurrencyCode string, toFraction int) (int64, error) {
 	if e == nil {
 		return -1, exception.ErrInvalidExchangeRate
 	}
@@ -121,7 +121,7 @@ func (e *Exchange) ConvertAmount(amount int64, fromCurrencyCode string, fromFrac
 }
 
 // ConvertAmountWithRate converts an amount from one currency to another using a provided exchange rate.
-func (e *Exchange) ConvertAmountWithRate(amount int64, fromFraction int, toFraction int, rate float64) (int64, error) {
+func (e *Rates) ConvertAmountWithRate(amount int64, fromFraction int, toFraction int, rate float64) (int64, error) {
 	if e == nil || rate <= 0 {
 		return 0, exception.ErrInvalidExchangeRate
 	}

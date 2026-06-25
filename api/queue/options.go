@@ -17,7 +17,7 @@ import (
 //	}
 //
 // This is the Go analogue of the upstream PHP8 attributes (#[Tries], #[Backoff],
-// #[Timeout], #[Queue], #[Connection], #[Delay], #[UniqueFor], #[FailOnTimeout],
+// #[Timeout], #[Backend], #[Connection], #[Delay], #[UniqueFor], #[FailOnTimeout],
 // #[MaxExceptions], #[DeleteWhenMissingModels]).
 //
 // Supported keys:
@@ -148,7 +148,7 @@ func applyJobOptionsKey(opts *JobOptions, key, value string, hasValue bool) erro
 			return fmt.Errorf("key %q requires a value", key)
 		}
 
-		opts.Queue = value
+		opts.Backend = value
 
 		return nil
 	case "connection":

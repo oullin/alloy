@@ -7,335 +7,335 @@ import (
 	"github.com/oullin/alloy/tempo/internal/kernel"
 )
 
-func (tempo Tempo) StartOf(unit Unit, options ...StartOfWeekOptions) Tempo {
+func (tempo Time) StartOf(unit Unit, options ...StartOfWeekOptions) Time {
 	return boundaries.StartOf(tempo, unit, weekOptions(options)...)
 }
 
-func (tempo Tempo) EndOf(unit Unit, options ...StartOfWeekOptions) Tempo {
+func (tempo Time) EndOf(unit Unit, options ...StartOfWeekOptions) Time {
 	return boundaries.EndOf(tempo, unit, weekOptions(options)...)
 }
 
-func (tempo Tempo) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
+func (tempo Time) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return boundaries.IsStartOf(tempo, unit, weekOptions(options)...)
 }
 
-func (tempo Tempo) IsStartOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
+func (tempo Time) IsStartOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.IsStartOf(unit, options...)
 }
 
-func (tempo Tempo) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
+func (tempo Time) IsEndOf(unit Unit, options ...StartOfWeekOptions) bool {
 	return boundaries.IsEndOf(tempo, unit, weekOptions(options)...)
 }
 
-func (tempo Tempo) IsEndOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
+func (tempo Time) IsEndOfUnit(unit Unit, options ...StartOfWeekOptions) bool {
 	return tempo.IsEndOf(unit, options...)
 }
 
-func (tempo Tempo) IsStartOfTime() bool {
+func (tempo Time) IsStartOfTime() bool {
 	return tempo.value.UnixMilli() <= -8640000000000000
 }
 
-func (tempo Tempo) IsEndOfTime() bool {
+func (tempo Time) IsEndOfTime() bool {
 	return tempo.value.UnixMilli() >= 8640000000000000
 }
 
-func (tempo Tempo) IsCurrentUnit(unit Unit, reference Tempo) bool {
+func (tempo Time) IsCurrentUnit(unit Unit, reference Time) bool {
 	return tempo.Same(reference, unit)
 }
 
-func (tempo Tempo) IsStartOfMillisecond() bool {
+func (tempo Time) IsStartOfMillisecond() bool {
 	return tempo.IsStartOf(Millisecond)
 }
 
-func (tempo Tempo) IsEndOfMillisecond() bool {
+func (tempo Time) IsEndOfMillisecond() bool {
 	return tempo.IsEndOf(Millisecond)
 }
 
-func (tempo Tempo) IsStartOfSecond() bool {
+func (tempo Time) IsStartOfSecond() bool {
 	return tempo.IsStartOf(Second)
 }
 
-func (tempo Tempo) IsEndOfSecond() bool {
+func (tempo Time) IsEndOfSecond() bool {
 	return tempo.IsEndOf(Second)
 }
 
-func (tempo Tempo) IsStartOfMinute() bool {
+func (tempo Time) IsStartOfMinute() bool {
 	return tempo.IsStartOf(Minute)
 }
 
-func (tempo Tempo) IsEndOfMinute() bool {
+func (tempo Time) IsEndOfMinute() bool {
 	return tempo.IsEndOf(Minute)
 }
 
-func (tempo Tempo) IsStartOfHour() bool {
+func (tempo Time) IsStartOfHour() bool {
 	return tempo.IsStartOf(Hour)
 }
 
-func (tempo Tempo) IsEndOfHour() bool {
+func (tempo Time) IsEndOfHour() bool {
 	return tempo.IsEndOf(Hour)
 }
 
-func (tempo Tempo) StartOfMillisecond() Tempo {
+func (tempo Time) StartOfMillisecond() Time {
 	return tempo.StartOf(Millisecond)
 }
 
-func (tempo Tempo) EndOfMillisecond() Tempo {
+func (tempo Time) EndOfMillisecond() Time {
 	return tempo.EndOf(Millisecond)
 }
 
-func (tempo Tempo) StartOfSecond() Tempo {
+func (tempo Time) StartOfSecond() Time {
 	return tempo.StartOf(Second)
 }
 
-func (tempo Tempo) EndOfSecond() Tempo {
+func (tempo Time) EndOfSecond() Time {
 	return tempo.EndOf(Second)
 }
 
-func (tempo Tempo) StartOfMinute() Tempo {
+func (tempo Time) StartOfMinute() Time {
 	return tempo.StartOf(Minute)
 }
 
-func (tempo Tempo) EndOfMinute() Tempo {
+func (tempo Time) EndOfMinute() Time {
 	return tempo.EndOf(Minute)
 }
 
-func (tempo Tempo) StartOfHour() Tempo {
+func (tempo Time) StartOfHour() Time {
 	return tempo.StartOf(Hour)
 }
 
-func (tempo Tempo) EndOfHour() Tempo {
+func (tempo Time) EndOfHour() Time {
 	return tempo.EndOf(Hour)
 }
 
-func (tempo Tempo) IsStartOfDay() bool {
+func (tempo Time) IsStartOfDay() bool {
 	return tempo.IsStartOf(Day)
 }
 
-func (tempo Tempo) IsEndOfDay() bool {
+func (tempo Time) IsEndOfDay() bool {
 	return tempo.IsEndOf(Day)
 }
 
-func (tempo Tempo) IsStartOfWeek(options ...StartOfWeekOptions) bool {
+func (tempo Time) IsStartOfWeek(options ...StartOfWeekOptions) bool {
 	return tempo.IsStartOf(Week, options...)
 }
 
-func (tempo Tempo) IsEndOfWeek(options ...StartOfWeekOptions) bool {
+func (tempo Time) IsEndOfWeek(options ...StartOfWeekOptions) bool {
 	return tempo.IsEndOf(Week, options...)
 }
 
-func (tempo Tempo) IsStartOfMonth() bool {
+func (tempo Time) IsStartOfMonth() bool {
 	return tempo.IsStartOf(Month)
 }
 
-func (tempo Tempo) IsEndOfMonth() bool {
+func (tempo Time) IsEndOfMonth() bool {
 	return tempo.IsEndOf(Month)
 }
 
-func (tempo Tempo) IsStartOfQuarter() bool {
+func (tempo Time) IsStartOfQuarter() bool {
 	return tempo.IsStartOf(Quarter)
 }
 
-func (tempo Tempo) IsEndOfQuarter() bool {
+func (tempo Time) IsEndOfQuarter() bool {
 	return tempo.IsEndOf(Quarter)
 }
 
-func (tempo Tempo) IsStartOfYear() bool {
+func (tempo Time) IsStartOfYear() bool {
 	return tempo.IsStartOf(Year)
 }
 
-func (tempo Tempo) IsEndOfYear() bool {
+func (tempo Time) IsEndOfYear() bool {
 	return tempo.IsEndOf(Year)
 }
 
-func (tempo Tempo) IsStartOfDecade() bool {
+func (tempo Time) IsStartOfDecade() bool {
 	return tempo.IsStartOf(Decade)
 }
 
-func (tempo Tempo) IsEndOfDecade() bool {
+func (tempo Time) IsEndOfDecade() bool {
 	return tempo.IsEndOf(Decade)
 }
 
-func (tempo Tempo) IsStartOfCentury() bool {
+func (tempo Time) IsStartOfCentury() bool {
 	return tempo.IsStartOf(Century)
 }
 
-func (tempo Tempo) IsEndOfCentury() bool {
+func (tempo Time) IsEndOfCentury() bool {
 	return tempo.IsEndOf(Century)
 }
 
-func (tempo Tempo) IsStartOfMillennium() bool {
+func (tempo Time) IsStartOfMillennium() bool {
 	return tempo.IsStartOf(Millennium)
 }
 
-func (tempo Tempo) IsEndOfMillennium() bool {
+func (tempo Time) IsEndOfMillennium() bool {
 	return tempo.IsEndOf(Millennium)
 }
 
-func (tempo Tempo) StartOfDay() Tempo {
+func (tempo Time) StartOfDay() Time {
 	return tempo.StartOf(Day)
 }
 
-func (tempo Tempo) EndOfDay() Tempo {
+func (tempo Time) EndOfDay() Time {
 	return tempo.EndOf(Day)
 }
 
-func (tempo Tempo) StartOfWeek(options ...StartOfWeekOptions) Tempo {
+func (tempo Time) StartOfWeek(options ...StartOfWeekOptions) Time {
 	return tempo.StartOf(Week, options...)
 }
 
-func (tempo Tempo) EndOfWeek(options ...StartOfWeekOptions) Tempo {
+func (tempo Time) EndOfWeek(options ...StartOfWeekOptions) Time {
 	return tempo.EndOf(Week, options...)
 }
 
-func (tempo Tempo) StartOfMonth() Tempo {
+func (tempo Time) StartOfMonth() Time {
 	return tempo.StartOf(Month)
 }
 
-func (tempo Tempo) EndOfMonth() Tempo {
+func (tempo Time) EndOfMonth() Time {
 	return tempo.EndOf(Month)
 }
 
-func (tempo Tempo) StartOfQuarter() Tempo {
+func (tempo Time) StartOfQuarter() Time {
 	return tempo.StartOf(Quarter)
 }
 
-func (tempo Tempo) EndOfQuarter() Tempo {
+func (tempo Time) EndOfQuarter() Time {
 	return tempo.EndOf(Quarter)
 }
 
-func (tempo Tempo) FirstOfMonth(weekdays ...time.Weekday) Tempo {
+func (tempo Time) FirstOfMonth(weekdays ...time.Weekday) Time {
 	return boundaries.FirstOfMonth(tempo, weekdays...)
 }
 
-func (tempo Tempo) LastOfMonth(weekdays ...time.Weekday) Tempo {
+func (tempo Time) LastOfMonth(weekdays ...time.Weekday) Time {
 	return boundaries.LastOfMonth(tempo, weekdays...)
 }
 
-func (tempo Tempo) NthOfMonth(occurrence int, weekday time.Weekday) (Tempo, bool) {
+func (tempo Time) NthOfMonth(occurrence int, weekday time.Weekday) (Time, bool) {
 	return boundaries.NthOfMonth(tempo, occurrence, weekday)
 }
 
-func (tempo Tempo) FirstOfQuarter(weekdays ...time.Weekday) Tempo {
+func (tempo Time) FirstOfQuarter(weekdays ...time.Weekday) Time {
 	return boundaries.FirstOfQuarter(tempo, weekdays...)
 }
 
-func (tempo Tempo) LastOfQuarter(weekdays ...time.Weekday) Tempo {
+func (tempo Time) LastOfQuarter(weekdays ...time.Weekday) Time {
 	return boundaries.LastOfQuarter(tempo, weekdays...)
 }
 
-func (tempo Tempo) NthOfQuarter(occurrence int, weekday time.Weekday) (Tempo, bool) {
+func (tempo Time) NthOfQuarter(occurrence int, weekday time.Weekday) (Time, bool) {
 	return boundaries.NthOfQuarter(tempo, occurrence, weekday)
 }
 
-func (tempo Tempo) StartOfYear() Tempo {
+func (tempo Time) StartOfYear() Time {
 	return tempo.StartOf(Year)
 }
 
-func (tempo Tempo) EndOfYear() Tempo {
+func (tempo Time) EndOfYear() Time {
 	return tempo.EndOf(Year)
 }
 
-func (tempo Tempo) StartOfDecade() Tempo {
+func (tempo Time) StartOfDecade() Time {
 	return tempo.StartOf(Decade)
 }
 
-func (tempo Tempo) EndOfDecade() Tempo {
+func (tempo Time) EndOfDecade() Time {
 	return tempo.EndOf(Decade)
 }
 
-func (tempo Tempo) StartOfCentury() Tempo {
+func (tempo Time) StartOfCentury() Time {
 	return tempo.StartOf(Century)
 }
 
-func (tempo Tempo) EndOfCentury() Tempo {
+func (tempo Time) EndOfCentury() Time {
 	return tempo.EndOf(Century)
 }
 
-func (tempo Tempo) StartOfMillennium() Tempo {
+func (tempo Time) StartOfMillennium() Time {
 	return tempo.StartOf(Millennium)
 }
 
-func (tempo Tempo) EndOfMillennium() Tempo {
+func (tempo Time) EndOfMillennium() Time {
 	return tempo.EndOf(Millennium)
 }
 
-func (tempo Tempo) FirstOfYear(weekdays ...time.Weekday) Tempo {
+func (tempo Time) FirstOfYear(weekdays ...time.Weekday) Time {
 	return boundaries.FirstOfYear(tempo, weekdays...)
 }
 
-func (tempo Tempo) LastOfYear(weekdays ...time.Weekday) Tempo {
+func (tempo Time) LastOfYear(weekdays ...time.Weekday) Time {
 	return boundaries.LastOfYear(tempo, weekdays...)
 }
 
-func (tempo Tempo) NthOfYear(occurrence int, weekday time.Weekday) (Tempo, bool) {
+func (tempo Time) NthOfYear(occurrence int, weekday time.Weekday) (Time, bool) {
 	return boundaries.NthOfYear(tempo, occurrence, weekday)
 }
 
-func (tempo Tempo) Floor(unit Unit) Tempo {
+func (tempo Time) Floor(unit Unit) Time {
 	return boundaries.Floor(tempo, unit)
 }
 
-func (tempo Tempo) FloorUnit(unit Unit) Tempo {
+func (tempo Time) FloorUnit(unit Unit) Time {
 	return tempo.Floor(unit)
 }
 
-func (tempo Tempo) FloorWeek(options ...StartOfWeekOptions) Tempo {
+func (tempo Time) FloorWeek(options ...StartOfWeekOptions) Time {
 	return boundaries.FloorWeek(tempo, weekOptions(options)...)
 }
 
-func (tempo Tempo) Ceil(unit Unit) Tempo {
+func (tempo Time) Ceil(unit Unit) Time {
 	return boundaries.Ceil(tempo, unit)
 }
 
-func (tempo Tempo) CeilUnit(unit Unit) Tempo {
+func (tempo Time) CeilUnit(unit Unit) Time {
 	return tempo.Ceil(unit)
 }
 
-func (tempo Tempo) CeilWeek(options ...StartOfWeekOptions) Tempo {
+func (tempo Time) CeilWeek(options ...StartOfWeekOptions) Time {
 	return boundaries.CeilWeek(tempo, weekOptions(options)...)
 }
 
-func (tempo Tempo) Round(unit Unit) Tempo {
+func (tempo Time) Round(unit Unit) Time {
 	return boundaries.Round(tempo, unit)
 }
 
-func (tempo Tempo) RoundUnit(unit Unit) Tempo {
+func (tempo Time) RoundUnit(unit Unit) Time {
 	return tempo.Round(unit)
 }
 
-func (tempo Tempo) RoundWeek(options ...StartOfWeekOptions) Tempo {
+func (tempo Time) RoundWeek(options ...StartOfWeekOptions) Time {
 	return boundaries.RoundWeek(tempo, weekOptions(options)...)
 }
 
-func (tempo Tempo) Next(weekday time.Weekday) Tempo {
+func (tempo Time) Next(weekday time.Weekday) Time {
 	return boundaries.Next(tempo, weekday)
 }
 
-func (tempo Tempo) Previous(weekday time.Weekday) Tempo {
+func (tempo Time) Previous(weekday time.Weekday) Time {
 	return boundaries.Previous(tempo, weekday)
 }
 
-func (tempo Tempo) NextOrSame(weekday time.Weekday) Tempo {
+func (tempo Time) NextOrSame(weekday time.Weekday) Time {
 	return boundaries.NextOrSame(tempo, weekday)
 }
 
-func (tempo Tempo) PreviousOrSame(weekday time.Weekday) Tempo {
+func (tempo Time) PreviousOrSame(weekday time.Weekday) Time {
 	return boundaries.PreviousOrSame(tempo, weekday)
 }
 
-func (tempo Tempo) NextWeekday() Tempo {
+func (tempo Time) NextWeekday() Time {
 	return boundaries.NextWeekday(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
-func (tempo Tempo) PreviousWeekday() Tempo {
+func (tempo Time) PreviousWeekday() Time {
 	return boundaries.PreviousWeekday(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
-func (tempo Tempo) NextWeekendDay() Tempo {
+func (tempo Time) NextWeekendDay() Time {
 	return boundaries.NextWeekendDay(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 
-func (tempo Tempo) PreviousWeekendDay() Tempo {
+func (tempo Time) PreviousWeekendDay() Time {
 	return boundaries.PreviousWeekendDay(tempo, tempo.settingsSnapshot().WeekendDays)
 }
 

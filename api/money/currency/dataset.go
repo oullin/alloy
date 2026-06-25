@@ -27,8 +27,8 @@ func GetSymbols() []Symbol {
 }
 
 // getCurrencies returns a map of all supported currencies, keyed by their ISO 4217 code.
-func getCurrencies() map[string]*Currency {
-	return map[string]*Currency{
+func getCurrencies() map[string]*Definition {
+	return map[string]*Definition{
 		AED: {Decimal: ".", Thousand: ",", Code: AED, Fraction: 2, NumericCode: "784", Grapheme: ".\u062f.\u0625", Template: "1 $"},
 		AFN: {Decimal: ".", Thousand: ",", Code: AFN, Fraction: 2, NumericCode: "971", Grapheme: "\u060b", Template: "1 $"},
 		ALL: {Decimal: ".", Thousand: ",", Code: ALL, Fraction: 2, NumericCode: "008", Grapheme: "L", Template: "$1"},

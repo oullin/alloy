@@ -41,7 +41,7 @@ type ExceptionReporter interface {
 }
 
 // WorkerPopCallback overrides how a worker pops from one queue name.
-type WorkerPopCallback func(ctx context.Context, q Queue, queueName string) (Job, error)
+type WorkerPopCallback func(ctx context.Context, q Backend, queueName string) (Job, error)
 
 // WorkerStopReason is the machine-readable status code returned from
 // the daemon loop when it exits. The numeric values intentionally
@@ -71,9 +71,9 @@ type EventEmitter interface {
 	Emit(event any)
 }
 
-// Worker processes jobs from a Queue in a daemon loop with graceful shutdown.
+// Worker processes jobs from a Backend in a daemon loop with graceful shutdown.
 type Worker struct {
-	queue   Queue
+	queue   Backend
 	handler Handler
 	emitter EventEmitter
 	opts    WorkerOptions
@@ -242,7 +242,7 @@ const (
 	WorkerStopReasonMaxJobsExceeded WorkerStopReason = 15
 )
 
-func NewWorker(q Queue, handler Handler, emitter EventEmitter, opts WorkerOptions) *Worker {
+func NewWorker(q Backend, handler Handler, emitter EventEmitter, opts WorkerOptions) *Worker {
 	if opts.Sleep == 0 {
 		opts.Sleep = time.Second
 	}
@@ -335,7 +335,7 @@ func (w *Worker) popCallbackFor(queueName string) WorkerPopCallback {
 		}
 	}
 
-	return func(ctx context.Context, q Queue, name string) (Job, error) {
+	return func(ctx context.Context, q Backend, name string) (Job, error) {
 		return q.Pop(ctx, name)
 	}
 }
@@ -422,7 +422,7 @@ func (w *Worker) Run(ctx context.Context, queueName string) error {
 
 	w.emit(WorkerStarting{
 		ConnectionName: w.queue.ConnectionName(),
-		Queue:          queueName,
+		Backend:        queueName,
 		WorkerName:     w.opts.Name,
 	})
 

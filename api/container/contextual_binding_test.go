@@ -26,19 +26,19 @@ func TestContextualBindingResolvesCorrectImplementation(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("logger", func(_ *container.Container) (any, error) {
+	c.Bind("logger", func(_ *container.App) (any, error) {
 		return "default-logger", nil
 	}, false)
 
-	c.When("service-a").Needs("logger").Give(container.Factory(func(_ *container.Container) (any, error) {
+	c.When("service-a").Needs("logger").Give(container.Factory(func(_ *container.App) (any, error) {
 		return "special-logger", nil
 	}))
 
-	c.Bind("service-a", func(cc *container.Container) (any, error) {
+	c.Bind("service-a", func(cc *container.App) (any, error) {
 		return cc.Make("logger")
 	}, false)
 
-	c.Bind("service-b", func(cc *container.Container) (any, error) {
+	c.Bind("service-b", func(cc *container.App) (any, error) {
 		return cc.Make("logger")
 	}, false)
 
@@ -60,7 +60,7 @@ func TestContextualBindingWithRawValue(t *testing.T) {
 	c := newContainer()
 	c.When("service").Needs("$apiKey").Give("secret-key-123")
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("$apiKey")
 	}, false)
 
@@ -75,23 +75,23 @@ func TestContextualBindingForMultipleConcretes(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("logger", func(_ *container.Container) (any, error) {
+	c.Bind("logger", func(_ *container.App) (any, error) {
 		return "default-logger", nil
 	}, false)
 
-	c.When("service-a", "service-b").Needs("logger").Give(container.Factory(func(_ *container.Container) (any, error) {
+	c.When("service-a", "service-b").Needs("logger").Give(container.Factory(func(_ *container.App) (any, error) {
 		return "shared-logger", nil
 	}))
 
-	c.Bind("service-a", func(cc *container.Container) (any, error) {
+	c.Bind("service-a", func(cc *container.App) (any, error) {
 		return cc.Make("logger")
 	}, false)
 
-	c.Bind("service-b", func(cc *container.Container) (any, error) {
+	c.Bind("service-b", func(cc *container.App) (any, error) {
 		return cc.Make("logger")
 	}, false)
 
-	c.Bind("service-c", func(cc *container.Container) (any, error) {
+	c.Bind("service-c", func(cc *container.App) (any, error) {
 		return cc.Make("logger")
 	}, false)
 
@@ -116,11 +116,11 @@ func TestContextualBindingDoesNotOverrideNonContextualResolution(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("logger", func(_ *container.Container) (any, error) {
+	c.Bind("logger", func(_ *container.App) (any, error) {
 		return "default-logger", nil
 	}, false)
 
-	c.When("service-a").Needs("logger").Give(container.Factory(func(_ *container.Container) (any, error) {
+	c.When("service-a").Needs("logger").Give(container.Factory(func(_ *container.App) (any, error) {
 		return "special-logger", nil
 	}))
 
@@ -136,11 +136,11 @@ func TestContextualBindingGiveTagged(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("report-a", func(_ *container.Container) (any, error) {
+	c.Bind("report-a", func(_ *container.App) (any, error) {
 		return "report-a", nil
 	}, false)
 
-	c.Bind("report-b", func(_ *container.Container) (any, error) {
+	c.Bind("report-b", func(_ *container.App) (any, error) {
 		return "report-b", nil
 	}, false)
 
@@ -148,7 +148,7 @@ func TestContextualBindingGiveTagged(t *testing.T) {
 
 	c.When("aggregator").Needs("reports").GiveTagged("reports")
 
-	c.Bind("aggregator", func(cc *container.Container) (any, error) {
+	c.Bind("aggregator", func(cc *container.App) (any, error) {
 		return cc.Make("reports")
 	}, false)
 
@@ -184,7 +184,7 @@ func TestContextualBindingGiveConfig(t *testing.T) {
 
 	c.When("service").Needs("$timeout").GiveConfig("app.timeout", 30)
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("$timeout")
 	}, false)
 
@@ -215,7 +215,7 @@ func TestContextualBindingGiveConfigWithGetter(t *testing.T) {
 
 	c.When("service").Needs("$timeout").GiveConfig("app.timeout", 30)
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("$timeout")
 	}, false)
 
@@ -244,11 +244,11 @@ func TestContextualBindingWorksForExistingInstancedBindings(t *testing.T) {
 	c := newContainer()
 	c.Instance("logger", "instanced-logger")
 
-	c.When("service").Needs("logger").Give(container.Factory(func(_ *container.Container) (any, error) {
+	c.When("service").Needs("logger").Give(container.Factory(func(_ *container.App) (any, error) {
 		return "contextual-logger", nil
 	}))
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("logger")
 	}, false)
 
@@ -264,17 +264,17 @@ func TestContextualBindingWorksWithAliasedTargets(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("logger", func(_ *container.Container) (any, error) {
+	c.Bind("logger", func(_ *container.App) (any, error) {
 		return "default", nil
 	}, false)
 
 	c.Alias("logger", "log")
 
-	c.When("service").Needs("log").Give(container.Factory(func(_ *container.Container) (any, error) {
+	c.When("service").Needs("log").Give(container.Factory(func(_ *container.App) (any, error) {
 		return "contextual", nil
 	}))
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("log")
 	}, false)
 
@@ -292,13 +292,13 @@ func TestContextualBindingNotRecreatedUnnecessarily(t *testing.T) {
 
 	count := 0
 
-	c.When("service").Needs("dep").Give(container.Factory(func(_ *container.Container) (any, error) {
+	c.When("service").Needs("dep").Give(container.Factory(func(_ *container.App) (any, error) {
 		count++
 
 		return count, nil
 	}))
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("dep")
 	}, false)
 
@@ -316,11 +316,11 @@ func TestAddContextualBindingDirectly(t *testing.T) {
 
 	c := newContainer()
 
-	c.AddContextualBinding("service", "dep", container.Factory(func(_ *container.Container) (any, error) {
+	c.AddContextualBinding("service", "dep", container.Factory(func(_ *container.App) (any, error) {
 		return "direct-contextual", nil
 	}))
 
-	c.Bind("service", func(cc *container.Container) (any, error) {
+	c.Bind("service", func(cc *container.App) (any, error) {
 		return cc.Make("dep")
 	}, false)
 

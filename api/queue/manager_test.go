@@ -11,8 +11,8 @@ import (
 	"github.com/oullin/alloy/queue/drivers"
 )
 
-// inspectorQueue is a queue.Queue that satisfies the optional
-// QueueNamer and JobInspector contracts, used here to exercise the
+// inspectorQueue is a queue.Backend that satisfies the optional
+// BackendNamer and JobInspector contracts, used here to exercise the
 // manager-level All{Pending,Delayed,Reserved}Jobs fan-out.
 type inspectorQueue struct {
 	connection string
@@ -28,7 +28,7 @@ func TestManagerRegisterAndDriver(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		return drivers.NewNullDriver("null"), nil
 	})
 
@@ -55,7 +55,7 @@ func TestManagerDriverCachesInstance(t *testing.T) {
 	m := queue.NewManager()
 
 	calls := 0
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		calls++
 
 		return drivers.NewNullDriver("null"), nil
@@ -109,7 +109,7 @@ func TestManagerExtendIsAlias(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Extend("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Extend("null", func(_ map[string]any) (queue.Backend, error) {
 		return drivers.NewNullDriver("null"), nil
 	})
 
@@ -131,7 +131,7 @@ func TestManagerConcurrentAccess(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		return drivers.NewNullDriver("null"), nil
 	})
 
@@ -157,7 +157,7 @@ func TestManagerConnectionIsAliasForDriver(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		return drivers.NewNullDriver("null"), nil
 	})
 
@@ -195,7 +195,7 @@ func TestManagerPurge(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		return drivers.NewNullDriver("null"), nil
 	})
 
@@ -215,7 +215,7 @@ func TestManagerForgetDriver(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		return drivers.NewNullDriver("null"), nil
 	})
 
@@ -235,7 +235,7 @@ func TestManagerCreatorError(t *testing.T) {
 
 	m := queue.NewManager()
 
-	m.Register("bad", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("bad", func(_ map[string]any) (queue.Backend, error) {
 		return nil, errors.New("create failed")
 	})
 
@@ -298,7 +298,7 @@ func newManagerWithInspector(t *testing.T, name string, q *inspectorQueue) *queu
 	t.Helper()
 
 	m := queue.NewManager()
-	m.Register("inspector", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("inspector", func(_ map[string]any) (queue.Backend, error) {
 		return q, nil
 	})
 	m.SetConfig(name, map[string]any{"driver": "inspector"})
@@ -313,8 +313,8 @@ func TestManagerAllPendingJobsFansOutAcrossQueues(t *testing.T) {
 		connection: "inspector",
 		names:      []string{"default", "emails"},
 		perQueue: map[string][]queue.InspectedJob{
-			"default": {{ID: 1, Queue: "default"}, {ID: 2, Queue: "default"}},
-			"emails":  {{ID: 3, Queue: "emails"}},
+			"default": {{ID: 1, Backend: "default"}, {ID: 2, Backend: "default"}},
+			"emails":  {{ID: 3, Backend: "emails"}},
 		},
 	}
 
@@ -393,7 +393,7 @@ func TestManagerAllPendingJobsConnectionWithoutContractErrors(t *testing.T) {
 	t.Parallel()
 
 	m := queue.NewManager()
-	m.Register("null", func(_ map[string]any) (queue.Queue, error) {
+	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		// NullDriver does satisfy QueueNames/JobInspector (returns nil),
 		// so to hit the "no contract" branch we use a thin driver here
 		// — but NullDriver returns nil names so the fan-out returns empty.

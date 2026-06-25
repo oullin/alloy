@@ -97,8 +97,8 @@ func TestCanGetAllFailedJobs(t *testing.T) {
 		t.Fatalf("all[1].ID=%q want 3", all[1].ID)
 	}
 
-	if all[1].Queue != "default" {
-		t.Fatalf("all[1].Queue=%q want default", all[1].Queue)
+	if all[1].Backend != "default" {
+		t.Fatalf("all[1].Backend=%q want default", all[1].Backend)
 	}
 }
 

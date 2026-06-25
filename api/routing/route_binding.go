@@ -6,7 +6,7 @@ import (
 )
 
 // BindingContainer is the minimum container surface RouteBinding needs to
-// resolve a class-based binding. The bedrock packages/container Container
+// resolve a class-based binding. The bedrock packages/container App
 // satisfies this via its Make method.
 type BindingContainer interface {
 	Make(abstract string) (any, error)

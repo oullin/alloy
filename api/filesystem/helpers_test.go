@@ -8,7 +8,7 @@ import (
 	"github.com/oullin/alloy/filesystem"
 )
 
-func newFilesystem() *filesystem.Filesystem {
+func newFilesystem() *filesystem.Local {
 	return filesystem.New()
 }
 

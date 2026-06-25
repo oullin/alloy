@@ -25,11 +25,11 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 	}
 
 	if got := parsed.ToMap()["hours"]; got != 4 {
-		t.Fatalf("Duration.ToMap()[hours] = %d, want 4", got)
+		t.Fatalf("Span.ToMap()[hours] = %d, want 4", got)
 	}
 
 	if got := parsed.ToSlice(); !reflect.DeepEqual(got, []int{1, 0, 2, 0, 3, 4, 5, 6, 7}) {
-		t.Fatalf("Duration.ToSlice() = %#v, want component slice", got)
+		t.Fatalf("Span.ToSlice() = %#v, want component slice", got)
 	}
 
 	if got := parsed.ISOString(); got != "P1Y2M3DT4H5M6.007S" {
@@ -100,7 +100,7 @@ func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
 		t.Fatalf("AddDuration(P1M).DateString() = %q, want overflowed date", got)
 	}
 
-	if got := base.SubDuration(tempo.Duration{Days: 2, Hours: 3}).ISOString(); got != "2024-01-28T21:00:00.000Z" {
+	if got := base.SubDuration(tempo.Span{Days: 2, Hours: 3}).ISOString(); got != "2024-01-28T21:00:00.000Z" {
 		t.Fatalf("SubDuration().ISOString() = %q, want shifted instant", got)
 	}
 

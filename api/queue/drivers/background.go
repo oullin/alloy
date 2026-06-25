@@ -18,12 +18,12 @@ type BackgroundDriver struct {
 	command    string // binary to run for each job
 	args       []string
 	connection string
-	inner      queue.Queue // underlying queue (e.g. database) for storage
+	inner      queue.Backend // underlying queue (e.g. database) for storage
 }
 
 // NewBackgroundDriver creates a BackgroundDriver backed by inner for storage.
 // command is the binary invoked as a subprocess for each job.
-func NewBackgroundDriver(command string, args []string, inner queue.Queue, connection string) *BackgroundDriver {
+func NewBackgroundDriver(command string, args []string, inner queue.Backend, connection string) *BackgroundDriver {
 	return &BackgroundDriver{
 		command:    command,
 		args:       args,
@@ -83,10 +83,10 @@ func (d *BackgroundDriver) ReservedSize(ctx context.Context, queueName string) (
 func (d *BackgroundDriver) ConnectionName() string { return d.connection }
 
 // QueueNames delegates to the wrapped storage queue when it implements
-// QueueNamer; otherwise it surfaces ErrNotSupported so the caller can
+// BackendNamer; otherwise it surfaces ErrNotSupported so the caller can
 // distinguish "no queues" from "this backend can't enumerate".
 func (d *BackgroundDriver) QueueNames(ctx context.Context) ([]string, error) {
-	if namer, ok := d.inner.(queue.QueueNamer); ok {
+	if namer, ok := d.inner.(queue.BackendNamer); ok {
 		return namer.QueueNames(ctx)
 	}
 

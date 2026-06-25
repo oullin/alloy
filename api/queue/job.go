@@ -69,7 +69,7 @@ type FailureHandler interface {
 
 // JobOptions configures job dispatch options.
 type JobOptions struct {
-	Queue                   string
+	Backend                 string
 	Connection              string
 	Delay                   time.Duration
 	BatchID                 string

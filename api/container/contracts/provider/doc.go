@@ -34,16 +34,16 @@
 //	import "github.com/oullin/alloy/container"
 //
 //	type CacheServiceProvider struct {
-//	    app           *container.Container
+//	    app           *container.App
 //	    defaultDriver string
 //	}
 //
-//	func NewCacheServiceProvider(app *container.Container, defaultDriver string) *CacheServiceProvider {
+//	func NewCacheServiceProvider(app *container.App, defaultDriver string) *CacheServiceProvider {
 //	    return &CacheServiceProvider{app: app, defaultDriver: defaultDriver}
 //	}
 //
 //	func (p *CacheServiceProvider) Register() {
-//	    p.app.Singleton("cache", func(_ *container.Container) (any, error) {
+//	    p.app.Singleton("cache", func(_ *container.App) (any, error) {
 //	        m := NewManager()
 //	        m.SetDefaultDriver(p.defaultDriver)
 //	        return m, nil
@@ -57,7 +57,7 @@
 // # Registering with an Application
 //
 //	app := container.NewApplication()
-//	app.Register(cache.NewCacheServiceProvider(app.Container, "array"))
+//	app.Register(cache.NewCacheServiceProvider(app.App, "array"))
 //	app.Boot()
 //
 //	mgr, _ := app.Make("cache")

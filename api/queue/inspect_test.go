@@ -11,8 +11,8 @@ import (
 	"github.com/oullin/alloy/queue"
 )
 
-// fakeInspectableQueue is a minimal Queue that also satisfies the two
-// optional inspection contracts (QueueNamer + JobInspector). It serves
+// fakeInspectableQueue is a minimal Backend that also satisfies the two
+// optional inspection contracts (BackendNamer + JobInspector). It serves
 // the manager fan-out tests without dragging in a real driver.
 type fakeInspectableQueue struct {
 	connection string
@@ -23,7 +23,7 @@ type fakeInspectableQueue struct {
 	pendingErr map[string]error
 }
 
-// inertQueue implements queue.Queue but neither QueueNamer nor
+// inertQueue implements queue.Backend but neither BackendNamer nor
 // JobInspector. The manager's fan-out should surface ErrNotSupported
 // for it.
 type inertQueue struct{ connection string }
@@ -97,12 +97,12 @@ func (q *inertQueue) DelayedSize(context.Context, string) (int64, error)  { retu
 func (q *inertQueue) ReservedSize(context.Context, string) (int64, error) { return 0, nil }
 func (q *inertQueue) ConnectionName() string                              { return q.connection }
 
-func newManagerWithQueue(t *testing.T, name string, q queue.Queue) *queue.Manager {
+func newManagerWithQueue(t *testing.T, name string, q queue.Backend) *queue.Manager {
 	t.Helper()
 
 	m := queue.NewManager()
 	m.SetConfig(name, map[string]any{"driver": "fake"})
-	m.Register("fake", func(_ map[string]any) (queue.Queue, error) { return q, nil })
+	m.Register("fake", func(_ map[string]any) (queue.Backend, error) { return q, nil })
 
 	return m
 }
@@ -114,8 +114,8 @@ func TestManagerAllPendingJobsConcatenatesAcrossQueues(t *testing.T) {
 		connection: "primary",
 		names:      []string{"high", "low"},
 		pending: map[string][]queue.InspectedJob{
-			"high": {{ID: 1, Queue: "high", Connection: "primary", UUID: "u-high"}},
-			"low":  {{ID: 2, Queue: "low", Connection: "primary", UUID: "u-low-a"}, {ID: 3, Queue: "low", Connection: "primary", UUID: "u-low-b"}},
+			"high": {{ID: 1, Backend: "high", Connection: "primary", UUID: "u-high"}},
+			"low":  {{ID: 2, Backend: "low", Connection: "primary", UUID: "u-low-a"}, {ID: 3, Backend: "low", Connection: "primary", UUID: "u-low-b"}},
 		},
 	}
 
@@ -146,7 +146,7 @@ func TestManagerAllDelayedJobsDeduplicatesByQueueIteration(t *testing.T) {
 		connection: "primary",
 		names:      []string{"only"},
 		delayed: map[string][]queue.InspectedJob{
-			"only": {{ID: 1, Queue: "only", UUID: "u-1"}, {ID: 2, Queue: "only", UUID: "u-2"}},
+			"only": {{ID: 1, Backend: "only", UUID: "u-1"}, {ID: 2, Backend: "only", UUID: "u-2"}},
 		},
 	}
 
@@ -182,7 +182,7 @@ func TestManagerAllPendingJobsSkipsPerQueueNotSupported(t *testing.T) {
 		connection: "mixed",
 		names:      []string{"yes", "no"},
 		pending: map[string][]queue.InspectedJob{
-			"yes": {{ID: 1, Queue: "yes", UUID: "u-yes"}},
+			"yes": {{ID: 1, Backend: "yes", UUID: "u-yes"}},
 		},
 		pendingErr: map[string]error{
 			"no": queue.ErrNotSupported,

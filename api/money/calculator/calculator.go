@@ -5,31 +5,31 @@ import "math"
 // Amount represents the integer value of a monetary amount.
 type Amount = int64
 
-// Calculator provides safe arithmetic operations for monetary amounts.
-type Calculator struct{}
+// Engine provides safe arithmetic operations for monetary amounts.
+type Engine struct{}
 
-// NewCalculator creates a new instance of Calculator.
-func NewCalculator() *Calculator {
-	return &Calculator{}
+// NewCalculator creates a new instance of Engine.
+func NewCalculator() *Engine {
+	return &Engine{}
 }
 
 // Add adds two amounts safely, handling potential overflows.
-func (c *Calculator) Add(a, b Amount) Amount {
+func (c *Engine) Add(a, b Amount) Amount {
 	return SafeAdd(a, b)
 }
 
 // Subtract subtracts the second amount from the first safely, handling potential overflows.
-func (c *Calculator) Subtract(a, b Amount) Amount {
+func (c *Engine) Subtract(a, b Amount) Amount {
 	return SafeSubtract(a, b)
 }
 
 // Multiply multiplies an amount by a given seed (ration).
-func (c *Calculator) Multiply(amount Amount, seed int64) Amount {
+func (c *Engine) Multiply(amount Amount, seed int64) Amount {
 	return Ration(amount, seed)
 }
 
 // SafeMultiply multiplies an initial amount by a series of multipliers, checking for overflow.
-func (c *Calculator) SafeMultiply(initial int64, multipliers ...int64) (int64, error) {
+func (c *Engine) SafeMultiply(initial int64, multipliers ...int64) (int64, error) {
 	if c == nil {
 		return 0, nil
 	}
@@ -38,7 +38,7 @@ func (c *Calculator) SafeMultiply(initial int64, multipliers ...int64) (int64, e
 }
 
 // Divide divides an amount by a seed. Returns 0 if the seed is 0.
-func (c *Calculator) Divide(amount Amount, seed int64) Amount {
+func (c *Engine) Divide(amount Amount, seed int64) Amount {
 	if c == nil || seed == 0 {
 		return 0
 	}
@@ -47,7 +47,7 @@ func (c *Calculator) Divide(amount Amount, seed int64) Amount {
 }
 
 // Modulus returns the remainder of dividing an amount by a seed. Returns 0 if the seed is 0.
-func (c *Calculator) Modulus(amount Amount, seed int64) Amount {
+func (c *Engine) Modulus(amount Amount, seed int64) Amount {
 	if c == nil || seed == 0 {
 		return 0
 	}
@@ -56,7 +56,7 @@ func (c *Calculator) Modulus(amount Amount, seed int64) Amount {
 }
 
 // Allocate allocates an amount based on a ration and scale.
-func (c *Calculator) Allocate(amount Amount, ration, scale int64) Amount {
+func (c *Engine) Allocate(amount Amount, ration, scale int64) Amount {
 	if c == nil || amount == 0 || scale == 0 {
 		return 0
 	}
@@ -65,7 +65,7 @@ func (c *Calculator) Allocate(amount Amount, ration, scale int64) Amount {
 }
 
 // Absolute returns the absolute value of an amount.
-func (c *Calculator) Absolute(amount Amount) Amount {
+func (c *Engine) Absolute(amount Amount) Amount {
 	if c == nil || amount < math.MinInt64 {
 		return 0
 	}
@@ -78,7 +78,7 @@ func (c *Calculator) Absolute(amount Amount) Amount {
 }
 
 // Negative returns the negative value of an amount.
-func (c *Calculator) Negative(amount Amount) Amount {
+func (c *Engine) Negative(amount Amount) Amount {
 	if c == nil {
 		return 0
 	}
@@ -91,7 +91,7 @@ func (c *Calculator) Negative(amount Amount) Amount {
 }
 
 // Round rounds an amount to a specified exponent (precision).
-func (c *Calculator) Round(amount Amount, exponent int) Amount {
+func (c *Engine) Round(amount Amount, exponent int) Amount {
 	// Guard against nil calculator to prevent panics
 	if c == nil {
 		return 0

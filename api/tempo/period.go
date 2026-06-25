@@ -6,8 +6,8 @@ import (
 	periodpkg "github.com/oullin/alloy/tempo/period"
 )
 
-func (period Period) Values() ([]Tempo, error) {
-	values := make([]Tempo, 0)
+func (period Period) Values() ([]Time, error) {
+	values := make([]Time, 0)
 	current := period.Start
 	forward := period.End.SameOrAfter(period.Start)
 
@@ -49,29 +49,29 @@ func (period Period) Values() ([]Tempo, error) {
 	return values, nil
 }
 
-func (period Period) First() (Tempo, bool, error) {
+func (period Period) First() (Time, bool, error) {
 	values, err := period.Values()
 
 	if err != nil {
-		return Tempo{}, false, err
+		return Time{}, false, err
 	}
 
 	if len(values) == 0 {
-		return Tempo{}, false, nil
+		return Time{}, false, nil
 	}
 
 	return values[0], true, nil
 }
 
-func (period Period) Last() (Tempo, bool, error) {
+func (period Period) Last() (Time, bool, error) {
 	values, err := period.Values()
 
 	if err != nil {
-		return Tempo{}, false, err
+		return Time{}, false, err
 	}
 
 	if len(values) == 0 {
-		return Tempo{}, false, nil
+		return Time{}, false, nil
 	}
 
 	return values[len(values)-1], true, nil
@@ -97,7 +97,7 @@ func (period Period) IsEmpty() (bool, error) {
 	return count == 0, nil
 }
 
-func (period Period) Contains(input Tempo) bool {
+func (period Period) Contains(input Time) bool {
 	return periodpkg.Bounds{
 		StartMs:    period.Start.TimestampMs(),
 		EndMs:      period.End.TimestampMs(),
@@ -105,14 +105,14 @@ func (period Period) Contains(input Tempo) bool {
 	}.Contains(input.TimestampMs())
 }
 
-func (period Period) Filter(predicate func(Tempo, int) bool) ([]Tempo, error) {
+func (period Period) Filter(predicate func(Time, int) bool) ([]Time, error) {
 	values, err := period.Values()
 
 	if err != nil {
 		return nil, err
 	}
 
-	filtered := make([]Tempo, 0, len(values))
+	filtered := make([]Time, 0, len(values))
 
 	for index, value := range values {
 		if predicate(value, index) {
@@ -123,14 +123,14 @@ func (period Period) Filter(predicate func(Tempo, int) bool) ([]Tempo, error) {
 	return filtered, nil
 }
 
-func (period Period) Map(mapper func(Tempo, int) Tempo) ([]Tempo, error) {
+func (period Period) Map(mapper func(Time, int) Time) ([]Time, error) {
 	values, err := period.Values()
 
 	if err != nil {
 		return nil, err
 	}
 
-	mapped := make([]Tempo, 0, len(values))
+	mapped := make([]Time, 0, len(values))
 
 	for index, value := range values {
 		mapped = append(mapped, mapper(value, index))

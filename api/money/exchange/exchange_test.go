@@ -17,9 +17,9 @@ func TestNewExchange(t *testing.T) {
 		t.Fatal("NewExchange() returned nil")
 	}
 
-	// A newly created Exchange has no rates, so it should be invalid
+	// A newly created Rates has no rates, so it should be invalid
 	if e.IsValid() {
-		t.Fatal("NewExchange() returned valid Exchange without any rates")
+		t.Fatal("NewExchange() returned valid Rates without any rates")
 	}
 
 	err := e.AddRate("SGD", "EUR", 0.85)
@@ -29,7 +29,7 @@ func TestNewExchange(t *testing.T) {
 	}
 
 	if e.IsInvalid() {
-		t.Fatal("Exchange with rates should be valid")
+		t.Fatal("Rates with rates should be valid")
 	}
 }
 
@@ -43,40 +43,40 @@ func TestExchangeIsValid(t *testing.T) {
 	}
 
 	if ex.IsInvalid() {
-		t.Fatal("IsInvalid() = true for properly initialized Exchange with rates, want false")
+		t.Fatal("IsInvalid() = true for properly initialized Rates with rates, want false")
 	}
 
 	// Test nil exchange
-	var nilEx *Exchange
+	var nilEx *Rates
 
 	if nilEx.IsValid() {
-		t.Fatal("IsValid() = true for nil Exchange, want false")
+		t.Fatal("IsValid() = true for nil Rates, want false")
 	}
 
 	if !nilEx.IsInvalid() {
-		t.Fatal("IsInvalid() = false for nil Exchange, want true")
+		t.Fatal("IsInvalid() = false for nil Rates, want true")
 	}
 
 	// Test exchange with nil rates map
-	invalidEx := &Exchange{rates: nil}
+	invalidEx := &Rates{rates: nil}
 
 	if invalidEx.IsValid() {
-		t.Fatal("IsValid() = true for Exchange with nil rates map, want false")
+		t.Fatal("IsValid() = true for Rates with nil rates map, want false")
 	}
 
 	if !invalidEx.IsInvalid() {
-		t.Fatal("IsInvalid() = false for Exchange with nil rates map, want true")
+		t.Fatal("IsInvalid() = false for Rates with nil rates map, want true")
 	}
 
 	// Test exchange with empty rates map
 	emptyEx := NewExchange()
 
 	if emptyEx.IsValid() {
-		t.Fatal("IsValid() = true for Exchange with empty rates map, want false")
+		t.Fatal("IsValid() = true for Rates with empty rates map, want false")
 	}
 
 	if !emptyEx.IsInvalid() {
-		t.Fatal("IsInvalid() = false for Exchange with empty rates map, want true")
+		t.Fatal("IsInvalid() = false for Rates with empty rates map, want true")
 	}
 }
 
@@ -95,7 +95,7 @@ func TestAddRate(t *testing.T) {
 		t.Errorf("Expected ErrInvalidExchangeRate, got %v", err)
 	}
 
-	var nilExchange *Exchange
+	var nilExchange *Rates
 
 	err = nilExchange.AddRate("SGD", "EUR", 0.85)
 
@@ -157,7 +157,7 @@ func TestGetRate(t *testing.T) {
 	}
 
 	// Test nil exchange
-	var nilExchange *Exchange
+	var nilExchange *Rates
 
 	_, err = nilExchange.GetRate("SGD", "EUR")
 
@@ -207,7 +207,7 @@ func TestConvertAmount(t *testing.T) {
 	}
 
 	// Test nil exchange
-	var nilExchange *Exchange
+	var nilExchange *Rates
 
 	_, err = nilExchange.ConvertAmount(1000, "SGD", 2, "EUR", 2)
 
@@ -394,7 +394,7 @@ func TestConvertAmountDifferentFractions(t *testing.T) {
 	}
 }
 
-// TestConcurrentAccess verifies that Exchange is safe for concurrent use
+// TestConcurrentAccess verifies that Rates is safe for concurrent use
 // by multiple goroutines performing reads and writes simultaneously.
 func TestConcurrentAccess(t *testing.T) {
 	e := NewExchange()
@@ -564,7 +564,7 @@ func TestConverterGetExchange_CoveragePaths(t *testing.T) {
 	})
 
 	t.Run("success", func(t *testing.T) {
-		ex := &Exchange{}
+		ex := &Rates{}
 		c, err := NewConverter(ex)
 
 		if err != nil {

@@ -3,7 +3,7 @@ package collection
 import "cmp"
 
 // Filter returns a new collection containing only items for which the callback returns true.
-func (c *Collection[T]) Filter(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) Filter(callback func(T, int) bool) *List[T] {
 	result := make([]T, 0)
 
 	for i, item := range c.items {
@@ -16,14 +16,14 @@ func (c *Collection[T]) Filter(callback func(T, int) bool) *Collection[T] {
 }
 
 // Reject returns a new collection containing only items for which the callback returns false.
-func (c *Collection[T]) Reject(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) Reject(callback func(T, int) bool) *List[T] {
 	return c.Filter(func(item T, index int) bool {
 		return !callback(item, index)
 	})
 }
 
 // Map applies the callback to each item and returns a new collection of results.
-func Map[T any, R any](c *Collection[T], callback func(T, int) R) *Collection[R] {
+func Map[T any, R any](c *List[T], callback func(T, int) R) *List[R] {
 	result := make([]R, len(c.items))
 
 	for i, item := range c.items {
@@ -34,7 +34,7 @@ func Map[T any, R any](c *Collection[T], callback func(T, int) R) *Collection[R]
 }
 
 // FlatMap applies the callback to each item, flattening the resulting slices into a single collection.
-func FlatMap[T any, R any](c *Collection[T], callback func(T, int) []R) *Collection[R] {
+func FlatMap[T any, R any](c *List[T], callback func(T, int) []R) *List[R] {
 	result := make([]R, 0)
 
 	for i, item := range c.items {
@@ -45,7 +45,7 @@ func FlatMap[T any, R any](c *Collection[T], callback func(T, int) []R) *Collect
 }
 
 // MapInto applies the constructor to each item, returning a new collection of the mapped types.
-func MapInto[T any, R any](c *Collection[T], constructor func(T) R) *Collection[R] {
+func MapInto[T any, R any](c *List[T], constructor func(T) R) *List[R] {
 	result := make([]R, len(c.items))
 
 	for i, item := range c.items {
@@ -56,7 +56,7 @@ func MapInto[T any, R any](c *Collection[T], constructor func(T) R) *Collection[
 }
 
 // Reduce iterating over the collection and accumulates a single result using the callback.
-func Reduce[T any, R any](c *Collection[T], callback func(R, T, int) R, initial R) R {
+func Reduce[T any, R any](c *List[T], callback func(R, T, int) R, initial R) R {
 	result := initial
 
 	for i, item := range c.items {
@@ -68,12 +68,12 @@ func Reduce[T any, R any](c *Collection[T], callback func(R, T, int) R, initial 
 
 // Flatten returns a shallow copy of the collection.
 // For non-nested typed slices this returns the items as-is.
-func (c *Collection[T]) Flatten() *Collection[T] {
+func (c *List[T]) Flatten() *List[T] {
 	return Collect(append([]T{}, c.items...))
 }
 
 // Reverse returns a new collection with items in reverse order.
-func (c *Collection[T]) Reverse() *Collection[T] {
+func (c *List[T]) Reverse() *List[T] {
 	result := make([]T, len(c.items))
 
 	for i, j := 0, len(c.items)-1; j >= 0; i, j = i+1, j-1 {
@@ -85,7 +85,7 @@ func (c *Collection[T]) Reverse() *Collection[T] {
 
 // Flip returns a new collection with the item order reversed.
 // For typed Go slices this reverses the element order.
-func (c *Collection[T]) Flip() *Collection[T] {
+func (c *List[T]) Flip() *List[T] {
 	result := make([]T, len(c.items))
 
 	for i, j := 0, len(c.items)-1; j >= 0; i, j = i+1, j-1 {
@@ -96,7 +96,7 @@ func (c *Collection[T]) Flip() *Collection[T] {
 }
 
 // Multiply returns a new collection with all items repeated the given number of times.
-func (c *Collection[T]) Multiply(multiplier int) *Collection[T] {
+func (c *List[T]) Multiply(multiplier int) *List[T] {
 	if multiplier <= 0 {
 		return Empty[T]()
 	}
@@ -111,15 +111,15 @@ func (c *Collection[T]) Multiply(multiplier int) *Collection[T] {
 }
 
 // Values returns a new collection with re-indexed items (a shallow copy).
-func (c *Collection[T]) Values() *Collection[T] {
+func (c *List[T]) Values() *List[T] {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
 	return Collect(result)
 }
 
-// Keys returns a new Collection[int] containing the indices 0 through n-1.
-func (c *Collection[T]) Keys() *Collection[int] {
+// Keys returns a new List[int] containing the indices 0 through n-1.
+func (c *List[T]) Keys() *List[int] {
 	keys := make([]int, len(c.items))
 
 	for i := range c.items {
@@ -131,7 +131,7 @@ func (c *Collection[T]) Keys() *Collection[int] {
 
 // Unique returns a new collection containing only items with distinct keys
 // as determined by the given key function.
-func Unique[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Collection[T] {
+func Unique[T any, K comparable](c *List[T], keyFunc func(T) K) *List[T] {
 	seen := make(map[K]bool)
 	result := make([]T, 0)
 
@@ -149,7 +149,7 @@ func Unique[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Collectio
 
 // Duplicates returns a new collection containing all duplicate items
 // as determined by the given key function.
-func Duplicates[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Collection[T] {
+func Duplicates[T any, K comparable](c *List[T], keyFunc func(T) K) *List[T] {
 	seen := make(map[K]bool)
 	result := make([]T, 0)
 
@@ -167,7 +167,7 @@ func Duplicates[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Colle
 }
 
 // Pluck extracts a value from each item using the given function, returning a new collection.
-func Pluck[T any, V any](c *Collection[T], valueFunc func(T) V) *Collection[V] {
+func Pluck[T any, V any](c *List[T], valueFunc func(T) V) *List[V] {
 	result := make([]V, len(c.items))
 
 	for i, item := range c.items {
@@ -178,7 +178,7 @@ func Pluck[T any, V any](c *Collection[T], valueFunc func(T) V) *Collection[V] {
 }
 
 // Every report whether all items in the collection satisfy the given predicate.
-func (c *Collection[T]) Every(callback func(T, int) bool) bool {
+func (c *List[T]) Every(callback func(T, int) bool) bool {
 	for i, item := range c.items {
 		if !callback(item, i) {
 			return false
@@ -189,21 +189,21 @@ func (c *Collection[T]) Every(callback func(T, int) bool) bool {
 }
 
 // Where filters items using a predicate that receives only the item (no index).
-func (c *Collection[T]) Where(predicate func(T) bool) *Collection[T] {
+func (c *List[T]) Where(predicate func(T) bool) *List[T] {
 	return c.Filter(func(item T, _ int) bool {
 		return predicate(item)
 	})
 }
 
 // WhereNot filters items using a negative predicate that receives only the item (no index).
-func (c *Collection[T]) WhereNot(predicate func(T) bool) *Collection[T] {
+func (c *List[T]) WhereNot(predicate func(T) bool) *List[T] {
 	return c.Filter(func(item T, _ int) bool {
 		return !predicate(item)
 	})
 }
 
 // WhereNull returns items whose extracted value equals the zero value.
-func WhereNull[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Collection[T] {
+func WhereNull[T any, K comparable](c *List[T], keyFunc func(T) K) *List[T] {
 	var zero K
 	result := make([]T, 0)
 
@@ -217,7 +217,7 @@ func WhereNull[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Collec
 }
 
 // WhereNotNull returns items whose extracted value is not the zero value.
-func WhereNotNull[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Collection[T] {
+func WhereNotNull[T any, K comparable](c *List[T], keyFunc func(T) K) *List[T] {
 	var zero K
 	result := make([]T, 0)
 
@@ -231,7 +231,7 @@ func WhereNotNull[T any, K comparable](c *Collection[T], keyFunc func(T) K) *Col
 }
 
 // WhereIn returns items whose extracted key value is in the given set.
-func WhereIn[T any, K comparable](c *Collection[T], keyFunc func(T) K, values []K) *Collection[T] {
+func WhereIn[T any, K comparable](c *List[T], keyFunc func(T) K, values []K) *List[T] {
 	set := make(map[K]bool, len(values))
 
 	for _, v := range values {
@@ -250,7 +250,7 @@ func WhereIn[T any, K comparable](c *Collection[T], keyFunc func(T) K, values []
 }
 
 // WhereNotIn returns items whose extracted key value is not in the given set.
-func WhereNotIn[T any, K comparable](c *Collection[T], keyFunc func(T) K, values []K) *Collection[T] {
+func WhereNotIn[T any, K comparable](c *List[T], keyFunc func(T) K, values []K) *List[T] {
 	set := make(map[K]bool, len(values))
 
 	for _, v := range values {
@@ -269,7 +269,7 @@ func WhereNotIn[T any, K comparable](c *Collection[T], keyFunc func(T) K, values
 }
 
 // WhereBetween returns items whose extracted key value is between min and max (inclusive).
-func WhereBetween[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K, min, max K) *Collection[T] {
+func WhereBetween[T any, K cmp.Ordered](c *List[T], keyFunc func(T) K, min, max K) *List[T] {
 	result := make([]T, 0)
 
 	for _, item := range c.items {
@@ -284,7 +284,7 @@ func WhereBetween[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K, min
 }
 
 // WhereNotBetween returns items whose extracted key value is outside the range [min, max].
-func WhereNotBetween[T any, K cmp.Ordered](c *Collection[T], keyFunc func(T) K, min, max K) *Collection[T] {
+func WhereNotBetween[T any, K cmp.Ordered](c *List[T], keyFunc func(T) K, min, max K) *List[T] {
 	result := make([]T, 0)
 
 	for _, item := range c.items {

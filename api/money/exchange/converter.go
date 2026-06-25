@@ -6,11 +6,11 @@ import (
 
 // Converter provides a simple interface for currency conversion with a fixed exchange
 type Converter struct {
-	exchange *Exchange
+	exchange *Rates
 }
 
-// NewConverter creates a new Converter instance with the provided Exchange.
-func NewConverter(exchange *Exchange) (*Converter, error) {
+// NewConverter creates a new Converter instance with the provided Rates.
+func NewConverter(exchange *Rates) (*Converter, error) {
 	if exchange == nil {
 		return nil, exception.ErrNoConverterProvided
 	}
@@ -20,8 +20,8 @@ func NewConverter(exchange *Exchange) (*Converter, error) {
 	}, nil
 }
 
-// GetExchange returns the underlying Exchange instance.
-func (c *Converter) GetExchange() (*Exchange, error) {
+// GetExchange returns the underlying Rates instance.
+func (c *Converter) GetExchange() (*Rates, error) {
 	if c == nil {
 		return nil, exception.ErrNoConverterProvided
 	}

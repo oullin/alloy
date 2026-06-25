@@ -10,7 +10,7 @@ import (
 )
 
 // Get reads the entire contents of a file.
-func (f *Filesystem) Get(path string) ([]byte, error) {
+func (f *Local) Get(path string) ([]byte, error) {
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -25,7 +25,7 @@ func (f *Filesystem) Get(path string) ([]byte, error) {
 }
 
 // JSON reads a file and unmarshals its JSON contents into v.
-func (f *Filesystem) JSON(path string, v any) error {
+func (f *Local) JSON(path string, v any) error {
 	data, err := f.Get(path)
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (f *Filesystem) JSON(path string, v any) error {
 }
 
 // SharedGet reads a file's contents while holding a shared (read) lock.
-func (f *Filesystem) SharedGet(path string) ([]byte, error) {
+func (f *Local) SharedGet(path string) ([]byte, error) {
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -61,7 +61,7 @@ func (f *Filesystem) SharedGet(path string) ([]byte, error) {
 }
 
 // Lines returns an iterator that yields each line of the file.
-func (f *Filesystem) Lines(path string) (iter.Seq[string], error) {
+func (f *Local) Lines(path string) (iter.Seq[string], error) {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return nil, ErrNotFound

@@ -135,7 +135,7 @@ func TestDynamoCanRetrieveAllFailedJobs(t *testing.T) {
 
 	got := all[0]
 
-	if got.ID != "uuid" || got.Connection != "connection" || got.Queue != "queue" ||
+	if got.ID != "uuid" || got.Connection != "connection" || got.Backend != "queue" ||
 		got.Payload != "payload" || got.Exception != "exception" {
 		t.Fatalf("unexpected: %+v", got)
 	}

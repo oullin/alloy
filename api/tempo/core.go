@@ -12,11 +12,11 @@ import (
 	setterspkg "github.com/oullin/alloy/tempo/setters"
 )
 
-func (tempo Tempo) Clone() Tempo {
+func (tempo Time) Clone() Time {
 	return tempo
 }
 
-func (tempo Tempo) Runtime() Runtime {
+func (tempo Time) Context() Context {
 	if tempo.runtime.Locale() == "" {
 		settings := tempo.settingsSnapshot()
 
@@ -29,41 +29,41 @@ func (tempo Tempo) Runtime() Runtime {
 	return tempo.runtime
 }
 
-func (tempo Tempo) WithRuntime(runtime Runtime) Tempo {
+func (tempo Time) WithRuntime(runtime Context) Time {
 	tempo.runtime = runtime
 
 	return tempo
 }
 
-func (tempo Tempo) WithTranslator(translator Translator) Tempo {
-	return tempo.WithRuntime(tempo.Runtime().With(RuntimeTranslator(translator)))
+func (tempo Time) WithTranslator(translator Translator) Time {
+	return tempo.WithRuntime(tempo.Context().With(RuntimeTranslator(translator)))
 }
 
-func (tempo Tempo) HasTranslator() bool {
-	return tempo.Runtime().HasTranslator()
+func (tempo Time) HasTranslator() bool {
+	return tempo.Context().HasTranslator()
 }
 
-func (tempo Tempo) AvoidMutation() Tempo {
+func (tempo Time) AvoidMutation() Time {
 	return tempo.Clone()
 }
 
-func (tempo Tempo) Cast() Tempo {
+func (tempo Time) Cast() Time {
 	return tempo.Clone()
 }
 
-func (tempo Tempo) Tempoize(input Tempo) Tempo {
-	return newTempo(input.value, input.location, tempo.Runtime())
+func (tempo Time) Tempoize(input Time) Time {
+	return newTempo(input.value, input.location, tempo.Context())
 }
 
-func (tempo Tempo) NowWithSameTz() Tempo {
-	return newTempo(time.Now(), tempo.location, tempo.Runtime())
+func (tempo Time) NowWithSameTz() Time {
+	return newTempo(time.Now(), tempo.location, tempo.Context())
 }
 
-func (tempo Tempo) Modify(modifier string) (Tempo, error) {
+func (tempo Time) Modify(modifier string) (Time, error) {
 	value := strings.TrimSpace(modifier)
 
 	if value == "" {
-		return Tempo{}, errors.New("Tempo modifier cannot be empty")
+		return Time{}, errors.New("Time modifier cannot be empty")
 	}
 
 	if parsed, err := Parse(value, WithTimezone(tempo.Timezone())); err == nil {
@@ -76,7 +76,7 @@ func (tempo Tempo) Modify(modifier string) (Tempo, error) {
 		amount, err := strconv.ParseFloat(match[1], 64)
 
 		if err != nil {
-			return Tempo{}, err
+			return Time{}, err
 		}
 
 		return tempo.Add(int(math.Round(amount)), Unit(match[2])), nil
@@ -102,35 +102,35 @@ func (tempo Tempo) Modify(modifier string) (Tempo, error) {
 	case "yesterday":
 		return tempo.NowWithSameTz().StartOfDay().SubDays(1), nil
 	default:
-		return Tempo{}, fmt.Errorf("invalid Tempo modifier: %s", modifier)
+		return Time{}, fmt.Errorf("invalid Time modifier: %s", modifier)
 	}
 }
 
-func (tempo Tempo) Change(modifier string) (Tempo, error) {
+func (tempo Time) Change(modifier string) (Time, error) {
 	return tempo.Modify(modifier)
 }
 
-func (tempo Tempo) Immutable() Tempo {
+func (tempo Time) Immutable() Time {
 	return tempo.Clone()
 }
 
-func (tempo Tempo) Mutable() *MutableTempo {
+func (tempo Time) Mutable() *MutableTime {
 	return NewMutable(tempo)
 }
 
-func (tempo Tempo) Timezone() string {
+func (tempo Time) Timezone() string {
 	return tempo.location.String()
 }
 
-func (tempo Tempo) Timestamp() int64 {
+func (tempo Time) Timestamp() int64 {
 	return tempo.value.Unix()
 }
 
-func (tempo Tempo) TimestampMs() int64 {
+func (tempo Time) TimestampMs() int64 {
 	return tempo.value.UnixMilli()
 }
 
-func (tempo Tempo) PreciseTimestamp(precisions ...int) float64 {
+func (tempo Time) PreciseTimestamp(precisions ...int) float64 {
 	precision := 6
 
 	if len(precisions) > 0 {
@@ -140,39 +140,39 @@ func (tempo Tempo) PreciseTimestamp(precisions ...int) float64 {
 	return math.Round(float64(tempo.value.UnixNano()) / math.Pow10(9-precision))
 }
 
-func (tempo Tempo) Unix() int64 {
+func (tempo Time) Unix() int64 {
 	return tempo.Timestamp()
 }
 
-func (tempo Tempo) Year() int {
+func (tempo Time) Year() int {
 	return tempo.local().Year()
 }
 
-func (tempo Tempo) Month() int {
+func (tempo Time) Month() int {
 	return int(tempo.local().Month())
 }
 
-func (tempo Tempo) Quarter() int {
+func (tempo Time) Quarter() int {
 	return (tempo.Month()-1)/3 + 1
 }
 
-func (tempo Tempo) Day() int {
+func (tempo Time) Day() int {
 	return tempo.local().Day()
 }
 
-func (tempo Tempo) DayOfWeek() int {
+func (tempo Time) DayOfWeek() int {
 	return int(tempo.local().Weekday())
 }
 
-func (tempo Tempo) Weekday() int {
+func (tempo Time) Weekday() int {
 	return tempo.DayOfWeek()
 }
 
-func (tempo Tempo) SetWeekday(weekday time.Weekday) Tempo {
+func (tempo Time) SetWeekday(weekday time.Weekday) Time {
 	return tempo.AddDays(int(weekday) - tempo.DayOfWeek())
 }
 
-func (tempo Tempo) ISOWeekday() int {
+func (tempo Time) ISOWeekday() int {
 	weekday := tempo.local().Weekday()
 
 	if weekday == time.Sunday {
@@ -182,35 +182,35 @@ func (tempo Tempo) ISOWeekday() int {
 	return int(weekday)
 }
 
-func (tempo Tempo) ISOWeek() (int, int) {
+func (tempo Time) ISOWeek() (int, int) {
 	year, week := tempo.local().ISOWeek()
 
 	return year, week
 }
 
-func (tempo Tempo) ISOWeekYear() int {
+func (tempo Time) ISOWeekYear() int {
 	year, _ := tempo.ISOWeek()
 
 	return year
 }
 
-func (tempo Tempo) ISOWeekNumber() int {
+func (tempo Time) ISOWeekNumber() int {
 	_, week := tempo.ISOWeek()
 
 	return week
 }
 
-func (tempo Tempo) WeeksInISOYear() int {
+func (tempo Time) WeeksInISOYear() int {
 	_, week := time.Date(tempo.ISOWeekYear(), time.December, 28, 0, 0, 0, 0, tempo.location).ISOWeek()
 
 	return week
 }
 
-func (tempo Tempo) DayOfYear() int {
+func (tempo Time) DayOfYear() int {
 	return tempo.local().YearDay()
 }
 
-func (tempo Tempo) SetDayOfYear(day int) Tempo {
+func (tempo Time) SetDayOfYear(day int) Time {
 	return setterspkg.SetTime(
 		tempo.StartOfYear().AddDays(day-1),
 		tempo.Hour(),
@@ -220,23 +220,23 @@ func (tempo Tempo) SetDayOfYear(day int) Tempo {
 	)
 }
 
-func (tempo Tempo) Hour() int {
+func (tempo Time) Hour() int {
 	return tempo.local().Hour()
 }
 
-func (tempo Tempo) Minute() int {
+func (tempo Time) Minute() int {
 	return tempo.local().Minute()
 }
 
-func (tempo Tempo) Second() int {
+func (tempo Time) Second() int {
 	return tempo.local().Second()
 }
 
-func (tempo Tempo) Millisecond() int {
+func (tempo Time) Millisecond() int {
 	return tempo.local().Nanosecond() / int(time.Millisecond)
 }
 
-func (tempo Tempo) fieldValue(field string) (any, bool) {
+func (tempo Time) fieldValue(field string) (any, bool) {
 	values := tempo.ToMap()
 	value, ok := values[field]
 
@@ -254,7 +254,7 @@ func (tempo Tempo) fieldValue(field string) (any, bool) {
 	}
 }
 
-func (tempo Tempo) PaddedUnit(field string, length int) (string, bool) {
+func (tempo Time) PaddedUnit(field string, length int) (string, bool) {
 	value, ok := tempo.fieldValue(field)
 
 	if !ok {
@@ -270,43 +270,43 @@ func (tempo Tempo) PaddedUnit(field string, length int) (string, bool) {
 	return fmt.Sprintf("%0*d", length, number), true
 }
 
-func (tempo Tempo) OffsetMinutes() int {
+func (tempo Time) OffsetMinutes() int {
 	_, offset := tempo.local().Zone()
 
 	return offset / 60
 }
 
-func (tempo Tempo) OffsetString(separator string) string {
+func (tempo Time) OffsetString(separator string) string {
 	return formatOffset(tempo.OffsetMinutes(), separator)
 }
 
-func (tempo Tempo) UTCOffset() int {
+func (tempo Time) UTCOffset() int {
 	return tempo.OffsetMinutes()
 }
 
-func (tempo Tempo) ZoneName() string {
+func (tempo Time) ZoneName() string {
 	name, _ := tempo.local().Zone()
 
 	return name
 }
 
-func (tempo Tempo) MonthName() string {
+func (tempo Time) MonthName() string {
 	return calendarMonthName(tempo.Month())
 }
 
-func (tempo Tempo) ShortMonthName() string {
+func (tempo Time) ShortMonthName() string {
 	return calendarShortMonthName(tempo.Month())
 }
 
-func (tempo Tempo) DayName() string {
+func (tempo Time) DayName() string {
 	return calendarDayName(int(tempo.local().Weekday()))
 }
 
-func (tempo Tempo) ShortDayName() string {
+func (tempo Time) ShortDayName() string {
 	return calendarShortDayName(int(tempo.local().Weekday()))
 }
 
-func (tempo Tempo) MinDayName() string {
+func (tempo Time) MinDayName() string {
 	name := tempo.ShortDayName()
 
 	if len(name) < 2 {
@@ -316,35 +316,35 @@ func (tempo Tempo) MinDayName() string {
 	return name[:2]
 }
 
-func (tempo Tempo) TranslateNumber(value int) string {
+func (tempo Time) TranslateNumber(value int) string {
 	return strconv.Itoa(value)
 }
 
-func (tempo Tempo) Translate(message string, replacements map[string]string) string {
-	if translated, ok := tempo.Runtime().Translate(message, replacements); ok {
+func (tempo Time) Translate(message string, replacements map[string]string) string {
+	if translated, ok := tempo.Context().Translate(message, replacements); ok {
 		return translated
 	}
 
 	return tempo.TranslateWith(message, replacements)
 }
 
-func (tempo Tempo) TranslateWith(message string, replacements map[string]string) string {
+func (tempo Time) TranslateWith(message string, replacements map[string]string) string {
 	return replaceTranslationTokens(message, replacements)
 }
 
-func (tempo Tempo) TranslationMessage(key string) (any, bool) {
-	return tempo.Runtime().Message(key)
+func (tempo Time) TranslationMessage(key string) (any, bool) {
+	return tempo.Context().Message(key)
 }
 
-func (tempo Tempo) IsUTC() bool {
+func (tempo Time) IsUTC() bool {
 	return tempo.location == time.UTC && tempo.OffsetMinutes() == 0
 }
 
-func (tempo Tempo) IsLocal() bool {
+func (tempo Time) IsLocal() bool {
 	return tempo.location.String() == time.Local.String()
 }
 
-func (tempo Tempo) IsDST() bool {
+func (tempo Time) IsDST() bool {
 	local := tempo.local()
 	january := time.Date(local.Year(), time.January, 1, 12, 0, 0, 0, tempo.location)
 	july := time.Date(local.Year(), time.July, 1, 12, 0, 0, 0, tempo.location)
@@ -356,13 +356,13 @@ func (tempo Tempo) IsDST() bool {
 	return currentOffset > standardOffset
 }
 
-func (tempo Tempo) IsLeapYear() bool {
+func (tempo Time) IsLeapYear() bool {
 	year := tempo.Year()
 
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
 
-func (tempo Tempo) DaysInYear() int {
+func (tempo Time) DaysInYear() int {
 	if tempo.IsLeapYear() {
 		return 366
 	}
@@ -370,100 +370,100 @@ func (tempo Tempo) DaysInYear() int {
 	return 365
 }
 
-func (tempo Tempo) IsLongYear() bool {
+func (tempo Time) IsLongYear() bool {
 	return tempo.WeeksInISOYear() == 53
 }
 
-func (tempo Tempo) IsLongISOYear() bool {
+func (tempo Time) IsLongISOYear() bool {
 	return tempo.IsLongYear()
 }
 
-func (tempo Tempo) IsLastOfMonth() bool {
+func (tempo Time) IsLastOfMonth() bool {
 	return tempo.Day() == tempo.DaysInMonth()
 }
 
-func (tempo Tempo) DaysInMonth() int {
+func (tempo Time) DaysInMonth() int {
 	return daysInMonth(tempo.Year(), tempo.Month())
 }
 
-func (tempo Tempo) IsWeekend() bool {
+func (tempo Time) IsWeekend() bool {
 	weekday := tempo.local().Weekday()
 
 	return slices.Contains(tempo.settingsSnapshot().WeekendDays, weekday)
 }
 
-func (tempo Tempo) IsSunday() bool {
+func (tempo Time) IsSunday() bool {
 	return tempo.local().Weekday() == time.Sunday
 }
 
-func (tempo Tempo) IsMonday() bool {
+func (tempo Time) IsMonday() bool {
 	return tempo.local().Weekday() == time.Monday
 }
 
-func (tempo Tempo) IsTuesday() bool {
+func (tempo Time) IsTuesday() bool {
 	return tempo.local().Weekday() == time.Tuesday
 }
 
-func (tempo Tempo) IsWednesday() bool {
+func (tempo Time) IsWednesday() bool {
 	return tempo.local().Weekday() == time.Wednesday
 }
 
-func (tempo Tempo) IsThursday() bool {
+func (tempo Time) IsThursday() bool {
 	return tempo.local().Weekday() == time.Thursday
 }
 
-func (tempo Tempo) IsFriday() bool {
+func (tempo Time) IsFriday() bool {
 	return tempo.local().Weekday() == time.Friday
 }
 
-func (tempo Tempo) IsSaturday() bool {
+func (tempo Time) IsSaturday() bool {
 	return tempo.local().Weekday() == time.Saturday
 }
 
-func (tempo Tempo) IsDayOfWeek(weekday time.Weekday) bool {
+func (tempo Time) IsDayOfWeek(weekday time.Weekday) bool {
 	return tempo.local().Weekday() == weekday
 }
 
-func (tempo Tempo) IsWeekday() bool {
+func (tempo Time) IsWeekday() bool {
 	return !tempo.IsWeekend()
 }
 
-func (tempo Tempo) IsPast(reference Tempo) bool {
+func (tempo Time) IsPast(reference Time) bool {
 	return tempo.Before(reference)
 }
 
-func (tempo Tempo) IsFuture(reference Tempo) bool {
+func (tempo Time) IsFuture(reference Time) bool {
 	return tempo.After(reference)
 }
 
-func (tempo Tempo) IsNowOrPast() bool {
-	return tempo.SameOrBefore(Tempo{value: time.Now().UTC(), location: tempo.location})
+func (tempo Time) IsNowOrPast() bool {
+	return tempo.SameOrBefore(Time{value: time.Now().UTC(), location: tempo.location})
 }
 
-func (tempo Tempo) IsNowOrFuture() bool {
-	return tempo.SameOrAfter(Tempo{value: time.Now().UTC(), location: tempo.location})
+func (tempo Time) IsNowOrFuture() bool {
+	return tempo.SameOrAfter(Time{value: time.Now().UTC(), location: tempo.location})
 }
 
-func (tempo Tempo) IsToday(reference Tempo) bool {
+func (tempo Time) IsToday(reference Time) bool {
 	return tempo.Same(reference, Day)
 }
 
-func (tempo Tempo) IsTomorrow(reference Tempo) bool {
+func (tempo Time) IsTomorrow(reference Time) bool {
 	return tempo.Same(reference.AddDays(1), Day)
 }
 
-func (tempo Tempo) IsYesterday(reference Tempo) bool {
+func (tempo Time) IsYesterday(reference Time) bool {
 	return tempo.Same(reference.SubDays(1), Day)
 }
 
-func (tempo Tempo) IsMidnight() bool {
+func (tempo Time) IsMidnight() bool {
 	return tempo.Hour() == 0 &&
 		tempo.Minute() == 0 &&
 		tempo.Second() == 0 &&
 		tempo.Millisecond() == 0
 }
 
-func (tempo Tempo) IsMidday() bool {
+func (tempo Time) IsMidday() bool {
 	return tempo.Hour() == tempo.settingsSnapshot().MidDayAt &&
 		tempo.Minute() == 0 &&
 		tempo.Second() == 0 &&

@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	// dbMoneyValueSeparator is used to join together the Amount and Currency components of money.Money instances
+	// dbMoneyValueSeparator is used to join together the Amount and Currency components of money.Value instances
 	// allowing them to be stored as strings (via the driver.Valuer interface) and unmarshalled as strings (via
 	// the sql.Scanner interface); use SetDBMoneyValueSeparator to change this value in a thread-safe manner.
 	dbMoneyValueSeparator   = DefaultDBMoneyValueSeparator
@@ -48,9 +48,9 @@ func SetDBMoneyValueSeparator(separator string) error {
 	return nil
 }
 
-// Value implements driver.Valuer to serialise a Money instance into a delimited string using the DBMoneyValueSeparator,
+// Value implements driver.Valuer to serialise a Value instance into a delimited string using the DBMoneyValueSeparator,
 // for example, "amount|currency_code"
-func (m *Money) Value() (driver.Value, error) {
+func (m *Value) Value() (driver.Value, error) {
 	if err := ensureMoneyProvided(m); err != nil {
 		return nil, err
 	}
@@ -69,17 +69,17 @@ func (m *Money) Value() (driver.Value, error) {
 	), nil
 }
 
-// Scan implements sql.Scanner to deserialize a Money instance from a DBMoneyValueSeparator-separated string,
+// Scan implements sql.Scanner to deserialize a Value instance from a DBMoneyValueSeparator-separated string,
 // for example, "amount|currency_code"
-func (m *Money) Scan(src any) error {
+func (m *Value) Scan(src any) error {
 	if m == nil {
-		return fmt.Errorf("cannot scan nil Money")
+		return fmt.Errorf("cannot scan nil Value")
 	}
 
 	var amount Amount
 
 	var parts []string
-	curr := &currency.Currency{}
+	curr := &currency.Definition{}
 	separator := GetDBMoneyValueSeparator()
 
 	switch v := src.(type) {
@@ -88,11 +88,11 @@ func (m *Money) Scan(src any) error {
 	case []byte:
 		parts = strings.Split(string(v), separator)
 	default:
-		return fmt.Errorf("don't know how to scan %T into Money; update your query to return a money.DBMoneyValueSeparator-separated pair of \"amount%scurrency_code\"", src, separator)
+		return fmt.Errorf("don't know how to scan %T into Value; update your query to return a money.DBMoneyValueSeparator-separated pair of \"amount%scurrency_code\"", src, separator)
 	}
 
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return fmt.Errorf("%#v is not valid to scan into Money; update your query to return a money.DBMoneyValueSeparator-separated pair of \"amount%scurrency_code\"", src, separator)
+		return fmt.Errorf("%#v is not valid to scan into Value; update your query to return a money.DBMoneyValueSeparator-separated pair of \"amount%scurrency_code\"", src, separator)
 	}
 
 	if a, err := strconv.ParseInt(parts[0], 10, 64); err == nil {
@@ -105,8 +105,8 @@ func (m *Money) Scan(src any) error {
 		return fmt.Errorf("scanning %#v into a Currency: %v", parts[1], err)
 	}
 
-	// allocate new Money with the scanned amount and curr
-	*m = Money{
+	// allocate new Value with the scanned amount and curr
+	*m = Value{
 		amount:   amount,
 		currency: curr,
 	}

@@ -5,7 +5,7 @@ ROOT_PATH="$(git rev-parse --show-toplevel)"
 
 API_PATH="${ROOT_PATH}/api"
 
-# Every Go module lives at api/<module> and owns a go.mod.
+# Every Go module under api owns a go.mod.
 while IFS= read -r -d '' gomod; do
 	module_dir="$(dirname "${gomod}")"
 	echo "==> ${module_dir#"${ROOT_PATH}/"}"
@@ -14,4 +14,4 @@ while IFS= read -r -d '' gomod; do
 		GOWORK=off go vet ./...
 		GOWORK=off go test -race ./...
 	)
-done < <(find "${API_PATH}" -mindepth 2 -maxdepth 2 -name go.mod -print0 | sort -z)
+done < <(find "${API_PATH}" -mindepth 2 -name go.mod -print0 | sort -z)

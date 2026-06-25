@@ -2,15 +2,15 @@ package failed
 
 import "time"
 
-// FailedJob is the decoded record returned by All and Find. It is the
+// Job is the decoded record returned by All and Find. It is the
 // Go analogue of the stdClass rows the upstream providers yield: the public
 // fields mirror failed_jobs columns, plus an ID that maps to either the
 // integer primary key (database) or the job UUID (uuid/file/dynamodb).
-type FailedJob struct {
+type Job struct {
 	ID         string
 	UUID       string
 	Connection string
-	Queue      string
+	Backend    string
 	Payload    string
 	Exception  string
 	FailedAt   time.Time
@@ -25,7 +25,7 @@ type FailedJob struct {
 //   - Find returns (nil, nil) when the id does not exist (upstream returns null).
 //   - Flush takes `hours int` where 0 means "flush everything". upstream
 //     accepts int|null with null meaning the same.
-type FailedJobProvider interface {
+type Provider interface {
 	// Log persists a failed job record and returns its id (the uuid
 	// for uuid-keyed providers, the integer for database providers
 	// stringified). An error is returned only on storage failure.
@@ -36,10 +36,10 @@ type FailedJobProvider interface {
 	IDs(queueFilter string) ([]string, error)
 
 	// All returns every failed job ordered newest-first.
-	All() ([]FailedJob, error)
+	All() ([]Job, error)
 
 	// Find loads a single failed job by id, or (nil, nil) if missing.
-	Find(id string) (*FailedJob, error)
+	Find(id string) (*Job, error)
 
 	// Forget deletes a failed job by id. It returns true when a row
 	// was actually removed.

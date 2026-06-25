@@ -15,7 +15,7 @@ import (
 func TestJSONSetMarshal(t *testing.T) {
 	parser := NewJson()
 
-	customMarshal := func(m Money) ([]byte, error) {
+	customMarshal := func(m Value) ([]byte, error) {
 		amount, err := m.Amount()
 
 		if err != nil {
@@ -54,8 +54,8 @@ func TestJSONSetMarshal(t *testing.T) {
 func TestJSONSetUnmarshal(t *testing.T) {
 	parser := NewJson()
 
-	customUnmarshal := func(m *Money, b []byte) error {
-		*m = Money{
+	customUnmarshal := func(m *Value, b []byte) error {
+		*m = Value{
 			amount:   9999,
 			currency: currency.NewManager().Resolve(currency.SGD),
 		}
@@ -67,7 +67,7 @@ func TestJSONSetUnmarshal(t *testing.T) {
 
 	jsonData := []byte(`{"amount": 1000, "currency": "EUR"}`)
 
-	var m Money
+	var m Value
 	err := parser.Unmarshal(&m, jsonData)
 
 	if err != nil {
@@ -86,13 +86,13 @@ func TestJSONSetUnmarshal(t *testing.T) {
 func TestJSONSetCurrency(t *testing.T) {
 	parser := NewJson()
 
-	testutil.TestRequireNoErr(t, parser.SetCurrency(func() (*currency.Currency, error) {
+	testutil.TestRequireNoErr(t, parser.SetCurrency(func() (*currency.Definition, error) {
 		return currency.NewManager().Resolve(currency.GBP), nil
 	}))
 
 	jsonData := []byte(`{"amount": 5000}`)
 
-	var m Money
+	var m Value
 	err := parser.Unmarshal(&m, jsonData)
 
 	if err != nil {
@@ -155,7 +155,7 @@ func TestJSONParserThreadSafety(t *testing.T) {
 	for range iterations {
 		wg.Go(func() {
 
-			var m Money
+			var m Value
 
 			if err := parser.Unmarshal(&m, []byte(`{"amount": 1000, "currency": "SGD"}`)); err != nil {
 				t.Errorf("Unmarshal() unexpected error: %v", err)
@@ -171,7 +171,7 @@ func TestJSONParserRestore(t *testing.T) {
 
 	originalMarshal := parser.defaultMarshalJSON
 
-	customMarshal := func(m Money) ([]byte, error) {
+	customMarshal := func(m Value) ([]byte, error) {
 		return []byte(`{"custom":true}`), nil
 	}
 
@@ -208,7 +208,7 @@ func TestJSONParserRestore(t *testing.T) {
 func TestCustomJSONCurrencyInUnmarshal(t *testing.T) {
 	parser := NewJson()
 
-	testutil.TestRequireNoErr(t, parser.SetCurrency(func() (*currency.Currency, error) {
+	testutil.TestRequireNoErr(t, parser.SetCurrency(func() (*currency.Definition, error) {
 		return currency.NewManager().Resolve(currency.EUR), nil
 	}))
 
@@ -246,7 +246,7 @@ func TestCustomJSONCurrencyInUnmarshal(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var m Money
+			var m Value
 			err := parser.Unmarshal(&m, []byte(tt.json))
 
 			if err != nil {
@@ -266,7 +266,7 @@ func TestCustomJSONCurrencyInUnmarshal(t *testing.T) {
 
 func TestNewJsonWithParser(t *testing.T) {
 	// Custom functions for testing
-	customMarshal := func(m Money) ([]byte, error) {
+	customMarshal := func(m Value) ([]byte, error) {
 		amount, err := m.Amount()
 
 		if err != nil {
@@ -282,8 +282,8 @@ func TestNewJsonWithParser(t *testing.T) {
 		return []byte(`{"amount":` + strconv.FormatInt(amount, 10) + `,"currency":"` + curr.Code + `","new_parser_marshal":true}`), nil
 	}
 
-	customUnmarshal := func(m *Money, b []byte) error {
-		*m = Money{
+	customUnmarshal := func(m *Value, b []byte) error {
+		*m = Value{
 			amount:   8888,
 			currency: currency.NewManager().Resolve(currency.JPY),
 		}
@@ -291,7 +291,7 @@ func TestNewJsonWithParser(t *testing.T) {
 		return nil
 	}
 
-	customCurrency := func() (*currency.Currency, error) {
+	customCurrency := func() (*currency.Definition, error) {
 		return currency.NewManager().Resolve(currency.AUD), nil
 	}
 
@@ -321,7 +321,7 @@ func TestNewJsonWithParser(t *testing.T) {
 		// Test Unmarshal
 		jsonData := []byte(`{"amount": 1000, "currency": "EUR"}`)
 
-		var unmarshalledMoney Money
+		var unmarshalledMoney Value
 
 		err = parser.Unmarshal(&unmarshalledMoney, jsonData)
 
@@ -336,7 +336,7 @@ func TestNewJsonWithParser(t *testing.T) {
 		// Test default currency when currency is missing in JSON
 		jsonDataNoCurrency := []byte(`{"amount": 5000}`)
 
-		var moneyWithDefaultCurrency Money
+		var moneyWithDefaultCurrency Value
 
 		err = parser.Unmarshal(&moneyWithDefaultCurrency, jsonDataNoCurrency)
 
@@ -356,7 +356,7 @@ func TestNewJsonWithParser(t *testing.T) {
 		// Test Unmarshal uses default
 		jsonData := []byte(`{"amount": 1000, "currency": "EUR"}`)
 
-		var unmarshalledMoney Money
+		var unmarshalledMoney Value
 		err := parser.Unmarshal(&unmarshalledMoney, jsonData)
 
 		if err != nil {
@@ -402,7 +402,7 @@ func TestNewJsonWithParser(t *testing.T) {
 		// Test default currency when currency is missing in JSON
 		jsonDataNoCurrency := []byte(`{"amount": 5000}`)
 
-		var moneyWithDefaultCurrency Money
+		var moneyWithDefaultCurrency Value
 		err := parser.Unmarshal(&moneyWithDefaultCurrency, jsonDataNoCurrency)
 
 		if err != nil {
@@ -431,17 +431,17 @@ func TestJSON_Coverage(t *testing.T) {
 func TestJSONDefaultMarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("nil receiver", func(t *testing.T) {
 		var j *JSON
-		_, err := j.defaultMarshalJSON(Money{})
+		_, err := j.defaultMarshalJSON(Value{})
 
 		if !errors.Is(err, exception.ErrNoJSONParserProvided) {
 			t.Fatalf("defaultMarshalJSON error = %v, want ErrNoJSONParserProvided", err)
 		}
 	})
 
-	t.Run("Money{} uses default", func(t *testing.T) {
+	t.Run("Value{} uses default", func(t *testing.T) {
 		j := NewJson()
 
-		b, err := j.defaultMarshalJSON(Money{})
+		b, err := j.defaultMarshalJSON(Value{})
 
 		if err != nil {
 			t.Fatalf("defaultMarshalJSON unexpected error: %v", err)
@@ -461,10 +461,10 @@ func TestJSONDefaultMarshalJSON_CoveragePaths(t *testing.T) {
 		}
 	})
 
-	t.Run("Money with nil currency errors", func(t *testing.T) {
+	t.Run("Value with nil currency errors", func(t *testing.T) {
 		j := NewJson()
 
-		_, err := j.defaultMarshalJSON(Money{amount: 1, currency: nil})
+		_, err := j.defaultMarshalJSON(Value{amount: 1, currency: nil})
 
 		if !errors.Is(err, exception.ErrNoCurrencyInstance) {
 			t.Fatalf("defaultMarshalJSON error = %v, want ErrNoCurrencyInstance", err)
@@ -476,7 +476,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("nil receiver", func(t *testing.T) {
 		var j *JSON
 
-		var m Money
+		var m Value
 		err := j.defaultUnmarshalJSON(&m, []byte(`{"amount": 10, "currency": "SGD"}`))
 
 		if !errors.Is(err, exception.ErrNoJSONParserProvided) {
@@ -487,7 +487,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("type error amount", func(t *testing.T) {
 		j := NewJson()
 
-		var m Money
+		var m Value
 		err := j.defaultUnmarshalJSON(&m, []byte(`{"amount": "nope", "currency": "SGD"}`))
 
 		if !errors.Is(err, exception.ErrInvalidJSONUnmarshal) {
@@ -498,7 +498,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("type error currency", func(t *testing.T) {
 		j := NewJson()
 
-		var m Money
+		var m Value
 		err := j.defaultUnmarshalJSON(&m, []byte(`{"amount": 10, "currency": 123}`))
 
 		if !errors.Is(err, exception.ErrInvalidJSONUnmarshal) {
@@ -509,7 +509,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("syntax error", func(t *testing.T) {
 		j := NewJson()
 
-		var m Money
+		var m Value
 		err := j.defaultUnmarshalJSON(&m, []byte(`{"amount":`))
 
 		if !errors.Is(err, exception.ErrInvalidJSONUnmarshal) {
@@ -520,7 +520,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("decimal rounding positive and negative", func(t *testing.T) {
 		j := NewJson()
 
-		var pos Money
+		var pos Value
 
 		testutil.TestRequireNoErr(t, j.defaultUnmarshalJSON(&pos, []byte(`{"amount": 12.50, "currency": "SGD"}`)))
 
@@ -528,7 +528,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 			t.Fatalf("amount = %d, want 13", testutil.TestRequire(t, pos.Amount))
 		}
 
-		var neg Money
+		var neg Value
 
 		testutil.TestRequireNoErr(t, j.defaultUnmarshalJSON(&neg, []byte(`{"amount": -12.50, "currency": "SGD"}`)))
 
@@ -540,7 +540,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("amount overflow beyond int64", func(t *testing.T) {
 		j := NewJson()
 
-		var m Money
+		var m Value
 		err := j.defaultUnmarshalJSON(&m, []byte(`{"amount": 9223372036854775808, "currency": "SGD"}`))
 
 		if !errors.Is(err, exception.ErrInvalidJSONUnmarshal) {
@@ -551,7 +551,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("unknown currency", func(t *testing.T) {
 		j := NewJson()
 
-		var m Money
+		var m Value
 		err := j.defaultUnmarshalJSON(&m, []byte(`{"amount": 10, "currency": "ZZZ"}`))
 
 		if !errors.Is(err, exception.ErrCurrencyNotFound) {
@@ -562,7 +562,7 @@ func TestJSONDefaultUnmarshalJSON_CoveragePaths(t *testing.T) {
 	t.Run("default currency used when currency missing", func(t *testing.T) {
 		j := NewJson()
 
-		var m Money
+		var m Value
 
 		testutil.TestRequireNoErr(t, j.defaultUnmarshalJSON(&m, []byte(`{"amount": 10}`)))
 

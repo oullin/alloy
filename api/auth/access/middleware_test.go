@@ -7,14 +7,14 @@ import (
 	"testing"
 
 	"github.com/oullin/alloy/auth/access"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type assertError string
 
 func TestAuthorizeMiddlewareAllowsAuthorizedRequest(t *testing.T) {
 	gate := access.New(userResolver(&testUser{id: "1"}))
-	gate.Define("view", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	gate.Define("view", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return true, nil
 	})
 
@@ -38,7 +38,7 @@ func TestAuthorizeMiddlewareAllowsAuthorizedRequest(t *testing.T) {
 
 func TestAuthorizeMiddlewareRendersDeniedJSON(t *testing.T) {
 	gate := access.New(userResolver(&testUser{id: "1"}))
-	gate.Define("delete", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	gate.Define("delete", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
 
@@ -76,10 +76,10 @@ func TestAuthorizeResolvedMiddlewareRendersNotFoundWhenModelCannotResolve(t *tes
 
 func TestAuthorizeMiddlewareAppliesGateBeforeHooks(t *testing.T) {
 	gate := access.New(userResolver(&testUser{id: "1"}))
-	gate.Define("view", func(_ context.Context, _ cauth.Authenticatable, _ any) (bool, error) {
+	gate.Define("view", func(_ context.Context, _ cauth.User, _ any) (bool, error) {
 		return false, nil
 	})
-	gate.Before(func(_ context.Context, _ cauth.Authenticatable, ability string, _ any) (bool, bool) {
+	gate.Before(func(_ context.Context, _ cauth.User, ability string, _ any) (bool, bool) {
 		if ability == "hidden" {
 			return false, true
 		}

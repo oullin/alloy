@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
 	"github.com/oullin/alloy/auth/twofactor"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // TwoFactorConfig controls two-factor endpoint output.
 type TwoFactorConfig struct {
 	Issuer      string
-	AccountName func(user cauth.Authenticatable) string
+	AccountName func(user cauth.User) string
 	Window      int
 }
 
@@ -157,7 +157,7 @@ func NewRegenerateRecoveryCodesHandler(guard cauth.Guard, persist TwoFactorUpdat
 	}
 }
 
-func twoFactorUser(w http.ResponseWriter, r *http.Request, guard cauth.Guard) (cauth.Authenticatable, cauth.TwoFactorAuthenticatable, bool) {
+func twoFactorUser(w http.ResponseWriter, r *http.Request, guard cauth.Guard) (cauth.User, cauth.TwoFactorUser, bool) {
 	user, err := guard.User(r.Context())
 
 	if err != nil || user == nil {
@@ -166,7 +166,7 @@ func twoFactorUser(w http.ResponseWriter, r *http.Request, guard cauth.Guard) (c
 		return nil, nil, false
 	}
 
-	twoFactor, ok := user.(cauth.TwoFactorAuthenticatable)
+	twoFactor, ok := user.(cauth.TwoFactorUser)
 
 	if !ok {
 		writeError(w, http.StatusUnprocessableEntity, "two-factor authentication is not supported")
@@ -177,7 +177,7 @@ func twoFactorUser(w http.ResponseWriter, r *http.Request, guard cauth.Guard) (c
 	return user, twoFactor, true
 }
 
-func persistTwoFactor(r *http.Request, user cauth.TwoFactorAuthenticatable, persist TwoFactorUpdater) error {
+func persistTwoFactor(r *http.Request, user cauth.TwoFactorUser, persist TwoFactorUpdater) error {
 	if persist == nil {
 		return nil
 	}
@@ -193,7 +193,7 @@ func twoFactorIssuer(cfg TwoFactorConfig) string {
 	return cfg.Issuer
 }
 
-func twoFactorAccountName(cfg TwoFactorConfig, user cauth.Authenticatable) string {
+func twoFactorAccountName(cfg TwoFactorConfig, user cauth.User) string {
 	if cfg.AccountName != nil {
 		return cfg.AccountName(user)
 	}

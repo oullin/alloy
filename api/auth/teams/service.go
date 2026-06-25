@@ -24,7 +24,7 @@ func (s *Service) Create(ctx context.Context, ownerID, name string) (Team, error
 }
 
 func (s *Service) List(ctx context.Context, userID string) ([]Team, error) {
-	return s.repo.TeamsForUser(ctx, userID)
+	return s.repo.ForUser(ctx, userID)
 }
 
 func (s *Service) AddMember(ctx context.Context, actorID, teamID, userID, role string) error {

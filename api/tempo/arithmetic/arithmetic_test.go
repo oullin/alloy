@@ -7,7 +7,7 @@ import (
 	"github.com/oullin/alloy/tempo"
 )
 
-func mustTempo(t *testing.T, value tempo.Tempo, err error) tempo.Tempo {
+func mustTempo(t *testing.T, value tempo.Time, err error) tempo.Time {
 	t.Helper()
 
 	if err != nil {
@@ -122,11 +122,11 @@ func TestWeekdayArithmeticAndSameUnitComparisons(t *testing.T) {
 		t.Fatalf("DiffInUnit(Day) = %d, want 5", got)
 	}
 
-	if got := wednesday.DiffInDaysFiltered(friday, func(item tempo.Tempo) bool { return item.IsMonday() }); got != 1 {
+	if got := wednesday.DiffInDaysFiltered(friday, func(item tempo.Time) bool { return item.IsMonday() }); got != 1 {
 		t.Fatalf("DiffInDaysFiltered(Monday) = %d, want 1", got)
 	}
 
-	if got := wednesday.DiffInHoursFiltered(friday, func(item tempo.Tempo) bool { return item.Hour() == 12 }); got != 5 {
+	if got := wednesday.DiffInHoursFiltered(friday, func(item tempo.Time) bool { return item.Hour() == 12 }); got != 5 {
 		t.Fatalf("DiffInHoursFiltered(hour 12) = %d, want 5", got)
 	}
 

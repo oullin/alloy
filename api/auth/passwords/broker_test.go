@@ -6,21 +6,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/auth"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
-	cevents "github.com/oullin/alloy/auth/contracts/events"
-	clog "github.com/oullin/alloy/auth/contracts/log"
 	authevents "github.com/oullin/alloy/auth/events"
 	"github.com/oullin/alloy/auth/passwords"
+	"github.com/oullin/alloy/auth/user"
+	cauth "github.com/oullin/alloy/contracts/auth"
+	cevents "github.com/oullin/alloy/contracts/auth/events"
+	clog "github.com/oullin/alloy/contracts/auth/log"
 )
 
 type resetUser struct {
-	*auth.GenericUser
+	*user.GenericUser
 	email string
 }
 
 type brokerProvider struct {
-	users map[string]cauth.Authenticatable
+	users map[string]cauth.User
 }
 
 type notifyingResetUser struct {
@@ -92,19 +92,19 @@ func (l *brokerLogger) Warning(message string, context ...map[string]any) {
 
 func (l *brokerLogger) Log(_ clog.Level, _ string, _ ...map[string]any) {}
 
-func (p *brokerProvider) RetrieveByID(_ context.Context, id string) (cauth.Authenticatable, error) {
+func (p *brokerProvider) RetrieveByID(_ context.Context, id string) (cauth.User, error) {
 	return p.users[id], nil
 }
 
-func (p *brokerProvider) RetrieveByToken(_ context.Context, _ string, _ string) (cauth.Authenticatable, error) {
+func (p *brokerProvider) RetrieveByToken(_ context.Context, _ string, _ string) (cauth.User, error) {
 	return nil, nil
 }
 
-func (p *brokerProvider) UpdateRememberToken(_ context.Context, _ cauth.Authenticatable, _ string) error {
+func (p *brokerProvider) UpdateRememberToken(_ context.Context, _ cauth.User, _ string) error {
 	return nil
 }
 
-func (p *brokerProvider) RetrieveByCredentials(_ context.Context, creds map[string]string) (cauth.Authenticatable, error) {
+func (p *brokerProvider) RetrieveByCredentials(_ context.Context, creds map[string]string) (cauth.User, error) {
 	email := creds["email"]
 
 	for _, u := range p.users {
@@ -116,11 +116,11 @@ func (p *brokerProvider) RetrieveByCredentials(_ context.Context, creds map[stri
 	return nil, nil
 }
 
-func (p *brokerProvider) ValidateCredentials(_ context.Context, _ cauth.Authenticatable, _ map[string]string) (bool, error) {
+func (p *brokerProvider) ValidateCredentials(_ context.Context, _ cauth.User, _ map[string]string) (bool, error) {
 	return true, nil
 }
 
-func (p *brokerProvider) RehashPasswordIfRequired(_ context.Context, _ cauth.Authenticatable, _ map[string]string, _ bool) error {
+func (p *brokerProvider) RehashPasswordIfRequired(_ context.Context, _ cauth.User, _ map[string]string, _ bool) error {
 	return nil
 }
 
@@ -142,10 +142,10 @@ func (d *brokerDispatcher) GetListeners(_ any) []cevents.Listener   { return nil
 
 func TestBrokerGetUser(t *testing.T) {
 	user := &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := passwords.NewMemoryRepository(time.Hour)
 	broker := passwords.NewBroker(provider, repo, time.Hour)
 
@@ -161,7 +161,7 @@ func TestBrokerGetUser(t *testing.T) {
 }
 
 func TestBrokerGetUserReturnsErrorForMissing(t *testing.T) {
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{}}
+	provider := &brokerProvider{users: map[string]cauth.User{}}
 	repo := passwords.NewMemoryRepository(time.Hour)
 	broker := passwords.NewBroker(provider, repo, time.Hour)
 
@@ -174,10 +174,10 @@ func TestBrokerGetUserReturnsErrorForMissing(t *testing.T) {
 
 func TestBrokerCreateAndTokenExists(t *testing.T) {
 	user := &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := passwords.NewMemoryRepository(time.Hour)
 	broker := passwords.NewBroker(provider, repo, time.Hour)
 
@@ -202,10 +202,10 @@ func TestBrokerCreateAndTokenExists(t *testing.T) {
 
 func TestBrokerSendResetLinkCreatesTokenSendsNotificationAndDispatchesEvent(t *testing.T) {
 	user := &notifyingResetUser{resetUser: &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := passwords.NewMemoryRepository(time.Hour)
 	dispatcher := &brokerDispatcher{}
 	broker := passwords.NewBroker(provider, repo, time.Hour).WithEventDispatcher(dispatcher)
@@ -250,10 +250,10 @@ func TestBrokerSendResetLinkCreatesTokenSendsNotificationAndDispatchesEvent(t *t
 
 func TestBrokerSendResetLinkUsingExecutesCallbackInsteadOfNotification(t *testing.T) {
 	user := &notifyingResetUser{resetUser: &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := passwords.NewMemoryRepository(time.Hour)
 	dispatcher := &brokerDispatcher{}
 	broker := passwords.NewBroker(provider, repo, time.Hour).WithEventDispatcher(dispatcher)
@@ -289,10 +289,10 @@ func TestBrokerSendResetLinkUsingExecutesCallbackInsteadOfNotification(t *testin
 
 func TestBrokerSendResetLinkReturnsErrorWhenNotificationUnsupported(t *testing.T) {
 	user := &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := &incompatibleTokenRepository{}
 	dispatcher := &brokerDispatcher{}
 	broker := passwords.NewBroker(provider, repo, time.Hour).WithEventDispatcher(dispatcher)
@@ -314,10 +314,10 @@ func TestBrokerSendResetLinkReturnsErrorWhenNotificationUnsupported(t *testing.T
 
 func TestBrokerSendResetLinkWithThrottleRequiresRecentTokenRepository(t *testing.T) {
 	user := &notifyingResetUser{resetUser: &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := &incompatibleTokenRepository{}
 	dispatcher := &brokerDispatcher{}
 	logger := &brokerLogger{}
@@ -387,10 +387,10 @@ func TestBrokerSendResetLinkWithThrottleRequiresRecentTokenRepository(t *testing
 
 func TestBrokerDeleteToken(t *testing.T) {
 	user := &resetUser{
-		GenericUser: auth.NewGenericUser(map[string]any{"id": "1"}),
+		GenericUser: user.NewGenericUser(map[string]any{"id": "1"}),
 		email:       "test@example.com",
 	}
-	provider := &brokerProvider{users: map[string]cauth.Authenticatable{"1": user}}
+	provider := &brokerProvider{users: map[string]cauth.User{"1": user}}
 	repo := passwords.NewMemoryRepository(time.Hour)
 	broker := passwords.NewBroker(provider, repo, time.Hour)
 

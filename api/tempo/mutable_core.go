@@ -6,32 +6,32 @@ import (
 	"github.com/oullin/alloy/tempo/setters"
 )
 
-func (mutable *MutableTempo) Tempo() Tempo {
+func (mutable *MutableTime) Immutable() Time {
 	return newTempoWithPolicy(mutable.value, mutable.location, mutable.runtime, mutable.settingsSnapshot(), mutable.serializer, mutable.toStringFormat)
 }
 
-func (mutable *MutableTempo) Clone() *MutableTempo {
-	return NewMutable(mutable.Tempo())
+func (mutable *MutableTime) Clone() *MutableTime {
+	return NewMutable(mutable.Immutable())
 }
 
-func (mutable *MutableTempo) AvoidMutation() *MutableTempo {
+func (mutable *MutableTime) AvoidMutation() *MutableTime {
 	return mutable.Clone()
 }
 
-func (mutable *MutableTempo) Cast() *MutableTempo {
+func (mutable *MutableTime) Cast() *MutableTime {
 	return mutable.Clone()
 }
 
-func (mutable *MutableTempo) Tempoize(input Tempo) *MutableTempo {
-	return mutable.replace(mutable.Tempo().Tempoize(input))
+func (mutable *MutableTime) Tempoize(input Time) *MutableTime {
+	return mutable.replace(mutable.Immutable().Tempoize(input))
 }
 
-func (mutable *MutableTempo) NowWithSameTz() *MutableTempo {
-	return mutable.replace(mutable.Tempo().NowWithSameTz())
+func (mutable *MutableTime) NowWithSameTz() *MutableTime {
+	return mutable.replace(mutable.Immutable().NowWithSameTz())
 }
 
-func (mutable *MutableTempo) Modify(modifier string) (*MutableTempo, error) {
-	next, err := mutable.Tempo().Modify(modifier)
+func (mutable *MutableTime) Modify(modifier string) (*MutableTime, error) {
+	next, err := mutable.Immutable().Modify(modifier)
 
 	if err != nil {
 		return nil, err
@@ -40,286 +40,282 @@ func (mutable *MutableTempo) Modify(modifier string) (*MutableTempo, error) {
 	return mutable.replace(next), nil
 }
 
-func (mutable *MutableTempo) Change(modifier string) (*MutableTempo, error) {
+func (mutable *MutableTime) Change(modifier string) (*MutableTime, error) {
 	return mutable.Modify(modifier)
 }
 
-func (mutable *MutableTempo) Immutable() Tempo {
-	return mutable.Tempo()
+func (mutable *MutableTime) Context() Context {
+	return mutable.Immutable().Context()
 }
 
-func (mutable *MutableTempo) Runtime() Runtime {
-	return mutable.Tempo().Runtime()
+func (mutable *MutableTime) WithRuntime(runtime Context) *MutableTime {
+	return mutable.replace(mutable.Immutable().WithRuntime(runtime))
 }
 
-func (mutable *MutableTempo) WithRuntime(runtime Runtime) *MutableTempo {
-	return mutable.replace(mutable.Tempo().WithRuntime(runtime))
+func (mutable *MutableTime) WithTranslator(translator Translator) *MutableTime {
+	return mutable.replace(mutable.Immutable().WithTranslator(translator))
 }
 
-func (mutable *MutableTempo) WithTranslator(translator Translator) *MutableTempo {
-	return mutable.replace(mutable.Tempo().WithTranslator(translator))
+func (mutable *MutableTime) HasTranslator() bool {
+	return mutable.Immutable().HasTranslator()
 }
 
-func (mutable *MutableTempo) HasTranslator() bool {
-	return mutable.Tempo().HasTranslator()
+func (mutable *MutableTime) Timezone() string {
+	return mutable.Immutable().Timezone()
 }
 
-func (mutable *MutableTempo) Timezone() string {
-	return mutable.Tempo().Timezone()
+func (mutable *MutableTime) Timestamp() int64 {
+	return mutable.Immutable().Timestamp()
 }
 
-func (mutable *MutableTempo) Timestamp() int64 {
-	return mutable.Tempo().Timestamp()
+func (mutable *MutableTime) TimestampMs() int64 {
+	return mutable.Immutable().TimestampMs()
 }
 
-func (mutable *MutableTempo) TimestampMs() int64 {
-	return mutable.Tempo().TimestampMs()
+func (mutable *MutableTime) PreciseTimestamp(precisions ...int) float64 {
+	return mutable.Immutable().PreciseTimestamp(precisions...)
 }
 
-func (mutable *MutableTempo) PreciseTimestamp(precisions ...int) float64 {
-	return mutable.Tempo().PreciseTimestamp(precisions...)
+func (mutable *MutableTime) Unix() int64 {
+	return mutable.Immutable().Unix()
 }
 
-func (mutable *MutableTempo) Unix() int64 {
-	return mutable.Tempo().Unix()
+func (mutable *MutableTime) Year() int {
+	return mutable.Immutable().Year()
 }
 
-func (mutable *MutableTempo) Year() int {
-	return mutable.Tempo().Year()
+func (mutable *MutableTime) Month() int {
+	return mutable.Immutable().Month()
 }
 
-func (mutable *MutableTempo) Month() int {
-	return mutable.Tempo().Month()
+func (mutable *MutableTime) Quarter() int {
+	return mutable.Immutable().Quarter()
 }
 
-func (mutable *MutableTempo) Quarter() int {
-	return mutable.Tempo().Quarter()
+func (mutable *MutableTime) Day() int {
+	return mutable.Immutable().Day()
 }
 
-func (mutable *MutableTempo) Day() int {
-	return mutable.Tempo().Day()
+func (mutable *MutableTime) DayOfWeek() int {
+	return mutable.Immutable().DayOfWeek()
 }
 
-func (mutable *MutableTempo) DayOfWeek() int {
-	return mutable.Tempo().DayOfWeek()
+func (mutable *MutableTime) Weekday() int {
+	return mutable.Immutable().Weekday()
 }
 
-func (mutable *MutableTempo) Weekday() int {
-	return mutable.Tempo().Weekday()
-}
-
-func (mutable *MutableTempo) SetWeekday(weekday time.Weekday) *MutableTempo {
+func (mutable *MutableTime) SetWeekday(weekday time.Weekday) *MutableTime {
 	return setters.SetWeekday(mutable, weekday)
 }
 
-func (mutable *MutableTempo) ISOWeekday() int {
-	return mutable.Tempo().ISOWeekday()
+func (mutable *MutableTime) ISOWeekday() int {
+	return mutable.Immutable().ISOWeekday()
 }
 
-func (mutable *MutableTempo) ISOWeek() (int, int) {
-	return mutable.Tempo().ISOWeek()
+func (mutable *MutableTime) ISOWeek() (int, int) {
+	return mutable.Immutable().ISOWeek()
 }
 
-func (mutable *MutableTempo) ISOWeekYear() int {
-	return mutable.Tempo().ISOWeekYear()
+func (mutable *MutableTime) ISOWeekYear() int {
+	return mutable.Immutable().ISOWeekYear()
 }
 
-func (mutable *MutableTempo) ISOWeekNumber() int {
-	return mutable.Tempo().ISOWeekNumber()
+func (mutable *MutableTime) ISOWeekNumber() int {
+	return mutable.Immutable().ISOWeekNumber()
 }
 
-func (mutable *MutableTempo) WeeksInISOYear() int {
-	return mutable.Tempo().WeeksInISOYear()
+func (mutable *MutableTime) WeeksInISOYear() int {
+	return mutable.Immutable().WeeksInISOYear()
 }
 
-func (mutable *MutableTempo) DayOfYear() int {
-	return mutable.Tempo().DayOfYear()
+func (mutable *MutableTime) DayOfYear() int {
+	return mutable.Immutable().DayOfYear()
 }
 
-func (mutable *MutableTempo) SetDayOfYear(day int) *MutableTempo {
+func (mutable *MutableTime) SetDayOfYear(day int) *MutableTime {
 	return setters.SetDayOfYear(mutable, day)
 }
 
-func (mutable *MutableTempo) Hour() int {
-	return mutable.Tempo().Hour()
+func (mutable *MutableTime) Hour() int {
+	return mutable.Immutable().Hour()
 }
 
-func (mutable *MutableTempo) Minute() int {
-	return mutable.Tempo().Minute()
+func (mutable *MutableTime) Minute() int {
+	return mutable.Immutable().Minute()
 }
 
-func (mutable *MutableTempo) Second() int {
-	return mutable.Tempo().Second()
+func (mutable *MutableTime) Second() int {
+	return mutable.Immutable().Second()
 }
 
-func (mutable *MutableTempo) Millisecond() int {
-	return mutable.Tempo().Millisecond()
+func (mutable *MutableTime) Millisecond() int {
+	return mutable.Immutable().Millisecond()
 }
 
-func (mutable *MutableTempo) PaddedUnit(field string, length int) (string, bool) {
-	return mutable.Tempo().PaddedUnit(field, length)
+func (mutable *MutableTime) PaddedUnit(field string, length int) (string, bool) {
+	return mutable.Immutable().PaddedUnit(field, length)
 }
 
-func (mutable *MutableTempo) OffsetMinutes() int {
-	return mutable.Tempo().OffsetMinutes()
+func (mutable *MutableTime) OffsetMinutes() int {
+	return mutable.Immutable().OffsetMinutes()
 }
 
-func (mutable *MutableTempo) OffsetString(separator string) string {
-	return mutable.Tempo().OffsetString(separator)
+func (mutable *MutableTime) OffsetString(separator string) string {
+	return mutable.Immutable().OffsetString(separator)
 }
 
-func (mutable *MutableTempo) UTCOffset() int {
-	return mutable.Tempo().UTCOffset()
+func (mutable *MutableTime) UTCOffset() int {
+	return mutable.Immutable().UTCOffset()
 }
 
-func (mutable *MutableTempo) ZoneName() string {
-	return mutable.Tempo().ZoneName()
+func (mutable *MutableTime) ZoneName() string {
+	return mutable.Immutable().ZoneName()
 }
 
-func (mutable *MutableTempo) MonthName() string {
-	return mutable.Tempo().MonthName()
+func (mutable *MutableTime) MonthName() string {
+	return mutable.Immutable().MonthName()
 }
 
-func (mutable *MutableTempo) ShortMonthName() string {
-	return mutable.Tempo().ShortMonthName()
+func (mutable *MutableTime) ShortMonthName() string {
+	return mutable.Immutable().ShortMonthName()
 }
 
-func (mutable *MutableTempo) DayName() string {
-	return mutable.Tempo().DayName()
+func (mutable *MutableTime) DayName() string {
+	return mutable.Immutable().DayName()
 }
 
-func (mutable *MutableTempo) ShortDayName() string {
-	return mutable.Tempo().ShortDayName()
+func (mutable *MutableTime) ShortDayName() string {
+	return mutable.Immutable().ShortDayName()
 }
 
-func (mutable *MutableTempo) MinDayName() string {
-	return mutable.Tempo().MinDayName()
+func (mutable *MutableTime) MinDayName() string {
+	return mutable.Immutable().MinDayName()
 }
 
-func (mutable *MutableTempo) TranslateNumber(value int) string {
-	return mutable.Tempo().TranslateNumber(value)
+func (mutable *MutableTime) TranslateNumber(value int) string {
+	return mutable.Immutable().TranslateNumber(value)
 }
 
-func (mutable *MutableTempo) Translate(message string, replacements map[string]string) string {
-	return mutable.Tempo().Translate(message, replacements)
+func (mutable *MutableTime) Translate(message string, replacements map[string]string) string {
+	return mutable.Immutable().Translate(message, replacements)
 }
 
-func (mutable *MutableTempo) TranslateWith(message string, replacements map[string]string) string {
-	return mutable.Tempo().TranslateWith(message, replacements)
+func (mutable *MutableTime) TranslateWith(message string, replacements map[string]string) string {
+	return mutable.Immutable().TranslateWith(message, replacements)
 }
 
-func (mutable *MutableTempo) TranslationMessage(key string) (any, bool) {
-	return mutable.Tempo().TranslationMessage(key)
+func (mutable *MutableTime) TranslationMessage(key string) (any, bool) {
+	return mutable.Immutable().TranslationMessage(key)
 }
 
-func (mutable *MutableTempo) IsUTC() bool {
-	return mutable.Tempo().IsUTC()
+func (mutable *MutableTime) IsUTC() bool {
+	return mutable.Immutable().IsUTC()
 }
 
-func (mutable *MutableTempo) IsLocal() bool {
-	return mutable.Tempo().IsLocal()
+func (mutable *MutableTime) IsLocal() bool {
+	return mutable.Immutable().IsLocal()
 }
 
-func (mutable *MutableTempo) IsDST() bool {
-	return mutable.Tempo().IsDST()
+func (mutable *MutableTime) IsDST() bool {
+	return mutable.Immutable().IsDST()
 }
 
-func (mutable *MutableTempo) IsLeapYear() bool {
-	return mutable.Tempo().IsLeapYear()
+func (mutable *MutableTime) IsLeapYear() bool {
+	return mutable.Immutable().IsLeapYear()
 }
 
-func (mutable *MutableTempo) DaysInYear() int {
-	return mutable.Tempo().DaysInYear()
+func (mutable *MutableTime) DaysInYear() int {
+	return mutable.Immutable().DaysInYear()
 }
 
-func (mutable *MutableTempo) IsLongYear() bool {
-	return mutable.Tempo().IsLongYear()
+func (mutable *MutableTime) IsLongYear() bool {
+	return mutable.Immutable().IsLongYear()
 }
 
-func (mutable *MutableTempo) IsLongISOYear() bool {
-	return mutable.Tempo().IsLongISOYear()
+func (mutable *MutableTime) IsLongISOYear() bool {
+	return mutable.Immutable().IsLongISOYear()
 }
 
-func (mutable *MutableTempo) IsLastOfMonth() bool {
-	return mutable.Tempo().IsLastOfMonth()
+func (mutable *MutableTime) IsLastOfMonth() bool {
+	return mutable.Immutable().IsLastOfMonth()
 }
 
-func (mutable *MutableTempo) DaysInMonth() int {
-	return mutable.Tempo().DaysInMonth()
+func (mutable *MutableTime) DaysInMonth() int {
+	return mutable.Immutable().DaysInMonth()
 }
 
-func (mutable *MutableTempo) IsWeekend() bool {
-	return mutable.Tempo().IsWeekend()
+func (mutable *MutableTime) IsWeekend() bool {
+	return mutable.Immutable().IsWeekend()
 }
 
-func (mutable *MutableTempo) IsSunday() bool {
-	return mutable.Tempo().IsSunday()
+func (mutable *MutableTime) IsSunday() bool {
+	return mutable.Immutable().IsSunday()
 }
 
-func (mutable *MutableTempo) IsMonday() bool {
-	return mutable.Tempo().IsMonday()
+func (mutable *MutableTime) IsMonday() bool {
+	return mutable.Immutable().IsMonday()
 }
 
-func (mutable *MutableTempo) IsTuesday() bool {
-	return mutable.Tempo().IsTuesday()
+func (mutable *MutableTime) IsTuesday() bool {
+	return mutable.Immutable().IsTuesday()
 }
 
-func (mutable *MutableTempo) IsWednesday() bool {
-	return mutable.Tempo().IsWednesday()
+func (mutable *MutableTime) IsWednesday() bool {
+	return mutable.Immutable().IsWednesday()
 }
 
-func (mutable *MutableTempo) IsThursday() bool {
-	return mutable.Tempo().IsThursday()
+func (mutable *MutableTime) IsThursday() bool {
+	return mutable.Immutable().IsThursday()
 }
 
-func (mutable *MutableTempo) IsFriday() bool {
-	return mutable.Tempo().IsFriday()
+func (mutable *MutableTime) IsFriday() bool {
+	return mutable.Immutable().IsFriday()
 }
 
-func (mutable *MutableTempo) IsSaturday() bool {
-	return mutable.Tempo().IsSaturday()
+func (mutable *MutableTime) IsSaturday() bool {
+	return mutable.Immutable().IsSaturday()
 }
 
-func (mutable *MutableTempo) IsDayOfWeek(weekday time.Weekday) bool {
-	return mutable.Tempo().IsDayOfWeek(weekday)
+func (mutable *MutableTime) IsDayOfWeek(weekday time.Weekday) bool {
+	return mutable.Immutable().IsDayOfWeek(weekday)
 }
 
-func (mutable *MutableTempo) IsWeekday() bool {
-	return mutable.Tempo().IsWeekday()
+func (mutable *MutableTime) IsWeekday() bool {
+	return mutable.Immutable().IsWeekday()
 }
 
-func (mutable *MutableTempo) IsPast(reference Tempo) bool {
-	return mutable.Tempo().IsPast(reference)
+func (mutable *MutableTime) IsPast(reference Time) bool {
+	return mutable.Immutable().IsPast(reference)
 }
 
-func (mutable *MutableTempo) IsFuture(reference Tempo) bool {
-	return mutable.Tempo().IsFuture(reference)
+func (mutable *MutableTime) IsFuture(reference Time) bool {
+	return mutable.Immutable().IsFuture(reference)
 }
 
-func (mutable *MutableTempo) IsNowOrPast() bool {
-	return mutable.Tempo().IsNowOrPast()
+func (mutable *MutableTime) IsNowOrPast() bool {
+	return mutable.Immutable().IsNowOrPast()
 }
 
-func (mutable *MutableTempo) IsNowOrFuture() bool {
-	return mutable.Tempo().IsNowOrFuture()
+func (mutable *MutableTime) IsNowOrFuture() bool {
+	return mutable.Immutable().IsNowOrFuture()
 }
 
-func (mutable *MutableTempo) IsToday(reference Tempo) bool {
-	return mutable.Tempo().IsToday(reference)
+func (mutable *MutableTime) IsToday(reference Time) bool {
+	return mutable.Immutable().IsToday(reference)
 }
 
-func (mutable *MutableTempo) IsTomorrow(reference Tempo) bool {
-	return mutable.Tempo().IsTomorrow(reference)
+func (mutable *MutableTime) IsTomorrow(reference Time) bool {
+	return mutable.Immutable().IsTomorrow(reference)
 }
 
-func (mutable *MutableTempo) IsYesterday(reference Tempo) bool {
-	return mutable.Tempo().IsYesterday(reference)
+func (mutable *MutableTime) IsYesterday(reference Time) bool {
+	return mutable.Immutable().IsYesterday(reference)
 }
 
-func (mutable *MutableTempo) IsMidnight() bool {
-	return mutable.Tempo().IsMidnight()
+func (mutable *MutableTime) IsMidnight() bool {
+	return mutable.Immutable().IsMidnight()
 }
 
-func (mutable *MutableTempo) IsMidday() bool {
-	return mutable.Tempo().IsMidday()
+func (mutable *MutableTime) IsMidday() bool {
+	return mutable.Immutable().IsMidday()
 }

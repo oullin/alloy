@@ -2,11 +2,11 @@ package duration
 
 import "strconv"
 
-func (value *Duration) MarshalJSON() ([]byte, error) {
+func (value *Span) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(value.ISOString())), nil
 }
 
-func (value *Duration) UnmarshalJSON(data []byte) error {
+func (value *Span) UnmarshalJSON(data []byte) error {
 	input, err := strconv.Unquote(string(data))
 
 	if err != nil {

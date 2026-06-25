@@ -96,7 +96,7 @@ func TestFindingFailedJobsById(t *testing.T) {
 
 	j, _ := p.Find("uuid-1")
 
-	if j == nil || j.ID != "uuid-1" || j.Queue != "queue-1" || j.Connection != "connection-1" {
+	if j == nil || j.ID != "uuid-1" || j.Backend != "queue-1" || j.Connection != "connection-1" {
 		t.Fatalf("unexpected job: %+v", j)
 	}
 }

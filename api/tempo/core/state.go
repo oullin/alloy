@@ -7,7 +7,7 @@ package core
 import "time"
 
 // State is the minimal snapshot a temporal value carries: an instant in UTC
-// plus the location used to project it. Runtime concerns (locale, translator,
+// plus the location used to project it. Context concerns (locale, translator,
 // settings) live on the higher-level type, not here, so kernel-level
 // operations stay pure.
 type State struct {

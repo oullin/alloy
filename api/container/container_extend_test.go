@@ -11,11 +11,11 @@ func TestExtendModifiesResolvedInstance(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
@@ -32,7 +32,7 @@ func TestExtendAppliedToExistingInstance(t *testing.T) {
 	c := newContainer()
 	c.Instance("name", "Taylor")
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
@@ -50,11 +50,11 @@ func TestExtendIsLazyInitialized(t *testing.T) {
 
 	called := false
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		called = true
 
 		return instance, nil
@@ -76,11 +76,11 @@ func TestExtendCanBeCalledBeforeBind(t *testing.T) {
 
 	c := newContainer()
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -96,15 +96,15 @@ func TestMultipleExtendersAppliedInOrder(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + "!", nil
 	})
 
@@ -120,11 +120,11 @@ func TestForgetExtenders(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
@@ -142,11 +142,11 @@ func TestExtendOnSingleton(t *testing.T) {
 
 	c := newContainer()
 
-	c.Singleton("name", func(_ *container.Container) (any, error) {
+	c.Singleton("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	})
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
@@ -167,13 +167,13 @@ func TestExtendOnAlias(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
 	c.Alias("name", "shortName")
 
-	c.Extend("shortName", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("shortName", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 
@@ -192,11 +192,11 @@ func TestExtendInstanceRebindingCallback(t *testing.T) {
 
 	var rebound bool
 
-	c.Rebinding("name", func(_ any, _ *container.Container) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
 		rebound = true
 	})
 
-	c.Extend("name", func(instance any, _ *container.Container) (any, error) {
+	c.Extend("name", func(instance any, _ *container.App) (any, error) {
 		return instance.(string) + " Otwell", nil
 	})
 

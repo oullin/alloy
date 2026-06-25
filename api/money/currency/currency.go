@@ -8,8 +8,8 @@ import (
 	"github.com/oullin/alloy/money/format"
 )
 
-// Currency represents the formatting rules for a specific currency.
-type Currency struct {
+// Definition represents the formatting rules for a specific currency.
+type Definition struct {
 	// Decimal is the decimal separator (e.g., ".").
 	Decimal string
 	// A Thousand is the thousand separators (e.g., ",").
@@ -27,7 +27,7 @@ type Currency struct {
 }
 
 // Formatter returns currency formatter representing
-func (c *Currency) Formatter() *format.Formatter {
+func (c *Definition) Formatter() *format.Renderer {
 	return format.NewFormatter(
 		c.Fraction,
 		c.Decimal,
@@ -38,7 +38,7 @@ func (c *Currency) Formatter() *format.Formatter {
 }
 
 // Equals checks if two currencies are equal based on their code.
-func (c *Currency) Equals(oc *Currency) bool {
+func (c *Definition) Equals(oc *Definition) bool {
 	if c == nil || oc == nil {
 		return c == oc
 	}
@@ -47,7 +47,7 @@ func (c *Currency) Equals(oc *Currency) bool {
 }
 
 // Get returns the currency if it exists, otherwise returns an error.
-func (c *Currency) Get() (*Currency, error) {
+func (c *Definition) Get() (*Definition, error) {
 	if c == nil {
 		return nil, exception.ErrCurrencyNotFound
 	}
@@ -55,8 +55,8 @@ func (c *Currency) Get() (*Currency, error) {
 	return c, nil
 }
 
-// DbValue implements driver.Valuer to serialize a Currency code into a string for saving to a database
-func (c *Currency) DbValue() (driver.Value, error) {
+// DbValue implements driver.Valuer to serialize a Definition code into a string for saving to a database
+func (c *Definition) DbValue() (driver.Value, error) {
 	if c == nil {
 		return nil, exception.ErrCurrencyNotFound
 	}
@@ -64,13 +64,13 @@ func (c *Currency) DbValue() (driver.Value, error) {
 	return c.Code, nil
 }
 
-// DbScan implements sql.Scanner to deserialize a Currency from a string value read from a database
-func (c *Currency) DbScan(src any) error {
+// DbScan implements sql.Scanner to deserialize a Definition from a string value read from a database
+func (c *Definition) DbScan(src any) error {
 	if c == nil {
 		return exception.ErrCurrencyNotFound
 	}
 
-	var val *Currency
+	var val *Definition
 
 	var code string
 
@@ -80,7 +80,7 @@ func (c *Currency) DbScan(src any) error {
 	case []byte:
 		code = string(v)
 	default:
-		return fmt.Errorf("%T is not a supported type for a Currency (store the Currency.Code value as a string only)", src)
+		return fmt.Errorf("%T is not a supported type for a Definition (store the Definition.Code value as a string only)", src)
 	}
 
 	currencies := NewCurrenciesMap()

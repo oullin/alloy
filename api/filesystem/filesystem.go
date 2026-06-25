@@ -16,28 +16,28 @@ import (
 	"strings"
 )
 
-// Filesystem provides local filesystem operations.
-type Filesystem struct{}
+// Local provides local filesystem operations.
+type Local struct{}
 
-// New creates a Filesystem instance.
-func New() *Filesystem {
-	return &Filesystem{}
+// New creates a Local instance.
+func New() *Local {
+	return &Local{}
 }
 
 // Exists determines if a file or directory exists at the given path.
-func (f *Filesystem) Exists(path string) bool {
+func (f *Local) Exists(path string) bool {
 	_, err := os.Stat(path)
 
 	return err == nil
 }
 
 // Missing determines if a file or directory is missing at the given path.
-func (f *Filesystem) Missing(path string) bool {
+func (f *Local) Missing(path string) bool {
 	return !f.Exists(path)
 }
 
 // IsFile determines if the given path is a regular file.
-func (f *Filesystem) IsFile(path string) bool {
+func (f *Local) IsFile(path string) bool {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -48,7 +48,7 @@ func (f *Filesystem) IsFile(path string) bool {
 }
 
 // IsDirectory determines if the given path is a directory.
-func (f *Filesystem) IsDirectory(path string) bool {
+func (f *Local) IsDirectory(path string) bool {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -60,7 +60,7 @@ func (f *Filesystem) IsDirectory(path string) bool {
 
 // IsEmptyDirectory determines if the given directory is empty.
 // When ignoreDotFiles is true, files starting with a dot are excluded.
-func (f *Filesystem) IsEmptyDirectory(directory string, ignoreDotFiles bool) (bool, error) {
+func (f *Local) IsEmptyDirectory(directory string, ignoreDotFiles bool) (bool, error) {
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {
@@ -79,7 +79,7 @@ func (f *Filesystem) IsEmptyDirectory(directory string, ignoreDotFiles bool) (bo
 }
 
 // IsReadable determines if the given path is readable.
-func (f *Filesystem) IsReadable(path string) bool {
+func (f *Local) IsReadable(path string) bool {
 	file, err := os.OpenFile(path, os.O_RDONLY, 0)
 
 	if err != nil {
@@ -92,7 +92,7 @@ func (f *Filesystem) IsReadable(path string) bool {
 }
 
 // IsWritable determines if the given path is writable.
-func (f *Filesystem) IsWritable(path string) bool {
+func (f *Local) IsWritable(path string) bool {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -128,7 +128,7 @@ func (f *Filesystem) IsWritable(path string) bool {
 
 // Hash calculates the hash of a file. The algorithm defaults to "md5".
 // Supported algorithms: "md5", "sha1", "sha256", "sha512".
-func (f *Filesystem) Hash(path string, algorithm ...string) (string, error) {
+func (f *Local) Hash(path string, algorithm ...string) (string, error) {
 	algo := "md5"
 
 	if len(algorithm) > 0 {
@@ -166,7 +166,7 @@ func (f *Filesystem) Hash(path string, algorithm ...string) (string, error) {
 }
 
 // HasSameHash determines if two files have the same hash.
-func (f *Filesystem) HasSameHash(firstFile, secondFile string) (bool, error) {
+func (f *Local) HasSameHash(firstFile, secondFile string) (bool, error) {
 	h1, err := f.Hash(firstFile)
 
 	if err != nil {
@@ -183,7 +183,7 @@ func (f *Filesystem) HasSameHash(firstFile, secondFile string) (bool, error) {
 }
 
 // Type returns the file type: "file" or "dir".
-func (f *Filesystem) Type(path string) (string, error) {
+func (f *Local) Type(path string) (string, error) {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -198,7 +198,7 @@ func (f *Filesystem) Type(path string) (string, error) {
 }
 
 // MimeType returns the MIME type of a file.
-func (f *Filesystem) MimeType(path string) (string, error) {
+func (f *Local) MimeType(path string) (string, error) {
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -232,7 +232,7 @@ func (f *Filesystem) MimeType(path string) (string, error) {
 }
 
 // GuessExtension returns the extension for a file based on its MIME type.
-func (f *Filesystem) GuessExtension(path string) (string, error) {
+func (f *Local) GuessExtension(path string) (string, error) {
 	mtype, err := f.MimeType(path)
 
 	if err != nil {
@@ -250,7 +250,7 @@ func (f *Filesystem) GuessExtension(path string) (string, error) {
 }
 
 // Size returns the file size in bytes.
-func (f *Filesystem) Size(path string) (int64, error) {
+func (f *Local) Size(path string) (int64, error) {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -261,7 +261,7 @@ func (f *Filesystem) Size(path string) (int64, error) {
 }
 
 // LastModified returns the last modification time as a Unix timestamp.
-func (f *Filesystem) LastModified(path string) (int64, error) {
+func (f *Local) LastModified(path string) (int64, error) {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -272,12 +272,12 @@ func (f *Filesystem) LastModified(path string) (int64, error) {
 }
 
 // Chmod sets the permission mode of a file or directory.
-func (f *Filesystem) Chmod(path string, mode fs.FileMode) error {
+func (f *Local) Chmod(path string, mode fs.FileMode) error {
 	return os.Chmod(path, mode)
 }
 
 // Name returns the filename without the extension.
-func (f *Filesystem) Name(path string) string {
+func (f *Local) Name(path string) string {
 	base := filepath.Base(path)
 	ext := filepath.Ext(base)
 
@@ -285,21 +285,21 @@ func (f *Filesystem) Name(path string) string {
 }
 
 // Basename returns the trailing name component of the path.
-func (f *Filesystem) Basename(path string) string {
+func (f *Local) Basename(path string) string {
 	return filepath.Base(path)
 }
 
 // Dirname returns the parent directory of the path.
-func (f *Filesystem) Dirname(path string) string {
+func (f *Local) Dirname(path string) string {
 	return filepath.Dir(path)
 }
 
 // Extension returns the file extension without the leading dot.
-func (f *Filesystem) Extension(path string) string {
+func (f *Local) Extension(path string) string {
 	return strings.TrimPrefix(filepath.Ext(path), ".")
 }
 
 // Glob finds path names matching a pattern.
-func (f *Filesystem) Glob(pattern string) ([]string, error) {
+func (f *Local) Glob(pattern string) ([]string, error) {
 	return filepath.Glob(pattern)
 }

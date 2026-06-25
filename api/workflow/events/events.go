@@ -24,7 +24,7 @@ type Event[T any] interface {
 
 // Base carries fields shared by every lifecycle event.
 type Base[T any] struct {
-	Workflow   string
+	Machine    string
 	SubjectVal T
 	Step       Transition
 	Tokens     map[string]int
@@ -70,7 +70,7 @@ type TransitionBlocker struct {
 	Code    string
 }
 
-func (e Base[T]) WorkflowName() string   { return e.Workflow }
+func (e Base[T]) WorkflowName() string   { return e.Machine }
 func (e Base[T]) Subject() T             { return e.SubjectVal }
 func (e Base[T]) Transition() Transition { return e.Step }
 func (e Base[T]) Marking() map[string]int {

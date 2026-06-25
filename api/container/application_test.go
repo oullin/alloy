@@ -41,7 +41,7 @@ type closureProvider struct{ register func() }
 // deferredProvider claims abstract keys but only registers them lazily.
 type deferredProvider struct {
 	keys       []string
-	register   func(*container.Container)
+	register   func(*container.App)
 	bootCalls  int
 	registered bool
 }
@@ -77,8 +77,8 @@ func TestNewApplication_HasUsableContainer(t *testing.T) {
 
 	app := container.NewApplication()
 
-	if app.Container == nil {
-		t.Fatal("expected embedded *Container to be non-nil")
+	if app.App == nil {
+		t.Fatal("expected embedded *App to be non-nil")
 	}
 
 	app.Instance("answer", 42)
@@ -205,7 +205,7 @@ func TestApplication_LazyResolution_HandlesOutOfOrderRegistration(t *testing.T) 
 
 	app.Register(&closureProvider{
 		register: func() {
-			app.Singleton("B", func(c *container.Container) (any, error) {
+			app.Singleton("B", func(c *container.App) (any, error) {
 				rawA, err := c.Make("A")
 
 				if err != nil {
@@ -219,7 +219,7 @@ func TestApplication_LazyResolution_HandlesOutOfOrderRegistration(t *testing.T) 
 
 	app.Register(&closureProvider{
 		register: func() {
-			app.Singleton("A", func(_ *container.Container) (any, error) {
+			app.Singleton("A", func(_ *container.App) (any, error) {
 				return "A", nil
 			})
 		},
@@ -279,7 +279,7 @@ func TestApplication_DeferredProvider_NotRegisteredUntilResolved(t *testing.T) {
 
 	dp := &deferredProvider{
 		keys: []string{"deferred.svc"},
-		register: func(_ *container.Container) {
+		register: func(_ *container.App) {
 			app.Instance("deferred.svc", "value")
 		},
 	}
@@ -312,7 +312,7 @@ func TestApplication_DeferredProvider_BootRunsAfterFlush(t *testing.T) {
 
 	dp := &deferredProvider{
 		keys: []string{"deferred.boot"},
-		register: func(_ *container.Container) {
+		register: func(_ *container.App) {
 			app.Instance("deferred.boot", 1)
 		},
 	}

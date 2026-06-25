@@ -7,7 +7,7 @@ import (
 	"github.com/oullin/alloy/container"
 )
 
-func newContainer() *container.Container {
+func newContainer() *container.App {
 	return container.New()
 }
 
@@ -17,7 +17,7 @@ func TestClosureResolution(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -41,7 +41,7 @@ func TestBindReturnsDifferentInstances(t *testing.T) {
 
 	n := 0
 
-	c.Bind("stub", func(_ *container.Container) (any, error) {
+	c.Bind("stub", func(_ *container.App) (any, error) {
 		n++
 
 		return &stub{id: n}, nil
@@ -59,11 +59,11 @@ func TestBindIfDoesNotRegisterIfAlreadyBound(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
-	c.BindIf("name", func(_ *container.Container) (any, error) {
+	c.BindIf("name", func(_ *container.App) (any, error) {
 		return "Dayle", nil
 	}, false)
 
@@ -78,7 +78,7 @@ func TestBindIfDoesRegisterIfNotBound(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.BindIf("name", func(_ *container.Container) (any, error) {
+	c.BindIf("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -96,7 +96,7 @@ func TestSingletonReturnsSameInstance(t *testing.T) {
 
 	type stub struct{ value string }
 
-	c.Singleton("stub", func(_ *container.Container) (any, error) {
+	c.Singleton("stub", func(_ *container.App) (any, error) {
 		return &stub{value: "hello"}, nil
 	})
 
@@ -112,11 +112,11 @@ func TestSingletonIfDoesNotRegisterIfAlreadyBound(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Singleton("name", func(_ *container.Container) (any, error) {
+	c.Singleton("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	})
 
-	c.SingletonIf("name", func(_ *container.Container) (any, error) {
+	c.SingletonIf("name", func(_ *container.App) (any, error) {
 		return "Dayle", nil
 	})
 
@@ -131,7 +131,7 @@ func TestSingletonIfDoesRegisterIfNotBound(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.SingletonIf("name", func(_ *container.Container) (any, error) {
+	c.SingletonIf("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	})
 
@@ -151,7 +151,7 @@ func TestScopedReturnsSameInstanceThenResets(t *testing.T) {
 
 	n := 0
 
-	c.Scoped("stub", func(_ *container.Container) (any, error) {
+	c.Scoped("stub", func(_ *container.App) (any, error) {
 		n++
 
 		return &stub{id: n}, nil
@@ -177,11 +177,11 @@ func TestScopedIfDoesNotRegisterIfAlreadyBound(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Scoped("name", func(_ *container.Container) (any, error) {
+	c.Scoped("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	})
 
-	c.ScopedIf("name", func(_ *container.Container) (any, error) {
+	c.ScopedIf("name", func(_ *container.App) (any, error) {
 		return "Dayle", nil
 	})
 
@@ -239,7 +239,7 @@ func TestContainerIsPassedToResolvers(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("something", func(cc *container.Container) (any, error) {
+	c.Bind("something", func(cc *container.App) (any, error) {
 		return cc, nil
 	}, false)
 
@@ -254,11 +254,11 @@ func TestNestedDependencyResolution(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("inner", func(_ *container.Container) (any, error) {
+	c.Bind("inner", func(_ *container.App) (any, error) {
 		return "inner-value", nil
 	}, false)
 
-	c.Bind("outer", func(cc *container.Container) (any, error) {
+	c.Bind("outer", func(cc *container.App) (any, error) {
 		inner, err := cc.Make("inner")
 
 		if err != nil {
@@ -283,7 +283,7 @@ func TestMakeWithParameters(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("greeting", func(cc *container.Container) (any, error) {
+	c.Bind("greeting", func(cc *container.App) (any, error) {
 		params := cc.Parameters()
 
 		name, _ := params["name"]
@@ -309,7 +309,7 @@ func TestSingletonNotCachedWithMakeParameters(t *testing.T) {
 
 	count := 0
 
-	c.Singleton("counter", func(_ *container.Container) (any, error) {
+	c.Singleton("counter", func(_ *container.App) (any, error) {
 		count++
 
 		return count, nil
@@ -327,7 +327,7 @@ func TestNestedParametersAreReset(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("inner", func(cc *container.Container) (any, error) {
+	c.Bind("inner", func(cc *container.App) (any, error) {
 		params := cc.Parameters()
 
 		if params != nil {
@@ -337,7 +337,7 @@ func TestNestedParametersAreReset(t *testing.T) {
 		return "no-params", nil
 	}, false)
 
-	c.Bind("outer", func(cc *container.Container) (any, error) {
+	c.Bind("outer", func(cc *container.App) (any, error) {
 		return cc.Make("inner")
 	}, false)
 
@@ -352,11 +352,11 @@ func TestBindingsCanBeOverridden(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Dayle", nil
 	}, false)
 
@@ -371,7 +371,7 @@ func TestContainerCanBindAnyWord(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("Taylor", func(_ *container.Container) (any, error) {
+	c.Bind("Taylor", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -385,7 +385,7 @@ func TestBuildExecutesFactory(t *testing.T) {
 
 	c := newContainer()
 
-	v, err := c.Build(func(_ *container.Container) (any, error) {
+	v, err := c.Build(func(_ *container.App) (any, error) {
 		return "built", nil
 	})
 
@@ -414,7 +414,7 @@ func TestGetResolvesBinding(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -438,7 +438,7 @@ func TestFactoryFuncReturnsNewInstanceEachTime(t *testing.T) {
 
 	n := 0
 
-	c.Bind("stub", func(_ *container.Container) (any, error) {
+	c.Bind("stub", func(_ *container.App) (any, error) {
 		n++
 
 		return &stub{id: n}, nil
@@ -471,15 +471,15 @@ func TestCircularDependencyDetection(t *testing.T) {
 
 	c := newContainer()
 
-	c.Bind("a", func(cc *container.Container) (any, error) {
+	c.Bind("a", func(cc *container.App) (any, error) {
 		return cc.Make("b")
 	}, false)
 
-	c.Bind("b", func(cc *container.Container) (any, error) {
+	c.Bind("b", func(cc *container.App) (any, error) {
 		return cc.Make("c")
 	}, false)
 
-	c.Bind("c", func(cc *container.Container) (any, error) {
+	c.Bind("c", func(cc *container.App) (any, error) {
 		return cc.Make("a")
 	}, false)
 
@@ -496,7 +496,7 @@ func TestAliasResolvesToAbstract(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -513,7 +513,7 @@ func TestAliasChainResolution(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -582,7 +582,7 @@ func TestBoundWithAlias(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -597,7 +597,7 @@ func TestResolvedResolvesAlias(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -620,7 +620,7 @@ func TestBound(t *testing.T) {
 		t.Fatal("should not be bound")
 	}
 
-	c.Bind("something", func(_ *container.Container) (any, error) {
+	c.Bind("something", func(_ *container.App) (any, error) {
 		return "value", nil
 	}, false)
 
@@ -644,7 +644,7 @@ func TestHasDelegatesToBound(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -661,7 +661,7 @@ func TestResolved(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -691,11 +691,11 @@ func TestIsShared(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("transient", func(_ *container.Container) (any, error) {
+	c.Bind("transient", func(_ *container.App) (any, error) {
 		return "value", nil
 	}, false)
 
-	c.Singleton("shared", func(_ *container.Container) (any, error) {
+	c.Singleton("shared", func(_ *container.App) (any, error) {
 		return "value", nil
 	})
 
@@ -712,7 +712,7 @@ func TestIsSharedWithScoped(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Scoped("scoped", func(_ *container.Container) (any, error) {
+	c.Scoped("scoped", func(_ *container.App) (any, error) {
 		return "value", nil
 	})
 
@@ -739,7 +739,7 @@ func TestCurrentlyResolving(t *testing.T) {
 
 	var resolving string
 
-	c.Bind("outer", func(cc *container.Container) (any, error) {
+	c.Bind("outer", func(cc *container.App) (any, error) {
 		resolving = cc.CurrentlyResolving()
 
 		return "outer", nil
@@ -795,11 +795,11 @@ func TestForgetScopedInstancesOnlyClearsScoped(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Singleton("shared", func(_ *container.Container) (any, error) {
+	c.Singleton("shared", func(_ *container.App) (any, error) {
 		return "shared", nil
 	})
 
-	c.Scoped("scoped", func(_ *container.Container) (any, error) {
+	c.Scoped("scoped", func(_ *container.App) (any, error) {
 		return "scoped", nil
 	})
 
@@ -820,7 +820,7 @@ func TestFlushResetsEverything(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -843,8 +843,8 @@ func TestGetBindings(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("a", func(_ *container.Container) (any, error) { return "a", nil }, false)
-	c.Singleton("b", func(_ *container.Container) (any, error) { return "b", nil })
+	c.Bind("a", func(_ *container.App) (any, error) { return "a", nil }, false)
+	c.Singleton("b", func(_ *container.App) (any, error) { return "b", nil })
 
 	bindings := c.GetBindings()
 
@@ -909,7 +909,7 @@ func TestConcurrentAccess(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		go func() {
-			c.Bind("name", func(_ *container.Container) (any, error) {
+			c.Bind("name", func(_ *container.App) (any, error) {
 				return "Taylor", nil
 			}, false)
 			done <- true
@@ -946,7 +946,7 @@ func TestMakeWithIsAliasForMake(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -970,13 +970,13 @@ func TestReboundListeners(t *testing.T) {
 
 	var rebound bool
 
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
 	c.Make("name") //nolint:errcheck
 
-	c.Rebinding("name", func(_ any, _ *container.Container) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
 		rebound = true
 	})
 
@@ -994,7 +994,7 @@ func TestReboundListenersOnInstances(t *testing.T) {
 
 	var called bool
 
-	c.Rebinding("name", func(_ any, _ *container.Container) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
 		called = true
 	})
 
@@ -1010,7 +1010,7 @@ func TestReboundListenersNotCalledWhenNotBound(t *testing.T) {
 
 	var called bool
 
-	c.Rebinding("name", func(_ any, _ *container.Container) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
 		called = true
 	})
 
@@ -1023,7 +1023,7 @@ func TestReboundListenersFiredOnRebind(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Taylor", nil
 	}, false)
 
@@ -1031,12 +1031,12 @@ func TestReboundListenersFiredOnRebind(t *testing.T) {
 
 	var newVal any
 
-	c.Rebinding("name", func(instance any, _ *container.Container) { //nolint:errcheck
+	c.Rebinding("name", func(instance any, _ *container.App) { //nolint:errcheck
 		newVal = instance
 	})
 
 	// Rebind.
-	c.Bind("name", func(_ *container.Container) (any, error) {
+	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Dayle", nil
 	}, false)
 

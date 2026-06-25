@@ -11,22 +11,22 @@ import (
 	"github.com/oullin/alloy/queue"
 )
 
-// BusDispatcher is the concrete implementation of QueueingDispatcher.
-type BusDispatcher struct {
+// DispatcherImpl is the concrete implementation of QueueingDispatcher.
+type DispatcherImpl struct {
 	mu                     sync.RWMutex
 	handlers               map[reflect.Type]Handler
 	pipes                  []Pipe
 	deferred               []any
-	queueBackend           queue.Queue
+	queueBackend           queue.Backend
 	batchRepo              BatchRepository
 	eventFunc              EventFunc
 	dispatchAfterResponses bool
 }
 
-// NewDispatcher creates a BusDispatcher.
+// NewDispatcher creates a DispatcherImpl.
 // queueBackend may be nil if DispatchToQueue is never called.
-func NewDispatcher(queueBackend queue.Queue, batchRepo BatchRepository) *BusDispatcher {
-	return &BusDispatcher{
+func NewDispatcher(queueBackend queue.Backend, batchRepo BatchRepository) *DispatcherImpl {
+	return &DispatcherImpl{
 		handlers:     make(map[reflect.Type]Handler),
 		queueBackend: queueBackend,
 		batchRepo:    batchRepo,
@@ -35,7 +35,7 @@ func NewDispatcher(queueBackend queue.Queue, batchRepo BatchRepository) *BusDisp
 
 // Map registers a command type → handler mapping.
 // command should be a zero-value instance of the command struct (e.g. MyCommand{}).
-func (d *BusDispatcher) Map(command any, handler Handler) Dispatcher {
+func (d *DispatcherImpl) Map(command any, handler Handler) Dispatcher {
 	d.mu.Lock()
 
 	defer d.mu.Unlock()
@@ -47,7 +47,7 @@ func (d *BusDispatcher) Map(command any, handler Handler) Dispatcher {
 }
 
 // PipeThrough replaces the current pipe list with the given pipes.
-func (d *BusDispatcher) PipeThrough(pipes ...Pipe) Dispatcher {
+func (d *DispatcherImpl) PipeThrough(pipes ...Pipe) Dispatcher {
 	d.mu.Lock()
 
 	defer d.mu.Unlock()
@@ -58,14 +58,14 @@ func (d *BusDispatcher) PipeThrough(pipes ...Pipe) Dispatcher {
 }
 
 // CommandShouldBeQueued reports whether the command implements ShouldQueue.
-func (d *BusDispatcher) CommandShouldBeQueued(command any) bool {
+func (d *DispatcherImpl) CommandShouldBeQueued(command any) bool {
 	_, ok := command.(ShouldQueue)
 
 	return ok
 }
 
 // WithDispatchingAfterResponses enables after-response dispatch mode.
-func (d *BusDispatcher) WithDispatchingAfterResponses() *BusDispatcher {
+func (d *DispatcherImpl) WithDispatchingAfterResponses() *DispatcherImpl {
 	d.mu.Lock()
 
 	defer d.mu.Unlock()
@@ -76,7 +76,7 @@ func (d *BusDispatcher) WithDispatchingAfterResponses() *BusDispatcher {
 }
 
 // WithoutDispatchingAfterResponses disables after-response dispatch mode.
-func (d *BusDispatcher) WithoutDispatchingAfterResponses() *BusDispatcher {
+func (d *DispatcherImpl) WithoutDispatchingAfterResponses() *DispatcherImpl {
 	d.mu.Lock()
 
 	defer d.mu.Unlock()
@@ -87,14 +87,14 @@ func (d *BusDispatcher) WithoutDispatchingAfterResponses() *BusDispatcher {
 }
 
 // SetEventFunc sets the event callback for batch lifecycle events.
-func (d *BusDispatcher) SetEventFunc(fn EventFunc) {
+func (d *DispatcherImpl) SetEventFunc(fn EventFunc) {
 	d.eventFunc = fn
 }
 
 // Dispatch sends the command through the pipeline and executes it.
 // If the command implements ShouldQueue, it is dispatched to the queue.
 // If dispatchAfterResponses is enabled, the command is deferred.
-func (d *BusDispatcher) Dispatch(ctx context.Context, command any) (any, error) {
+func (d *DispatcherImpl) Dispatch(ctx context.Context, command any) (any, error) {
 	d.mu.RLock()
 	afterResponses := d.dispatchAfterResponses
 	d.mu.RUnlock()
@@ -111,18 +111,18 @@ func (d *BusDispatcher) Dispatch(ctx context.Context, command any) (any, error) 
 }
 
 // DispatchSync executes the command synchronously, bypassing any queue routing.
-func (d *BusDispatcher) DispatchSync(ctx context.Context, command any) (any, error) {
+func (d *DispatcherImpl) DispatchSync(ctx context.Context, command any) (any, error) {
 	return d.execute(ctx, command)
 }
 
 // DispatchNow is an alias for DispatchSync.
-func (d *BusDispatcher) DispatchNow(ctx context.Context, command any) (any, error) {
+func (d *DispatcherImpl) DispatchNow(ctx context.Context, command any) (any, error) {
 	return d.DispatchSync(ctx, command)
 }
 
 // DispatchAfterResponse buffers a command for execution after the response is sent.
 // Call FlushDeferred() to process all buffered commands.
-func (d *BusDispatcher) DispatchAfterResponse(_ context.Context, command any) error {
+func (d *DispatcherImpl) DispatchAfterResponse(_ context.Context, command any) error {
 	d.mu.Lock()
 
 	defer d.mu.Unlock()
@@ -133,7 +133,7 @@ func (d *BusDispatcher) DispatchAfterResponse(_ context.Context, command any) er
 }
 
 // FlushDeferred dispatches all after-response commands synchronously.
-func (d *BusDispatcher) FlushDeferred(ctx context.Context) error {
+func (d *DispatcherImpl) FlushDeferred(ctx context.Context) error {
 	d.mu.Lock()
 	commands := d.deferred
 	d.deferred = nil
@@ -149,7 +149,7 @@ func (d *BusDispatcher) FlushDeferred(ctx context.Context) error {
 }
 
 // DispatchToQueue serialises the command and pushes it to the queue backend.
-func (d *BusDispatcher) DispatchToQueue(ctx context.Context, command any) error {
+func (d *DispatcherImpl) DispatchToQueue(ctx context.Context, command any) error {
 	if d.queueBackend == nil {
 		return fmt.Errorf("bus: no queue backend configured")
 	}
@@ -180,7 +180,7 @@ func (d *BusDispatcher) DispatchToQueue(ctx context.Context, command any) error 
 }
 
 // FindBatch retrieves a Batch by ID from the repository.
-func (d *BusDispatcher) FindBatch(ctx context.Context, id string) (*Batch, error) {
+func (d *DispatcherImpl) FindBatch(ctx context.Context, id string) (*Batch, error) {
 	if d.batchRepo == nil {
 		return nil, fmt.Errorf("bus: no batch repository configured")
 	}
@@ -189,7 +189,7 @@ func (d *BusDispatcher) FindBatch(ctx context.Context, id string) (*Batch, error
 }
 
 // HasCommandHandler reports whether a handler is registered for the command type.
-func (d *BusDispatcher) HasCommandHandler(command any) bool {
+func (d *DispatcherImpl) HasCommandHandler(command any) bool {
 	d.mu.RLock()
 
 	defer d.mu.RUnlock()
@@ -200,7 +200,7 @@ func (d *BusDispatcher) HasCommandHandler(command any) bool {
 }
 
 // GetCommandHandler returns the handler for the given command type.
-func (d *BusDispatcher) GetCommandHandler(command any) (Handler, bool) {
+func (d *DispatcherImpl) GetCommandHandler(command any) (Handler, bool) {
 	d.mu.RLock()
 
 	defer d.mu.RUnlock()
@@ -211,12 +211,12 @@ func (d *BusDispatcher) GetCommandHandler(command any) (Handler, bool) {
 }
 
 // Chain creates a PendingChain for sequential job execution.
-func (d *BusDispatcher) Chain(jobs []any) *PendingChain {
+func (d *DispatcherImpl) Chain(jobs []any) *PendingChain {
 	return NewPendingChain(d, jobs)
 }
 
 // Batch creates a PendingBatch for the given jobs.
-func (d *BusDispatcher) Batch(jobs []any) *PendingBatch {
+func (d *DispatcherImpl) Batch(jobs []any) *PendingBatch {
 	pb := NewPendingBatch(d, jobs)
 	pb.batchRepo = d.batchRepo
 	pb.eventFunc = d.eventFunc
@@ -224,7 +224,7 @@ func (d *BusDispatcher) Batch(jobs []any) *PendingBatch {
 	return pb
 }
 
-func (d *BusDispatcher) runThroughPipeline(ctx context.Context, command any) (any, error) {
+func (d *DispatcherImpl) runThroughPipeline(ctx context.Context, command any) (any, error) {
 	d.mu.RLock()
 	pipes := d.pipes
 	d.mu.RUnlock()
@@ -248,7 +248,7 @@ func (d *BusDispatcher) runThroughPipeline(ctx context.Context, command any) (an
 		})
 }
 
-func (d *BusDispatcher) execute(ctx context.Context, command any) (any, error) {
+func (d *DispatcherImpl) execute(ctx context.Context, command any) (any, error) {
 	d.mu.RLock()
 	handler, ok := d.handlers[reflect.TypeOf(command)]
 	d.mu.RUnlock()

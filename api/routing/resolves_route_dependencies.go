@@ -21,7 +21,7 @@ type ResolvesRouteDependencies struct {
 // DependencyContainer is the surface a container must expose so the resolver
 // can look up typed parameters by their reflect.Type. The bedrock container
 // has [DependencyContainer.Make] but lacks reflection-based binding; the
-// concrete adapter in M11 will wrap container.Container.
+// concrete adapter in M11 will wrap container.App.
 type DependencyContainer interface {
 	// MakeFor resolves an instance of the requested type. It is the Go
 	// counterpart to PHP's $container->make($className), keyed by reflect.Type

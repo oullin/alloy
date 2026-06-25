@@ -70,8 +70,8 @@ func TestParseJobOptionsReadsEveryKey(t *testing.T) {
 		t.Error("FailOnTimeout: expected true")
 	}
 
-	if opts.Queue != "emails" {
-		t.Errorf("Queue: got %q, want %q", opts.Queue, "emails")
+	if opts.Backend != "emails" {
+		t.Errorf("Backend: got %q, want %q", opts.Backend, "emails")
 	}
 
 	if opts.Connection != "redis" {
@@ -114,7 +114,7 @@ func TestParseJobOptionsPointerAndStruct(t *testing.T) {
 		t.Fatalf("pointer form: %v", err)
 	}
 
-	if got.MaxTries != want.MaxTries || got.Queue != want.Queue {
+	if got.MaxTries != want.MaxTries || got.Backend != want.Backend {
 		t.Errorf("pointer and struct disagreed: got %+v, want %+v", got, want)
 	}
 }
@@ -131,7 +131,7 @@ func TestParseJobOptionsZeroForUntaggedStruct(t *testing.T) {
 	if opts.MaxTries != 0 || opts.MaxExceptions != 0 || opts.Timeout != 0 ||
 		opts.Delay != 0 || len(opts.Backoff) != 0 || opts.UniqueFor != 0 ||
 		opts.FailOnTimeout || opts.DeleteWhenMissingModels ||
-		opts.Queue != "" || opts.Connection != "" || !opts.RetryUntil.IsZero() {
+		opts.Backend != "" || opts.Connection != "" || !opts.RetryUntil.IsZero() {
 		t.Errorf("expected zero JobOptions, got %+v", opts)
 	}
 }

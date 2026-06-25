@@ -1,8 +1,8 @@
 // Package arithmetic exposes generic time-shift operations that work on any
-// core.Bearer — both the immutable Tempo and the mutable *MutableTempo — so
+// core.Bearer — both the immutable Time and the mutable *MutableTime — so
 // the underlying math is written once and instantiated per concrete type.
 //
-// Functions here are pure mechanism: callers (typically Tempo/Mutable method
+// Functions here are pure mechanism: callers (typically Time/Mutable method
 // shims) decide policy such as month/year overflow by passing the relevant
 // flags. The package itself depends only on core, duration, calendar and
 // internal/kernel — never on the higher-level tempo package — keeping it
@@ -168,7 +168,7 @@ func SubWeekdays[T core.Bearer[T]](bearer T, days int, weekendDays []time.Weekda
 // → hours → minutes → seconds → milliseconds — so calendar-aware shifts land
 // before fixed-length ones. The overflow flags propagate to the month/year
 // stages exactly as if each AddX had been invoked individually.
-func AddDuration[T core.Bearer[T]](bearer T, dur duration.Duration, monthsOverflow bool, yearsOverflow bool) T {
+func AddDuration[T core.Bearer[T]](bearer T, dur duration.Span, monthsOverflow bool, yearsOverflow bool) T {
 	current := bearer
 	current = AddYears(current, dur.Years, yearsOverflow)
 	current = AddMonths(current, dur.Quarters*3+dur.Months, monthsOverflow)
@@ -182,8 +182,8 @@ func AddDuration[T core.Bearer[T]](bearer T, dur duration.Duration, monthsOverfl
 	return current
 }
 
-func SubDuration[T core.Bearer[T]](bearer T, dur duration.Duration, monthsOverflow bool, yearsOverflow bool) T {
-	return AddDuration(bearer, duration.Duration{
+func SubDuration[T core.Bearer[T]](bearer T, dur duration.Span, monthsOverflow bool, yearsOverflow bool) T {
+	return AddDuration(bearer, duration.Span{
 		Years:        -dur.Years,
 		Quarters:     -dur.Quarters,
 		Months:       -dur.Months,

@@ -68,7 +68,7 @@ func (interval Interval) Abs() Interval {
 	return interval
 }
 
-func (interval Interval) Contains(input Tempo, inclusivity ...string) bool {
+func (interval Interval) Contains(input Time, inclusivity ...string) bool {
 	mode := "[]"
 
 	if len(inclusivity) > 0 {
@@ -90,8 +90,8 @@ func (interval Interval) Intersection(other Interval) (Interval, bool) {
 	}
 
 	return Interval{
-		Start: newTempo(time.UnixMilli(intersection.StartMs), interval.Start.location, interval.Start.Runtime()),
-		End:   newTempo(time.UnixMilli(intersection.EndMs), interval.End.location, interval.End.Runtime()),
+		Start: newTempo(time.UnixMilli(intersection.StartMs), interval.Start.location, interval.Start.Context()),
+		End:   newTempo(time.UnixMilli(intersection.EndMs), interval.End.location, interval.End.Context()),
 	}, true
 }
 
@@ -99,7 +99,7 @@ func (interval Interval) Union(other Interval) Interval {
 	union := interval.span().Union(other.span())
 
 	return Interval{
-		Start: newTempo(time.UnixMilli(union.StartMs), interval.Start.location, interval.Start.Runtime()),
-		End:   newTempo(time.UnixMilli(union.EndMs), interval.End.location, interval.End.Runtime()),
+		Start: newTempo(time.UnixMilli(union.StartMs), interval.Start.location, interval.Start.Context()),
+		End:   newTempo(time.UnixMilli(union.EndMs), interval.End.location, interval.End.Context()),
 	}
 }

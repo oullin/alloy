@@ -69,7 +69,7 @@ type QueueBackend interface {
 // ListenerOptions configures a queued listener.
 type ListenerOptions struct {
 	Connection    string
-	Queue         string
+	Backend       string
 	Delay         time.Duration
 	Tries         int
 	MaxExceptions int

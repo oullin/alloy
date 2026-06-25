@@ -71,8 +71,8 @@ func TestRuntimeScopedTranslator(t *testing.T) {
 		t.Fatalf("second parse: %v", err)
 	}
 
-	assertEqual(t, "first Translate()", first.Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
-	assertEqual(t, "second Translate()", second.Translate("greeting", map[string]string{"name": "Tempo"}), "Hola Tempo")
+	assertEqual(t, "first Translate()", first.Translate("greeting", map[string]string{"name": "Time"}), "Hello Time")
+	assertEqual(t, "second Translate()", second.Translate("greeting", map[string]string{"name": "Time"}), "Hola Time")
 
 	if value, ok := first.TranslationMessage("locale"); !ok || value != "en-US" {
 		t.Fatalf("first locale message = %v, %v, want en-US, true", value, ok)
@@ -86,11 +86,11 @@ func TestRuntimeScopedTranslator(t *testing.T) {
 		t.Fatalf("HasTranslator() = false, want true")
 	}
 
-	assertEqual(t, "Clone().Translate()", first.Clone().Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
-	assertEqual(t, "AddDays().Translate()", first.AddDays(1).Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
-	assertEqual(t, "Mutable AddDays().Translate()", first.Mutable().AddDays(1).Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	assertEqual(t, "Clone().Translate()", first.Clone().Translate("greeting", map[string]string{"name": "Time"}), "Hello Time")
+	assertEqual(t, "AddDays().Translate()", first.AddDays(1).Translate("greeting", map[string]string{"name": "Time"}), "Hello Time")
+	assertEqual(t, "Mutable AddDays().Translate()", first.Mutable().AddDays(1).Translate("greeting", map[string]string{"name": "Time"}), "Hello Time")
 
 	replaced := first.WithTranslator(mapTranslator{"greeting": "Salut :name"})
-	assertEqual(t, "replaced Translate()", replaced.Translate("greeting", map[string]string{"name": "Tempo"}), "Salut Tempo")
-	assertEqual(t, "original Translate()", first.Translate("greeting", map[string]string{"name": "Tempo"}), "Hello Tempo")
+	assertEqual(t, "replaced Translate()", replaced.Translate("greeting", map[string]string{"name": "Time"}), "Salut Time")
+	assertEqual(t, "original Translate()", first.Translate("greeting", map[string]string{"name": "Time"}), "Hello Time")
 }

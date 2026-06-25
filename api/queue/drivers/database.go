@@ -397,7 +397,7 @@ func (d *DatabaseDriver) fetchInspected(ctx context.Context, query string, args 
 
 		job := InspectedJob{
 			ID:         id,
-			Queue:      queueName,
+			Backend:    queueName,
 			Connection: d.connection,
 			Payload:    []byte(payload),
 			Attempts:   attempts,

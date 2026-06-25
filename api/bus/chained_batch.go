@@ -43,7 +43,7 @@ func NewChainedBatch(pb *PendingBatch) *ChainedBatch {
 	}
 
 	cb.Connection = pb.Connection()
-	cb.Queue = pb.Queue()
+	cb.Backend = pb.Backend()
 
 	return cb
 }
@@ -86,8 +86,8 @@ func (cb *ChainedBatch) ToPendingBatch(dispatcher QueueingDispatcher) *PendingBa
 		pb.OnConnection(cb.Connection)
 	}
 
-	if cb.Queue != "" {
-		pb.OnQueue(cb.Queue)
+	if cb.Backend != "" {
+		pb.OnQueue(cb.Backend)
 	}
 
 	if cb.options != nil {

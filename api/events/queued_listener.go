@@ -46,7 +46,7 @@ func (c *CallQueuedListener) Failed(_ context.Context, _ error) {}
 func (c *CallQueuedListener) ShouldQueue() {}
 
 // GetQueue returns the queue name for routing.
-func (c *CallQueuedListener) GetQueue() string { return c.Options.Queue }
+func (c *CallQueuedListener) GetQueue() string { return c.Options.Backend }
 
 // GetConnection returns the connection name.
 func (c *CallQueuedListener) GetConnection() string { return c.Options.Connection }

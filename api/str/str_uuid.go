@@ -21,10 +21,10 @@ var (
 	ulidFallback func() string
 )
 
-// StrUuid generates a UUID version 4.
+// Uuid generates a UUID version 4.
 // If a factory or sequence is installed (via FreezeUuids/CreateUuidsUsing),
 // it is used instead.
-func StrUuid() string {
+func Uuid() string {
 	uuidMu.Lock()
 
 	defer uuidMu.Unlock()
@@ -47,8 +47,8 @@ func StrUuid() string {
 	return uuid.New().String()
 }
 
-// StrOrderedUuid generates a time-sortable UUID version 7.
-func StrOrderedUuid() string {
+// OrderedUuid generates a time-sortable UUID version 7.
+func OrderedUuid() string {
 	uuidMu.Lock()
 
 	defer uuidMu.Unlock()
@@ -73,9 +73,9 @@ func StrOrderedUuid() string {
 	return v7.String()
 }
 
-// StrUuid7 generates a UUID version 7 with optional time.
-func StrUuid7(t ...time.Time) string {
-	return StrOrderedUuid()
+// Uuid7 generates a UUID version 7 with optional time.
+func Uuid7(t ...time.Time) string {
+	return OrderedUuid()
 }
 
 // FreezeUuids installs a factory that returns a deterministic UUID string.
@@ -140,8 +140,8 @@ func CreateUuidsNormally() {
 	uuidMu.Unlock()
 }
 
-// StrUlid generates a ULID.
-func StrUlid() string {
+// Ulid generates a ULID.
+func Ulid() string {
 	ulidMu.Lock()
 
 	defer ulidMu.Unlock()

@@ -95,7 +95,7 @@ func TestMoney_Scan(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var m Money
+			var m Value
 			err := m.Scan(tt.input)
 
 			if (err != nil) != tt.wantErr {
@@ -181,7 +181,7 @@ func TestCurrency_Scan(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var c currency.Currency
+			var c currency.Definition
 			err := c.DbScan(tt.input)
 
 			if (err != nil) != tt.wantErr {
@@ -272,7 +272,7 @@ func TestSetDBMoneyValueSeparator(t *testing.T) {
 			}
 
 			// Verify Scan() works with the new separator
-			var scanned Money
+			var scanned Value
 
 			if err := scanned.Scan(expected); err != nil {
 				t.Fatalf("Scan() unexpected error: %v", err)
@@ -395,7 +395,7 @@ func TestSetDBMoneyValueSeparator_RoundTrip(t *testing.T) {
 			}
 
 			// Scan back from value
-			var restored Money
+			var restored Value
 
 			if err := restored.Scan(val); err != nil {
 				t.Fatalf("Scan() error: %v", err)
@@ -416,19 +416,19 @@ func TestSetDBMoneyValueSeparator_RoundTrip(t *testing.T) {
 func TestMoney_Value_Coverage(t *testing.T) {
 	t.Parallel()
 
-	// Test nil Money
-	var m *Money
+	// Test nil Value
+	var m *Value
 	_, err := m.Value()
 
 	if err == nil {
-		t.Error("Value() called on nil Money should return error")
+		t.Error("Value() called on nil Value should return error")
 	}
 
-	// Test Money with nil currency
-	m2 := &Money{amount: 100, currency: nil}
+	// Test Value with nil currency
+	m2 := &Value{amount: 100, currency: nil}
 	_, err = m2.Value()
 
 	if err == nil {
-		t.Error("Value() called on Money with nil currency should return error")
+		t.Error("Value() called on Value with nil currency should return error")
 	}
 }

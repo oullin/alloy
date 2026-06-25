@@ -26,8 +26,8 @@ func TestQueueableOnQueue(t *testing.T) {
 	q := &bus.Queueable{}
 	q.OnQueue("emails")
 
-	if q.Queue != "emails" {
-		t.Errorf("expected Queue 'emails', got %q", q.Queue)
+	if q.Backend != "emails" {
+		t.Errorf("expected Backend 'emails', got %q", q.Backend)
 	}
 }
 
@@ -63,7 +63,7 @@ func TestQueueableFluentChaining(t *testing.T) {
 	q := &bus.Queueable{}
 	result := q.OnConnection("redis").OnQueue("emails").WithDelay(10 * time.Second)
 
-	if result.Connection != "redis" || result.Queue != "emails" || result.Delay != 10*time.Second {
+	if result.Connection != "redis" || result.Backend != "emails" || result.Delay != 10*time.Second {
 		t.Error("fluent chaining did not set all fields correctly")
 	}
 }
@@ -166,8 +166,8 @@ func TestQueueableAllOnQueue(t *testing.T) {
 	q.Chain(j1, j2)
 	q.AllOnQueue("high")
 
-	if q.Queue != "high" {
-		t.Errorf("expected queue 'high', got %q", q.Queue)
+	if q.Backend != "high" {
+		t.Errorf("expected queue 'high', got %q", q.Backend)
 	}
 }
 

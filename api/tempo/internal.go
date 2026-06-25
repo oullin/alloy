@@ -22,13 +22,13 @@ func applyOptions(options ...Option) (config, error) {
 	return cfg, nil
 }
 
-func newTempo(value time.Time, location *time.Location, runtime Runtime) Tempo {
+func newTempo(value time.Time, location *time.Location, runtime Context) Time {
 	settings := defaultSettings()
 
 	return newTempoWithPolicy(value, location, runtime, settings, nil, "")
 }
 
-func newTempoWithPolicy(value time.Time, location *time.Location, runtime Runtime, settings Settings, serializer Serializer, toStringFormat string) Tempo {
+func newTempoWithPolicy(value time.Time, location *time.Location, runtime Context, settings Settings, serializer Serializer, toStringFormat string) Time {
 	if location == nil {
 		location = defaultLocation()
 	}
@@ -42,7 +42,7 @@ func newTempoWithPolicy(value time.Time, location *time.Location, runtime Runtim
 		)
 	}
 
-	return Tempo{
+	return Time{
 		value:          value.UTC(),
 		location:       location,
 		runtime:        runtime,
@@ -52,15 +52,15 @@ func newTempoWithPolicy(value time.Time, location *time.Location, runtime Runtim
 	}
 }
 
-func (tempo Tempo) with(value time.Time, location *time.Location) Tempo {
-	return newTempoWithPolicy(value, location, tempo.Runtime(), tempo.settingsSnapshot(), tempo.serializer, tempo.toStringFormat)
+func (tempo Time) with(value time.Time, location *time.Location) Time {
+	return newTempoWithPolicy(value, location, tempo.Context(), tempo.settingsSnapshot(), tempo.serializer, tempo.toStringFormat)
 }
 
-func (tempo Tempo) settingsSnapshot() Settings {
+func (tempo Time) settingsSnapshot() Settings {
 	return cloneSettings(normalizeSettings(tempo.settings))
 }
 
-func (mutable *MutableTempo) settingsSnapshot() Settings {
+func (mutable *MutableTime) settingsSnapshot() Settings {
 	if mutable == nil {
 		return defaultSettings()
 	}

@@ -3,6 +3,7 @@ module github.com/oullin/alloy/auth
 go 1.26.4
 
 require (
+	github.com/oullin/alloy/contracts/auth v0.0.0
 	github.com/oullin/alloy/container v0.0.0
 	github.com/oullin/alloy/cookie v0.0.0
 	golang.org/x/crypto v0.52.0
@@ -23,6 +24,7 @@ require (
 )
 
 replace (
+	github.com/oullin/alloy/contracts/auth => ../contracts/auth
 	github.com/oullin/alloy/container => ../container
 	github.com/oullin/alloy/cookie => ../cookie
 )

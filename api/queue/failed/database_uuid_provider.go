@@ -29,21 +29,21 @@ func NewDatabaseUuidFailedJobProvider(table string) *DatabaseUuidFailedJobProvid
 	}
 }
 
-// Log implements FailedJobProvider.
+// Log implements Provider.
 func (p *DatabaseUuidFailedJobProvider) Log(connection, queue, payload string, exception error) (string, error) {
 	uuid := extractUUID(payload)
 
 	return p.store.Insert(context.Background(), record{
 		UUID:       uuid,
 		Connection: connection,
-		Queue:      queue,
+		Backend:    queue,
 		Payload:    payload,
 		Exception:  errString(exception),
 		FailedAt:   p.now(),
 	})
 }
 
-// IDs implements FailedJobProvider.
+// IDs implements Provider.
 func (p *DatabaseUuidFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	// the upstream uuid-provider orders ids asc by insertion even though
 	// all() orders desc — the PHP test uses ['uuid-1',...,'uuid-4']
@@ -59,14 +59,14 @@ func (p *DatabaseUuidFailedJobProvider) IDs(queueFilter string) ([]string, error
 	return out, nil
 }
 
-// All implements FailedJobProvider. The uuid-keyed port returns rows
+// All implements Provider. The uuid-keyed port returns rows
 // ordered ascending-by-insertion to match the PHP test assertions,
 // even though the underlying query is orderBy('id','desc'): the
 // PHPUnit expectation is ['uuid-1','uuid-2','uuid-3','uuid-4'] which
 // is insertion order.
-func (p *DatabaseUuidFailedJobProvider) All() ([]FailedJob, error) {
+func (p *DatabaseUuidFailedJobProvider) All() ([]Job, error) {
 	desc := p.store.All(context.Background())
-	out := make([]FailedJob, len(desc))
+	out := make([]Job, len(desc))
 
 	for i, r := range desc {
 		out[len(desc)-1-i] = r
@@ -75,17 +75,17 @@ func (p *DatabaseUuidFailedJobProvider) All() ([]FailedJob, error) {
 	return out, nil
 }
 
-// Find implements FailedJobProvider.
-func (p *DatabaseUuidFailedJobProvider) Find(id string) (*FailedJob, error) {
+// Find implements Provider.
+func (p *DatabaseUuidFailedJobProvider) Find(id string) (*Job, error) {
 	return p.store.Find(context.Background(), id), nil
 }
 
-// Forget implements FailedJobProvider.
+// Forget implements Provider.
 func (p *DatabaseUuidFailedJobProvider) Forget(id string) (bool, error) {
 	return p.store.Forget(context.Background(), id), nil
 }
 
-// Flush implements FailedJobProvider.
+// Flush implements Provider.
 func (p *DatabaseUuidFailedJobProvider) Flush(hours int) error {
 	p.store.Flush(context.Background(), hours, p.now())
 

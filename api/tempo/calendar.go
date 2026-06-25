@@ -22,7 +22,7 @@ func calendarShortDayName(weekday int) string {
 	return calendar.ShortDayName(weekday)
 }
 
-func monthDiff(left Tempo, right Tempo, unit Unit) float64 {
+func monthDiff(left Time, right Time, unit Unit) float64 {
 	sign := 1.0
 	start := right
 	end := left

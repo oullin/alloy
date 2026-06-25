@@ -4,7 +4,7 @@ package events
 // Ref: @bedrock/code-0252
 type WorkerStarting struct {
 	ConnectionName string
-	Queue          string
+	Backend        string
 	WorkerName     string
 }
 
@@ -24,7 +24,7 @@ type WorkerStopping struct {
 // Ref: @bedrock/code-0250
 type WorkerPausing struct {
 	ConnectionName string
-	Queue          string
+	Backend        string
 	WorkerName     string
 }
 
@@ -33,6 +33,6 @@ type WorkerPausing struct {
 // Ref: @bedrock/code-0251
 type WorkerResuming struct {
 	ConnectionName string
-	Queue          string
+	Backend        string
 	WorkerName     string
 }

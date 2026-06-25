@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // DBQuerier is the minimal raw-SQL interface for DatabaseUserProvider.
@@ -23,8 +23,8 @@ type DBRow interface {
 	Scan(dest ...any) error
 }
 
-// RowMapper converts a scanned row map into an Authenticatable.
-type RowMapper func(row map[string]any) cauth.Authenticatable
+// RowMapper converts a scanned row map into an User.
+type RowMapper func(row map[string]any) cauth.User
 
 // DatabaseUserProvider retrieves users from a raw SQL table.
 type DatabaseUserProvider struct {
@@ -35,7 +35,7 @@ type DatabaseUserProvider struct {
 }
 
 // NewDatabaseUserProvider creates a DatabaseUserProvider.
-// table is the users table name. rowMapper converts a row map to Authenticatable.
+// table is the users table name. rowMapper converts a row map to User.
 func NewDatabaseUserProvider(db DBQuerier, table string, hasher cauth.PasswordHasher, rowMapper RowMapper) *DatabaseUserProvider {
 	if !isSafeIdentifier(table) {
 		table = "users"
@@ -49,13 +49,13 @@ func NewDatabaseUserProvider(db DBQuerier, table string, hasher cauth.PasswordHa
 	}
 }
 
-func (p *DatabaseUserProvider) RetrieveByID(ctx context.Context, id string) (cauth.Authenticatable, error) {
+func (p *DatabaseUserProvider) RetrieveByID(ctx context.Context, id string) (cauth.User, error) {
 	row := p.db.QueryRow(ctx, fmt.Sprintf("SELECT * FROM %s WHERE id = $1 LIMIT 1", p.table), id)
 
 	return p.mapRow(row)
 }
 
-func (p *DatabaseUserProvider) RetrieveByToken(ctx context.Context, id string, token string) (cauth.Authenticatable, error) {
+func (p *DatabaseUserProvider) RetrieveByToken(ctx context.Context, id string, token string) (cauth.User, error) {
 	row := p.db.QueryRow(ctx,
 		fmt.Sprintf("SELECT * FROM %s WHERE id = $1 AND remember_token = $2 LIMIT 1", p.table),
 		id, token,
@@ -64,14 +64,14 @@ func (p *DatabaseUserProvider) RetrieveByToken(ctx context.Context, id string, t
 	return p.mapRow(row)
 }
 
-func (p *DatabaseUserProvider) UpdateRememberToken(ctx context.Context, user cauth.Authenticatable, token string) error {
+func (p *DatabaseUserProvider) UpdateRememberToken(ctx context.Context, user cauth.User, token string) error {
 	return p.db.Exec(ctx,
 		fmt.Sprintf("UPDATE %s SET remember_token = $1 WHERE id = $2", p.table),
 		token, user.GetAuthIdentifier(),
 	)
 }
 
-func (p *DatabaseUserProvider) RetrieveByCredentials(ctx context.Context, credentials map[string]string) (cauth.Authenticatable, error) {
+func (p *DatabaseUserProvider) RetrieveByCredentials(ctx context.Context, credentials map[string]string) (cauth.User, error) {
 	query := fmt.Sprintf("SELECT * FROM %s WHERE ", p.table)
 
 	args := make([]any, 0, len(credentials))
@@ -105,7 +105,7 @@ func (p *DatabaseUserProvider) RetrieveByCredentials(ctx context.Context, creden
 	return p.mapRow(row)
 }
 
-func (p *DatabaseUserProvider) ValidateCredentials(ctx context.Context, user cauth.Authenticatable, credentials map[string]string) (bool, error) {
+func (p *DatabaseUserProvider) ValidateCredentials(ctx context.Context, user cauth.User, credentials map[string]string) (bool, error) {
 	plain := credentials["password"]
 
 	if plain == "" {
@@ -143,7 +143,7 @@ func isSafeIdentifier(identifier string) bool {
 	return true
 }
 
-func (p *DatabaseUserProvider) RehashPasswordIfRequired(ctx context.Context, user cauth.Authenticatable, credentials map[string]string, force bool) error {
+func (p *DatabaseUserProvider) RehashPasswordIfRequired(ctx context.Context, user cauth.User, credentials map[string]string, force bool) error {
 	if !force && !p.hasher.NeedsRehash(user.GetAuthPassword()) {
 		return nil
 	}
@@ -166,7 +166,7 @@ func (p *DatabaseUserProvider) RehashPasswordIfRequired(ctx context.Context, use
 	)
 }
 
-func (p *DatabaseUserProvider) mapRow(row DBRow) (cauth.Authenticatable, error) {
+func (p *DatabaseUserProvider) mapRow(row DBRow) (cauth.User, error) {
 	// Scan into a map via column names is not directly supported by the DBRow
 	// interface; callers must provide a RowMapper that matches their DB driver's
 	// row type. Here we delegate to the injected mapper.

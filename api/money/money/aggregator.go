@@ -4,7 +4,7 @@ import (
 	"github.com/oullin/alloy/money/exception"
 )
 
-// Aggregator performs aggregate operations on Money objects using a shared Manager.
+// Aggregator performs aggregate operations on Value objects using a shared Manager.
 type Aggregator struct {
 	manager *Manager
 }
@@ -14,12 +14,12 @@ func NewAggregator(manager *Manager) *Aggregator {
 	return &Aggregator{manager: manager}
 }
 
-// Sum adds multiple Money objects together and returns the result.
-// All Money objects must have the same currency.
+// Sum adds multiple Value objects together and returns the result.
+// All Value objects must have the same currency.
 //
 // Preconditions:
-//   - All Money arguments must be non-nil (panics if nil)
-func (a *Aggregator) Sum(moneys ...*Money) (*Money, error) {
+//   - All Value arguments must be non-nil (panics if nil)
+func (a *Aggregator) Sum(moneys ...*Value) (*Value, error) {
 	if a == nil || a.manager == nil {
 		return nil, exception.ErrInvalidAggregatorProvider
 	}
@@ -39,12 +39,12 @@ func (a *Aggregator) Sum(moneys ...*Money) (*Money, error) {
 	return a.manager.Add(result, remaining...)
 }
 
-// Min returns the Money object with the minimum amount from the given slice.
-// All Money objects must have the same currency.
+// Min returns the Value object with the minimum amount from the given slice.
+// All Value objects must have the same currency.
 //
 // Preconditions:
-//   - All Money arguments must be non-nil (panics if nil)
-func (a *Aggregator) Min(moneys ...*Money) (*Money, error) {
+//   - All Value arguments must be non-nil (panics if nil)
+func (a *Aggregator) Min(moneys ...*Value) (*Value, error) {
 	if a == nil || a.manager == nil {
 		return nil, exception.ErrInvalidAggregatorProvider
 	}
@@ -72,12 +72,12 @@ func (a *Aggregator) Min(moneys ...*Money) (*Money, error) {
 	return money, nil
 }
 
-// Max returns the Money object with the maximum amount from the given slice.
-// All Money objects must have the same currency.
+// Max returns the Value object with the maximum amount from the given slice.
+// All Value objects must have the same currency.
 //
 // Preconditions:
-//   - All Money arguments must be non-nil (panics if nil)
-func (a *Aggregator) Max(moneys ...*Money) (*Money, error) {
+//   - All Value arguments must be non-nil (panics if nil)
+func (a *Aggregator) Max(moneys ...*Value) (*Value, error) {
 	if a == nil || a.manager == nil {
 		return nil, exception.ErrInvalidAggregatorProvider
 	}
@@ -105,8 +105,8 @@ func (a *Aggregator) Max(moneys ...*Money) (*Money, error) {
 	return money, nil
 }
 
-// Avg returns the average of multiple Money objects.
-// All Money objects must have the same currency.
+// Avg returns the average of multiple Value objects.
+// All Value objects must have the same currency.
 //
 // The result is computed as sum.amount / len(moneys) using integer division,
 // which truncates any fractional cents toward zero rather than rounding.
@@ -116,8 +116,8 @@ func (a *Aggregator) Max(moneys ...*Money) (*Money, error) {
 // The average of $0.02 and $0.01 is $0.01 (truncated from $0.015).
 //
 // Preconditions:
-//   - All Money arguments must be non-nil (panics if nil)
-func (a *Aggregator) Avg(moneys ...*Money) (*Money, error) {
+//   - All Value arguments must be non-nil (panics if nil)
+func (a *Aggregator) Avg(moneys ...*Value) (*Value, error) {
 	if a == nil || a.manager == nil {
 		return nil, exception.ErrInvalidAggregatorProvider
 	}
@@ -139,7 +139,7 @@ func (a *Aggregator) Avg(moneys ...*Money) (*Money, error) {
 	// Divide by the count
 	avgAmount := sum.amount / int64(len(moneys))
 
-	return &Money{
+	return &Value{
 		amount:   avgAmount,
 		currency: sum.currency,
 	}, nil
@@ -147,35 +147,35 @@ func (a *Aggregator) Avg(moneys ...*Money) (*Money, error) {
 
 //var defaultAggregator = NewAggregator(NewManager())
 //
-//// Sum adds multiple Money objects together and returns the result.
-//// All Money objects must have the same currency.
+//// Sum adds multiple Value objects together and returns the result.
+//// All Value objects must have the same currency.
 ////
 //// Preconditions:
-////   - All Money arguments must be non-nil (panics if nil)
-//func Sum(moneys ...*Money) (*Money, error) {
+////   - All Value arguments must be non-nil (panics if nil)
+//func Sum(moneys ...*Value) (*Value, error) {
 //	return defaultAggregator.Sum(moneys...)
 //}
 //
-//// Min returns the Money object with the minimum amount from the given slice.
-//// All Money objects must have the same currency.
+//// Min returns the Value object with the minimum amount from the given slice.
+//// All Value objects must have the same currency.
 ////
 //// Preconditions:
-////   - All Money arguments must be non-nil (panics if nil)
-//func Min(moneys ...*Money) (*Money, error) {
+////   - All Value arguments must be non-nil (panics if nil)
+//func Min(moneys ...*Value) (*Value, error) {
 //	return defaultAggregator.Min(moneys...)
 //}
 //
-//// Max returns the Money object with the maximum amount from the given slice.
-//// All Money objects must have the same currency.
+//// Max returns the Value object with the maximum amount from the given slice.
+//// All Value objects must have the same currency.
 ////
 //// Preconditions:
-////   - All Money arguments must be non-nil (panics if nil)
-//func Max(moneys ...*Money) (*Money, error) {
+////   - All Value arguments must be non-nil (panics if nil)
+//func Max(moneys ...*Value) (*Value, error) {
 //	return defaultAggregator.Max(moneys...)
 //}
 //
-//// Avg returns the average of multiple Money objects.
-//// All Money objects must have the same currency.
+//// Avg returns the average of multiple Value objects.
+//// All Value objects must have the same currency.
 ////
 //// The result is computed as sum.amount / len(moneys) using integer division,
 //// which truncates any fractional cents toward zero rather than rounding.
@@ -185,7 +185,7 @@ func (a *Aggregator) Avg(moneys ...*Money) (*Money, error) {
 //// The average of $0.02 and $0.01 is $0.01 (truncated from $0.015).
 ////
 //// Preconditions:
-////   - All Money arguments must be non-nil (panics if nil)
-//func Avg(moneys ...*Money) (*Money, error) {
+////   - All Value arguments must be non-nil (panics if nil)
+//func Avg(moneys ...*Value) (*Value, error) {
 //	return defaultAggregator.Avg(moneys...)
 //}

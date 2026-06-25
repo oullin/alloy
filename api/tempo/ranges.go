@@ -2,11 +2,11 @@ package tempo
 
 import "time"
 
-func (tempo Tempo) IntervalUntil(end Tempo) Interval {
+func (tempo Time) IntervalUntil(end Time) Interval {
 	return Interval{Start: tempo, End: end}
 }
 
-func (tempo Tempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
+func (tempo Time) PeriodUntil(end Time, options ...PeriodOptions) Period {
 	step := Duration{Days: 1}
 	includeEnd := true
 
@@ -25,18 +25,18 @@ func (tempo Tempo) PeriodUntil(end Tempo, options ...PeriodOptions) Period {
 	return Period{Start: tempo, End: end, Step: step, IncludeEnd: includeEnd}
 }
 
-func (tempo Tempo) ToPeriod(end Tempo, options ...PeriodOptions) Period {
+func (tempo Time) ToPeriod(end Time, options ...PeriodOptions) Period {
 	return tempo.PeriodUntil(end, options...)
 }
 
-func (tempo Tempo) Until(end Tempo, options ...PeriodOptions) Period {
+func (tempo Time) Until(end Time, options ...PeriodOptions) Period {
 	return tempo.PeriodUntil(end, options...)
 }
 
-func (tempo Tempo) Range(end Tempo, options ...PeriodOptions) Period {
+func (tempo Time) Range(end Time, options ...PeriodOptions) Period {
 	return tempo.PeriodUntil(end, options...)
 }
 
-func (tempo Tempo) local() time.Time {
+func (tempo Time) local() time.Time {
 	return tempo.value.In(tempo.location)
 }

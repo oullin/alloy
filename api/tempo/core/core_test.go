@@ -8,11 +8,11 @@ import (
 	"github.com/oullin/alloy/tempo/core"
 )
 
-// Compile-time guarantees that Tempo and *MutableTempo continue to satisfy
+// Compile-time guarantees that Time and *MutableTime continue to satisfy
 // the Bearer contract feature packages depend on.
 var (
-	_ core.Bearer[tempo.Tempo]         = tempo.Tempo{}
-	_ core.Bearer[*tempo.MutableTempo] = (*tempo.MutableTempo)(nil)
+	_ core.Bearer[tempo.Time]         = tempo.Time{}
+	_ core.Bearer[*tempo.MutableTime] = (*tempo.MutableTime)(nil)
 )
 
 func TestStateRoundTripsThroughBearer(t *testing.T) {

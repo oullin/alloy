@@ -1,8 +1,8 @@
 // Package boundaries exposes generic snap-to-unit operations that work on any
-// core.Bearer — both the immutable Tempo and the mutable *MutableTempo — so
+// core.Bearer — both the immutable Time and the mutable *MutableTime — so
 // the StartOf/EndOf/Floor/Ceil/Round and Nth-weekday math live in one place.
 //
-// Functions here are pure mechanism: callers (typically Tempo/Mutable method
+// Functions here are pure mechanism: callers (typically Time/Mutable method
 // shims) decide policy such as weekend days by passing the relevant slice.
 // The package itself depends only on core, duration, calendar and
 // internal/kernel — never on the higher-level tempo package — keeping it

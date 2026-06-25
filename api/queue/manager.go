@@ -9,27 +9,27 @@ import (
 )
 
 // DriverCreator is the legacy one-shot creator: a function that takes a
-// raw config map and returns a ready-to-use Queue. It is the simpler of
+// raw config map and returns a ready-to-use Backend. It is the simpler of
 // the two registration paths — drivers that do not need a separate
 // Connector step can register this way.
-type DriverCreator func(config map[string]any) (Queue, error)
+type DriverCreator func(config map[string]any) (Backend, error)
 
 // ConnectorFactory is the upstream-faithful two-step path: the factory
 // returns a Connector, and the Manager then calls Connector.Connect(config)
-// to obtain a Queue.
+// to obtain a Backend.
 // Ref: @bedrock/code-0231
 type ConnectorFactory func() Connector
 
-// ConnectionNameSetter is the optional contract a Queue implementation
+// ConnectionNameSetter is the optional contract a Backend implementation
 // can satisfy if it wants the Manager to stamp the resolved connection
 // name onto it immediately after creation.
-// the upstream Queue::setConnectionName — exposed as an optional interface
-// so the core Queue interface stays frozen.
+// the upstream Backend::setConnectionName — exposed as an optional interface
+// so the core Backend interface stays frozen.
 type ConnectionNameSetter interface {
 	SetConnectionName(name string)
 }
 
-// ContainerAware is the optional contract a Queue implementation can
+// ContainerAware is the optional contract a Backend implementation can
 // satisfy if it wants the Manager to hand it the application container
 // (or any opaque value the caller chose as container) after creation.
 type ContainerAware interface {
@@ -52,7 +52,7 @@ type HookFunc func(event any)
 // hook registration for the worker pipeline.
 type Manager struct {
 	mu                sync.RWMutex
-	queues            map[string]Queue
+	queues            map[string]Backend
 	creators          map[string]DriverCreator
 	factories         map[string]ConnectorFactory
 	configs           map[string]map[string]any
@@ -78,7 +78,7 @@ type Manager struct {
 func NewManager() *Manager {
 	store := NewInMemoryPauseStore()
 	m := &Manager{
-		queues:       make(map[string]Queue),
+		queues:       make(map[string]Backend),
 		creators:     make(map[string]DriverCreator),
 		factories:    make(map[string]ConnectorFactory),
 		configs:      make(map[string]map[string]any),
@@ -161,17 +161,17 @@ func (m *Manager) SetContainer(container any) *Manager {
 
 // --- connection resolution -------------------------------------------
 
-// Driver returns (or lazily creates) the Queue for the given connection
+// Driver returns (or lazily creates) the Backend for the given connection
 // name. This is the string-typed, existing bedrock API.
-func (m *Manager) Driver(connection string) (Queue, error) {
+func (m *Manager) Driver(connection string) (Backend, error) {
 	return m.resolveConnection(connection)
 }
 
-// Connection returns (or lazily creates) the Queue for the given
+// Connection returns (or lazily creates) the Backend for the given
 // connection name. Accepts either a plain string or any value that
 // implements fmt.Stringer — matching the upstream enum-or-string handling.
 // Passing nil or an empty string resolves the default connection.
-func (m *Manager) Connection(name any) (Queue, error) {
+func (m *Manager) Connection(name any) (Backend, error) {
 	key := connectionKey(name)
 
 	if key == "" {
@@ -223,7 +223,7 @@ func (m *Manager) SetDefaultConnection(connection string) *Manager {
 	return m
 }
 
-// Purge removes the cached Queue for connection, forcing re-creation
+// Purge removes the cached Backend for connection, forcing re-creation
 // on the next resolve.
 func (m *Manager) Purge(connection string) {
 	m.mu.Lock()
@@ -237,7 +237,7 @@ func (m *Manager) Purge(connection string) {
 // Driver and Connection: cache lookup → config lookup → connector or
 // creator invocation → optional SetConnectionName / SetContainer hooks
 // → cache and return.
-func (m *Manager) resolveConnection(connection string) (Queue, error) {
+func (m *Manager) resolveConnection(connection string) (Backend, error) {
 	m.mu.Lock()
 
 	defer m.mu.Unlock()
@@ -291,7 +291,7 @@ func (m *Manager) lookupConfigLocked(name string) (map[string]any, bool) {
 // instantiateLocked runs the appropriate creation path for driver,
 // preferring the upstream-faithful ConnectorFactory path over the legacy
 // DriverCreator path. Caller holds m.mu.
-func (m *Manager) instantiateLocked(driver string, cfg map[string]any) (Queue, error) {
+func (m *Manager) instantiateLocked(driver string, cfg map[string]any) (Backend, error) {
 	if factory, ok := m.factories[driver]; ok {
 		connector := factory()
 
@@ -340,7 +340,7 @@ func (m *Manager) Before(hook HookFunc) *Manager {
 func (m *Manager) After(hook HookFunc) *Manager { return m.appendHook(&m.afterHooks, hook) }
 
 // Failing registers a listener that runs when a job fails.
-// the upstream Queue::failing.
+// the upstream Backend::failing.
 func (m *Manager) Failing(hook HookFunc) *Manager { return m.appendHook(&m.failingHooks, hook) }
 
 // Starting registers a listener that runs when a worker daemon boots.
@@ -453,9 +453,9 @@ func (m *Manager) IsPaused(connection, queue string) bool {
 // AllPendingJobs returns a snapshot of every pending job sitting on any
 // queue belonging to connection. It resolves the connection, asks the
 // driver for the set of queue names it currently knows about (via the
-// optional QueueNamer contract), and concatenates the per-queue
+// optional Namer contract), and concatenates the per-queue
 // PendingJobs results in declared order.
-// Queue::allPendingJobs.
+// Backend::allPendingJobs.
 func (m *Manager) AllPendingJobs(ctx context.Context, connection string) ([]InspectedJob, error) {
 	return m.allJobs(ctx, connection, func(i JobInspector, name string) ([]InspectedJob, error) {
 		return i.PendingJobs(ctx, name)
@@ -479,7 +479,7 @@ func (m *Manager) AllReservedJobs(ctx context.Context, connection string) ([]Ins
 }
 
 // allJobs implements the shared fan-out used by the three All*Jobs
-// helpers. Drivers that do not implement QueueNamer or JobInspector
+// helpers. Drivers that do not implement Namer or JobInspector
 // surface as ErrNotSupported; per-queue calls that themselves return
 // ErrNotSupported are skipped silently — the caller then receives only
 // the upstream "best-effort across queues" semantics.
@@ -490,10 +490,10 @@ func (m *Manager) allJobs(ctx context.Context, connection string, fetch func(Job
 		return nil, err
 	}
 
-	namer, ok := q.(QueueNamer)
+	namer, ok := q.(BackendNamer)
 
 	if !ok {
-		return nil, fmt.Errorf("%w: connection %q has no QueueNamer", ErrNotSupported, connection)
+		return nil, fmt.Errorf("%w: connection %q has no BackendNamer", ErrNotSupported, connection)
 	}
 
 	inspector, ok := q.(JobInspector)

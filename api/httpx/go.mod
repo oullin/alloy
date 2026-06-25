@@ -1,6 +1,6 @@
 module github.com/oullin/alloy/httpx
 
-go 1.26.0
+go 1.26.4
 
 require github.com/oullin/alloy/routing v0.0.0
 

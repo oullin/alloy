@@ -5,19 +5,19 @@ import (
 	"testing"
 	"time"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
 	"github.com/oullin/alloy/auth/events"
 	"github.com/oullin/alloy/auth/listeners"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
-// stubUser implements Authenticatable but not MustVerifyEmail.
+// stubUser implements User but not MustVerifyEmail.
 type stubUser struct {
 	id            string
 	password      string
 	rememberToken string
 }
 
-// verifiableUser implements both Authenticatable and EmailVerificationSender.
+// verifiableUser implements both User and EmailVerificationSender.
 type verifiableUser struct {
 	stubUser
 	verified                 bool

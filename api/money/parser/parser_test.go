@@ -703,7 +703,7 @@ func TestParser_NewParserWithAndNilReceiverPaths(t *testing.T) {
 		t.Fatalf("ParseAmount() unexpected error: %v", err)
 	}
 
-	var nilParser *Parser
+	var nilParser *Reader
 
 	if _, _, err := nilParser.ParseAmount("SGD 10"); !errors.Is(err, exception.ErrParserNotProvided) {
 		t.Fatalf("ParseAmount(nil) error = %v, want ErrParserNotProvided", err)
@@ -718,7 +718,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	p := NewParser()
 
 	t.Run("validThousandsGrouping nil receiver", func(t *testing.T) {
-		var nilParser *Parser
+		var nilParser *Reader
 		_, err := nilParser.validThousandsGrouping("1,234.56", ",", ".")
 
 		if !errors.Is(err, exception.ErrParserNotProvided) {
@@ -727,7 +727,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	})
 
 	t.Run("parseNumericString nil receiver", func(t *testing.T) {
-		var nilParser *Parser
+		var nilParser *Reader
 		_, err := nilParser.parseNumericString("10", false)
 
 		if !errors.Is(err, exception.ErrParserNotProvided) {
@@ -744,7 +744,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	})
 
 	t.Run("extractCurrency invalid state", func(t *testing.T) {
-		bad := &Parser{iso: nil}
+		bad := &Reader{iso: nil}
 		_, _, err := bad.extractCurrency("$10")
 
 		if !errors.Is(err, exception.ErrParserInvalidState) {
@@ -807,7 +807,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	})
 
 	t.Run("ParseStringSign nil receiver", func(t *testing.T) {
-		var nilParser *Parser
+		var nilParser *Reader
 		_, _, err := nilParser.ParseStringSign("1")
 
 		if !errors.Is(err, exception.ErrParserNotProvided) {
@@ -828,7 +828,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	})
 
 	t.Run("ParseDecimalParts nil receiver", func(t *testing.T) {
-		var nilParser *Parser
+		var nilParser *Reader
 		_, _, err := nilParser.ParseDecimalParts("1")
 
 		if !errors.Is(err, exception.ErrParserNotProvided) {
@@ -849,7 +849,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	})
 
 	t.Run("ValidateAndPadDecimal nil receiver", func(t *testing.T) {
-		var nilParser *Parser
+		var nilParser *Reader
 		_, err := nilParser.ValidateAndPadDecimal("1", 2)
 
 		if !errors.Is(err, exception.ErrParserNotProvided) {
@@ -864,7 +864,7 @@ func TestParser_HelperCoveragePaths(t *testing.T) {
 	})
 
 	t.Run("ParseAmountString nil receiver", func(t *testing.T) {
-		var nilParser *Parser
+		var nilParser *Reader
 		_, err := nilParser.ParseAmountString("1", 2, false)
 
 		if !errors.Is(err, exception.ErrParserNotProvided) {

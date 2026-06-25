@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/auth"
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	"github.com/oullin/alloy/auth/security"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 type providerDB struct {
@@ -23,7 +23,7 @@ type providerRow struct {
 var errProviderScan = errors.New("scan failed")
 
 func TestDatabaseUserProviderRejectsUnsafeCredentialField(t *testing.T) {
-	provider := NewDatabaseUserProvider(&providerDB{}, "users", auth.NewBcryptHasher(4), nil)
+	provider := NewDatabaseUserProvider(&providerDB{}, "users", security.NewBcryptHasher(4), nil)
 
 	_, err := provider.RetrieveByCredentials(context.Background(), map[string]string{
 		"email; DROP TABLE users": "test@example.com",
@@ -36,7 +36,7 @@ func TestDatabaseUserProviderRejectsUnsafeCredentialField(t *testing.T) {
 
 func TestDatabaseUserProviderRejectsEmptyQueryableCredentials(t *testing.T) {
 	db := &providerDB{}
-	provider := NewDatabaseUserProvider(db, "users", auth.NewBcryptHasher(4), nil)
+	provider := NewDatabaseUserProvider(db, "users", security.NewBcryptHasher(4), nil)
 
 	_, err := provider.RetrieveByCredentials(context.Background(), map[string]string{
 		"password": "secret",
@@ -53,7 +53,7 @@ func TestDatabaseUserProviderRejectsEmptyQueryableCredentials(t *testing.T) {
 
 func TestDatabaseUserProviderFallsBackWhenTableNameIsUnsafe(t *testing.T) {
 	db := &providerDB{}
-	provider := NewDatabaseUserProvider(db, "users; DROP TABLE users", auth.NewBcryptHasher(4), func(map[string]any) cauth.Authenticatable {
+	provider := NewDatabaseUserProvider(db, "users; DROP TABLE users", security.NewBcryptHasher(4), func(map[string]any) cauth.User {
 		return nil
 	})
 
@@ -66,7 +66,7 @@ func TestDatabaseUserProviderFallsBackWhenTableNameIsUnsafe(t *testing.T) {
 
 func TestDatabaseUserProviderTreatsNoRowsAsMissingUser(t *testing.T) {
 	db := &providerDB{row: providerRow{err: sql.ErrNoRows}}
-	provider := NewDatabaseUserProvider(db, "users", auth.NewBcryptHasher(4), func(map[string]any) cauth.Authenticatable {
+	provider := NewDatabaseUserProvider(db, "users", security.NewBcryptHasher(4), func(map[string]any) cauth.User {
 		t.Fatal("row mapper should not be called for sql.ErrNoRows")
 
 		return nil
@@ -85,7 +85,7 @@ func TestDatabaseUserProviderTreatsNoRowsAsMissingUser(t *testing.T) {
 
 func TestDatabaseUserProviderReturnsScanErrors(t *testing.T) {
 	db := &providerDB{row: providerRow{err: errProviderScan}}
-	provider := NewDatabaseUserProvider(db, "users", auth.NewBcryptHasher(4), func(map[string]any) cauth.Authenticatable {
+	provider := NewDatabaseUserProvider(db, "users", security.NewBcryptHasher(4), func(map[string]any) cauth.User {
 		t.Fatal("row mapper should not be called when scan fails")
 
 		return nil

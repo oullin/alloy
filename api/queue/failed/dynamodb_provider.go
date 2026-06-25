@@ -41,7 +41,7 @@ func NewDynamoDbFailedJobProvider(client DynamoDBClient, applicationName, table 
 	}
 }
 
-// Log implements FailedJobProvider.
+// Log implements Provider.
 func (p *DynamoDbFailedJobProvider) Log(connection, queue, payload string, exception error) (string, error) {
 	id := extractUUID(payload)
 	failedAt := p.now()
@@ -66,7 +66,7 @@ func (p *DynamoDbFailedJobProvider) Log(connection, queue, payload string, excep
 	return id, nil
 }
 
-// IDs implements FailedJobProvider.
+// IDs implements Provider.
 func (p *DynamoDbFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	all, err := p.All()
 
@@ -77,7 +77,7 @@ func (p *DynamoDbFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	out := []string{}
 
 	for _, j := range all {
-		if queueFilter != "" && j.Queue != queueFilter {
+		if queueFilter != "" && j.Backend != queueFilter {
 			continue
 		}
 
@@ -87,8 +87,8 @@ func (p *DynamoDbFailedJobProvider) IDs(queueFilter string) ([]string, error) {
 	return out, nil
 }
 
-// All implements FailedJobProvider.
-func (p *DynamoDbFailedJobProvider) All() ([]FailedJob, error) {
+// All implements Provider.
+func (p *DynamoDbFailedJobProvider) All() ([]Job, error) {
 	resp, err := p.client.Query(context.Background(), map[string]any{
 		"TableName":              p.table,
 		"Select":                 "ALL_ATTRIBUTES",
@@ -129,7 +129,7 @@ func (p *DynamoDbFailedJobProvider) All() ([]FailedJob, error) {
 		return dynNumber(items[i], "failed_at") > dynNumber(items[j], "failed_at")
 	})
 
-	out := make([]FailedJob, 0, len(items))
+	out := make([]Job, 0, len(items))
 
 	for _, it := range items {
 		out = append(out, itemToFailedJob(it))
@@ -138,8 +138,8 @@ func (p *DynamoDbFailedJobProvider) All() ([]FailedJob, error) {
 	return out, nil
 }
 
-// Find implements FailedJobProvider.
-func (p *DynamoDbFailedJobProvider) Find(id string) (*FailedJob, error) {
+// Find implements Provider.
+func (p *DynamoDbFailedJobProvider) Find(id string) (*Job, error) {
 	resp, err := p.client.GetItem(context.Background(), map[string]any{
 		"TableName": p.table,
 		"Key": map[string]any{
@@ -169,7 +169,7 @@ func (p *DynamoDbFailedJobProvider) Find(id string) (*FailedJob, error) {
 	return &fj, nil
 }
 
-// Forget implements FailedJobProvider.
+// Forget implements Provider.
 func (p *DynamoDbFailedJobProvider) Forget(id string) (bool, error) {
 	_, err := p.client.DeleteItem(context.Background(), map[string]any{
 		"TableName": p.table,
@@ -186,7 +186,7 @@ func (p *DynamoDbFailedJobProvider) Forget(id string) (bool, error) {
 	return true, nil
 }
 
-// Flush implements FailedJobProvider. DynamoDB storage relies on the
+// Flush implements Provider. DynamoDB storage relies on the
 // table's TTL feature; upstream throws an exception here and this port
 // returns a matching sentinel error.
 func (p *DynamoDbFailedJobProvider) Flush(_ int) error {
@@ -232,14 +232,14 @@ func dynString(item map[string]any, field string) string {
 	return s
 }
 
-func itemToFailedJob(it map[string]any) FailedJob {
+func itemToFailedJob(it map[string]any) Job {
 	uuid := dynString(it, "uuid")
 
-	return FailedJob{
+	return Job{
 		ID:         uuid,
 		UUID:       uuid,
 		Connection: dynString(it, "connection"),
-		Queue:      dynString(it, "queue"),
+		Backend:    dynString(it, "queue"),
 		Payload:    dynString(it, "payload"),
 		Exception:  dynString(it, "exception"),
 		FailedAt:   time.Unix(dynNumber(it, "failed_at"), 0),

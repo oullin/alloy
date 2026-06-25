@@ -506,7 +506,7 @@ func TestRedisDriverDelayedJobsReturnsSnapshots(t *testing.T) {
 		t.Fatalf("DelayedJobs: %v", err)
 	}
 
-	if len(jobs) != 1 || jobs[0].UUID != "d1" || jobs[0].Queue != "default" {
+	if len(jobs) != 1 || jobs[0].UUID != "d1" || jobs[0].Backend != "default" {
 		t.Errorf("got %+v, want 1 job with UUID d1 on default", jobs)
 	}
 }

@@ -8,12 +8,12 @@ import (
 	"sort"
 	"sync"
 
-	cauth "github.com/oullin/alloy/auth/contracts/auth"
+	cauth "github.com/oullin/alloy/contracts/auth"
 )
 
 // Ability is a function that determines whether a user can perform an action.
 // It receives the user, the optional model, and returns (allow bool, err error).
-type Ability func(ctx context.Context, user cauth.Authenticatable, model any) (bool, error)
+type Ability func(ctx context.Context, user cauth.User, model any) (bool, error)
 
 // Policy is a struct implementing named ability methods.
 // Methods must have the signature: func(ctx, user, model) (bool, error) or func(ctx, user) (bool, error).
@@ -30,8 +30,8 @@ type Response struct {
 
 // Deny returns a denying Response.
 
-// AuthorizationException is returned when a gate check fails.
-type AuthorizationException struct {
+// UnauthorizedError is returned when a gate check fails.
+type UnauthorizedError struct {
 	Response Response
 }
 
@@ -40,9 +40,9 @@ type Gate struct {
 	mu           sync.RWMutex
 	abilities    map[string]Ability
 	policies     map[string]any
-	before       []func(ctx context.Context, user cauth.Authenticatable, ability string, model any) (bool, bool)
-	after        []func(ctx context.Context, user cauth.Authenticatable, ability string, result bool, model any)
-	userResolver func(ctx context.Context) cauth.Authenticatable
+	before       []func(ctx context.Context, user cauth.User, ability string, model any) (bool, bool)
+	after        []func(ctx context.Context, user cauth.User, ability string, result bool, model any)
+	userResolver func(ctx context.Context) cauth.User
 }
 
 func Allow(message string) Response {
@@ -67,13 +67,13 @@ func DenyAsNotFound(message string) Response {
 	return Deny(message, http.StatusNotFound)
 }
 
-// Authorize returns an AuthorizationException when the response is denied.
+// Authorize returns an UnauthorizedError when the response is denied.
 func (r Response) Authorize() error {
 	if r.Allowed {
 		return nil
 	}
 
-	return &AuthorizationException{Response: r}
+	return &UnauthorizedError{Response: r}
 }
 
 // String returns the response message.
@@ -90,7 +90,7 @@ func (r Response) ToMap() map[string]any {
 	}
 }
 
-func (e *AuthorizationException) Error() string {
+func (e *UnauthorizedError) Error() string {
 	if e.Response.Message != "" {
 		return e.Response.Message
 	}
@@ -99,7 +99,7 @@ func (e *AuthorizationException) Error() string {
 }
 
 // New creates a Gate with the given user resolver.
-func New(userResolver func(ctx context.Context) cauth.Authenticatable) *Gate {
+func New(userResolver func(ctx context.Context) cauth.User) *Gate {
 	return &Gate{
 		abilities:    make(map[string]Ability),
 		policies:     make(map[string]any),
@@ -120,7 +120,7 @@ func (g *Gate) Define(ability string, fn Ability) *Gate {
 
 // Before registers a hook that runs before any ability check.
 // If the hook returns (result, true) the ability check is skipped.
-func (g *Gate) Before(fn func(ctx context.Context, user cauth.Authenticatable, ability string, model any) (bool, bool)) *Gate {
+func (g *Gate) Before(fn func(ctx context.Context, user cauth.User, ability string, model any) (bool, bool)) *Gate {
 	g.mu.Lock()
 
 	defer g.mu.Unlock()
@@ -131,7 +131,7 @@ func (g *Gate) Before(fn func(ctx context.Context, user cauth.Authenticatable, a
 }
 
 // After registers a hook that runs after any ability check.
-func (g *Gate) After(fn func(ctx context.Context, user cauth.Authenticatable, ability string, result bool, model any)) *Gate {
+func (g *Gate) After(fn func(ctx context.Context, user cauth.User, ability string, result bool, model any)) *Gate {
 	g.mu.Lock()
 
 	defer g.mu.Unlock()
@@ -234,7 +234,7 @@ func (g *Gate) Authorize(ctx context.Context, ability string, model any) error {
 	resp := g.Inspect(ctx, ability, model)
 
 	if !resp.Allowed {
-		return &AuthorizationException{Response: resp}
+		return &UnauthorizedError{Response: resp}
 	}
 
 	return nil
@@ -324,13 +324,13 @@ func (g *Gate) GetPolicyFor(model any) (any, bool) {
 }
 
 // ForUser returns a new Gate that uses the given user instead of the resolver.
-func (g *Gate) ForUser(user cauth.Authenticatable) *Gate {
+func (g *Gate) ForUser(user cauth.User) *Gate {
 	clone := &Gate{
 		abilities:    g.abilities,
 		policies:     g.policies,
 		before:       g.before,
 		after:        g.after,
-		userResolver: func(_ context.Context) cauth.Authenticatable { return user },
+		userResolver: func(_ context.Context) cauth.User { return user },
 	}
 
 	return clone
@@ -338,7 +338,7 @@ func (g *Gate) ForUser(user cauth.Authenticatable) *Gate {
 
 // callPolicyMethod looks up and invokes a policy method for the given ability.
 // Returns (result, true) if a policy method was found, (false, false) otherwise.
-func (g *Gate) callPolicyMethod(ctx context.Context, user cauth.Authenticatable, ability string, model any) (bool, bool) {
+func (g *Gate) callPolicyMethod(ctx context.Context, user cauth.User, ability string, model any) (bool, bool) {
 	g.mu.RLock()
 	typeName := reflect.TypeOf(model).String()
 	policy, ok := g.policies[typeName]

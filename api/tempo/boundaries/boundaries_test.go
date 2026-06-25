@@ -10,7 +10,7 @@ import (
 	"github.com/oullin/alloy/tempo/internal/kernel"
 )
 
-func mustParse(t *testing.T, value string) tempo.Tempo {
+func mustParse(t *testing.T, value string) tempo.Time {
 	t.Helper()
 
 	parsed, err := tempo.Parse(value)

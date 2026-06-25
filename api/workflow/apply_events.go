@@ -2,7 +2,7 @@ package workflow
 
 import "github.com/oullin/alloy/workflow/events"
 
-func (w *Workflow[T]) dispatchLeaveEvents(subject T, transition Transition, next Marking, context map[string]any) {
+func (w *Machine[T]) dispatchLeaveEvents(subject T, transition Transition, next Marking, context map[string]any) {
 	current := markingBeforeEnter(next, transition)
 	current = restoreFromPlaces(current, transition)
 
@@ -14,7 +14,7 @@ func (w *Workflow[T]) dispatchLeaveEvents(subject T, transition Transition, next
 	}
 }
 
-func (w *Workflow[T]) dispatchTransitionEvents(subject T, transition Transition, next Marking, context map[string]any) {
+func (w *Machine[T]) dispatchTransitionEvents(subject T, transition Transition, next Marking, context map[string]any) {
 	current := markingBeforeEnter(next, transition)
 	w.dispatcher.Dispatch(
 		EventNameTransition(w.name),
@@ -26,7 +26,7 @@ func (w *Workflow[T]) dispatchTransitionEvents(subject T, transition Transition,
 	)
 }
 
-func (w *Workflow[T]) dispatchEnterEvents(subject T, transition Transition, next Marking, context map[string]any) {
+func (w *Machine[T]) dispatchEnterEvents(subject T, transition Transition, next Marking, context map[string]any) {
 	current := markingBeforeEnter(next, transition)
 
 	for _, place := range transition.To {
@@ -37,7 +37,7 @@ func (w *Workflow[T]) dispatchEnterEvents(subject T, transition Transition, next
 	}
 }
 
-func (w *Workflow[T]) dispatchEnteredEvents(subject T, transition Transition, next Marking, context map[string]any) {
+func (w *Machine[T]) dispatchEnteredEvents(subject T, transition Transition, next Marking, context map[string]any) {
 	for _, place := range transition.To {
 		event := &events.EnteredEvent[T]{Base: w.baseEvent(subject, transition, next.Clone(), context), Place: place}
 		w.dispatcher.Dispatch(EventNameEntered(w.name), event)
@@ -45,7 +45,7 @@ func (w *Workflow[T]) dispatchEnteredEvents(subject T, transition Transition, ne
 	}
 }
 
-func (w *Workflow[T]) dispatchCompletionEvents(subject T, transition Transition, next Marking, context map[string]any) error {
+func (w *Machine[T]) dispatchCompletionEvents(subject T, transition Transition, next Marking, context map[string]any) error {
 	completed := &events.CompletedEvent[T]{Base: w.baseEvent(subject, transition, next.Clone(), context)}
 	w.dispatcher.Dispatch(EventNameCompleted(w.name), completed)
 	w.dispatcher.Dispatch(EventNameCompletedNamed(w.name, transition.Name), completed)

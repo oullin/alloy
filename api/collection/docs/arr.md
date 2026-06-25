@@ -4,7 +4,7 @@
 
 The `arr` package provides standalone, generic helper functions for working with Go slices. Every function operates on plain slices, returns new slices (the original is never mutated), and can be called without constructing a collection object.
 
-Use `arr` when you need a single operation on a slice and do not need the fluent chaining that `collection.Collection` provides.
+Use `arr` when you need a single operation on a slice and do not need the fluent chaining that `collection.List` provides.
 
 ---
 

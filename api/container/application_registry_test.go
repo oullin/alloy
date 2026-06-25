@@ -18,8 +18,8 @@ func TestSetAppAndApp(t *testing.T) {
 	application := container.NewApplication()
 	container.SetApp(application)
 
-	if got := container.App(); got != application {
-		t.Fatalf("App() = %p, want %p", got, application)
+	if got := container.Global(); got != application {
+		t.Fatalf("Global() = %p, want %p", got, application)
 	}
 }
 
@@ -36,7 +36,7 @@ func TestAppPanicsWhenUnset(t *testing.T) {
 		}
 	}()
 
-	container.App()
+	container.Global()
 }
 
 func TestHasApp(t *testing.T) {

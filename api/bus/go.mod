@@ -1,6 +1,6 @@
 module github.com/oullin/alloy/bus
 
-go 1.26.0
+go 1.26.4
 
 require github.com/oullin/alloy/queue v0.0.0
 

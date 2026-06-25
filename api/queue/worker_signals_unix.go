@@ -41,7 +41,7 @@ func (w *Worker) installSignalHandlers(ctx context.Context, cancel context.Cance
 				if w.paused.CompareAndSwap(false, true) {
 					w.emit(WorkerPausing{
 						ConnectionName: connectionName,
-						Queue:          queueName,
+						Backend:        queueName,
 						WorkerName:     w.opts.Name,
 					})
 				}
@@ -49,7 +49,7 @@ func (w *Worker) installSignalHandlers(ctx context.Context, cancel context.Cance
 				if w.paused.CompareAndSwap(true, false) {
 					w.emit(WorkerResuming{
 						ConnectionName: connectionName,
-						Queue:          queueName,
+						Backend:        queueName,
 						WorkerName:     w.opts.Name,
 					})
 				}

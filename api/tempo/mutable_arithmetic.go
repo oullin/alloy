@@ -4,126 +4,126 @@ import (
 	"github.com/oullin/alloy/tempo/arithmetic"
 )
 
-func (mutable *MutableTempo) Add(value int, unit Unit) *MutableTempo {
+func (mutable *MutableTime) Add(value int, unit Unit) *MutableTime {
 	return arithmetic.Add(mutable, value, unit, mutable.settingsSnapshot().MonthsOverflow, mutable.settingsSnapshot().YearsOverflow)
 }
 
-func (mutable *MutableTempo) Sub(value int, unit Unit) *MutableTempo {
+func (mutable *MutableTime) Sub(value int, unit Unit) *MutableTime {
 	return mutable.Add(-value, unit)
 }
 
-func (mutable *MutableTempo) AddNoOverflow(value int, valueUnit Unit, overflowUnit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().AddNoOverflow(value, valueUnit, overflowUnit))
+func (mutable *MutableTime) AddNoOverflow(value int, valueUnit Unit, overflowUnit Unit) *MutableTime {
+	return mutable.replace(mutable.Immutable().AddNoOverflow(value, valueUnit, overflowUnit))
 }
 
-func (mutable *MutableTempo) SubNoOverflow(value int, valueUnit Unit, overflowUnit Unit) *MutableTempo {
-	return mutable.replace(mutable.Tempo().SubNoOverflow(value, valueUnit, overflowUnit))
+func (mutable *MutableTime) SubNoOverflow(value int, valueUnit Unit, overflowUnit Unit) *MutableTime {
+	return mutable.replace(mutable.Immutable().SubNoOverflow(value, valueUnit, overflowUnit))
 }
 
-func (mutable *MutableTempo) AddDuration(dur Duration) *MutableTempo {
+func (mutable *MutableTime) AddDuration(dur Duration) *MutableTime {
 	return arithmetic.AddDuration(mutable, dur, mutable.settingsSnapshot().MonthsOverflow, mutable.settingsSnapshot().YearsOverflow)
 }
 
-func (mutable *MutableTempo) SubDuration(dur Duration) *MutableTempo {
+func (mutable *MutableTime) SubDuration(dur Duration) *MutableTime {
 	return arithmetic.SubDuration(mutable, dur, mutable.settingsSnapshot().MonthsOverflow, mutable.settingsSnapshot().YearsOverflow)
 }
 
-func (mutable *MutableTempo) AddMilliseconds(milliseconds int) *MutableTempo {
+func (mutable *MutableTime) AddMilliseconds(milliseconds int) *MutableTime {
 	return arithmetic.AddMilliseconds(mutable, milliseconds)
 }
 
-func (mutable *MutableTempo) SubMilliseconds(milliseconds int) *MutableTempo {
+func (mutable *MutableTime) SubMilliseconds(milliseconds int) *MutableTime {
 	return arithmetic.SubMilliseconds(mutable, milliseconds)
 }
 
-func (mutable *MutableTempo) AddSeconds(seconds int) *MutableTempo {
+func (mutable *MutableTime) AddSeconds(seconds int) *MutableTime {
 	return arithmetic.AddSeconds(mutable, seconds)
 }
 
-func (mutable *MutableTempo) SubSeconds(seconds int) *MutableTempo {
+func (mutable *MutableTime) SubSeconds(seconds int) *MutableTime {
 	return arithmetic.SubSeconds(mutable, seconds)
 }
 
-func (mutable *MutableTempo) AddMinutes(minutes int) *MutableTempo {
+func (mutable *MutableTime) AddMinutes(minutes int) *MutableTime {
 	return arithmetic.AddMinutes(mutable, minutes)
 }
 
-func (mutable *MutableTempo) SubMinutes(minutes int) *MutableTempo {
+func (mutable *MutableTime) SubMinutes(minutes int) *MutableTime {
 	return arithmetic.SubMinutes(mutable, minutes)
 }
 
-func (mutable *MutableTempo) AddHours(hours int) *MutableTempo {
+func (mutable *MutableTime) AddHours(hours int) *MutableTime {
 	return arithmetic.AddHours(mutable, hours)
 }
 
-func (mutable *MutableTempo) SubHours(hours int) *MutableTempo {
+func (mutable *MutableTime) SubHours(hours int) *MutableTime {
 	return arithmetic.SubHours(mutable, hours)
 }
 
-func (mutable *MutableTempo) AddDays(days int) *MutableTempo {
+func (mutable *MutableTime) AddDays(days int) *MutableTime {
 	return arithmetic.AddDays(mutable, days)
 }
 
-func (mutable *MutableTempo) SubDays(days int) *MutableTempo {
+func (mutable *MutableTime) SubDays(days int) *MutableTime {
 	return arithmetic.SubDays(mutable, days)
 }
 
-func (mutable *MutableTempo) AddWeekdays(days int) *MutableTempo {
+func (mutable *MutableTime) AddWeekdays(days int) *MutableTime {
 	return arithmetic.AddWeekdays(mutable, days, mutable.settingsSnapshot().WeekendDays)
 }
 
-func (mutable *MutableTempo) SubWeekdays(days int) *MutableTempo {
+func (mutable *MutableTime) SubWeekdays(days int) *MutableTime {
 	return arithmetic.SubWeekdays(mutable, days, mutable.settingsSnapshot().WeekendDays)
 }
 
-func (mutable *MutableTempo) AddWeeks(weeks int) *MutableTempo {
+func (mutable *MutableTime) AddWeeks(weeks int) *MutableTime {
 	return arithmetic.AddWeeks(mutable, weeks)
 }
 
-func (mutable *MutableTempo) SubWeeks(weeks int) *MutableTempo {
+func (mutable *MutableTime) SubWeeks(weeks int) *MutableTime {
 	return arithmetic.SubWeeks(mutable, weeks)
 }
 
-func (mutable *MutableTempo) AddMonths(months int) *MutableTempo {
+func (mutable *MutableTime) AddMonths(months int) *MutableTime {
 	return arithmetic.AddMonths(mutable, months, mutable.settingsSnapshot().MonthsOverflow)
 }
 
-func (mutable *MutableTempo) SubMonths(months int) *MutableTempo {
+func (mutable *MutableTime) SubMonths(months int) *MutableTime {
 	return arithmetic.SubMonths(mutable, months, mutable.settingsSnapshot().MonthsOverflow)
 }
 
-func (mutable *MutableTempo) AddMonthsNoOverflow(months int) *MutableTempo {
+func (mutable *MutableTime) AddMonthsNoOverflow(months int) *MutableTime {
 	return arithmetic.AddMonthsNoOverflow(mutable, months)
 }
 
-func (mutable *MutableTempo) SubMonthsNoOverflow(months int) *MutableTempo {
+func (mutable *MutableTime) SubMonthsNoOverflow(months int) *MutableTime {
 	return arithmetic.SubMonthsNoOverflow(mutable, months)
 }
 
-func (mutable *MutableTempo) AddQuarters(quarters int) *MutableTempo {
+func (mutable *MutableTime) AddQuarters(quarters int) *MutableTime {
 	return arithmetic.AddQuarters(mutable, quarters, mutable.settingsSnapshot().MonthsOverflow)
 }
 
-func (mutable *MutableTempo) SubQuarters(quarters int) *MutableTempo {
+func (mutable *MutableTime) SubQuarters(quarters int) *MutableTime {
 	return arithmetic.SubQuarters(mutable, quarters, mutable.settingsSnapshot().MonthsOverflow)
 }
 
-func (mutable *MutableTempo) AddYears(years int) *MutableTempo {
+func (mutable *MutableTime) AddYears(years int) *MutableTime {
 	return arithmetic.AddYears(mutable, years, mutable.settingsSnapshot().YearsOverflow)
 }
 
-func (mutable *MutableTempo) SubYears(years int) *MutableTempo {
+func (mutable *MutableTime) SubYears(years int) *MutableTime {
 	return arithmetic.SubYears(mutable, years, mutable.settingsSnapshot().YearsOverflow)
 }
 
-func (mutable *MutableTempo) AddYearsNoOverflow(years int) *MutableTempo {
+func (mutable *MutableTime) AddYearsNoOverflow(years int) *MutableTime {
 	return arithmetic.AddYearsNoOverflow(mutable, years)
 }
 
-func (mutable *MutableTempo) SubYearsNoOverflow(years int) *MutableTempo {
+func (mutable *MutableTime) SubYearsNoOverflow(years int) *MutableTime {
 	return arithmetic.SubYearsNoOverflow(mutable, years)
 }
 
-func (mutable *MutableTempo) Age(reference Tempo) int {
-	return mutable.Tempo().Age(reference)
+func (mutable *MutableTime) Age(reference Time) int {
+	return mutable.Immutable().Age(reference)
 }

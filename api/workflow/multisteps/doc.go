@@ -3,7 +3,7 @@
 //
 // Usage:
 //
-//	wf := multisteps.Workflow("signup",
+//	wf := multisteps.Machine("signup",
 //	    multisteps.Sync("create", createUserAccount, multisteps.Args(multisteps.A{
 //	        "name": multisteps.Variable("name"),
 //	    })),

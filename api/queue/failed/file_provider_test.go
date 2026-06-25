@@ -68,7 +68,7 @@ func TestCanLogFailedJobs(t *testing.T) {
 
 	got := all[0]
 
-	if got.ID != j.uuid || got.Connection != "connection" || got.Queue != "queue" {
+	if got.ID != j.uuid || got.Connection != "connection" || got.Backend != "queue" {
 		t.Fatalf("unexpected: %+v", got)
 	}
 

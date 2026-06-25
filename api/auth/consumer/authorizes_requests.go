@@ -16,7 +16,7 @@ type AuthorizesRequests struct {
 // Returns false when the request is denied (caller should return early).
 func (a *AuthorizesRequests) Authorize(ctx context.Context, w http.ResponseWriter, ability string, model any) bool {
 	if err := a.Gate.Authorize(ctx, ability, model); err != nil {
-		if ae, ok := err.(*access.AuthorizationException); ok {
+		if ae, ok := err.(*access.UnauthorizedError); ok {
 			http.Error(w, ae.Error(), ae.Response.StatusCode)
 		} else {
 			http.Error(w, "forbidden", http.StatusForbidden)

@@ -11,7 +11,7 @@ import (
 
 // Each iterates over the items, passing each item and its index to the callback.
 // Return false from the callback to stop iterating.
-func (c *Collection[T]) Each(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) Each(callback func(T, int) bool) *List[T] {
 	for i, item := range c.items {
 		if !callback(item, i) {
 			break
@@ -23,19 +23,19 @@ func (c *Collection[T]) Each(callback func(T, int) bool) *Collection[T] {
 
 // EachSpread iterates over the collection's items, passing each item value
 // into the given callback. In Go this operates the same as Each.
-func (c *Collection[T]) EachSpread(callback func(T, int) bool) *Collection[T] {
+func (c *List[T]) EachSpread(callback func(T, int) bool) *List[T] {
 	return c.Each(callback)
 }
 
 // Tap passes the collection to the given callback and returns the collection unchanged.
-func (c *Collection[T]) Tap(callback func(*Collection[T])) *Collection[T] {
+func (c *List[T]) Tap(callback func(*List[T])) *List[T] {
 	callback(c)
 
 	return c
 }
 
 // TapEach calls the given callback on each item for side effects, returning the original collection.
-func (c *Collection[T]) TapEach(callback func(T, int)) *Collection[T] {
+func (c *List[T]) TapEach(callback func(T, int)) *List[T] {
 	for i, item := range c.items {
 		callback(item, i)
 	}
@@ -44,17 +44,17 @@ func (c *Collection[T]) TapEach(callback func(T, int)) *Collection[T] {
 }
 
 // Pipe passes the collection to the given callback and returns the callback's result.
-func Pipe[T any, R any](c *Collection[T], callback func(*Collection[T]) R) R {
+func Pipe[T any, R any](c *List[T], callback func(*List[T]) R) R {
 	return callback(c)
 }
 
 // PipeInto passes the collection to the given constructor and returns the result.
-func PipeInto[T any, R any](c *Collection[T], constructor func(*Collection[T]) R) R {
+func PipeInto[T any, R any](c *List[T], constructor func(*List[T]) R) R {
 	return constructor(c)
 }
 
 // PipeThrough passes the collection through a series of callbacks, returning the final result.
-func PipeThrough[T any](c *Collection[T], callbacks ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func PipeThrough[T any](c *List[T], callbacks ...func(*List[T]) *List[T]) *List[T] {
 	result := c
 
 	for _, cb := range callbacks {
@@ -65,7 +65,7 @@ func PipeThrough[T any](c *Collection[T], callbacks ...func(*Collection[T]) *Col
 }
 
 // When applies the callback if the condition is true; otherwise it applies the optional default callback.
-func (c *Collection[T]) When(condition bool, callback func(*Collection[T]) *Collection[T], defaults ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func (c *List[T]) When(condition bool, callback func(*List[T]) *List[T], defaults ...func(*List[T]) *List[T]) *List[T] {
 	if condition {
 		return callback(c)
 	}
@@ -78,32 +78,32 @@ func (c *Collection[T]) When(condition bool, callback func(*Collection[T]) *Coll
 }
 
 // WhenEmpty applies the callback when the collection is empty.
-func (c *Collection[T]) WhenEmpty(callback func(*Collection[T]) *Collection[T], defaults ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func (c *List[T]) WhenEmpty(callback func(*List[T]) *List[T], defaults ...func(*List[T]) *List[T]) *List[T] {
 	return c.When(c.IsEmpty(), callback, defaults...)
 }
 
 // WhenNotEmpty applies the callback when the collection is not empty.
-func (c *Collection[T]) WhenNotEmpty(callback func(*Collection[T]) *Collection[T], defaults ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func (c *List[T]) WhenNotEmpty(callback func(*List[T]) *List[T], defaults ...func(*List[T]) *List[T]) *List[T] {
 	return c.When(c.IsNotEmpty(), callback, defaults...)
 }
 
 // Unless applies the callback unless the condition is true.
-func (c *Collection[T]) Unless(condition bool, callback func(*Collection[T]) *Collection[T], defaults ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func (c *List[T]) Unless(condition bool, callback func(*List[T]) *List[T], defaults ...func(*List[T]) *List[T]) *List[T] {
 	return c.When(!condition, callback, defaults...)
 }
 
 // UnlessEmpty applies the callback unless the collection is empty.
-func (c *Collection[T]) UnlessEmpty(callback func(*Collection[T]) *Collection[T], defaults ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func (c *List[T]) UnlessEmpty(callback func(*List[T]) *List[T], defaults ...func(*List[T]) *List[T]) *List[T] {
 	return c.WhenNotEmpty(callback, defaults...)
 }
 
 // UnlessNotEmpty applies the callback unless the collection is not empty.
-func (c *Collection[T]) UnlessNotEmpty(callback func(*Collection[T]) *Collection[T], defaults ...func(*Collection[T]) *Collection[T]) *Collection[T] {
+func (c *List[T]) UnlessNotEmpty(callback func(*List[T]) *List[T], defaults ...func(*List[T]) *List[T]) *List[T] {
 	return c.WhenEmpty(callback, defaults...)
 }
 
 // Implode joins elements into a string using the given glue, converting each item via fmt.Sprint.
-func (c *Collection[T]) Implode(glue string) string {
+func (c *List[T]) Implode(glue string) string {
 	parts := make([]string, len(c.items))
 
 	for i, item := range c.items {
@@ -115,7 +115,7 @@ func (c *Collection[T]) Implode(glue string) string {
 
 // Join joins elements into a string using the given glue,
 // with an optional final separator between the last two items.
-func (c *Collection[T]) Join(glue string, finalGlues ...string) string {
+func (c *List[T]) Join(glue string, finalGlues ...string) string {
 	parts := make([]string, len(c.items))
 
 	for i, item := range c.items {
@@ -126,7 +126,7 @@ func (c *Collection[T]) Join(glue string, finalGlues ...string) string {
 }
 
 // ToSlice returns a copy of the underlying slice.
-func (c *Collection[T]) ToSlice() []T {
+func (c *List[T]) ToSlice() []T {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
@@ -134,17 +134,17 @@ func (c *Collection[T]) ToSlice() []T {
 }
 
 // ToJSON serializes the collection to JSON bytes.
-func (c *Collection[T]) ToJSON() ([]byte, error) {
+func (c *List[T]) ToJSON() ([]byte, error) {
 	return json.Marshal(c.items)
 }
 
 // ToPrettyJSON serializes the collection to indented JSON bytes.
-func (c *Collection[T]) ToPrettyJSON() ([]byte, error) {
+func (c *List[T]) ToPrettyJSON() ([]byte, error) {
 	return json.MarshalIndent(c.items, "", "    ")
 }
 
 // String returns the JSON string representation of the collection.
-func (c *Collection[T]) String() string {
+func (c *List[T]) String() string {
 	b, err := c.ToJSON()
 
 	if err != nil {
@@ -155,17 +155,17 @@ func (c *Collection[T]) String() string {
 }
 
 // MarshalJSON implements the json.Marshaler interface.
-func (c *Collection[T]) MarshalJSON() ([]byte, error) {
+func (c *List[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.items)
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
-func (c *Collection[T]) UnmarshalJSON(data []byte) error {
+func (c *List[T]) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, &c.items)
 }
 
 // Copy creates a shallow copy of the collection.
-func (c *Collection[T]) Copy() *Collection[T] {
+func (c *List[T]) Copy() *List[T] {
 	result := make([]T, len(c.items))
 	copy(result, c.items)
 
@@ -173,14 +173,14 @@ func (c *Collection[T]) Copy() *Collection[T] {
 }
 
 // Dump prints the collection items to stdout for debugging.
-func (c *Collection[T]) Dump() *Collection[T] {
+func (c *List[T]) Dump() *List[T] {
 	fmt.Printf("%v\n", c.items)
 
 	return c
 }
 
 // DD prints the collection items for debugging and terminates the program.
-func (c *Collection[T]) DD() {
+func (c *List[T]) DD() {
 	c.Dump()
 	os.Exit(1)
 }

@@ -167,7 +167,7 @@ Use `tokens.RequireAbility("ability")` to enforce token abilities.
 
 Enabling 2FA generates a TOTP secret and plaintext recovery codes. Store only
 hashed recovery codes on the user record. Confirmation is required before
-`TwoFactorAuthenticatable.IsTwoFactorEnabled()` should become true.
+`TwoFactorUser.IsTwoFactorEnabled()` should become true.
 
 ## Password And Session Invalidation
 
