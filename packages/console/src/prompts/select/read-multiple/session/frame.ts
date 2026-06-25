@@ -7,7 +7,12 @@ export type MultipleChoicesSessionFrame = {
 	value(): string;
 };
 
-export const createMultipleChoicesSessionFrame = <T>(message: string, choices: Array<Choice<T>>, scroll?: number, info?: MultiSelectPromptOptions<T>['info']): MultipleChoicesSessionFrame => {
+export const createMultipleChoicesSessionFrame = <T>(
+	message: string,
+	choices: Array<Choice<T>>,
+	scroll?: number,
+	info?: MultiSelectPromptOptions<T>['info'],
+): MultipleChoicesSessionFrame => {
 	let frame = '';
 
 	return {
