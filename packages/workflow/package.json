@@ -62,10 +62,10 @@
 		"node": ">=20"
 	},
 	"scripts": {
-		"build": "XDG_CACHE_HOME=../../infra/.cache/xdg PLAYWRIGHT_BROWSERS_PATH=../../infra/.cache/playwright tsc -b tsconfig.build.json --force",
+		"build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -b tsconfig.build.json --force'",
 		"prepack": "pnpm build",
-		"test": "XDG_CACHE_HOME=../../infra/.cache/xdg PLAYWRIGHT_BROWSERS_PATH=../../infra/.cache/playwright vp test run tests",
-		"typecheck": "XDG_CACHE_HOME=../../infra/.cache/xdg PLAYWRIGHT_BROWSERS_PATH=../../infra/.cache/playwright tsc -p tsconfig.json --noEmit"
+		"test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && vp test run tests'",
+		"typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
 	},
 	"devDependencies": {
 		"@types/node": "^25.6.2",

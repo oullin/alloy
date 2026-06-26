@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT_PATH="$(git rev-parse --show-toplevel)"
 
+source "${ROOT_PATH}/infra/scripts/tasks/cache-env.sh"
+
 API_PATH="${ROOT_PATH}/api"
 GO_WORK_PATH="${API_PATH}/go.work"
 

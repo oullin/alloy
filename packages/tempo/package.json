@@ -18,11 +18,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "vp pack",
-    "lint": "tsc -p tsconfig.json --noEmit",
+    "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && cd \"${ALLOY_ROOT_PATH}\" && vp pack'",
+    "lint": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'",
     "prepublishOnly": "pnpm build",
     "test": "pnpm --filter @alloy/tempo-acceptance test:tempo",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
   },
   "devDependencies": {
     "typescript": "^6.0.3"
