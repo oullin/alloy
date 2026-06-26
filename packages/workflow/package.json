@@ -1,0 +1,74 @@
+{
+	"name": "@alloy/workflow",
+	"version": "0.1.0",
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"license": "MIT",
+	"sideEffects": false,
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./audit": {
+			"types": "./dist/audit.d.ts",
+			"import": "./dist/audit.js",
+			"default": "./dist/audit.js"
+		},
+		"./config": {
+			"types": "./dist/config.d.ts",
+			"import": "./dist/config.js",
+			"default": "./dist/config.js"
+		},
+		"./events": {
+			"types": "./dist/events.d.ts",
+			"import": "./dist/events.js",
+			"default": "./dist/events.js"
+		},
+		"./multisteps": {
+			"types": "./dist/multisteps.d.ts",
+			"import": "./dist/multisteps.js",
+			"default": "./dist/multisteps.js"
+		},
+		"./registry": {
+			"types": "./dist/registry.d.ts",
+			"import": "./dist/registry.js",
+			"default": "./dist/registry.js"
+		},
+		"./stores": {
+			"types": "./dist/stores.d.ts",
+			"import": "./dist/stores.js",
+			"default": "./dist/stores.js"
+		},
+		"./validator": {
+			"types": "./dist/validator.d.ts",
+			"import": "./dist/validator.js",
+			"default": "./dist/validator.js"
+		}
+	},
+	"imports": {
+		"#workflow/*": {
+			"types": "./dist/*.d.ts",
+			"default": "./dist/*.js"
+		}
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -b tsconfig.build.json --force'",
+		"prepack": "pnpm build",
+		"test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && vp test run tests'",
+		"typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
+	},
+	"devDependencies": {
+		"@types/node": "^25.6.2",
+		"typescript": "^6.0.3"
+	}
+}

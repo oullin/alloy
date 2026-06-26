@@ -1,6 +1,7 @@
 {
   "extends": "../../infra/tsconfig/base.json",
   "compilerOptions": {
+    "tsBuildInfoFile": "../../infra/.cache/tsbuild/console.tsbuildinfo",
     "types": ["node"],
     "paths": {
       "#console/*": ["./src/*"],

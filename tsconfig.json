@@ -4,6 +4,8 @@
     { "path": "./infra" },
     { "path": "./packages/tempo" },
     { "path": "./packages/tempo/tests" },
-    { "path": "./packages/console" }
+    { "path": "./packages/console" },
+    { "path": "./packages/money" },
+    { "path": "./packages/workflow" }
   ]
 }

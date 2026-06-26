@@ -1,0 +1,11 @@
+{
+  "extends": "../../infra/tsconfig/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "../../infra/.cache/tsbuild/money.tsbuildinfo",
+    "types": ["node"],
+    "paths": {
+      "#money/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}

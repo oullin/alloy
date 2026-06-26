@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vp run -r build",
-    "lint": "vp lint",
+    "imports:check": "node infra/scripts/tasks/check-package-imports.mjs",
+    "lint": "vp lint && node infra/scripts/tasks/check-package-imports.mjs",
     "test": "vp test",
     "typecheck": "vp check"
   },
