@@ -2,14 +2,8 @@ SHELL := /bin/bash
 
 GO_IMAGE ?= golang:1.26.4-alpine
 TASK_VERSION ?= latest
-GO_BIN_VOLUME ?= alloy-go-bin
-GO_MOD_VOLUME ?= alloy-go-mod
-GO_BUILD_VOLUME ?= alloy-go-build
 
 export GO_IMAGE
-export GO_BIN_VOLUME
-export GO_MOD_VOLUME
-export GO_BUILD_VOLUME
 
 VP := ./node_modules/.bin/vp
 DOCKER_COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then printf 'docker-compose'; else printf 'docker compose'; fi)

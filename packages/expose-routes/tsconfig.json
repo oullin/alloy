@@ -4,8 +4,9 @@
     "outDir": "../../infra/.cache/typescript/expose-routes/dist",
     "tsBuildInfoFile": "../../infra/.cache/typescript/expose-routes/tsconfig.tsbuildinfo",
     "paths": {
+      "#expose-routes/*": ["./src/*"],
       "#*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
 }

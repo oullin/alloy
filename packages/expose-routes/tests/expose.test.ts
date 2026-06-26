@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-import { createRouteResolver, fillPattern, resolveRoute, resolveRouteUrl } from '../src';
+import { createRouteResolver, fillPattern, resolveRoute, resolveRouteUrl } from '#expose-routes/index';
 
 describe('expose manifest routing', () => {
 	it('fills route parameters from a manifest', () => {
@@ -35,6 +35,15 @@ describe('expose manifest routing', () => {
 
 		expect(url).toBe('#!expose:unknown-route');
 		expect(onMissingRoute).toHaveBeenCalledWith('missing.route', '#!expose:unknown-route');
+	});
+
+	it('resolves empty root route patterns', () => {
+		const onMissingRoute = vi.fn();
+
+		const url = resolveRouteUrl({ home: '' }, 'home', {}, { onMissingRoute });
+
+		expect(url).toBe('');
+		expect(onMissingRoute).not.toHaveBeenCalled();
 	});
 
 	it('creates reusable resolvers from dynamic route manifests', () => {

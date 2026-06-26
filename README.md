@@ -16,6 +16,7 @@ TypeScript package (`@alloy/tempo`).
 - `api/collection`: Go collection utilities and package docs.
 - `packages/tempo`: TypeScript Tempo package.
 - `packages/tempo/tests`: TypeScript Tempo acceptance tests.
+- `packages/money`: TypeScript Money package.
 - `packages/console`: TypeScript terminal UI helpers.
 - `infra`: repo automation, cache paths, scripts, and shared TypeScript config.
 - `vite.config.ts`: Vite+ orchestration for checks, tests, packaging, and custom tasks.

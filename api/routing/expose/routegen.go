@@ -89,5 +89,5 @@ func (o Options) runtimeDirectory() string {
 		return "expose"
 	}
 
-	return filepath.ToSlash(o.RuntimeDirectory)
+	return strings.ReplaceAll(o.RuntimeDirectory, "\\", "/")
 }

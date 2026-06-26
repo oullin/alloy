@@ -146,3 +146,34 @@ func TestGatherRouteMiddlewareModes(t *testing.T) {
 		t.Fatalf("expanded = %#v", expanded)
 	}
 }
+
+func TestGatherRouteMiddlewareNilRouter(t *testing.T) {
+	t.Parallel()
+
+	var router *Router
+	route := NewRoute("GET", "/dashboard", map[string]any{
+		"middleware": []any{"web"},
+	})
+
+	if got := router.GatherRouteMiddleware(route, MiddlewareExpanded); got != nil {
+		t.Fatalf("middleware = %#v", got)
+	}
+}
+
+func TestRouteListEntryNilRoute(t *testing.T) {
+	t.Parallel()
+
+	got := routeListEntry(nil, nil, MiddlewareNames)
+
+	if got.Domain != "" || got.Method != "" || got.URI != "" || got.Name != "" || got.Action != "" || len(got.Middleware) != 0 || got.Path != "" || got.Vendor {
+		t.Fatalf("entry = %#v", got)
+	}
+}
+
+func TestIntStringHandlesNegativeValues(t *testing.T) {
+	t.Parallel()
+
+	if got := intString(-42); got != "-42" {
+		t.Fatalf("intString(-42) = %q", got)
+	}
+}

@@ -777,6 +777,17 @@ func TestExposeRuntimeDirectoryCompatibility(t *testing.T) {
 	assertContains(t, content, `export const queryParams`)
 }
 
+func TestExposeRuntimeDirectoryImportsUseForwardSlashes(t *testing.T) {
+	t.Parallel()
+
+	dir := generateTo(t, postControllerRoutes(), expose.Options{
+		RuntimeDirectory: `runtime\expose`,
+	})
+	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+
+	assertContains(t, content, `from './../../../../runtime/expose'`)
+}
+
 func TestExposeRuntimeQueryParamsSource(t *testing.T) {
 	t.Parallel()
 

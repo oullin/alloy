@@ -3,9 +3,9 @@ services:
     image: ${GO_IMAGE:-golang:1.26.4-alpine}
     volumes:
       - .:/workspace
-      - alloy-go-bin:/go/bin
-      - alloy-go-mod:/go/pkg/mod
-      - alloy-go-build:/root/.cache/go-build
+      - ./infra/.cache/go/path/bin:/go/bin
+      - ./infra/.cache/go/mod:/go/pkg/mod
+      - ./infra/.cache/go/build:/root/.cache/go-build
     working_dir: /workspace
 
   fmt:
@@ -15,11 +15,3 @@ services:
     environment:
       - HOST_PROJECT_PATH=${PWD}
     working_dir: /work
-
-volumes:
-  alloy-go-bin:
-    name: ${GO_BIN_VOLUME:-alloy-go-bin}
-  alloy-go-mod:
-    name: ${GO_MOD_VOLUME:-alloy-go-mod}
-  alloy-go-build:
-    name: ${GO_BUILD_VOLUME:-alloy-go-build}

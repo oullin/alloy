@@ -77,7 +77,7 @@ export const fillPattern = (pattern: string | null | undefined, params: RoutePar
 export const resolveRouteUrl = (manifest: RouteManifest | null | undefined, name: string, params: RouteParams = {}, options?: ExposeOptions): string => {
 	const pattern = manifest && hasOwn(manifest, name) ? manifest[name] : undefined;
 
-	if (!pattern) {
+	if (pattern === undefined || pattern === null) {
 		const fallback = routeFallback(options);
 
 		reportMissing(name, fallback, options);

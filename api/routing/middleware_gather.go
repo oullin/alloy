@@ -17,7 +17,7 @@ const (
 
 // GatherRouteMiddleware returns the route middleware according to mode.
 func (r *Router) GatherRouteMiddleware(route *Route, mode MiddlewareGatherMode) []any {
-	if route == nil || mode == MiddlewareHidden {
+	if r == nil || route == nil || mode == MiddlewareHidden {
 		return nil
 	}
 

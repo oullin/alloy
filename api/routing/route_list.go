@@ -121,6 +121,10 @@ func (e RouteListEntry) RouteListColumns(columns []string) map[string]any {
 }
 
 func routeListEntry(router *Router, route *Route, mode MiddlewareGatherMode) RouteListEntry {
+	if route == nil {
+		return RouteListEntry{}
+	}
+
 	path, vendor := routeActionPath(route)
 	middleware := []string{}
 
@@ -380,6 +384,12 @@ func intString(value int) string {
 		return "0"
 	}
 
+	negative := value < 0
+
+	if negative {
+		value = -value
+	}
+
 	var buf [20]byte
 	pos := len(buf)
 
@@ -387,6 +397,11 @@ func intString(value int) string {
 		pos--
 		buf[pos] = byte('0' + value%10)
 		value /= 10
+	}
+
+	if negative {
+		pos--
+		buf[pos] = '-'
 	}
 
 	return string(buf[pos:])
