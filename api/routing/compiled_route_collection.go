@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"github.com/oullin/alloy/routing/matching"
+	"github.com/oullin/alloy/api/routing/matching"
 )
 
 // CompiledRouteCollection is the production-mode counterpart to

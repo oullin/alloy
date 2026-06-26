@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/queue"
-	"github.com/oullin/alloy/queue/drivers"
+	"github.com/oullin/alloy/api/queue"
+	"github.com/oullin/alloy/api/queue/drivers"
 )
 
 // Use a non-existent command so spawn is a harmless no-op.

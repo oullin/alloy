@@ -3,7 +3,7 @@ package routing
 import (
 	"testing"
 
-	"github.com/oullin/alloy/routing/controllers"
+	"github.com/oullin/alloy/api/routing/controllers"
 )
 
 // tests/Routing/RoutingControllerAttributeTest.php and the controller

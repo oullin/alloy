@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/collection/support"
+	"github.com/oullin/alloy/api/collection/support"
 )
 
 // Framework collections parity markers exercised by this file.

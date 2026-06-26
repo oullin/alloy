@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/money/exception"
+	"github.com/oullin/alloy/api/money/exception"
 )
 
 type stubProvider struct {

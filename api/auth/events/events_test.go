@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/oullin/alloy/api/auth/events"
+	"github.com/oullin/alloy/api/auth/user"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/events"
-	"github.com/oullin/alloy/auth/user"
 )
 
 type resettableEventUser struct {

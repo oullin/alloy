@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/collection/arr"
+	"github.com/oullin/alloy/api/collection/arr"
 )
 
 // Each iterates over items, calling the callback for each one.

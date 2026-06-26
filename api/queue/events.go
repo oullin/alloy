@@ -1,6 +1,6 @@
 package queue
 
-import "github.com/oullin/alloy/queue/events"
+import "github.com/oullin/alloy/api/queue/events"
 
 // This file re-exports the event types defined in the events subpackage at
 // the root of the queue package. The aliases exist for two reasons:

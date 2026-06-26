@@ -13,10 +13,10 @@ import (
 	"slices"
 	"time"
 
-	"github.com/oullin/alloy/tempo/arithmetic"
-	"github.com/oullin/alloy/tempo/core"
-	"github.com/oullin/alloy/tempo/duration"
-	"github.com/oullin/alloy/tempo/internal/kernel"
+	"github.com/oullin/alloy/api/tempo/arithmetic"
+	"github.com/oullin/alloy/api/tempo/core"
+	"github.com/oullin/alloy/api/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/internal/kernel"
 )
 
 func StartOf[T core.Bearer[T]](bearer T, unit duration.Unit, options ...kernel.WeekOptions) T {

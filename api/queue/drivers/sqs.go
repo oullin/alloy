@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/queue"
+	"github.com/oullin/alloy/api/queue"
 )
 
 // SQSClient is the interface for an AWS SQS client.

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/hashing"
+	"github.com/oullin/alloy/api/hashing"
 )
 
 func TestArgon2iMakeAndCheck(t *testing.T) {

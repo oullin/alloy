@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/httpx/middleware"
+	"github.com/oullin/alloy/api/httpx/middleware"
 )
 
 func TestCorsSimpleRequest(t *testing.T) {

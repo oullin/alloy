@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/money/exception"
+	"github.com/oullin/alloy/api/money/exception"
 )
 
 // Map holds a reference to the active currency configuration.

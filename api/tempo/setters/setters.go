@@ -17,12 +17,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/oullin/alloy/tempo/arithmetic"
-	"github.com/oullin/alloy/tempo/boundaries"
-	"github.com/oullin/alloy/tempo/comparison"
-	"github.com/oullin/alloy/tempo/core"
-	"github.com/oullin/alloy/tempo/duration"
-	"github.com/oullin/alloy/tempo/internal/kernel"
+	"github.com/oullin/alloy/api/tempo/arithmetic"
+	"github.com/oullin/alloy/api/tempo/boundaries"
+	"github.com/oullin/alloy/api/tempo/comparison"
+	"github.com/oullin/alloy/api/tempo/core"
+	"github.com/oullin/alloy/api/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/internal/kernel"
 )
 
 func SetYear[T core.Bearer[T]](bearer T, year int) T {

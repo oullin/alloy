@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/tempo/parser"
+	"github.com/oullin/alloy/api/tempo/parser"
 )
 
 func parseInLocation(input string, location *time.Location) (time.Time, error) {

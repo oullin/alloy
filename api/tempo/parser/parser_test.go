@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo/parser"
+	"github.com/oullin/alloy/api/tempo/parser"
 )
 
 func TestParseISO(t *testing.T) {

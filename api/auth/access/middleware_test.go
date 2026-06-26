@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/oullin/alloy/api/auth/access"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/access"
 )
 
 type assertError string

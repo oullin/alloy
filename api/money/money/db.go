@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/money/currency"
+	"github.com/oullin/alloy/api/money/currency"
 )
 
 var (

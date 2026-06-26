@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oullin/alloy/routing"
+	"github.com/oullin/alloy/api/routing"
 )
 
 // AdapterOptions configures how Alloy routes are converted to RouteInfo.

@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/duration"
 )
 
 func ParseDuration(input string) (Duration, error) {

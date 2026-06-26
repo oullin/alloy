@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/container"
+	"github.com/oullin/alloy/api/container"
 )
 
 func TestCallInvokesCallable(t *testing.T) {

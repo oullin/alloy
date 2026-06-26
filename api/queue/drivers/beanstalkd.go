@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/oullin/alloy/queue"
+	"github.com/oullin/alloy/api/queue"
 )
 
 // BeanstalkdClient is the interface for a Beanstalkd client.

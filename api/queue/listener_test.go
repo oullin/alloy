@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/queue"
+	"github.com/oullin/alloy/api/queue"
 )
 
 // Ref: @bedrock/code-0369

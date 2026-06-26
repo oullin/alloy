@@ -23,7 +23,7 @@
 //
 // # Service providers
 //
-// See package github.com/oullin/alloy/container/contracts/provider for the
+// See package github.com/oullin/alloy/api/container/contracts/provider for the
 // provider contract. The Application supports five lifecycle hooks:
 //
 //   - Register:  called once per provider when it is added.

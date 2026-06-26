@@ -1,6 +1,6 @@
 package routing
 
-import "github.com/oullin/alloy/routing/controllers"
+import "github.com/oullin/alloy/api/routing/controllers"
 
 // Controller is the embeddable base class for routing controllers.
 //

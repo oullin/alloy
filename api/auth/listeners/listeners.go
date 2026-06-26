@@ -3,8 +3,8 @@ package listeners
 import (
 	"context"
 
+	"github.com/oullin/alloy/api/auth/events"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/events"
 )
 
 // EmailVerificationSender is kept for backward compatibility. New code should

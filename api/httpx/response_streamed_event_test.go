@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/httpx"
+	"github.com/oullin/alloy/api/httpx"
 )
 
 func TestStreamedEventString(t *testing.T) {

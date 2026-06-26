@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/collection/arr"
+	"github.com/oullin/alloy/api/collection/arr"
 )
 
 func TestWrap(t *testing.T) {

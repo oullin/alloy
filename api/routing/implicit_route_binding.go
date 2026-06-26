@@ -5,7 +5,7 @@ import (
 	"reflect"
 
 	contracts "github.com/oullin/alloy/api/contracts/routing"
-	"github.com/oullin/alloy/routing/exceptions"
+	"github.com/oullin/alloy/api/routing/exceptions"
 )
 
 // Ref: @bedrock/code-0312

@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/container"
+	"github.com/oullin/alloy/api/container"
 )
 
 func TestNewReturnsInitializedContainer(t *testing.T) {

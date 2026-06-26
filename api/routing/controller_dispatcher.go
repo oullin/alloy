@@ -1,7 +1,7 @@
 package routing
 
 import (
-	"github.com/oullin/alloy/routing/controllers"
+	"github.com/oullin/alloy/api/routing/controllers"
 )
 
 // ControllerDispatcher resolves and invokes a controller method against a

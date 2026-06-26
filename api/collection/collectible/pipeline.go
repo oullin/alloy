@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oullin/alloy/collection/arr"
-	"github.com/oullin/alloy/collection/support"
+	"github.com/oullin/alloy/api/collection/arr"
+	"github.com/oullin/alloy/api/collection/support"
 )
 
 // Each iterates over items in insertion order, calling the callback for each

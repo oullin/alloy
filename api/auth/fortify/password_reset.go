@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/oullin/alloy/auth/passwords"
+	"github.com/oullin/alloy/api/auth/passwords"
 )
 
 // NewForgotPasswordHandler sends a reset link with an enumeration-safe response.

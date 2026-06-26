@@ -2,7 +2,7 @@ package middleware
 
 import (
 	cmiddleware "github.com/oullin/alloy/api/contracts/routing/middleware"
-	"github.com/oullin/alloy/routing/exceptions"
+	"github.com/oullin/alloy/api/routing/exceptions"
 )
 
 // SignatureValidator is the surface ValidateSignature needs from a request.

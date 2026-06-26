@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/routing/exceptions"
+	"github.com/oullin/alloy/api/routing/exceptions"
 )
 
 // Ref: @bedrock/code-0346

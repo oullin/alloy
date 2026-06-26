@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/workflow"
-	"github.com/oullin/alloy/workflow/audit"
-	"github.com/oullin/alloy/workflow/events"
-	"github.com/oullin/alloy/workflow/registry"
-	"github.com/oullin/alloy/workflow/store"
+	"github.com/oullin/alloy/api/workflow"
+	"github.com/oullin/alloy/api/workflow/audit"
+	"github.com/oullin/alloy/api/workflow/events"
+	"github.com/oullin/alloy/api/workflow/registry"
+	"github.com/oullin/alloy/api/workflow/store"
 )
 
 // Subscription is the canonical state-machine test subject: trial -> active -> cancelled.

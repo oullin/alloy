@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/queue/drivers"
+	"github.com/oullin/alloy/api/queue/drivers"
 )
 
 // Ref: @bedrock/code-0366

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/oullin/alloy/api/auth/events"
+	"github.com/oullin/alloy/api/auth/listeners"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/events"
-	"github.com/oullin/alloy/auth/listeners"
 )
 
 // stubUser implements User but not MustVerifyEmail.

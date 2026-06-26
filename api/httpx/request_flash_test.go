@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/httpx"
+	"github.com/oullin/alloy/api/httpx"
 )
 
 // stubSession implements httpx.SessionStore for testing.

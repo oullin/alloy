@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/queue"
-	"github.com/oullin/alloy/queue/drivers"
+	"github.com/oullin/alloy/api/queue"
+	"github.com/oullin/alloy/api/queue/drivers"
 )
 
 // mockQueue wraps a real queue to control behavior in tests.

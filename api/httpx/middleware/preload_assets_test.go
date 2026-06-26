@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/httpx/middleware"
+	"github.com/oullin/alloy/api/httpx/middleware"
 )
 
 func TestPreloadAssetsLinkHeader(t *testing.T) {

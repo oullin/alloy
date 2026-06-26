@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/oullin/alloy/api/auth/errorsx"
+	"github.com/oullin/alloy/api/auth/httpx"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/errorsx"
-	"github.com/oullin/alloy/auth/httpx"
 )
 
 // RequestCallback resolves the user from an HTTP request.

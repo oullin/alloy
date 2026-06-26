@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/httpx"
+	"github.com/oullin/alloy/api/httpx"
 )
 
 func TestContentType(t *testing.T) {

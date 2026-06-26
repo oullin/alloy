@@ -6,7 +6,7 @@
 // declaration out-of-band (e.g. when porting a controller mechanically).
 package attributes
 
-import "github.com/oullin/alloy/routing/controllers"
+import "github.com/oullin/alloy/api/routing/controllers"
 
 // Middleware is a value object describing a controller-attached middleware.
 // It is the parity counterpart of #[Middleware] in PHP.

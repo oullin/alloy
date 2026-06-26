@@ -3,7 +3,7 @@ package workflow
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/workflow/events"
+	"github.com/oullin/alloy/api/workflow/events"
 )
 
 // StateMachine is a Machine constrained to a single active place and

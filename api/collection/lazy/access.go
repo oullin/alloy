@@ -3,7 +3,7 @@ package lazy
 import (
 	"slices"
 
-	"github.com/oullin/alloy/collection/support"
+	"github.com/oullin/alloy/api/collection/support"
 )
 
 // First returns the first element matching the optional predicate.

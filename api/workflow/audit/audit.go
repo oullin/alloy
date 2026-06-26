@@ -3,8 +3,8 @@
 package audit
 
 import (
-	"github.com/oullin/alloy/workflow"
-	"github.com/oullin/alloy/workflow/events"
+	"github.com/oullin/alloy/api/workflow"
+	"github.com/oullin/alloy/api/workflow/events"
 )
 
 // Entry is one recorded transition.

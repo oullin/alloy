@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/oullin/alloy/queue"
+	"github.com/oullin/alloy/api/queue"
 )
 
 type registerableJob struct {

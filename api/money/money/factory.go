@@ -1,7 +1,7 @@
 package money
 
 import (
-	"github.com/oullin/alloy/money/currency"
+	"github.com/oullin/alloy/api/money/currency"
 )
 
 // defaultManager is the default singleton instance of Manager used by the factory methods.
