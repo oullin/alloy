@@ -1,5 +1,5 @@
 {
-  "name": "@alloy/expose-routes",
+  "name": "@alloy/navigator-routes",
   "version": "0.1.0",
   "type": "module",
   "exports": {
@@ -9,7 +9,7 @@
     }
   },
   "imports": {
-    "#expose-routes/*": "./src/*",
+    "#navigator-routes/*": "./src/*",
     "#*": "./src/*"
   },
   "files": [

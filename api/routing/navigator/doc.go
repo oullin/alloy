@@ -1,4 +1,4 @@
-// Package expose generates fully-typed, importable TypeScript functions for
+// Package navigator generates fully-typed, importable TypeScript functions for
 // Alloy routes.
 //
 // It exposes the backend route table to frontend applications using a
@@ -6,8 +6,8 @@
 //
 // Usage:
 //
-//	routes := expose.FromRouteCollection(router.GetRoutes(), expose.AdapterOptions{})
-//	err := expose.Generate(routes, expose.Options{
+//	routes := navigator.FromRouteCollection(router.GetRoutes(), navigator.AdapterOptions{})
+//	err := navigator.Generate(routes, navigator.Options{
 //	    Path:     "resources/js",
 //	    WithForm: true,
 //	})
@@ -17,4 +17,4 @@
 //   - {Path}/actions/   — per-controller TypeScript files, one function per route
 //   - {Path}/routes/    — named-route helpers grouped by name prefix
 //   - {Path}/expose/ — the runtime TypeScript utility (index.ts)
-package expose
+package navigator

@@ -10,10 +10,13 @@ export type RouteResult = {
 
 export type MissingRouteReporter = (name: string, fallback: string) => void;
 
-export type ExposeOptions = {
+export type NavigatorOptions = {
 	fallback?: string;
 	onMissingRoute?: MissingRouteReporter | false;
 };
+
+/** @deprecated Use NavigatorOptions. */
+export type ExposeOptions = NavigatorOptions;
 
 export type RouteResolver = (name: string, params?: RouteParams) => RouteResult;
 
@@ -21,14 +24,14 @@ const defaultFallback = '#!expose:unknown-route';
 const optionalSegmentRe = /\/\{([A-Za-z0-9_-]+)(?::[^}?]+)?\?\}/g;
 const parameterRe = /\{([A-Za-z0-9_-]+)(?::[^}?]+)?\??\}/g;
 const hasOwn = <T extends object>(value: T, key: PropertyKey): key is keyof T => Object.prototype.hasOwnProperty.call(value, key);
-const routeFallback = (options?: ExposeOptions): string => options?.fallback ?? defaultFallback;
+const routeFallback = (options?: NavigatorOptions): string => options?.fallback ?? defaultFallback;
 const encodeRouteParam = (value: RouteParamValue): string => encodeURIComponent(String(value));
 
 const defaultReporter: MissingRouteReporter = (name) => {
 	console.warn(`[expose] unknown route "${name}", returning fallback`);
 };
 
-const reportMissing = (name: string, fallback: string, options?: ExposeOptions): void => {
+const reportMissing = (name: string, fallback: string, options?: NavigatorOptions): void => {
 	if (options?.onMissingRoute === false) {
 		return;
 	}
@@ -48,7 +51,7 @@ const normalizedUrl = (url: string): string => {
 	return normalized;
 };
 
-export const fillPattern = (pattern: string | null | undefined, params: RouteParams = {}, options?: ExposeOptions): string => {
+export const fillPattern = (pattern: string | null | undefined, params: RouteParams = {}, options?: NavigatorOptions): string => {
 	let url = pattern ?? routeFallback(options);
 
 	url = url.replace(optionalSegmentRe, (_segment, key: string) => {
@@ -74,7 +77,7 @@ export const fillPattern = (pattern: string | null | undefined, params: RoutePar
 	return normalizedUrl(url);
 };
 
-export const resolveRouteUrl = (manifest: RouteManifest | null | undefined, name: string, params: RouteParams = {}, options?: ExposeOptions): string => {
+export const resolveRouteUrl = (manifest: RouteManifest | null | undefined, name: string, params: RouteParams = {}, options?: NavigatorOptions): string => {
 	const pattern = manifest && hasOwn(manifest, name) ? manifest[name] : undefined;
 
 	if (pattern === undefined || pattern === null) {
@@ -88,11 +91,11 @@ export const resolveRouteUrl = (manifest: RouteManifest | null | undefined, name
 	return fillPattern(pattern, params, options);
 };
 
-export const resolveRoute = (manifest: RouteManifest | null | undefined, name: string, params: RouteParams = {}, options?: ExposeOptions): RouteResult => ({
+export const resolveRoute = (manifest: RouteManifest | null | undefined, name: string, params: RouteParams = {}, options?: NavigatorOptions): RouteResult => ({
 	url: resolveRouteUrl(manifest, name, params, options),
 });
 
-export const createRouteResolver = (manifest: RouteManifest | (() => RouteManifest | null | undefined), options?: ExposeOptions): RouteResolver => {
+export const createRouteResolver = (manifest: RouteManifest | (() => RouteManifest | null | undefined), options?: NavigatorOptions): RouteResolver => {
 	return (name, params = {}) => {
 		const routes = typeof manifest === 'function' ? manifest() : manifest;
 

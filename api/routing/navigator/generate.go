@@ -1,4 +1,4 @@
-package expose
+package navigator
 
 import (
 	"fmt"

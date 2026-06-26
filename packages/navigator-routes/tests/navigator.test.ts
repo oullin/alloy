@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-import { createRouteResolver, fillPattern, resolveRoute, resolveRouteUrl } from '#expose-routes/index';
+import { createRouteResolver, fillPattern, resolveRoute, resolveRouteUrl } from '#navigator-routes/index';
 
-describe('expose manifest routing', () => {
+describe('navigator manifest routing', () => {
 	it('fills route parameters from a manifest', () => {
 		const route = resolveRoute(
 			{

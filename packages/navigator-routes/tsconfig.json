@@ -1,0 +1,12 @@
+{
+  "extends": "../../infra/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "../../infra/.cache/typescript/navigator-routes/dist",
+    "tsBuildInfoFile": "../../infra/.cache/typescript/navigator-routes/tsconfig.tsbuildinfo",
+    "paths": {
+      "#navigator-routes/*": ["./src/*"],
+      "#*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}
