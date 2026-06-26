@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/tempo/core"
+	"github.com/oullin/alloy/api/tempo/core"
 )
 
 // Compile-time guarantee that Time and *MutableTime both satisfy the

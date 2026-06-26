@@ -1,8 +1,8 @@
 package money
 
 import (
-	"github.com/oullin/alloy/money/currency"
-	"github.com/oullin/alloy/money/exception"
+	"github.com/oullin/alloy/api/money/currency"
+	"github.com/oullin/alloy/api/money/exception"
 )
 
 // Currency returns the currency of the money object.

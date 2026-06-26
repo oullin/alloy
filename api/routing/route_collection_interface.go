@@ -1,6 +1,6 @@
 package routing
 
-import "github.com/oullin/alloy/routing/matching"
+import "github.com/oullin/alloy/api/routing/matching"
 
 // Ref: @bedrock/code-0336
 // Both [RouteCollection] and [CompiledRouteCollection] satisfy this interface,

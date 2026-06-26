@@ -1,6 +1,6 @@
 package tempo
 
-import "github.com/oullin/alloy/tempo/internal/kernel"
+import "github.com/oullin/alloy/api/tempo/internal/kernel"
 
 func AverageMilliseconds(startMs int64, endMs int64) int64 {
 	return kernel.AverageMilliseconds(startMs, endMs)

@@ -3,7 +3,7 @@
 The `collectible` package provides a generic `Collection[K, V]` type that wraps a Go map. It maintains the insertion order of keys and offers a fluent API for common map operations, transformations, and queries.
 
 ```go
-import "github.com/oullin/alloy/collection/collectible"
+import "github.com/oullin/alloy/api/collection/collectible"
 ```
 
 ### 🚀 Constructors

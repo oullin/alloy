@@ -7,7 +7,7 @@ package middleware
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/routing"
+	"github.com/oullin/alloy/api/routing"
 )
 
 // BindingRouter is the minimum router surface SubstituteBindings touches.

@@ -3,11 +3,11 @@ package config_test
 import (
 	"testing"
 
-	bconfig "github.com/oullin/alloy/config"
-	"github.com/oullin/alloy/workflow"
-	"github.com/oullin/alloy/workflow/config"
-	"github.com/oullin/alloy/workflow/events"
-	"github.com/oullin/alloy/workflow/store"
+	bconfig "github.com/oullin/alloy/api/config"
+	"github.com/oullin/alloy/api/workflow"
+	"github.com/oullin/alloy/api/workflow/config"
+	"github.com/oullin/alloy/api/workflow/events"
+	"github.com/oullin/alloy/api/workflow/store"
 )
 
 type Subscription struct{ State string }

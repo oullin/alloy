@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/oullin/alloy/api/auth/sessionx"
+	"github.com/oullin/alloy/api/auth/user"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
 	"github.com/oullin/alloy/api/contracts/auth/events"
-	"github.com/oullin/alloy/auth/sessionx"
-	"github.com/oullin/alloy/auth/user"
 )
 
 // ErrProvider is a reusable provider error for auth tests.

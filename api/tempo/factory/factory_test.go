@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo/duration"
-	"github.com/oullin/alloy/tempo/factory"
+	"github.com/oullin/alloy/api/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/factory"
 )
 
 func TestFromTimestampAndMs(t *testing.T) {

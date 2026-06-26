@@ -3,9 +3,9 @@ package comparison_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/tempo"
-	"github.com/oullin/alloy/tempo/comparison"
-	"github.com/oullin/alloy/tempo/duration"
+	"github.com/oullin/alloy/api/tempo"
+	"github.com/oullin/alloy/api/tempo/comparison"
+	"github.com/oullin/alloy/api/tempo/duration"
 )
 
 const (

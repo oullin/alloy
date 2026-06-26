@@ -21,12 +21,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/tempo/arithmetic"
-	"github.com/oullin/alloy/tempo/boundaries"
-	"github.com/oullin/alloy/tempo/calendar"
-	"github.com/oullin/alloy/tempo/comparison"
-	"github.com/oullin/alloy/tempo/core"
-	"github.com/oullin/alloy/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/arithmetic"
+	"github.com/oullin/alloy/api/tempo/boundaries"
+	"github.com/oullin/alloy/api/tempo/calendar"
+	"github.com/oullin/alloy/api/tempo/comparison"
+	"github.com/oullin/alloy/api/tempo/core"
+	"github.com/oullin/alloy/api/tempo/duration"
 )
 
 type Options struct {

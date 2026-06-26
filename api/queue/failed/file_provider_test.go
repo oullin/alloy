@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/queue/failed"
+	"github.com/oullin/alloy/api/queue/failed"
 )
 
 type loggedJob struct {

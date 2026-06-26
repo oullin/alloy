@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/oullin/alloy/api/auth/errorsx"
+	"github.com/oullin/alloy/api/auth/security"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
 	"github.com/oullin/alloy/api/contracts/auth/events"
-	"github.com/oullin/alloy/auth/errorsx"
-	"github.com/oullin/alloy/auth/security"
-	"github.com/oullin/alloy/cookie"
+	"github.com/oullin/alloy/api/cookie"
 
-	authevents "github.com/oullin/alloy/auth/events"
+	authevents "github.com/oullin/alloy/api/auth/events"
 )
 
 // SessionStore is the minimal session interface needed by SessionGuard.

@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
+	. "github.com/oullin/alloy/api/auth/errorsx"
+	. "github.com/oullin/alloy/api/auth/manager"
+	. "github.com/oullin/alloy/api/auth/security"
+	. "github.com/oullin/alloy/api/auth/sessionx"
+	. "github.com/oullin/alloy/api/auth/user"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
 	"github.com/oullin/alloy/api/contracts/auth/events"
-	. "github.com/oullin/alloy/auth/errorsx"
-	. "github.com/oullin/alloy/auth/manager"
-	. "github.com/oullin/alloy/auth/security"
-	. "github.com/oullin/alloy/auth/sessionx"
-	. "github.com/oullin/alloy/auth/user"
 )
 
 // --- Test helpers ---

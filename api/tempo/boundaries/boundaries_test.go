@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo"
-	"github.com/oullin/alloy/tempo/boundaries"
-	"github.com/oullin/alloy/tempo/duration"
-	"github.com/oullin/alloy/tempo/internal/kernel"
+	"github.com/oullin/alloy/api/tempo"
+	"github.com/oullin/alloy/api/tempo/boundaries"
+	"github.com/oullin/alloy/api/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/internal/kernel"
 )
 
 func mustParse(t *testing.T, value string) tempo.Time {

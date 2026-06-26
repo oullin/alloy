@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/oullin/alloy/api/auth/passwords"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/passwords"
 )
 
 // RegisterUser creates a user from a headless registration request.

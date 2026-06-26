@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	cworkflow "github.com/oullin/alloy/api/contracts/workflow"
-	"github.com/oullin/alloy/workflow/events"
+	"github.com/oullin/alloy/api/workflow/events"
 )
 
 // Sink is the optional structured logger interface the engine writes to.

@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/tempo/boundaries"
+	"github.com/oullin/alloy/api/tempo/boundaries"
 )
 
 func (mutable *MutableTime) StartOf(unit Unit, options ...StartOfWeekOptions) *MutableTime {

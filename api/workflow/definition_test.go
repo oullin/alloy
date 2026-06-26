@@ -3,7 +3,7 @@ package workflow_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/workflow"
+	"github.com/oullin/alloy/api/workflow"
 )
 
 func TestDefinitionMetadataValue(t *testing.T) {

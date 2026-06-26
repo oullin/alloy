@@ -7,9 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/oullin/alloy/api/auth/httpx"
+	"github.com/oullin/alloy/api/auth/user"
 	cauth "github.com/oullin/alloy/api/contracts/auth"
-	"github.com/oullin/alloy/auth/httpx"
-	"github.com/oullin/alloy/auth/user"
 )
 
 type stubProvider struct {

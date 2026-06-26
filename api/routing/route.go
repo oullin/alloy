@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/routing/compiler"
-	"github.com/oullin/alloy/routing/matching"
+	"github.com/oullin/alloy/api/routing/compiler"
+	"github.com/oullin/alloy/api/routing/matching"
 )
 
 // Ref: @bedrock/code-0332

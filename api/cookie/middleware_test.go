@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/cookie"
+	"github.com/oullin/alloy/api/cookie"
 )
 
 // stubEncrypter is a trivial reversible encrypter for testing.

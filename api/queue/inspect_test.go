@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/queue"
+	"github.com/oullin/alloy/api/queue"
 )
 
 // fakeInspectableQueue is a minimal Backend that also satisfies the two

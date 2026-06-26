@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/queue/failed"
+	"github.com/oullin/alloy/api/queue/failed"
 )
 
 // fakeDynamoClient records the last arguments to each call and returns

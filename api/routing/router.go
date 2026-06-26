@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	crouting "github.com/oullin/alloy/api/contracts/routing"
-	"github.com/oullin/alloy/routing/matching"
+	"github.com/oullin/alloy/api/routing/matching"
 )
 
 // EventDispatcher is the minimal event surface the router needs.

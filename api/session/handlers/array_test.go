@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/session/handlers"
+	"github.com/oullin/alloy/api/session/handlers"
 )
 
 func TestArrayHandlerOpen(t *testing.T) {

@@ -3,10 +3,10 @@ package tempo
 import (
 	"time"
 
-	configpkg "github.com/oullin/alloy/tempo/config"
-	"github.com/oullin/alloy/tempo/duration"
-	"github.com/oullin/alloy/tempo/factory"
-	"github.com/oullin/alloy/tempo/runtime"
+	configpkg "github.com/oullin/alloy/api/tempo/config"
+	"github.com/oullin/alloy/api/tempo/duration"
+	"github.com/oullin/alloy/api/tempo/factory"
+	"github.com/oullin/alloy/api/tempo/runtime"
 )
 
 type Unit = duration.Unit

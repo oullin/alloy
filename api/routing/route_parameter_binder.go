@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"github.com/oullin/alloy/routing/compiler"
+	"github.com/oullin/alloy/api/routing/compiler"
 )
 
 // boundRoute is the minimum surface RouteParameterBinder needs from a route.

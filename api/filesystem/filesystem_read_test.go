@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/filesystem"
+	"github.com/oullin/alloy/api/filesystem"
 )
 
 func TestGet(t *testing.T) {

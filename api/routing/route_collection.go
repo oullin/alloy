@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"github.com/oullin/alloy/routing/matching"
+	"github.com/oullin/alloy/api/routing/matching"
 )
 
 // RouteCollection is the in-memory route store used by [Router] during

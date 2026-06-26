@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/bus"
+	"github.com/oullin/alloy/api/bus"
 )
 
 type batchableTestJob struct {

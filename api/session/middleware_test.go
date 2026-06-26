@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/session"
-	"github.com/oullin/alloy/session/handlers"
+	"github.com/oullin/alloy/api/session"
+	"github.com/oullin/alloy/api/session/handlers"
 )
 
 func TestStartSessionWritesCookie(t *testing.T) {

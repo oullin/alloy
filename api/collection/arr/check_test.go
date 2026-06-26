@@ -3,7 +3,7 @@ package arr_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/collection/arr"
+	"github.com/oullin/alloy/api/collection/arr"
 )
 
 func TestAccessible(t *testing.T) {

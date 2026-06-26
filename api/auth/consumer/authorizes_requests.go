@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/oullin/alloy/auth/access"
+	"github.com/oullin/alloy/api/auth/access"
 )
 
 // AuthorizesRequests provides gate-based authorization helpers for HTTP handlers.

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/tempo/interval"
+	"github.com/oullin/alloy/api/tempo/interval"
 )
 
 const (

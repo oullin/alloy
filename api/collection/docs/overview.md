@@ -19,7 +19,7 @@ Go's built-in slice and map operations are intentionally minimal. Common tasks l
 ## 🏗️ Package Structure
 
 ```text
-github.com/oullin/alloy/collection
+github.com/oullin/alloy/api/collection
     ├── collection/      Core: Collection[T] (fluent slice wrapper)
     ├── lazy/            Lazy sequences backed by iter.Seq[T]
     ├── collectible/     collectible.Collection[K, V] (ordered map with fluent API)
@@ -40,7 +40,7 @@ github.com/oullin/alloy/collection
 ### Basic Collection
 
 ```go
-import "github.com/oullin/alloy/collection/collection"
+import "github.com/oullin/alloy/api/collection/collection"
 
 // Create a collection from a slice
 numbers := collection.Collect([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
@@ -56,7 +56,7 @@ fmt.Println(result.All()) // [2, 4, 6]
 ### Map Collection
 
 ```go
-import "github.com/oullin/alloy/collection/collectible"
+import "github.com/oullin/alloy/api/collection/collectible"
 
 m := collectible.New(map[string]int{
     "apples":  5,
@@ -69,7 +69,7 @@ m.IsNotEmpty() // true
 ### Lazy Collection
 
 ```go
-import "github.com/oullin/alloy/collection/lazy"
+import "github.com/oullin/alloy/api/collection/lazy"
 
 // Computation is deferred until .All() or .Iter() is called
 lc := lazy.Range(1, 1000000).

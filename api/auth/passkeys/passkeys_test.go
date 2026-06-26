@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/oullin/alloy/auth/passkeys"
-	"github.com/oullin/alloy/auth/user"
+	"github.com/oullin/alloy/api/auth/passkeys"
+	"github.com/oullin/alloy/api/auth/user"
 )
 
 func TestMemoryRepositoryCreatesStableUserHandle(t *testing.T) {

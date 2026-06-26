@@ -4,10 +4,10 @@ import (
 	"math"
 	"strings"
 
-	"github.com/oullin/alloy/money/calculator"
-	"github.com/oullin/alloy/money/currency"
-	"github.com/oullin/alloy/money/exception"
-	"github.com/oullin/alloy/money/parser"
+	"github.com/oullin/alloy/api/money/calculator"
+	"github.com/oullin/alloy/api/money/currency"
+	"github.com/oullin/alloy/api/money/exception"
+	"github.com/oullin/alloy/api/money/parser"
 )
 
 // Manager handles Value creation and operations with a dependency-injected currency manager and calculator.

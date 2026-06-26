@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/oullin/alloy/session"
-	"github.com/oullin/alloy/session/handlers"
+	"github.com/oullin/alloy/api/session"
+	"github.com/oullin/alloy/api/session/handlers"
 )
 
 // Calling again should return the cached instance.

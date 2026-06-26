@@ -3,7 +3,7 @@ package container
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/container/contracts/provider"
+	"github.com/oullin/alloy/api/container/contracts/provider"
 )
 
 // Application wraps App and manages service provider lifecycle,
