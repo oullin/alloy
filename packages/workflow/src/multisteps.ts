@@ -734,10 +734,14 @@ const createAttemptSignal = (parent: AbortSignal, timeout: number): { signal: Ab
 
 const sleep = async (ms: number, signal: AbortSignal): Promise<void> => {
 	await new Promise<void>((resolve, reject) => {
-		const timer = setTimeout(resolve, ms);
+		let timer: NodeJS.Timeout | undefined;
 
 		const abort = (): void => {
-			clearTimeout(timer);
+			if (timer !== undefined) {
+				clearTimeout(timer);
+			}
+
+			signal.removeEventListener('abort', abort);
 			reject(signal.reason ?? new Error('operation aborted'));
 		};
 
@@ -746,6 +750,11 @@ const sleep = async (ms: number, signal: AbortSignal): Promise<void> => {
 
 			return;
 		}
+
+		timer = setTimeout(() => {
+			signal.removeEventListener('abort', abort);
+			resolve();
+		}, ms);
 
 		signal.addEventListener('abort', abort, { once: true });
 	});

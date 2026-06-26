@@ -72,6 +72,7 @@ export class DefaultCurrencyProvider implements CurrencyProvider {
 }
 
 export class CurrencyMap {
+	private static defaultDefinitions: CurrencyDefinition[] | null = null;
 	private readonly dataset: Map<string, CurrencyDefinition>;
 
 	public constructor(dataset: Iterable<CurrencyDefinition>) {
@@ -83,7 +84,9 @@ export class CurrencyMap {
 	}
 
 	public static default(): CurrencyMap {
-		return new CurrencyMap(Object.values(CURRENCY_DATA).map((data) => new CurrencyDefinition(data)));
+		CurrencyMap.defaultDefinitions ??= Object.values(CURRENCY_DATA).map((data) => new CurrencyDefinition(data));
+
+		return new CurrencyMap(CurrencyMap.defaultDefinitions);
 	}
 
 	public static from(dataset: ReadonlyMap<string, CurrencyDefinition> | Record<string, CurrencyDefinition>): CurrencyMap {

@@ -99,6 +99,49 @@ describe('multisteps workflow', () => {
 		await expect(new MultiStepEngine().run(brokenWorkflow)).rejects.toBeInstanceOf(WorkflowError);
 	});
 
+	it('removes retry backoff abort listeners after successful sleeps', async () => {
+		const controller = new AbortController();
+		const signal = controller.signal;
+		const originalAddEventListener = signal.addEventListener.bind(signal);
+		const originalRemoveEventListener = signal.removeEventListener.bind(signal);
+
+		let activeAbortListeners = 0;
+
+		signal.addEventListener = ((type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void => {
+			if (type === 'abort') {
+				activeAbortListeners += 1;
+			}
+
+			originalAddEventListener(type, listener, options);
+		}) as AbortSignal['addEventListener'];
+		signal.removeEventListener = ((type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void => {
+			if (type === 'abort') {
+				activeAbortListeners -= 1;
+			}
+
+			originalRemoveEventListener(type, listener, options);
+		}) as AbortSignal['removeEventListener'];
+
+		let attempts = 0;
+
+		const workflow = MultiStepWorkflow.machine(
+			'retry-cleanup',
+			new SyncJob('flaky', () => {
+				attempts += 1;
+
+				if (attempts < 3) {
+					throw new Error('transient');
+				}
+
+				return 'ok';
+			}).withRetry(3, 1),
+		);
+
+		await expect(new MultiStepEngine().run(workflow, {}, signal)).resolves.toMatchObject({ responses: { flaky: 'ok' } });
+
+		expect(activeAbortListeners).toBe(0);
+	});
+
 	it('skips run-if jobs and lets downstream dependencies continue', async () => {
 		let notifyRan = false;
 

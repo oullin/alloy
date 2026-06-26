@@ -91,13 +91,21 @@ export class MoneyCalculator {
 	public static safeAdd(a: Amount, b: Amount): Amount {
 		const result = a + b;
 
-		return inInt64Range(result) ? result : 0n;
+		if (!inInt64Range(result)) {
+			throw ERR_OVERFLOW;
+		}
+
+		return result;
 	}
 
 	public static safeSubtract(a: Amount, b: Amount): Amount {
 		const result = a - b;
 
-		return inInt64Range(result) ? result : 0n;
+		if (!inInt64Range(result)) {
+			throw ERR_OVERFLOW;
+		}
+
+		return result;
 	}
 
 	public static ration(amount: Amount, ration: bigint): bigint {
@@ -107,7 +115,11 @@ export class MoneyCalculator {
 
 		const result = amount * ration;
 
-		return inInt64Range(result) ? result : 0n;
+		if (!inInt64Range(result)) {
+			throw ERR_OVERFLOW;
+		}
+
+		return result;
 	}
 
 	public static safeMultiply(initial: bigint, ...multipliers: bigint[]): bigint {

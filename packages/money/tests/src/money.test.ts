@@ -4,11 +4,13 @@ import type { Amount, CurrencyCode, MoneyValueInstance } from '#money/index';
 import {
 	CURRENCY_CODES,
 	CurrencyDefinition,
+	CurrencyMap,
 	CurrencyManager,
 	ERR_CURRENCY_CONVERSION_NOT_FOUND,
 	ERR_CURRENCY_MISMATCH,
 	ERR_INVALID_AMOUNT_FRACTION,
 	ERR_INVALID_EXCHANGE_RATE,
+	ERR_INVALID_JSON_UNMARSHAL,
 	ERR_INVALID_MONEY_STRING,
 	ERR_NO_MULTIPLIERS_PROVIDED,
 	ERR_OVERFLOW,
@@ -127,6 +129,16 @@ describe('@alloy/money OOP port', () => {
 		expect(CurrencyDefinition.fromDbValue('eur').code).toBe('EUR');
 	});
 
+	it('returns independent default currency maps from cached definitions', () => {
+		const first = CurrencyMap.default();
+		const second = CurrencyMap.default();
+
+		first.set(new CurrencyDefinition({ code: 'SGD', numericCode: '998', fraction: 2, grapheme: 'T$', template: '$1', decimal: '.', thousand: ',' }));
+
+		expect(first.findByCode('SGD')?.numericCode).toBe('998');
+		expect(second.findByCode('SGD')?.numericCode).toBe('702');
+	});
+
 	it('converts amounts with direct rates, inverse rates, explicit rates, and fraction changes', () => {
 		const rates = ExchangeRates.create().addRate('USD', 'EUR', 0.85).addRate('USD', 'JPY', 150);
 		const converter = MoneyConverter.create(CurrencyManager.default(), rates);
@@ -147,6 +159,9 @@ describe('@alloy/money OOP port', () => {
 		expect(json.marshal(money)).toBe('{"amount":9223372036854775807,"currency":"USD"}');
 		expect(json.unmarshal('{"amount":9223372036854775807,"currency":"USD"}').amount()).toBe(9_223_372_036_854_775_807n);
 		expect(json.unmarshal('{"amount":12.5,"currency":"USD"}').amount()).toBe(13n);
+		expect(json.unmarshal('{"description":"The amount is 50","amount":100,"currency":"USD"}').amount()).toBe(100n);
+		expect(json.unmarshal('{"metadata":{"amount":50},"amount":100,"currency":"USD"}').amount()).toBe(100n);
+		expect(() => json.unmarshal('{"amount":"100","currency":"USD"}')).toThrow(ERR_INVALID_JSON_UNMARSHAL.message);
 		expect(money.dbValue()).toBe('9223372036854775807|USD');
 		expect(MoneyValue.fromDbValue('1234|SGD').display()).toBe('S$12.34');
 
@@ -165,9 +180,9 @@ describe('@alloy/money OOP port', () => {
 	it('preserves calculator int64 overflow behavior', () => {
 		const calculator = MoneyCalculator.create();
 
-		expect(calculator.add(MAX_INT64, 1n)).toBe(0n);
-		expect(calculator.subtract(MIN_INT64, 1n)).toBe(0n);
-		expect(calculator.multiply(MAX_INT64, 2n)).toBe(0n);
+		expect(() => calculator.add(MAX_INT64, 1n)).toThrow(ERR_OVERFLOW.message);
+		expect(() => calculator.subtract(MIN_INT64, 1n)).toThrow(ERR_OVERFLOW.message);
+		expect(() => calculator.multiply(MAX_INT64, 2n)).toThrow(ERR_OVERFLOW.message);
 		expect(() => calculator.safeMultiply(MAX_INT64, 2n)).toThrow(ERR_OVERFLOW.message);
 	});
 });
