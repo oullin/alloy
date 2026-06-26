@@ -1,10 +1,10 @@
-import { EventNames } from '../event-names.js';
-import { TransitionError } from '../errors.js';
-import { BaseEvent, type Dispatcher, GuardEvent } from '../events.js';
-import type { Marking } from '../marking.js';
-import { snapshotTransition, type Transition } from '../transition.js';
-import type { WorkflowContext } from '../types.js';
-import { transitionEnabled } from './markings.js';
+import { EventNames } from '#workflow/event-names';
+import { TransitionError } from '#workflow/errors';
+import { BaseEvent, type Dispatcher, GuardEvent } from '#workflow/events';
+import type { Marking } from '#workflow/marking';
+import { snapshotTransition, type Transition } from '#workflow/transition';
+import type { WorkflowContext } from '#workflow/types';
+import { transitionEnabled } from '#workflow/machine/markings';
 
 export const assertTransitionAllowed = <T>(input: { machine: string; dispatcher: Dispatcher<T>; subject: T; transition: Transition; marking: Marking; context: WorkflowContext }): void => {
 	if (!transitionEnabled(input.marking, input.transition)) {

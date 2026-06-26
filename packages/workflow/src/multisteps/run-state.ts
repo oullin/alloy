@@ -1,5 +1,5 @@
-import type { CompiledGraph } from './graph.js';
-import { MultiStepResult } from './result.js';
+import type { CompiledGraph } from '#workflow/multisteps/graph';
+import { MultiStepResult } from '#workflow/multisteps/result';
 
 export class RunState {
 	readonly #graph: CompiledGraph;

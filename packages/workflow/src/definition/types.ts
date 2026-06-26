@@ -1,6 +1,6 @@
-import type { Marking } from '../marking.js';
-import type { Transition } from '../transition.js';
-import type { Metadata, NestedMetadata } from '../types.js';
+import type { Marking } from '#workflow/marking';
+import type { Transition } from '#workflow/transition';
+import type { Metadata, NestedMetadata } from '#workflow/types';
 
 export interface DefinitionInput {
 	places?: string[];

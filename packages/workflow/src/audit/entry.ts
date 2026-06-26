@@ -1,5 +1,5 @@
-import type { Marking } from '../marking.js';
-import type { WorkflowContext } from '../types.js';
+import type { Marking } from '#workflow/marking';
+import type { WorkflowContext } from '#workflow/types';
 
 export class AuditEntry<T> {
 	public readonly machine: string;

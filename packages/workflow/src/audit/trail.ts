@@ -1,6 +1,6 @@
-import { CompletedEvent, EventNames, type Dispatcher, type WorkflowEvent } from '../events.js';
-import { Marking } from '../marking.js';
-import { AuditEntry } from './entry.js';
+import { CompletedEvent, EventNames, type Dispatcher, type WorkflowEvent } from '#workflow/events';
+import { Marking } from '#workflow/marking';
+import { AuditEntry } from '#workflow/audit/entry';
 
 export class AuditTrail<T> {
 	public readonly entries: AuditEntry<T>[] = [];

@@ -1,6 +1,6 @@
-import { CompileError } from './errors.js';
-import { CompiledGraph } from './graph.js';
-import type { JobSpec } from './jobs.js';
+import { CompileError } from '#workflow/multisteps/errors';
+import { CompiledGraph } from '#workflow/multisteps/graph';
+import type { JobSpec } from '#workflow/multisteps/jobs';
 
 export class MultiStepWorkflow {
 	readonly #name: string;

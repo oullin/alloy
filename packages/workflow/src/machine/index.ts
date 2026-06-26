@@ -1,2 +1,2 @@
-export type { WorkflowEngine } from './engine.js';
-export { Machine } from './machine.js';
+export type { WorkflowEngine } from '#workflow/machine/engine';
+export { Machine } from '#workflow/machine/machine';

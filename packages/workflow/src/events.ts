@@ -1,8 +1,8 @@
-import { TransitionBlocker, type TransitionBlockerShape } from './errors.js';
-import { type TransitionSnapshot } from './transition.js';
-import { cloneRecord, type WorkflowContext } from './types.js';
+import { TransitionBlocker, type TransitionBlockerShape } from '#workflow/errors';
+import { type TransitionSnapshot } from '#workflow/transition';
+import { cloneRecord, type WorkflowContext } from '#workflow/types';
 
-export { EventNames } from './event-names.js';
+export { EventNames } from '#workflow/event-names';
 
 export type Listener<T> = (event: WorkflowEvent<T>) => void;
 

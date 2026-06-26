@@ -1,15 +1,15 @@
-import type { Definition } from '../definition.js';
-import { Dispatcher } from '../events.js';
-import type { Marking } from '../marking.js';
-import { DefinitionMetadataStore } from '../metadata.js';
-import type { MarkingStore } from '../stores.js';
-import type { Transition } from '../transition.js';
-import type { MetadataStore, Sink, WorkflowContext } from '../types.js';
-import type { WorkflowEngine } from './engine.js';
-import { WorkflowLifecycleDispatcher } from './lifecycle-events.js';
-import { MachineLogger } from './logger.js';
-import { assertTransitionAllowed } from './transition-gate.js';
-import { createTransitionPlan, resolveTransition } from './transition-plan.js';
+import type { Definition } from '#workflow/definition';
+import { Dispatcher } from '#workflow/events';
+import type { Marking } from '#workflow/marking';
+import { DefinitionMetadataStore } from '#workflow/metadata';
+import type { MarkingStore } from '#workflow/stores';
+import type { Transition } from '#workflow/transition';
+import type { MetadataStore, Sink, WorkflowContext } from '#workflow/types';
+import type { WorkflowEngine } from '#workflow/machine/engine';
+import { WorkflowLifecycleDispatcher } from '#workflow/machine/lifecycle-events';
+import { MachineLogger } from '#workflow/machine/logger';
+import { assertTransitionAllowed } from '#workflow/machine/transition-gate';
+import { createTransitionPlan, resolveTransition } from '#workflow/machine/transition-plan';
 
 export class Machine<T> implements WorkflowEngine<T> {
 	readonly #name: string;

@@ -1,2 +1,2 @@
-export { Definition } from './definition.js';
-export { DefinitionBuilder } from './builder.js';
+export { Definition } from '#workflow/definition/definition';
+export { DefinitionBuilder } from '#workflow/definition/builder';

@@ -1,5 +1,5 @@
-import type { Metadata } from './types.js';
-import { cloneRecord } from './types.js';
+import type { Metadata } from '#workflow/types';
+import { cloneRecord } from '#workflow/types';
 
 export class Transition {
 	public readonly name: string;

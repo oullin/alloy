@@ -1,4 +1,4 @@
-import type { Sink } from '../types.js';
+import type { Sink } from '#workflow/types';
 
 export class MachineLogger {
 	#logger?: Sink;

@@ -1,5 +1,5 @@
-import type { Marking } from '../marking.js';
-import type { Transition } from '../transition.js';
+import type { Marking } from '#workflow/marking';
+import type { Transition } from '#workflow/transition';
 
 export const buildNextMarking = (marking: Marking, transition: Transition): Marking => {
 	const next = marking.clone();

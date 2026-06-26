@@ -1,5 +1,5 @@
-import { CompileError } from './errors.js';
-import type { JobSpec } from './jobs.js';
+import { CompileError } from '#workflow/multisteps/errors';
+import type { JobSpec } from '#workflow/multisteps/jobs';
 
 export class CompiledGraph {
 	public readonly jobs: JobSpec[];

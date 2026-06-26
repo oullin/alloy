@@ -40,6 +40,10 @@ export default defineConfig({
 				replacement: repoPath('./packages/workflow/src/$1'),
 			},
 			{
+				find: /^#workflow\/(.+)$/u,
+				replacement: repoPath('./packages/workflow/src/$1'),
+			},
+			{
 				find: /^#console\/(.+)$/u,
 				replacement: repoPath('./packages/console/src/$1'),
 			},

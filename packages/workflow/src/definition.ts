@@ -1,1 +1,1 @@
-export * from './definition/index.js';
+export * from '#workflow/definition/index';

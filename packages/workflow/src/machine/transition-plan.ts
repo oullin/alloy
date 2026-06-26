@@ -1,8 +1,8 @@
-import type { Definition } from '../definition.js';
-import type { Marking } from '../marking.js';
-import type { Transition } from '../transition.js';
-import { TransitionNotFoundError } from '../errors.js';
-import { buildNextMarking } from './markings.js';
+import type { Definition } from '#workflow/definition';
+import type { Marking } from '#workflow/marking';
+import type { Transition } from '#workflow/transition';
+import { TransitionNotFoundError } from '#workflow/errors';
+import { buildNextMarking } from '#workflow/machine/markings';
 
 export interface TransitionPlan {
 	transition: Transition;

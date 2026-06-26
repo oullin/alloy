@@ -1,5 +1,6 @@
 import type { CurrencySymbolData } from '#money/currency-data';
-import { CurrencyMap, type CurrencyDefinition } from '#money/currency/model';
+import type { CurrencyDefinition } from '#money/currency/definition';
+import { CurrencyMap } from '#money/currency/map';
 import { DefaultCurrencyProvider, type CurrencyProvider } from '#money/currency/provider';
 import { ERR_NO_CONVERTER_PROVIDED } from '#money/errors';
 

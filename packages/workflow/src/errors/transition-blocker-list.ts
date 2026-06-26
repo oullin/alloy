@@ -1,4 +1,4 @@
-import { TransitionBlocker, type TransitionBlockerShape } from './transition-blocker.js';
+import { TransitionBlocker, type TransitionBlockerShape } from '#workflow/errors/transition-blocker';
 
 export class TransitionBlockerList {
 	readonly #blockers: TransitionBlocker[] = [];

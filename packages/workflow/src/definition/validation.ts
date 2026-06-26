@@ -1,4 +1,4 @@
-import type { Definition } from './definition.js';
+import type { Definition } from '#workflow/definition/definition';
 
 export const validateDefinition = (definition: Definition): void => {
 	if (definition.places.length === 0) {

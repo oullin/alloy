@@ -1,7 +1,7 @@
-import type { Definition } from './definition.js';
-import { Dispatcher } from './events.js';
-import { Machine } from './machine.js';
-import type { MarkingStore } from './stores.js';
+import type { Definition } from '#workflow/definition';
+import { Dispatcher } from '#workflow/events';
+import { Machine } from '#workflow/machine';
+import type { MarkingStore } from '#workflow/stores';
 
 export class StateMachine<T> extends Machine<T> {
 	public constructor(name: string, definition: Definition, store: MarkingStore<T>, dispatcher = new Dispatcher<T>()) {

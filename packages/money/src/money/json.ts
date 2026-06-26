@@ -1,4 +1,4 @@
-import type { CurrencyDefinition } from '#money/currency/model';
+import type { CurrencyDefinition } from '#money/currency/definition';
 import { CurrencyManager } from '#money/currency/manager';
 import { roundAwayFromZero } from '#money/internal/rounding';
 import { MoneyValueBase, requireMoney, type MoneyValue } from '#money/money/core';

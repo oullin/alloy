@@ -1,4 +1,4 @@
-import { resolveField } from './response-resolver.js';
+import { resolveField } from '#workflow/multisteps/response-resolver';
 
 export abstract class Arg {
 	public abstract kind(): string;

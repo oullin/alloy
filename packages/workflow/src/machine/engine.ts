@@ -1,7 +1,7 @@
-import type { Definition } from '../definition.js';
-import type { Marking } from '../marking.js';
-import type { Transition } from '../transition.js';
-import type { MetadataStore, WorkflowContext } from '../types.js';
+import type { Definition } from '#workflow/definition';
+import type { Marking } from '#workflow/marking';
+import type { Transition } from '#workflow/transition';
+import type { MetadataStore, WorkflowContext } from '#workflow/types';
 
 export interface WorkflowEngine<T> {
 	name(): string;

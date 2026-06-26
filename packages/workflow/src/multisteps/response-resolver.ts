@@ -1,4 +1,4 @@
-import { UnresolvedResponseError } from './errors.js';
+import { UnresolvedResponseError } from '#workflow/multisteps/errors';
 
 export const resolveField = (raw: unknown, field: string, job = ''): unknown => {
 	if (raw === null || raw === undefined) {

@@ -1,5 +1,5 @@
-import type { MetadataStore } from './types.js';
-import type { Definition } from './definition.js';
+import type { MetadataStore } from '#workflow/types';
+import type { Definition } from '#workflow/definition';
 
 export class DefinitionMetadataStore implements MetadataStore {
 	readonly #definition: Definition;

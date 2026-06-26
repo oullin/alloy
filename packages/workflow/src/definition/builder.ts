@@ -1,7 +1,7 @@
-import { Marking } from '../marking.js';
-import { Transition } from '../transition.js';
-import { Definition } from './definition.js';
-import type { MutableDefinition } from './types.js';
+import { Marking } from '#workflow/marking';
+import { Transition } from '#workflow/transition';
+import { Definition } from '#workflow/definition/definition';
+import type { MutableDefinition } from '#workflow/definition/types';
 
 export class DefinitionBuilder {
 	readonly #definition: MutableDefinition;

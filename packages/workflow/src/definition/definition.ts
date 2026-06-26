@@ -1,9 +1,9 @@
-import { Marking } from '../marking.js';
-import { Transition } from '../transition.js';
-import type { Metadata, NestedMetadata } from '../types.js';
-import { cloneNestedRecord, cloneRecord } from '../types.js';
-import type { DefinitionInput } from './types.js';
-import { validateDefinition } from './validation.js';
+import { Marking } from '#workflow/marking';
+import { Transition } from '#workflow/transition';
+import type { Metadata, NestedMetadata } from '#workflow/types';
+import { cloneNestedRecord, cloneRecord } from '#workflow/types';
+import type { DefinitionInput } from '#workflow/definition/types';
+import { validateDefinition } from '#workflow/definition/validation';
 
 export class Definition {
 	public readonly places: string[];

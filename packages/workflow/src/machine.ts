@@ -1,1 +1,1 @@
-export * from './machine/index.js';
+export * from '#workflow/machine/index';

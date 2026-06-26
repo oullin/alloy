@@ -1,9 +1,9 @@
-import { EventNames } from '../event-names.js';
-import { AnnounceEvent, BaseEvent, CompletedEvent, type Dispatcher, EnteredEvent, EnterEvent, LeaveEvent, TransitionEvent } from '../events.js';
-import type { Marking } from '../marking.js';
-import { snapshotTransition, type Transition } from '../transition.js';
-import type { WorkflowContext } from '../types.js';
-import { markingBeforeEnter, restoreFromPlaces } from './markings.js';
+import { EventNames } from '#workflow/event-names';
+import { AnnounceEvent, BaseEvent, CompletedEvent, type Dispatcher, EnteredEvent, EnterEvent, LeaveEvent, TransitionEvent } from '#workflow/events';
+import type { Marking } from '#workflow/marking';
+import { snapshotTransition, type Transition } from '#workflow/transition';
+import type { WorkflowContext } from '#workflow/types';
+import { markingBeforeEnter, restoreFromPlaces } from '#workflow/machine/markings';
 
 export class WorkflowLifecycleDispatcher<T> {
 	readonly #machine: string;

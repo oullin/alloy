@@ -1,4 +1,4 @@
-import type { WorkflowEngine } from './machine.js';
+import type { WorkflowEngine } from '#workflow/machine';
 
 export type SupportStrategy<T> = (subject: T) => boolean;
 

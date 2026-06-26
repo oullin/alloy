@@ -1,1 +1,1 @@
-export * from './config/index.js';
+export * from '#workflow/config/index';

@@ -1,4 +1,4 @@
-import type { Definition } from './definition.js';
+import type { Definition } from '#workflow/definition';
 
 export class WorkflowValidator {
 	public validateDefinition(definition: Definition | null | undefined): void {

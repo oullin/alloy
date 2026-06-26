@@ -1,5 +1,5 @@
 import { CURRENCY_DATA, CURRENCY_SYMBOLS, type CurrencyCode, type CurrencySymbolData } from '#money/currency-data';
-import { CurrencyDefinition } from '#money/currency/model';
+import { CurrencyDefinition } from '#money/currency/definition';
 
 export interface CurrencyProvider {
 	get(): CurrencyDefinition;

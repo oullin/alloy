@@ -1,4 +1,4 @@
-import { TransitionBlocker } from './transition-blocker.js';
+import { TransitionBlocker } from '#workflow/errors/transition-blocker';
 
 export class TransitionError extends Error {
 	public readonly machine: string;

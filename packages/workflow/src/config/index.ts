@@ -1,1 +1,1 @@
-export { WorkflowConfigLoader } from './loader.js';
+export { WorkflowConfigLoader } from '#workflow/config/loader';

@@ -1,4 +1,4 @@
-import type { Arg } from './args.js';
+import type { Arg } from '#workflow/multisteps/args';
 
 export type Task = () => Promise<unknown>;
 

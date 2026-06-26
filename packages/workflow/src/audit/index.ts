@@ -1,2 +1,2 @@
-export { AuditEntry } from './entry.js';
-export { AuditTrail } from './trail.js';
+export { AuditEntry } from '#workflow/audit/entry';
+export { AuditTrail } from '#workflow/audit/trail';

@@ -1,1 +1,1 @@
-export * from './multisteps/index.js';
+export * from '#workflow/multisteps/index';

@@ -1,1 +1,1 @@
-export * from './audit/index.js';
+export * from '#workflow/audit/index';

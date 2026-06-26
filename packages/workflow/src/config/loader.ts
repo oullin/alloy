@@ -1,6 +1,6 @@
-import { DefinitionBuilder, type Definition } from '../definition.js';
-import { coerceStringMap, coerceStringSlice, coerceTransitions, isRecord } from './coercion.js';
-import { WorkflowConfigSource } from './source.js';
+import { DefinitionBuilder, type Definition } from '#workflow/definition';
+import { coerceStringMap, coerceStringSlice, coerceTransitions, isRecord } from '#workflow/config/coercion';
+import { WorkflowConfigSource } from '#workflow/config/source';
 
 export class WorkflowConfigLoader {
 	readonly #source: WorkflowConfigSource;

@@ -1,6 +1,6 @@
-import type { Definition } from './definition.js';
-import { Marking } from './marking.js';
-import type { WorkflowContext } from './types.js';
+import type { Definition } from '#workflow/definition';
+import { Marking } from '#workflow/marking';
+import type { WorkflowContext } from '#workflow/types';
 
 export interface MarkingStore<T> {
 	getMarking(subject: T, definition: Definition): Marking;

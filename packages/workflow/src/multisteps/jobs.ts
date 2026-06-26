@@ -1,5 +1,5 @@
-import { RetryPolicy } from './retry.js';
-import type { ArgMap, JobHandler, RunIfPredicate } from './types.js';
+import { RetryPolicy } from '#workflow/multisteps/retry';
+import type { ArgMap, JobHandler, RunIfPredicate } from '#workflow/multisteps/types';
 
 export abstract class JobSpec {
 	public readonly name: string;

@@ -1,1 +1,1 @@
-export * from './errors/index.js';
+export * from '#workflow/errors/index';

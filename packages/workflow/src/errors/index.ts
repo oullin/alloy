@@ -1,4 +1,4 @@
-export { TransitionBlocker, type TransitionBlockerShape } from './transition-blocker.js';
-export { TransitionBlockerList } from './transition-blocker-list.js';
-export { TransitionError } from './transition-error.js';
-export { TransitionNotFoundError } from './transition-not-found-error.js';
+export { TransitionBlocker, type TransitionBlockerShape } from '#workflow/errors/transition-blocker';
+export { TransitionBlockerList } from '#workflow/errors/transition-blocker-list';
+export { TransitionError } from '#workflow/errors/transition-error';
+export { TransitionNotFoundError } from '#workflow/errors/transition-not-found-error';

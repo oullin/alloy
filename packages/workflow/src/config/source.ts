@@ -1,4 +1,4 @@
-import { isRecord } from './coercion.js';
+import { isRecord } from '#workflow/config/coercion';
 
 export class WorkflowConfigSource {
 	readonly #source: Record<string, unknown>;
