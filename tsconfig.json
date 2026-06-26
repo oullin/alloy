@@ -5,6 +5,7 @@
     { "path": "./packages/tempo" },
     { "path": "./packages/tempo/tests" },
     { "path": "./packages/console" },
+    { "path": "./packages/navigator-routes" },
     { "path": "./packages/money" },
     { "path": "./packages/workflow" }
   ]

@@ -1,4 +1,4 @@
-package generator_test
+package navigator_test
 
 import (
 	"os"
@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/oullin/alloy/routing"
-	"github.com/oullin/alloy/routing/generator"
+	"github.com/oullin/alloy/routing/navigator"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -15,13 +15,13 @@ import (
 // ─────────────────────────────────────────────────────────────────────────────
 
 // generateTo runs Generate() into a temp directory and returns the base path.
-func generateTo(t *testing.T, routes []*generator.RouteInfo, opts generator.Options) string {
+func generateTo(t *testing.T, routes []*navigator.RouteInfo, opts navigator.Options) string {
 	t.Helper()
 
 	dir := t.TempDir()
 	opts.Path = dir
 
-	if err := generator.Generate(routes, opts); err != nil {
+	if err := navigator.Generate(routes, opts); err != nil {
 		t.Fatalf("Generate: %v", err)
 	}
 
@@ -60,35 +60,35 @@ func assertNotContains(t *testing.T, content, unwanted string) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Workbench route fixtures (mirror RouteGen workbench)
+// Workbench route fixtures (mirror Expose workbench)
 // ─────────────────────────────────────────────────────────────────────────────
 
-func postControllerRoutes() []*generator.RouteInfo {
+func postControllerRoutes() []*navigator.RouteInfo {
 	base := "App\\Http\\Controllers\\PostController"
 
-	return []*generator.RouteInfo{
+	return []*navigator.RouteInfo{
 		{URI: "/posts", Methods: []string{"get", "head"}, Controller: base + "@index"},
 		{URI: "/posts/create", Methods: []string{"get", "head"}, Controller: base + "@create"},
 		{URI: "/posts", Methods: []string{"post"}, Controller: base + "@store"},
 		{
 			URI: "/posts/{post}", Methods: []string{"get", "head"},
 			Controller: base + "@show",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/posts/{post}/edit", Methods: []string{"get", "head"},
 			Controller: base + "@edit",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/posts/{post}", Methods: []string{"put", "patch"},
 			Controller: base + "@update",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/posts/{post}", Methods: []string{"delete"},
 			Controller: base + "@destroy",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 	}
 }
@@ -100,7 +100,7 @@ func postControllerRoutes() []*generator.RouteInfo {
 func TestPostControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	dir := generateTo(t, postControllerRoutes(), generator.Options{})
+	dir := generateTo(t, postControllerRoutes(), navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
 
 	// index — no params, GET
@@ -140,12 +140,12 @@ func TestPostControllerGeneration(t *testing.T) {
 func TestAnonymousMiddlewareClosureRoutesDoNotBlockGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{URI: "/closure", Methods: []string{"get", "head"}, Controller: "Closure"},
 		{URI: "/posts", Methods: []string{"get", "head"}, Controller: "App\\Http\\Controllers\\PostController@index"},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
 
 	assertContains(t, content, `url: "/posts"`)
@@ -162,7 +162,7 @@ func TestAnonymousMiddlewareClosureRoutesDoNotBlockGeneration(t *testing.T) {
 func TestInvokableControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:         "/invokable-controller",
 			Methods:     []string{"get", "head"},
@@ -171,7 +171,7 @@ func TestInvokableControllerGeneration(t *testing.T) {
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/InvokableController.ts")
 
 	// Must use default export (not a named export).
@@ -185,7 +185,7 @@ func TestInvokableControllerGeneration(t *testing.T) {
 func TestInvokablePlusControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:         "/invokable-plus",
 			Methods:     []string{"get", "head"},
@@ -199,7 +199,7 @@ func TestInvokablePlusControllerGeneration(t *testing.T) {
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/InvokablePlusController.ts")
 
 	assertContains(t, content, `const InvokablePlusController = (`)
@@ -216,18 +216,18 @@ func TestInvokablePlusControllerGeneration(t *testing.T) {
 func TestOptionalControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/optional/{parameter?}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\OptionalController@optional",
-			Params:     []generator.Param{{Name: "parameter", Optional: true}},
+			Params:     []navigator.Param{{Name: "parameter", Optional: true}},
 		},
 		{
 			URI:        "/many-optional/{one?}/{two?}/{three?}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\OptionalController@manyOptional",
-			Params: []generator.Param{
+			Params: []navigator.Param{
 				{Name: "one", Optional: true},
 				{Name: "two", Optional: true},
 				{Name: "three", Optional: true},
@@ -235,7 +235,7 @@ func TestOptionalControllerGeneration(t *testing.T) {
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/OptionalController.ts")
 
 	// optional param — definition should contain {parameter?}
@@ -253,10 +253,10 @@ func TestOptionalControllerGeneration(t *testing.T) {
 	assertContains(t, content, `.replace("{three?}", parsedArgs.three?.toString() ?? '')`)
 }
 
-func TestEmptyRouteGeneration(t *testing.T) {
+func TestEmptyRouteExposure(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "",
 			Methods:    []string{"get", "head"},
@@ -264,7 +264,7 @@ func TestEmptyRouteGeneration(t *testing.T) {
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/EmptyRouteController.ts")
 
 	assertContains(t, content, `url: ""`)
@@ -278,16 +278,16 @@ func TestEmptyRouteGeneration(t *testing.T) {
 func TestModelBindingControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/users/{user}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\ModelBindingController@show",
-			Params:     []generator.Param{{Name: "user"}},
+			Params:     []navigator.Param{{Name: "user"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/ModelBindingController.ts")
 
 	assertContains(t, content, `url: "/users/{user}"`)
@@ -300,16 +300,16 @@ func TestModelBindingControllerGeneration(t *testing.T) {
 func TestCamelCaseRouteParameterGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/profiles/{userProfile}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\CamelCaseRouteParameterController@show",
-			Params:     []generator.Param{{Name: "userProfile", Key: "uuid"}},
+			Params:     []navigator.Param{{Name: "userProfile", Key: "uuid"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/CamelCaseRouteParameterController.ts")
 
 	assertContains(t, content, `url: "/profiles/{userProfile}"`)
@@ -321,16 +321,16 @@ func TestCamelCaseRouteParameterGeneration(t *testing.T) {
 func TestHyphenatedRouteParameterGenerationUsesSafeNames(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/profiles/{user-profile}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\HyphenatedRouteParameterController@show",
-			Params:     []generator.Param{{Name: "user-profile", Key: "uuid"}},
+			Params:     []navigator.Param{{Name: "user-profile", Key: "uuid"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/HyphenatedRouteParameterController.ts")
 
 	assertContains(t, content, `url: "/profiles/{user-profile}"`)
@@ -348,16 +348,16 @@ func TestHyphenatedRouteParameterGenerationUsesSafeNames(t *testing.T) {
 func TestKeyControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/keys/{key}/edit",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\KeyController@edit",
-			Params:     []generator.Param{{Name: "key", Key: "uuid"}},
+			Params:     []navigator.Param{{Name: "key", Key: "uuid"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/KeyController.ts")
 
 	assertContains(t, content, `url: "/keys/{key}/edit"`)
@@ -375,14 +375,14 @@ func TestDisallowedMethodNamesGeneration(t *testing.T) {
 	t.Parallel()
 
 	base := "App\\Http\\Controllers\\DisallowedMethodNameController"
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{URI: "/disallowed/delete", Methods: []string{"get", "head"}, Controller: base + "@delete"},
 		{URI: "/disallowed/404", Methods: []string{"get", "head"}, Controller: base + "@404"},
 		{URI: "/disallowed/2fa", Methods: []string{"get", "head"}, Controller: base + "@2fa"},
 		{URI: "/disallowed/default", Methods: []string{"get", "head"}, Controller: base + "@default"},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/DisallowedMethodNameController.ts")
 
 	// Reserved word "delete" → "deleteMethod"
@@ -407,16 +407,16 @@ func TestDisallowedMethodNamesGeneration(t *testing.T) {
 func TestMethodNameCollisionGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/method-collision/{post}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\MethodNameCollisionController@options",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/MethodNameCollisionController.ts")
 
 	assertContains(t, content, `export const options = (args: {`)
@@ -428,12 +428,12 @@ func TestMethodNameCollisionGeneration(t *testing.T) {
 func TestParameterNameCollisionGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/parameter-names/{args}/{options}/{parsedArgs}",
 			Methods:    []string{"get", "head"},
 			Controller: "App\\Http\\Controllers\\ParamaterNameController@show",
-			Params: []generator.Param{
+			Params: []navigator.Param{
 				{Name: "args"},
 				{Name: "options"},
 				{Name: "parsedArgs"},
@@ -441,7 +441,7 @@ func TestParameterNameCollisionGeneration(t *testing.T) {
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/ParamaterNameController.ts")
 
 	assertContains(t, content, `url: "/parameter-names/{args}/{options}/{parsedArgs}"`)
@@ -458,12 +458,12 @@ func TestTwoRoutesSameActionGeneration(t *testing.T) {
 	t.Parallel()
 
 	base := "App\\Http\\Controllers\\TwoRoutesSameActionController"
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{URI: "/two-routes-one-action-1", Methods: []string{"get", "head"}, Controller: base + "@same"},
 		{URI: "/two-routes-one-action-2", Methods: []string{"get", "head"}, Controller: base + "@same"},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/TwoRoutesSameActionController.ts")
 
 	// Keyed dictionary with URI strings as keys.
@@ -480,27 +480,27 @@ func TestDomainControllerGeneration(t *testing.T) {
 	t.Parallel()
 
 	base := "App\\Http\\Controllers\\DomainController"
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI: "/fixed-domain/{param}", Methods: []string{"get", "head"},
 			Controller: base + "@fixedDomain",
 			Domain:     "example.test",
 			Scheme:     "//",
-			Params:     []generator.Param{{Name: "param"}},
+			Params:     []navigator.Param{{Name: "param"}},
 		},
 		{
 			URI: "/default-parameters-domain/{param}", Methods: []string{"get", "head"},
 			Controller: base + "@defaultParametersDomain",
 			Domain:     "{defaultDomain?}.au",
 			Scheme:     "//",
-			Params: []generator.Param{
+			Params: []navigator.Param{
 				{Name: "defaultDomain", Optional: true},
 				{Name: "param"},
 			},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/DomainController.ts")
 
 	// Fixed domain URLs include the domain.
@@ -518,12 +518,12 @@ func TestDomainControllerGeneration(t *testing.T) {
 func TestNamedRoutesGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI: "/posts/{post}/edit", Methods: []string{"get", "head"},
 			Name:       "posts.edit",
 			Controller: "App\\Http\\Controllers\\PostController@edit",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/dashboard", Methods: []string{"get", "head"},
@@ -545,7 +545,7 @@ func TestNamedRoutesGeneration(t *testing.T) {
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{SkipActions: true})
+	dir := generateTo(t, routes, navigator.Options{SkipActions: true})
 
 	// posts/index.ts should export "edit"
 	postsContent := readFile(t, dir, "routes/posts/index.ts")
@@ -560,7 +560,7 @@ func TestNamedRoutesGeneration(t *testing.T) {
 func TestNamespacedAndStorageRoutesGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/admin/reports",
 			Methods:    []string{"get", "head"},
@@ -571,11 +571,11 @@ func TestNamespacedAndStorageRoutesGeneration(t *testing.T) {
 			URI:     "/storage/{path}",
 			Methods: []string{"get", "head"},
 			Name:    "storage.local",
-			Params:  []generator.Param{{Name: "path"}},
+			Params:  []navigator.Param{{Name: "path"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "routes/namespaced/admin/reports/index.ts")
 	assertContains(t, content, `export const index`)
 	assertContains(t, content, `url: "/admin/reports"`)
@@ -593,19 +593,19 @@ func TestUrlDefaultsControllerGeneration(t *testing.T) {
 	t.Parallel()
 
 	base := "App\\Http\\Controllers\\UrlDefaultsController"
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI:        "/with-defaults/{locale}",
 			Methods:    []string{"post"},
 			Controller: base + "@onlyDefaults",
-			Params: []generator.Param{
+			Params: []navigator.Param{
 				{Name: "locale", Optional: true, Default: "en"},
 			},
 			Defaults: map[string]string{"locale": "en"},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/UrlDefaultsController.ts")
 
 	// Default value is used in parsedArgs.
@@ -619,7 +619,7 @@ func TestFromRouteCollectionKeepsMultiDigitIntegerDefaults(t *testing.T) {
 
 	router := routing.NewRouter(nil, nil)
 	router.Get("/archive/{year}", func() {}).Defaults("year", 2026)
-	routes := generator.FromRouteCollection(router.GetRoutes(), generator.AdapterOptions{})
+	routes := navigator.FromRouteCollection(router.GetRoutes(), navigator.AdapterOptions{})
 
 	if len(routes) != 1 {
 		t.Fatalf("expected 1 route, got %d", len(routes))
@@ -634,6 +634,65 @@ func TestFromRouteCollectionKeepsMultiDigitIntegerDefaults(t *testing.T) {
 	}
 }
 
+func TestFromRouteCollectionUsesForcedRootAndDefaults(t *testing.T) {
+	t.Parallel()
+
+	router := routing.NewRouter(nil, nil)
+	router.Get("/{locale}/posts/{post:slug}", "App\\Http\\Controllers\\PostController@show").Name("posts.show")
+
+	routes := navigator.FromRouteCollection(router.GetRoutes(), navigator.AdapterOptions{
+		ForcedRoot: "https://example.test/app",
+		Defaults:   map[string]string{"locale": "en"},
+	})
+
+	if len(routes) != 1 {
+		t.Fatalf("expected 1 route, got %d", len(routes))
+	}
+
+	if routes[0].Domain != "example.test" {
+		t.Fatalf("domain = %q", routes[0].Domain)
+	}
+
+	if routes[0].Scheme != "https://" {
+		t.Fatalf("scheme = %q", routes[0].Scheme)
+	}
+
+	if routes[0].BasePath != "/app" {
+		t.Fatalf("basePath = %q", routes[0].BasePath)
+	}
+
+	if routes[0].Params[0].Default != "en" || !routes[0].Params[0].Optional {
+		t.Fatalf("locale param = %#v", routes[0].Params[0])
+	}
+
+	if routes[0].Params[1].Key != "slug" {
+		t.Fatalf("post key = %q", routes[0].Params[1].Key)
+	}
+}
+
+func TestGenerateFromRouter(t *testing.T) {
+	t.Parallel()
+
+	router := routing.NewRouter(nil, nil)
+	router.Get("/posts/{post:slug}", "App\\Http\\Controllers\\PostController@show").Name("posts.show")
+
+	dir := t.TempDir()
+
+	if err := navigator.GenerateFromRouter(router, navigator.Options{Path: dir}, navigator.AdapterOptions{}); err != nil {
+		t.Fatalf("GenerateFromRouter: %v", err)
+	}
+
+	action := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	named := readFile(t, dir, "routes/posts/index.ts")
+	runtime := readFile(t, dir, "expose/index.ts")
+
+	assertContains(t, action, `from './../../../../expose'`)
+	assertContains(t, action, `url: "/posts/{post}"`)
+	assertContains(t, action, `args.post.slug`)
+	assertContains(t, named, `export const show`)
+	assertContains(t, runtime, `export const queryParams`)
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // WithForm option tests
 // ─────────────────────────────────────────────────────────────────────────────
@@ -641,7 +700,7 @@ func TestFromRouteCollectionKeepsMultiDigitIntegerDefaults(t *testing.T) {
 func TestWithFormOption(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI: "/posts", Methods: []string{"post"},
 			Controller: "App\\Http\\Controllers\\PostController@store",
@@ -649,11 +708,11 @@ func TestWithFormOption(t *testing.T) {
 		{
 			URI: "/posts/{post}", Methods: []string{"put", "patch"},
 			Controller: "App\\Http\\Controllers\\PostController@update",
-			Params:     []generator.Param{{Name: "post"}},
+			Params:     []navigator.Param{{Name: "post"}},
 		},
 	}
 
-	dir := generateTo(t, routes, generator.Options{WithForm: true})
+	dir := generateTo(t, routes, navigator.Options{WithForm: true})
 	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
 
 	// Form helpers must be present.
@@ -677,7 +736,7 @@ func TestAppURLPathPrefix(t *testing.T) {
 		r.BasePath = "/v2"
 	}
 
-	dir := generateTo(t, routes, generator.Options{})
+	dir := generateTo(t, routes, navigator.Options{})
 	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
 
 	assertContains(t, content, `url: "/v2/posts"`)
@@ -685,14 +744,14 @@ func TestAppURLPathPrefix(t *testing.T) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RouteGen runtime utility
+// Expose runtime utility
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestRouteGenRuntimeUtility(t *testing.T) {
+func TestExposeRuntimeUtility(t *testing.T) {
 	t.Parallel()
 
-	dir := generateTo(t, nil, generator.Options{SkipActions: true, SkipRoutes: true})
-	content := readFile(t, dir, "routegen/index.ts")
+	dir := generateTo(t, nil, navigator.Options{SkipActions: true, SkipRoutes: true})
+	content := readFile(t, dir, "expose/index.ts")
 
 	// Must contain the core runtime functions.
 	assertContains(t, content, `export const queryParams`)
@@ -705,10 +764,34 @@ func TestRouteGenRuntimeUtility(t *testing.T) {
 	assertContains(t, content, `export type RouteQueryOptions`)
 }
 
-func TestRouteGenRuntimeQueryParamsSource(t *testing.T) {
+func TestExposeRuntimeDirectoryCompatibility(t *testing.T) {
 	t.Parallel()
 
-	data, err := os.ReadFile(filepath.FromSlash("resources/routegen.ts"))
+	dir := generateTo(t, nil, navigator.Options{
+		SkipActions:      true,
+		SkipRoutes:       true,
+		RuntimeDirectory: "routegen",
+	})
+	content := readFile(t, dir, "routegen/index.ts")
+
+	assertContains(t, content, `export const queryParams`)
+}
+
+func TestExposeRuntimeDirectoryImportsUseForwardSlashes(t *testing.T) {
+	t.Parallel()
+
+	dir := generateTo(t, postControllerRoutes(), navigator.Options{
+		RuntimeDirectory: `runtime\expose`,
+	})
+	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+
+	assertContains(t, content, `from './../../../../runtime/expose'`)
+}
+
+func TestExposeRuntimeQueryParamsSource(t *testing.T) {
+	t.Parallel()
+
+	data, err := os.ReadFile(filepath.FromSlash("resources/expose.ts"))
 
 	if err != nil {
 		t.Fatal(err)
@@ -734,7 +817,7 @@ func TestRouteGenRuntimeQueryParamsSource(t *testing.T) {
 func TestSkipOptions(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{
 			URI: "/posts", Methods: []string{"get"},
 			Name:       "posts.index",
@@ -744,7 +827,7 @@ func TestSkipOptions(t *testing.T) {
 
 	t.Run("skip_actions", func(t *testing.T) {
 		t.Parallel()
-		dir := generateTo(t, routes, generator.Options{SkipActions: true})
+		dir := generateTo(t, routes, navigator.Options{SkipActions: true})
 
 		if _, err := os.Stat(filepath.Join(dir, "actions")); !os.IsNotExist(err) {
 			t.Error("actions/ directory should not exist when SkipActions=true")
@@ -753,7 +836,7 @@ func TestSkipOptions(t *testing.T) {
 
 	t.Run("skip_routes", func(t *testing.T) {
 		t.Parallel()
-		dir := generateTo(t, routes, generator.Options{SkipRoutes: true})
+		dir := generateTo(t, routes, navigator.Options{SkipRoutes: true})
 
 		if _, err := os.Stat(filepath.Join(dir, "routes")); !os.IsNotExist(err) {
 			t.Error("routes/ directory should not exist when SkipRoutes=true")
@@ -768,12 +851,12 @@ func TestSkipOptions(t *testing.T) {
 func TestBarrelFilesGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{URI: "/posts", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\PostController@index"},
 		{URI: "/users", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\UserController@index"},
 	}
 
-	dir := generateTo(t, routes, generator.Options{SkipRoutes: true})
+	dir := generateTo(t, routes, navigator.Options{SkipRoutes: true})
 
 	// Controller-level barrel.
 	indexContent := readFile(t, dir, "actions/App/Http/Controllers/index.ts")
@@ -788,12 +871,12 @@ func TestBarrelFilesGeneration(t *testing.T) {
 func TestRepeatedNamespaceControllerGeneration(t *testing.T) {
 	t.Parallel()
 
-	routes := []*generator.RouteInfo{
+	routes := []*navigator.RouteInfo{
 		{URI: "/admin/repeated", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\Admin\\Admin\\RepeatedNamespaceController@index"},
 		{URI: "/admin/users", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\Admin\\UserController@index"},
 	}
 
-	dir := generateTo(t, routes, generator.Options{SkipRoutes: true})
+	dir := generateTo(t, routes, navigator.Options{SkipRoutes: true})
 	content := readFile(t, dir, "actions/App/Http/Controllers/Admin/index.ts")
 
 	assertContains(t, content, `import Admin from './Admin'`)

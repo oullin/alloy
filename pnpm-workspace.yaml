@@ -3,6 +3,7 @@ packages:
   - "packages/money"
   - "packages/tempo"
   - "packages/tempo/tests"
+  - "packages/navigator-routes"
   - "packages/workflow"
   - "infra"
   - "infra/*"

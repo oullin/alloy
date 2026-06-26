@@ -1,6 +1,7 @@
-package generator
+package navigator
 
 import (
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -17,33 +18,63 @@ type AdapterOptions struct {
 
 	// ForcedScheme overrides the scheme for all routes ("http://", "https://").
 	ForcedScheme string
+
+	// ForcedRoot overrides the host, scheme, and base path for routes that do
+	// not declare their own domain.
+	ForcedRoot string
+
+	// Defaults holds URL default values, equivalent to URL::defaults() values
+	// discovered from route middleware.
+	Defaults map[string]string
 }
 
 // FromRouteCollection converts an Alloy RouteCollectionInterface into a slice
 // of RouteInfo values suitable for passing to Generate.
-//
-// implementation, extracting controller metadata, parameters, defaults, and
-// domain information from each registered route.
 func FromRouteCollection(collection routing.RouteCollectionInterface, opts AdapterOptions) []*RouteInfo {
 	routes := collection.GetRoutes()
 	out := make([]*RouteInfo, 0, len(routes))
 
 	basePath, forcedScheme := parseAppURL(opts.AppURL)
+	rootDomain, rootScheme, rootBasePath := parseForcedRoot(opts.ForcedRoot)
+
+	if rootBasePath != "" {
+		basePath = rootBasePath
+	}
+
+	if rootScheme != "" {
+		forcedScheme = rootScheme
+	}
 
 	if opts.ForcedScheme != "" {
-		forcedScheme = opts.ForcedScheme
+		forcedScheme = normalizeScheme(opts.ForcedScheme)
 	}
 
 	for _, r := range routes {
-		info := adaptRoute(r, basePath, forcedScheme)
+		info := adaptRoute(r, basePath, forcedScheme, rootDomain, opts.Defaults)
 		out = append(out, info)
 	}
 
 	return out
 }
 
+// GenerateFromRouteCollection adapts a live route collection and writes
+// TypeScript route exposure files.
+func GenerateFromRouteCollection(collection routing.RouteCollectionInterface, generate Options, adapter AdapterOptions) error {
+	return Generate(FromRouteCollection(collection, adapter), generate)
+}
+
+// GenerateFromRouter adapts a live router and writes TypeScript route exposure
+// files from its registered route collection.
+func GenerateFromRouter(router *routing.Router, generate Options, adapter AdapterOptions) error {
+	if router == nil {
+		return fmt.Errorf("expose: nil router")
+	}
+
+	return GenerateFromRouteCollection(router.GetRoutes(), generate, adapter)
+}
+
 // adaptRoute converts a single routing.Route to a RouteInfo.
-func adaptRoute(r *routing.Route, basePath, forcedScheme string) *RouteInfo {
+func adaptRoute(r *routing.Route, basePath, forcedScheme, rootDomain string, urlDefaults map[string]string) *RouteInfo {
 	// Lower-case HTTP methods.
 	methods := make([]string, len(r.HTTPMethods))
 
@@ -66,12 +97,13 @@ func adaptRoute(r *routing.Route, basePath, forcedScheme string) *RouteInfo {
 	paramNames := r.ParameterNames()
 	bindingFields := r.BindingFields()
 	defaults := r.DefaultValues
+	defaultStrings := mergeDefaultStrings(urlDefaults, defaults)
 	params := make([]Param, 0, len(paramNames))
 
 	for _, pName := range paramNames {
-		optional := isOptionalParam(r.Uri, pName) || hasDefault(defaults, pName)
+		optional := isOptionalParam(r.Uri, pName) || hasDefault(defaults, pName) || hasStringDefault(urlDefaults, pName)
 		key := bindingFields[pName]
-		defaultVal := defaultString(defaults, pName)
+		defaultVal := defaultStrings[pName]
 
 		params = append(params, Param{
 			Name:     pName,
@@ -85,13 +117,24 @@ func adaptRoute(r *routing.Route, basePath, forcedScheme string) *RouteInfo {
 	domain := r.GetDomain()
 	scheme := ""
 
+	if domain == "" {
+		domain = rootDomain
+	}
+
 	if domain != "" {
 		scheme = "//"
 	}
 
-	if forcedScheme != "" && domain == "" {
-		// Only apply forced scheme when route has no own domain.
+	if forcedScheme != "" {
 		scheme = forcedScheme
+	}
+
+	if r.HttpOnly() {
+		scheme = "http://"
+	}
+
+	if r.HttpsOnly() {
+		scheme = "https://"
 	}
 
 	return &RouteInfo{
@@ -104,6 +147,7 @@ func adaptRoute(r *routing.Route, basePath, forcedScheme string) *RouteInfo {
 		Domain:      domain,
 		Scheme:      scheme,
 		BasePath:    basePath,
+		Defaults:    defaultStrings,
 	}
 }
 
@@ -122,6 +166,34 @@ func hasDefault(defaults map[string]any, name string) bool {
 	_, ok := defaults[name]
 
 	return ok
+}
+
+func hasStringDefault(defaults map[string]string, name string) bool {
+	if defaults == nil {
+		return false
+	}
+
+	_, ok := defaults[name]
+
+	return ok
+}
+
+func mergeDefaultStrings(urlDefaults map[string]string, routeDefaults map[string]any) map[string]string {
+	if len(urlDefaults) == 0 && len(routeDefaults) == 0 {
+		return nil
+	}
+
+	out := make(map[string]string, len(urlDefaults)+len(routeDefaults))
+
+	for key, value := range urlDefaults {
+		out[key] = value
+	}
+
+	for key := range routeDefaults {
+		out[key] = defaultString(routeDefaults, key)
+	}
+
+	return out
 }
 
 // defaultString returns the string representation of a default value,
@@ -172,4 +244,48 @@ func parseAppURL(appURL string) (basePath, scheme string) {
 	}
 
 	return path, ""
+}
+
+func parseForcedRoot(root string) (domain, scheme, basePath string) {
+	if root == "" {
+		return "", "", ""
+	}
+
+	if strings.HasPrefix(root, "//") {
+		root = "http:" + root
+	}
+
+	u, err := url.Parse(root)
+
+	if err != nil {
+		return "", "", ""
+	}
+
+	if u.Host != "" {
+		domain = u.Host
+	}
+
+	if u.Scheme != "" {
+		scheme = normalizeScheme(u.Scheme)
+	}
+
+	path := strings.TrimRight(u.Path, "/")
+
+	if path != "/" {
+		basePath = path
+	}
+
+	return domain, scheme, basePath
+}
+
+func normalizeScheme(scheme string) string {
+	if scheme == "" {
+		return ""
+	}
+
+	if strings.HasSuffix(scheme, "://") || scheme == "//" {
+		return scheme
+	}
+
+	return strings.TrimSuffix(scheme, ":") + "://"
 }
