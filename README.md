@@ -97,4 +97,3 @@ formatter commands.
 - [Go Tempo](api/tempo/README.md)
 - [Go Collection](api/collection/README.md)
 - [TypeScript Tempo](packages/tempo/README.md)
-- [TypeScript Money](packages/money/README.md)
