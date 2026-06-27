@@ -13,7 +13,7 @@ import (
 
 // Ref: @bedrock/code-0332
 // In PHP, Route composes several traits (Conditionable, Macroable,
-// CreatesRegularExpressionRouteConstraints, FiltersControllerMiddleware,
+// CreatesRegularExpressionRouteConstraints, FiltersHandlerMiddleware,
 // ResolvesRouteDependencies). In Go, the constraint helper is composed via
 // embedding [CreatesRegularExpressionRouteConstraints]; the dispatch traits
 // are realized as methods on Route directly in M5.
@@ -28,7 +28,7 @@ type Route struct {
 	HTTPMethods        []string
 	ActionMap          map[string]any // holds the action data as an associative map
 	IsFallback         bool
-	Controller         any
+	Handler            any
 	DefaultValues      map[string]any
 	Wheres             map[string]string
 	Parameters         map[string]string
@@ -66,7 +66,7 @@ func (r *Route) BoundModel(name string) any { return r.boundModels[name] }
 // NewRoute constructs a Route.
 //
 // methods may be a single HTTP verb or a slice of verbs. action follows the
-// same rules as [ParseAction]: a func, "Controller@method" string, map, or
+// same rules as [ParseAction]: a func, "Handler@method" string, map, or
 // nil for fluent registration.
 //
 // Ref: @bedrock/code-0332
@@ -210,8 +210,8 @@ func actionToMap(a *Action) map[string]any {
 		m["uses"] = a.Uses
 	}
 
-	if a.Controller != "" {
-		m["controller"] = a.Controller
+	if a.Handler != "" {
+		m["handler"] = a.Handler
 	}
 
 	if len(a.Middleware) > 0 {
@@ -796,7 +796,7 @@ func (r *Route) Uses(action any) *Route {
 
 // GetActionName returns the canonical "Class@method" name, or "Closure".
 func (r *Route) GetActionName() string {
-	if v, ok := r.ActionMap["controller"]; ok {
+	if v, ok := r.ActionMap["handler"]; ok {
 		if s, ok := v.(string); ok {
 			return s
 		}
@@ -811,8 +811,8 @@ func (r *Route) GetActionName() string {
 	return "Closure"
 }
 
-// GetControllerClass returns the class portion of a controller action.
-func (r *Route) GetControllerClass() string {
+// GetHandlerClass returns the class portion of a handler action.
+func (r *Route) GetHandlerClass() string {
 	name := r.GetActionName()
 
 	if name == "Closure" {
@@ -826,9 +826,9 @@ func (r *Route) GetControllerClass() string {
 	return name
 }
 
-// FlushController clears any cached controller instance.
-func (r *Route) FlushController() *Route {
-	r.Controller = nil
+// FlushHandler clears any cached handler instance.
+func (r *Route) FlushHandler() *Route {
+	r.Handler = nil
 
 	return r
 }

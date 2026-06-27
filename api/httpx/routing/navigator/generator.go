@@ -21,27 +21,27 @@ type emitter struct {
 
 // generateActions builds the actions/ directory content.
 
-// Only routes backed by a named controller.
+// Only routes backed by a named handler.
 
-// Group by dot-namespace (one group = one controller file).
+// Group by dot-namespace (one group = one handler file).
 
-// Write one file per controller.
+// Write one file per handler.
 
 // Write barrel index.ts files bottom-up.
 
-// writeControllerFile generates the exports for a single controller file.
+// writeHandlerFile generates the exports for a single handler file.
 
 // Group routes by JS method name to detect multi-route-same-action cases.
 
-// Invokable controllers are exported via `export default`, not `export const`.
+// Invokable handlers are exported via `export default`, not `export const`.
 
 // Determine whether any route in this file is invokable.
 
-// e.g. "PostController"
+// e.g. "PostHandler"
 
 // Invokable: attach sibling methods, then default-export the invokable.
 
-// Regular controller: build an object with safe method names + original aliases.
+// Regular handler: build an object with safe method names + original aliases.
 
 // Add original→safe alias when the name was sanitised.
 
@@ -55,7 +55,7 @@ type emitter struct {
 // Always exported (shouldExport=true).
 
 // writeMultiRouteExport handles the case where multiple routes share the same
-// controller action. It generates a keyed dictionary.
+// handler action. It generates a keyed dictionary.
 
 // Generate a temporary (unexported) helper for each route keyed by URI hash.
 
@@ -155,7 +155,7 @@ func (g *emitter) generateActions(routes []*RouteInfo, base string) {
 	var controlled []*RouteInfo
 
 	for _, r := range routes {
-		if r.HasController() {
+		if r.HasHandler() {
 			controlled = append(controlled, r)
 		}
 	}
@@ -165,13 +165,13 @@ func (g *emitter) generateActions(routes []*RouteInfo, base string) {
 	for ns, nsRoutes := range byNS {
 		path := dotNamespaceToPath(base, ns) + ".ts"
 		g.appendCommonImports(path, ns, nsRoutes)
-		g.writeControllerFile(path, ns, nsRoutes)
+		g.writeHandlerFile(path, ns, nsRoutes)
 	}
 
 	g.writeBarrelFiles(base, byNS)
 }
 
-func (g *emitter) writeControllerFile(path, ns string, routes []*RouteInfo) {
+func (g *emitter) writeHandlerFile(path, ns string, routes []*RouteInfo) {
 
 	byMethod := groupByJsMethod(routes)
 
@@ -321,7 +321,7 @@ func (g *emitter) renderMethod(method string, r *RouteInfo, shouldExport bool) s
 		docMethod = "__invoke"
 	}
 
-	cls := r.ControllerClass()
+	cls := r.HandlerClass()
 
 	if cls != "" && cls != "Closure" && cls != "\\Closure" {
 		cls = strings.TrimPrefix(cls, "\\")
@@ -514,7 +514,7 @@ func (g *emitter) renderFormHelpers(method string, r *RouteInfo, params []Param,
 	var b strings.Builder
 	formMethod := method + "Form"
 
-	cls := r.ControllerClass()
+	cls := r.HandlerClass()
 	docMethod := method
 
 	if r.IsInvokable {
@@ -936,7 +936,7 @@ func (g *emitter) flush(base string) error {
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-// groupByDotNamespace groups routes by their dot-separated controller namespace.
+// groupByDotNamespace groups routes by their dot-separated handler namespace.
 func groupByDotNamespace(routes []*RouteInfo) map[string][]*RouteInfo {
 	m := make(map[string][]*RouteInfo)
 
@@ -961,7 +961,7 @@ func groupByJsMethod(routes []*RouteInfo) map[string][]*RouteInfo {
 }
 
 // dotNamespaceToPath converts a dot-separated namespace to an absolute file path.
-// "App.Http.Controllers.PostController" → "{base}/App/Http/Controllers/PostController"
+// "App.Http.Handlers.PostHandler" → "{base}/App/Http/Handlers/PostHandler"
 func dotNamespaceToPath(base, ns string) string {
 	parts := strings.Split(ns, ".")
 
@@ -969,7 +969,7 @@ func dotNamespaceToPath(base, ns string) string {
 }
 
 // lastDotSegment returns the portion after the last dot.
-// "App.Http.Controllers.PostController" → "PostController"
+// "App.Http.Handlers.PostHandler" → "PostHandler"
 func lastDotSegment(s string) string {
 	if idx := strings.LastIndex(s, "."); idx >= 0 {
 		return s[idx+1:]

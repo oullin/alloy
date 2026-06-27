@@ -82,12 +82,12 @@ func adaptRoute(r *routing.Route, basePath, forcedScheme, rootDomain string, url
 		methods[i] = strings.ToLower(m)
 	}
 
-	// Controller string ("Class@Method" or "Closure").
-	controller := r.GetActionName()
+	// Handler string ("Class@Method" or "Closure").
+	handler := r.GetActionName()
 	actionMethod := r.GetActionMethod()
 
 	// Invokable detection: the Go routing package registers invokable
-	// controllers with method "Invoke" (capital I) appended by ParseAction.
+	// handlers with method "Invoke" (capital I) appended by ParseAction.
 	isInvokable := actionMethod == "Invoke" || actionMethod == "__invoke"
 
 	// Route name — strip generated:: prefix and trailing dots.
@@ -141,7 +141,7 @@ func adaptRoute(r *routing.Route, basePath, forcedScheme, rootDomain string, url
 		URI:         r.Uri,
 		Methods:     methods,
 		Name:        name,
-		Controller:  controller,
+		Handler:     handler,
 		IsInvokable: isInvokable,
 		Params:      params,
 		Domain:      domain,

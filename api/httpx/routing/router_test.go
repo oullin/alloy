@@ -23,7 +23,7 @@ import (
 // RoutingRouteTest::testMiddlewarePrioritySorting
 // RoutingRouteTest::testGroupMerging
 // RoutingRouteTest::testCurrentRouteUses
-// RoutingRouteTest::testMergingControllerUses
+// RoutingRouteTest::testMergingHandlerUses
 
 func TestRouter_Registration(t *testing.T) {
 	t.Run("test_get_post_put_patch_delete", func(t *testing.T) {
@@ -117,15 +117,15 @@ func TestRouter_Group(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testMergingControllerUses
-	t.Run("test_group_controller_merges_with_method_action", func(t *testing.T) {
+	// RoutingRouteTest::testMergingHandlerUses
+	t.Run("test_group_handler_merges_with_method_action", func(t *testing.T) {
 		r := NewRouter(nil, nil)
-		r.Group(map[string]any{"controller": "UserController"}, func(r *Router) {
+		r.Group(map[string]any{"handler": "UserHandler"}, func(r *Router) {
 			r.Get("/users/{user}", "show")
 		})
 		route := r.GetRoutes().GetRoutes()[0]
 
-		if route.GetActionName() != "UserController@show" {
+		if route.GetActionName() != "UserHandler@show" {
 			t.Errorf("action = %q", route.GetActionName())
 		}
 	})
@@ -197,16 +197,16 @@ func TestRouter_Dispatch(t *testing.T) {
 	})
 
 	// RoutingRouteTest::testCurrentRouteUses
-	t.Run("test_current_route_uses_matches_controller_action", func(t *testing.T) {
+	t.Run("test_current_route_uses_matches_handler_action", func(t *testing.T) {
 		r := NewRouter(nil, nil)
-		r.Get("/users/{user}", "UserController@show")
+		r.Get("/users/{user}", "UserHandler@show")
 		_, err := r.Dispatch(fakeRequest{method: "GET", path: "/users/42"})
 
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if !r.CurrentRouteUses("UserController@show") {
+		if !r.CurrentRouteUses("UserHandler@show") {
 			t.Errorf("current route action = %q", r.CurrentRouteAction())
 		}
 	})
@@ -461,7 +461,7 @@ func TestRouteGroup_Merge(t *testing.T) {
 	})
 }
 
-func TestFiltersControllerMiddleware(t *testing.T) {
+func TestFiltersHandlerMiddleware(t *testing.T) {
 	t.Run("test_only_excludes_others", func(t *testing.T) {
 		opts := map[string]any{"only": []string{"index", "show"}}
 
@@ -487,35 +487,35 @@ func TestFiltersControllerMiddleware(t *testing.T) {
 	})
 }
 
-func TestRouter_ActionReferencesController(t *testing.T) {
+func TestRouter_ActionReferencesHandler(t *testing.T) {
 	r := NewRouter(nil, nil)
 
-	if r.actionReferencesController(nil) {
-		t.Error("nil should not be a controller action")
+	if r.actionReferencesHandler(nil) {
+		t.Error("nil should not be a handler action")
 	}
 
-	if r.actionReferencesController(42) {
-		t.Error("int should not be a controller action")
+	if r.actionReferencesHandler(42) {
+		t.Error("int should not be a handler action")
 	}
 
-	if r.actionReferencesController(func() {}) {
-		t.Error("func should not be a controller action")
+	if r.actionReferencesHandler(func() {}) {
+		t.Error("func should not be a handler action")
 	}
 
-	if !r.actionReferencesController("Controller@action") {
-		t.Error("string should be a controller action")
+	if !r.actionReferencesHandler("Handler@action") {
+		t.Error("string should be a handler action")
 	}
 
-	if !r.actionReferencesController(map[string]any{"uses": "X@y"}) {
-		t.Error("map with string uses should be a controller action")
+	if !r.actionReferencesHandler(map[string]any{"uses": "X@y"}) {
+		t.Error("map with string uses should be a handler action")
 	}
 
-	if r.actionReferencesController(map[string]any{"uses": func() {}}) {
-		t.Error("map with non-string uses should not be a controller action")
+	if r.actionReferencesHandler(map[string]any{"uses": func() {}}) {
+		t.Error("map with non-string uses should not be a handler action")
 	}
 
-	if r.actionReferencesController(map[string]any{}) {
-		t.Error("map without uses should not be a controller action")
+	if r.actionReferencesHandler(map[string]any{}) {
+		t.Error("map without uses should not be a handler action")
 	}
 }
 
@@ -547,26 +547,26 @@ func TestRouter_PrependGroupNamespace_EmptyAndLeadingBackslash(t *testing.T) {
 	}
 }
 
-func TestRouter_PrependGroupController_AlreadyHasAtSign(t *testing.T) {
+func TestRouter_PrependGroupHandler_AlreadyHasAtSign(t *testing.T) {
 	r := NewRouter(nil, nil)
 
-	if got := r.prependGroupController("X@y"); got != "X@y" {
+	if got := r.prependGroupHandler("X@y"); got != "X@y" {
 		t.Errorf("no stack = %q", got)
 	}
 
 	r.updateGroupStack(map[string]any{})
 
-	if got := r.prependGroupController("y"); got != "y" {
-		t.Errorf("no controller = %q", got)
+	if got := r.prependGroupHandler("y"); got != "y" {
+		t.Errorf("no handler = %q", got)
 	}
 
-	r.updateGroupStack(map[string]any{"controller": "UserController"})
+	r.updateGroupStack(map[string]any{"handler": "UserHandler"})
 
-	if got := r.prependGroupController("Other@index"); got != "Other@index" {
+	if got := r.prependGroupHandler("Other@index"); got != "Other@index" {
 		t.Errorf("class with @ = %q", got)
 	}
 
-	if got := r.prependGroupController("show"); got != "UserController@show" {
+	if got := r.prependGroupHandler("show"); got != "UserHandler@show" {
 		t.Errorf("prefixed = %q", got)
 	}
 }

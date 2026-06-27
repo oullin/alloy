@@ -8,8 +8,8 @@ import (
 )
 
 // same name. It performs reflection-based parameter resolution for both
-// callable handlers (used by [CallableDispatcher]) and controller methods
-// (used by [ControllerDispatcher]).
+// callable handlers (used by [CallableDispatcher]) and handler methods
+// (used by [HandlerDispatcher]).
 //
 // The PHP version uses ReflectionParameter to inspect type hints, then
 // either fetches an instance from the container, falls back to the route's
@@ -39,16 +39,16 @@ type DependencyContainer = crouting.DependencyContainer
 
 // Otherwise resolve from the container (may be nil for tests/M5).
 
-// ResolveClassMethodDependencies is the controller-method counterpart of
+// ResolveClassMethodDependencies is the handler-method counterpart of
 // ResolveMethodDependencies. It locates the method on the supplied receiver
 // via reflection and resolves its arguments the same way.
 
 // reflect.Method.Type includes the receiver as In(0); skip it.
 
-// MissingControllerMethodError is returned by
+// MissingHandlerMethodError is returned by
 // [ResolveClassMethodDependencies] when the named method is absent from the
 // supplied receiver.
-type MissingControllerMethodError struct {
+type MissingHandlerMethodError struct {
 	Type   string
 	Method string
 }
@@ -111,7 +111,7 @@ func (r *ResolvesRouteDependencies) ResolveClassMethodDependencies(
 	m, ok := rvType.MethodByName(method)
 
 	if !ok {
-		return nil, nil, rv, &MissingControllerMethodError{Type: rvType.String(), Method: method}
+		return nil, nil, rv, &MissingHandlerMethodError{Type: rvType.String(), Method: method}
 	}
 
 	fnType := m.Type
@@ -154,8 +154,8 @@ func (r *ResolvesRouteDependencies) ResolveClassMethodDependencies(
 	return in, &m, rv, nil
 }
 
-func (e *MissingControllerMethodError) Error() string {
-	return "controller " + e.Type + " has no method " + e.Method
+func (e *MissingHandlerMethodError) Error() string {
+	return "handler " + e.Type + " has no method " + e.Method
 }
 
 // isPrimitive reports whether t is one of the kinds that a route parameter

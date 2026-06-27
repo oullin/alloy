@@ -23,7 +23,7 @@ type RouteCollectionInterface interface {
 	HasNamedRoute(name string) bool
 	// GetByName returns the named route or nil.
 	GetByName(name string) *Route
-	// GetByAction returns the route for the given controller action or nil.
+	// GetByAction returns the route for the given handler action or nil.
 	GetByAction(action string) *Route
 	// GetRoutes returns every route in registration order.
 	GetRoutes() []*Route

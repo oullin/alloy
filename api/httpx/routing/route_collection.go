@@ -16,7 +16,7 @@ import (
 //   - allRoutes:  every route in registration order, keyed by methods+uri
 //     so re-registration of the same route overwrites in place.
 //   - nameList:   route name → Route, populated when [Route.Name] is set.
-//   - actionList: "Controller@method" → Route, populated when a controller
+//   - actionList: "Handler@method" → Route, populated when a handler
 //     action is supplied.
 //
 // Ref: @bedrock/code-0335
@@ -93,12 +93,12 @@ func (c *RouteCollection) addLookups(route *Route) {
 		}
 	}
 
-	if v, ok := route.ActionMap["controller"]; ok {
-		if controller, ok := v.(string); ok && controller != "" {
-			controller = strings.TrimLeft(controller, `\`)
+	if v, ok := route.ActionMap["handler"]; ok {
+		if handler, ok := v.(string); ok && handler != "" {
+			handler = strings.TrimLeft(handler, `\`)
 
-			if _, present := c.actionList[controller]; !present {
-				c.actionList[controller] = route
+			if _, present := c.actionList[handler]; !present {
+				c.actionList[handler] = route
 			}
 		}
 	}
@@ -122,12 +122,12 @@ func (c *RouteCollection) RefreshActionLookups() {
 	c.actionList = map[string]*Route{}
 
 	for _, r := range c.allRoutes {
-		if v, ok := r.ActionMap["controller"]; ok {
-			if controller, ok := v.(string); ok && controller != "" {
-				controller = strings.TrimLeft(controller, `\`)
+		if v, ok := r.ActionMap["handler"]; ok {
+			if handler, ok := v.(string); ok && handler != "" {
+				handler = strings.TrimLeft(handler, `\`)
 
-				if _, present := c.actionList[controller]; !present {
-					c.actionList[controller] = r
+				if _, present := c.actionList[handler]; !present {
+					c.actionList[handler] = r
 				}
 			}
 		}

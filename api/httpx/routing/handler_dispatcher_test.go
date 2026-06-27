@@ -3,45 +3,45 @@ package routing
 import (
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/routing/controllers"
+	handlermiddleware "github.com/oullin/alloy/api/httpx/handlerx/middleware"
 )
 
-// tests/Routing/RoutingControllerAttributeTest.php and the controller
+// tests/Routing/RoutingHandlerAttributeTest.php and the handler
 // dispatch parts of RoutingRouteTest.
-// RoutingControllerAttributeTest::testControllerMiddlewareAttributesAreInherited
-// RoutingControllerAttributeTest::testControllerMiddlewareAttributesAreInheritedInDeclarationOrder
-// RoutingRouteTest::testControllerCallActionMethodParameters
+// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInherited
+// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInheritedInDeclarationOrder
+// RoutingRouteTest::testHandlerCallActionMethodParameters
 
-// userController is a fake controller used in dispatch tests.
-type userController struct {
-	Controller
+// userHandler is a fake handler used in dispatch tests.
+type userHandler struct {
+	Handler
 	lastID  int
 	lastTag string
 }
 
-// authController declares middleware via the HasMiddleware interface.
-type authController struct{ Controller }
+// authHandler declares middleware via the middleware.Provider interface.
+type authHandler struct{ Handler }
 
-func (c *userController) Show(id int) string {
+func (c *userHandler) Show(id int) string {
 	c.lastID = id
 
 	return "show"
 }
 
-func (c *userController) ShowTagged(tag string) string {
+func (c *userHandler) ShowTagged(tag string) string {
 	c.lastTag = tag
 
 	return "tagged:" + tag
 }
 
-func (c *authController) Middleware() []controllers.Middleware {
-	return []controllers.Middleware{
-		controllers.NewMiddleware("auth").WithExcept("Public"),
-		controllers.NewMiddleware("verified").WithOnly("Settings"),
+func (c *authHandler) Middleware() []handlermiddleware.Entry {
+	return []handlermiddleware.Entry{
+		handlermiddleware.New("auth").WithExcept("Public"),
+		handlermiddleware.New("verified").WithOnly("Settings"),
 	}
 }
-func (c *authController) Settings() string { return "ok" }
-func (c *authController) Public() string   { return "ok" }
+func (c *authHandler) Settings() string { return "ok" }
+func (c *authHandler) Public() string   { return "ok" }
 
 func TestCallableDispatcher(t *testing.T) {
 	t.Run("test_dispatch_func_with_string_param", func(t *testing.T) {
@@ -75,12 +75,12 @@ func TestCallableDispatcher(t *testing.T) {
 	})
 }
 
-func TestControllerDispatcher(t *testing.T) {
-	// RoutingRouteTest::testControllerCallActionMethodParameters
+func TestHandlerDispatcher(t *testing.T) {
+	// RoutingRouteTest::testHandlerCallActionMethodParameters
 	t.Run("test_dispatch_calls_method", func(t *testing.T) {
-		d := NewControllerDispatcher(nil)
-		ctrl := &userController{}
-		r := NewRoute("GET", "/users/{id}", "userController@Show")
+		d := NewHandlerDispatcher(nil)
+		ctrl := &userHandler{}
+		r := NewRoute("GET", "/users/{id}", "userHandler@Show")
 		_, _ = r.Bind(fakeRequest{path: "/users/7"})
 		got, err := d.Dispatch(r, ctrl, "Show")
 
@@ -94,9 +94,9 @@ func TestControllerDispatcher(t *testing.T) {
 	})
 
 	t.Run("test_dispatch_string_param", func(t *testing.T) {
-		d := NewControllerDispatcher(nil)
-		ctrl := &userController{}
-		r := NewRoute("GET", "/tags/{tag}", "userController@ShowTagged")
+		d := NewHandlerDispatcher(nil)
+		ctrl := &userHandler{}
+		r := NewRoute("GET", "/tags/{tag}", "userHandler@ShowTagged")
 		_, _ = r.Bind(fakeRequest{path: "/tags/api"})
 		got, err := d.Dispatch(r, ctrl, "ShowTagged")
 
@@ -110,22 +110,22 @@ func TestControllerDispatcher(t *testing.T) {
 	})
 
 	t.Run("test_dispatch_missing_method", func(t *testing.T) {
-		d := NewControllerDispatcher(nil)
-		ctrl := &userController{}
-		r := NewRoute("GET", "/x", "userController@Missing")
+		d := NewHandlerDispatcher(nil)
+		ctrl := &userHandler{}
+		r := NewRoute("GET", "/x", "userHandler@Missing")
 		_, err := d.Dispatch(r, ctrl, "Missing")
 
-		var mc *MissingControllerMethodError
+		var mc *MissingHandlerMethodError
 
 		if err == nil || !asMissing(err, &mc) {
-			t.Errorf("expected MissingControllerMethodError, got %v", err)
+			t.Errorf("expected MissingHandlerMethodError, got %v", err)
 		}
 	})
 
-	// RoutingControllerAttributeTest::testControllerMiddlewareAttributesAreInherited
+	// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInherited
 	t.Run("test_get_middleware_filters_by_only_except", func(t *testing.T) {
-		d := NewControllerDispatcher(nil)
-		ctrl := &authController{}
+		d := NewHandlerDispatcher(nil)
+		ctrl := &authHandler{}
 
 		// Settings → "auth" applies (Public excluded), "verified" applies (only=Settings)
 		got := d.GetMiddleware(ctrl, "Settings")
@@ -142,12 +142,12 @@ func TestControllerDispatcher(t *testing.T) {
 		}
 	})
 
-	// RoutingControllerAttributeTest::testControllerMiddlewareAttributesAreInherited
-	t.Run("test_controller_middleware_attributes_are_inherited", func(t *testing.T) {
-		type inheritedController struct{ Controller }
+	// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInherited
+	t.Run("test_handler_middleware_attributes_are_inherited", func(t *testing.T) {
+		type inheritedHandler struct{ Handler }
 
-		d := NewControllerDispatcher(nil)
-		ctrl := &inheritedController{}
+		d := NewHandlerDispatcher(nil)
+		ctrl := &inheritedHandler{}
 		ctrl.Use("auth").Only("Show")
 		ctrl.Use("throttle").Except("Public")
 
@@ -164,12 +164,12 @@ func TestControllerDispatcher(t *testing.T) {
 		}
 	})
 
-	// RoutingControllerAttributeTest::testControllerMiddlewareAttributesAreInheritedInDeclarationOrder
-	t.Run("test_controller_middleware_attributes_are_in_declaration_order", func(t *testing.T) {
-		type orderedController struct{ Controller }
+	// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInheritedInDeclarationOrder
+	t.Run("test_handler_middleware_attributes_are_in_declaration_order", func(t *testing.T) {
+		type orderedHandler struct{ Handler }
 
-		d := NewControllerDispatcher(nil)
-		ctrl := &orderedController{}
+		d := NewHandlerDispatcher(nil)
+		ctrl := &orderedHandler{}
 		ctrl.Use("first").Only("Show")
 		ctrl.Use("second").Only("Show")
 
@@ -182,8 +182,8 @@ func TestControllerDispatcher(t *testing.T) {
 }
 
 // Helper for type-asserting the missing-method error without importing errors.
-func asMissing(err error, dst **MissingControllerMethodError) bool {
-	if e, ok := err.(*MissingControllerMethodError); ok {
+func asMissing(err error, dst **MissingHandlerMethodError) bool {
+	if e, ok := err.(*MissingHandlerMethodError); ok {
 		*dst = e
 
 		return true

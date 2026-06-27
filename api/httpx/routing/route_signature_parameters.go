@@ -11,7 +11,7 @@ import (
 //
 // In PHP this is implemented with ReflectionFunction / ReflectionMethod. In
 // Go we use the [reflect] package: for a func value the parameter list is
-// reflect.Type.In(i); for a "Controller@method" string we look the method up
+// reflect.Type.In(i); for a "Handler@method" string we look the method up
 // on the receiver's reflect.Type. Closures are unsupported because Go has no
 // runtime parameter-name metadata for them — the parameter Type is recovered,
 // but the parameter Name is always empty.
@@ -24,14 +24,14 @@ type SignatureParameter struct {
 	Index int
 	Type  reflect.Type
 	// Name is always "" for Go closures; populated for struct method receivers
-	// only when the controller registry can map it (set by M5).
+	// only when the handler registry can map it (set by M5).
 	Name string
 }
 
 // FromAction extracts signature parameters from a parsed [*Action].
 //
 //   - "subClass": when set, only parameters whose Type implements the named
-//     interface (looked up via the controller registry) are returned. In M1
+//     interface (looked up via the handler registry) are returned. In M1
 //     this is honored only for func handlers whose parameter types are
 //     interface kinds.
 //   - "backedEnum": when set, only parameters whose Type implements the

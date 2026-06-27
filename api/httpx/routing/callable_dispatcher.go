@@ -27,7 +27,7 @@ func (d *CallableDispatcher) Dispatch(route *Route, callable any) (any, error) {
 	rv := reflect.ValueOf(callable)
 
 	if rv.Kind() != reflect.Func {
-		return nil, &MissingControllerMethodError{Type: rv.Type().String(), Method: "(callable)"}
+		return nil, &MissingHandlerMethodError{Type: rv.Type().String(), Method: "(callable)"}
 	}
 
 	in, err := d.ResolveMethodDependencies(

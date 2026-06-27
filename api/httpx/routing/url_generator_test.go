@@ -27,7 +27,7 @@ import (
 // RoutingUrlGeneratorTest::testRoutesWithDomains
 // RoutingUrlGeneratorTest::testRoutesWithDomainsAndPorts
 // RoutingUrlGeneratorTest::testRoutesWithDomainsStripsProtocols
-// RoutingUrlGeneratorTest::testUrlGenerationForControllersRequiresPassingOfRequiredParameters
+// RoutingUrlGeneratorTest::testUrlGenerationForHandlersRequiresPassingOfRequiredParameters
 // RoutingUrlGeneratorTest::testUrlGenerationThrowsExceptionForMissingParametersWithMeaningfulMessage
 // RoutingUrlGeneratorTest::testSetAssetUrl
 // RoutingUrlGeneratorTest::testSignedUrl
@@ -224,7 +224,7 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testUrlGenerationForControllersRequiresPassingOfRequiredParameters
+	// RoutingUrlGeneratorTest::testUrlGenerationForHandlersRequiresPassingOfRequiredParameters
 	// RoutingUrlGeneratorTest::testUrlGenerationThrowsExceptionForMissingParametersWithMeaningfulMessage
 	t.Run("test_missing_parameter_errors", func(t *testing.T) {
 		gen, router := newGen(t)

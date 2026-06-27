@@ -10,11 +10,11 @@ func TestRouterListRoutesFiltersSortsAndColumns(t *testing.T) {
 
 	router := NewRouter(nil, nil)
 	router.Get("/users/{user:slug}", map[string]any{
-		"uses":       "UserController@show",
+		"uses":       "UserHandler@show",
 		"middleware": []any{"web", "auth"},
 	}).Name("users.show")
 	router.Post("/posts", map[string]any{
-		"uses": "PostController@store",
+		"uses": "PostHandler@store",
 	}).Name("posts.store")
 
 	entries := router.ListRoutes(RouteListOptions{
@@ -31,7 +31,7 @@ func TestRouterListRoutesFiltersSortsAndColumns(t *testing.T) {
 		t.Fatalf("uri = %q", entries[0].URI)
 	}
 
-	if entries[0].Action != "UserController@show" {
+	if entries[0].Action != "UserHandler@show" {
 		t.Fatalf("action = %q", entries[0].Action)
 	}
 
@@ -78,7 +78,7 @@ func TestRouterListRoutesMethodFilterMatchesMethodTokens(t *testing.T) {
 	t.Parallel()
 
 	router := NewRouter(nil, nil)
-	router.Get("/users", map[string]any{"uses": "UserController@index"}).Name("users.index")
+	router.Get("/users", map[string]any{"uses": "UserHandler@index"}).Name("users.index")
 
 	if entries := router.ListRoutes(RouteListOptions{Method: "ET"}); len(entries) != 0 {
 		t.Fatalf("partial method filter matched entries = %#v", entries)
@@ -94,7 +94,7 @@ func TestRouterListRoutesJSONMiddlewareShape(t *testing.T) {
 
 	router := NewRouter(nil, nil)
 	router.Get("/users", map[string]any{
-		"uses":       "UserController@index",
+		"uses":       "UserHandler@index",
 		"middleware": []any{"auth", "verified"},
 	}).Name("users.index")
 
@@ -128,7 +128,7 @@ func TestGatherRouteMiddlewareModes(t *testing.T) {
 	route := NewRouteRegistrar(router).
 		Middleware("web", "auth", "csrf").
 		WithoutMiddleware("csrf").
-		Get("/dashboard", map[string]any{"uses": "DashboardController@index"})
+		Get("/dashboard", map[string]any{"uses": "DashboardHandler@index"})
 
 	if got := router.GatherRouteMiddleware(route, MiddlewareHidden); len(got) != 0 {
 		t.Fatalf("hidden middleware = %#v", got)

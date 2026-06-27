@@ -44,9 +44,9 @@ func NewResourceRegistrar(router *Router) *ResourceRegistrar {
 //   - "as":       string prefix prepended to every route name
 //   - "shallow":  bool — for nested resources, drop the parent prefix on
 //     show/edit/update/destroy.
-func (rr *ResourceRegistrar) Register(name, controller string, options map[string]any) *RouteCollection {
+func (rr *ResourceRegistrar) Register(name, handler string, options map[string]any) *RouteCollection {
 	if strings.Contains(name, "/") {
-		return rr.prefixedResource(name, controller, options)
+		return rr.prefixedResource(name, handler, options)
 	}
 
 	base := rr.GetResourceWildcard(lastSegment(name, "."))
@@ -59,19 +59,19 @@ func (rr *ResourceRegistrar) Register(name, controller string, options map[strin
 
 		switch m {
 		case "index":
-			route = rr.addResourceIndex(name, base, controller, options)
+			route = rr.addResourceIndex(name, base, handler, options)
 		case "create":
-			route = rr.addResourceCreate(name, base, controller, options)
+			route = rr.addResourceCreate(name, base, handler, options)
 		case "store":
-			route = rr.addResourceStore(name, base, controller, options)
+			route = rr.addResourceStore(name, base, handler, options)
 		case "show":
-			route = rr.addResourceShow(name, base, controller, options)
+			route = rr.addResourceShow(name, base, handler, options)
 		case "edit":
-			route = rr.addResourceEdit(name, base, controller, options)
+			route = rr.addResourceEdit(name, base, handler, options)
 		case "update":
-			route = rr.addResourceUpdate(name, base, controller, options)
+			route = rr.addResourceUpdate(name, base, handler, options)
 		case "destroy":
-			route = rr.addResourceDestroy(name, base, controller, options)
+			route = rr.addResourceDestroy(name, base, handler, options)
 		}
 
 		if route != nil {
@@ -83,7 +83,7 @@ func (rr *ResourceRegistrar) Register(name, controller string, options map[strin
 }
 
 // Singleton emits the routes for a singleton resource (no index, no list).
-func (rr *ResourceRegistrar) Singleton(name, controller string, options map[string]any) *RouteCollection {
+func (rr *ResourceRegistrar) Singleton(name, handler string, options map[string]any) *RouteCollection {
 	defaults := append([]string(nil), singletonResourceDefaults...)
 
 	if _, ok := options["creatable"]; ok {
@@ -101,17 +101,17 @@ func (rr *ResourceRegistrar) Singleton(name, controller string, options map[stri
 
 		switch m {
 		case "create":
-			route = rr.addResourceCreate(name, base, controller, options)
+			route = rr.addResourceCreate(name, base, handler, options)
 		case "store":
-			route = rr.addResourceStore(name, base, controller, options)
+			route = rr.addResourceStore(name, base, handler, options)
 		case "show":
-			route = rr.addSingletonShow(name, controller, options)
+			route = rr.addSingletonShow(name, handler, options)
 		case "edit":
-			route = rr.addSingletonEdit(name, controller, options)
+			route = rr.addSingletonEdit(name, handler, options)
 		case "update":
-			route = rr.addSingletonUpdate(name, controller, options)
+			route = rr.addSingletonUpdate(name, handler, options)
 		case "destroy":
-			route = rr.addSingletonDestroy(name, controller, options)
+			route = rr.addSingletonDestroy(name, handler, options)
 		}
 
 		if route != nil {
@@ -126,51 +126,51 @@ func (rr *ResourceRegistrar) Singleton(name, controller string, options map[stri
 // Standard resource methods
 // =====================================================================
 
-func (rr *ResourceRegistrar) addResourceIndex(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceIndex(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name)
-	action := rr.getResourceAction(name, controller, "index", options)
+	action := rr.getResourceAction(name, handler, "index", options)
 
 	return rr.router.AddRoute([]string{"GET", "HEAD"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addResourceCreate(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceCreate(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name) + "/" + resourceVerbs["create"]
-	action := rr.getResourceAction(name, controller, "create", options)
+	action := rr.getResourceAction(name, handler, "create", options)
 
 	return rr.router.AddRoute([]string{"GET", "HEAD"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addResourceStore(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceStore(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name)
-	action := rr.getResourceAction(name, controller, "store", options)
+	action := rr.getResourceAction(name, handler, "store", options)
 
 	return rr.router.AddRoute([]string{"POST"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addResourceShow(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceShow(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name) + "/{" + base + "}"
-	action := rr.getResourceAction(name, controller, "show", options)
+	action := rr.getResourceAction(name, handler, "show", options)
 
 	return rr.router.AddRoute([]string{"GET", "HEAD"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addResourceEdit(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceEdit(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name) + "/{" + base + "}/" + resourceVerbs["edit"]
-	action := rr.getResourceAction(name, controller, "edit", options)
+	action := rr.getResourceAction(name, handler, "edit", options)
 
 	return rr.router.AddRoute([]string{"GET", "HEAD"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addResourceUpdate(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceUpdate(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name) + "/{" + base + "}"
-	action := rr.getResourceAction(name, controller, "update", options)
+	action := rr.getResourceAction(name, handler, "update", options)
 
 	return rr.router.AddRoute([]string{"PUT", "PATCH"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addResourceDestroy(name, base, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addResourceDestroy(name, base, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name) + "/{" + base + "}"
-	action := rr.getResourceAction(name, controller, "destroy", options)
+	action := rr.getResourceAction(name, handler, "destroy", options)
 
 	return rr.router.AddRoute([]string{"DELETE"}, uri, action)
 }
@@ -179,30 +179,30 @@ func (rr *ResourceRegistrar) addResourceDestroy(name, base, controller string, o
 // Singleton methods
 // =====================================================================
 
-func (rr *ResourceRegistrar) addSingletonShow(name, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addSingletonShow(name, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name)
-	action := rr.getResourceAction(name, controller, "show", options)
+	action := rr.getResourceAction(name, handler, "show", options)
 
 	return rr.router.AddRoute([]string{"GET", "HEAD"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addSingletonEdit(name, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addSingletonEdit(name, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name) + "/" + resourceVerbs["edit"]
-	action := rr.getResourceAction(name, controller, "edit", options)
+	action := rr.getResourceAction(name, handler, "edit", options)
 
 	return rr.router.AddRoute([]string{"GET", "HEAD"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addSingletonUpdate(name, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addSingletonUpdate(name, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name)
-	action := rr.getResourceAction(name, controller, "update", options)
+	action := rr.getResourceAction(name, handler, "update", options)
 
 	return rr.router.AddRoute([]string{"PUT", "PATCH"}, uri, action)
 }
 
-func (rr *ResourceRegistrar) addSingletonDestroy(name, controller string, options map[string]any) *Route {
+func (rr *ResourceRegistrar) addSingletonDestroy(name, handler string, options map[string]any) *Route {
 	uri := rr.GetResourceUri(name)
-	action := rr.getResourceAction(name, controller, "destroy", options)
+	action := rr.getResourceAction(name, handler, "destroy", options)
 
 	return rr.router.AddRoute([]string{"DELETE"}, uri, action)
 }
@@ -323,11 +323,11 @@ func (rr *ResourceRegistrar) getResourceMethods(defaults []string, options map[s
 	return methods
 }
 
-func (rr *ResourceRegistrar) getResourceAction(name, controller, method string, options map[string]any) any {
+func (rr *ResourceRegistrar) getResourceAction(name, handler, method string, options map[string]any) any {
 	action := map[string]any{
-		"uses":       controller + "@" + method,
-		"controller": controller + "@" + method,
-		"as":         rr.getResourceRouteName(name, method, options),
+		"uses":    handler + "@" + method,
+		"handler": handler + "@" + method,
+		"as":      rr.getResourceRouteName(name, method, options),
 	}
 
 	if mw, ok := options["middleware"]; ok {
@@ -353,13 +353,13 @@ func (rr *ResourceRegistrar) getResourceRouteName(resource, method string, optio
 	return name
 }
 
-func (rr *ResourceRegistrar) prefixedResource(name, controller string, options map[string]any) *RouteCollection {
+func (rr *ResourceRegistrar) prefixedResource(name, handler string, options map[string]any) *RouteCollection {
 	idx := strings.LastIndex(name, "/")
 	prefix := name[:idx]
 	bare := name[idx+1:]
 	collection := NewRouteCollection()
 	rr.router.Group(map[string]any{"prefix": prefix}, func(r *Router) {
-		nested := rr.Register(bare, controller, options)
+		nested := rr.Register(bare, handler, options)
 
 		for _, route := range nested.GetRoutes() {
 			collection.Add(route)
@@ -369,13 +369,13 @@ func (rr *ResourceRegistrar) prefixedResource(name, controller string, options m
 	return collection
 }
 
-func (rr *ResourceRegistrar) prefixedSingleton(name, controller string, options map[string]any) *RouteCollection {
+func (rr *ResourceRegistrar) prefixedSingleton(name, handler string, options map[string]any) *RouteCollection {
 	idx := strings.LastIndex(name, "/")
 	prefix := name[:idx]
 	bare := name[idx+1:]
 	collection := NewRouteCollection()
 	rr.router.Group(map[string]any{"prefix": prefix}, func(r *Router) {
-		nested := rr.Singleton(bare, controller, options)
+		nested := rr.Singleton(bare, handler, options)
 
 		for _, route := range nested.GetRoutes() {
 			collection.Add(route)

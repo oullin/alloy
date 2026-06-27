@@ -32,7 +32,7 @@ type Options struct {
 
 // Generate writes TypeScript route helpers for all provided routes.
 //
-//	{Path}/actions/   — per-controller action functions
+//	{Path}/actions/   — per-handler action functions
 //	{Path}/routes/    — named-route helpers
 //	{Path}/{RuntimeDirectory}/ — runtime TypeScript utility (index.ts)
 func Generate(routes []*RouteInfo, opts Options) error {

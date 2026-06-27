@@ -148,29 +148,29 @@ func (r *Router) PermanentRedirect(uri, destination string) *Route {
 // Resource entry points (mirror Router::resource / ::apiResource etc.)
 // =====================================================================
 
-// Resource starts a fluent registration for a RESTful resource controller.
-func (r *Router) Resource(name, controller string, options map[string]any) *PendingResourceRegistration {
-	return NewPendingResourceRegistration(NewResourceRegistrar(r), name, controller, options)
+// Resource starts a fluent registration for a RESTful resource handler.
+func (r *Router) Resource(name, handler string, options map[string]any) *PendingResourceRegistration {
+	return NewPendingResourceRegistration(NewResourceRegistrar(r), name, handler, options)
 }
 
 // ApiResource starts a fluent registration that excludes the create and edit
 // form actions (the JSON-API subset).
-func (r *Router) ApiResource(name, controller string, options map[string]any) *PendingResourceRegistration {
+func (r *Router) ApiResource(name, handler string, options map[string]any) *PendingResourceRegistration {
 	options = withAPIExceptDefaults(options, []string{"create", "edit"})
 
-	return r.Resource(name, controller, options)
+	return r.Resource(name, handler, options)
 }
 
-// Singleton starts a fluent registration for a singleton resource controller.
-func (r *Router) Singleton(name, controller string, options map[string]any) *PendingSingletonResourceRegistration {
-	return NewPendingSingletonResourceRegistration(NewResourceRegistrar(r), name, controller, options)
+// Singleton starts a fluent registration for a singleton resource handler.
+func (r *Router) Singleton(name, handler string, options map[string]any) *PendingSingletonResourceRegistration {
+	return NewPendingSingletonResourceRegistration(NewResourceRegistrar(r), name, handler, options)
 }
 
 // ApiSingleton is the JSON-API counterpart of [Router.Singleton].
-func (r *Router) ApiSingleton(name, controller string, options map[string]any) *PendingSingletonResourceRegistration {
+func (r *Router) ApiSingleton(name, handler string, options map[string]any) *PendingSingletonResourceRegistration {
 	options = withAPIExceptDefaults(options, []string{"create", "edit"})
 
-	return r.Singleton(name, controller, options)
+	return r.Singleton(name, handler, options)
 }
 
 func withAPIExceptDefaults(options map[string]any, defaults []string) map[string]any {
@@ -210,24 +210,24 @@ func appendUniqueStrings(base []string, values ...string) []string {
 	return out
 }
 
-// Resources iterates name → controller pairs, registering each as a resource.
+// Resources iterates name → handler pairs, registering each as a resource.
 func (r *Router) Resources(resources map[string]string, options map[string]any) {
-	for name, controller := range resources {
-		r.Resource(name, controller, options).Register()
+	for name, handler := range resources {
+		r.Resource(name, handler, options).Register()
 	}
 }
 
 // ApiResources is the bulk counterpart of [Router.ApiResource].
 func (r *Router) ApiResources(resources map[string]string, options map[string]any) {
-	for name, controller := range resources {
-		r.ApiResource(name, controller, options).Register()
+	for name, handler := range resources {
+		r.ApiResource(name, handler, options).Register()
 	}
 }
 
 // Singletons is the bulk counterpart of [Router.Singleton].
 func (r *Router) Singletons(resources map[string]string, options map[string]any) {
-	for name, controller := range resources {
-		r.Singleton(name, controller, options).Register()
+	for name, handler := range resources {
+		r.Singleton(name, handler, options).Register()
 	}
 }
 
@@ -300,8 +300,8 @@ func (r *Router) AddRoute(methods []string, uri string, action any) *Route {
 }
 
 func (r *Router) createRoute(methods []string, uri string, action any) *Route {
-	if r.actionReferencesController(action) {
-		action = r.convertToControllerAction(action)
+	if r.actionReferencesHandler(action) {
+		action = r.convertToHandlerAction(action)
 	}
 
 	route := r.NewRoute(methods, r.prefixUri(uri), action)
@@ -315,7 +315,7 @@ func (r *Router) createRoute(methods []string, uri string, action any) *Route {
 	return route
 }
 
-func (r *Router) actionReferencesController(action any) bool {
+func (r *Router) actionReferencesHandler(action any) bool {
 	switch v := action.(type) {
 	case nil:
 		return false
@@ -332,7 +332,7 @@ func (r *Router) actionReferencesController(action any) bool {
 	return false
 }
 
-func (r *Router) convertToControllerAction(action any) any {
+func (r *Router) convertToHandlerAction(action any) any {
 	var m map[string]any
 
 	switch v := action.(type) {
@@ -348,14 +348,14 @@ func (r *Router) convertToControllerAction(action any) any {
 
 	if r.HasGroupStack() {
 		if uses, ok := m["uses"].(string); ok {
-			uses = r.prependGroupController(uses)
+			uses = r.prependGroupHandler(uses)
 			uses = r.prependGroupNamespace(uses)
 			m["uses"] = uses
 		}
 	}
 
 	if uses, ok := m["uses"].(string); ok {
-		m["controller"] = uses
+		m["handler"] = uses
 	}
 
 	return m
@@ -380,13 +380,13 @@ func (r *Router) prependGroupNamespace(class string) string {
 	return ns + `\` + class
 }
 
-func (r *Router) prependGroupController(class string) string {
+func (r *Router) prependGroupHandler(class string) string {
 	if !r.HasGroupStack() {
 		return class
 	}
 
 	last := r.groupStack[len(r.groupStack)-1]
-	groupCtrl, ok := last["controller"].(string)
+	groupCtrl, ok := last["handler"].(string)
 
 	if !ok || groupCtrl == "" {
 		return class
@@ -483,7 +483,7 @@ func (r *Router) findRoute(request matching.MatchableRequest) (*Route, error) {
 }
 
 // runRoute is the simplified Go form: middleware-less direct invocation. Full
-// pipeline support arrives in M5 once ControllerDispatcher/CallableDispatcher
+// pipeline support arrives in M5 once HandlerDispatcher/CallableDispatcher
 // land. For now we call the route's "uses" handler if it's a Go function.
 func (r *Router) runRoute(request matching.MatchableRequest, route *Route) (any, error) {
 	uses, ok := route.ActionMap["uses"]
@@ -667,7 +667,7 @@ func (r *Router) CurrentRouteName() string {
 	return route.GetName()
 }
 
-// CurrentRouteAction returns the controller action of the current route.
+// CurrentRouteAction returns the handler action of the current route.
 func (r *Router) CurrentRouteAction() string {
 	route := r.Current()
 
@@ -706,7 +706,7 @@ func (r *Router) CurrentRouteNamed(patterns ...string) bool { return r.Is(patter
 
 // Uses reports whether the current route's action matches any of the given
 // glob patterns. Useful in middleware that wants to scope behavior to a
-// controller namespace.
+// handler namespace.
 func (r *Router) Uses(patterns ...string) bool {
 	route := r.Current()
 

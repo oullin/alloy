@@ -1,9 +1,9 @@
 package routing
 
-// same name. It exposes the static helper used by [ControllerDispatcher] and
+// same name. It exposes the static helper used by [HandlerDispatcher] and
 // [ResourceRegistrar] to decide whether a middleware applies to a given
-// controller method based on its only/except options.
-type FiltersControllerMiddleware struct{}
+// handler method based on its only/except options.
+type FiltersHandlerMiddleware struct{}
 
 // MethodExcludedByOptions reports whether method is excluded from the option
 // set's "only"/"except" filters.
@@ -33,7 +33,7 @@ func MethodExcludedByOptions(method string, options map[string]any) bool {
 
 // MethodExcludedByOptions is the method form of the package-level helper, kept
 // for parity with the PHP trait's static method dispatch.
-func (FiltersControllerMiddleware) MethodExcludedByOptions(method string, options map[string]any) bool {
+func (FiltersHandlerMiddleware) MethodExcludedByOptions(method string, options map[string]any) bool {
 	return MethodExcludedByOptions(method, options)
 }
 

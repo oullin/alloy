@@ -40,7 +40,7 @@ func TestSafeMethod(t *testing.T) {
 		{"dashboard", "Method", "dashboard"},
 		{"index", "Method", "index"},
 		{"show", "Method", "show"},
-		{"PostController", "Method", "PostController"},
+		{"PostHandler", "Method", "PostHandler"},
 
 		// Kebab-case converted to camelCase.
 		{"invalid-js-name", "Method", "invalidJsName"},
@@ -127,21 +127,21 @@ func TestRouteInfoHelpers(t *testing.T) {
 	t.Parallel()
 
 	r := &RouteInfo{
-		URI:        "/posts/{post}",
-		Methods:    []string{"get", "head"},
-		Name:       "posts.show",
-		Controller: "App\\Http\\Controllers\\PostController@show",
+		URI:     "/posts/{post}",
+		Methods: []string{"get", "head"},
+		Name:    "posts.show",
+		Handler: "App\\Http\\Handlers\\PostHandler@show",
 	}
 
-	if got := r.ControllerClass(); got != "App\\Http\\Controllers\\PostController" {
-		t.Errorf("ControllerClass() = %q", got)
+	if got := r.HandlerClass(); got != "App\\Http\\Handlers\\PostHandler" {
+		t.Errorf("HandlerClass() = %q", got)
 	}
 
 	if got := r.ActionMethod(); got != "show" {
 		t.Errorf("ActionMethod() = %q", got)
 	}
 
-	if got := r.DotNamespace(); got != "App.Http.Controllers.PostController" {
+	if got := r.DotNamespace(); got != "App.Http.Handlers.PostHandler" {
 		t.Errorf("DotNamespace() = %q", got)
 	}
 
@@ -154,19 +154,19 @@ func TestRouteInfoHelpers(t *testing.T) {
 	}
 }
 
-// TestRouteInfoInvokable exercises invokable controller detection.
+// TestRouteInfoInvokable exercises invokable handler detection.
 func TestRouteInfoInvokable(t *testing.T) {
 	t.Parallel()
 
 	r := &RouteInfo{
-		URI:         "/invokable-controller",
+		URI:         "/invokable-handler",
 		Methods:     []string{"get", "head"},
-		Controller:  "App\\Http\\Controllers\\InvokableController@Invoke",
+		Handler:     "App\\Http\\Handlers\\InvokableHandler@Invoke",
 		IsInvokable: true,
 	}
 
-	if got := r.OriginalJsMethod(); got != "InvokableController" {
-		t.Errorf("OriginalJsMethod() = %q, want InvokableController", got)
+	if got := r.OriginalJsMethod(); got != "InvokableHandler" {
+		t.Errorf("OriginalJsMethod() = %q, want InvokableHandler", got)
 	}
 }
 

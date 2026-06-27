@@ -1,23 +1,23 @@
 package routing
 
-import "github.com/oullin/alloy/api/httpx/routing/controllers"
+import handlermiddleware "github.com/oullin/alloy/api/httpx/handlerx/middleware"
 
-// Controller is the embeddable base class for routing controllers.
+// Handler is the embeddable base class for routing handlers.
 //
-// In Go the recommended pattern is to compose a [Controller] into your own
-// struct and override [Controller.Middleware] (via the [HasMiddleware]
+// In Go the recommended pattern is to compose a [Handler] into your own
+// struct and override [Handler.Middleware] (via the [handlermiddleware.Provider]
 // interface) to declare per-method middleware. The base type retains the
 // PHP class's public surface (Middleware, GetMiddleware, CallAction) so
 // dispatchers can probe for it uniformly.
 //
 // Ref: @bedrock/code-0295
-type Controller struct {
-	middleware []controllerMiddlewareEntry
+type Handler struct {
+	middleware []handlerMiddlewareEntry
 }
 
-type controllerMiddlewareEntry struct {
-	Middleware any
-	Options    map[string]any
+type handlerMiddlewareEntry struct {
+	Value   any
+	Options map[string]any
 }
 
 // MiddlewareOptions is the chainable filter helper returned by Use.
@@ -39,32 +39,31 @@ func (o *MiddlewareOptions) Except(methods ...string) *MiddlewareOptions {
 	return o
 }
 
-// Use registers middleware on the controller and returns a chainable options
+// Use registers middleware on the handler and returns a chainable options
 // object (Only/Except).
 //
 // Ref: @bedrock/code-0295
-// already the [HasMiddleware] method name.
-func (c *Controller) Use(middleware any) *MiddlewareOptions {
+func (c *Handler) Use(middleware any) *MiddlewareOptions {
 	options := map[string]any{}
-	c.middleware = append(c.middleware, controllerMiddlewareEntry{
-		Middleware: middleware,
-		Options:    options,
+	c.middleware = append(c.middleware, handlerMiddlewareEntry{
+		Value:   middleware,
+		Options: options,
 	})
 
 	return &MiddlewareOptions{options: options}
 }
 
-// GetMiddleware returns the middleware registered via [Controller.Use].
-func (c *Controller) GetMiddleware() []controllerMiddlewareEntry { return c.middleware }
+// GetMiddleware returns the middleware registered via [Handler.Use].
+func (c *Handler) GetMiddleware() []handlerMiddlewareEntry { return c.middleware }
 
-// Middleware satisfies [controllers.HasMiddleware] for controllers that only
+// Middleware satisfies [handlermiddleware.Provider] for handlers that only
 // register middleware imperatively via Use. Override this on your own
 // embedding type to return declarative entries.
-func (c *Controller) Middleware() []controllers.Middleware {
-	out := make([]controllers.Middleware, 0, len(c.middleware))
+func (c *Handler) Middleware() []handlermiddleware.Entry {
+	out := make([]handlermiddleware.Entry, 0, len(c.middleware))
 
 	for _, e := range c.middleware {
-		m := controllers.Middleware{Middleware: e.Middleware}
+		m := handlermiddleware.Entry{Value: e.Value}
 
 		if only, ok := e.Options["only"].([]string); ok {
 			m.Only = only

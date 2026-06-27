@@ -10,22 +10,22 @@ package routing
 type PendingResourceRegistration struct {
 	registrar  *ResourceRegistrar
 	name       string
-	controller string
+	handler    string
 	options    map[string]any
 	registered *RouteCollection
 }
 
 // NewPendingResourceRegistration constructs the builder.
-func NewPendingResourceRegistration(rr *ResourceRegistrar, name, controller string, options map[string]any) *PendingResourceRegistration {
+func NewPendingResourceRegistration(rr *ResourceRegistrar, name, handler string, options map[string]any) *PendingResourceRegistration {
 	if options == nil {
 		options = map[string]any{}
 	}
 
 	return &PendingResourceRegistration{
-		registrar:  rr,
-		name:       name,
-		controller: controller,
-		options:    options,
+		registrar: rr,
+		name:      name,
+		handler:   handler,
+		options:   options,
 	}
 }
 
@@ -96,7 +96,7 @@ func (p *PendingResourceRegistration) Register() *RouteCollection {
 		return p.registered
 	}
 
-	p.registered = p.registrar.Register(p.name, p.controller, p.options)
+	p.registered = p.registrar.Register(p.name, p.handler, p.options)
 
 	return p.registered
 }

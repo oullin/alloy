@@ -189,8 +189,8 @@ func (r *Redirector) TemporarySignedRoute(name string, expiration int64, paramet
 	return r.SignedRoute(name, parameters, expiration, status, headers)
 }
 
-// Action redirects to a controller action — the parity entry point used by
-// "Controller@method" style references.
+// Action redirects to a handler action — the parity entry point used by
+// "Handler@method" style references.
 func (r *Redirector) Action(action string, parameters map[string]any, status int, headers map[string][]string) (*RedirectResponse, error) {
 	return nil, fmt.Errorf("redirect to action [%s]: action lookup not yet implemented", action)
 }

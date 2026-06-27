@@ -48,7 +48,7 @@ func (c *CompiledRouteCollection) Add(route *Route) *Route {
 		}
 	}
 
-	if v, ok := route.ActionMap["controller"]; ok {
+	if v, ok := route.ActionMap["handler"]; ok {
 		if s, ok := v.(string); ok && s != "" {
 			s = strings.TrimLeft(s, `\`)
 
@@ -79,7 +79,7 @@ func (c *CompiledRouteCollection) RefreshActionLookups() {
 	c.actionList = map[string]*Route{}
 
 	for _, r := range c.routes {
-		if v, ok := r.ActionMap["controller"]; ok {
+		if v, ok := r.ActionMap["handler"]; ok {
 			if s, ok := v.(string); ok && s != "" {
 				s = strings.TrimLeft(s, `\`)
 

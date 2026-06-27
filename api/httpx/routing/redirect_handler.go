@@ -1,15 +1,15 @@
 package routing
 
-// RedirectController is the invokable controller used by [Router.Redirect]
+// RedirectHandler is the invokable handler used by [Router.Redirect]
 // and [Router.PermanentRedirect]. It reads the destination and status from
 // the matched route's parameters and produces a [RedirectResponse].
 //
 // Ref: @bedrock/code-0328
-type RedirectController struct{ Controller }
+type RedirectHandler struct{ Handler }
 
-// Invoke is the dispatch entry point — controller dispatchers detect the
+// Invoke is the dispatch entry point — handler dispatchers detect the
 // "Invoke" method by reflection and call it like an invokable.
-func (c *RedirectController) Invoke(route *Route) *RedirectResponse {
+func (c *RedirectHandler) Invoke(route *Route) *RedirectResponse {
 	destination := route.Parameter("destination", "")
 	status := 302
 

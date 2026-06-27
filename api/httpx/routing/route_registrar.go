@@ -112,17 +112,17 @@ func (r *RouteRegistrar) As(value string) *RouteRegistrar {
 	return r
 }
 
-// Namespace sets the controller namespace prefix.
+// Namespace sets the handler namespace prefix.
 func (r *RouteRegistrar) Namespace(ns string) *RouteRegistrar {
 	r.attributes["namespace"] = ns
 
 	return r
 }
 
-// Controller sets the group-level controller, allowing terminal verb calls to
+// Handler sets the group-level handler, allowing terminal verb calls to
 // pass just a method name as their action.
-func (r *RouteRegistrar) Controller(controller string) *RouteRegistrar {
-	r.attributes["controller"] = controller
+func (r *RouteRegistrar) Handler(handler string) *RouteRegistrar {
+	r.attributes["handler"] = handler
 
 	return r
 }
@@ -185,12 +185,12 @@ func (r *RouteRegistrar) Group(routes func(*Router)) {
 	r.router.Group(r.attributes, routes)
 }
 
-// Resource registers a RESTful resource controller within scope.
-func (r *RouteRegistrar) Resource(name, controller string, options map[string]any) *PendingResourceRegistration {
+// Resource registers a RESTful resource handler within scope.
+func (r *RouteRegistrar) Resource(name, handler string, options map[string]any) *PendingResourceRegistration {
 	merged := mergeOptions(r.attributes, options)
 	rr := NewResourceRegistrar(r.router)
 
-	return NewPendingResourceRegistration(rr, name, controller, merged)
+	return NewPendingResourceRegistration(rr, name, handler, merged)
 }
 
 // =====================================================================

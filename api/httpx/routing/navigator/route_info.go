@@ -18,13 +18,13 @@ type RouteInfo struct {
 	// Name is the route name (e.g. "posts.show").  Empty for unnamed routes.
 	Name string
 
-	// Controller is the fully-qualified "Class@Method" action string
-	// (e.g. "App\\Http\\Controllers\\PostController@show").
+	// Handler is the fully-qualified "Class@Method" action string
+	// (e.g. "App\\Http\\Handlers\\PostHandler@show").
 	// Empty for closure-based routes.
-	Controller string
+	Handler string
 
 	// IsInvokable is true when the action class and action method refer to
-	// the same thing — i.e. the controller has a single __invoke / Invoke
+	// the same thing — i.e. the handler has a single __invoke / Invoke
 	// method rather than named action methods.
 	IsInvokable bool
 
@@ -47,41 +47,41 @@ type RouteInfo struct {
 	Defaults map[string]string
 }
 
-// HasController reports whether this route is backed by a named controller
+// HasHandler reports whether this route is backed by a named handler
 // rather than a closure.
-func (r *RouteInfo) HasController() bool {
-	return r.Controller != "" && r.Controller != "\\Closure" && r.Controller != "Closure"
+func (r *RouteInfo) HasHandler() bool {
+	return r.Handler != "" && r.Handler != "\\Closure" && r.Handler != "Closure"
 }
 
-// ControllerClass returns just the class portion of the Controller string,
+// HandlerClass returns just the class portion of the Handler string,
 // stripping the "@Method" suffix.
 //
-// "App\\Http\\Controllers\\PostController@show" → "App\\Http\\Controllers\\PostController"
-func (r *RouteInfo) ControllerClass() string {
-	if idx := strings.LastIndex(r.Controller, "@"); idx >= 0 {
-		return r.Controller[:idx]
+// "App\\Http\\Handlers\\PostHandler@show" → "App\\Http\\Handlers\\PostHandler"
+func (r *RouteInfo) HandlerClass() string {
+	if idx := strings.LastIndex(r.Handler, "@"); idx >= 0 {
+		return r.Handler[:idx]
 	}
 
-	return r.Controller
+	return r.Handler
 }
 
-// ActionMethod returns the method portion of the Controller string.
+// ActionMethod returns the method portion of the Handler string.
 //
-// "App\\Http\\Controllers\\PostController@show" → "show"
+// "App\\Http\\Handlers\\PostHandler@show" → "show"
 func (r *RouteInfo) ActionMethod() string {
-	if idx := strings.LastIndex(r.Controller, "@"); idx >= 0 {
-		return r.Controller[idx+1:]
+	if idx := strings.LastIndex(r.Handler, "@"); idx >= 0 {
+		return r.Handler[idx+1:]
 	}
 
-	return r.Controller
+	return r.Handler
 }
 
-// DotNamespace converts the controller class path into a dot-separated
+// DotNamespace converts the handler class path into a dot-separated
 // namespace suitable for grouping and file-path construction.
 //
-// "App\\Http\\Controllers\\PostController@show" → "App.Http.Controllers.PostController"
+// "App\\Http\\Handlers\\PostHandler@show" → "App.Http.Handlers.PostHandler"
 func (r *RouteInfo) DotNamespace() string {
-	cls := r.ControllerClass()
+	cls := r.HandlerClass()
 	// Strip leading backslash if present.
 	cls = strings.TrimPrefix(cls, "\\")
 	// Convert both Go backslash style and forward-slash style.
@@ -92,10 +92,10 @@ func (r *RouteInfo) DotNamespace() string {
 }
 
 // OriginalJsMethod returns the raw method name before TypeScript sanitisation.
-// For invokable controllers this is the last segment of the class name.
+// For invokable handlers this is the last segment of the class name.
 func (r *RouteInfo) OriginalJsMethod() string {
 	if r.IsInvokable {
-		cls := r.ControllerClass()
+		cls := r.HandlerClass()
 		cls = strings.TrimPrefix(cls, "\\")
 		parts := strings.FieldsFunc(cls, func(c rune) bool {
 			return c == '\\' || c == '/'

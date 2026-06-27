@@ -57,7 +57,7 @@ func TestRouteSignatureParameters(t *testing.T) {
 	})
 
 	t.Run("test_non_func_action_returns_nil", func(t *testing.T) {
-		a := &Action{Uses: "Controller@show"}
+		a := &Action{Uses: "Handler@show"}
 		params := RouteSignatureParameters{}.FromAction(a, nil)
 
 		if params != nil {

@@ -1,7 +1,7 @@
 // Ref: @bedrock/code-0284
 // The directory layout, type names, method names, and behavior mirror the
 // upstream PHP package as faithfully as Go allows. PHP traits are realized as
-// embedded structs; PHP attributes are realized via the [controllers.HasMiddleware]
+// embedded structs; PHP attributes are realized via the handler middleware
 // interface; Symfony's RouteCompiler is reimplemented under [compiler] using the
 // Go regexp/syntax package (RE2).
 //

@@ -42,7 +42,7 @@ registered, so applications can enable modules incrementally.
 
 ## JSON Errors
 
-Headless controllers should render errors through `httpx.ExceptionRenderer`
+Headless handlers should render errors through `httpx.ExceptionRenderer`
 or return the same shape:
 
 ```json

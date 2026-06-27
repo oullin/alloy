@@ -9,7 +9,7 @@ type RouteGroup struct{}
 
 // MergeRouteGroup merges a new group attribute set into an old one.
 //
-// like "namespace", "prefix", "where", "as", "domain", "controller",
+// like "namespace", "prefix", "where", "as", "domain", "handler",
 // "middleware". Unknown keys are passed through unchanged.
 //
 // prependExistingPrefix controls whether the old prefix is placed before the
@@ -29,8 +29,8 @@ func MergeRouteGroup(new, old map[string]any, prependExistingPrefix bool) map[st
 		delete(old, "domain")
 	}
 
-	if _, ok := new["controller"]; ok {
-		delete(old, "controller")
+	if _, ok := new["handler"]; ok {
+		delete(old, "handler")
 	}
 
 	new = formatAs(new, old)

@@ -12,9 +12,9 @@ import (
 // callers get type safety without losing parity. The most-used keys map to
 // fields directly:
 //
-//   - Uses: the actual handler. May be a Go func value, a "Controller@method"
-//     string, an invokable controller type, or nil for fluent registration.
-//   - Controller: the canonical "Type@Method" form when known.
+//   - Uses: the actual handler. May be a Go func value, a "Handler@method"
+//     string, an invokable handler type, or nil for fluent registration.
+//   - Handler: the canonical "Type@Method" form when known.
 //     of the same name.
 //   - Domain, Prefix, As, Namespace: group-style attributes that may be
 //     attached to the action.
@@ -24,7 +24,7 @@ import (
 // Ref: @bedrock/code-0333
 type Action struct {
 	Uses       any
-	Controller string
+	Handler    string
 	Middleware []any
 	Where      map[string]string
 	Defaults   map[string]any
@@ -41,8 +41,8 @@ type Action struct {
 //   - nil: produces a placeholder action whose Uses returns an error when
 //     invoked, equivalent to the upstream missingAction closure.
 //   - a Go func: stored in Uses as-is.
-//   - a string of the form "Controller@method": stored in Uses and Controller.
-//   - a struct/pointer with an Invoke method: stored in Uses; Controller is
+//   - a string of the form "Handler@method": stored in Uses and Handler.
+//   - a struct/pointer with an Invoke method: stored in Uses; Handler is
 //     populated using the Go type name + "@__invoke".
 //   - a map[string]any: passed through, with the "uses" key resolved as above
 //     and other keys distributed to the matching fields or Extras.
@@ -75,7 +75,7 @@ func ParseAction(uri string, action any) (*Action, error) {
 			t = t.Elem()
 		}
 
-		return &Action{Uses: action, Controller: t.String() + "@Invoke"}, nil
+		return &Action{Uses: action, Handler: t.String() + "@Invoke"}, nil
 	}
 
 	return nil, fmt.Errorf("invalid route action: %T", action)
@@ -98,16 +98,16 @@ func parseMapAction(uri string, m map[string]any) (*Action, error) {
 		}
 
 		a.Uses = sub.Uses
-		a.Controller = sub.Controller
+		a.Handler = sub.Handler
 	}
 
 	for k, v := range m {
 		switch k {
 		case "uses":
 			continue
-		case "controller":
+		case "handler":
 			if s, ok := v.(string); ok {
-				a.Controller = s
+				a.Handler = s
 			}
 		case "middleware":
 			if mw, ok := v.([]any); ok {
@@ -154,11 +154,11 @@ func parseMapAction(uri string, m map[string]any) (*Action, error) {
 
 func parseStringAction(s string) (*Action, error) {
 	if !strings.Contains(s, "@") {
-		// Treat as invokable controller name: "Pkg.Type" → "Pkg.Type@Invoke".
-		return &Action{Uses: s + "@Invoke", Controller: s + "@Invoke"}, nil
+		// Treat as invokable handler name: "Pkg.Type" → "Pkg.Type@Invoke".
+		return &Action{Uses: s + "@Invoke", Handler: s + "@Invoke"}, nil
 	}
 
-	return &Action{Uses: s, Controller: s}, nil
+	return &Action{Uses: s, Handler: s}, nil
 }
 
 // isInvokable reports whether v has an exported "Invoke" method, the Go

@@ -4,8 +4,8 @@ import "testing"
 
 // Ref: @bedrock/code-0391
 // RouteActionTest::test_it_can_detect_a_serialized_closure
-// RoutingRouteTest::testRouteGetControllerClass
-// RoutingRouteTest::testRouteFlushController
+// RoutingRouteTest::testRouteGetHandlerClass
+// RoutingRouteTest::testRouteFlushHandler
 func TestRouteAction(t *testing.T) {
 	t.Run("test_parse_action_with_callable", func(t *testing.T) {
 		called := false
@@ -27,29 +27,29 @@ func TestRouteAction(t *testing.T) {
 		}
 	})
 
-	t.Run("test_parse_action_with_controller_string", func(t *testing.T) {
-		a, err := ParseAction("/x", "App\\Http\\Controllers\\UserController@show")
+	t.Run("test_parse_action_with_handler_string", func(t *testing.T) {
+		a, err := ParseAction("/x", "App\\Http\\Handlers\\UserHandler@show")
 
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if a.Controller != "App\\Http\\Controllers\\UserController@show" {
-			t.Errorf("controller = %q", a.Controller)
+		if a.Handler != "App\\Http\\Handlers\\UserHandler@show" {
+			t.Errorf("handler = %q", a.Handler)
 		}
 	})
 
 	t.Run("test_parse_action_invokable_string", func(t *testing.T) {
-		a, err := ParseAction("/x", "App\\Http\\Controllers\\Invokable")
+		a, err := ParseAction("/x", "App\\Http\\Handlers\\Invokable")
 
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		want := "App\\Http\\Controllers\\Invokable@Invoke"
+		want := "App\\Http\\Handlers\\Invokable@Invoke"
 
-		if a.Controller != want {
-			t.Errorf("controller = %q, want %q", a.Controller, want)
+		if a.Handler != want {
+			t.Errorf("handler = %q, want %q", a.Handler, want)
 		}
 	})
 
@@ -69,12 +69,12 @@ func TestRouteAction(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testRouteGetControllerClass
-	t.Run("test_route_get_controller_class", func(t *testing.T) {
-		route := NewRoute("GET", "/users/{user}", "App\\Http\\Controllers\\UserController@show")
+	// RoutingRouteTest::testRouteGetHandlerClass
+	t.Run("test_route_get_handler_class", func(t *testing.T) {
+		route := NewRoute("GET", "/users/{user}", "App\\Http\\Handlers\\UserHandler@show")
 
-		if got := route.GetControllerClass(); got != "App\\Http\\Controllers\\UserController" {
-			t.Errorf("controller class = %q", got)
+		if got := route.GetHandlerClass(); got != "App\\Http\\Handlers\\UserHandler" {
+			t.Errorf("handler class = %q", got)
 		}
 
 		if got := route.GetActionMethod(); got != "show" {
@@ -82,14 +82,14 @@ func TestRouteAction(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testRouteFlushController
-	t.Run("test_route_flush_controller", func(t *testing.T) {
-		route := NewRoute("GET", "/users/{user}", "UserController@show")
-		route.Controller = &userController{}
-		route.FlushController()
+	// RoutingRouteTest::testRouteFlushHandler
+	t.Run("test_route_flush_handler", func(t *testing.T) {
+		route := NewRoute("GET", "/users/{user}", "UserHandler@show")
+		route.Handler = &userHandler{}
+		route.FlushHandler()
 
-		if route.Controller != nil {
-			t.Errorf("controller = %v, want nil", route.Controller)
+		if route.Handler != nil {
+			t.Errorf("handler = %v, want nil", route.Handler)
 		}
 	})
 

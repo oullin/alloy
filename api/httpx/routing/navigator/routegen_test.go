@@ -63,45 +63,45 @@ func assertNotContains(t *testing.T, content, unwanted string) {
 // Workbench route fixtures (mirror Expose workbench)
 // ─────────────────────────────────────────────────────────────────────────────
 
-func postControllerRoutes() []*navigator.RouteInfo {
-	base := "App\\Http\\Controllers\\PostController"
+func postHandlerRoutes() []*navigator.RouteInfo {
+	base := "App\\Http\\Handlers\\PostHandler"
 
 	return []*navigator.RouteInfo{
-		{URI: "/posts", Methods: []string{"get", "head"}, Controller: base + "@index"},
-		{URI: "/posts/create", Methods: []string{"get", "head"}, Controller: base + "@create"},
-		{URI: "/posts", Methods: []string{"post"}, Controller: base + "@store"},
+		{URI: "/posts", Methods: []string{"get", "head"}, Handler: base + "@index"},
+		{URI: "/posts/create", Methods: []string{"get", "head"}, Handler: base + "@create"},
+		{URI: "/posts", Methods: []string{"post"}, Handler: base + "@store"},
 		{
 			URI: "/posts/{post}", Methods: []string{"get", "head"},
-			Controller: base + "@show",
-			Params:     []navigator.Param{{Name: "post"}},
+			Handler: base + "@show",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/posts/{post}/edit", Methods: []string{"get", "head"},
-			Controller: base + "@edit",
-			Params:     []navigator.Param{{Name: "post"}},
+			Handler: base + "@edit",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/posts/{post}", Methods: []string{"put", "patch"},
-			Controller: base + "@update",
-			Params:     []navigator.Param{{Name: "post"}},
+			Handler: base + "@update",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/posts/{post}", Methods: []string{"delete"},
-			Controller: base + "@destroy",
-			Params:     []navigator.Param{{Name: "post"}},
+			Handler: base + "@destroy",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 	}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PostController tests
+// PostHandler tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestPostControllerGeneration(t *testing.T) {
+func TestPostHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
-	dir := generateTo(t, postControllerRoutes(), navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	dir := generateTo(t, postHandlerRoutes(), navigator.Options{})
+	content := readFile(t, dir, "actions/App/Http/Handlers/PostHandler.ts")
 
 	// index — no params, GET
 	assertContains(t, content, `export const index`)
@@ -133,20 +133,20 @@ func TestPostControllerGeneration(t *testing.T) {
 	assertContains(t, content, `export const store`)
 	assertContains(t, content, `method: "post"`)
 
-	// Default export (controller object)
-	assertContains(t, content, `export default PostController`)
+	// Default export (handler object)
+	assertContains(t, content, `export default PostHandler`)
 }
 
 func TestAnonymousMiddlewareClosureRoutesDoNotBlockGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
-		{URI: "/closure", Methods: []string{"get", "head"}, Controller: "Closure"},
-		{URI: "/posts", Methods: []string{"get", "head"}, Controller: "App\\Http\\Controllers\\PostController@index"},
+		{URI: "/closure", Methods: []string{"get", "head"}, Handler: "Closure"},
+		{URI: "/posts", Methods: []string{"get", "head"}, Handler: "App\\Http\\Handlers\\PostHandler@index"},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/PostHandler.ts")
 
 	assertContains(t, content, `url: "/posts"`)
 
@@ -156,77 +156,77 @@ func TestAnonymousMiddlewareClosureRoutesDoNotBlockGeneration(t *testing.T) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// InvokableController tests
+// InvokableHandler tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestInvokableControllerGeneration(t *testing.T) {
+func TestInvokableHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:         "/invokable-controller",
+			URI:         "/invokable-handler",
 			Methods:     []string{"get", "head"},
-			Controller:  "App\\Http\\Controllers\\InvokableController@Invoke",
+			Handler:     "App\\Http\\Handlers\\InvokableHandler@Invoke",
 			IsInvokable: true,
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/InvokableController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/InvokableHandler.ts")
 
 	// Must use default export (not a named export).
-	assertContains(t, content, `export default InvokableController`)
-	assertContains(t, content, `url: "/invokable-controller"`)
+	assertContains(t, content, `export default InvokableHandler`)
+	assertContains(t, content, `url: "/invokable-handler"`)
 	assertContains(t, content, `method: "get"`)
-	// Should NOT have "export const InvokableController"
-	assertNotContains(t, content, `export const InvokableController`)
+	// Should NOT have "export const InvokableHandler"
+	assertNotContains(t, content, `export const InvokableHandler`)
 }
 
-func TestInvokablePlusControllerGeneration(t *testing.T) {
+func TestInvokablePlusHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
 		{
 			URI:         "/invokable-plus",
 			Methods:     []string{"get", "head"},
-			Controller:  "App\\Http\\Controllers\\InvokablePlusController@Invoke",
+			Handler:     "App\\Http\\Handlers\\InvokablePlusHandler@Invoke",
 			IsInvokable: true,
 		},
 		{
-			URI:        "/invokable-plus/download",
-			Methods:    []string{"post"},
-			Controller: "App\\Http\\Controllers\\InvokablePlusController@download",
+			URI:     "/invokable-plus/download",
+			Methods: []string{"post"},
+			Handler: "App\\Http\\Handlers\\InvokablePlusHandler@download",
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/InvokablePlusController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/InvokablePlusHandler.ts")
 
-	assertContains(t, content, `const InvokablePlusController = (`)
+	assertContains(t, content, `const InvokablePlusHandler = (`)
 	assertContains(t, content, `const download = (`)
-	assertContains(t, content, `InvokablePlusController.download = download`)
-	assertContains(t, content, `export default InvokablePlusController`)
-	assertNotContains(t, content, `export const InvokablePlusController`)
+	assertContains(t, content, `InvokablePlusHandler.download = download`)
+	assertContains(t, content, `export default InvokablePlusHandler`)
+	assertNotContains(t, content, `export const InvokablePlusHandler`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// OptionalController tests
+// OptionalHandler tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestOptionalControllerGeneration(t *testing.T) {
+func TestOptionalHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/optional/{parameter?}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\OptionalController@optional",
-			Params:     []navigator.Param{{Name: "parameter", Optional: true}},
+			URI:     "/optional/{parameter?}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\OptionalHandler@optional",
+			Params:  []navigator.Param{{Name: "parameter", Optional: true}},
 		},
 		{
-			URI:        "/many-optional/{one?}/{two?}/{three?}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\OptionalController@manyOptional",
+			URI:     "/many-optional/{one?}/{two?}/{three?}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\OptionalHandler@manyOptional",
 			Params: []navigator.Param{
 				{Name: "one", Optional: true},
 				{Name: "two", Optional: true},
@@ -236,7 +236,7 @@ func TestOptionalControllerGeneration(t *testing.T) {
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/OptionalController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/OptionalHandler.ts")
 
 	// optional param — definition should contain {parameter?}
 	assertContains(t, content, `url: "/optional/{parameter?}"`)
@@ -258,37 +258,37 @@ func TestEmptyRouteExposure(t *testing.T) {
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\EmptyRouteController@index",
+			URI:     "",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\EmptyRouteHandler@index",
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/EmptyRouteController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/EmptyRouteHandler.ts")
 
 	assertContains(t, content, `url: ""`)
 	assertNotContains(t, content, `url: "/"`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ModelBindingController tests
+// ModelBindingHandler tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestModelBindingControllerGeneration(t *testing.T) {
+func TestModelBindingHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/users/{user}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\ModelBindingController@show",
-			Params:     []navigator.Param{{Name: "user"}},
+			URI:     "/users/{user}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\ModelBindingHandler@show",
+			Params:  []navigator.Param{{Name: "user"}},
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/ModelBindingController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/ModelBindingHandler.ts")
 
 	assertContains(t, content, `url: "/users/{user}"`)
 	// Primitive shorthand support.
@@ -302,15 +302,15 @@ func TestCamelCaseRouteParameterGeneration(t *testing.T) {
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/profiles/{userProfile}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\CamelCaseRouteParameterController@show",
-			Params:     []navigator.Param{{Name: "userProfile", Key: "uuid"}},
+			URI:     "/profiles/{userProfile}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\CamelCaseRouteParameterHandler@show",
+			Params:  []navigator.Param{{Name: "userProfile", Key: "uuid"}},
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/CamelCaseRouteParameterController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/CamelCaseRouteParameterHandler.ts")
 
 	assertContains(t, content, `url: "/profiles/{userProfile}"`)
 	assertContains(t, content, `"uuid" in args`)
@@ -323,15 +323,15 @@ func TestHyphenatedRouteParameterGenerationUsesSafeNames(t *testing.T) {
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/profiles/{user-profile}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\HyphenatedRouteParameterController@show",
-			Params:     []navigator.Param{{Name: "user-profile", Key: "uuid"}},
+			URI:     "/profiles/{user-profile}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\HyphenatedRouteParameterHandler@show",
+			Params:  []navigator.Param{{Name: "user-profile", Key: "uuid"}},
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/HyphenatedRouteParameterController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/HyphenatedRouteParameterHandler.ts")
 
 	assertContains(t, content, `url: "/profiles/{user-profile}"`)
 	assertContains(t, content, `{ userProfile: args }`)
@@ -342,23 +342,23 @@ func TestHyphenatedRouteParameterGenerationUsesSafeNames(t *testing.T) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// KeyController tests
+// KeyHandler tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestKeyControllerGeneration(t *testing.T) {
+func TestKeyHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/keys/{key}/edit",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\KeyController@edit",
-			Params:     []navigator.Param{{Name: "key", Key: "uuid"}},
+			URI:     "/keys/{key}/edit",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\KeyHandler@edit",
+			Params:  []navigator.Param{{Name: "key", Key: "uuid"}},
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/KeyController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/KeyHandler.ts")
 
 	assertContains(t, content, `url: "/keys/{key}/edit"`)
 	// Custom key resolution: check for uuid field.
@@ -374,16 +374,16 @@ func TestKeyControllerGeneration(t *testing.T) {
 func TestDisallowedMethodNamesGeneration(t *testing.T) {
 	t.Parallel()
 
-	base := "App\\Http\\Controllers\\DisallowedMethodNameController"
+	base := "App\\Http\\Handlers\\DisallowedMethodNameHandler"
 	routes := []*navigator.RouteInfo{
-		{URI: "/disallowed/delete", Methods: []string{"get", "head"}, Controller: base + "@delete"},
-		{URI: "/disallowed/404", Methods: []string{"get", "head"}, Controller: base + "@404"},
-		{URI: "/disallowed/2fa", Methods: []string{"get", "head"}, Controller: base + "@2fa"},
-		{URI: "/disallowed/default", Methods: []string{"get", "head"}, Controller: base + "@default"},
+		{URI: "/disallowed/delete", Methods: []string{"get", "head"}, Handler: base + "@delete"},
+		{URI: "/disallowed/404", Methods: []string{"get", "head"}, Handler: base + "@404"},
+		{URI: "/disallowed/2fa", Methods: []string{"get", "head"}, Handler: base + "@2fa"},
+		{URI: "/disallowed/default", Methods: []string{"get", "head"}, Handler: base + "@default"},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/DisallowedMethodNameController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/DisallowedMethodNameHandler.ts")
 
 	// Reserved word "delete" → "deleteMethod"
 	assertContains(t, content, `const deleteMethod`)
@@ -396,12 +396,12 @@ func TestDisallowedMethodNamesGeneration(t *testing.T) {
 	// Reserved word "default" → "defaultMethod"
 	assertContains(t, content, `const defaultMethod`)
 
-	// Controller object must have original name aliases.
+	// Handler object must have original name aliases.
 	assertContains(t, content, `delete: deleteMethod`)
 	assertContains(t, content, `404: method404`)
 
 	// Default export
-	assertContains(t, content, `export default DisallowedMethodNameController`)
+	assertContains(t, content, `export default DisallowedMethodNameHandler`)
 }
 
 func TestMethodNameCollisionGeneration(t *testing.T) {
@@ -409,15 +409,15 @@ func TestMethodNameCollisionGeneration(t *testing.T) {
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/method-collision/{post}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\MethodNameCollisionController@options",
-			Params:     []navigator.Param{{Name: "post"}},
+			URI:     "/method-collision/{post}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\MethodNameCollisionHandler@options",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/MethodNameCollisionController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/MethodNameCollisionHandler.ts")
 
 	assertContains(t, content, `export const options = (args: {`)
 	assertContains(t, content, `routeOptions?: RouteQueryOptions`)
@@ -430,9 +430,9 @@ func TestParameterNameCollisionGeneration(t *testing.T) {
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/parameter-names/{args}/{options}/{parsedArgs}",
-			Methods:    []string{"get", "head"},
-			Controller: "App\\Http\\Controllers\\ParamaterNameController@show",
+			URI:     "/parameter-names/{args}/{options}/{parsedArgs}",
+			Methods: []string{"get", "head"},
+			Handler: "App\\Http\\Handlers\\ParamaterNameHandler@show",
 			Params: []navigator.Param{
 				{Name: "args"},
 				{Name: "options"},
@@ -442,7 +442,7 @@ func TestParameterNameCollisionGeneration(t *testing.T) {
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/ParamaterNameController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/ParamaterNameHandler.ts")
 
 	assertContains(t, content, `url: "/parameter-names/{args}/{options}/{parsedArgs}"`)
 	assertContains(t, content, `.replace("{args}", parsedArgs.args.toString())`)
@@ -457,14 +457,14 @@ func TestParameterNameCollisionGeneration(t *testing.T) {
 func TestTwoRoutesSameActionGeneration(t *testing.T) {
 	t.Parallel()
 
-	base := "App\\Http\\Controllers\\TwoRoutesSameActionController"
+	base := "App\\Http\\Handlers\\TwoRoutesSameActionHandler"
 	routes := []*navigator.RouteInfo{
-		{URI: "/two-routes-one-action-1", Methods: []string{"get", "head"}, Controller: base + "@same"},
-		{URI: "/two-routes-one-action-2", Methods: []string{"get", "head"}, Controller: base + "@same"},
+		{URI: "/two-routes-one-action-1", Methods: []string{"get", "head"}, Handler: base + "@same"},
+		{URI: "/two-routes-one-action-2", Methods: []string{"get", "head"}, Handler: base + "@same"},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/TwoRoutesSameActionController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/TwoRoutesSameActionHandler.ts")
 
 	// Keyed dictionary with URI strings as keys.
 	assertContains(t, content, `"/two-routes-one-action-1"`)
@@ -473,26 +473,26 @@ func TestTwoRoutesSameActionGeneration(t *testing.T) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DomainController tests
+// DomainHandler tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestDomainControllerGeneration(t *testing.T) {
+func TestDomainHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
-	base := "App\\Http\\Controllers\\DomainController"
+	base := "App\\Http\\Handlers\\DomainHandler"
 	routes := []*navigator.RouteInfo{
 		{
 			URI: "/fixed-domain/{param}", Methods: []string{"get", "head"},
-			Controller: base + "@fixedDomain",
-			Domain:     "example.test",
-			Scheme:     "//",
-			Params:     []navigator.Param{{Name: "param"}},
+			Handler: base + "@fixedDomain",
+			Domain:  "example.test",
+			Scheme:  "//",
+			Params:  []navigator.Param{{Name: "param"}},
 		},
 		{
 			URI: "/default-parameters-domain/{param}", Methods: []string{"get", "head"},
-			Controller: base + "@defaultParametersDomain",
-			Domain:     "{defaultDomain?}.au",
-			Scheme:     "//",
+			Handler: base + "@defaultParametersDomain",
+			Domain:  "{defaultDomain?}.au",
+			Scheme:  "//",
 			Params: []navigator.Param{
 				{Name: "defaultDomain", Optional: true},
 				{Name: "param"},
@@ -501,7 +501,7 @@ func TestDomainControllerGeneration(t *testing.T) {
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/DomainController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/DomainHandler.ts")
 
 	// Fixed domain URLs include the domain.
 	assertContains(t, content, `//example.test/fixed-domain/{param}`)
@@ -521,27 +521,27 @@ func TestNamedRoutesGeneration(t *testing.T) {
 	routes := []*navigator.RouteInfo{
 		{
 			URI: "/posts/{post}/edit", Methods: []string{"get", "head"},
-			Name:       "posts.edit",
-			Controller: "App\\Http\\Controllers\\PostController@edit",
-			Params:     []navigator.Param{{Name: "post"}},
+			Name:    "posts.edit",
+			Handler: "App\\Http\\Handlers\\PostHandler@edit",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 		{
 			URI: "/dashboard", Methods: []string{"get", "head"},
-			Name:       "dashboard",
-			Controller: "App\\Http\\Controllers\\DashboardController@index",
+			Name:    "dashboard",
+			Handler: "App\\Http\\Handlers\\DashboardHandler@index",
 		},
 		{
-			URI:         "/named-invokable-controller",
+			URI:         "/named-invokable-handler",
 			Methods:     []string{"get", "head"},
 			Name:        "invokable",
-			Controller:  "App\\Http\\Controllers\\InvokableController@Invoke",
+			Handler:     "App\\Http\\Handlers\\InvokableHandler@Invoke",
 			IsInvokable: true,
 		},
 		{
-			URI:        "/invalid-js-name",
-			Methods:    []string{"get", "head"},
-			Name:       "invalid_js_name",
-			Controller: "App\\Http\\Controllers\\SomeController@invalidJsName",
+			URI:     "/invalid-js-name",
+			Methods: []string{"get", "head"},
+			Name:    "invalid_js_name",
+			Handler: "App\\Http\\Handlers\\SomeHandler@invalidJsName",
 		},
 	}
 
@@ -562,10 +562,10 @@ func TestNamespacedAndStorageRoutesGeneration(t *testing.T) {
 
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/admin/reports",
-			Methods:    []string{"get", "head"},
-			Name:       "admin::reports.index",
-			Controller: "App\\Http\\Controllers\\Admin\\ReportsController@index",
+			URI:     "/admin/reports",
+			Methods: []string{"get", "head"},
+			Name:    "admin::reports.index",
+			Handler: "App\\Http\\Handlers\\Admin\\ReportsHandler@index",
 		},
 		{
 			URI:     "/storage/{path}",
@@ -589,15 +589,15 @@ func TestNamespacedAndStorageRoutesGeneration(t *testing.T) {
 // UrlDefaults tests
 // ─────────────────────────────────────────────────────────────────────────────
 
-func TestUrlDefaultsControllerGeneration(t *testing.T) {
+func TestUrlDefaultsHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
-	base := "App\\Http\\Controllers\\UrlDefaultsController"
+	base := "App\\Http\\Handlers\\UrlDefaultsHandler"
 	routes := []*navigator.RouteInfo{
 		{
-			URI:        "/with-defaults/{locale}",
-			Methods:    []string{"post"},
-			Controller: base + "@onlyDefaults",
+			URI:     "/with-defaults/{locale}",
+			Methods: []string{"post"},
+			Handler: base + "@onlyDefaults",
 			Params: []navigator.Param{
 				{Name: "locale", Optional: true, Default: "en"},
 			},
@@ -606,7 +606,7 @@ func TestUrlDefaultsControllerGeneration(t *testing.T) {
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/UrlDefaultsController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/UrlDefaultsHandler.ts")
 
 	// Default value is used in parsedArgs.
 	assertContains(t, content, `?? "en"`)
@@ -638,7 +638,7 @@ func TestFromRouteCollectionUsesForcedRootAndDefaults(t *testing.T) {
 	t.Parallel()
 
 	router := routing.NewRouter(nil, nil)
-	router.Get("/{locale}/posts/{post:slug}", "App\\Http\\Controllers\\PostController@show").Name("posts.show")
+	router.Get("/{locale}/posts/{post:slug}", "App\\Http\\Handlers\\PostHandler@show").Name("posts.show")
 
 	routes := navigator.FromRouteCollection(router.GetRoutes(), navigator.AdapterOptions{
 		ForcedRoot: "https://example.test/app",
@@ -674,7 +674,7 @@ func TestGenerateFromRouter(t *testing.T) {
 	t.Parallel()
 
 	router := routing.NewRouter(nil, nil)
-	router.Get("/posts/{post:slug}", "App\\Http\\Controllers\\PostController@show").Name("posts.show")
+	router.Get("/posts/{post:slug}", "App\\Http\\Handlers\\PostHandler@show").Name("posts.show")
 
 	dir := t.TempDir()
 
@@ -682,7 +682,7 @@ func TestGenerateFromRouter(t *testing.T) {
 		t.Fatalf("GenerateFromRouter: %v", err)
 	}
 
-	action := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	action := readFile(t, dir, "actions/App/Http/Handlers/PostHandler.ts")
 	named := readFile(t, dir, "routes/posts/index.ts")
 	runtime := readFile(t, dir, "expose/index.ts")
 
@@ -703,17 +703,17 @@ func TestWithFormOption(t *testing.T) {
 	routes := []*navigator.RouteInfo{
 		{
 			URI: "/posts", Methods: []string{"post"},
-			Controller: "App\\Http\\Controllers\\PostController@store",
+			Handler: "App\\Http\\Handlers\\PostHandler@store",
 		},
 		{
 			URI: "/posts/{post}", Methods: []string{"put", "patch"},
-			Controller: "App\\Http\\Controllers\\PostController@update",
-			Params:     []navigator.Param{{Name: "post"}},
+			Handler: "App\\Http\\Handlers\\PostHandler@update",
+			Params:  []navigator.Param{{Name: "post"}},
 		},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{WithForm: true})
-	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/PostHandler.ts")
 
 	// Form helpers must be present.
 	assertContains(t, content, `.form = `)
@@ -730,14 +730,14 @@ func TestWithFormOption(t *testing.T) {
 func TestAppURLPathPrefix(t *testing.T) {
 	t.Parallel()
 
-	routes := postControllerRoutes()
+	routes := postHandlerRoutes()
 	// Apply base path — simulates APP_URL=http://localhost:8081/v2.
 	for _, r := range routes {
 		r.BasePath = "/v2"
 	}
 
 	dir := generateTo(t, routes, navigator.Options{})
-	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/PostHandler.ts")
 
 	assertContains(t, content, `url: "/v2/posts"`)
 	assertContains(t, content, `url: "/v2/posts/{post}"`)
@@ -780,10 +780,10 @@ func TestExposeRuntimeDirectoryCompatibility(t *testing.T) {
 func TestExposeRuntimeDirectoryImportsUseForwardSlashes(t *testing.T) {
 	t.Parallel()
 
-	dir := generateTo(t, postControllerRoutes(), navigator.Options{
+	dir := generateTo(t, postHandlerRoutes(), navigator.Options{
 		RuntimeDirectory: `runtime\expose`,
 	})
-	content := readFile(t, dir, "actions/App/Http/Controllers/PostController.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/PostHandler.ts")
 
 	assertContains(t, content, `from './../../../../runtime/expose'`)
 }
@@ -820,8 +820,8 @@ func TestSkipOptions(t *testing.T) {
 	routes := []*navigator.RouteInfo{
 		{
 			URI: "/posts", Methods: []string{"get"},
-			Name:       "posts.index",
-			Controller: "App\\Http\\Controllers\\PostController@index",
+			Name:    "posts.index",
+			Handler: "App\\Http\\Handlers\\PostHandler@index",
 		},
 	}
 
@@ -852,34 +852,34 @@ func TestBarrelFilesGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
-		{URI: "/posts", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\PostController@index"},
-		{URI: "/users", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\UserController@index"},
+		{URI: "/posts", Methods: []string{"get"}, Handler: "App\\Http\\Handlers\\PostHandler@index"},
+		{URI: "/users", Methods: []string{"get"}, Handler: "App\\Http\\Handlers\\UserHandler@index"},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{SkipRoutes: true})
 
-	// Controller-level barrel.
-	indexContent := readFile(t, dir, "actions/App/Http/Controllers/index.ts")
-	assertContains(t, indexContent, `import PostController from './PostController'`)
-	assertContains(t, indexContent, `import UserController from './UserController'`)
+	// Handler-level barrel.
+	indexContent := readFile(t, dir, "actions/App/Http/Handlers/index.ts")
+	assertContains(t, indexContent, `import PostHandler from './PostHandler'`)
+	assertContains(t, indexContent, `import UserHandler from './UserHandler'`)
 
 	// Top-level barrel.
 	rootIndex := readFile(t, dir, "actions/index.ts")
 	assertContains(t, rootIndex, `export default`)
 }
 
-func TestRepeatedNamespaceControllerGeneration(t *testing.T) {
+func TestRepeatedNamespaceHandlerGeneration(t *testing.T) {
 	t.Parallel()
 
 	routes := []*navigator.RouteInfo{
-		{URI: "/admin/repeated", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\Admin\\Admin\\RepeatedNamespaceController@index"},
-		{URI: "/admin/users", Methods: []string{"get"}, Controller: "App\\Http\\Controllers\\Admin\\UserController@index"},
+		{URI: "/admin/repeated", Methods: []string{"get"}, Handler: "App\\Http\\Handlers\\Admin\\Admin\\RepeatedNamespaceHandler@index"},
+		{URI: "/admin/users", Methods: []string{"get"}, Handler: "App\\Http\\Handlers\\Admin\\UserHandler@index"},
 	}
 
 	dir := generateTo(t, routes, navigator.Options{SkipRoutes: true})
-	content := readFile(t, dir, "actions/App/Http/Controllers/Admin/index.ts")
+	content := readFile(t, dir, "actions/App/Http/Handlers/Admin/index.ts")
 
 	assertContains(t, content, `import Admin from './Admin'`)
-	assertContains(t, content, `import UserController from './UserController'`)
+	assertContains(t, content, `import UserHandler from './UserHandler'`)
 	assertContains(t, content, `const Admin = {`)
 }

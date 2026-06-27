@@ -14,7 +14,7 @@
 //
 // The package writes three output directories:
 //
-//   - {Path}/actions/   — per-controller TypeScript files, one function per route
+//   - {Path}/actions/   — per-handler TypeScript files, one function per route
 //   - {Path}/routes/    — named-route helpers grouped by name prefix
 //   - {Path}/expose/ — the runtime TypeScript utility (index.ts)
 package navigator

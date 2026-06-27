@@ -124,12 +124,12 @@ func TestRouteCollection_Add(t *testing.T) {
 	t.Run("test_refresh_lookups_cleans_up_overwritten_routes", func(t *testing.T) {
 		c := NewRouteCollection()
 		first := NewRoute("GET", "/product", map[string]any{
-			"controller": "View@view",
-			"as":         "routeA",
+			"handler": "View@view",
+			"as":      "routeA",
 		})
 		second := NewRoute("GET", "/product", map[string]any{
-			"controller": "OverwrittenView@view",
-			"as":         "overwrittenRouteA",
+			"handler": "OverwrittenView@view",
+			"as":      "overwrittenRouteA",
 		})
 		c.Add(first)
 		c.Add(second)
@@ -258,10 +258,10 @@ func TestRouteCollection_ActionLookups(t *testing.T) {
 	// RouteCollectionTest::testRouteCollectionCanRetrieveByAction
 	t.Run("test_get_by_action", func(t *testing.T) {
 		c := NewRouteCollection()
-		r := NewRoute("GET", "/users", "App\\Http\\Controllers\\UserController@index")
+		r := NewRoute("GET", "/users", "App\\Http\\Handlers\\UserHandler@index")
 		c.Add(r)
 
-		if c.GetByAction("App\\Http\\Controllers\\UserController@index") != r {
+		if c.GetByAction("App\\Http\\Handlers\\UserHandler@index") != r {
 			t.Error("GetByAction failed")
 		}
 	})
@@ -269,17 +269,17 @@ func TestRouteCollection_ActionLookups(t *testing.T) {
 	t.Run("test_refresh_action_lookups_normalizes_leading_backslash", func(t *testing.T) {
 		c := NewRouteCollection()
 		r := NewRoute("GET", "/users", map[string]any{
-			"controller": "\\App\\Http\\Controllers\\UserController@index",
+			"handler": "\\App\\Http\\Handlers\\UserHandler@index",
 		})
 		c.Add(r)
 
-		if c.GetByAction("App\\Http\\Controllers\\UserController@index") != r {
+		if c.GetByAction("App\\Http\\Handlers\\UserHandler@index") != r {
 			t.Fatal("GetByAction should normalize leading backslashes on add")
 		}
 
 		c.RefreshActionLookups()
 
-		if c.GetByAction("App\\Http\\Controllers\\UserController@index") != r {
+		if c.GetByAction("App\\Http\\Handlers\\UserHandler@index") != r {
 			t.Fatal("GetByAction should normalize leading backslashes on refresh")
 		}
 	})
@@ -308,7 +308,7 @@ func TestRouteCollection_ToCompiledCollection(t *testing.T) {
 	// RouteCollectionTest::testToSymfonyRouteCollection
 	t.Run("test_to_symfony_route_collection", func(t *testing.T) {
 		route := NewRoute("GET", "/users", map[string]any{
-			"controller": "\\App\\Http\\Controllers\\UserController@index",
+			"handler": "\\App\\Http\\Handlers\\UserHandler@index",
 		}).Name("users.index")
 		c := NewCompiledRouteCollection([]*Route{route}, nil)
 
@@ -320,8 +320,8 @@ func TestRouteCollection_ToCompiledCollection(t *testing.T) {
 			t.Fatal("compiled collection should preserve named route lookups")
 		}
 
-		if c.GetByAction("App\\Http\\Controllers\\UserController@index") != route {
-			t.Fatal("compiled collection should normalize controller lookups")
+		if c.GetByAction("App\\Http\\Handlers\\UserHandler@index") != route {
+			t.Fatal("compiled collection should normalize handler lookups")
 		}
 	})
 }

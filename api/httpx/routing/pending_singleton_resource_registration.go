@@ -5,22 +5,22 @@ package routing
 type PendingSingletonResourceRegistration struct {
 	registrar  *ResourceRegistrar
 	name       string
-	controller string
+	handler    string
 	options    map[string]any
 	registered *RouteCollection
 }
 
 // NewPendingSingletonResourceRegistration constructs the builder.
-func NewPendingSingletonResourceRegistration(rr *ResourceRegistrar, name, controller string, options map[string]any) *PendingSingletonResourceRegistration {
+func NewPendingSingletonResourceRegistration(rr *ResourceRegistrar, name, handler string, options map[string]any) *PendingSingletonResourceRegistration {
 	if options == nil {
 		options = map[string]any{}
 	}
 
 	return &PendingSingletonResourceRegistration{
-		registrar:  rr,
-		name:       name,
-		controller: controller,
-		options:    options,
+		registrar: rr,
+		name:      name,
+		handler:   handler,
+		options:   options,
 	}
 }
 
@@ -60,7 +60,7 @@ func (p *PendingSingletonResourceRegistration) Register() *RouteCollection {
 		return p.registered
 	}
 
-	p.registered = p.registrar.Singleton(p.name, p.controller, p.options)
+	p.registered = p.registrar.Singleton(p.name, p.handler, p.options)
 
 	return p.registered
 }

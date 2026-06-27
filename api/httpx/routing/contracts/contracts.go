@@ -11,10 +11,10 @@ type CallableDispatcher interface {
 	Dispatch(route any, callable any) (any, error)
 }
 
-// ControllerDispatcher dispatches controller route actions.
-type ControllerDispatcher interface {
-	Dispatch(route any, controller any, method string) (any, error)
-	GetMiddleware(controller any, method string) []any
+// HandlerDispatcher dispatches handler route actions.
+type HandlerDispatcher interface {
+	Dispatch(route any, handler any, method string) (any, error)
+	GetMiddleware(handler any, method string) []any
 }
 
 // UrlRoutable participates in implicit and scoped route-model binding.
@@ -40,7 +40,7 @@ type EventDispatcher interface {
 	Dispatch(event any)
 }
 
-// ViewFactory is the minimum surface ViewController needs from a view layer.
+// ViewFactory is the minimum surface ViewHandler needs from a view layer.
 type ViewFactory interface {
 	Make(view string, data map[string]any) any
 }
