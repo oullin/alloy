@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/api/tempo/factory"
+	"alloy.dev/api/tempo/factory"
 )
 
 func timeFromComponents(components Components, location *time.Location) time.Time {

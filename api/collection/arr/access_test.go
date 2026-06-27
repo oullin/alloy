@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/api/collection/arr"
+	"alloy.dev/api/collection/arr"
 )
 
 func TestFirst(t *testing.T) {

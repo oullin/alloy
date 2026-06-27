@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // RedisClient is the minimal Redis interface required by the Redis queue driver.

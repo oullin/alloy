@@ -3,7 +3,7 @@ package kernel
 import (
 	"time"
 
-	"github.com/oullin/alloy/api/tempo/duration"
+	"alloy.dev/api/tempo/duration"
 )
 
 type WeekOptions struct {

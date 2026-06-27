@@ -3,7 +3,7 @@ package middleware
 import (
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/routing"
+	"alloy.dev/api/httpx/routing"
 )
 
 type fakeBindingRouter struct {

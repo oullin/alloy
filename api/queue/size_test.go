@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // memoryQueue is a minimal in-memory Backend used only by the SizeTest

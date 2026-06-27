@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/api/session"
-	"github.com/oullin/alloy/api/session/handlers"
+	"alloy.dev/api/session"
+	"alloy.dev/api/session/handlers"
 )
 
 // --- mock types ---

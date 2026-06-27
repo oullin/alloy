@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // The struct-tag parser replaces the upstream PHP8 attribute system

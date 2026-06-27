@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/foundation"
+	"alloy.dev/api/httpx/foundation"
 )
 
 func TestInputFromQueryString(t *testing.T) {

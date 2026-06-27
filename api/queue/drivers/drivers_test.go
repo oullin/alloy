@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oullin/alloy/api/queue/drivers"
+	"alloy.dev/api/queue/drivers"
 )
 
 // --- Mock Redis Client ---

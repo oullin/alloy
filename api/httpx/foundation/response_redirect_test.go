@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/foundation"
+	"alloy.dev/api/httpx/foundation"
 )
 
 func TestRedirectResponseSend(t *testing.T) {

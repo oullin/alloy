@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/money/currency"
-	"github.com/oullin/alloy/api/money/exception"
-	"github.com/oullin/alloy/api/money/exchange"
-	testutil "github.com/oullin/alloy/api/money/tests"
+	"alloy.dev/api/money/currency"
+	"alloy.dev/api/money/exception"
+	"alloy.dev/api/money/exchange"
+	testutil "alloy.dev/api/money/tests"
 )
 
 func TestConvert(t *testing.T) {

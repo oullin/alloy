@@ -6,7 +6,7 @@ package middleware
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/api/httpx/routing"
+	"alloy.dev/api/httpx/routing"
 )
 
 // BindingRouter is the minimum router surface SubstituteBindings touches.

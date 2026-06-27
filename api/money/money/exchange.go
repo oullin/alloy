@@ -3,9 +3,9 @@ package money
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/api/money/currency"
-	"github.com/oullin/alloy/api/money/exception"
-	"github.com/oullin/alloy/api/money/exchange"
+	"alloy.dev/api/money/currency"
+	"alloy.dev/api/money/exception"
+	"alloy.dev/api/money/exchange"
 )
 
 type Converter struct {

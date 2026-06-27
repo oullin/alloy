@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/foundation"
+	"alloy.dev/api/httpx/foundation"
 )
 
 func TestHttpResponseErrorMessage(t *testing.T) {

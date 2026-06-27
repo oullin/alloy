@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/queue/drivers"
+	"alloy.dev/api/queue/drivers"
 )
 
 // covers Bulk + PendingJobs + DelayedJobs + ReservedJobs.

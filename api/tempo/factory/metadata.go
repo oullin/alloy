@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/api/tempo/duration"
+	"alloy.dev/api/tempo/duration"
 )
 
 func CalendarFormats() map[string]string {

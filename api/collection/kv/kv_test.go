@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/collection/kv"
+	"alloy.dev/api/collection/kv"
 )
 
 func TestGet(t *testing.T) {

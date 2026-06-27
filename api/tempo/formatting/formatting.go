@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/api/tempo/calendar"
-	"github.com/oullin/alloy/api/tempo/core"
+	"alloy.dev/api/tempo/calendar"
+	"alloy.dev/api/tempo/core"
 )
 
 type Object struct {

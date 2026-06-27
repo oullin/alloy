@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	authevents "github.com/oullin/alloy/api/auth/events"
-	"github.com/oullin/alloy/api/auth/passwords"
-	"github.com/oullin/alloy/api/auth/user"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
-	cevents "github.com/oullin/alloy/api/contracts/auth/events"
-	clog "github.com/oullin/alloy/api/contracts/auth/log"
+	authevents "alloy.dev/api/auth/events"
+	"alloy.dev/api/auth/passwords"
+	"alloy.dev/api/auth/user"
+	cauth "alloy.dev/api/contracts/auth"
+	cevents "alloy.dev/api/contracts/auth/events"
+	clog "alloy.dev/api/contracts/auth/log"
 )
 
 type resetUser struct {

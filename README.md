@@ -1,18 +1,18 @@
 # Alloy
 
 Alloy is a Go and TypeScript workspace for reusable application primitives.
-The repository currently includes the Go API modules under `api/`, the
+The repository currently includes the Go API module under `api/`, the
 TypeScript packages under `packages/`, and the shared automation under
 `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go module (`github.com/oullin/alloy/tempo`) and a
+available as both a Go package (`alloy.dev/api/tempo`) and a
 TypeScript package (`@alloy/tempo`).
 
 ## Workspace
 
-- `api`: Go workspace containing the Alloy API modules.
-- `api/tempo`: Go Tempo module.
+- `api`: Go module containing the Alloy API packages.
+- `api/tempo`: Go Tempo package.
 - `api/collection`: Go collection utilities and package docs.
 - `packages/tempo`: TypeScript Tempo package.
 - `packages/tempo/tests`: TypeScript Tempo acceptance tests.
@@ -39,7 +39,7 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-`monorepo:initialise` keeps the Go workspace in sync with `api/go.work`.
+`monorepo:initialise` creates and syncs the optional Go workspace at `api/go.work`.
 
 ## Checks
 

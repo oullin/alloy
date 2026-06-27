@@ -1,4 +1,4 @@
-module github.com/oullin/alloy/api
+module alloy.dev/api
 
 go 1.26.4
 

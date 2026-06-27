@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	contracts "github.com/oullin/alloy/api/httpx/routing/contracts"
+	contracts "alloy.dev/api/httpx/routing/contracts"
 )
 
 // RouteUrlGenerator builds a URL for a single named route by substituting

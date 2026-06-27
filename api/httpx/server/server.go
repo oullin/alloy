@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/api/httpx/handlerx"
-	"github.com/oullin/alloy/api/httpx/routing"
+	"alloy.dev/api/httpx/handlerx"
+	"alloy.dev/api/httpx/routing"
 )
 
 // Config controls the net/http server created for an Alloy router.

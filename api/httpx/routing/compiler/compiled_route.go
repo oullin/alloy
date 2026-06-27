@@ -1,6 +1,6 @@
 package compiler
 
-import ccompiler "github.com/oullin/alloy/api/httpx/routing/contracts/compiler"
+import ccompiler "alloy.dev/api/httpx/routing/contracts/compiler"
 
 // Token is one element of a compiled route pattern.
 type Token = ccompiler.Token

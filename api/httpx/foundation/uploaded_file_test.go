@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/foundation"
+	"alloy.dev/api/httpx/foundation"
 )
 
 // memoryFileStore is a test double for foundation.FileStore.

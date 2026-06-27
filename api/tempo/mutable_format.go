@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/api/tempo/formatting"
+	"alloy.dev/api/tempo/formatting"
 )
 
 func (mutable *MutableTime) DateString() string {

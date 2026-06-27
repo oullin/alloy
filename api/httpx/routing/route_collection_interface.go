@@ -1,6 +1,6 @@
 package routing
 
-import "github.com/oullin/alloy/api/httpx/routing/matching"
+import "alloy.dev/api/httpx/routing/matching"
 
 // Both [RouteCollection] and [CompiledRouteCollection] satisfy this interface,
 // so consumers (notably [Router]) can hold a single field and switch

@@ -1,8 +1,8 @@
 package tempo
 
 import (
-	"github.com/oullin/alloy/api/tempo/comparison"
-	"github.com/oullin/alloy/api/tempo/diff"
+	"alloy.dev/api/tempo/comparison"
+	"alloy.dev/api/tempo/diff"
 )
 
 func (mutable *MutableTime) IsStartOf(unit Unit, options ...StartOfWeekOptions) bool {

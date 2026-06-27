@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/api/auth/teams"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
+	"alloy.dev/api/auth/teams"
+	cauth "alloy.dev/api/contracts/auth"
 )
 
 type teamResponse struct {

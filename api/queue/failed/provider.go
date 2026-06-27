@@ -1,6 +1,6 @@
 package failed
 
-import cfailed "github.com/oullin/alloy/api/contracts/queue/failed"
+import cfailed "alloy.dev/api/contracts/queue/failed"
 
 // Job is the decoded record returned by All and Find. It is the
 // Go analogue of the stdClass rows the upstream providers yield: the public

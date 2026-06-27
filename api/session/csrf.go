@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	csession "github.com/oullin/alloy/api/contracts/session"
+	csession "alloy.dev/api/contracts/session"
 )
 
 // CSRFStore is the session surface required by VerifyCSRFToken.

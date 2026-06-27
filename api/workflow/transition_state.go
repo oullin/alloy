@@ -3,7 +3,7 @@ package workflow
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/api/workflow/events"
+	"alloy.dev/api/workflow/events"
 )
 
 func (w *Machine[T]) transitionState(subject T, transitionName string, context map[string]any) error {

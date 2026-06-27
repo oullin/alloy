@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/oullin/alloy/api/workflow"
+	"alloy.dev/api/workflow"
 )
 
 // SupportStrategy reports whether a workflow applies to a subject.

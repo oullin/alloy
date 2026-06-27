@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/api/money/exception"
+	"alloy.dev/api/money/exception"
 )
 
 type stubDefault struct {

@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/oullin/alloy/api/auth/manager"
-	"github.com/oullin/alloy/api/container"
+	"alloy.dev/api/auth/manager"
+	"alloy.dev/api/container"
 )
 
 // ServiceProvider registers the authentication registry into the container.

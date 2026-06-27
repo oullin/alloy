@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/hashing"
+	"alloy.dev/api/hashing"
 	"golang.org/x/crypto/bcrypt"
 )
 
