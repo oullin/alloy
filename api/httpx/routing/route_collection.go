@@ -19,7 +19,7 @@ import (
 //   - actionList: "Handler@method" → Route, populated when a handler
 //     action is supplied.
 type RouteCollection struct {
-	AbstractRouteCollection
+	routeCollectionMatcher
 
 	// Insertion order for each verb. We keep an explicit slice alongside the
 	// map because Go maps are unordered, which would break dispatch.
@@ -134,9 +134,9 @@ func (c *RouteCollection) RefreshActionLookups() {
 // Match returns the route that matches the request or an error.
 func (c *RouteCollection) Match(request matching.MatchableRequest) (*Route, error) {
 	routes := c.Get(request.Method())
-	matched := c.MatchAgainstRoutes(routes, request, true)
+	matched := c.matchAgainstRoutes(routes, request, true)
 
-	return c.HandleMatchedRoute(c.Get, request, matched)
+	return c.handleMatchedRoute(c.Get, request, matched)
 }
 
 // Get returns routes for the given method, or all routes when method is "".

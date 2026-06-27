@@ -10,8 +10,8 @@ import (
 )
 
 // These tests cover Go-specific helpers (DisplayName, NewUUIDv4,
-// CreatePayloadFor, ShouldDispatchAfterCommit) that the abstract_queue.go
-// file introduces. The payload-hook behaviour they assert matches the
+// CreatePayloadFor, ShouldDispatchAfterCommit) that payload_builder.go
+// introduces. The payload-hook behaviour they assert matches the
 // CreatePayloadUsing contract.
 
 type sampleJob struct {

@@ -42,25 +42,8 @@ type Route struct {
 	container          BindingContainer
 	bindingFields      map[string]string
 	missingHandler     any
-	boundModels        map[string]any // populated by ImplicitRouteBinding
 	compileMu          *sync.Mutex
 }
-
-// storeBoundModel records a resolved model instance so consumers can fetch
-// the typed value (rather than the string parameter) after binding.
-//
-// Used by [ImplicitRouteBinding] in M9.
-func (r *Route) storeBoundModel(name string, model any) {
-	if r.boundModels == nil {
-		r.boundModels = map[string]any{}
-	}
-
-	r.boundModels[name] = model
-}
-
-// BoundModel returns the typed model resolved for parameter name, or nil if
-// no implicit binding has populated one.
-func (r *Route) BoundModel(name string) any { return r.boundModels[name] }
 
 // NewRoute constructs a Route.
 //
@@ -134,10 +117,8 @@ func (r *Route) cloneForRequest() *Route {
 	clone.ActionMap = cloneAnyMap(r.ActionMap)
 	clone.DefaultValues = cloneAnyMap(r.DefaultValues)
 	clone.Wheres = cloneStringMap(r.Wheres)
-	// Bound values are request state and must not leak across dispatches.
 	clone.Parameters = nil
 	clone.originalParameters = nil
-	clone.boundModels = nil
 
 	if clone.compileMu == nil {
 		clone.compileMu = &sync.Mutex{}
@@ -517,7 +498,7 @@ func (r *Route) ParentOfParameter(parameter string) string {
 	return ""
 }
 
-// WithTrashed enables retrieval of soft-deleted models for implicit bindings.
+// WithTrashed enables retrieval of soft-deleted models for route bindings.
 func (r *Route) WithTrashed(withTrashed ...bool) *Route {
 	v := true
 
@@ -857,8 +838,8 @@ func (r *Route) SetAction(action map[string]any) *Route {
 // Missing / scoped bindings / blocking
 // =====================================================================
 
-// Missing assigns a callback that runs when implicit binding cannot resolve
-// a parameter for this route.
+// Missing assigns a callback that runs when route binding cannot resolve a
+// parameter for this route.
 func (r *Route) Missing(handler func(req any) any) *Route {
 	r.missingHandler = handler
 
@@ -868,14 +849,14 @@ func (r *Route) Missing(handler func(req any) any) *Route {
 // GetMissing returns the missing-binding handler set via [Route.Missing].
 func (r *Route) GetMissing() any { return r.missingHandler }
 
-// ScopeBindings enables scoped implicit binding for child route parameters.
+// ScopeBindings enables scoped binding metadata for child route parameters.
 func (r *Route) ScopeBindings() *Route {
 	r.ActionMap["scope_bindings"] = true
 
 	return r
 }
 
-// WithoutScopedBindings explicitly disables scoped implicit binding.
+// WithoutScopedBindings explicitly disables scoped binding metadata.
 func (r *Route) WithoutScopedBindings() *Route {
 	r.ActionMap["scope_bindings"] = false
 

@@ -13,11 +13,10 @@ import (
 // Both [routing.Router] and any future test fake satisfy it.
 type BindingRouter interface {
 	SubstituteBindings(route *routing.Route) error
-	SubstituteImplicitBindings(route *routing.Route) error
 }
 
-// SubstituteBindings is the middleware that runs explicit and implicit route
-// bindings before the route handler executes.
+// SubstituteBindings is the middleware that runs route bindings before the
+// route handler executes.
 type SubstituteBindings struct{ Router BindingRouter }
 
 // New wraps a router into the middleware.
@@ -29,7 +28,7 @@ func New(router BindingRouter) *SubstituteBindings {
 //
 // route must be a *routing.Route obtained from the request's route resolver
 // (M11 wires this via foundation.Request.SetRouteResolver). Returning an error
-// from either binder short-circuits the pipeline; if the route declared a
+// from the binder short-circuits the pipeline; if the route declared a
 // missing handler via [routing.Route.Missing] the wrapping pipeline catches
 // the error and invokes it instead.
 func (s *SubstituteBindings) Handle(request any, route any, next func(any) any) (any, error) {
@@ -44,10 +43,6 @@ func (s *SubstituteBindings) Handle(request any, route any, next func(any) any) 
 	}
 
 	if err := s.Router.SubstituteBindings(routingRoute); err != nil {
-		return nil, err
-	}
-
-	if err := s.Router.SubstituteImplicitBindings(routingRoute); err != nil {
 		return nil, err
 	}
 

@@ -38,8 +38,7 @@ type SignatureParameter struct {
 // Returns parameters in declaration order.
 
 // BackedEnum is the sentinel interface that user-defined backed enums must
-// implement to participate in implicit route binding.
-// BackedEnum interface in surface.
+// implement to participate in signature filtering.
 type BackedEnum = crouting.BackedEnum
 
 func (RouteSignatureParameters) FromAction(action *Action, conditions map[string]any) []SignatureParameter {

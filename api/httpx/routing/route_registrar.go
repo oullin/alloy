@@ -125,14 +125,14 @@ func (r *RouteRegistrar) Handler(handler string) *RouteRegistrar {
 	return r
 }
 
-// ScopeBindings enables scoped implicit bindings on the resulting routes.
+// ScopeBindings enables scoped binding metadata on the resulting routes.
 func (r *RouteRegistrar) ScopeBindings() *RouteRegistrar {
 	r.attributes["scope_bindings"] = true
 
 	return r
 }
 
-// WithoutScopedBindings disables scoped implicit bindings.
+// WithoutScopedBindings disables scoped binding metadata.
 func (r *RouteRegistrar) WithoutScopedBindings() *RouteRegistrar {
 	r.attributes["scope_bindings"] = false
 

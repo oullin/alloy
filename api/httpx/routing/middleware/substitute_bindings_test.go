@@ -8,19 +8,12 @@ import (
 
 type fakeBindingRouter struct {
 	explicit *routing.Route
-	implicit *routing.Route
 }
 
 var _ BindingRouter = (*routing.Router)(nil)
 
 func (r *fakeBindingRouter) SubstituteBindings(route *routing.Route) error {
 	r.explicit = route
-
-	return nil
-}
-
-func (r *fakeBindingRouter) SubstituteImplicitBindings(route *routing.Route) error {
-	r.implicit = route
 
 	return nil
 }
@@ -44,10 +37,6 @@ func TestSubstituteBindingsPassesRoutingRouteToRouter(t *testing.T) {
 
 	if router.explicit != route {
 		t.Fatal("explicit bindings did not receive route")
-	}
-
-	if router.implicit != route {
-		t.Fatal("implicit bindings did not receive route")
 	}
 }
 

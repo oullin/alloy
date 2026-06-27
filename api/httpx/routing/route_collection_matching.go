@@ -22,16 +22,15 @@ type MethodNotAllowedError struct {
 	Path    string
 }
 
-// AbstractRouteCollection is the embeddable base shared by [RouteCollection]
-// and [CompiledRouteCollection]. It holds no state; it provides the protected
-// helpers that the PHP abstract class supplies via inheritance.
-type AbstractRouteCollection struct{}
+// routeCollectionMatcher is the shared matching helper embedded by
+// [RouteCollection] and [CompiledRouteCollection]. It holds no state.
+type routeCollectionMatcher struct{}
 
-// HandleMatchedRoute binds a found route to the request, or — if none was
+// handleMatchedRoute binds a found route to the request, or — if none was
 // found — searches for a route that responds to a different verb and either
 // returns a 405 or a generic 404.
 
-// MatchAgainstRoutes scans routes in order, deferring fallback routes until
+// matchAgainstRoutes scans routes in order, deferring fallback routes until
 // after non-fallbacks have been considered. Returns the first match (or the
 // fallback) or nil.
 
@@ -53,7 +52,7 @@ func (e *MethodNotAllowedError) Error() string {
 		"requested", e.Path, e.Allowed)
 }
 
-func (AbstractRouteCollection) HandleMatchedRoute(
+func (routeCollectionMatcher) handleMatchedRoute(
 	getter func(method string) []*Route,
 	request matching.MatchableRequest,
 	matched *Route,
@@ -71,7 +70,7 @@ func (AbstractRouteCollection) HandleMatchedRoute(
 	return nil, ErrRouteNotFound
 }
 
-func (AbstractRouteCollection) MatchAgainstRoutes(
+func (routeCollectionMatcher) matchAgainstRoutes(
 	routes []*Route,
 	request matching.MatchableRequest,
 	includingMethod bool,
@@ -106,7 +105,7 @@ func checkForAlternateVerbs(getter func(method string) []*Route, request matchin
 			continue
 		}
 
-		matched := AbstractRouteCollection{}.MatchAgainstRoutes(getter(m), request, false)
+		matched := routeCollectionMatcher{}.matchAgainstRoutes(getter(m), request, false)
 
 		if matched != nil {
 			out = append(out, m)

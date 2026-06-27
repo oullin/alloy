@@ -17,7 +17,7 @@ type HandlerDispatcher interface {
 	GetMiddleware(handler any, method string) []any
 }
 
-// UrlRoutable participates in implicit and scoped route-model binding.
+// UrlRoutable exposes route key behavior for URL generation and binding hooks.
 type UrlRoutable interface {
 	GetRouteKey() any
 	GetRouteKeyName() string
@@ -75,7 +75,7 @@ type DependencyContainer interface {
 	MakeFor(t reflect.Type) (any, error)
 }
 
-// BackedEnum participates in implicit route binding.
+// BackedEnum exposes a scalar backing value for route URLs and signatures.
 type BackedEnum interface {
 	BackingValue() string
 }

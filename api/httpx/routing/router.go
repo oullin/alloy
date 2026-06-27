@@ -23,19 +23,18 @@ type noopEvents struct{}
 // PHP overloads (e.g. domain($d=null) acts as both setter and getter) the Go
 // surface splits them into two methods.
 type Router struct {
-	events                  EventDispatcher
-	container               BindingContainer
-	routes                  RouteCollectionInterface
-	current                 *Route
-	currentRequest          matching.MatchableRequest
-	currentMu               sync.RWMutex
-	middleware              map[string]any   // alias name → class string or closure
-	middlewareGroups        map[string][]any // group name → middleware list
-	MiddlewarePriority      []string
-	binders                 map[string]BindingResolver
-	patterns                map[string]string
-	groupStack              []map[string]any
-	implicitBindingCallback any
+	events             EventDispatcher
+	container          BindingContainer
+	routes             RouteCollectionInterface
+	current            *Route
+	currentRequest     matching.MatchableRequest
+	currentMu          sync.RWMutex
+	middleware         map[string]any   // alias name → class string or closure
+	middlewareGroups   map[string][]any // group name → middleware list
+	MiddlewarePriority []string
+	binders            map[string]BindingResolver
+	patterns           map[string]string
+	groupStack         []map[string]any
 }
 
 // DispatchResult carries the request-scoped route and the route handler's
@@ -797,19 +796,4 @@ func (r *Router) SubstituteBindings(route *Route) error {
 	}
 
 	return nil
-}
-
-// SubstituteImplicitBindings delegates to [ImplicitRouteBinding.ResolveForRoute].
-func (r *Router) SubstituteImplicitBindings(route *Route) error {
-	if route == nil || r.container == nil {
-		return nil
-	}
-
-	dependencyResolver, ok := r.container.(DependencyContainer)
-
-	if !ok {
-		return nil
-	}
-
-	return ImplicitRouteBinding{}.ResolveForRoute(dependencyResolver, route)
 }

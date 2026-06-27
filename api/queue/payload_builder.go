@@ -10,10 +10,9 @@ import (
 	cqueue "github.com/oullin/alloy/api/contracts/queue"
 )
 
-// class — the shared base every concrete driver extends in PHP. In Go we
-// expose it as a set of stateless helpers that drivers call directly,
-// rather than as embedded state, so existing drivers can opt in without
-// inheritance.
+// Payload builder helpers provide the shared queue-driver behavior that the
+// upstream PHP queue base class exposes through inheritance. In Go, drivers call
+// these stateless functions directly instead of embedding base state.
 //
 // The helpers cover:
 //

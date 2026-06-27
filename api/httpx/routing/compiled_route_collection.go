@@ -15,7 +15,7 @@ import (
 // the dumper produces alongside it. In Go we store a slice of Routes that the
 // router built from the cached form; M11 will provide a real cache loader.
 type CompiledRouteCollection struct {
-	AbstractRouteCollection
+	routeCollectionMatcher
 	routes     []*Route
 	nameList   map[string]*Route
 	actionList map[string]*Route
@@ -92,9 +92,9 @@ func (c *CompiledRouteCollection) RefreshActionLookups() {
 // Match scans the compiled set in registration order, just like
 // RouteCollection.Match.
 func (c *CompiledRouteCollection) Match(request matching.MatchableRequest) (*Route, error) {
-	matched := c.MatchAgainstRoutes(c.Get(request.Method()), request, true)
+	matched := c.matchAgainstRoutes(c.Get(request.Method()), request, true)
 
-	return c.HandleMatchedRoute(c.Get, request, matched)
+	return c.handleMatchedRoute(c.Get, request, matched)
 }
 
 // Get returns routes filtered by method, or all routes when method is "".
