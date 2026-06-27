@@ -1,2 +1,2 @@
-// Package testing provides MIME type helpers for the httpx package.
+// Package testing provides MIME type helpers for HTTP tests.
 package testing
