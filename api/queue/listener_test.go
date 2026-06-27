@@ -6,10 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
-// Ref: @bedrock/code-0369
 // the upstream test uses Mockery to partial-mock Symfony's Process and
 // the Listener itself, then asserts that makeProcess() returns a
 // process with the right command-line string, working directory, and
@@ -46,7 +45,6 @@ func (p *fakeListenerProcess) Timeout() time.Duration   { return 0 }
 
 // --- ports ------------------------------------------------------------
 
-// Ref: @bedrock/code-0369
 func TestRunProcessCallsProcess(t *testing.T) {
 	t.Parallel()
 
@@ -77,7 +75,6 @@ func TestRunProcessCallsProcess(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0369
 func TestListenerStopsWhenMemoryIsExceeded(t *testing.T) {
 	t.Parallel()
 
@@ -108,7 +105,6 @@ func TestListenerStopsWhenMemoryIsExceeded(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0369
 func TestMakeProcessCorrectlyFormatsCommandLine(t *testing.T) {
 	t.Parallel()
 
@@ -152,7 +148,6 @@ func TestMakeProcessCorrectlyFormatsCommandLine(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0369
 func TestMakeProcessCorrectlyFormatsCommandLineWithAnEnvironmentSpecified(t *testing.T) {
 	t.Parallel()
 
@@ -194,7 +189,6 @@ func TestMakeProcessCorrectlyFormatsCommandLineWithAnEnvironmentSpecified(t *tes
 	}
 }
 
-// Ref: @bedrock/code-0369
 func TestMakeProcessCorrectlyFormatsCommandLineWhenTheConnectionIsNotSpecified(t *testing.T) {
 	t.Parallel()
 

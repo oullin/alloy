@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/api/bus"
+	"alloy.dev/api/bus"
 )
 
 type chainableJob struct {

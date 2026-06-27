@@ -3,7 +3,7 @@
 The `lazy` package provides a `Collection[T]` type that leverages Go's iterators (`iter.Seq[T]`) for lazy evaluation. Items are only computed when needed, making it highly efficient for processing large datasets or infinite sequences.
 
 ```go
-import "github.com/oullin/alloy/api/collection/lazy"
+import "alloy.dev/api/collection/lazy"
 ```
 
 ### 🚀 Constructors

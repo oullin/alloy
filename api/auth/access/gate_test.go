@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/api/auth/access"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
+	"alloy.dev/api/auth/access"
+	cauth "alloy.dev/api/contracts/auth"
 )
 
 type testUser struct {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/api/config"
+	"alloy.dev/api/config"
 	"github.com/spf13/viper"
 )
 

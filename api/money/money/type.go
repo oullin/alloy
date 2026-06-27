@@ -1,8 +1,8 @@
 package money
 
 import (
-	"github.com/oullin/alloy/api/money/calculator"
-	"github.com/oullin/alloy/api/money/currency"
+	"alloy.dev/api/money/calculator"
+	"alloy.dev/api/money/currency"
 )
 
 // Amount is a data structure that stores the amount being used for calculations.

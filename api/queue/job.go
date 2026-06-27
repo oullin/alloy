@@ -1,6 +1,6 @@
 package queue
 
-import cqueue "github.com/oullin/alloy/api/contracts/queue"
+import cqueue "alloy.dev/api/contracts/queue"
 
 // Job represents a queued job instance.
 type Job = cqueue.Job

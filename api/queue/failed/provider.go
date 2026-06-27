@@ -1,6 +1,6 @@
 package failed
 
-import cfailed "github.com/oullin/alloy/api/contracts/queue/failed"
+import cfailed "alloy.dev/api/contracts/queue/failed"
 
 // Job is the decoded record returned by All and Find. It is the
 // Go analogue of the stdClass rows the upstream providers yield: the public
@@ -8,7 +8,6 @@ import cfailed "github.com/oullin/alloy/api/contracts/queue/failed"
 // integer primary key (database) or the job UUID (uuid/file/dynamodb).
 type Job = cfailed.Job
 
-// Ref: @bedrock/code-0258
 // persistence layer the worker uses to record permanently-failed jobs.
 //
 // Differences from PHP:

@@ -1,6 +1,6 @@
 package provider
 
-import cprovider "github.com/oullin/alloy/api/contracts/provider"
+import cprovider "alloy.dev/api/contracts/provider"
 
 // ServiceProvider is implemented by packages that register their services
 type ServiceProvider = cprovider.ServiceProvider

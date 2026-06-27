@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/hashing"
+	"alloy.dev/api/hashing"
 )
 
 func TestArgon2idMakeAndCheck(t *testing.T) {

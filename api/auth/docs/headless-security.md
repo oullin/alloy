@@ -42,7 +42,7 @@ registered, so applications can enable modules incrementally.
 
 ## JSON Errors
 
-Headless controllers should render errors through `httpx.ExceptionRenderer`
+Headless handlers should render errors through `httpx.ExceptionRenderer`
 or return the same shape:
 
 ```json
@@ -106,7 +106,7 @@ meta, ok := observability.RequestContextFromContext(r.Context())
 
 ## Cache And Rate Limits
 
-Use `github.com/oullin/alloy/api/cache` for shared TTL cache and fixed-window
+Use `alloy.dev/api/cache` for shared TTL cache and fixed-window
 rate-limit primitives. The memory store is suitable for tests and single-process
 apps; production multi-instance deployments should provide a distributed
 implementation of `cache.Store`.

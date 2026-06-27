@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	cauth "github.com/oullin/alloy/api/contracts/auth"
+	cauth "alloy.dev/api/contracts/auth"
 )
 
 // DBQuerier is the minimal raw-SQL interface for DatabaseUserProvider.

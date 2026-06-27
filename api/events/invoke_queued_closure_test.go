@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/oullin/alloy/api/events"
+	"alloy.dev/api/events"
 )
 
 func TestInvokeQueuedClosure_Handle(t *testing.T) {

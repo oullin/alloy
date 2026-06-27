@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // RedisClient is the minimal Redis interface required by the Redis queue driver.
@@ -96,7 +96,6 @@ type RedisDriver struct {
 
 // hasHashTag reports whether key contains a valid Redis cluster hash tag
 // (an opening `{` followed by a `}` with at least one character in between).
-// Ref: @bedrock/code-0276
 
 type redisJob struct{ BaseJob }
 

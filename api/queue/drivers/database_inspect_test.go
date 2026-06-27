@@ -6,10 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/queue/drivers"
+	"alloy.dev/api/queue/drivers"
 )
 
-// Ref: @bedrock/code-0366
 // covers Bulk + PendingJobs + DelayedJobs + ReservedJobs.
 //
 // These tests exercise the new DBExecer.Query path (multi-row result
@@ -61,7 +60,6 @@ func createdAtFloat(s string) float64 {
 	return out
 }
 
-// Ref: @bedrock/code-0366
 // Upstream asserts that DatabaseQueue::bulk issues one $db->insert call
 // with an array of records. The Go port asserts one Exec call whose
 // SQL carries two VALUES tuples and 8 positional args.
@@ -117,7 +115,6 @@ func TestBulkBatchPushesOntoDatabase(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0366
 func TestPendingJobs(t *testing.T) {
 	t.Parallel()
 
@@ -170,7 +167,6 @@ func TestPendingJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0366
 func TestDelayedJobs(t *testing.T) {
 	t.Parallel()
 
@@ -222,7 +218,6 @@ func TestDelayedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0366
 func TestReservedJobs(t *testing.T) {
 	t.Parallel()
 

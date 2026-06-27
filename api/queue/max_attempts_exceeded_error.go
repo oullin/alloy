@@ -3,7 +3,6 @@ package queue
 import "fmt"
 
 // ResolveNamer is the minimal job contract required by
-// Ref: @bedrock/code-0195
 // A package-local interface is used (rather than adding ResolveName to the
 // Job interface) because the Job interface is frozen until Step 9 of the
 // queue parity plan. See PARITY.md.
@@ -11,7 +10,6 @@ type ResolveNamer interface {
 	ResolveName() string
 }
 
-// Ref: @bedrock/code-0267
 // It is returned by the Worker when a job has exhausted its retry budget.
 // Access the failing job via the Job field (type-assert to the concrete
 // job type when needed).
@@ -28,7 +26,6 @@ type MaxAttemptsExceededError struct {
 func (e *MaxAttemptsExceededError) Error() string { return e.message }
 
 // NewMaxAttemptsExceededErrorForJob builds an error for the given job.
-// Ref: @bedrock/code-0267
 func NewMaxAttemptsExceededErrorForJob(job ResolveNamer) *MaxAttemptsExceededError {
 	return &MaxAttemptsExceededError{
 		Job:     job,

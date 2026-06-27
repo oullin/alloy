@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	factorypkg "github.com/oullin/alloy/api/tempo/factory"
+	factorypkg "alloy.dev/api/tempo/factory"
 )
 
 func Days() []string {

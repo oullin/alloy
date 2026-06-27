@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/httpx/middleware"
+	"alloy.dev/api/httpx/middleware"
 )
 
 func TestValidatePostSizeAllowed(t *testing.T) {

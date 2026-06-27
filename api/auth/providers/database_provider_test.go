@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/auth/security"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
+	"alloy.dev/api/auth/security"
+	cauth "alloy.dev/api/contracts/auth"
 )
 
 type providerDB struct {

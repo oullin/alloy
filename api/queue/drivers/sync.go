@@ -4,11 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // SyncDriver executes jobs immediately in the same goroutine. It is
-// Ref: @bedrock/code-0273
 // The Go API differs from the upstream in one ergonomic way: the handler
 // that runs every job is injected at construction time rather than
 // resolved from a container per-push. This keeps the existing bedrock

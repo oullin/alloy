@@ -1,4 +1,3 @@
-// Ref: @bedrock/code-0254
 // upstream framework 13.x. It defines the Provider contract plus
 // the optional Countable and Prunable extensions, and ships five
 // implementations that mirror the upstream providers:

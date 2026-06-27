@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/tempo"
+	"alloy.dev/api/tempo"
 )
 
 type mapTranslator map[string]string

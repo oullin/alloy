@@ -1,12 +1,5 @@
 package failed_test
 
-// Ref: @bedrock/code-0362
-// ✅ testCanProperlyLogFailedJob
-// ✅ testCanRetrieveAllFailedJobs
-// ✅ testASingleJobCanBeFound
-// ✅ testNullIsReturnedIfJobNotFound
-// ✅ testJobsCanBeDeleted
-
 import (
 	"context"
 	"encoding/json"
@@ -16,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/api/queue/failed"
+	"alloy.dev/api/queue/failed"
 )
 
 // fakeDynamoClient records the last arguments to each call and returns
@@ -53,7 +46,6 @@ func (f *fakeDynamoClient) DeleteItem(_ context.Context, params map[string]any) 
 	return map[string]any{}, nil
 }
 
-// Ref: @bedrock/code-0362
 func TestDynamoCanProperlyLogFailedJob(t *testing.T) {
 	t.Parallel()
 	fake := &fakeDynamoClient{}
@@ -87,7 +79,6 @@ func TestDynamoCanProperlyLogFailedJob(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0362
 func TestDynamoCanRetrieveAllFailedJobs(t *testing.T) {
 	t.Parallel()
 	timeNow := time.Now().Unix()
@@ -177,7 +168,6 @@ func TestDynamoCanRetrieveAllFailedJobsFromDecodedJSONArray(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0362
 func TestDynamoASingleJobCanBeFound(t *testing.T) {
 	t.Parallel()
 	timeNow := time.Now().Unix()
@@ -220,7 +210,6 @@ func TestDynamoASingleJobCanBeFound(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0362
 func TestDynamoNullIsReturnedIfJobNotFound(t *testing.T) {
 	t.Parallel()
 	fake := &fakeDynamoClient{getResp: map[string]any{}}
@@ -233,7 +222,6 @@ func TestDynamoNullIsReturnedIfJobNotFound(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0362
 func TestDynamoJobsCanBeDeleted(t *testing.T) {
 	t.Parallel()
 	fake := &fakeDynamoClient{}

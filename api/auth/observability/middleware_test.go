@@ -6,10 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/api/auth/observability"
-	"github.com/oullin/alloy/api/auth/user"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
-	clog "github.com/oullin/alloy/api/contracts/auth/log"
+	"alloy.dev/api/auth/observability"
+	"alloy.dev/api/auth/user"
+	cauth "alloy.dev/api/contracts/auth"
+	clog "alloy.dev/api/contracts/auth/log"
 )
 
 type staticGuard struct {

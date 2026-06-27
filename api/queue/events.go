@@ -1,6 +1,6 @@
 package queue
 
-import "github.com/oullin/alloy/api/queue/events"
+import "alloy.dev/api/queue/events"
 
 // This file re-exports the event types defined in the events subpackage at
 // the root of the queue package. The aliases exist for two reasons:
@@ -13,7 +13,6 @@ import "github.com/oullin/alloy/api/queue/events"
 // it here. New upstream events should be added to events/ first, then
 // re-exported here only if callers need the unqualified name.
 //
-// Ref: @bedrock/code-0232
 // re-exported below so a migration to qualified names is a pure find &
 // replace.
 

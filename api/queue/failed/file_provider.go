@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// Ref: @bedrock/code-0259
 // job as a record inside a single JSON file on disk (newest first),
 // capped at `limit` entries.
 //

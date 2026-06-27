@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oullin/alloy/api/collection/arr"
+	"alloy.dev/api/collection/arr"
 )
 
 // Each iterates over the items, passing each item and its index to the callback.

@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
+	cauth "alloy.dev/api/contracts/auth"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
 )
 
 // Service coordinates WebAuthn ceremonies.

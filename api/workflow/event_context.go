@@ -3,7 +3,7 @@ package workflow
 import (
 	"maps"
 
-	"github.com/oullin/alloy/api/workflow/events"
+	"alloy.dev/api/workflow/events"
 )
 
 func (w *Machine[T]) baseEvent(subject T, transition Transition, marking Marking, context map[string]any) events.Base[T] {

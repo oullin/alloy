@@ -8,8 +8,8 @@ package kernel
 import (
 	"time"
 
-	"github.com/oullin/alloy/api/tempo/calendar"
-	"github.com/oullin/alloy/api/tempo/duration"
+	"alloy.dev/api/tempo/calendar"
+	"alloy.dev/api/tempo/duration"
 )
 
 func Add(value time.Time, location *time.Location, amount int, unit duration.Unit, monthsOverflow bool, yearsOverflow bool) time.Time {

@@ -7,6 +7,11 @@ source "${ROOT_PATH}/infra/scripts/tasks/cache-env.sh"
 
 API_PATH="${ROOT_PATH}/api"
 GO_WORK_PATH="${API_PATH}/go.work"
+GO_WORK_ENV="off"
+
+if [[ -f "${GO_WORK_PATH}" ]]; then
+	GO_WORK_ENV="${GO_WORK_PATH}"
+fi
 
 # Every Go module under api owns a go.mod.
 while IFS= read -r -d '' gomod; do
@@ -14,13 +19,17 @@ while IFS= read -r -d '' gomod; do
 	echo "==> ${module_dir#"${ROOT_PATH}/"}"
 	(
 		cd "${module_dir}"
-		export GOWORK="${GO_WORK_PATH}"
-		if [[ "$(go env GOWORK)" != "${GO_WORK_PATH}" ]]; then
-			echo "go workspace resolution is not using ${GO_WORK_PATH}" >&2
+		export GOWORK="${GO_WORK_ENV}"
+		if [[ "${GO_WORK_ENV}" != "off" && "$(go env GOWORK)" != "${GO_WORK_ENV}" ]]; then
+			echo "go workspace resolution is not using ${GO_WORK_ENV}" >&2
 			exit 1
 		fi
-		go list -m github.com/oullin/alloy/api/contracts >/dev/null
+		module_path="$(go list -m)"
+		if [[ "${module_path}" != "alloy.dev/api" && "${module_path}" != alloy.dev/api/* ]]; then
+			echo "unexpected Go module path: ${module_path}" >&2
+			exit 1
+		fi
 		go vet ./...
 		go test -race ./...
 	)
-done < <(find "${API_PATH}" -mindepth 2 -name go.mod -print0 | sort -z)
+done < <(find "${API_PATH}" -name go.mod -print0 | sort -z)

@@ -10,16 +10,16 @@ import (
 	"testing"
 	"time"
 
+	"alloy.dev/api/auth/browserx"
+	"alloy.dev/api/auth/fortify"
+	"alloy.dev/api/auth/passkeys"
+	"alloy.dev/api/auth/passwords"
+	"alloy.dev/api/auth/teams"
+	patokens "alloy.dev/api/auth/tokens"
+	"alloy.dev/api/auth/twofactor"
+	"alloy.dev/api/auth/user"
+	cauth "alloy.dev/api/contracts/auth"
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/oullin/alloy/api/auth/browserx"
-	"github.com/oullin/alloy/api/auth/fortify"
-	"github.com/oullin/alloy/api/auth/passkeys"
-	"github.com/oullin/alloy/api/auth/passwords"
-	"github.com/oullin/alloy/api/auth/teams"
-	patokens "github.com/oullin/alloy/api/auth/tokens"
-	"github.com/oullin/alloy/api/auth/twofactor"
-	"github.com/oullin/alloy/api/auth/user"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
 )
 
 type stubStatefulGuard struct {

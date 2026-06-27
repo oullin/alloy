@@ -3,8 +3,8 @@ package money
 import (
 	"testing"
 
-	"github.com/oullin/alloy/api/money/currency"
-	testutil "github.com/oullin/alloy/api/money/tests"
+	"alloy.dev/api/money/currency"
+	testutil "alloy.dev/api/money/tests"
 )
 
 func TestMoney_Value(t *testing.T) {

@@ -1,20 +1,5 @@
 package failed_test
 
-// Ref: @bedrock/code-0363
-// ✅ testCanLogFailedJobs
-// ✅ testCanRetrieveAllFailedJobs
-// ✅ testCanFindFailedJobs
-// ✅ testNullIsReturnedIfJobNotFound
-// ✅ testCanForgetFailedJobs
-// ✅ testCanFlushFailedJobs
-// ✅ testCanPruneFailedJobs
-// ✅ testCanPruneFailedJobsWithRelativeHours
-// ✅ testEmptyFailedJobsByDefault
-// ✅ testJobsCanBeCounted
-// ✅ testJobsCanBeCountedByConnection
-// ✅ testJobsCanBeCountedByQueue
-// ✅ testJobsCanBeCountedByQueueAndConnection
-
 import (
 	"encoding/json"
 	"errors"
@@ -24,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/api/queue/failed"
+	"alloy.dev/api/queue/failed"
 )
 
 type loggedJob struct {
@@ -54,7 +39,6 @@ func logFileJob(t *testing.T, p *failed.FileFailedJobProvider, connection, queue
 	return loggedJob{uuid: uuid, err: ex}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanLogFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -77,7 +61,6 @@ func TestCanLogFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanRetrieveAllFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -115,7 +98,6 @@ func TestMalformedFailedJobFileReturnsError(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanFindFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -128,7 +110,6 @@ func TestCanFindFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestNullIsReturnedIfJobNotFound(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -138,7 +119,6 @@ func TestNullIsReturnedIfJobNotFound(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanForgetFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -150,7 +130,6 @@ func TestCanForgetFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanFlushFailedJobsFile(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -164,7 +143,6 @@ func TestCanFlushFailedJobsFile(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanPruneFailedJobsFile(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -191,7 +169,6 @@ func TestCanPruneFailedJobsFile(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestCanPruneFailedJobsWithRelativeHours(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -214,7 +191,6 @@ func TestCanPruneFailedJobsWithRelativeHours(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestEmptyFailedJobsByDefault(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -225,7 +201,6 @@ func TestEmptyFailedJobsByDefault(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestJobsCanBeCountedFile(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -248,7 +223,6 @@ func TestJobsCanBeCountedFile(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestJobsCanBeCountedByConnectionFile(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -274,7 +248,6 @@ func TestJobsCanBeCountedByConnectionFile(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestJobsCanBeCountedByQueueFile(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)
@@ -300,7 +273,6 @@ func TestJobsCanBeCountedByQueueFile(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0363
 func TestJobsCanBeCountedByQueueAndConnectionFile(t *testing.T) {
 	t.Parallel()
 	p := newFileProvider(t)

@@ -1,6 +1,5 @@
 //go:build integration
 
-// Ref: @bedrock/code-0365
 //
 // Parity status:
 //   testAvailableAndUnReservedJobsArePopped   ✅
@@ -35,11 +34,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/queue"
-	"github.com/oullin/alloy/api/queue/drivers"
+	"alloy.dev/api/queue"
+	"alloy.dev/api/queue/drivers"
 )
 
-// Ref: @bedrock/code-0365
 func TestAvailableAndUnReservedJobsArePopped(t *testing.T) {
 	t.Parallel()
 
@@ -66,7 +64,6 @@ func TestAvailableAndUnReservedJobsArePopped(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0365
 func TestPoppedJobsIncrementAttempts(t *testing.T) {
 	t.Parallel()
 
@@ -105,7 +102,6 @@ func TestPoppedJobsIncrementAttempts(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0365
 func TestThatQueueCanBeCleared(t *testing.T) {
 	t.Parallel()
 
@@ -145,7 +141,6 @@ func TestThatQueueCanBeCleared(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0365
 func TestUnavailableJobsAreNotPopped(t *testing.T) {
 	t.Parallel()
 
@@ -170,7 +165,6 @@ func TestUnavailableJobsAreNotPopped(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0365
 // DEFERRED. the upstream Pop reclaims reserved_at rows whose reservation
 // has expired (reserved_at < now - retry_after). The Go DatabaseDriver
 // Pop today only selects rows where reserved_at IS NULL, so there is
@@ -181,7 +175,6 @@ func TestThatReservedAndExpiredJobsArePopped(t *testing.T) {
 	t.Skip("deferred: DatabaseDriver.Pop does not yet reclaim expired reservations")
 }
 
-// Ref: @bedrock/code-0365
 func TestThatReservedJobsAreNotPopped(t *testing.T) {
 	t.Parallel()
 
@@ -201,7 +194,6 @@ func TestThatReservedJobsAreNotPopped(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0365
 // Adaptation: upstream dispatches JobQueueing / JobQueued events from
 // DatabaseQueue::push and the PHP test asserts the event payload()
 // contains the job UUID. In the Go port, the driver does not emit

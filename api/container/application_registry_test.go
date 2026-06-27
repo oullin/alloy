@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/api/container"
+	"alloy.dev/api/container"
 )
 
 type sample struct{ Value string }

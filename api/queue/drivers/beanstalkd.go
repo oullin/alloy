@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // BeanstalkdClient is the interface for a Beanstalkd client.
@@ -42,7 +42,6 @@ type BeanstalkdPeeker interface {
 }
 
 // BeanstalkdDriver enqueues jobs via a Beanstalkd client. It is the
-// Ref: @bedrock/code-0230
 // Two knobs are tunable after construction:
 //
 //   - SetDefaultTube configures the fallback tube used when a caller

@@ -1,6 +1,6 @@
 # 💎 Collection[T] API Reference
 
-`import "github.com/oullin/alloy/api/collection/collection"`
+`import "alloy.dev/api/collection/collection"`
 
 `Collection[T]` is a generic wrapper around a Go slice that provides a fluent, chainable API for filtering, sorting, transforming, and aggregating data. It is the core type of the `collection` package.
 

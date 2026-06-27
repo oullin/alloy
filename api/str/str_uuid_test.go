@@ -47,7 +47,6 @@ func TestStrFreezeUuidsCleanup(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testItCanSpecifyAFallbackForASequence
 func TestStrUuidSequence(t *testing.T) {
 	// NOT parallel — modifies global state
 	cleanup := CreateUuidsUsingSequence([]string{
@@ -78,7 +77,6 @@ func TestStrUuidSequence(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testItCanFreezeUlidsInAClosure
 func TestStrFreezeUlids(t *testing.T) {
 	// NOT parallel — modifies global state
 	cleanup := FreezeUlids(func() string { return "FROZENULID00000000000000000" })
@@ -91,7 +89,6 @@ func TestStrFreezeUlids(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testItCanSpecifyAFallbackForAUlidSequence
 func TestStrUlidSequence(t *testing.T) {
 	// NOT parallel — modifies global state
 	seq := []string{
@@ -125,7 +122,6 @@ func TestStrUlidSequence(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testItCreatesUlidsNormallyAfterFailureWithinFreezeMethod
 func TestStrCreateUuidsNormally(t *testing.T) {
 	// NOT parallel — modifies global state
 	cleanup := FreezeUuids(func() string { return "frozen" })

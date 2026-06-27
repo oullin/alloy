@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/api/container"
+	"alloy.dev/api/container"
 )
 
 func newContainer() *container.App {

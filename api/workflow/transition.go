@@ -1,6 +1,6 @@
 package workflow
 
-import cworkflow "github.com/oullin/alloy/api/contracts/workflow"
+import cworkflow "alloy.dev/api/contracts/workflow"
 
 // Transition is an arc in the Petri-Net moving tokens from From places to To places.
 type Transition = cworkflow.Transition

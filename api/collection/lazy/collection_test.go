@@ -6,167 +6,6 @@ import (
 	"time"
 )
 
-// Framework collections parity markers exercised by this file.
-// SupportLazyCollectionTest::testCanCreateCollectionFromArray
-// SupportLazyCollectionTest::testCanCreateCollectionFromGeneratorFunction
-// SupportLazyCollectionTest::testCanCreateCollectionFromNonGeneratorFunction
-// SupportLazyCollectionTest::testDoesNotCreateCollectionFromGenerator
-// SupportLazyCollectionTest::testCanCreateEmptyCollection
-// SupportLazyCollectionTest::testEager
-// SupportLazyCollectionTest::testRemember
-// SupportLazyCollectionTest::testRememberWithTwoRunners
-// SupportLazyCollectionTest::testRememberWithDuplicateKeys
-// SupportLazyCollectionTest::testTakeUntilTimeout
-// SupportLazyCollectionTest::testTapEach
-// SupportLazyCollectionTest::testThrottle
-// SupportLazyCollectionTest::testThrottleAccountsForTimePassed
-// SupportLazyCollectionTest::testUniqueDoubleEnumeration
-// SupportLazyCollectionTest::testAfter
-// SupportLazyCollectionTest::testBefore
-// SupportLazyCollectionTest::testShuffle
-// SupportLazyCollectionTest::testCollapseWithKeys
-// SupportLazyCollectionTest::testContainsOneItem
-// SupportLazyCollectionTest::testContainsManyItems
-// SupportLazyCollectionTest::testDoesntContain
-// SupportLazyCollectionTest::testDot
-// SupportLazyCollectionTest::testWithHeartbeat
-// SupportLazyCollectionTest::testRandomPreservesKeys
-// SupportLazyCollectionTest::testFirstOrFail
-// SupportLazyCollectionTest::testFirstOrFailReturnsFirstItemInCollectionIfOnlyOneExistsWithCallback
-// SupportLazyCollectionTest::testFirstOrFailThrowsExceptionIfNoItemsExistWithCallback
-// SupportLazyCollectionTest::testFirstOrFailDoesntThrowExceptionIfMoreThanOneItemExistsWithCallback
-// SupportLazyCollectionIsLazyTest::testFirstIsLazy
-// SupportLazyCollectionTest::testLast
-// SupportLazyCollectionTest::testGet
-// SupportLazyCollectionTest::testContains
-// SupportLazyCollectionTest::testSearch
-// SupportLazyCollectionTest::testBefore
-// SupportLazyCollectionTest::testAfter
-// SupportLazyCollectionTest::testFilter
-// SupportLazyCollectionTest::testReject
-// SupportLazyCollectionTest::testMap
-// SupportLazyCollectionTest::testFlatMap
-// SupportLazyCollectionTest::testTake
-// SupportLazyCollectionTest::testTakeUntil
-// SupportLazyCollectionTest::testTakeWhile
-// SupportLazyCollectionTest::testSkip
-// SupportLazyCollectionTest::testSkipUntil
-// SupportLazyCollectionTest::testSkipWhile
-// SupportLazyCollectionTest::testSlice
-// SupportLazyCollectionTest::testChunk
-// SupportLazyCollectionTest::testNth
-// SupportLazyCollectionTest::testConcat
-// SupportLazyCollectionTest::testPad
-// SupportLazyCollectionTest::testEvery
-// SupportLazyCollectionTest::testImplode
-// SupportLazyCollectionTest::testJoin
-// SupportLazyCollectionTest::testReduce
-// SupportLazyCollectionTest::testUnique
-// SupportLazyCollectionTest::testPluck
-// SupportLazyCollectionTest::testGroupBy
-// SupportLazyCollectionTest::testKeyBy
-// SupportLazyCollectionTest::testCountBy
-// SupportLazyCollectionTest::testRemember
-// SupportLazyCollectionTest::testContainsOneItem
-// SupportLazyCollectionTest::testWhen
-// SupportLazyCollectionTest::testTapEach
-// SupportLazyCollectionTest::testFromSlice
-// SupportLazyCollectionTest::testEach
-// SupportLazyCollectionTest::testSole
-// SupportLazyCollectionTest::testFirstOrFail
-// SupportLazyCollectionTest::testIter
-// SupportLazyCollectionTest::testCollect
-// SupportLazyCollectionTest::testContainsManyItems
-// SupportLazyCollectionTest::testSome
-// SupportLazyCollectionTest::testDoesntContain
-// SupportLazyCollectionTest::testTap
-// SupportLazyCollectionTest::testHas
-// SupportLazyCollectionTest::testHasAny
-// SupportLazyCollectionTest::testHasSole
-// SupportLazyCollectionTest::testChunkWhile
-// SupportLazyCollectionTest::testTakeUntilTimeout
-// SupportLazyCollectionTest::testThrottle
-// SupportLazyCollectionTest::testWhenFalseWithDefault
-// SupportLazyCollectionTest::testWhenFalseWithoutDefault
-// SupportLazyCollectionTest::testWhenEmpty
-// SupportLazyCollectionTest::testWhenNotEmpty
-// SupportLazyCollectionTest::testUnless
-// SupportLazyCollectionTest::testDump
-// SupportLazyCollectionTest::testSoleEmpty
-// SupportLazyCollectionTest::testSoleMultiple
-// SupportLazyCollectionTest::testSoleSingle
-// SupportLazyCollectionTest::testSoleCallbackNoMatch
-// SupportLazyCollectionTest::testSoleCallbackMultipleMatches
-// SupportLazyCollectionTest::testPadNegative
-// SupportLazyCollectionTest::testPadAlreadySufficient
-// SupportLazyCollectionTest::testRangeSingle
-// SupportLazyCollectionTest::testTimesZero
-// SupportLazyCollectionTest::testIsEmptyNonEmpty
-// SupportLazyCollectionTest::testEveryEmpty
-// SupportLazyCollectionTest::testEveryFailing
-// SupportLazyCollectionIsLazyTest::testMakeWithClosureIsLazy
-// SupportLazyCollectionIsLazyTest::testMakeWithLazyCollectionIsLazy
-// SupportLazyCollectionIsLazyTest::testEagerEnumeratesOnce
-// SupportLazyCollectionIsLazyTest::testChunkIsLazy
-// SupportLazyCollectionIsLazyTest::testChunkWhileIsLazy
-// SupportLazyCollectionIsLazyTest::testCollapseIsLazy
-// SupportLazyCollectionIsLazyTest::testCombineIsLazy
-// SupportLazyCollectionIsLazyTest::testConcatIsLazy
-// SupportLazyCollectionIsLazyTest::testMultiplyIsLazy
-// SupportLazyCollectionIsLazyTest::testContainsIsLazy
-// SupportLazyCollectionIsLazyTest::testDoesntContainIsLazy
-// SupportLazyCollectionIsLazyTest::testContainsStrictIsLazy
-// SupportLazyCollectionIsLazyTest::testCountEnumeratesOnce
-// SupportLazyCollectionIsLazyTest::testCountByIsLazy
-// SupportLazyCollectionIsLazyTest::testCrossJoinIsLazy
-// SupportLazyCollectionIsLazyTest::testDiffIsLazy
-// SupportLazyCollectionIsLazyTest::testDiffAssocIsLazy
-// SupportLazyCollectionIsLazyTest::testDiffAssocUsingIsLazy
-// SupportLazyCollectionIsLazyTest::testDiffKeysIsLazy
-// SupportLazyCollectionIsLazyTest::testDiffKeysUsingIsLazy
-// SupportLazyCollectionIsLazyTest::testDiffUsingIsLazy
-// SupportLazyCollectionIsLazyTest::testDuplicatesIsLazy
-// SupportLazyCollectionIsLazyTest::testDuplicatesStrictIsLazy
-// SupportLazyCollectionIsLazyTest::testEachIsLazy
-// SupportLazyCollectionIsLazyTest::testEachSpreadIsLazy
-// SupportLazyCollectionIsLazyTest::testEveryIsLazy
-// SupportLazyCollectionIsLazyTest::testExceptIsLazy
-// SupportLazyCollectionIsLazyTest::testFilterIsLazy
-// SupportLazyCollectionIsLazyTest::testFirstIsLazy
-// SupportLazyCollectionIsLazyTest::testFirstWhereIsLazy
-// SupportLazyCollectionIsLazyTest::testFlatMapIsLazy
-// SupportLazyCollectionIsLazyTest::testFlattenIsLazy
-// SupportLazyCollectionIsLazyTest::testFlipIsLazy
-// SupportLazyCollectionIsLazyTest::testForPageIsLazy
-// SupportLazyCollectionIsLazyTest::testGetIsLazy
-// SupportLazyCollectionIsLazyTest::testGroupByIsLazy
-// SupportLazyCollectionIsLazyTest::testHasIsLazy
-// SupportLazyCollectionIsLazyTest::testHasAnyIsLazy
-// SupportLazyCollectionIsLazyTest::testImplodeEnumeratesOnce
-// SupportLazyCollectionIsLazyTest::testIntersectIsLazy
-// SupportLazyCollectionIsLazyTest::testIntersectUsingIsLazy
-// SupportLazyCollectionIsLazyTest::testIntersectAssocIsLazy
-// SupportLazyCollectionIsLazyTest::testIntersectAssocUsingIsLazy
-// SupportLazyCollectionIsLazyTest::testIsEmptyIsLazy
-// SupportLazyCollectionIsLazyTest::testIsNotEmptyIsLazy
-// SupportLazyCollectionIsLazyTest::testContainsOneItemIsLazy
-// SupportLazyCollectionIsLazyTest::testHasManyIsLazy
-// SupportLazyCollectionIsLazyTest::testHasSoleIsLazy
-// SupportLazyCollectionIsLazyTest::testJoinIsLazy
-// SupportLazyCollectionIsLazyTest::testLastEnumeratesOnce
-// SupportLazyCollectionIsLazyTest::testMapIsLazy
-// SupportLazyCollectionIsLazyTest::testNthIsLazy
-// SupportLazyCollectionIsLazyTest::testPluckIsLazy
-// SupportLazyCollectionIsLazyTest::testRejectIsLazy
-// SupportLazyCollectionIsLazyTest::testSkipIsLazy
-// SupportLazyCollectionIsLazyTest::testSkipUntilIsLazy
-// SupportLazyCollectionIsLazyTest::testSkipWhileIsLazy
-// SupportLazyCollectionIsLazyTest::testSliceIsLazy
-// SupportLazyCollectionIsLazyTest::testTakeIsLazy
-// SupportLazyCollectionIsLazyTest::testTakeUntilIsLazy
-// SupportLazyCollectionIsLazyTest::testTakeWhileIsLazy
-// SupportLazyCollectionIsLazyTest::testUniqueIsLazy
-// SupportLazyCollectionIsLazyTest::testValuesIsLazy
 func TestFrom(t *testing.T) {
 	lc := From([]int{1, 2, 3})
 	items := lc.All()
@@ -358,15 +197,6 @@ func TestFlatMap(t *testing.T) {
 }
 
 func TestLazyTransformationsAreDeferredUntilConsumed(t *testing.T) {
-	// SupportLazyCollectionIsLazyTest::testPadIsLazy
-	// SupportLazyCollectionIsLazyTest::testRangeIsLazy
-	// SupportLazyCollectionIsLazyTest::testRememberIsLazy
-	// SupportLazyCollectionIsLazyTest::testTakeUntilTimeoutIsLazy
-	// SupportLazyCollectionIsLazyTest::testTapDoesNotEnumerate
-	// SupportLazyCollectionIsLazyTest::testTapEachIsLazy
-	// SupportLazyCollectionIsLazyTest::testTimesIsLazy
-	// SupportLazyCollectionIsLazyTest::testUnlessDoesNotEnumerate
-	// SupportLazyCollectionIsLazyTest::testWhenDoesNotEnumerate
 	tests := []struct {
 		name  string
 		build func(*Collection[int]) *Collection[int]
@@ -559,25 +389,6 @@ func TestLazyTransformationsAreDeferredUntilConsumed(t *testing.T) {
 func TestLazyTerminalOperationsEnumerateOnceOrStopEarly(t *testing.T) {
 	t.Parallel()
 
-	// SupportLazyCollectionIsLazyTest::testAvgEnumeratesOnce
-	// SupportLazyCollectionIsLazyTest::testFindFirstOrFailIsLazy
-	// SupportLazyCollectionIsLazyTest::testMaxEnumeratesOnce
-	// SupportLazyCollectionIsLazyTest::testMinEnumeratesOnce
-	// SupportLazyCollectionIsLazyTest::testReduceIsLazy
-	// SupportLazyCollectionIsLazyTest::testReverseIsLazy
-	// SupportLazyCollectionIsLazyTest::testRandomEnumeratesOnce
-	// SupportLazyCollectionIsLazyTest::testSearchIsLazy
-	// SupportLazyCollectionIsLazyTest::testShuffleIsLazy
-	// SupportLazyCollectionIsLazyTest::testSlidingIsLazy
-	// SupportLazyCollectionIsLazyTest::testSomeIsLazy
-	// SupportLazyCollectionIsLazyTest::testSoleIsLazy
-	// SupportLazyCollectionIsLazyTest::testSortIsLazy
-	// SupportLazyCollectionIsLazyTest::testSortDescIsLazy
-	// SupportLazyCollectionIsLazyTest::testSortByIsLazy
-	// SupportLazyCollectionIsLazyTest::testSortByDescIsLazy
-	// SupportLazyCollectionIsLazyTest::testSumEnumeratesOnce
-	// SupportLazyCollectionIsLazyTest::testThrottleIsLazy
-	// SupportLazyCollectionIsLazyTest::testToArrayEnumeratesOnce
 	enumerated := 0
 	source := New(func(yield func(int) bool) {
 		for _, item := range []int{1, 2, 3, 4} {

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/api/auth/internal/authtest"
-	"github.com/oullin/alloy/api/auth/sessionx"
-	"github.com/oullin/alloy/api/auth/user"
-	cauth "github.com/oullin/alloy/api/contracts/auth"
+	"alloy.dev/api/auth/internal/authtest"
+	"alloy.dev/api/auth/sessionx"
+	"alloy.dev/api/auth/user"
+	cauth "alloy.dev/api/contracts/auth"
 )
 
 func TestTokenGuardUserCanBeRetrievedByQueryStringVariable(t *testing.T) {

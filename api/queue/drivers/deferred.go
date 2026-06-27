@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oullin/alloy/api/queue"
+	"alloy.dev/api/queue"
 )
 
 // DeferredEntry holds a deferred job payload.
