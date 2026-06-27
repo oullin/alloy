@@ -267,7 +267,6 @@ func TestShouldDispatchAfterCommitPrecedence(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0359
 func TestBeforeCommitContractDispatchPrecedence(t *testing.T) {
 	t.Parallel()
 
@@ -292,7 +291,6 @@ func TestBeforeCommitContractDispatchPrecedence(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0367
 func TestQueueDelayAndWithoutDelayOptions(t *testing.T) {
 	t.Parallel()
 
@@ -313,7 +311,6 @@ func TestQueueDelayAndWithoutDelayOptions(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0366
 func TestCreatePayloadForIncludesBatchID(t *testing.T) {
 	t.Parallel()
 

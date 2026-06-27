@@ -8,7 +8,6 @@ import cfailed "github.com/oullin/alloy/api/contracts/queue/failed"
 // integer primary key (database) or the job UUID (uuid/file/dynamodb).
 type Job = cfailed.Job
 
-// Ref: @bedrock/code-0258
 // persistence layer the worker uses to record permanently-failed jobs.
 //
 // Differences from PHP:

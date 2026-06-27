@@ -6,8 +6,6 @@ import (
 
 // HandlerDispatcher resolves and invokes a handler method against a
 // matched route, applying reflection-based parameter resolution.
-//
-// Ref: @bedrock/code-0296
 type HandlerDispatcher struct {
 	ResolvesRouteDependencies
 	FiltersHandlerMiddleware

@@ -2,9 +2,7 @@ package routing
 
 import "testing"
 
-// Ref: @bedrock/code-0396
 // Each subtest preserves the upstream PHP method name for grep-ability.
-// RouteUriTest::testRouteUrisAreProperlyParsed
 func TestRouteUri(t *testing.T) {
 	t.Run("test_parsing_uri_with_no_binding_fields", func(t *testing.T) {
 		ru := ParseRouteUri("/users/{user}")

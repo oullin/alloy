@@ -96,7 +96,6 @@ type RedisDriver struct {
 
 // hasHashTag reports whether key contains a valid Redis cluster hash tag
 // (an opening `{` followed by a `}` with at least one character in between).
-// Ref: @bedrock/code-0276
 
 type redisJob struct{ BaseJob }
 

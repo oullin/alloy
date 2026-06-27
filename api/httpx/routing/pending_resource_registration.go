@@ -5,8 +5,6 @@ package routing
 // the Go form applies them when [PendingResourceRegistration.Register] is
 // called explicitly, or implicitly when the user reads the resulting
 // collection via [PendingResourceRegistration.Routes].
-//
-// Ref: @bedrock/code-0325
 type PendingResourceRegistration struct {
 	registrar  *ResourceRegistrar
 	name       string

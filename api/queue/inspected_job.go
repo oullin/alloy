@@ -3,7 +3,6 @@ package queue
 import "time"
 
 // InspectedJob is a read-only snapshot of a job that lives on a queue
-// Ref: @bedrock/code-0263
 // and is returned by the JobInspector methods on drivers that support
 // peeking at the contents of a queue without removing them.
 //

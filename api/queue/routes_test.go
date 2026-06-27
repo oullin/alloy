@@ -7,7 +7,6 @@ import (
 	"github.com/oullin/alloy/api/queue"
 )
 
-// Ref: @bedrock/code-0371
 // PHP's class_parents / class_implements / class_uses chain; Go has no
 // runtime class hierarchy, so fake values here implement RouteLineage
 // to report the same logical lookup chain. Behaviour under assertion
@@ -55,7 +54,6 @@ func newPayment() lineageFixture {
 
 // --- ports ------------------------------------------------------------
 
-// Ref: @bedrock/code-0371
 func TestSet(t *testing.T) {
 	t.Parallel()
 
@@ -94,7 +92,6 @@ func TestSet(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0371
 func TestGetQueue(t *testing.T) {
 	t.Parallel()
 
@@ -125,7 +122,6 @@ func TestGetQueue(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0371
 func TestGetConnection(t *testing.T) {
 	t.Parallel()
 
@@ -155,7 +151,6 @@ func TestGetConnection(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0371
 func TestStringRouteDefaultsToQueueNotConnection(t *testing.T) {
 	t.Parallel()
 

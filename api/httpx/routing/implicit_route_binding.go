@@ -8,7 +8,6 @@ import (
 	"github.com/oullin/alloy/api/httpx/routing/exceptions"
 )
 
-// Ref: @bedrock/code-0312
 // In PHP it walks the route's signature parameters, picks out those whose
 // type implements [contracts.UrlRoutable], and replaces the matching path
 // parameter with the resolved instance (looked up via the parameter's class).

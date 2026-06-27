@@ -70,7 +70,6 @@ func NewSQSDriver(client SQSClient, queueURLs map[string]string, connection stri
 // SetPrefix sets the SQS queue URL prefix. Returns the
 // driver for chaining. When set, GetQueue composes the full URL from
 // prefix + queue name (with optional suffix and FIFO-awareness),
-// Ref: @bedrock/code-0272
 func (d *SQSDriver) SetPrefix(prefix string) *SQSDriver {
 	d.prefix = prefix
 
@@ -95,7 +94,6 @@ func (d *SQSDriver) SetSuffix(suffix string) *SQSDriver {
 }
 
 // GetQueue resolves a logical queue name to its SQS URL, replicating
-// Ref: @bedrock/code-0272
 //   - Empty input falls back to the configured default queue.
 //   - Already-qualified URLs (starts with http:// or https://) are
 //     returned unchanged.

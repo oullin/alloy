@@ -7,43 +7,9 @@ import (
 	contracts "github.com/oullin/alloy/api/httpx/routing/contracts"
 )
 
-// Ref: @bedrock/code-0399
 // Byte-level signed URL parity with upstream cannot be asserted here without a
 // PHP runtime to dump fixtures. The tests below verify the round-trip
 // invariants (Sign → HasValidSignature) and the canonical encoding rules.
-// RoutingUrlGeneratorTest::testBasicGeneration
-// RoutingUrlGeneratorTest::testQueryGeneration
-// RoutingUrlGeneratorTest::testAssetGeneration
-// RoutingUrlGeneratorTest::testBasicGenerationWithPathFormatting
-// RoutingUrlGeneratorTest::testUseRootUrl
-// RoutingUrlGeneratorTest::testForceHttps
-// RoutingUrlGeneratorTest::testBasicRouteGeneration
-// RoutingUrlGeneratorTest::testFluentRouteNameDefinitions
-// RoutingUrlGeneratorTest::testRoutableInterfaceRouting
-// RoutingUrlGeneratorTest::testRoutableInterfaceRoutingWithCustomBindingField
-// RoutingUrlGeneratorTest::testRoutableInterfaceRoutingAsQueryString
-// RoutingUrlGeneratorTest::testRoutableInterfaceRoutingWithSingleParameter
-// RoutingUrlGeneratorTest::testRoutesMaintainRequestScheme
-// RoutingUrlGeneratorTest::testRoutesWithDomains
-// RoutingUrlGeneratorTest::testRoutesWithDomainsAndPorts
-// RoutingUrlGeneratorTest::testRoutesWithDomainsStripsProtocols
-// RoutingUrlGeneratorTest::testUrlGenerationForHandlersRequiresPassingOfRequiredParameters
-// RoutingUrlGeneratorTest::testUrlGenerationThrowsExceptionForMissingParametersWithMeaningfulMessage
-// RoutingUrlGeneratorTest::testSetAssetUrl
-// RoutingUrlGeneratorTest::testSignedUrl
-// RoutingUrlGeneratorTest::testSignedRelativeUrl
-// RoutingUrlGeneratorTest::testTemporarySignedRoute
-// RoutingUrlGeneratorTest::testSignedUrlParameterCannotBeNamedSignature
-// RoutingUrlGeneratorTest::testSignedUrlParameterCannotBeNamedExpires
-// RoutingUrlGeneratorTest::testRouteGenerationWithBackedEnums
-// RoutingUrlGeneratorTest::testRouteGenerationWithNestedBackedEnums
-// RoutingUrlGeneratorTest::testSignedUrlWithKeyResolver
-// RoutingUrlGeneratorTest::testRouteNotDefinedException
-// RoutingUrlGeneratorTest::testMissingNamedRouteResolution
-// RoutingUrlGeneratorTest::testPassedParametersHavePrecedenceOverDefaults
-// RoutingUrlGeneratorTest::testComplexRouteGenerationWithDefaultsAndBindingFields
-// RoutingUrlGeneratorTest::testDefaultsCanBeCombinedWithExtraQueryParameters
-// RoutingUrlGeneratorTest::testUrlGenerationWithOptionalParameters
 
 // fakeURLRequest implements [URLRequest] for tests.
 type fakeURLRequest struct {
@@ -88,7 +54,6 @@ func newGen(t *testing.T) (*UrlGenerator, *Router) {
 }
 
 func TestUrlGenerator_To(t *testing.T) {
-	// RoutingUrlGeneratorTest::testBasicGeneration
 	t.Run("test_to_returns_absolute", func(t *testing.T) {
 		gen, _ := newGen(t)
 		got := gen.To("/foo", nil, nil)
@@ -98,7 +63,6 @@ func TestUrlGenerator_To(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testBasicGenerationWithPathFormatting
 	t.Run("test_to_escapes_extra_path_segments", func(t *testing.T) {
 		gen, _ := newGen(t)
 		got := gen.To("/users", []string{"Taylor Otwell"}, nil)
@@ -108,7 +72,6 @@ func TestUrlGenerator_To(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testForceHttps
 	t.Run("test_to_secure_forces_https", func(t *testing.T) {
 		gen, _ := newGen(t)
 		got := gen.Secure("/foo", nil)
@@ -129,7 +92,6 @@ func TestUrlGenerator_To(t *testing.T) {
 }
 
 func TestUrlGenerator_Route(t *testing.T) {
-	// RoutingUrlGeneratorTest::testBasicRouteGeneration
 	t.Run("test_named_route_url", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users/{user}", func() {}).Name("users.show")
@@ -158,7 +120,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutesMaintainRequestScheme
 	t.Run("test_named_route_uses_request_scheme", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		req := fakeURLRequest{scheme: "https", host: "example.com"}
@@ -175,7 +136,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testQueryGeneration
 	t.Run("test_named_route_extra_params_become_query", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/search", func() {}).Name("search")
@@ -190,7 +150,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testAssetGeneration
 	t.Run("test_asset_generation_uses_asset_root", func(t *testing.T) {
 		gen, _ := newGen(t)
 		gen.assetRoot = "https://cdn.example/assets"
@@ -201,7 +160,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testSetAssetUrl
 	t.Run("test_constructor_asset_root_sets_asset_url", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		gen := NewUrlGenerator(router.GetRoutes(), fakeURLRequest{scheme: "http", host: "example.com"}, "https://assets.example")
@@ -212,7 +170,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testUseRootUrl
 	t.Run("test_force_root_url_overrides_host", func(t *testing.T) {
 		gen, _ := newGen(t)
 		gen.ForceRootUrl("cdn.example/base")
@@ -224,8 +181,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testUrlGenerationForHandlersRequiresPassingOfRequiredParameters
-	// RoutingUrlGeneratorTest::testUrlGenerationThrowsExceptionForMissingParametersWithMeaningfulMessage
 	t.Run("test_missing_parameter_errors", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users/{user}", func() {}).Name("users.show")
@@ -240,7 +195,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRouteNotDefinedException
 	t.Run("test_unknown_route_errors", func(t *testing.T) {
 		gen, _ := newGen(t)
 		_, err := gen.Route("missing", nil, true)
@@ -250,7 +204,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutesWithDomains
 	t.Run("test_named_route_uses_route_domain", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users", func() {}).Domain("admin.example.com").Name("users.index")
@@ -265,7 +218,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutesWithDomainsAndPorts
 	t.Run("test_named_route_preserves_route_domain_port", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users", func() {}).Domain("admin.example.com:8443").Name("users.index")
@@ -280,7 +232,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutesWithDomainsStripsProtocols
 	t.Run("test_named_route_strips_protocol_from_route_domain", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users", func() {}).Domain("https://admin.example.com").Name("users.index")
@@ -295,7 +246,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testUrlGenerationWithOptionalParameters
 	t.Run("test_optional_route_parameters_are_removed_when_missing", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users/{user?}", func() {}).Name("users.optional")
@@ -310,7 +260,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testPassedParametersHavePrecedenceOverDefaults
 	t.Run("test_passed_parameters_override_route_defaults", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/{locale}/users", func() {}).Name("localized.users").Defaults("locale", "en")
@@ -325,7 +274,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testDefaultsCanBeCombinedWithExtraQueryParameters
 	t.Run("test_route_defaults_combine_with_extra_query_parameters", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/{locale}/users", func() {}).Name("localized.users").Defaults("locale", "en")
@@ -340,7 +288,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testComplexRouteGenerationWithDefaultsAndBindingFields
 	t.Run("test_route_defaults_and_binding_fields_generate_url", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/{locale}/users/{user:slug}", func() {}).Name("localized.users.show").Defaults("locale", "en")
@@ -358,8 +305,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutableInterfaceRouting
-	// RoutingUrlGeneratorTest::testRoutableInterfaceRoutingWithSingleParameter
 	t.Run("test_routable_parameter_uses_route_key", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users/{user}", func() {}).Name("users.show")
@@ -374,7 +319,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutableInterfaceRoutingWithCustomBindingField
 	t.Run("test_routable_parameter_with_custom_binding_field_uses_route_key", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/users/{user:slug}", func() {}).Name("users.slug")
@@ -389,7 +333,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRoutableInterfaceRoutingAsQueryString
 	t.Run("test_routable_extra_parameter_is_query_string", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/search", func() {}).Name("search")
@@ -404,7 +347,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRouteGenerationWithBackedEnums
 	t.Run("test_backed_enum_parameter_uses_backing_value", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/statuses/{status}", func() {}).Name("statuses.show")
@@ -419,7 +361,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testRouteGenerationWithNestedBackedEnums
 	t.Run("test_nested_backed_enum_parameters_use_backing_values", func(t *testing.T) {
 		gen, router := newGen(t)
 		router.Get("/teams/{team}/statuses/{status}", func() {}).Name("teams.statuses.show")
@@ -439,7 +380,6 @@ func TestUrlGenerator_Route(t *testing.T) {
 }
 
 func TestUrlGenerator_Signed(t *testing.T) {
-	// RoutingUrlGeneratorTest::testSignedUrl
 	t.Run("test_signed_route_round_trip", func(t *testing.T) {
 		gen, router := newGen(t)
 		gen.SetKeyResolver("test-key-12345")
@@ -469,7 +409,6 @@ func TestUrlGenerator_Signed(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testSignedRelativeUrl
 	t.Run("test_signed_relative_route_round_trip", func(t *testing.T) {
 		gen, router := newGen(t)
 		gen.SetKeyResolver("test-key-12345")
@@ -495,7 +434,6 @@ func TestUrlGenerator_Signed(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testTemporarySignedRoute
 	t.Run("test_temporary_signed_route_has_expires", func(t *testing.T) {
 		gen, router := newGen(t)
 		gen.SetKeyResolver("k")
@@ -511,8 +449,6 @@ func TestUrlGenerator_Signed(t *testing.T) {
 		}
 	})
 
-	// RoutingUrlGeneratorTest::testSignedUrlParameterCannotBeNamedSignature
-	// RoutingUrlGeneratorTest::testSignedUrlParameterCannotBeNamedExpires
 	t.Run("test_signed_route_rejects_reserved_params", func(t *testing.T) {
 		gen, router := newGen(t)
 		gen.SetKeyResolver("k")

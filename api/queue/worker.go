@@ -35,7 +35,6 @@ type WorkerOptions struct {
 
 // ExceptionReporter is the optional contract the Worker uses to report
 // exceptions that escape a job handler. It is the Go analogue of
-// Ref: @bedrock/code-0193
 type ExceptionReporter interface {
 	ReportException(err error)
 }

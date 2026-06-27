@@ -15,8 +15,6 @@ import (
 // on the receiver's reflect.Type. Closures are unsupported because Go has no
 // runtime parameter-name metadata for them — the parameter Type is recovered,
 // but the parameter Name is always empty.
-//
-// Ref: @bedrock/code-0340
 type RouteSignatureParameters struct{}
 
 // SignatureParameter is a Go-friendly stand-in for ReflectionParameter.

@@ -5,31 +5,7 @@ import (
 	"testing"
 )
 
-// Ref: @bedrock/code-0393
-// RouteCollectionTest::testRouteCollectionCanAddRoute
-// RouteCollectionTest::testRouteCollectionAddReturnsTheRoute
-// RouteCollectionTest::testRouteCollectionCanRetrieveByName
-// RouteCollectionTest::testRouteCollectionCanRetrieveByAction
-// RouteCollectionTest::testRouteCollectionCanRetrieveByMethod
-// RouteCollectionTest::testRouteCollectionCanGetAllRoutes
-// RouteCollectionTest::testRouteCollectionCanGetRoutesByName
-// RouteCollectionTest::testRouteCollectionCanGetRoutesByMethod
-// RouteCollectionTest::testRouteCollectionCanRefreshNameLookups
-// RouteCollectionTest::testCannotCacheDuplicateRouteNames
-// RouteCollectionTest::testRouteCollectionCanHandleSameRoute
-// RouteCollectionTest::testRouteCollectionCleansUpOverwrittenRoutes
-// RouteCollectionTest::testRouteCollectionCanGetIterator
-// RouteCollectionTest::testRouteCollectionCanGetIteratorWhenEmpty
-// RouteCollectionTest::testRouteCollectionCanGetIteratorWhenRouteAreAdded
-// RouteCollectionTest::testRouteCollectionRequestMethodNotAllowed
-// RouteCollectionTest::testRouteCollectionDontMatchNonMatchingDoubleSlashes
-// RouteCollectionTest::testOverlappingRoutesMatchesFirstRoute
-// RouteCollectionTest::testHasNameRouteMethod
-// RouteCollectionTest::testPrependsRoutesWithDomain
-// RouteCollectionTest::testToSymfonyRouteCollection
-
 func TestRouteCollection_Add(t *testing.T) {
-	// RouteCollectionTest::testRouteCollectionAddReturnsTheRoute
 	t.Run("test_add_returns_route", func(t *testing.T) {
 		c := NewRouteCollection()
 		r := NewRoute("GET", "/foo", func() {})
@@ -44,7 +20,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanRetrieveByMethod
 	t.Run("test_add_indexes_by_method", func(t *testing.T) {
 		c := NewRouteCollection()
 		c.Add(NewRoute("GET", "/foo", func() {}))
@@ -59,7 +34,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanGetRoutesByMethod
 	t.Run("test_get_routes_by_method_returns_registered_method_indexes", func(t *testing.T) {
 		c := NewRouteCollection()
 		index := NewRoute("GET", "/foo/index", func() {}).Name("foo.index")
@@ -84,7 +58,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanGetAllRoutes
 	t.Run("test_get_with_empty_string_returns_all", func(t *testing.T) {
 		c := NewRouteCollection()
 		c.Add(NewRoute("GET", "/foo", func() {}))
@@ -95,7 +68,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanHandleSameRoute
 	t.Run("test_same_route_overwrites_in_place", func(t *testing.T) {
 		c := NewRouteCollection()
 		first := NewRoute("GET", "/foo", func() {})
@@ -120,7 +92,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCleansUpOverwrittenRoutes
 	t.Run("test_refresh_lookups_cleans_up_overwritten_routes", func(t *testing.T) {
 		c := NewRouteCollection()
 		first := NewRoute("GET", "/product", map[string]any{
@@ -154,7 +125,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanGetIterator
 	t.Run("test_get_routes_returns_copy_in_registration_order", func(t *testing.T) {
 		c := NewRouteCollection()
 		first := NewRoute("GET", "/a", func() {})
@@ -175,7 +145,6 @@ func TestRouteCollection_Add(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanGetIteratorWhenEmpty
 	t.Run("test_get_routes_empty", func(t *testing.T) {
 		c := NewRouteCollection()
 
@@ -186,8 +155,6 @@ func TestRouteCollection_Add(t *testing.T) {
 }
 
 func TestRouteCollection_NameLookups(t *testing.T) {
-	// RouteCollectionTest::testRouteCollectionCanRetrieveByName
-	// RouteCollectionTest::testHasNameRouteMethod
 	t.Run("test_get_by_name", func(t *testing.T) {
 		c := NewRouteCollection()
 		r := NewRoute("GET", "/users", func() {}).Name("users.index")
@@ -206,7 +173,6 @@ func TestRouteCollection_NameLookups(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanGetRoutesByName
 	t.Run("test_get_routes_by_name_returns_registered_name_lookup", func(t *testing.T) {
 		c := NewRouteCollection()
 		index := NewRoute("GET", "/foo/index", func() {}).Name("foo_index")
@@ -227,7 +193,6 @@ func TestRouteCollection_NameLookups(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionCanRefreshNameLookups
 	t.Run("test_refresh_name_lookups", func(t *testing.T) {
 		c := NewRouteCollection()
 		r := NewRoute("GET", "/users", func() {})
@@ -240,7 +205,6 @@ func TestRouteCollection_NameLookups(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testCannotCacheDuplicateRouteNames
 	t.Run("test_first_name_wins", func(t *testing.T) {
 		c := NewRouteCollection()
 		r1 := NewRoute("GET", "/a", func() {}).Name("dup")
@@ -255,7 +219,6 @@ func TestRouteCollection_NameLookups(t *testing.T) {
 }
 
 func TestRouteCollection_ActionLookups(t *testing.T) {
-	// RouteCollectionTest::testRouteCollectionCanRetrieveByAction
 	t.Run("test_get_by_action", func(t *testing.T) {
 		c := NewRouteCollection()
 		r := NewRoute("GET", "/users", "App\\Http\\Handlers\\UserHandler@index")
@@ -286,7 +249,6 @@ func TestRouteCollection_ActionLookups(t *testing.T) {
 }
 
 func TestRouteCollection_DomainHandling(t *testing.T) {
-	// RouteCollectionTest::testPrependsRoutesWithDomain
 	t.Run("test_prepends_routes_with_domain", func(t *testing.T) {
 		c := NewRouteCollection()
 		admin := NewRoute("GET", "/users", func() {}).Domain("admin.example.com")
@@ -305,7 +267,6 @@ func TestRouteCollection_DomainHandling(t *testing.T) {
 }
 
 func TestRouteCollection_ToCompiledCollection(t *testing.T) {
-	// RouteCollectionTest::testToSymfonyRouteCollection
 	t.Run("test_to_symfony_route_collection", func(t *testing.T) {
 		route := NewRoute("GET", "/users", map[string]any{
 			"handler": "\\App\\Http\\Handlers\\UserHandler@index",
@@ -351,7 +312,6 @@ func TestRouteCollection_Match(t *testing.T) {
 		}
 	})
 
-	// RouteCollectionTest::testRouteCollectionDontMatchNonMatchingDoubleSlashes
 	t.Run("test_double_slash_path_does_not_match_single_slash_route", func(t *testing.T) {
 		c := NewRouteCollection()
 		c.Add(NewRoute("GET", "/foo", func() {}))

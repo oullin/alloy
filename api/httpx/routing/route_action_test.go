@@ -2,10 +2,6 @@ package routing
 
 import "testing"
 
-// Ref: @bedrock/code-0391
-// RouteActionTest::test_it_can_detect_a_serialized_closure
-// RoutingRouteTest::testRouteGetHandlerClass
-// RoutingRouteTest::testRouteFlushHandler
 func TestRouteAction(t *testing.T) {
 	t.Run("test_parse_action_with_callable", func(t *testing.T) {
 		called := false
@@ -69,7 +65,6 @@ func TestRouteAction(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testRouteGetHandlerClass
 	t.Run("test_route_get_handler_class", func(t *testing.T) {
 		route := NewRoute("GET", "/users/{user}", "App\\Http\\Handlers\\UserHandler@show")
 
@@ -82,7 +77,6 @@ func TestRouteAction(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testRouteFlushHandler
 	t.Run("test_route_flush_handler", func(t *testing.T) {
 		route := NewRoute("GET", "/users/{user}", "UserHandler@show")
 		route.Handler = &userHandler{}
@@ -114,7 +108,6 @@ func TestRouteAction(t *testing.T) {
 		}
 	})
 
-	// RouteActionTest::test_it_can_detect_a_serialized_closure
 	t.Run("test_contains_serialized_closure_is_false", func(t *testing.T) {
 		if ContainsSerializedClosure(&Action{}) {
 			t.Error("ContainsSerializedClosure should always return false")

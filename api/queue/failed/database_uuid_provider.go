@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-// Ref: @bedrock/code-0256
 // the same failed_jobs table shape as the integer-keyed provider but
 // the primary key exposed to callers is the payload's uuid field.
 type DatabaseUuidFailedJobProvider struct {

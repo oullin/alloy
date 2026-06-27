@@ -9,8 +9,6 @@ import handlermiddleware "github.com/oullin/alloy/api/httpx/handlerx/middleware"
 // interface) to declare per-method middleware. The base type retains the
 // PHP class's public surface (Middleware, GetMiddleware, CallAction) so
 // dispatchers can probe for it uniformly.
-//
-// Ref: @bedrock/code-0295
 type Handler struct {
 	middleware []handlerMiddlewareEntry
 }
@@ -21,8 +19,6 @@ type handlerMiddlewareEntry struct {
 }
 
 // MiddlewareOptions is the chainable filter helper returned by Use.
-//
-// Ref: @bedrock/code-0297
 type MiddlewareOptions struct{ options map[string]any }
 
 // Only constrains the middleware to the named methods.
@@ -41,8 +37,6 @@ func (o *MiddlewareOptions) Except(methods ...string) *MiddlewareOptions {
 
 // Use registers middleware on the handler and returns a chainable options
 // object (Only/Except).
-//
-// Ref: @bedrock/code-0295
 func (c *Handler) Use(middleware any) *MiddlewareOptions {
 	options := map[string]any{}
 	c.middleware = append(c.middleware, handlerMiddlewareEntry{

@@ -11,7 +11,6 @@ import (
 	"github.com/oullin/alloy/api/httpx/routing/matching"
 )
 
-// Ref: @bedrock/code-0332
 // In PHP, Route composes several traits (Conditionable, Macroable,
 // CreatesRegularExpressionRouteConstraints, FiltersHandlerMiddleware,
 // ResolvesRouteDependencies). In Go, the constraint helper is composed via
@@ -68,8 +67,6 @@ func (r *Route) BoundModel(name string) any { return r.boundModels[name] }
 // methods may be a single HTTP verb or a slice of verbs. action follows the
 // same rules as [ParseAction]: a func, "Handler@method" string, map, or
 // nil for fluent registration.
-//
-// Ref: @bedrock/code-0332
 func NewRoute(methods any, uri string, action any) *Route {
 	r := &Route{
 		Uri:           uri,
@@ -279,8 +276,6 @@ func (r *Route) HasDefault(name string) bool {
 
 // CompileRoute compiles the route into a [*compiler.CompiledRoute] if it has
 // not been compiled yet, then returns the cached value.
-//
-// Ref: @bedrock/code-0332
 func (r *Route) CompileRoute() (*compiler.CompiledRoute, error) {
 	if r.compileMu == nil {
 		r.compileMu = &sync.Mutex{}
@@ -320,7 +315,6 @@ func (r *Route) Compiled() *compiler.CompiledRoute {
 func (r *Route) GetCompiled() *compiler.CompiledRoute { return r.Compiled() }
 
 // Bind binds the route to a request, populating Parameters via the
-// Ref: @bedrock/code-0332
 func (r *Route) Bind(req boundRequest) (*Route, error) {
 	if _, err := r.CompileRoute(); err != nil {
 		return nil, err
@@ -340,8 +334,6 @@ func (r *Route) Bind(req boundRequest) (*Route, error) {
 //
 // includingMethod=false skips the method validator — used by the router when
 // gathering "method not allowed" candidates.
-//
-// Ref: @bedrock/code-0332
 func (r *Route) Matches(req matching.MatchableRequest, includingMethod bool) bool {
 	if _, err := r.CompileRoute(); err != nil {
 		return false
@@ -723,7 +715,6 @@ func (r *Route) GetName() string {
 	return ""
 }
 
-// Ref: @bedrock/code-0332
 // when a name is already present (used by RouteRegistrar to compose group
 // name prefixes).
 func (r *Route) Name(name string) *Route {
@@ -918,7 +909,6 @@ func (r *Route) PreventsScopedBindings() bool {
 }
 
 // Block enables session blocking with the supplied lock and wait windows
-// Ref: @bedrock/code-0332
 func (r *Route) Block(lockSeconds, waitSeconds int) *Route {
 	r.lockSeconds = &lockSeconds
 	r.waitSeconds = &waitSeconds

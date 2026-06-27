@@ -24,15 +24,12 @@ type ModelInstance = crouting.ModelInstance
 // callers reach the helpers through `RouteBinding::forCallback($c, $binder)`;
 // Go callers can use either the package functions directly or the methods on
 // this empty struct, both produce the same result.
-//
-// Ref: @bedrock/code-0334
 type RouteBinding struct{}
 
 // ForCallback returns the binding resolver for the given binder. If binder is
 // a [BindingResolver] it is returned unchanged. If it is a string it is
 // treated as a "Class@method" reference and resolved through the container.
 //
-// Ref: @bedrock/code-0334
 
 // ForCallback is the method form of the package-level helper.
 
@@ -40,7 +37,6 @@ type RouteBinding struct{}
 // container and asks it to resolve the URL value. If the model returns nil and
 // fallback is supplied, fallback is invoked; otherwise an error is returned.
 //
-// Ref: @bedrock/code-0334
 // ModelNotFoundException; the Go version returns a typed error so callers can
 // test for it with errors.Is.
 

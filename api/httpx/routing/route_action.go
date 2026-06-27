@@ -20,8 +20,6 @@ import (
 //     attached to the action.
 //   - Extras: a catch-all map for any non-standard keys passed through by
 //     callers that want to round-trip arbitrary action metadata.
-//
-// Ref: @bedrock/code-0333
 type Action struct {
 	Uses       any
 	Handler    string
@@ -46,8 +44,6 @@ type Action struct {
 //     populated using the Go type name + "@__invoke".
 //   - a map[string]any: passed through, with the "uses" key resolved as above
 //     and other keys distributed to the matching fields or Extras.
-//
-// Ref: @bedrock/code-0333
 func ParseAction(uri string, action any) (*Action, error) {
 	if action == nil {
 		return missingAction(uri), nil

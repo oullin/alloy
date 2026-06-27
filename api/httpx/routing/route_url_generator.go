@@ -12,7 +12,6 @@ import (
 // RouteUrlGenerator builds a URL for a single named route by substituting
 // parameter values into the route's URI template.
 //
-// Ref: @bedrock/code-0342
 // (rather than a method on UrlGenerator) so signed URL generation can call it
 // recursively without circular wiring.
 type RouteUrlGenerator struct {
@@ -32,8 +31,6 @@ func NewRouteUrlGenerator(u *UrlGenerator, request URLRequest) *RouteUrlGenerato
 }
 
 // To produces a URL for route with the supplied parameter values.
-//
-// Ref: @bedrock/code-0342
 func (g *RouteUrlGenerator) To(route *Route, parameters map[string]any, absolute bool) string {
 	domain := route.GetDomain()
 	uri := route.Uri

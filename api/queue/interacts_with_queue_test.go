@@ -35,7 +35,6 @@ func (j *recordingJob) HasFailed() bool              { return j.failErr != nil }
 func (j *recordingJob) GetQueue() string             { return "" }
 func (j *recordingJob) GetConnectionName() string    { return "" }
 
-// Ref: @bedrock/code-0364
 func TestCreatesAnExceptionFromString(t *testing.T) {
 	t.Parallel()
 

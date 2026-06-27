@@ -5,11 +5,6 @@ import (
 	"testing"
 )
 
-// Ref: @bedrock/code-0392
-// RouteBindingTest::test_it_can_resolve_the_explicit_model_for_the_given_route
-// RouteBindingTest::test_it_cannot_resolve_the_explicit_soft_deleted_model_for_the_given_route
-// RouteBindingTest::test_it_can_resolve_the_explicit_soft_deleted_model_for_the_given_route_with_trashed
-
 type explicitBindingModel struct {
 	id      string
 	trashed bool
@@ -46,7 +41,6 @@ func (c explicitBindingContainer) Make(abstract string) (any, error) {
 }
 
 func TestRouteBinding_ForModel(t *testing.T) {
-	// RouteBindingTest::test_it_can_resolve_the_explicit_model_for_the_given_route
 	t.Run("test_resolves_the_explicit_model", func(t *testing.T) {
 		route := NewRoute("GET", "/users/{user}", func() {})
 		resolver := ForModel(explicitBindingContainer{model: &explicitBindingModel{}}, "User", nil)
@@ -68,7 +62,6 @@ func TestRouteBinding_ForModel(t *testing.T) {
 		}
 	})
 
-	// RouteBindingTest::test_it_cannot_resolve_the_explicit_soft_deleted_model_for_the_given_route
 	t.Run("test_rejects_soft_deleted_model_without_trashed", func(t *testing.T) {
 		route := NewRoute("GET", "/users/{user}", func() {})
 		resolver := ForModel(explicitBindingContainer{model: &explicitBindingModel{trashed: true}}, "User", nil)
@@ -86,7 +79,6 @@ func TestRouteBinding_ForModel(t *testing.T) {
 		}
 	})
 
-	// RouteBindingTest::test_it_can_resolve_the_explicit_soft_deleted_model_for_the_given_route_with_trashed
 	t.Run("test_resolves_soft_deleted_model_with_trashed", func(t *testing.T) {
 		route := NewRoute("GET", "/users/{user}", func() {}).WithTrashed()
 		resolver := ForModel(explicitBindingContainer{model: &explicitBindingModel{trashed: true}}, "User", nil)

@@ -18,8 +18,6 @@ import (
 //   - nameList:   route name → Route, populated when [Route.Name] is set.
 //   - actionList: "Handler@method" → Route, populated when a handler
 //     action is supplied.
-//
-// Ref: @bedrock/code-0335
 type RouteCollection struct {
 	AbstractRouteCollection
 
@@ -45,7 +43,6 @@ func NewRouteCollection() *RouteCollection {
 	}
 }
 
-// Ref: @bedrock/code-0335
 func (c *RouteCollection) Add(route *Route) *Route {
 	c.addToCollections(route)
 	c.addLookups(route)

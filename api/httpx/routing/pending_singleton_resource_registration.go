@@ -1,6 +1,5 @@
 package routing
 
-// Ref: @bedrock/code-0326
 // twin of [PendingResourceRegistration].
 type PendingSingletonResourceRegistration struct {
 	registrar  *ResourceRegistrar

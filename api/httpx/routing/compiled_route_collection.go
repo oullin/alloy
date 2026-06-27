@@ -14,8 +14,6 @@ import (
 // dumped matcher data, opaque to consumers) and an "attributes" payload that
 // the dumper produces alongside it. In Go we store a slice of Routes that the
 // router built from the cached form; M11 will provide a real cache loader.
-//
-// Ref: @bedrock/code-0288
 type CompiledRouteCollection struct {
 	AbstractRouteCollection
 	routes     []*Route

@@ -6,14 +6,6 @@ import (
 
 // tests/Routing/RoutingRouteTest.php — the dispatching half of that file
 // requires Router (M4) and lives in router_test.go.
-// RoutingRouteTest::testMatchesMethodAgainstRequests
-// RoutingRouteTest::testWherePatternsProperlyFilter
-// RoutingRouteTest::testRoutePrefixing
-// RoutingRouteTest::testRouteDomainRegistration
-// RoutingRouteTest::testRouteParametersDefaultValue
-// RoutingRouteTest::testHasParameters
-// RoutingRouteTest::testForgetParameter
-// RoutingRouteTest::testParameterNames
 
 // fakeRequest implements matching.MatchableRequest and boundRequest for tests.
 type fakeRequest struct {

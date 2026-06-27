@@ -8,9 +8,6 @@ import (
 
 // tests/Routing/RoutingHandlerAttributeTest.php and the handler
 // dispatch parts of RoutingRouteTest.
-// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInherited
-// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInheritedInDeclarationOrder
-// RoutingRouteTest::testHandlerCallActionMethodParameters
 
 // userHandler is a fake handler used in dispatch tests.
 type userHandler struct {
@@ -76,7 +73,6 @@ func TestCallableDispatcher(t *testing.T) {
 }
 
 func TestHandlerDispatcher(t *testing.T) {
-	// RoutingRouteTest::testHandlerCallActionMethodParameters
 	t.Run("test_dispatch_calls_method", func(t *testing.T) {
 		d := NewHandlerDispatcher(nil)
 		ctrl := &userHandler{}
@@ -122,7 +118,6 @@ func TestHandlerDispatcher(t *testing.T) {
 		}
 	})
 
-	// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInherited
 	t.Run("test_get_middleware_filters_by_only_except", func(t *testing.T) {
 		d := NewHandlerDispatcher(nil)
 		ctrl := &authHandler{}
@@ -142,7 +137,6 @@ func TestHandlerDispatcher(t *testing.T) {
 		}
 	})
 
-	// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInherited
 	t.Run("test_handler_middleware_attributes_are_inherited", func(t *testing.T) {
 		type inheritedHandler struct{ Handler }
 
@@ -164,7 +158,6 @@ func TestHandlerDispatcher(t *testing.T) {
 		}
 	})
 
-	// RoutingHandlerAttributeTest::testHandlerMiddlewareAttributesAreInheritedInDeclarationOrder
 	t.Run("test_handler_middleware_attributes_are_in_declaration_order", func(t *testing.T) {
 		type orderedHandler struct{ Handler }
 

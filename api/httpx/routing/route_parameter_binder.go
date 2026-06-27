@@ -26,8 +26,6 @@ type boundRequest interface {
 // RouteParameterBinder extracts route parameter values from a request by
 // running the route's compiled regex against the request's path (and host,
 // when the route has a host pattern), then merging in declared defaults.
-//
-// Ref: @bedrock/code-0338
 type RouteParameterBinder struct {
 	route boundRoute
 }

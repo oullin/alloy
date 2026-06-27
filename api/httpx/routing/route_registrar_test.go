@@ -2,61 +2,9 @@ package routing
 
 import "testing"
 
-// Ref: @bedrock/code-0394
 // the resource-registration portions of RoutingRouteTest.
-// RouteRegistrarTest::testMiddlewareFluentRegistration
-// RouteRegistrarTest::testMiddlewareAsNull
-// RouteRegistrarTest::testCanRegisterGroupWithPrefix
-// RouteRegistrarTest::testCanRegisterGroupWithDomain
-// RouteRegistrarTest::testFallbackRoute
-// RouteRegistrarTest::testCanRegisterMatchRouteWithClosureAction
-// RouteRegistrarTest::testCanRegisterAnyRouteWithClosureAction
-// RouteRegistrarTest::testWithoutMiddlewareRegistration
-// RouteRegistrarTest::testCanSetScopeBindings
-// RouteRegistrarTest::testCanSetWithoutScopedBindings
-// RouteRegistrarTest::testWhereNumberRegistration
-// RouteRegistrarTest::testWhereAlphaRegistration
-// RouteRegistrarTest::testWhereAlphaNumericRegistration
-// RouteRegistrarTest::testWhereInRegistration
-// RouteRegistrarTest::testCanRegisterRouteWithHandlerActionArray
-// RouteRegistrarTest::testCanRegisterNamespacedGroupRouteWithHandlerActionArray
-// RouteRegistrarTest::testCanRegisterRouteWithArrayAndHandlerAction
-// RouteRegistrarTest::testCanRegisterResource
-// RouteRegistrarTest::testCanRegisterResourcesWithOnlyOption
-// RouteRegistrarTest::testCanRegisterResourcesWithExceptOption
-// RouteRegistrarTest::testCanLimitMethodsOnRegisteredResource
-// RouteRegistrarTest::testCanExcludeMethodsOnRegisteredResource
-// RouteRegistrarTest::testCanLimitAndExcludeMethodsOnRegisteredResource
-// RouteRegistrarTest::testCanExcludeMethodsOnRegisteredApiResource
-// RouteRegistrarTest::testCanRegisterApiResourcesWithExceptOption
-// RouteRegistrarTest::testCanRegisterApiResourcesWithOnlyOption
-// RouteRegistrarTest::testCanRegisterApiResourcesWithoutOption
-// RouteRegistrarTest::testCanNameRoutesOnRegisteredResource
-// RouteRegistrarTest::testCanSetMiddlewareOnRegisteredResource
-// RouteRegistrarTest::testCanRegisterCreatableSingleton
-// RouteRegistrarTest::testSingletonCreatableNotDestroyable
-// RouteRegistrarTest::testCanRegisterSingleton
-// RouteRegistrarTest::testCanRegisterApiSingleton
-// RouteRegistrarTest::testCanRegisterCreatableApiSingleton
-// RouteRegistrarTest::testApiSingletonCreatableNotDestroyable
-// RouteRegistrarTest::testApiSingletonCanBeOnlyCreatable
-// RouteRegistrarTest::testApiSingletonCanIncludeAnySingletonMethods
-// RouteRegistrarTest::testCanSetRouteName
-// RouteRegistrarTest::testCanSetRouteNameUsingNameAlias
-// RouteRegistrarTest::testCanOverrideParametersOnRegisteredResource
-// RouteRegistrarTest::testCanAccessRegisteredResourceRoutesAsRouteCollection
-// RouteRegistrarTest::testCanRegisterResourcesWithoutOption
-// RouteRegistrarTest::testSingletonCanBeDestroyable
-// RouteRegistrarTest::testSingletonCanBeOnlyCreatable
-// RouteRegistrarTest::testSingletonDoesntAllowIncludingUnsupportedMethods
-// RouteRegistrarTest::testApiSingletonCanBeDestroyable
-// RouteRegistrarTest::testCanRegisterGroupWithNamespace
-// RouteRegistrarTest::testCanRegisterGroupWithDomainAndNamePrefix
-// RouteRegistrarTest::testCanRegisterGroupWithHandler
-// RouteRegistrarTest::testCanOverrideGroupHandlerWithStringSyntax
 
 func TestRouteRegistrar_Fluent(t *testing.T) {
-	// RouteRegistrarTest::testMiddlewareFluentRegistration
 	t.Run("test_middleware_then_get", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		registrar := NewRouteRegistrar(router)
@@ -73,7 +21,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanSetRouteNameUsingNameAlias
 	t.Run("test_as_prefixes_name", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		registrar := NewRouteRegistrar(router)
@@ -84,7 +31,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterRouteWithHandlerActionArray
 	t.Run("test_route_action_array_sets_handler", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		route := router.Get("/users", map[string]any{"uses": "UserHandler@show"})
@@ -94,7 +40,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterGroupWithDomain
 	t.Run("test_domain_attribute", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		registrar := NewRouteRegistrar(router)
@@ -105,7 +50,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterNamespacedGroupRouteWithHandlerActionArray
 	t.Run("test_group_namespace_prefixes_handler_action", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Group(map[string]any{"namespace": "App\\Http\\Handlers"}, func(r *Router) {
@@ -117,7 +61,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		})
 	})
 
-	// RouteRegistrarTest::testCanRegisterGroupWithDomainAndNamePrefix
 	t.Run("test_group_domain_and_name_prefix_merge", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Group(map[string]any{
@@ -136,7 +79,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		})
 	})
 
-	// RouteRegistrarTest::testCanRegisterGroupWithHandler
 	t.Run("test_group_handler_prefixes_string_action", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Group(map[string]any{"handler": "App\\Http\\Handlers\\UserHandler"}, func(r *Router) {
@@ -148,7 +90,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		})
 	})
 
-	// RouteRegistrarTest::testCanOverrideGroupHandlerWithStringSyntax
 	t.Run("test_group_handler_does_not_override_explicit_action", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Group(map[string]any{"handler": "App\\Http\\Handlers\\UserHandler"}, func(r *Router) {
@@ -160,7 +101,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		})
 	})
 
-	// RouteRegistrarTest::testMiddlewareAsNull
 	t.Run("test_middleware_nil_is_ignored", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		route := NewRouteRegistrar(router).Middleware(nil).Get("/users", func() {})
@@ -170,7 +110,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testWithoutMiddlewareRegistration
 	t.Run("test_without_middleware_registration", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		route := NewRouteRegistrar(router).WithoutMiddleware("csrf").Get("/users", func() {})
@@ -181,7 +120,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanSetScopeBindings
 	t.Run("test_scope_bindings_are_propagated", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		route := NewRouteRegistrar(router).ScopeBindings().Get("/users/{user}", func() {})
@@ -191,7 +129,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanSetWithoutScopedBindings
 	t.Run("test_without_scoped_bindings_are_propagated", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		route := NewRouteRegistrar(router).WithoutScopedBindings().Get("/users/{user}", func() {})
@@ -202,7 +139,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 	})
 
 	t.Run("test_where_constraints_are_propagated", func(t *testing.T) {
-		// RouteRegistrarTest::testWhereNumberRegistration
 		t.Run("number", func(t *testing.T) {
 			router := NewRouter(nil, nil)
 			registrar := NewRouteRegistrar(router)
@@ -214,7 +150,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 			}
 		})
 
-		// RouteRegistrarTest::testWhereAlphaRegistration
 		t.Run("alpha", func(t *testing.T) {
 			router := NewRouter(nil, nil)
 			registrar := NewRouteRegistrar(router)
@@ -226,7 +161,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 			}
 		})
 
-		// RouteRegistrarTest::testWhereAlphaNumericRegistration
 		t.Run("alpha_numeric", func(t *testing.T) {
 			router := NewRouter(nil, nil)
 			registrar := NewRouteRegistrar(router)
@@ -238,7 +172,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 			}
 		})
 
-		// RouteRegistrarTest::testWhereInRegistration
 		t.Run("in", func(t *testing.T) {
 			router := NewRouter(nil, nil)
 			registrar := NewRouteRegistrar(router)
@@ -253,7 +186,6 @@ func TestRouteRegistrar_Fluent(t *testing.T) {
 }
 
 func TestResourceRegistrar(t *testing.T) {
-	// RouteRegistrarTest::testCanRegisterResource
 	t.Run("test_register_emits_seven_routes", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users", "UserHandler", nil).Register()
@@ -264,8 +196,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterResourcesWithOnlyOption
-	// RouteRegistrarTest::testCanLimitMethodsOnRegisteredResource
 	t.Run("test_only_filters_actions", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users", "UserHandler", nil).Only("index", "show", "destroy").Register()
@@ -278,8 +208,6 @@ func TestResourceRegistrar(t *testing.T) {
 		assertNamedRoutes(t, router, []string{"users.index", "users.show", "users.destroy"}, nil)
 	})
 
-	// RouteRegistrarTest::testCanRegisterResourcesWithExceptOption
-	// RouteRegistrarTest::testCanExcludeMethodsOnRegisteredResource
 	t.Run("test_except_filters_actions", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users", "UserHandler", nil).Except("index", "create", "store", "show", "edit").Register()
@@ -292,7 +220,6 @@ func TestResourceRegistrar(t *testing.T) {
 		assertNamedRoutes(t, router, []string{"users.update", "users.destroy"}, []string{"users.index", "users.show"})
 	})
 
-	// RouteRegistrarTest::testCanLimitAndExcludeMethodsOnRegisteredResource
 	t.Run("test_only_and_except_filters_actions", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users", "UserHandler", nil).
@@ -307,7 +234,6 @@ func TestResourceRegistrar(t *testing.T) {
 		assertNamedRoutes(t, router, []string{"users.index", "users.show"}, []string{"users.destroy"})
 	})
 
-	// RouteRegistrarTest::testCanRegisterApiResourcesWithoutOption
 	t.Run("test_api_resource_excludes_create_edit", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiResource("users", "UserHandler", nil).Register()
@@ -318,7 +244,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanExcludeMethodsOnRegisteredApiResource
 	t.Run("test_api_resource_except_keeps_api_exclusions", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiResource("users", "UserHandler", nil).Except("index", "show", "store").Register()
@@ -333,7 +258,6 @@ func TestResourceRegistrar(t *testing.T) {
 		)
 	})
 
-	// RouteRegistrarTest::testCanRegisterApiResourcesWithExceptOption
 	t.Run("test_api_resources_with_except_option", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiResources(map[string]string{
@@ -353,7 +277,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterApiResourcesWithOnlyOption
 	t.Run("test_api_resources_with_only_option", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiResources(map[string]string{
@@ -373,7 +296,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterResourcesWithoutOption
 	t.Run("test_resources_without_option_registers_each_resource", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resources(map[string]string{
@@ -398,7 +320,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanNameRoutesOnRegisteredResource
 	t.Run("test_route_names_default", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users", "UserHandler", nil).Only("index").Register()
@@ -409,7 +330,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanAccessRegisteredResourceRoutesAsRouteCollection
 	t.Run("test_registered_resource_routes_are_returned_as_collection", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		resource := router.Resource("users", "UserHandler", nil).Register()
@@ -424,7 +344,6 @@ func TestResourceRegistrar(t *testing.T) {
 		)
 	})
 
-	// RouteRegistrarTest::testCanRegisterSingleton
 	t.Run("test_singleton_emits_three_routes", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Singleton("profile", "ProfileHandler", nil).Register()
@@ -435,7 +354,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanRegisterCreatableSingleton
 	t.Run("test_singleton_creatable_adds_create_store_destroy", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Singleton("profile", "ProfileHandler", nil).Creatable().Register()
@@ -446,7 +364,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testSingletonCreatableNotDestroyable
 	t.Run("test_singleton_creatable_can_exclude_destroy", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Singleton("profile", "ProfileHandler", nil).Creatable().Except("destroy").Register()
@@ -461,7 +378,6 @@ func TestResourceRegistrar(t *testing.T) {
 		)
 	})
 
-	// RouteRegistrarTest::testCanRegisterApiSingleton
 	t.Run("test_api_singleton_excludes_edit", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiSingleton("profile", "ProfileHandler", nil).Register()
@@ -473,7 +389,6 @@ func TestResourceRegistrar(t *testing.T) {
 		assertNamedRoutes(t, router, []string{"profile.show", "profile.update"}, []string{"profile.edit"})
 	})
 
-	// RouteRegistrarTest::testCanRegisterCreatableApiSingleton
 	t.Run("test_creatable_api_singleton_excludes_create_edit", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiSingleton("profile", "ProfileHandler", nil).Creatable().Register()
@@ -488,7 +403,6 @@ func TestResourceRegistrar(t *testing.T) {
 		)
 	})
 
-	// RouteRegistrarTest::testApiSingletonCreatableNotDestroyable
 	t.Run("test_creatable_api_singleton_can_exclude_destroy", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiSingleton("profile", "ProfileHandler", nil).Creatable().Except("destroy").Register()
@@ -513,7 +427,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanOverrideParametersOnRegisteredResource
 	t.Run("test_resource_parameters_override_wildcards", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users.posts", "PostHandler", nil).
@@ -527,7 +440,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testCanSetMiddlewareOnRegisteredResource
 	t.Run("test_resource_middleware_is_applied", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Resource("users", "UserHandler", nil).Middleware("auth").Only("index").Register()
@@ -540,7 +452,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testSingletonCanBeDestroyable
 	t.Run("test_singleton_destroyable_adds_destroy_route", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Singleton("profile", "ProfileHandler", nil).Destroyable().Register()
@@ -550,7 +461,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testApiSingletonCanBeDestroyable
 	t.Run("test_api_singleton_destroyable_adds_destroy_route", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiSingleton("profile", "ProfileHandler", nil).Destroyable().Register()
@@ -560,7 +470,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testSingletonCanBeOnlyCreatable
 	t.Run("test_singleton_can_be_only_creatable", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Singleton("profile", "ProfileHandler", nil).Creatable().Only("create", "store").Register()
@@ -572,7 +481,6 @@ func TestResourceRegistrar(t *testing.T) {
 		assertNamedRoutes(t, router, []string{"profile.create", "profile.store"}, []string{"profile.show"})
 	})
 
-	// RouteRegistrarTest::testApiSingletonCanBeOnlyCreatable
 	t.Run("test_api_singleton_can_be_only_creatable", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiSingleton("profile", "ProfileHandler", nil).Creatable().Only("store").Register()
@@ -584,7 +492,6 @@ func TestResourceRegistrar(t *testing.T) {
 		assertNamedRoutes(t, router, []string{"profile.store"}, []string{"profile.show", "profile.create"})
 	})
 
-	// RouteRegistrarTest::testSingletonDoesntAllowIncludingUnsupportedMethods
 	t.Run("test_singleton_rejects_unsupported_methods", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.Singleton("profile", "ProfileHandler", nil).Only("index", "store", "create", "destroy").Register()
@@ -600,7 +507,6 @@ func TestResourceRegistrar(t *testing.T) {
 		}
 	})
 
-	// RouteRegistrarTest::testApiSingletonCanIncludeAnySingletonMethods
 	t.Run("test_api_singleton_can_explicitly_include_edit", func(t *testing.T) {
 		router := NewRouter(nil, nil)
 		router.ApiSingleton("profile", "ProfileHandler", nil).Only("edit").Register()

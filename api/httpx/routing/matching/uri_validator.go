@@ -8,7 +8,6 @@ import (
 // UriValidator matches the request's URI path against the route's compiled
 // path regex.
 //
-// Ref: @bedrock/code-0317
 // trailing slash from the request path (preserving "/") before matching, and
 // raw-URL-decodes the result.
 type UriValidator struct{}

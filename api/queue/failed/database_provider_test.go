@@ -1,19 +1,5 @@
 package failed_test
 
-// Ref: @bedrock/code-0360
-// ✅ testCanGetAllFailedJobIds
-// ✅ testCanGetAllFailedJobs
-// ✅ testCanRetrieveFailedJobsById
-// ✅ testCanRemoveFailedJobsById
-// ✅ testCanPruneFailedJobs
-// ✅ testCanPruneFailedJobsWithRelativeHoursAndMinutes
-// ✅ testCanFlushFailedJobs
-// ✅ testCanProperlyLogFailedJob
-// ✅ testJobsCanBeCounted
-// ✅ testJobsCanBeCountedByConnection
-// ✅ testJobsCanBeCountedByQueue
-// ✅ testJobsCanBeCountedByQueueAndConnection
-
 import (
 	"encoding/json"
 	"errors"
@@ -42,7 +28,6 @@ func createIntFailedJob(t *testing.T, p *failed.DatabaseFailedJobProvider, faile
 	failed.SetNow(p, time.Now)
 }
 
-// Ref: @bedrock/code-0360
 func TestCanGetAllFailedJobIds(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -72,7 +57,6 @@ func TestCanGetAllFailedJobIds(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanGetAllFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -102,7 +86,6 @@ func TestCanGetAllFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanRetrieveFailedJobsById(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -122,7 +105,6 @@ func TestCanRetrieveFailedJobsById(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanRemoveFailedJobsById(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -149,7 +131,6 @@ func TestCanRemoveFailedJobsById(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanPruneFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -182,7 +163,6 @@ func TestCanPruneFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanPruneFailedJobsWithRelativeHoursAndMinutes(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -204,7 +184,6 @@ func TestCanPruneFailedJobsWithRelativeHoursAndMinutes(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanFlushFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -236,7 +215,6 @@ func TestCanFlushFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestCanProperlyLogFailedJob(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -260,7 +238,6 @@ func TestCanProperlyLogFailedJob(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestJobsCanBeCounted(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -285,7 +262,6 @@ func TestJobsCanBeCounted(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestJobsCanBeCountedByConnection(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -313,7 +289,6 @@ func TestJobsCanBeCountedByConnection(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestJobsCanBeCountedByQueue(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()
@@ -341,7 +316,6 @@ func TestJobsCanBeCountedByQueue(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0360
 func TestJobsCanBeCountedByQueueAndConnection(t *testing.T) {
 	t.Parallel()
 	p := newIntProvider()

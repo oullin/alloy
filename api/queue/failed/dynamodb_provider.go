@@ -22,7 +22,6 @@ type DynamoDBClient interface {
 	DeleteItem(ctx context.Context, params map[string]any) (map[string]any, error)
 }
 
-// Ref: @bedrock/code-0257
 type DynamoDbFailedJobProvider struct {
 	client          DynamoDBClient
 	applicationName string

@@ -2,7 +2,6 @@ package routing
 
 import "github.com/oullin/alloy/api/httpx/routing/matching"
 
-// Ref: @bedrock/code-0336
 // Both [RouteCollection] and [CompiledRouteCollection] satisfy this interface,
 // so consumers (notably [Router]) can hold a single field and switch
 // implementations in production via route caching.

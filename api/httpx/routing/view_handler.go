@@ -9,8 +9,6 @@ type ViewFactory = crouting.ViewFactory
 // ViewHandler is the invokable handler used by [Router.View]. It
 // renders the named view with the supplied data, merging in any extra route
 // parameters as additional data.
-//
-// Ref: @bedrock/code-0347
 type ViewHandler struct {
 	Handler
 	view ViewFactory

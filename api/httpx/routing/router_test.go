@@ -7,23 +7,6 @@ import (
 )
 
 // tests/Routing/RoutingRouteTest.php — the parts that need a Router instance.
-// RouteRegistrarTest::testCanRegisterGetRouteWithClosureAction
-// RouteRegistrarTest::testCanRegisterPostRouteWithClosureAction
-// RouteRegistrarTest::testCanRegisterAnyRouteWithClosureAction
-// RouteRegistrarTest::testCanRegisterMatchRouteWithClosureAction
-// RouteRegistrarTest::testFallbackRoute
-// RouteRegistrarTest::testSetFallbackRoute
-// RouteRegistrarTest::testCanRegisterGroupWithPrefix
-// RouteRegistrarTest::testCanRegisterGroupWithNamePrefix
-// RouteRegistrarTest::testCanRegisterGroupWithDomain
-// RouteRegistrarTest::testPushMiddlewareToGroup
-// RouteRegistrarTest::testCanRemoveMiddlewareFromGroup
-// RoutingRouteTest::testBasicDispatchingOfRoutes
-// RoutingRouteTest::testRouterPatternSetting
-// RoutingRouteTest::testMiddlewarePrioritySorting
-// RoutingRouteTest::testGroupMerging
-// RoutingRouteTest::testCurrentRouteUses
-// RoutingRouteTest::testMergingHandlerUses
 
 func TestRouter_Registration(t *testing.T) {
 	t.Run("test_get_post_put_patch_delete", func(t *testing.T) {
@@ -117,7 +100,6 @@ func TestRouter_Group(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testMergingHandlerUses
 	t.Run("test_group_handler_merges_with_method_action", func(t *testing.T) {
 		r := NewRouter(nil, nil)
 		r.Group(map[string]any{"handler": "UserHandler"}, func(r *Router) {
@@ -196,7 +178,6 @@ func TestRouter_Dispatch(t *testing.T) {
 		}
 	})
 
-	// RoutingRouteTest::testCurrentRouteUses
 	t.Run("test_current_route_uses_matches_handler_action", func(t *testing.T) {
 		r := NewRouter(nil, nil)
 		r.Get("/users/{user}", "UserHandler@show")
@@ -324,7 +305,6 @@ func TestRouter_Has(t *testing.T) {
 }
 
 func TestSortedMiddleware(t *testing.T) {
-	// Ref: @bedrock/code-0398
 	t.Run("test_priority_order_is_respected", func(t *testing.T) {
 		priority := []string{"first", "second", "third"}
 		input := []any{"third", "first", "second"}

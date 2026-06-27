@@ -8,8 +8,6 @@ package routing
 // that receives the router and registers routes against it. The helper exists
 // so the Router::Group machinery can treat closures and "route file" loaders
 // uniformly.
-//
-// Ref: @bedrock/code-0337
 type RouteFileRegistrar struct{ router *Router }
 
 // NewRouteFileRegistrar wraps the router so the resulting value can be used

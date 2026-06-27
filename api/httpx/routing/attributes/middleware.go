@@ -1,4 +1,3 @@
-// Ref: @bedrock/code-0286
 // PHP 8 attributes have no direct Go equivalent. The strict-parity story here
 // is "the value object is identical, but you attach it via the
 // [handlermiddleware.Provider] interface instead of an attribute on the class".

@@ -1,4 +1,3 @@
-// Ref: @bedrock/code-0306
 // Each exported error type maps to a PHP exception class of the same name.
 // Errors are returned by value so callers can use [errors.As] to discriminate.
 package exceptions
@@ -8,8 +7,6 @@ import "fmt"
 // UrlGenerationException is returned when [routing.UrlGenerator] cannot
 // generate a URL for the requested route — typically because a required
 // parameter is missing.
-//
-// Ref: @bedrock/code-0311
 type UrlGenerationException struct {
 	RouteName string
 	Missing   []string

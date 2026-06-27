@@ -13,8 +13,6 @@ type SignatureValidator = cmiddleware.SignatureValidator
 
 // ValidateSignature is the middleware form of [routing.UrlGenerator]'s signed
 // URL check. It rejects requests whose signature does not match.
-//
-// Ref: @bedrock/code-0324
 type ValidateSignature struct {
 	// Ignore lists parameter names that should be skipped when computing the
 	// HMAC input. Useful for unrelated tracking parameters.

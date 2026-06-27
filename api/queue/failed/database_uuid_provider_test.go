@@ -1,18 +1,5 @@
 package failed_test
 
-// Ref: @bedrock/code-0361
-// ✅ testGettingIdsOfAllFailedJobs
-// ✅ testGettingAllFailedJobs
-// ✅ testFindingFailedJobsById
-// ✅ testRemovingJobsById
-// ✅ testRemovingAllFailedJobs
-// ✅ testPruningFailedJobs
-// ✅ testPruningFailedJobsWithRelativeHoursAndMinutes
-// ✅ testJobsCanBeCounted
-// ✅ testJobsCanBeCountedByConnection
-// ✅ testJobsCanBeCountedByQueue
-// ✅ testJobsCanBeCountedByQueueAndConnection
-
 import (
 	"encoding/json"
 	"errors"
@@ -32,7 +19,6 @@ func uuidPayload(uuid string) string {
 	return string(b)
 }
 
-// Ref: @bedrock/code-0361
 func TestGettingIdsOfAllFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -53,7 +39,6 @@ func TestGettingIdsOfAllFailedJobs(t *testing.T) {
 	assertStringSlice(t, ids, []string{"uuid-3", "uuid-4"})
 }
 
-// Ref: @bedrock/code-0361
 func TestGettingAllFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -84,7 +69,6 @@ func TestGettingAllFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestFindingFailedJobsById(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -101,7 +85,6 @@ func TestFindingFailedJobsById(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestRemovingJobsById(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -118,7 +101,6 @@ func TestRemovingJobsById(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestRemovingAllFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -139,7 +121,6 @@ func TestRemovingAllFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestPruningFailedJobs(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -164,7 +145,6 @@ func TestPruningFailedJobs(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestPruningFailedJobsWithRelativeHoursAndMinutes(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -189,7 +169,6 @@ func TestPruningFailedJobsWithRelativeHoursAndMinutes(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestJobsCanBeCountedUuid(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -212,7 +191,6 @@ func TestJobsCanBeCountedUuid(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestJobsCanBeCountedByConnectionUuid(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -238,7 +216,6 @@ func TestJobsCanBeCountedByConnectionUuid(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestJobsCanBeCountedByQueueUuid(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()
@@ -264,7 +241,6 @@ func TestJobsCanBeCountedByQueueUuid(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0361
 func TestJobsCanBeCountedByQueueAndConnectionUuid(t *testing.T) {
 	t.Parallel()
 	p := newUUIDProvider()

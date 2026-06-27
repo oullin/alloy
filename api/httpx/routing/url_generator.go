@@ -13,7 +13,6 @@ import (
 	"github.com/oullin/alloy/api/httpx/routing/exceptions"
 )
 
-// Ref: @bedrock/code-0346
 // It owns the request, the route collection (for name lookups), and the
 // signing key. The four big jobs:
 //
@@ -40,7 +39,6 @@ func NewUrlGenerator(routes RouteCollectionInterface, request URLRequest, assetR
 // SetKeyResolver sets the signing key (used for signed URLs).
 func (u *UrlGenerator) SetKeyResolver(key string) *UrlGenerator { u.key = key; return u }
 
-// Ref: @bedrock/code-0346
 func (u *UrlGenerator) ForceScheme(scheme string) { u.forcedScheme = scheme }
 
 // ForceHttps is the boolean shorthand for [UrlGenerator.ForceScheme]("https").
@@ -53,7 +51,6 @@ func (u *UrlGenerator) ForceHttps(force bool) {
 }
 
 // ForceRootUrl pins the URL root used for absolute generation.
-// UrlGenerator::forceRootUrl.
 func (u *UrlGenerator) ForceRootUrl(root string) { u.forcedRootUrl = root }
 
 // =====================================================================
@@ -86,8 +83,6 @@ func (u *UrlGenerator) Current() string {
 
 // To produces an absolute URL for the supplied path. extra is appended as
 // path segments (URL-encoded). When secure is true the URL forces HTTPS.
-//
-// Ref: @bedrock/code-0346
 func (u *UrlGenerator) To(path string, extra []string, secure *bool) string {
 	if isAbsoluteURL(path) {
 		return path
@@ -179,8 +174,6 @@ func (u *UrlGenerator) formatRoot(scheme, root string) string {
 // =====================================================================
 
 // Route generates a URL for the named route.
-//
-// Ref: @bedrock/code-0346
 func (u *UrlGenerator) Route(name string, parameters map[string]any, absolute bool) (string, error) {
 	route := u.routes.GetByName(name)
 
@@ -191,7 +184,6 @@ func (u *UrlGenerator) Route(name string, parameters map[string]any, absolute bo
 	return u.ToRoute(route, parameters, absolute)
 }
 
-// Ref: @bedrock/code-0346
 func (u *UrlGenerator) ToRoute(route *Route, parameters map[string]any, absolute bool) (string, error) {
 	parameters = mergeRouteDefaults(route, parameters)
 
@@ -242,7 +234,6 @@ func isOptionalParam(uri, name string) bool {
 //
 // expiration may be 0 (no expiration) or a positive number of seconds from
 // now until the signature must be considered expired.
-// UrlGenerator::signedRoute.
 func (u *UrlGenerator) SignedRoute(name string, parameters map[string]any, expiration int64, absolute bool) (string, error) {
 	if parameters == nil {
 		parameters = map[string]any{}

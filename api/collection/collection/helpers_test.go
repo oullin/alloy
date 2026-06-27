@@ -4,9 +4,6 @@ import (
 	"testing"
 )
 
-// Framework collections parity markers exercised by this file.
-// SupportCollectionTest::testValue
-// SupportCollectionTest::testWhenDefault
 func TestValue(t *testing.T) {
 	v := Value(42)
 

@@ -17,7 +17,6 @@ type DriverCreator func(config map[string]any) (Backend, error)
 // ConnectorFactory is the upstream-faithful two-step path: the factory
 // returns a Connector, and the Manager then calls Connector.Connect(config)
 // to obtain a Backend.
-// Ref: @bedrock/code-0231
 type ConnectorFactory func() Connector
 
 // ConnectionNameSetter is the optional contract a Backend implementation
@@ -43,7 +42,6 @@ type HookFunc func(event any)
 
 // Manager creates, caches, and coordinates named queue connections.
 //
-// Ref: @bedrock/code-0269
 // two entry points for registering drivers (Register for the simple
 // creator path, AddConnector for the two-step Connector path), enum-like
 // connection references via Connection(any), optional queue hooks for
@@ -111,7 +109,6 @@ func (m *Manager) Extend(driver string, creator DriverCreator) *Manager {
 
 // AddConnector registers a ConnectorFactory for the given driver name.
 // The factory is invoked lazily the first time a connection using that
-// Ref: @bedrock/code-0269
 func (m *Manager) AddConnector(driver string, factory ConnectorFactory) *Manager {
 	m.mu.Lock()
 
@@ -455,7 +452,6 @@ func (m *Manager) IsPaused(connection, queue string) bool {
 // driver for the set of queue names it currently knows about (via the
 // optional Namer contract), and concatenates the per-queue
 // PendingJobs results in declared order.
-// Backend::allPendingJobs.
 func (m *Manager) AllPendingJobs(ctx context.Context, connection string) ([]InspectedJob, error) {
 	return m.allJobs(ctx, connection, func(i JobInspector, name string) ([]InspectedJob, error) {
 		return i.PendingJobs(ctx, name)

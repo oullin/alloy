@@ -10,7 +10,6 @@ import (
 	cqueue "github.com/oullin/alloy/api/contracts/queue"
 )
 
-// Ref: @bedrock/code-0268
 // class — the shared base every concrete driver extends in PHP. In Go we
 // expose it as a set of stateless helpers that drivers call directly,
 // rather than as embedded state, so existing drivers can opt in without
@@ -33,12 +32,9 @@ type Namer = cqueue.Namer
 // concrete transaction plumbing arrives in Step 14; for now the marker
 // exists so drivers can detect the intent without a compile-time dep
 // on a higher-level transaction package.
-//
-// Ref: @bedrock/code-0197
 type AfterCommitMarker = cqueue.AfterCommitMarker
 
 // BeforeCommitMarker is the inverse of AfterCommitMarker: a job that
-// Ref: @bedrock/code-0196
 // override. Step 14 wires the full decision tree; today the type exists
 // so drivers and tests can reference it.
 type BeforeCommitMarker = cqueue.BeforeCommitMarker
@@ -94,7 +90,6 @@ func NewUUIDv4() string {
 }
 
 // CreatePayloadFor builds, hook-applies, and serialises a payload ready
-// Ref: @bedrock/code-0268
 // Drivers should call this instead of constructing Payload structs by
 // hand so that CreatePayloadUsing hooks fire uniformly, the UUID format
 // matches upstream's, and timestamp/field shapes stay consistent.

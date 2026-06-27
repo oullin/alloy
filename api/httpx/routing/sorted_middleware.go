@@ -8,8 +8,6 @@ import "strings"
 // a constructor that performs the sort. Slice elements are typed as any
 // because middleware may be either a string class name (with optional ":args"
 // suffix) or a closure.
-//
-// Ref: @bedrock/code-0345
 type SortedMiddleware []any
 
 // NewSortedMiddleware returns the middleware list reordered so that any

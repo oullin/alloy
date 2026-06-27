@@ -9,8 +9,6 @@ import (
 // RedirectResponse is a minimal redirect-response value type used by the
 // routing port. The bedrock httpx package supplies a richer type that the
 // service provider in M11 wires in via [Redirector.SetResponseFactory].
-//
-// Ref: @bedrock/code-0223
 type RedirectResponse struct {
 	URL     string
 	Status  int
@@ -29,7 +27,6 @@ type RedirectResponse struct {
 // foundation.SessionStore narrowly.
 type SessionStore = crouting.RedirectSessionStore
 
-// Ref: @bedrock/code-0329
 // [RedirectResponse] values for the various redirect verbs (To, Away, Secure,
 // Back, Refresh, Route, Action).
 type Redirector struct {

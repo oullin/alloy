@@ -2,8 +2,6 @@ package matching
 
 // MethodValidator matches the request's HTTP method against the methods
 // declared on the route.
-//
-// Ref: @bedrock/code-0315
 type MethodValidator struct{}
 
 // Matches reports whether the request method is one of the route's methods.

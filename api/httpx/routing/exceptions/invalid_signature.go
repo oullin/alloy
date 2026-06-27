@@ -4,8 +4,6 @@ import "errors"
 
 // InvalidSignatureException indicates that a signed URL's HMAC did not match
 // or that its expiration timestamp has passed.
-//
-// Ref: @bedrock/code-0308
 type InvalidSignatureException struct{ Reason string }
 
 func (e *InvalidSignatureException) Error() string {

@@ -1,6 +1,5 @@
 package queue
 
-// Ref: @bedrock/code-0262
 // It is returned by Payload marshalling/unmarshalling helpers when a
 // payload cannot be encoded or decoded. The Value field carries the
 // original input that failed to decode (matching the upstream $value field)

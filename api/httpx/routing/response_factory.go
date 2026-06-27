@@ -1,6 +1,5 @@
 package routing
 
-// Ref: @bedrock/code-0331
 // In the upstream framework the factory hand-builds Response/JsonResponse instances; the Go
 // port provides a struct-based equivalent that the bedrock httpx layer can
 // translate into real HTTP responses. The methods cover the public surface

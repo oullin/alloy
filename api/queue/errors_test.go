@@ -7,13 +7,11 @@ import (
 	"github.com/oullin/alloy/api/queue"
 )
 
-// Ref: @bedrock/code-0368
 // and returns the same display name the PHP fixture returns.
 type fakeRedisJob struct{}
 
 func (fakeRedisJob) ResolveName() string { return "App\\Jobs\\UnderlyingJob" }
 
-// Ref: @bedrock/code-0368
 func TestItCanCreateTimeoutExceptionForJob(t *testing.T) {
 	t.Parallel()
 
@@ -38,7 +36,6 @@ func TestItCanCreateTimeoutExceptionForJob(t *testing.T) {
 	}
 }
 
-// Ref: @bedrock/code-0368
 func TestItCanCreateMaxAttemptsExceptionForJob(t *testing.T) {
 	t.Parallel()
 

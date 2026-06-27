@@ -6,9 +6,6 @@ import (
 )
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testStringCanBeLimitedByWordsNonAscii
-// SupportStrTest::testStringTrimmedOnlyWhereNecessary
-// SupportStrTest::testStringWithoutWordsDoesntProduceError
 func TestStrWords(t *testing.T) {
 	t.Parallel()
 
@@ -69,7 +66,6 @@ func TestStrHeadline(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testDoesntStartWith
 func TestStrStartsWith(t *testing.T) {
 	t.Parallel()
 
@@ -91,7 +87,6 @@ func TestStrStartsWith(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testDoesntEndWith
 func TestStrEndsWith(t *testing.T) {
 	t.Parallel()
 
@@ -113,7 +108,6 @@ func TestStrEndsWith(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testStrDoesntContain
 func TestStrContains(t *testing.T) {
 	t.Parallel()
 
@@ -323,8 +317,6 @@ func TestStrIsJson(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testIsUuidWithInvalidUuid
-// SupportStrTest::testIsUuidWithVersion
 func TestStrIsUuid(t *testing.T) {
 	t.Parallel()
 
@@ -365,7 +357,6 @@ func TestStrIsUlid(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testWhetherTheNumberOfGeneratedCharactersIsEquallyDistributed
 func TestStrRandom(t *testing.T) {
 	t.Parallel()
 
@@ -395,7 +386,6 @@ func TestStrRandom(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testFromBase64
 func TestStrBase64(t *testing.T) {
 	t.Parallel()
 
@@ -817,7 +807,6 @@ func TestStrNumbers(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testStringApa
 func TestStrApa(t *testing.T) {
 	t.Parallel()
 
@@ -884,8 +873,6 @@ func TestStrTrim(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testPadLeft
-// SupportStrTest::testPadRight
 func TestStrPad(t *testing.T) {
 	t.Parallel()
 
@@ -942,23 +929,6 @@ func TestStrOf(t *testing.T) {
 func TestSupportStringablePredicateAndPluralParity(t *testing.T) {
 	t.Parallel()
 
-	// SupportStringableTest::testIsAscii
-	// SupportStringableTest::testIsUrl
-	// SupportStringableTest::testIsUuid
-	// SupportStringableTest::testIsUlid
-	// SupportStringableTest::testIsJson
-	// SupportStringableTest::testIsMatch
-	// SupportStringableTest::testIsEmpty
-	// SupportStringableTest::testIsNotEmpty
-	// SupportStringableTest::testPluralStudly
-	// SupportStringableTest::testPluralPascal
-	// SupportStringableTest::testMatch
-	// SupportStringableTest::testTake
-	// SupportStringableTest::testTest
-	// SupportStringableTest::testTrim
-	// SupportStringableTest::testLtrim
-	// SupportStringableTest::testRtrim
-	// SupportStringableTest::testClassBasename
 	if !Of("hello").IsAscii() {
 		t.Fatal("expected ASCII string")
 	}
@@ -1037,7 +1007,6 @@ func TestStrRandomFactory(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testItCanSpecifyAFallbackForARandomStringSequence
 func TestStrRandomSequence(t *testing.T) {
 	// NOT parallel — modifies global state
 	cleanup := func() { CreateRandomStringsNormally() }
@@ -1065,7 +1034,6 @@ func TestStrRandomSequence(t *testing.T) {
 }
 
 // Ref: @alloy/code-0380
-// SupportStrTest::testSubstrReplaceWithMultibyte
 func TestStrSubstrReplace(t *testing.T) {
 	t.Parallel()
 
@@ -1078,31 +1046,6 @@ func TestStrSubstrReplace(t *testing.T) {
 	}
 }
 
-// SupportStrTest::testStrAfterLast
-// SupportStrTest::testStrBeforeLast
-// SupportStrTest::testLength
-// SupportStrTest::testLtrim
-// SupportStrTest::testRtrim
-// SupportStrTest::testRemove
-// SupportStrTest::testRepeat
-// SupportStrTest::testPascal
-// SupportStrTest::testCharAt
-// SupportStrTest::testParseCallback
-// SupportStrTest::testDedup
-// SupportStrTest::testIsUrl
-// SupportStrTest::testMatch
-// SupportStrTest::testUcwords
-// SupportStrTest::testTransliterate
-// SupportStrTest::testTransliterateOverrideUnknown
-// SupportStrTest::testPasswordCreation
-// SupportStrTest::testStringAscii
-// SupportStrTest::testStringAsciiWithSpecificLocale
-// SupportStrTest::testConvertCase
-// SupportStrTest::testFlushCache
-// SupportStrTest::testIsWithMultilineStrings
-// SupportStrTest::testPluralPascal
-// SupportStrTest::testRepeatWhenTimesIsNegative
-// SupportStrTest::testWrapEdgeCases
 func TestStrAdditionalInventoryEquivalents(t *testing.T) {
 	t.Parallel()
 
@@ -1238,116 +1181,6 @@ func assertPanics(t *testing.T, fn func()) {
 func TestSupportStringableInventoryCloseout(t *testing.T) {
 	t.Parallel()
 
-	// SupportStringableTest::testCanBeLimitedByWords
-	// SupportStringableTest::testUcwords
-	// SupportStringableTest::testUnless
-	// SupportStringableTest::testWhenContains
-	// SupportStringableTest::testWhenContainsAll
-	// SupportStringableTest::testDedup
-	// SupportStringableTest::testDirname
-	// SupportStringableTest::testUcsplitOnStringable
-	// SupportStringableTest::testWhenEndsWith
-	// SupportStringableTest::testWhenDoesntEndWith
-	// SupportStringableTest::testWhenExactly
-	// SupportStringableTest::testWhenNotExactly
-	// SupportStringableTest::testWhenIs
-	// SupportStringableTest::testWhenIsAscii
-	// SupportStringableTest::testWhenIsUuid
-	// SupportStringableTest::testWhenIsUlid
-	// SupportStringableTest::testWhenTest
-	// SupportStringableTest::testWhenStartsWith
-	// SupportStringableTest::testWhenDoesntStartWith
-	// SupportStringableTest::testWhenEmpty
-	// SupportStringableTest::testWhenNotEmpty
-	// SupportStringableTest::testWhenFalse
-	// SupportStringableTest::testWhenTrue
-	// SupportStringableTest::testUnlessTruthy
-	// SupportStringableTest::testUnlessFalsy
-	// SupportStringableTest::testTrimmedOnlyWhereNecessary
-	// SupportStringableTest::testTitle
-	// SupportStringableTest::testWithoutWordsDoesntProduceError
-	// SupportStringableTest::testAscii
-	// SupportStringableTest::testTransliterate
-	// SupportStringableTest::testNewLine
-	// SupportStringableTest::testAsciiWithSpecificLocale
-	// SupportStringableTest::testStartsWith
-	// SupportStringableTest::testDoesntStartWith
-	// SupportStringableTest::testEndsWith
-	// SupportStringableTest::testDoesntEndWith
-	// SupportStringableTest::testExcerpt
-	// SupportStringableTest::testBefore
-	// SupportStringableTest::testBeforeLast
-	// SupportStringableTest::testBetween
-	// SupportStringableTest::testBetweenFirst
-	// SupportStringableTest::testAfter
-	// SupportStringableTest::testAfterLast
-	// SupportStringableTest::testContains
-	// SupportStringableTest::testContainsAll
-	// SupportStringableTest::testDoesntContain
-	// SupportStringableTest::testParseCallback
-	// SupportStringableTest::testSlug
-	// SupportStringableTest::testSquish
-	// SupportStringableTest::testStart
-	// SupportStringableTest::testFinish
-	// SupportStringableTest::testIs
-	// SupportStringableTest::testIsWithMultilineStrings
-	// SupportStringableTest::testKebab
-	// SupportStringableTest::testLower
-	// SupportStringableTest::testUpper
-	// SupportStringableTest::testLimit
-	// SupportStringableTest::testLength
-	// SupportStringableTest::testReplace
-	// SupportStringableTest::testReplaceArray
-	// SupportStringableTest::testReplaceFirst
-	// SupportStringableTest::testReplaceStart
-	// SupportStringableTest::testReplaceLast
-	// SupportStringableTest::testReplaceEnd
-	// SupportStringableTest::testRemove
-	// SupportStringableTest::testReverse
-	// SupportStringableTest::testSnake
-	// SupportStringableTest::testStudly
-	// SupportStringableTest::testPascal
-	// SupportStringableTest::testCamel
-	// SupportStringableTest::testCharAt
-	// SupportStringableTest::testSubstr
-	// SupportStringableTest::testSwap
-	// SupportStringableTest::testSubstrCount
-	// SupportStringableTest::testPosition
-	// SupportStringableTest::testSubstrReplace
-	// SupportStringableTest::testPadBoth
-	// SupportStringableTest::testPadLeft
-	// SupportStringableTest::testPadRight
-	// SupportStringableTest::testExplode
-	// SupportStringableTest::testChunk
-	// SupportStringableTest::testJsonSerialize
-	// SupportStringableTest::testTap
-	// SupportStringableTest::testPipe
-	// SupportStringableTest::testMarkdown
-	// SupportStringableTest::testInlineMarkdown
-	// SupportStringableTest::testMask
-	// SupportStringableTest::testRepeat
-	// SupportStringableTest::testWordCount
-	// SupportStringableTest::testWrap
-	// SupportStringableTest::testUnwrap
-	// SupportStringableTest::testToHtmlString
-	// SupportStringableTest::testStripTags
-	// SupportStringableTest::testReplaceMatches
-	// SupportStringableTest::testScan
-	// SupportStringableTest::testGet
-	// SupportStringableTest::testExactly
-	// SupportStringableTest::testInitials
-	// SupportStringableTest::testToInteger
-	// SupportStringableTest::testToFloat
-	// SupportStringableTest::testBooleanMethod
-	// SupportStringableTest::testNumbers
-	// SupportStringableTest::testToDate
-	// SupportStringableTest::testToDateThrowsException
-	// SupportStringableTest::testToUri
-	// SupportStringableTest::testArrayAccess
-	// SupportStringableTest::testToBase64
-	// SupportStringableTest::testFromBase64
-	// SupportStringableTest::testHash
-	// SupportStringableTest::testEncryptAndDecrypt
 	if got := Of("hello world").Words(1).Value(); got != "hello..." {
 		t.Fatalf("Words = %q", got)
 	}

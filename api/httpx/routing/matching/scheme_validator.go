@@ -5,8 +5,6 @@ package matching
 //
 // A route marked HttpOnly only matches insecure requests; a route marked
 // Secure only matches secure requests; an unconstrained route matches both.
-//
-// Ref: @bedrock/code-0316
 type SchemeValidator struct{}
 
 // Matches reports whether the request's scheme satisfies the route.

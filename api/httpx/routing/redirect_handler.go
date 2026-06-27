@@ -3,8 +3,6 @@ package routing
 // RedirectHandler is the invokable handler used by [Router.Redirect]
 // and [Router.PermanentRedirect]. It reads the destination and status from
 // the matched route's parameters and produces a [RedirectResponse].
-//
-// Ref: @bedrock/code-0328
 type RedirectHandler struct{ Handler }
 
 // Invoke is the dispatch entry point — handler dispatchers detect the

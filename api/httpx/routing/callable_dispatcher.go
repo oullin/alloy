@@ -4,8 +4,6 @@ import "reflect"
 
 // CallableDispatcher dispatches a closure-style route action by resolving its
 // parameters via reflection and invoking it.
-//
-// Ref: @bedrock/code-0287
 type CallableDispatcher struct {
 	ResolvesRouteDependencies
 	container DependencyContainer

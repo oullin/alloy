@@ -26,12 +26,6 @@ type inventoryUser struct {
 func TestInventoryParityFirstWhereAndTypedFilters(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testFirstOrFailStopsIteratingAtFirstMatch
-	// SupportCollectionTest::testFirstWhere
-	// SupportCollectionTest::testWhereStrict
-	// SupportCollectionTest::testWhereInStrict
-	// SupportCollectionTest::testWhereNotInStrict
-	// SupportCollectionTest::testBetween
 	users := Collect([]inventoryUser{
 		{ID: 1, Name: "Taylor", Team: "core", Active: true, Score: 10},
 		{ID: 2, Name: "Abigail", Team: "docs", Active: false, Score: 20},
@@ -91,14 +85,6 @@ func TestInventoryParityFirstWhereAndTypedFilters(t *testing.T) {
 func TestInventoryParityUniquenessDuplicatesAndSorting(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testUniqueWithCallback
-	// SupportCollectionTest::testUniqueStrict
-	// SupportCollectionTest::testDuplicatesWithKey
-	// SupportCollectionTest::testDuplicatesWithCallback
-	// SupportCollectionTest::testDuplicatesWithStrict
-	// SupportCollectionTest::testValuesResetKey
-	// SupportCollectionTest::testSortWithCallback
-	// SupportCollectionTest::testSortByMany
 	items := Collect([]inventoryUser{
 		{ID: 1, Name: "Taylor", Team: "core"},
 		{ID: 2, Name: "Abigail", Team: "docs"},
@@ -160,16 +146,6 @@ func TestInventoryParityUniquenessDuplicatesAndSorting(t *testing.T) {
 func TestInventoryParityGroupKeyAndMapWithKeys(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testMapToDictionaryWithNumericKeys
-	// SupportCollectionTest::testMapToGroupsWithNumericKeys
-	// SupportCollectionTest::testMapWithKeysIntegerKeys
-	// SupportCollectionTest::testMapWithKeysMultipleRows
-	// SupportCollectionTest::testMapWithKeysCallbackKey
-	// SupportCollectionTest::testMapWithKeysOverwritingKeys
-	// SupportCollectionTest::testGroupByClosureWhereItemsHaveSingleGroup
-	// SupportCollectionTest::testGroupByClosureWhereItemsHaveMultipleGroups
-	// SupportCollectionTest::testGroupByAttribute
-	// SupportCollectionTest::testKeyByClosure
 	users := Collect([]inventoryUser{
 		{ID: 1, Name: "Taylor", Team: "core"},
 		{ID: 2, Name: "Abigail", Team: "docs"},
@@ -230,16 +206,6 @@ func TestInventoryParityGroupKeyAndMapWithKeys(t *testing.T) {
 func TestInventoryParityMergeConcatSliceMedianAndMode(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testMergeCollection
-	// SupportCollectionTest::testConcatWithCollection
-	// SupportCollectionTest::testSliceNegativeOffset
-	// SupportCollectionTest::testSliceNegativeOffsetAndLength
-	// SupportCollectionTest::testMedianValueByKey
-	// SupportCollectionTest::testMedianOnCollectionWithNull
-	// SupportCollectionTest::testMedianOutOfOrderCollection
-	// SupportCollectionTest::testMedianOnEmptyCollectionReturnsNull
-	// SupportCollectionTest::testModeOnNullCollection
-	// SupportCollectionTest::testModeValueByKey
 	left := Collect([]int{1, 2})
 	right := Collect([]int{3, 4})
 
@@ -291,19 +257,6 @@ func TestInventoryParityMergeConcatSliceMedianAndMode(t *testing.T) {
 func TestInventoryParitySerializationMutationAndMath(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testLazyReturnsLazyCollection
-	// SupportCollectionTest::testToJsonEncodesTheJsonSerializeResult
-	// SupportCollectionTest::testToPrettyJsonEncodesTheJsonSerializeResult
-	// SupportCollectionTest::testCastingToStringJsonEncodesTheToArrayResult
-	// SupportCollectionTest::testForgetSingleKey
-	// SupportCollectionTest::testMultiplyCollection
-	// SupportCollectionTest::testPut
-	// SupportCollectionTest::testPutWithNoKey
-	// SupportCollectionTest::testGettingSumFromEmptyCollection
-	// SupportCollectionTest::testUnshiftWithOneItem
-	// SupportCollectionTest::testUnshiftWithMultipleItems
-	// SupportCollectionTest::testCombineWithCollection
-	// SupportCollectionTest::testMedianValueWithArrayCollection
 	users := Collect([]inventoryUser{
 		{ID: 1, Name: "Taylor", Score: 10},
 		{ID: 2, Name: "Abigail", Score: 20},
@@ -391,30 +344,6 @@ func TestInventoryParitySerializationMutationAndMath(t *testing.T) {
 func TestInventoryParityChunkTakeSplitAndPartition(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testChunkWhenGivenZeroAsSize
-	// SupportCollectionTest::testChunkWhenGivenLessThanZero
-	// SupportCollectionTest::testChunkWhileOnContiguouslyIncreasingIntegers
-	// SupportCollectionTest::testTakeLast
-	// SupportCollectionTest::testTakeUntilUsingValue
-	// SupportCollectionTest::testTakeUntilReturnsAllItemsForUnmetValue
-	// SupportCollectionTest::testTakeWhileUsingValue
-	// SupportCollectionTest::testTakeWhileReturnsNoItemsForUnmetValue
-	// SupportCollectionTest::testSplitCollectionWithAnUndivisableCount
-	// SupportCollectionTest::testSplitCollectionWithCountLessThenDivisor
-	// SupportCollectionTest::testSplitCollectionIntoThreeWithCountOfFour
-	// SupportCollectionTest::testSplitCollectionIntoThreeWithCountOfFive
-	// SupportCollectionTest::testSplitCollectionIntoSixWithCountOfTen
-	// SupportCollectionTest::testSplitEmptyCollection
-	// SupportCollectionTest::testNthThrowsExceptionForInvalidStep
-	// SupportCollectionTest::testNthThrowsExceptionForNegativeStep
-	// SupportCollectionTest::testSplitThrowsExceptionForInvalidNumberOfGroups
-	// SupportCollectionTest::testSplitThrowsExceptionForNegativeNumberOfGroups
-	// SupportCollectionTest::testSplitInThrowsExceptionForInvalidNumberOfGroups
-	// SupportCollectionTest::testSplitInThrowsExceptionForNegativeNumberOfGroups
-	// SupportCollectionTest::testPartitionCallbackWithKey
-	// SupportCollectionTest::testPartitionByKey
-	// SupportCollectionTest::testPartitionWithOperators
-	// SupportCollectionTest::testPartitionEmptyCollection
 	items := Collect([]int{1, 2, 3, 5, 6, 9})
 
 	if chunks := items.Chunk(0); chunks != nil {
@@ -519,11 +448,6 @@ func TestInventoryParityChunkTakeSplitAndPartition(t *testing.T) {
 func TestInventoryParityEnsureAndMapInto(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testMapInto
-	// SupportCollectionTest::testEnsureForScalar
-	// SupportCollectionTest::testEnsureForObjects
-	// SupportCollectionTest::testEnsureForInheritance
-	// SupportCollectionTest::testEnsureForMultipleTypes
 	mapped := MapInto(Collect([]int{1, 2, 3}), func(value int) string {
 		return strings.Repeat("*", value)
 	})
@@ -559,17 +483,6 @@ func TestInventoryParityEnsureAndMapInto(t *testing.T) {
 func TestInventoryParitySetOperationsAndKeyedCollections(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testMergeNull
-	// SupportCollectionTest::testMergeRecursiveNull
-	// SupportCollectionTest::testMergeRecursiveArray
-	// SupportCollectionTest::testMergeRecursiveCollection
-	// SupportCollectionTest::testReplaceNull
-	// SupportCollectionTest::testReplaceCollection
-	// SupportCollectionTest::testReplaceRecursiveNull
-	// SupportCollectionTest::testReplaceRecursiveArray
-	// SupportCollectionTest::testReplaceRecursiveCollection
-	// SupportCollectionTest::testUnionNull
-	// SupportCollectionTest::testUnionCollection
 	base := collectible.FromPairs(
 		csupport.Pair[string, string]{Key: "name", Value: "Taylor"},
 		csupport.Pair[string, string]{Key: "role", Value: "admin"},
@@ -625,24 +538,6 @@ func TestInventoryParitySetOperationsAndKeyedCollections(t *testing.T) {
 func TestInventoryParityDiffIntersectCollapseAndSortKeys(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testDiffCollection
-	// SupportCollectionTest::testDiffUsingWithCollection
-	// SupportCollectionTest::testDiffUsingWithNull
-	// SupportCollectionTest::testDiffNull
-	// SupportCollectionTest::testIntersectNull
-	// SupportCollectionTest::testIntersectCollection
-	// SupportCollectionTest::testIntersectUsingWithNull
-	// SupportCollectionTest::testIntersectUsingCollection
-	// SupportCollectionTest::testIntersectByKeysNull
-	// SupportCollectionTest::testDiffAssocUsing
-	// SupportCollectionTest::testIntersectAssocWithNull
-	// SupportCollectionTest::testIntersectAssocCollection
-	// SupportCollectionTest::testIntersectAssocUsingWithNull
-	// SupportCollectionTest::testIntersectAssocUsingCollection
-	// SupportCollectionTest::testCollapseWithNestedCollections
-	// SupportCollectionTest::testCollapseWithKeys
-	// SupportCollectionTest::testCollapseWithKeysOnNestedCollections
-	// SupportCollectionTest::testSortKeysUsing
 	left := Collect([]string{"Taylor", "Abigail", "Mohamed"})
 	right := Collect([]string{"Abigail"})
 
@@ -728,18 +623,6 @@ func TestInventoryParityDiffIntersectCollapseAndSortKeys(t *testing.T) {
 func TestInventoryParityDepthFlattenDotPercentageAndReduceSpread(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testFlattenWithDepth
-	// SupportCollectionTest::testFlattenIgnoresKeys
-	// SupportCollectionTest::testDotWithDepth
-	// SupportCollectionTest::testJsonSerialize
-	// SupportCollectionTest::testReduceSpread
-	// SupportCollectionTest::testReduceSpreadThrowsAnExceptionIfReducerDoesNotReturnAnArray
-	// SupportCollectionTest::testSliceOffsetAndNegativeLength
-	// SupportCollectionTest::testSliceNegativeOffsetAndNegativeLength
-	// SupportCollectionTest::testPercentageWithFlatCollection
-	// SupportCollectionTest::testPercentageWithNestedCollection
-	// SupportCollectionTest::testHighOrderPercentage
-	// SupportCollectionTest::testPercentageReturnsNullForEmptyCollections
 	flattened := arr.FlattenAny([]any{1, []any{2, []any{3, 4}}, 5}, 1)
 
 	if !reflect.DeepEqual(flattened, []any{1, 2, []any{3, 4}, 5}) {
@@ -812,15 +695,6 @@ func TestInventoryParityDepthFlattenDotPercentageAndReduceSpread(t *testing.T) {
 func TestInventoryParityConditionalsNullFiltersAndPagination(t *testing.T) {
 	t.Parallel()
 
-	// SupportCollectionTest::testPaginate
-	// SupportCollectionTest::testHasReturnsValidResults
-	// SupportCollectionTest::testWhereNullWithoutKey
-	// SupportCollectionTest::testWhereNotNullWithoutKey
-	// SupportCollectionTest::testWhenEmptyDefault
-	// SupportCollectionTest::testWhenNotEmptyDefault
-	// SupportCollectionTest::testUnlessDefault
-	// SupportCollectionTest::testUnlessEmptyDefault
-	// SupportCollectionTest::testUnlessNotEmptyDefault
 	values := Collect([]int{10, 20, 30, 40, 50})
 
 	if got := values.ForPage(2, 2).All(); !reflect.DeepEqual(got, []int{30, 40}) {

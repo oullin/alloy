@@ -2,15 +2,6 @@ package routing
 
 import "testing"
 
-// Ref: @bedrock/code-0397
-// RoutingRedirectorTest::testBasicRedirectTo
-// RoutingRedirectorTest::testAwayDoesntValidateTheUrl
-// RoutingRedirectorTest::testSecureRedirectToHttpsUrl
-// RoutingRedirectorTest::testBackRedirectToHttpReferer
-// RoutingRedirectorTest::testRoute
-// RoutingRedirectorTest::testIntendedRedirectToIntendedUrlInSession
-// RoutingRedirectorTest::testItSetsAndGetsValidIntendedUrl
-
 // fakeSession implements [SessionStore] for redirector tests.
 type fakeSession struct {
 	flashes  map[string]any

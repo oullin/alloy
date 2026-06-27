@@ -2,7 +2,6 @@ package failed
 
 import "time"
 
-// Ref: @bedrock/code-0260
 // no-op; Log returns an empty id, counters return zero, and Forget
 // reports success. Useful for disabling failed-job tracking in tests.
 type NullFailedJobProvider struct{}

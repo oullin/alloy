@@ -25,8 +25,6 @@ type MethodNotAllowedError struct {
 // AbstractRouteCollection is the embeddable base shared by [RouteCollection]
 // and [CompiledRouteCollection]. It holds no state; it provides the protected
 // helpers that the PHP abstract class supplies via inheritance.
-//
-// Ref: @bedrock/code-0285
 type AbstractRouteCollection struct{}
 
 // HandleMatchedRoute binds a found route to the request, or — if none was

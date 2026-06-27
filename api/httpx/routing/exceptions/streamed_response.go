@@ -2,8 +2,6 @@ package exceptions
 
 // StreamedResponseException wraps an error encountered while writing a
 // streamed response back to the client.
-//
-// Ref: @bedrock/code-0310
 type StreamedResponseException struct{ Inner error }
 
 func (e *StreamedResponseException) Error() string {

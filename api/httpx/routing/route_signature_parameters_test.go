@@ -5,9 +5,6 @@ import (
 	"testing"
 )
 
-// Ref: @bedrock/code-0395
-// RouteSignatureParametersTest::test_it_can_extract_the_route_action_signature_parameters
-
 type testEnum string
 
 type testMarker interface {
