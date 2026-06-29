@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": false,
+		"jsx": "preserve",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"skipLibCheck": true,
+		"types": ["node"]
+	},
+	"include": [".vuepress/**/*.d.ts", ".vuepress/**/*.ts", ".vuepress/**/*.vue"],
+	"exclude": [".vuepress/.temp", ".vuepress/dist", "node_modules"]
+}

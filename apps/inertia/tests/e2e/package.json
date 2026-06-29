@@ -1,0 +1,13 @@
+{
+	"name": "@alloy/inertia-e2e",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "pnpm run test:alloy",
+		"test:alloy": "pnpm --filter @alloy/inertia-app build && node runner.mjs --target alloy",
+		"test:bedrock": "node runner.mjs --target bedrock --build-app"
+	},
+	"devDependencies": {
+		"agent-browser": "^0.31.1"
+	}
+}
