@@ -1,18 +1,31 @@
-// Tiny Go syntax highlighter. Input is a static constant (see HERO_TABS),
-// so regex order is chosen for clarity, not resilience.
+// Tiny Go syntax highlighter for static snippets used by the home page.
 export function highlightGo(src: string): string {
 	const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-	let t = esc(src);
+	const token =
+		/("(?:\\.|[^"\\\n])*"|`[^`]*`)|(\/\/[^\n]*)|\b(package|import|func|return|if|else|for|range|var|const|type|struct|interface|map|chan|go|defer|switch|case|break|continue|nil|true|false)\b|\b([A-Z][A-Za-z0-9_]*)\b|([a-zA-Z_][a-zA-Z0-9_]*)(\()/g;
 
-	t = t.replace(/(\/\/[^\n]*)/g, '<span class="c">$1</span>');
-	t = t.replace(/(&quot;|")([^&"\n]*?)(&quot;|")/g, '<span class="s">"$2"</span>');
-	t = t.replace(
-		/\b(package|import|func|return|if|else|for|range|var|const|type|struct|interface|map|chan|go|defer|switch|case|break|continue|nil|true|false)\b/g,
-		'<span class="k">$1</span>',
-	);
-	t = t.replace(/\b([A-Z][A-Za-z0-9]*)\b/g, '<span class="t">$1</span>');
-	t = t.replace(/([a-zA-Z_][a-zA-Z0-9_]*)(\()/g, '<span class="fn">$1</span>$2');
+	return esc(src).replace(token, (match, stringLiteral, comment, keyword, typeName, functionName, openParen) => {
+		if (stringLiteral) {
+			return `<span class="s">${stringLiteral}</span>`;
+		}
 
-	return t;
+		if (comment) {
+			return `<span class="c">${comment}</span>`;
+		}
+
+		if (keyword) {
+			return `<span class="k">${keyword}</span>`;
+		}
+
+		if (typeName) {
+			return `<span class="t">${typeName}</span>`;
+		}
+
+		if (functionName) {
+			return `<span class="fn">${functionName}</span>${openParen}`;
+		}
+
+		return match;
+	});
 }

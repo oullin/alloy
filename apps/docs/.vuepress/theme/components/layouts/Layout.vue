@@ -155,10 +155,7 @@ const nextPage = computed(() => (currentIdx.value >= 0 && currentIdx.value < fla
 								v-if="prevPage"
 								variant="outline"
 								as-child
-								class="flex-1 h-auto flex-col items-start gap-1 px-5 py-4 text-left hover:bg-transparent"
-								style="border-color: var(--line)"
-								@mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)')"
-								@mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--line)')"
+								class="flex-1 h-auto flex-col items-start gap-1 border-[var(--line)] px-5 py-4 text-left hover:border-[var(--accent)] hover:bg-transparent"
 							>
 								<RouteLink :to="prevPage.link" class="w-full">
 									<span class="flex items-center gap-1 text-xs" style="color: var(--ink-3)">
@@ -177,10 +174,7 @@ const nextPage = computed(() => (currentIdx.value >= 0 && currentIdx.value < fla
 								v-if="nextPage"
 								variant="outline"
 								as-child
-								class="flex-1 h-auto flex-col items-end gap-1 px-5 py-4 text-right hover:bg-transparent"
-								style="border-color: var(--line)"
-								@mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--accent)')"
-								@mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--line)')"
+								class="flex-1 h-auto flex-col items-end gap-1 border-[var(--line)] px-5 py-4 text-right hover:border-[var(--accent)] hover:bg-transparent"
 							>
 								<RouteLink :to="nextPage.link" class="w-full text-right">
 									<span class="flex items-center justify-end gap-1 text-xs" style="color: var(--ink-3)">

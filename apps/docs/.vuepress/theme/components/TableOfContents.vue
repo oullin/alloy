@@ -36,6 +36,7 @@ const headers = computed<FlatHeader[]>(() => {
 });
 
 let observer: IntersectionObserver | null = null;
+let observerTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function initObserver() {
 	observer?.disconnect();
@@ -62,15 +63,29 @@ function initObserver() {
 	nodes.forEach((n) => observer!.observe(n));
 }
 
+function clearObserverTimeout() {
+	if (observerTimeout) {
+		clearTimeout(observerTimeout);
+		observerTimeout = null;
+	}
+}
+
 onMounted(initObserver);
 
-onBeforeUnmount(() => observer?.disconnect());
+onBeforeUnmount(() => {
+	clearObserverTimeout();
+	observer?.disconnect();
+});
 
 watch(
 	() => route.path,
 	() => {
 		activeSlug.value = '';
-		setTimeout(initObserver, 350);
+		clearObserverTimeout();
+		observerTimeout = setTimeout(() => {
+			observerTimeout = null;
+			initObserver();
+		}, 350);
 	},
 );
 </script>
