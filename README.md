@@ -2,7 +2,7 @@
 
 Alloy is a Go and TypeScript workspace for reusable application primitives.
 The repository currently includes the Go module under `go/`, the
-TypeScript packages under `packages/`, and the shared automation under
+TypeScript packages under `ts/`, and the shared automation under
 `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
@@ -14,15 +14,15 @@ TypeScript package (`@alloy/tempo`).
 - `go`: Go module containing the Alloy packages.
 - `go/tempo`: Go Tempo package.
 - `go/collection`: Go collection utilities and package docs.
-- `packages/tempo`: TypeScript Tempo package.
-- `packages/tempo/tests`: TypeScript Tempo acceptance tests.
-- `packages/money`: TypeScript Money package.
-- `packages/console`: TypeScript terminal UI helpers.
+- `ts/tempo`: TypeScript Tempo package.
+- `ts/tempo/tests`: TypeScript Tempo acceptance tests.
+- `ts/money`: TypeScript Money package.
+- `ts/console`: TypeScript terminal UI helpers.
 - `infra`: repo automation, cache paths, scripts, and shared TypeScript config.
 - `vite.config.ts`: Vite+ orchestration for checks, tests, packaging, and custom tasks.
 - `docker-compose.yml`: container definitions for Go execution and formatting.
 
-TypeScript packages live directly at their package directory under `packages/`.
+TypeScript packages live directly at their package directory under `ts/`.
 Do not add language suffixes such as `*-ts` to package paths.
 
 ## Requirements
@@ -96,4 +96,4 @@ formatter commands.
 - [Development workflow](docs/development.md)
 - [Go Tempo](go/tempo/README.md)
 - [Go Collection](go/collection/README.md)
-- [TypeScript Tempo](packages/tempo/README.md)
+- [TypeScript Tempo](ts/tempo/README.md)
