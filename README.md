@@ -1,19 +1,19 @@
 # Alloy
 
 Alloy is a Go and TypeScript workspace for reusable application primitives.
-The repository currently includes the Go API module under `api/`, the
+The repository currently includes the Go backend module under `packages/backend/`, the
 TypeScript packages under `packages/`, and the shared automation under
 `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go package (`alloy.dev/api/tempo`) and a
+available as both a Go package (`alloy.dev/backend/tempo`) and a
 TypeScript package (`@alloy/tempo`).
 
 ## Workspace
 
-- `api`: Go module containing the Alloy API packages.
-- `api/tempo`: Go Tempo package.
-- `api/collection`: Go collection utilities and package docs.
+- `packages/backend`: Go module containing the Alloy backend packages.
+- `packages/backend/tempo`: Go Tempo package.
+- `packages/backend/collection`: Go collection utilities and package docs.
 - `packages/tempo`: TypeScript Tempo package.
 - `packages/tempo/tests`: TypeScript Tempo acceptance tests.
 - `packages/money`: TypeScript Money package.
@@ -39,7 +39,7 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-`monorepo:initialise` creates and syncs the optional Go workspace at `api/go.work`.
+`monorepo:initialise` syncs the root Go workspace at `go.work`.
 
 ## Checks
 
@@ -47,7 +47,7 @@ pnpm exec vp run monorepo:initialise
 pnpm exec vp check
 pnpm exec vp test
 pnpm exec vp pack
-pnpm exec vp run go:test
+pnpm exec vp run backend:test
 pnpm exec vp run format-all
 ```
 
@@ -94,6 +94,6 @@ formatter commands.
 ## More Documentation
 
 - [Development workflow](docs/development.md)
-- [Go Tempo](api/tempo/README.md)
-- [Go Collection](api/collection/README.md)
+- [Go Tempo](packages/backend/tempo/README.md)
+- [Go Collection](packages/backend/collection/README.md)
 - [TypeScript Tempo](packages/tempo/README.md)

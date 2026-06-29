@@ -11,8 +11,7 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-The initialise task creates `api/go.work` from `api/go.work.example` when
-needed, then runs `go work sync` inside `api/`.
+The initialise task runs `go work sync` against the root `go.work` workspace.
 
 ## Common Commands
 
@@ -21,7 +20,8 @@ needed, then runs `go work sync` inside `api/`.
 | `pnpm exec vp check` | Type-check and lint the TypeScript workspace. |
 | `pnpm exec vp test` | Run TypeScript tests through Vite+. |
 | `pnpm exec vp pack` | Build the TypeScript package output configured in `vite.config.ts`. |
-| `pnpm exec vp run go:test` | Run Go vet and race-enabled tests for Go module(s) under `api/`. |
+| `pnpm exec vp run backend:test` | Run Go vet and race-enabled tests for Go module(s) under `packages/backend/`. |
+| `pnpm exec vp run go:test` | Compatibility alias for `backend:test`. |
 | `pnpm exec vp run format` | Format changed Go and TypeScript files with the formatter container. |
 | `pnpm exec vp run format-all` | Format the repository and run `vp check --fix`. |
 
@@ -47,12 +47,12 @@ Vite+ fixes.
 
 ## Go Workspace
 
-The Go code lives under `api/`. The current public module path is
-`alloy.dev/api`, declared in `api/go.mod`; `api/go.work` is optional local
-workspace glue.
+The Go code lives under `packages/backend/`. The current public module path is
+`alloy.dev/backend`, declared in `packages/backend/go.mod`; `go.work` is the
+root workspace glue.
 
-`go:test` iterates over Go module(s) under `api/`, uses `api/go.work` when it
-exists, then runs:
+`backend:test` iterates over Go module(s) under `packages/backend/`, uses the
+root `go.work` when it exists, then runs:
 
 ```sh
 go vet ./...
@@ -67,6 +67,7 @@ surfaces are:
 - `@alloy/tempo` in `packages/tempo`.
 - `@alloy/tempo-acceptance` in `packages/tempo/tests`.
 - `@alloy/console` in `packages/console`.
+- `@alloy/backend` in `packages/backend`.
 - `@alloy/infra` in `infra`.
 
 Package paths should match the package family directly; avoid language suffixes
