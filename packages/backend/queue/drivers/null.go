@@ -1,0 +1,51 @@
+package drivers
+
+import (
+	"context"
+	"time"
+
+	"alloy.dev/backend/queue"
+)
+
+// NullDriver discards all jobs silently.
+type NullDriver struct {
+	connection string
+}
+
+// NewNullDriver creates a NullDriver.
+func NewNullDriver(connection string) *NullDriver {
+	return &NullDriver{connection: connection}
+}
+
+func (d *NullDriver) Push(_ context.Context, _ string, _ []byte) (string, error) { return "", nil }
+func (d *NullDriver) PushDelayed(_ context.Context, _ string, _ []byte, _ time.Duration) (string, error) {
+	return "", nil
+}
+func (d *NullDriver) PushMultiple(_ context.Context, _ string, payloads [][]byte) ([]string, error) {
+	return make([]string, len(payloads)), nil
+}
+func (d *NullDriver) Pop(_ context.Context, _ string) (queue.Job, error)      { return nil, queue.ErrNoJob }
+func (d *NullDriver) Size(_ context.Context, _ string) (int64, error)         { return 0, nil }
+func (d *NullDriver) PendingSize(_ context.Context, _ string) (int64, error)  { return 0, nil }
+func (d *NullDriver) DelayedSize(_ context.Context, _ string) (int64, error)  { return 0, nil }
+func (d *NullDriver) ReservedSize(_ context.Context, _ string) (int64, error) { return 0, nil }
+func (d *NullDriver) ConnectionName() string                                  { return d.connection }
+
+// QueueNames returns an empty slice — the null driver never holds jobs
+// and therefore has no queues to enumerate.
+func (d *NullDriver) QueueNames(_ context.Context) ([]string, error) { return nil, nil }
+
+// PendingJobs returns an empty slice.
+func (d *NullDriver) PendingJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+	return nil, nil
+}
+
+// DelayedJobs returns an empty slice.
+func (d *NullDriver) DelayedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+	return nil, nil
+}
+
+// ReservedJobs returns an empty slice.
+func (d *NullDriver) ReservedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+	return nil, nil
+}

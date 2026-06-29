@@ -1,10 +1,6 @@
 packages:
-  - "packages/console"
-  - "packages/money"
-  - "packages/tempo"
+  - "packages/*"
   - "packages/tempo/tests"
-  - "packages/navigator-routes"
-  - "packages/workflow"
   - "infra"
   - "infra/*"
 

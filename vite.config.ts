@@ -78,10 +78,11 @@ export default defineConfig({
 	},
 	run: {
 		tasks: {
+			'backend:test': { command: 'vp run --filter @alloy/backend test', cache: false },
 			'cache:setup': { command: 'bash infra/scripts/tasks/cache-setup.sh', cache: false },
 			format: { command: 'bash infra/scripts/tasks/format-files.sh changed', cache: false },
 			'format-all': { command: "bash infra/scripts/tasks/docker-compose-run.sh fmt format-all && bash -lc 'source infra/scripts/tasks/cache-env.sh && vp check --fix'", cache: false },
-			'go:test': { command: 'bash infra/scripts/tasks/go-test.sh', cache: false },
+			'go:test': { command: 'vp run backend:test', cache: false },
 			'monorepo:initialise': { command: 'bash infra/scripts/tasks/monorepo-initialise.sh', cache: false },
 		},
 	},

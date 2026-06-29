@@ -13,7 +13,7 @@ const trackedPackageFiles = () => {
 	try {
 		return execFileSync('git', ['-C', rootPath, 'ls-files', '-z', '--', 'packages'], { encoding: 'utf8' })
 			.split('\0')
-			.filter((file) => file.endsWith('.ts'));
+			.filter((file) => file.endsWith('.ts') && !file.startsWith('packages/backend/'));
 	} catch {
 		return [];
 	}
@@ -38,7 +38,7 @@ const discoveredPackageFiles = (directory) => {
 			continue;
 		}
 
-		if (entry.isFile() && entry.name.endsWith('.ts')) {
+		if (entry.isFile() && entry.name.endsWith('.ts') && !path.relative(rootPath, absolutePath).startsWith('packages/backend/')) {
 			files.push(path.relative(rootPath, absolutePath));
 		}
 	}

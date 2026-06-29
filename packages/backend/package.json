@@ -1,0 +1,10 @@
+{
+  "name": "@alloy/backend",
+  "private": true,
+  "scripts": {
+    "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && go test ./... -run=^$'",
+    "lint": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && go vet ./...'",
+    "test": "bash ../../infra/scripts/tasks/go-test.sh",
+    "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && go test ./... -run=^$'"
+  }
+}
