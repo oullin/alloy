@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"alloy.dev/go/events"
-	cevents "alloy.dev/go/events"
 )
 
 // Push via null should not store anything.
@@ -227,7 +226,7 @@ func TestNullDispatcher_SubscribeDelegates(t *testing.T) {
 	}
 }
 
-func (s *nullTestSubscriber) Subscribe(d cevents.Dispatcher) {
+func (s *nullTestSubscriber) Subscribe(d events.Dispatcher) {
 	d.Listen("sub.event", func(ctx context.Context, event any) (any, error) {
 		return nil, nil
 	})

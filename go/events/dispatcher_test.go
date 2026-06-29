@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"alloy.dev/go/events"
-	cevents "alloy.dev/go/events"
 )
 
 // Register listener.
@@ -958,7 +957,7 @@ func TestSetTransactionManagerResolver(t *testing.T) {
 	}
 }
 
-func (s *testSubscriber) Subscribe(d cevents.Dispatcher) {
+func (s *testSubscriber) Subscribe(d events.Dispatcher) {
 	d.Listen("order.created", s.orderFn)
 	d.Listen("user.registered", s.userFn)
 }
