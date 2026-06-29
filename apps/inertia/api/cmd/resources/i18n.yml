@@ -1,0 +1,25 @@
+default_locale: "en"
+url_prefix: true
+
+locales:
+  en:
+    name: "English"
+    direction: "ltr"
+    head:
+      title: "Alloy Inertia Demo"
+      meta:
+        - name: "description"
+          content: "A secondary Alloy demo for Inertia protocol flows"
+        - property: "og:locale"
+          content: "en_US"
+
+  es:
+    name: "Español"
+    direction: "ltr"
+    head:
+      title: "Alloy Inertia Demo"
+      meta:
+        - name: "description"
+          content: "Una demostración secundaria de Alloy para flujos de protocolo Inertia"
+        - property: "og:locale"
+          content: "es_ES"
