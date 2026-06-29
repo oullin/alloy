@@ -1,10 +1,10 @@
 packages:
-  - "packages/console"
-  - "packages/money"
-  - "packages/tempo"
-  - "packages/tempo/tests"
-  - "packages/navigator-routes"
-  - "packages/workflow"
+  - "ts/console"
+  - "ts/money"
+  - "ts/tempo"
+  - "ts/tempo/tests"
+  - "ts/navigator-routes"
+  - "ts/workflow"
   - "infra"
   - "infra/*"
 

@@ -1,28 +1,28 @@
 # Alloy
 
 Alloy is a Go and TypeScript workspace for reusable application primitives.
-The repository currently includes the Go API module under `api/`, the
-TypeScript packages under `packages/`, and the shared automation under
+The repository currently includes the Go module under `go/`, the
+TypeScript packages under `ts/`, and the shared automation under
 `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go package (`alloy.dev/api/tempo`) and a
+available as both a Go package (`alloy.dev/go/tempo`) and a
 TypeScript package (`@alloy/tempo`).
 
 ## Workspace
 
-- `api`: Go module containing the Alloy API packages.
-- `api/tempo`: Go Tempo package.
-- `api/collection`: Go collection utilities and package docs.
-- `packages/tempo`: TypeScript Tempo package.
-- `packages/tempo/tests`: TypeScript Tempo acceptance tests.
-- `packages/money`: TypeScript Money package.
-- `packages/console`: TypeScript terminal UI helpers.
+- `go`: Go module containing the Alloy packages.
+- `go/tempo`: Go Tempo package.
+- `go/collection`: Go collection utilities and package docs.
+- `ts/tempo`: TypeScript Tempo package.
+- `ts/tempo/tests`: TypeScript Tempo acceptance tests.
+- `ts/money`: TypeScript Money package.
+- `ts/console`: TypeScript terminal UI helpers.
 - `infra`: repo automation, cache paths, scripts, and shared TypeScript config.
 - `vite.config.ts`: Vite+ orchestration for checks, tests, packaging, and custom tasks.
 - `docker-compose.yml`: container definitions for Go execution and formatting.
 
-TypeScript packages live directly at their package directory under `packages/`.
+TypeScript packages live directly at their package directory under `ts/`.
 Do not add language suffixes such as `*-ts` to package paths.
 
 ## Requirements
@@ -39,7 +39,7 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-`monorepo:initialise` creates and syncs the optional Go workspace at `api/go.work`.
+`monorepo:initialise` creates and syncs the optional Go workspace at `go/go.work`.
 
 ## Checks
 
@@ -94,6 +94,6 @@ formatter commands.
 ## More Documentation
 
 - [Development workflow](docs/development.md)
-- [Go Tempo](api/tempo/README.md)
-- [Go Collection](api/collection/README.md)
-- [TypeScript Tempo](packages/tempo/README.md)
+- [Go Tempo](go/tempo/README.md)
+- [Go Collection](go/collection/README.md)
+- [TypeScript Tempo](ts/tempo/README.md)

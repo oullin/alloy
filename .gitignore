@@ -7,8 +7,9 @@ coverage/
 .idea
 /go.work
 /go.work.sum
+/go/go.work
 infra/.cache/
 infra/.logs/
 infra/dist/
-packages/docs/src/.vitepress/
+ts/docs/src/.vitepress/
 .pnpm-store/

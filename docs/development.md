@@ -11,8 +11,8 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-The initialise task creates `api/go.work` from `api/go.work.example` when
-needed, then runs `go work sync` inside `api/`.
+The initialise task creates `go/go.work` from `go/go.work.example` when
+needed, then runs `go work sync` inside `go/`.
 
 ## Common Commands
 
@@ -21,7 +21,7 @@ needed, then runs `go work sync` inside `api/`.
 | `pnpm exec vp check` | Type-check and lint the TypeScript workspace. |
 | `pnpm exec vp test` | Run TypeScript tests through Vite+. |
 | `pnpm exec vp pack` | Build the TypeScript package output configured in `vite.config.ts`. |
-| `pnpm exec vp run go:test` | Run Go vet and race-enabled tests for Go module(s) under `api/`. |
+| `pnpm exec vp run go:test` | Run Go vet and race-enabled tests for Go module(s) under `go/`. |
 | `pnpm exec vp run format` | Format changed Go and TypeScript files with the formatter container. |
 | `pnpm exec vp run format-all` | Format the repository and run `vp check --fix`. |
 
@@ -47,11 +47,11 @@ Vite+ fixes.
 
 ## Go Workspace
 
-The Go code lives under `api/`. The current public module path is
-`alloy.dev/api`, declared in `api/go.mod`; `api/go.work` is optional local
+The Go code lives under `go/`. The current public module path is
+`alloy.dev/go`, declared in `go/go.mod`; `go/go.work` is optional local
 workspace glue.
 
-`go:test` iterates over Go module(s) under `api/`, uses `api/go.work` when it
+`go:test` iterates over Go module(s) under `go/`, uses `go/go.work` when it
 exists, then runs:
 
 ```sh
@@ -64,18 +64,18 @@ go test -race ./...
 pnpm workspace packages are defined in `pnpm-workspace.yaml`. The main package
 surfaces are:
 
-- `@alloy/tempo` in `packages/tempo`.
-- `@alloy/tempo-acceptance` in `packages/tempo/tests`.
-- `@alloy/console` in `packages/console`.
+- `@alloy/tempo` in `ts/tempo`.
+- `@alloy/tempo-acceptance` in `ts/tempo/tests`.
+- `@alloy/console` in `ts/console`.
 - `@alloy/infra` in `infra`.
 
 Package paths should match the package family directly; avoid language suffixes
 such as `*-ts` in directory names. Acceptance-test packages live below the
-package they validate, as `packages/tempo/tests` does for `@alloy/tempo`.
+package they validate, as `ts/tempo/tests` does for `@alloy/tempo`.
 
 Path aliases and packaging are configured in `vite.config.ts`. The Tempo package
-build uses `packages/tempo/src/index.ts`, `packages/tempo/tsconfig.json`, and
-emits to `packages/tempo/dist`.
+build uses `ts/tempo/src/index.ts`, `ts/tempo/tsconfig.json`, and
+emits to `ts/tempo/dist`.
 
 Tempo acceptance tests can be run through the package script:
 
