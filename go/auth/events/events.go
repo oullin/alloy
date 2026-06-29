@@ -3,7 +3,7 @@ package events
 import (
 	"net/http"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // Attempting is dispatched when an authentication attempt begins.

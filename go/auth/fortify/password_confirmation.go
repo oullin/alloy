@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // NewConfirmPasswordHandler records a recent password confirmation.

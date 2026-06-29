@@ -3,7 +3,7 @@ package workflow_test
 import (
 	"testing"
 
-	"alloy.dev/api/workflow"
+	"alloy.dev/go/workflow"
 )
 
 func TestDefinitionMetadataValue(t *testing.T) {

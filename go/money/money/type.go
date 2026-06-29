@@ -1,8 +1,8 @@
 package money
 
 import (
-	"alloy.dev/api/money/calculator"
-	"alloy.dev/api/money/currency"
+	"alloy.dev/go/money/calculator"
+	"alloy.dev/go/money/currency"
 )
 
 // Amount is a data structure that stores the amount being used for calculations.

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 type stubProvider struct {

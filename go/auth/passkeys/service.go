@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 )

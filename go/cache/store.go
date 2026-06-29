@@ -3,7 +3,7 @@ package cache
 import (
 	"errors"
 
-	ccache "alloy.dev/api/contracts/cache"
+	ccache "alloy.dev/go/contracts/cache"
 )
 
 // Store is a TTL-aware cache contract.

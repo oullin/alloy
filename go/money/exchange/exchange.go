@@ -4,7 +4,7 @@ import (
 	"math"
 	"sync"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 // Rates provides currency conversion functionality.

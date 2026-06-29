@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	intervalpkg "alloy.dev/api/tempo/interval"
+	intervalpkg "alloy.dev/go/tempo/interval"
 )
 
 func (interval Interval) span() intervalpkg.Span {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/httpx/foundation"
+	"alloy.dev/go/httpx/foundation"
 )
 
 func TestJsonResponseSend(t *testing.T) {

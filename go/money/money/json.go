@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"alloy.dev/api/money/currency"
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/currency"
+	"alloy.dev/go/money/exception"
 )
 
 // JSONRawData represents the raw JSON structure for money unmarshalling.

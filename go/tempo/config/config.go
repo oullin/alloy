@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/tempo/duration"
+	"alloy.dev/go/tempo/duration"
 	"github.com/spf13/viper"
 )
 

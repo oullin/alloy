@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 type stubDefault struct {

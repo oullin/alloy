@@ -1,6 +1,6 @@
 # 🧩 Array Utilities (`arr`)
 
-`import "alloy.dev/api/collection/arr"`
+`import "alloy.dev/go/collection/arr"`
 
 The `arr` package provides standalone, generic helper functions for working with Go slices. Every function operates on plain slices, returns new slices (the original is never mutated), and can be called without constructing a collection object.
 

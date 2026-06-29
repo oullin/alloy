@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/config"
+	"alloy.dev/go/config"
 	"github.com/spf13/viper"
 )
 

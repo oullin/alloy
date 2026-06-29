@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
-	"alloy.dev/api/queue/events"
+	"alloy.dev/go/queue"
+	"alloy.dev/go/queue/events"
 )
 
 // the upstream test constructs a QueueManager against a Carbon test clock

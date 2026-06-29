@@ -3,7 +3,7 @@ package testing_test
 import (
 	"testing"
 
-	httptesting "alloy.dev/api/httpx/testing"
+	httptesting "alloy.dev/go/httpx/testing"
 )
 
 func TestMimeTypeByExtension(t *testing.T) {

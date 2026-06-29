@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/api/queue/drivers"
+	"alloy.dev/go/queue/drivers"
 )
 
 // --- Mock Redis Client ---

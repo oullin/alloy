@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // BeanstalkdClient is the interface for a Beanstalkd client.

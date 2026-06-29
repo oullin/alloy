@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 // ISOCodePattern provides functionality to identify and extract currency ISO codes and symbols.

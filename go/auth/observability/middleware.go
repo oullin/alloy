@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	cauth "alloy.dev/api/contracts/auth"
-	clog "alloy.dev/api/contracts/auth/log"
+	cauth "alloy.dev/go/contracts/auth"
+	clog "alloy.dev/go/contracts/auth/log"
 )
 
 // RequestIDResolver returns the request id for a request.

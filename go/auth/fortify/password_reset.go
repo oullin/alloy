@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"alloy.dev/api/auth/passwords"
+	"alloy.dev/go/auth/passwords"
 )
 
 // NewForgotPasswordHandler sends a reset link with an enumeration-safe response.

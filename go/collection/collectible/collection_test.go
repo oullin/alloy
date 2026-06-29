@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/support"
 )
 
 func TestNew(t *testing.T) {

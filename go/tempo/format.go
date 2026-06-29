@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/tempo/formatting"
+	"alloy.dev/go/tempo/formatting"
 )
 
 func (tempo Time) Format(pattern string) string {

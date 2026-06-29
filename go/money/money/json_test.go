@@ -7,9 +7,9 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/api/money/currency"
-	"alloy.dev/api/money/exception"
-	testutil "alloy.dev/api/money/tests"
+	"alloy.dev/go/money/currency"
+	"alloy.dev/go/money/exception"
+	testutil "alloy.dev/go/money/tests"
 )
 
 func TestJSONSetMarshal(t *testing.T) {

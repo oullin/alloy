@@ -3,7 +3,7 @@ package period_test
 import (
 	"testing"
 
-	"alloy.dev/api/tempo/period"
+	"alloy.dev/go/tempo/period"
 )
 
 func TestForwardBoundsContains(t *testing.T) {

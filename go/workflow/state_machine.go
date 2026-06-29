@@ -3,7 +3,7 @@ package workflow
 import (
 	"fmt"
 
-	"alloy.dev/api/workflow/events"
+	"alloy.dev/go/workflow/events"
 )
 
 // StateMachine is a Machine constrained to a single active place and

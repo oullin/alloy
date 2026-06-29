@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/api/httpx/middleware"
+	"alloy.dev/go/httpx/middleware"
 )
 
 func TestCorsSimpleRequest(t *testing.T) {

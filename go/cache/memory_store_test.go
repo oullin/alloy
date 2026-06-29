@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/cache"
+	"alloy.dev/go/cache"
 )
 
 func TestMemoryStorePutGetForgetAndExpiry(t *testing.T) {

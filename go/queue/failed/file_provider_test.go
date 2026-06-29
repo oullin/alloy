@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue/failed"
+	"alloy.dev/go/queue/failed"
 )
 
 type loggedJob struct {

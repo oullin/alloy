@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	setterspkg "alloy.dev/api/tempo/setters"
+	setterspkg "alloy.dev/go/tempo/setters"
 )
 
 func (tempo Time) Clone() Time {

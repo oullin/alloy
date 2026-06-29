@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // ResetURLBuilder builds a reset-password URL for a user and token.

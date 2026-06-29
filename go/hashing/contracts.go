@@ -1,6 +1,6 @@
 package hashing
 
-import chashing "alloy.dev/api/contracts/hashing"
+import chashing "alloy.dev/go/contracts/hashing"
 
 // HashInfo contains metadata about a hashed value.
 type HashInfo = chashing.HashInfo

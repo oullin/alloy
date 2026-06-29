@@ -3,7 +3,7 @@ package parser
 import (
 	"regexp"
 
-	"alloy.dev/api/tempo/config"
+	"alloy.dev/go/tempo/config"
 )
 
 var parserSettings = config.DefaultParserSettings()

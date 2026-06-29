@@ -13,10 +13,10 @@ import (
 	"slices"
 	"time"
 
-	"alloy.dev/api/tempo/arithmetic"
-	"alloy.dev/api/tempo/core"
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/internal/kernel"
+	"alloy.dev/go/tempo/arithmetic"
+	"alloy.dev/go/tempo/core"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/internal/kernel"
 )
 
 func StartOf[T core.Bearer[T]](bearer T, unit duration.Unit, options ...kernel.WeekOptions) T {

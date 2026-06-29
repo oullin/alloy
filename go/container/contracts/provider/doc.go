@@ -31,7 +31,7 @@
 //
 //	package cache
 //
-//	import "alloy.dev/api/container"
+//	import "alloy.dev/go/container"
 //
 //	type CacheServiceProvider struct {
 //	    app           *container.App

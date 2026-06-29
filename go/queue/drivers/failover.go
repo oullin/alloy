@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"alloy.dev/api/queue"
-	"alloy.dev/api/queue/events"
+	"alloy.dev/go/queue"
+	"alloy.dev/go/queue/events"
 )
 
 // FailoverDriver tries each driver in order; reads from the first that succeeds,

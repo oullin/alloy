@@ -6,7 +6,7 @@ package store
 import (
 	"fmt"
 
-	"alloy.dev/api/workflow"
+	"alloy.dev/go/workflow"
 )
 
 // SingleState persists exactly one active place per subject — the classic

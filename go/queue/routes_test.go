@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // PHP's class_parents / class_implements / class_uses chain; Go has no

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // VerificationURLBuilder builds a signed verification URL for a user.

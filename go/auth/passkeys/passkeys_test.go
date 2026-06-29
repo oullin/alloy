@@ -5,8 +5,8 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/api/auth/passkeys"
-	"alloy.dev/api/auth/user"
+	"alloy.dev/go/auth/passkeys"
+	"alloy.dev/go/auth/user"
 	"github.com/go-webauthn/webauthn/webauthn"
 )
 

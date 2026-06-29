@@ -1,7 +1,7 @@
 package routing
 
 import (
-	handlermiddleware "alloy.dev/api/httpx/handlerx/middleware"
+	handlermiddleware "alloy.dev/go/httpx/handlerx/middleware"
 )
 
 // HandlerDispatcher resolves and invokes a handler method against a

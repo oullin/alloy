@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/tempo/core"
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/internal/kernel"
+	"alloy.dev/go/tempo/core"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/internal/kernel"
 )
 
 func Before[T core.Bearer[T]](bearer T, other core.State, units ...duration.Unit) bool {

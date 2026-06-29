@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"alloy.dev/api/filesystem"
+	"alloy.dev/go/filesystem"
 )
 
 func newFilesystem() *filesystem.Local {

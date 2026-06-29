@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/auth/events"
-	"alloy.dev/api/auth/listeners"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/events"
+	"alloy.dev/go/auth/listeners"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // stubUser implements User but not MustVerifyEmail.

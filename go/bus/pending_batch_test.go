@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/api/bus"
+	"alloy.dev/go/bus"
 )
 
 type batchableTestJob struct {

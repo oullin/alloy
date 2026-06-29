@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // BackgroundDriver dispatches jobs by spawning OS subprocesses.

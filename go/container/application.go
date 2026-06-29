@@ -3,7 +3,7 @@ package container
 import (
 	"fmt"
 
-	"alloy.dev/api/container/contracts/provider"
+	"alloy.dev/go/container/contracts/provider"
 )
 
 // Application wraps App and manages service provider lifecycle,

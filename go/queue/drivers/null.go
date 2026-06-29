@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // NullDriver discards all jobs silently.

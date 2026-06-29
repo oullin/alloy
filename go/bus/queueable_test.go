@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/bus"
+	"alloy.dev/go/bus"
 )
 
 type chainableJob struct {

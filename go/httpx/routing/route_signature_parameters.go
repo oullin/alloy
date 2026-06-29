@@ -3,7 +3,7 @@ package routing
 import (
 	"reflect"
 
-	crouting "alloy.dev/api/httpx/routing/contracts"
+	crouting "alloy.dev/go/httpx/routing/contracts"
 )
 
 // RouteSignatureParameters extracts the parameter list of a route action's

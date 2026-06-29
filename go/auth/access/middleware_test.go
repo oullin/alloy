@@ -6,8 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/api/auth/access"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/access"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 type assertError string

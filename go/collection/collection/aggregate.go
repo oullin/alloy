@@ -5,7 +5,7 @@ import (
 	"errors"
 	"slices"
 
-	"alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/support"
 )
 
 // ErrReduceSpreadLength is returned when a spread reducer changes the accumulator arity.

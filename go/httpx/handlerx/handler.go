@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	"alloy.dev/api/httpx/foundation"
-	"alloy.dev/api/httpx/routing"
+	"alloy.dev/go/httpx/foundation"
+	"alloy.dev/go/httpx/routing"
 )
 
 // New returns an http.Handler that dispatches requests through router.

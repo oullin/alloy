@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	authevents "alloy.dev/api/auth/events"
-	"alloy.dev/api/auth/passwords"
-	"alloy.dev/api/auth/user"
-	cauth "alloy.dev/api/contracts/auth"
-	cevents "alloy.dev/api/contracts/auth/events"
-	clog "alloy.dev/api/contracts/auth/log"
+	authevents "alloy.dev/go/auth/events"
+	"alloy.dev/go/auth/passwords"
+	"alloy.dev/go/auth/user"
+	cauth "alloy.dev/go/contracts/auth"
+	cevents "alloy.dev/go/contracts/auth/events"
+	clog "alloy.dev/go/contracts/auth/log"
 )
 
 type resetUser struct {

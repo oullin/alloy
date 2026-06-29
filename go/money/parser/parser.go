@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/api/money/currency"
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/currency"
+	"alloy.dev/go/money/exception"
 )
 
 type Reader struct {

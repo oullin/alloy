@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // Issuer creates personal access tokens for authenticated users.

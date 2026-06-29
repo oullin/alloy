@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo"
-	"alloy.dev/api/tempo/core"
+	"alloy.dev/go/tempo"
+	"alloy.dev/go/tempo/core"
 )
 
 // Compile-time guarantees that Time and *MutableTime continue to satisfy

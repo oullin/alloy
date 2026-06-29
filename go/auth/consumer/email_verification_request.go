@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // EmailVerificationRequest handles email verification logic for the current user.

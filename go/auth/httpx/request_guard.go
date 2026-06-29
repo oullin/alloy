@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // Callback resolves the authenticated user from a request.

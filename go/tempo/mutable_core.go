@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/api/tempo/setters"
+	"alloy.dev/go/tempo/setters"
 )
 
 func (mutable *MutableTime) Immutable() Time {

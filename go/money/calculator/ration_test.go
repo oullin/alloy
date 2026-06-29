@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 func TestRationEdgeCases(t *testing.T) {

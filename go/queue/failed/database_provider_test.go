@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue/failed"
+	"alloy.dev/go/queue/failed"
 )
 
 func newIntProvider() *failed.DatabaseFailedJobProvider {

@@ -3,11 +3,11 @@ package config_test
 import (
 	"testing"
 
-	bconfig "alloy.dev/api/config"
-	"alloy.dev/api/workflow"
-	"alloy.dev/api/workflow/config"
-	"alloy.dev/api/workflow/events"
-	"alloy.dev/api/workflow/store"
+	bconfig "alloy.dev/go/config"
+	"alloy.dev/go/workflow"
+	"alloy.dev/go/workflow/config"
+	"alloy.dev/go/workflow/events"
+	"alloy.dev/go/workflow/store"
 )
 
 type Subscription struct{ State string }

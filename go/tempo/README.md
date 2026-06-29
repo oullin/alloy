@@ -1,6 +1,6 @@
 # Time Go
 
-Time exposes a root package (`alloy.dev/api/tempo`) that wires
+Time exposes a root package (`alloy.dev/go/tempo`) that wires
 methods onto `Time` / `*MutableTime` and a set of feature packages
 that hold reusable mechanics behind a generic `core.Bearer[T]` contract.
 Every feature package — `arithmetic`, `boundaries`, `comparison`,
@@ -13,10 +13,10 @@ package examples
 import (
 	"time"
 
-	"alloy.dev/api/tempo/arithmetic"
-	"alloy.dev/api/tempo/boundaries"
-	"alloy.dev/api/tempo/formatting"
-	tempo "alloy.dev/api/tempo"
+	"alloy.dev/go/tempo/arithmetic"
+	"alloy.dev/go/tempo/boundaries"
+	"alloy.dev/go/tempo/formatting"
+	tempo "alloy.dev/go/tempo"
 )
 
 func DateOnly(value tempo.Time) string {
@@ -36,8 +36,8 @@ Locale and translation behavior is composed with runtimes and factories:
 
 ```go
 import (
-	"alloy.dev/api/tempo/runtime"
-	tempo "alloy.dev/api/tempo"
+	"alloy.dev/go/tempo/runtime"
+	tempo "alloy.dev/go/tempo"
 )
 
 rt := runtime.New(

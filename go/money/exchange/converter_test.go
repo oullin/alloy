@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 func TestNewConverter(t *testing.T) {

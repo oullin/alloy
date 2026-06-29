@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/workflow/multisteps"
+	"alloy.dev/go/workflow/multisteps"
 )
 
 // Wait briefly so both async siblings overlap, confirming parallelism.

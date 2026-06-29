@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"alloy.dev/api/auth/access"
+	"alloy.dev/go/auth/access"
 )
 
 // AuthorizesRequests provides gate-based authorization helpers for HTTP handlers.

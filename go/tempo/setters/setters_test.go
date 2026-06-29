@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo"
+	"alloy.dev/go/tempo"
 )
 
 func assertEqual(t *testing.T, label string, got string, want string) {

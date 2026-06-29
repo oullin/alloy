@@ -3,8 +3,8 @@ package workflow
 import (
 	"fmt"
 
-	cworkflow "alloy.dev/api/contracts/workflow"
-	"alloy.dev/api/workflow/events"
+	cworkflow "alloy.dev/go/contracts/workflow"
+	"alloy.dev/go/workflow/events"
 )
 
 // Sink is the optional structured logger interface the engine writes to.

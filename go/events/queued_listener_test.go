@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/events"
+	"alloy.dev/go/events"
 )
 
 func TestCallQueuedListener_New(t *testing.T) {

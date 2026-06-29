@@ -3,7 +3,7 @@ package providers
 import (
 	"context"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // ModelQuery is the minimal interface for an ORM-backed user query.

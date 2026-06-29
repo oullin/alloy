@@ -1,8 +1,8 @@
 package money
 
 import (
-	"alloy.dev/api/money/currency"
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/currency"
+	"alloy.dev/go/money/exception"
 )
 
 // Currency returns the currency of the money object.

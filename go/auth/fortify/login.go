@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // LoginConfig controls how credentials are read from a headless login request.

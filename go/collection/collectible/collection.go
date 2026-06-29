@@ -4,7 +4,7 @@ import (
 	"iter"
 	"maps"
 
-	"alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/support"
 )
 
 // Collection wraps a map and provides a fluent API for working with

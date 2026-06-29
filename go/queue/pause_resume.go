@@ -3,7 +3,7 @@ package queue
 import (
 	"time"
 
-	"alloy.dev/api/queue/events"
+	"alloy.dev/go/queue/events"
 )
 
 // PauseResumer coordinates the pause/resume lifecycle across a

@@ -1,7 +1,7 @@
 package passkeys
 
 import (
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 	"github.com/go-webauthn/webauthn/webauthn"
 )
 

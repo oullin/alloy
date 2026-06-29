@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/api/events"
-	cevents "alloy.dev/api/events"
+	"alloy.dev/go/events"
+	cevents "alloy.dev/go/events"
 )
 
 // Push via null should not store anything.

@@ -1,7 +1,7 @@
 package money
 
 import (
-	"alloy.dev/api/money/currency"
+	"alloy.dev/go/money/currency"
 )
 
 // defaultManager is the default singleton instance of Manager used by the factory methods.

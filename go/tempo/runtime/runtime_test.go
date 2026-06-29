@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/tempo"
+	"alloy.dev/go/tempo"
 )
 
 type mapTranslator map[string]string

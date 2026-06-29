@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"alloy.dev/api/auth/manager"
-	"alloy.dev/api/container"
+	"alloy.dev/go/auth/manager"
+	"alloy.dev/go/container"
 )
 
 // ServiceProvider registers the authentication registry into the container.

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"alloy.dev/api/auth/twofactor"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/twofactor"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // TwoFactorConfig controls two-factor endpoint output.

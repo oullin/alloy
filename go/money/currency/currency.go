@@ -4,8 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 
-	"alloy.dev/api/money/exception"
-	"alloy.dev/api/money/format"
+	"alloy.dev/go/money/exception"
+	"alloy.dev/go/money/format"
 )
 
 // Definition represents the formatting rules for a specific currency.

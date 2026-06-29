@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/httpx/middleware"
+	"alloy.dev/go/httpx/middleware"
 )
 
 func TestSetCacheHeadersPublic(t *testing.T) {

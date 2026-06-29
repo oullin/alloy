@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/api/tempo"
+	"alloy.dev/go/tempo"
 )
 
 func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {

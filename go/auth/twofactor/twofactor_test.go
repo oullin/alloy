@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/auth/twofactor"
+	"alloy.dev/go/auth/twofactor"
 )
 
 func TestCodeAndVerifyTOTP(t *testing.T) {

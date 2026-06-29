@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/api/auth/events"
-	"alloy.dev/api/auth/internal/authtest"
-	"alloy.dev/api/auth/security"
-	"alloy.dev/api/auth/sessionx"
-	"alloy.dev/api/auth/user"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/events"
+	"alloy.dev/go/auth/internal/authtest"
+	"alloy.dev/go/auth/security"
+	"alloy.dev/go/auth/sessionx"
+	"alloy.dev/go/auth/user"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // --- SessionGuard: User resolution ---

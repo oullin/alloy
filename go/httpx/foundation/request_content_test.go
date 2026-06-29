@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/api/httpx/foundation"
+	"alloy.dev/go/httpx/foundation"
 )
 
 func TestContentType(t *testing.T) {

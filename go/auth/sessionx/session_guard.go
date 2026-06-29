@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/api/auth/errorsx"
-	"alloy.dev/api/auth/security"
-	cauth "alloy.dev/api/contracts/auth"
-	"alloy.dev/api/contracts/auth/events"
-	"alloy.dev/api/cookie"
+	"alloy.dev/go/auth/errorsx"
+	"alloy.dev/go/auth/security"
+	cauth "alloy.dev/go/contracts/auth"
+	"alloy.dev/go/contracts/auth/events"
+	"alloy.dev/go/cookie"
 
-	authevents "alloy.dev/api/auth/events"
+	authevents "alloy.dev/go/auth/events"
 )
 
 // SessionStore is the minimal session interface needed by SessionGuard.

@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"alloy.dev/api/httpx/routing/matching"
+	"alloy.dev/go/httpx/routing/matching"
 )
 
 // RouteCollection is the in-memory route store used by [Router] during

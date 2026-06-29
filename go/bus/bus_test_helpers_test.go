@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/api/bus"
-	"alloy.dev/api/queue"
+	"alloy.dev/go/bus"
+	"alloy.dev/go/queue"
 )
 
 // mockQueue implements queue.Backend for testing.

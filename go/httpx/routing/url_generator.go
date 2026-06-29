@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/httpx/routing/exceptions"
+	"alloy.dev/go/httpx/routing/exceptions"
 )
 
 // It owns the request, the route collection (for name lookups), and the

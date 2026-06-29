@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/internal/kernel"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/internal/kernel"
 )
 
 const (

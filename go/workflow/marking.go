@@ -1,6 +1,6 @@
 package workflow
 
-import cworkflow "alloy.dev/api/contracts/workflow"
+import cworkflow "alloy.dev/go/contracts/workflow"
 
 // Marking tracks active places and token counts.
 type Marking = cworkflow.Marking

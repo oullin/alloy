@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
-	"alloy.dev/api/queue/drivers"
+	"alloy.dev/go/queue"
+	"alloy.dev/go/queue/drivers"
 )
 
 // inspectorQueue is a queue.Backend that satisfies the optional

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/collection/arr"
+	"alloy.dev/go/collection/arr"
 )
 
 // Each iterates over items, calling the callback for each one.

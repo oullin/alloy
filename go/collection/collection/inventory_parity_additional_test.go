@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/collection/arr"
-	collectible "alloy.dev/api/collection/collectible"
-	"alloy.dev/api/collection/kv"
-	csupport "alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/arr"
+	collectible "alloy.dev/go/collection/collectible"
+	"alloy.dev/go/collection/kv"
+	csupport "alloy.dev/go/collection/support"
 )
 
 type inventoryUser struct {

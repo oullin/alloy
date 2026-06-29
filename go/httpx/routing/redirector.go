@@ -3,7 +3,7 @@ package routing
 import (
 	"fmt"
 
-	crouting "alloy.dev/api/httpx/routing/contracts"
+	crouting "alloy.dev/go/httpx/routing/contracts"
 )
 
 // RedirectResponse is a minimal redirect-response value type used by the

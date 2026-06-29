@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/api/httpx/middleware"
+	"alloy.dev/go/httpx/middleware"
 )
 
 var okHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

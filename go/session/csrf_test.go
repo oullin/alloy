@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/session"
+	"alloy.dev/go/session"
 )
 
 type csrfStore struct{ token string }

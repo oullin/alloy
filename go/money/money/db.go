@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"alloy.dev/api/money/currency"
+	"alloy.dev/go/money/currency"
 )
 
 var (

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // memoryQueue is a minimal in-memory Backend used only by the SizeTest

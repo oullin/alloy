@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/events"
+	"alloy.dev/go/events"
 )
 
 func TestQueueable(t *testing.T) {

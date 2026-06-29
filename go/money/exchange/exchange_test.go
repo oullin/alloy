@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/api/money/exception"
-	testutil "alloy.dev/api/money/tests"
+	"alloy.dev/go/money/exception"
+	testutil "alloy.dev/go/money/tests"
 )
 
 func TestNewExchange(t *testing.T) {

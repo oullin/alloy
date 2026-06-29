@@ -1,6 +1,6 @@
 package cookie
 
-import ccookie "alloy.dev/api/contracts/cookie"
+import ccookie "alloy.dev/go/contracts/cookie"
 
 // Factory creates cookies.
 type Factory = ccookie.Factory

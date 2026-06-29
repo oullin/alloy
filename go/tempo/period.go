@@ -3,7 +3,7 @@ package tempo
 import (
 	"errors"
 
-	periodpkg "alloy.dev/api/tempo/period"
+	periodpkg "alloy.dev/go/tempo/period"
 )
 
 func (period Period) Values() ([]Time, error) {

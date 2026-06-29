@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/api/tempo/diff"
+	"alloy.dev/go/tempo/diff"
 )
 
 func (tempo Time) Diff(other Time, unit Unit, options ...DiffOptions) float64 {

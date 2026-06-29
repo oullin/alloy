@@ -29,8 +29,8 @@ package config
 import (
 	"fmt"
 
-	bconfig "alloy.dev/api/config"
-	"alloy.dev/api/workflow"
+	bconfig "alloy.dev/go/config"
+	"alloy.dev/go/workflow"
 )
 
 // Load builds a workflow Definition from the repository under root key "workflow".

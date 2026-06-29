@@ -1,4 +1,4 @@
-module alloy.dev/api
+module alloy.dev/go
 
 go 1.26.4
 

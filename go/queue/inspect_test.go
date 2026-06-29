@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // fakeInspectableQueue is a minimal Backend that also satisfies the two

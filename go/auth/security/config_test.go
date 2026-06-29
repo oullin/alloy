@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/auth/security"
+	"alloy.dev/go/auth/security"
 )
 
 func TestProductionDefaultsValidateWhenRequiredSecretsAreSet(t *testing.T) {

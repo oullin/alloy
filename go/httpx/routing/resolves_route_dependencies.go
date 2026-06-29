@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strconv"
 
-	crouting "alloy.dev/api/httpx/routing/contracts"
+	crouting "alloy.dev/go/httpx/routing/contracts"
 )
 
 // same name. It performs reflection-based parameter resolution for both

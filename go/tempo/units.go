@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/api/tempo/duration"
+	"alloy.dev/go/tempo/duration"
 )
 
 func normalizeUnit(unit Unit) Unit {

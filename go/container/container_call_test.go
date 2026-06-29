@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/container"
+	"alloy.dev/go/container"
 )
 
 func TestCallInvokesCallable(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	crouting "alloy.dev/api/httpx/routing/contracts"
-	"alloy.dev/api/httpx/routing/matching"
+	crouting "alloy.dev/go/httpx/routing/contracts"
+	"alloy.dev/go/httpx/routing/matching"
 )
 
 // EventDispatcher is the minimal event surface the router needs.

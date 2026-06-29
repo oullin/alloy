@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/httpx/routing"
-	"alloy.dev/api/httpx/server"
+	"alloy.dev/go/httpx/routing"
+	"alloy.dev/go/httpx/server"
 )
 
 type contextKey struct{}

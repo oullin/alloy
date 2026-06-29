@@ -7,9 +7,9 @@
 //
 // # Related packages
 //
-//   - [alloy.dev/api/collection/lazy] — lazily evaluated sequences backed by iter.Seq
-//   - [alloy.dev/api/collection/collectible] — ordered map with fluent key-value API
-//   - [alloy.dev/api/collection/support] — shared types (Pair, Numeric) and errors
-//   - [alloy.dev/api/collection/arr] — generic slice helpers
-//   - [alloy.dev/api/collection/kv] — map helpers with dot-notation support
+//   - [alloy.dev/go/collection/lazy] — lazily evaluated sequences backed by iter.Seq
+//   - [alloy.dev/go/collection/collectible] — ordered map with fluent key-value API
+//   - [alloy.dev/go/collection/support] — shared types (Pair, Numeric) and errors
+//   - [alloy.dev/go/collection/arr] — generic slice helpers
+//   - [alloy.dev/go/collection/kv] — map helpers with dot-notation support
 package collection

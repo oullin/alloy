@@ -5,7 +5,7 @@ import (
 	"maps"
 	"sync"
 
-	cmultisteps "alloy.dev/api/contracts/workflow/multisteps"
+	cmultisteps "alloy.dev/go/contracts/workflow/multisteps"
 )
 
 // Task is a unit of concurrent work.

@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	cmiddleware "alloy.dev/api/httpx/routing/contracts/middleware"
-	"alloy.dev/api/httpx/routing/exceptions"
+	cmiddleware "alloy.dev/go/httpx/routing/contracts/middleware"
+	"alloy.dev/go/httpx/routing/exceptions"
 )
 
 // SignatureValidator is the surface ValidateSignature needs from a request.

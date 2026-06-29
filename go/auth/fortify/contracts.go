@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"alloy.dev/api/auth/passwords"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/passwords"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // RegisterUser creates a user from a headless registration request.

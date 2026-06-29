@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"alloy.dev/api/collection/arr"
-	"alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/arr"
+	"alloy.dev/go/collection/support"
 )
 
 // Each iterates over items in insertion order, calling the callback for each

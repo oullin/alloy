@@ -1,8 +1,8 @@
 package tempo
 
 import (
-	"alloy.dev/api/tempo/comparison"
-	"alloy.dev/api/tempo/core"
+	"alloy.dev/go/tempo/comparison"
+	"alloy.dev/go/tempo/core"
 )
 
 func states(values []Time) []core.State {

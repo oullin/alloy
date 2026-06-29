@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"alloy.dev/api/events"
+	"alloy.dev/go/events"
 )
 
 func TestInvokeQueuedClosure_Handle(t *testing.T) {

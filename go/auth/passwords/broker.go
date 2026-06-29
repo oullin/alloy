@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	authevents "alloy.dev/api/auth/events"
-	cauth "alloy.dev/api/contracts/auth"
-	cevents "alloy.dev/api/contracts/auth/events"
-	clog "alloy.dev/api/contracts/auth/log"
+	authevents "alloy.dev/go/auth/events"
+	cauth "alloy.dev/go/contracts/auth"
+	cevents "alloy.dev/go/contracts/auth/events"
+	clog "alloy.dev/go/contracts/auth/log"
 )
 
 // ErrResetLinkThrottled is returned when a reset link was requested too recently.

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/session/handlers"
+	"alloy.dev/go/session/handlers"
 )
 
 type mockDBConn struct {

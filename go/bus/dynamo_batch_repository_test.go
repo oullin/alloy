@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/bus"
+	"alloy.dev/go/bus"
 )
 
 // mockDynamoClient implements bus.DynamoClient for testing.

@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/api/tempo/core"
+	"alloy.dev/go/tempo/core"
 )
 
 // Compile-time guarantee that Time and *MutableTime both satisfy the

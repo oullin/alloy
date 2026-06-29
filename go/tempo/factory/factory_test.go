@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/factory"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/factory"
 )
 
 func TestFromTimestampAndMs(t *testing.T) {

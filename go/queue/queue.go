@@ -1,6 +1,6 @@
 package queue
 
-import cqueue "alloy.dev/api/contracts/queue"
+import cqueue "alloy.dev/go/contracts/queue"
 
 // Backend defines the interface for a queue backend.
 type Backend = cqueue.Backend

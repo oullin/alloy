@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // SQSClient is the interface for an AWS SQS client.

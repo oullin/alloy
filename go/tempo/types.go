@@ -3,10 +3,10 @@ package tempo
 import (
 	"time"
 
-	configpkg "alloy.dev/api/tempo/config"
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/factory"
-	"alloy.dev/api/tempo/runtime"
+	configpkg "alloy.dev/go/tempo/config"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/factory"
+	"alloy.dev/go/tempo/runtime"
 )
 
 type Unit = duration.Unit

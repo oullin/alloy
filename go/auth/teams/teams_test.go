@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/api/auth/teams"
+	"alloy.dev/go/auth/teams"
 )
 
 func TestServiceCreatesListsAndSwitchesTeams(t *testing.T) {

@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/api/auth/sessionx"
-	"alloy.dev/api/auth/user"
-	cauth "alloy.dev/api/contracts/auth"
-	"alloy.dev/api/contracts/auth/events"
+	"alloy.dev/go/auth/sessionx"
+	"alloy.dev/go/auth/user"
+	cauth "alloy.dev/go/contracts/auth"
+	"alloy.dev/go/contracts/auth/events"
 )
 
 // ErrProvider is a reusable provider error for auth tests.

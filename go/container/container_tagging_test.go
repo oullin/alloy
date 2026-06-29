@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"alloy.dev/api/container"
+	"alloy.dev/go/container"
 )
 
 func TestTagAndTaggedResolvesAll(t *testing.T) {

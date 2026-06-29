@@ -3,8 +3,8 @@ package listeners
 import (
 	"context"
 
-	"alloy.dev/api/auth/events"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/events"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // EmailVerificationSender is kept for backward compatibility. New code should

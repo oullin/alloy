@@ -1,7 +1,7 @@
 package money
 
 import (
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 // Aggregator performs aggregate operations on Value objects using a shared Manager.

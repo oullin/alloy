@@ -1,7 +1,7 @@
 package exchange
 
 import (
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 // Converter provides a simple interface for currency conversion with a fixed exchange

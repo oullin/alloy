@@ -3,8 +3,8 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/setters"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/setters"
 )
 
 func (tempo Time) SetTimezone(name string) (Time, error) {

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo"
+	"alloy.dev/go/tempo"
 )
 
 func mustTempo(t *testing.T, value tempo.Time, err error) tempo.Time {

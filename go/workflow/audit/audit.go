@@ -3,8 +3,8 @@
 package audit
 
 import (
-	"alloy.dev/api/workflow"
-	"alloy.dev/api/workflow/events"
+	"alloy.dev/go/workflow"
+	"alloy.dev/go/workflow/events"
 )
 
 // Entry is one recorded transition.

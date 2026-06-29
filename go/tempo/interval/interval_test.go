@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo/interval"
+	"alloy.dev/go/tempo/interval"
 )
 
 const (

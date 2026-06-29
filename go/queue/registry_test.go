@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 type registerableJob struct {

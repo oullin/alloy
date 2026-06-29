@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/api/session/handlers"
+	"alloy.dev/go/session/handlers"
 )
 
 func TestArrayHandlerOpen(t *testing.T) {

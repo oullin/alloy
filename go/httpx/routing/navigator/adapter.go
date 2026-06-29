@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/api/httpx/routing"
+	"alloy.dev/go/httpx/routing"
 )
 
 // AdapterOptions configures how Alloy routes are converted to RouteInfo.

@@ -23,7 +23,7 @@
 //
 // # Service providers
 //
-// See package alloy.dev/api/container/contracts/provider for the
+// See package alloy.dev/go/container/contracts/provider for the
 // provider contract. The Application supports five lifecycle hooks:
 //
 //   - Register:  called once per provider when it is added.

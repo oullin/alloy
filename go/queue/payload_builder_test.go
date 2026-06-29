@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // These tests cover Go-specific helpers (DisplayName, NewUUIDv4,

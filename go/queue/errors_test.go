@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // and returns the same display name the PHP fixture returns.

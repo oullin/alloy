@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/api/collection/arr"
+	"alloy.dev/go/collection/arr"
 )
 
 func TestFirst(t *testing.T) {

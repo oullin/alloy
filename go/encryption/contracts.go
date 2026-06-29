@@ -1,6 +1,6 @@
 package encryption
 
-import cencryption "alloy.dev/api/contracts/encryption"
+import cencryption "alloy.dev/go/contracts/encryption"
 
 // EncrypterContract encrypts and decrypts values.
 type EncrypterContract = cencryption.EncrypterContract

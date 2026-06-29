@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/session/handlers"
+	"alloy.dev/go/session/handlers"
 )
 
 func TestFileHandlerOpen(t *testing.T) {

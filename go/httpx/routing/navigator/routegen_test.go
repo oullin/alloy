@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/httpx/routing"
-	"alloy.dev/api/httpx/routing/navigator"
+	"alloy.dev/go/httpx/routing"
+	"alloy.dev/go/httpx/routing/navigator"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────

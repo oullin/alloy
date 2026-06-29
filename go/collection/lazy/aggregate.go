@@ -3,7 +3,7 @@ package lazy
 import (
 	"cmp"
 
-	"alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/support"
 )
 
 // Reduce reduces the lazy collection to a single value by applying the callback

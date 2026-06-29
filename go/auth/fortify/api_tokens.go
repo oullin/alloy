@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	patokens "alloy.dev/api/auth/tokens"
-	cauth "alloy.dev/api/contracts/auth"
+	patokens "alloy.dev/go/auth/tokens"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 type apiTokenResponse struct {

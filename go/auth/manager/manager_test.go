@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	. "alloy.dev/api/auth/errorsx"
-	. "alloy.dev/api/auth/manager"
-	. "alloy.dev/api/auth/security"
-	. "alloy.dev/api/auth/sessionx"
-	. "alloy.dev/api/auth/user"
-	cauth "alloy.dev/api/contracts/auth"
-	"alloy.dev/api/contracts/auth/events"
+	. "alloy.dev/go/auth/errorsx"
+	. "alloy.dev/go/auth/manager"
+	. "alloy.dev/go/auth/security"
+	. "alloy.dev/go/auth/sessionx"
+	. "alloy.dev/go/auth/user"
+	cauth "alloy.dev/go/contracts/auth"
+	"alloy.dev/go/contracts/auth/events"
 )
 
 // --- Test helpers ---

@@ -3,7 +3,7 @@ package collection
 import (
 	"slices"
 
-	"alloy.dev/api/collection/support"
+	"alloy.dev/go/collection/support"
 )
 
 // First returns the first element matching the optional predicate.

@@ -3,7 +3,7 @@ package events_test
 import (
 	"testing"
 
-	"alloy.dev/api/events"
+	"alloy.dev/go/events"
 )
 
 func TestEventName_String(t *testing.T) {

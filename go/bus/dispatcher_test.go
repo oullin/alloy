@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/api/bus"
+	"alloy.dev/go/bus"
 )
 
 type testCommand struct{ Value string }

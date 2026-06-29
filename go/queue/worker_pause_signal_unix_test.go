@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // signalingQueue is a minimal Backend that returns ErrNoJob from every

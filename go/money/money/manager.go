@@ -4,10 +4,10 @@ import (
 	"math"
 	"strings"
 
-	"alloy.dev/api/money/calculator"
-	"alloy.dev/api/money/currency"
-	"alloy.dev/api/money/exception"
-	"alloy.dev/api/money/parser"
+	"alloy.dev/go/money/calculator"
+	"alloy.dev/go/money/currency"
+	"alloy.dev/go/money/exception"
+	"alloy.dev/go/money/parser"
 )
 
 // Manager handles Value creation and operations with a dependency-injected currency manager and calculator.

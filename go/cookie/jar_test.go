@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/cookie"
+	"alloy.dev/go/cookie"
 )
 
 func defaultOpts() cookie.Options {

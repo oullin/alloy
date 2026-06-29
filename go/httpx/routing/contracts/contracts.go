@@ -3,7 +3,7 @@ package contracts
 import (
 	"reflect"
 
-	"alloy.dev/api/httpx/routing/contracts/compiler"
+	"alloy.dev/go/httpx/routing/contracts/compiler"
 )
 
 // CallableDispatcher dispatches callable route actions.

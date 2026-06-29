@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"alloy.dev/api/money/exception"
+	"alloy.dev/go/money/exception"
 )
 
 // Map holds a reference to the active currency configuration.

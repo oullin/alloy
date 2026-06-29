@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // DBExecer is the minimal database interface for the database queue driver.

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/api/queue"
+	"alloy.dev/go/queue"
 )
 
 // DeferredEntry holds a deferred job payload.

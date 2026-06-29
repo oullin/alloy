@@ -3,8 +3,8 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/api/tempo/boundaries"
-	"alloy.dev/api/tempo/internal/kernel"
+	"alloy.dev/go/tempo/boundaries"
+	"alloy.dev/go/tempo/internal/kernel"
 )
 
 func (tempo Time) StartOf(unit Unit, options ...StartOfWeekOptions) Time {

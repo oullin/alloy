@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/api/filesystem"
+	"alloy.dev/go/filesystem"
 )
 
 func TestGet(t *testing.T) {

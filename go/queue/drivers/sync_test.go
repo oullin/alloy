@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/queue"
-	"alloy.dev/api/queue/drivers"
+	"alloy.dev/go/queue"
+	"alloy.dev/go/queue/drivers"
 )
 
 func TestSyncDriverPushExecutesImmediately(t *testing.T) {

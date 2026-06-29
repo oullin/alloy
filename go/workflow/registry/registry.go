@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"alloy.dev/api/workflow"
+	"alloy.dev/go/workflow"
 )
 
 // SupportStrategy reports whether a workflow applies to a subject.

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/bus"
+	"alloy.dev/go/bus"
 )
 
 func TestBatchFinished(t *testing.T) {

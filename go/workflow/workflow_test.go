@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/api/workflow"
-	"alloy.dev/api/workflow/audit"
-	"alloy.dev/api/workflow/events"
-	"alloy.dev/api/workflow/registry"
-	"alloy.dev/api/workflow/store"
+	"alloy.dev/go/workflow"
+	"alloy.dev/go/workflow/audit"
+	"alloy.dev/go/workflow/events"
+	"alloy.dev/go/workflow/registry"
+	"alloy.dev/go/workflow/store"
 )
 
 // Subscription is the canonical state-machine test subject: trial -> active -> cancelled.

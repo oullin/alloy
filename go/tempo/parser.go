@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	dateparser "alloy.dev/api/tempo/parser"
+	dateparser "alloy.dev/go/tempo/parser"
 )
 
 type Parser struct {

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/queue"
-	"alloy.dev/api/queue/drivers"
+	"alloy.dev/go/queue"
+	"alloy.dev/go/queue/drivers"
 )
 
 // Use a non-existent command so spawn is a harmless no-op.

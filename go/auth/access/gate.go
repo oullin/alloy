@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	cauth "alloy.dev/api/contracts/auth"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 // Ability is a function that determines whether a user can perform an action.

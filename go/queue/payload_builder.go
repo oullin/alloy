@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"time"
 
-	cqueue "alloy.dev/api/contracts/queue"
+	cqueue "alloy.dev/go/contracts/queue"
 )
 
 // Payload builder helpers provide the shared queue-driver behavior that the

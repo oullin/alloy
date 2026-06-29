@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/tempo"
-	"alloy.dev/api/tempo/boundaries"
-	"alloy.dev/api/tempo/duration"
-	"alloy.dev/api/tempo/internal/kernel"
+	"alloy.dev/go/tempo"
+	"alloy.dev/go/tempo/boundaries"
+	"alloy.dev/go/tempo/duration"
+	"alloy.dev/go/tempo/internal/kernel"
 )
 
 func mustParse(t *testing.T, value string) tempo.Time {

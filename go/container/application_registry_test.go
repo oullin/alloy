@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"alloy.dev/api/container"
+	"alloy.dev/go/container"
 )
 
 type sample struct{ Value string }

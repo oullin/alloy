@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/bus"
+	"alloy.dev/go/bus"
 )
 
 // mockDBExecutor implements bus.DBExecutor for unit testing.

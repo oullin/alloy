@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"alloy.dev/api/events"
-	cevents "alloy.dev/api/events"
+	"alloy.dev/go/events"
+	cevents "alloy.dev/go/events"
 )
 
 // Register listener.

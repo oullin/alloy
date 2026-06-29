@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/auth/browserx"
+	"alloy.dev/go/auth/browserx"
 )
 
 type sessionSQLDB struct {

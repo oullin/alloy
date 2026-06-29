@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/auth/httpx"
-	"alloy.dev/api/auth/tokens"
-	"alloy.dev/api/auth/user"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/httpx"
+	"alloy.dev/go/auth/tokens"
+	"alloy.dev/go/auth/user"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 type stubUserProvider struct {

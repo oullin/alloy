@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/api/auth/events"
-	"alloy.dev/api/auth/user"
-	cauth "alloy.dev/api/contracts/auth"
+	"alloy.dev/go/auth/events"
+	"alloy.dev/go/auth/user"
+	cauth "alloy.dev/go/contracts/auth"
 )
 
 type resettableEventUser struct {

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/api/session"
-	"alloy.dev/api/session/handlers"
+	"alloy.dev/go/session"
+	"alloy.dev/go/session/handlers"
 )
 
 func TestStartSessionWritesCookie(t *testing.T) {

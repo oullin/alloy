@@ -21,12 +21,12 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/api/tempo/arithmetic"
-	"alloy.dev/api/tempo/boundaries"
-	"alloy.dev/api/tempo/calendar"
-	"alloy.dev/api/tempo/comparison"
-	"alloy.dev/api/tempo/core"
-	"alloy.dev/api/tempo/duration"
+	"alloy.dev/go/tempo/arithmetic"
+	"alloy.dev/go/tempo/boundaries"
+	"alloy.dev/go/tempo/calendar"
+	"alloy.dev/go/tempo/comparison"
+	"alloy.dev/go/tempo/core"
+	"alloy.dev/go/tempo/duration"
 )
 
 type Options struct {
