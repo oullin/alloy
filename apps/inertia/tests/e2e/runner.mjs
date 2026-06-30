@@ -467,7 +467,7 @@ async function targetConfig(port) {
 
 	const distPath = path.join(repoRoot, 'storage/apps/inertia/dist/app');
 	if (!existsSync(distPath) || !statSync(distPath).isDirectory()) {
-		throw new Error(`Missing Alloy Inertia dist at ${distPath}. Run pnpm --filter @alloy/inertia-app build first.`);
+		throw new Error(`Missing Alloy Inertia dist at ${distPath}. Run pnpm inertia:build first.`);
 	}
 
 	return {

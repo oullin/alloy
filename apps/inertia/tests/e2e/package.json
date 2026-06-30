@@ -3,11 +3,11 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"test": "pnpm run test:alloy",
-		"test:alloy": "pnpm --filter @alloy/inertia-app build && node runner.playwright.mjs --target alloy",
-		"test:alloy:agent-browser": "pnpm --filter @alloy/inertia-app build && node runner.mjs --target alloy",
-		"test:alloy:playwright": "pnpm run test:alloy",
-		"test:bedrock": "node runner.mjs --target bedrock --build-app"
+		"test": "pnpm --dir ../../../.. exec vp run inertia:e2e",
+		"test:alloy": "pnpm --dir ../../../.. exec vp run inertia:e2e",
+		"test:alloy:agent-browser": "pnpm --dir ../../../.. exec vp run inertia:e2e:agent-browser",
+		"test:alloy:playwright": "pnpm --dir ../../../.. exec vp run inertia:e2e",
+		"test:bedrock": "pnpm --dir ../../../.. exec vp run inertia:e2e:bedrock"
 	},
 	"devDependencies": {
 		"agent-browser": "^0.31.1",

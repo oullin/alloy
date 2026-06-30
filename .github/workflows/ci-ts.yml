@@ -37,7 +37,7 @@ jobs:
           echo "CODEX_BROWSER_ARTIFACTS_DIR=$RUNNER_TEMP/browser-artifacts" >> "$GITHUB_ENV"
           echo "PLAYWRIGHT_BROWSERS_PATH=$RUNNER_TEMP/playwright" >> "$GITHUB_ENV"
 
-      - run: pnpm --filter @alloy/inertia-e2e exec playwright install --with-deps chromium
+      - run: pnpm exec vp exec -F @alloy/inertia-e2e -- playwright install --with-deps chromium
 
       - run: pnpm test:e2e:inertia
 

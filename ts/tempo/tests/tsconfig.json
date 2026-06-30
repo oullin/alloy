@@ -3,7 +3,7 @@
   "compilerOptions": {
     "composite": false,
     "noEmit": true,
-    "types": ["node", "vitest/globals"],
+    "types": ["node"],
     "paths": {
       "@alloy/tempo": ["../src"],
       "#*": ["../src/*"]

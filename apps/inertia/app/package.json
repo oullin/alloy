@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
-    "fmt": "oxfmt --write .",
-    "fmt:check": "oxfmt --check ."
+    "dev": "pnpm --dir ../../.. exec vp run inertia:dev",
+    "build": "pnpm --dir ../../.. exec vp run inertia:build",
+    "typecheck": "pnpm --dir ../../.. exec vp exec tsc -p apps/inertia/app/tsconfig.json --noEmit",
+    "fmt": "pnpm --dir ../../.. exec vp fmt apps/inertia/app",
+    "fmt:check": "pnpm --dir ../../.. exec vp fmt --check apps/inertia/app"
   },
   "dependencies": {
     "@inertiajs/vue3": "^3.0.0",
@@ -28,10 +28,6 @@
     "vue": "^3.5.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.0",
-    "oxfmt": "latest",
-    "oxlint": "latest",
-    "typescript": "^6.0.2",
-    "vite": "^6.0.0"
+    "@vitejs/plugin-vue": "^5.2.0"
   }
 }

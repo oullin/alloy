@@ -5,20 +5,21 @@
   "type": "module",
   "scripts": {
     "build": "vp run -r build",
-    "docs:build": "pnpm --filter @alloy/docs build",
-    "docs:dev": "pnpm --filter @alloy/docs dev",
-    "imports:check": "node infra/scripts/tasks/check-package-imports.mjs",
-    "inertia:build": "pnpm --filter @alloy/inertia-app build",
-    "inertia:dev": "pnpm --filter @alloy/inertia-app dev",
-    "lint": "vp lint && node infra/scripts/tasks/check-package-imports.mjs",
+    "docs:build": "vp run -F @alloy/docs build",
+    "docs:dev": "vp run -F @alloy/docs dev",
+    "imports:check": "vp run check:imports",
+    "inertia:build": "vp run inertia-app:build",
+    "inertia:dev": "vp run inertia-app:dev",
+    "lint": "vp lint && vp run check:imports",
     "test": "vp test",
-    "test:e2e:inertia": "pnpm --filter @alloy/inertia-e2e test:alloy",
+    "test:e2e:inertia": "vp run inertia:e2e",
     "typecheck": "vp check"
   },
   "devDependencies": {
     "@alloy/infra": "workspace:*",
     "@types/node": "^25.0.0",
     "typescript": "^6.0.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plus": "latest"
   },
   "packageManager": "pnpm@10.33.0",
@@ -27,9 +28,7 @@
       "esbuild"
     ],
     "overrides": {
-      "@alloy/inertia-app>vite": "^8.0.16",
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-      "vitest": "4.1.9"
+      "vite": "npm:@voidzero-dev/vite-plus-core@latest"
     },
     "peerDependencyRules": {
       "allowAny": [
