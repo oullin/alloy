@@ -1,0 +1,33 @@
+name: TypeScript CI
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Check package imports
+        run: pnpm imports:check
+
+      - name: Typecheck
+        run: pnpm exec vp check
+
+      - name: Tests
+        run: pnpm exec vp test
+
+      - name: Pack
+        run: pnpm exec vp pack
