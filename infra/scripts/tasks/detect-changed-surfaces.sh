@@ -46,7 +46,7 @@ git diff --name-only "${base_sha}" "${head_sha}" > "${changed_files}"
 
 labels=""
 if [[ -n "${GITHUB_EVENT_PATH:-}" && -f "${GITHUB_EVENT_PATH}" ]]; then
-	labels="$(jq -r '(.pull_request.labels // [])[] | .name' "${GITHUB_EVENT_PATH}")"
+	labels="$(jq -r '.pull_request.labels[]?.name' "${GITHUB_EVENT_PATH}")"
 fi
 
 has_coverage_label=false
