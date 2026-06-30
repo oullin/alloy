@@ -43,14 +43,14 @@ pnpm run test
 Run the documentation site locally:
 
 ```bash
-pnpm run dev --filter=@alloy/web
+pnpm run dev --filter=@alloy/docs
 ```
 
 Build the static site:
 
 ```bash
-pnpm run build --filter=@alloy/web
-# Output: web/.vuepress/dist/
+pnpm run build --filter=@alloy/docs
+# Output: web/docs/.vuepress/dist/
 ```
 
 ## Package Index

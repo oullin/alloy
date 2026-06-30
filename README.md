@@ -18,7 +18,7 @@ TypeScript package (`@alloy/tempo`).
 - `ts/tempo/tests`: TypeScript Tempo acceptance tests.
 - `ts/money`: TypeScript Money package.
 - `ts/console`: TypeScript terminal UI helpers.
-- `web`: VuePress documentation site package.
+- `web/docs`: VuePress documentation site package.
 - `web/inertia-demo`: Inertia demo app, Go API, and browser E2E suite.
 - `web/storage`: local runtime and cache data for web demos.
 - `infra`: repo automation, cache paths, scripts, and shared TypeScript config.
@@ -51,7 +51,7 @@ pnpm exec vp check
 pnpm exec vp test
 pnpm exec vp pack
 pnpm exec vp run go:test
-pnpm web:build
+pnpm docs:build
 pnpm inertia-demo:build
 pnpm exec vp run format-all
 ```

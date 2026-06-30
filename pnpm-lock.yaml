@@ -98,7 +98,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  web:
+  web/docs:
     devDependencies:
       '@tailwindcss/typography':
         specifier: ^0.5.13

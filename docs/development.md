@@ -24,7 +24,7 @@ needed, then runs `go work sync` inside `go/`.
 | `pnpm exec vp run go:test` | Run Go vet and race-enabled tests for Go module(s) under `go/` and web demo APIs. |
 | `pnpm exec vp run format` | Format changed Go and TypeScript files with the formatter container. |
 | `pnpm exec vp run format-all` | Format the repository and run `vp check --fix`. |
-| `pnpm web:build` | Build the VuePress documentation workspace. |
+| `pnpm docs:build` | Build the VuePress documentation workspace. |
 | `pnpm inertia-demo:build` | Build the Inertia demo frontend into `web/storage/inertia-demo`. |
 
 The root package scripts map to the common TypeScript workflows:
@@ -70,7 +70,7 @@ surfaces are:
 - `@alloy/tempo` in `ts/tempo`.
 - `@alloy/tempo-acceptance` in `ts/tempo/tests`.
 - `@alloy/console` in `ts/console`.
-- `@alloy/web` in `web`.
+- `@alloy/docs` in `web/docs`.
 - `@alloy/inertia-demo-app` in `web/inertia-demo/app`.
 - `@alloy/inertia-demo-e2e` in `web/inertia-demo/tests/e2e`.
 - `@alloy/infra` in `infra`.

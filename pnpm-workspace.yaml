@@ -1,5 +1,5 @@
 packages:
-  - "web"
+  - "web/docs"
   - "web/inertia-demo/app"
   - "web/inertia-demo/tests/e2e"
   - "ts/console"

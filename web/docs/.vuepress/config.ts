@@ -10,7 +10,7 @@ export default defineUserConfig({
 	lang: 'en-US',
 	title: 'Alloy',
 	description: 'Foundational Go packages for building web applications.',
-	pagePatterns: ['**/*.md', '!.vuepress', '!inertia-demo', '!inertia-demo/**', '!storage', '!storage/**'],
+	pagePatterns: ['**/*.md', '!.vuepress', '!.vuepress/**'],
 
 	// Prevent dark mode flash: apply saved preference before first paint
 	head: [
