@@ -4,10 +4,13 @@
 	"type": "module",
 	"scripts": {
 		"test": "pnpm run test:alloy",
-		"test:alloy": "pnpm --filter @alloy/inertia-app build && node runner.mjs --target alloy",
+		"test:alloy": "pnpm --filter @alloy/inertia-app build && node runner.playwright.mjs --target alloy",
+		"test:alloy:agent-browser": "pnpm --filter @alloy/inertia-app build && node runner.mjs --target alloy",
+		"test:alloy:playwright": "pnpm run test:alloy",
 		"test:bedrock": "node runner.mjs --target bedrock --build-app"
 	},
 	"devDependencies": {
-		"agent-browser": "^0.31.1"
+		"agent-browser": "^0.31.1",
+		"playwright": "^1.61.1"
 	}
 }

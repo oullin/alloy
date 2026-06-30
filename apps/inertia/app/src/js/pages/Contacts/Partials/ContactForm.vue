@@ -25,6 +25,21 @@ const props = withDefaults(
 );
 
 const isEdit = computed(() => props.mode === 'edit');
+const noOrganizationValue = '__none__';
+
+const organizationID = computed({
+	get: () => props.form.organization_id || noOrganizationValue,
+	set: (value: string) => {
+		props.form.organization_id = value === noOrganizationValue ? '' : value;
+	},
+});
+
+const organizationOptions = computed(() =>
+	props.organizations.map((option) => ({
+		...option,
+		value: option.value || noOrganizationValue,
+	})),
+);
 
 const breadcrumbs = computed(() =>
 	isEdit.value
@@ -63,12 +78,12 @@ function submit() {
 					<form class="grid gap-6 md:grid-cols-2" @submit.prevent="submit">
 						<div class="grid gap-2">
 							<Label for="organization">Organization</Label>
-							<Select v-model="form.organization_id">
+							<Select v-model="organizationID">
 								<SelectTrigger id="organization">
 									<SelectValue placeholder="Select an organization" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem v-for="option in organizations" :key="option.value || 'none'" :value="option.value">
+									<SelectItem v-for="option in organizationOptions" :key="option.value" :value="option.value">
 										{{ option.label }}
 									</SelectItem>
 								</SelectContent>

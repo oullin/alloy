@@ -1,0 +1,35 @@
+name: Inertia E2E CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  inertia-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CODEX_BROWSER_ARTIFACTS_DIR: ${{ runner.temp }}/browser-artifacts
+      PLAYWRIGHT_BROWSER_ARGS: --no-sandbox,--disable-dev-shm-usage
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/playwright
+      PLAYWRIGHT_HEADED: "false"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup
+        with:
+          go-version: "1.26.4"
+
+      - run: pnpm --filter @alloy/inertia-e2e exec playwright install --with-deps chromium
+
+      - run: pnpm test:e2e:inertia
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inertia-e2e-artifacts
+          path: ${{ runner.temp }}/browser-artifacts
+          if-no-files-found: ignore
+          retention-days: 7
