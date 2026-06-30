@@ -3,7 +3,7 @@ package features
 import (
 	"net/http"
 
-	"alloy.dev/go/inertia/protocol"
+	"alloy.dev/foundation/inertia/protocol"
 )
 
 func (a app) persistentLayoutsHandler(w http.ResponseWriter, r *http.Request) {

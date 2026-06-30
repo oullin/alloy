@@ -20,13 +20,13 @@ Package websockets implements a Go port of the upstream WebSockets WebSocket ser
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/websockets@latest
+go get alloy.dev/foundation/websockets@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/websockets/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/websockets/...
 ```
 
 ## Source Coverage
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/websockets"
+    _ "alloy.dev/foundation/websockets"
 )
 
 func main() {
@@ -72,7 +72,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/websockets` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/websockets` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -112,13 +112,13 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/websockets/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/websockets/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/websockets/http_inventory_additional_test.go`
-- `packages/websockets/inventory_parity_test.go`
+- `packages/foundation/websockets/http_inventory_additional_test.go`
+- `packages/foundation/websockets/inventory_parity_test.go`
 
 ## API Reference
 

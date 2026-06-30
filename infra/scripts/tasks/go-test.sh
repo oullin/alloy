@@ -5,7 +5,7 @@ ROOT_PATH="$(git rev-parse --show-toplevel)"
 
 source "${ROOT_PATH}/infra/scripts/tasks/cache-env.sh"
 
-GO_PATH="${ROOT_PATH}/go"
+GO_PATH="${ROOT_PATH}/packages/foundation"
 GO_WORK_PATH="${GO_PATH}/go.work"
 GO_WORK_ENV="off"
 
@@ -24,7 +24,7 @@ go_work_for_module() {
 	printf '%s\n' "off"
 }
 
-# Shared Go code lives under go/. Web demo Go entrypoints live under web/*/api.
+# Shared Go code lives under packages/foundation/. Web demo Go entrypoints live under web/*/api.
 while IFS= read -r -d '' gomod; do
 	module_dir="$(dirname "${gomod}")"
 	module_work_env="$(go_work_for_module "${module_dir}")"
@@ -36,11 +36,12 @@ while IFS= read -r -d '' gomod; do
 			echo "go workspace resolution is not using ${module_work_env}" >&2
 			exit 1
 		fi
-		module_path="$(go list -m)"
-		if [[ "${module_path}" != "alloy.dev/go" && "${module_path}" != alloy.dev/go/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
-			echo "unexpected Go module path: ${module_path}" >&2
-			exit 1
-		fi
+		while IFS= read -r module_path; do
+			if [[ "${module_path}" != "alloy.dev/foundation" && "${module_path}" != alloy.dev/foundation/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
+				echo "unexpected Go module path: ${module_path}" >&2
+				exit 1
+			fi
+		done < <(go list -m)
 		go vet ./...
 		go test -race ./...
 	)

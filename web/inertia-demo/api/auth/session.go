@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"alloy.dev/go/encryption"
+	"alloy.dev/foundation/encryption"
 	"alloy.dev/inertia-demo/internal/database"
 )
 

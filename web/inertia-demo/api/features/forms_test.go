@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/go/inertia/protocol"
+	"alloy.dev/foundation/inertia/protocol"
 )
 
 func TestFormHandlers_RenderAndMethodGuards(t *testing.T) {

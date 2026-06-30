@@ -13,39 +13,39 @@ export default defineConfig({
 			},
 			{
 				find: '@alloy/tempo',
-				replacement: repoPath('./ts/tempo/src'),
+				replacement: repoPath('./packages/tempo/src'),
 			},
 			{
 				find: '@alloy/money',
-				replacement: repoPath('./ts/money/src'),
+				replacement: repoPath('./packages/money/src'),
 			},
 			{
 				find: /^#money\/(.+)$/u,
-				replacement: repoPath('./ts/money/src/$1'),
+				replacement: repoPath('./packages/money/src/$1'),
 			},
 			{
 				find: '@alloy/tempo-tests',
-				replacement: repoPath('./ts/tempo/tests/src'),
+				replacement: repoPath('./packages/tempo/tests/src'),
 			},
 			{
 				find: '@alloy/console',
-				replacement: repoPath('./ts/console/src'),
+				replacement: repoPath('./packages/console/src'),
 			},
 			{
 				find: '@alloy/workflow',
-				replacement: repoPath('./ts/workflow/src'),
+				replacement: repoPath('./packages/workflow/src'),
 			},
 			{
 				find: /^@alloy\/workflow\/(.+)$/u,
-				replacement: repoPath('./ts/workflow/src/$1'),
+				replacement: repoPath('./packages/workflow/src/$1'),
 			},
 			{
 				find: /^#workflow\/(.+)$/u,
-				replacement: repoPath('./ts/workflow/src/$1'),
+				replacement: repoPath('./packages/workflow/src/$1'),
 			},
 			{
 				find: /^#console\/(.+)$/u,
-				replacement: repoPath('./ts/console/src/$1'),
+				replacement: repoPath('./packages/console/src/$1'),
 			},
 		],
 	},
@@ -58,9 +58,9 @@ export default defineConfig({
 		},
 	},
 	pack: {
-		entry: [repoPath('./ts/tempo/src/index.ts')],
-		tsconfig: './ts/tempo/tsconfig.json',
-		outDir: './ts/tempo/dist',
+		entry: [repoPath('./packages/tempo/src/index.ts')],
+		tsconfig: './packages/tempo/tsconfig.json',
+		outDir: './packages/tempo/dist',
 		dts: true,
 		format: ['esm'],
 		clean: true,

@@ -20,13 +20,13 @@ Package support provides Go ports of alloy support utilities. It includes array 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/support@latest
+go get alloy.dev/foundation/support@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/support/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/support/...
 ```
 
 ## Source Coverage
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/support"
+    _ "alloy.dev/foundation/support"
 )
 
 func main() {
@@ -72,7 +72,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/support` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/support` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -112,12 +112,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/support/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/support/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/support/support_inventory_closeout_test.go`
+- `packages/foundation/support/support_inventory_closeout_test.go`
 
 ## API Reference
 

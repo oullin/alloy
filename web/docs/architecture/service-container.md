@@ -19,7 +19,7 @@ Bindings live under string keys called _abstracts_. Alloy's standard
 providers bind a stable set of names — `"cache"`, `"queue"`, `"log"`,
 `"router"`, `"db"`, `"session"`, `"hash"`, `"events"`, `"bus"`, etc. Each
 provider declares the keys it owns via the `Provides()` method
-([provider/provider.go:18](https://github.com/oullin/alloy/blob/main/packages/contracts/provider/provider.go#L18)),
+([provider/provider.go:18](https://github.com/oullin/alloy/blob/main/packages/foundation/contracts/provider/provider.go#L18)),
 and the demo's `StandardProviders` is the easiest place to see them all
 in one list.
 
@@ -77,7 +77,7 @@ manager := container.Resolve[*cache.Manager]("cache")
 
 It panics if the binding is missing or the wrong type — fail-fast semantics
 appropriate for code that expects the application to be configured.
-See [`packages/container/application_registry.go:63`](https://github.com/oullin/alloy/blob/main/packages/container/application_registry.go#L63).
+See [`packages/foundation/container/application_registry.go:63`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application_registry.go#L63).
 
 `TryResolve[T]` is the non-panicking variant; it returns `(T, error)`.
 
@@ -92,7 +92,7 @@ For the most common services, the `facades/*` packages cache a typed
 manager on first use and forward common calls:
 
 ```go
-import "alloy.dev/go/facades/cache"
+import "alloy.dev/foundation/facades/cache"
 
 store, _ := cache.Driver()             // default store
 named, _ := cache.Store("redis")       // specific store
@@ -110,7 +110,7 @@ the container. Three primitives cover the common cases.
 ### `Bind(name, factory, shared)` — every resolution runs the factory
 
 ```go
-// packages/container/container.go:83
+// packages/foundation/container/container.go:83
 func (c *Container) Bind(abstract string, factory Factory, shared bool)
 ```
 
@@ -125,7 +125,7 @@ every subsequent `Make` returns the same value. This is what every
 standard provider uses:
 
 ```go
-// packages/cache/cache_service_provider.go:19
+// packages/foundation/cache/cache_service_provider.go:19
 func (p *CacheServiceProvider) Register() {
     p.app.Singleton("cache", func(_ *container.Container) (any, error) {
         m := NewManager()
@@ -136,14 +136,14 @@ func (p *CacheServiceProvider) Register() {
 ```
 
 `Singleton` is `Bind(..., shared: true)`
-([container.go:107](https://github.com/oullin/alloy/blob/main/packages/container/container.go#L107)).
+([container.go:107](https://github.com/oullin/alloy/blob/main/packages/foundation/container/container.go#L107)).
 
 ### `Scoped(name, factory)` — per-scope singleton
 
 Like `Singleton`, but you can drop the cache with
 `ForgetScopedInstances()`. Useful for request-scoped state when you want
 to flush the cache between requests in a long-running test loop or queue
-worker. See [container.go:120](https://github.com/oullin/alloy/blob/main/packages/container/container.go#L120).
+worker. See [container.go:120](https://github.com/oullin/alloy/blob/main/packages/foundation/container/container.go#L120).
 
 ### `Instance(name, value)` — register a pre-built object
 
@@ -157,7 +157,7 @@ application.Container.Instance("demo.sql", db)
 
 `Instance` is the right call for "I built this in `main`; let the rest of
 the app find it under this name." See
-[container.go:145](https://github.com/oullin/alloy/blob/main/packages/container/container.go#L145).
+[container.go:145](https://github.com/oullin/alloy/blob/main/packages/foundation/container/container.go#L145).
 
 ## Aliases
 
@@ -171,7 +171,7 @@ container.Alias("cache", "cache.default")
 mgr, _ := application.Make("cache.default") // resolves "cache"
 ```
 
-See [container.go:344](https://github.com/oullin/alloy/blob/main/packages/container/container.go#L344).
+See [container.go:344](https://github.com/oullin/alloy/blob/main/packages/foundation/container/container.go#L344).
 
 ## Deferred Resolution
 
@@ -188,14 +188,14 @@ type Deferred interface {
 When a deferred provider is registered, the application records its
 declared keys but does _not_ call `Register()` until the first time
 `application.Make("...")` is called for one of those keys
-([application.go:96](https://github.com/oullin/alloy/blob/main/packages/container/application.go#L96)).
+([application.go:96](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L96)).
 
 Deferred resolution is an `*Application` feature, not a `*Container`
 feature: code that bypasses the application and calls
 `Container.Make` directly will see `ErrNotBound` for keys whose providers
 have not yet been flushed. This is intentional — it keeps the container
 free of provider lifecycle concerns
-([application.go:21](https://github.com/oullin/alloy/blob/main/packages/container/application.go#L21)).
+([application.go:21](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L21)).
 
 ## Resolving Inside Handlers
 
@@ -221,7 +221,7 @@ expected.
 `container.SetApp`, `container.App`, `container.Make`, `container.MustMake`,
 `container.Resolve[T]`, and `container.TryResolve[T]` work against a
 process-wide application
-([application_registry.go:8](https://github.com/oullin/alloy/blob/main/packages/container/application_registry.go#L8)).
+([application_registry.go:8](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application_registry.go#L8)).
 
 The trade-off:
 
@@ -242,6 +242,6 @@ application into the global slot before the test body runs.
   shortcut access.
 - [Application Bootstrap](/architecture/application) — where the container
   comes from.
-- [`packages/container/container.go`](https://github.com/oullin/alloy/blob/main/packages/container/container.go)
+- [`packages/foundation/container/container.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/container.go)
   — full container API: tagging, contextual bindings, extenders, lifecycle
   callbacks.

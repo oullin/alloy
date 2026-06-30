@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	routegen "alloy.dev/go/httpx/routing/navigator"
-	"alloy.dev/go/inertia"
-	"alloy.dev/go/inertia/protocol"
+	routegen "alloy.dev/foundation/httpx/routing/navigator"
+	"alloy.dev/foundation/inertia"
+	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/auth"
 	"alloy.dev/inertia-demo/crm"
 	demoerrors "alloy.dev/inertia-demo/errors"

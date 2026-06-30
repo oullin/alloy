@@ -19,13 +19,13 @@ Package redis ports the relevant upstream surface.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/redis@latest
+go get alloy.dev/foundation/redis@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/redis/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/redis/...
 ```
 
 ## Source Coverage
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/redis"
+    _ "alloy.dev/foundation/redis"
 )
 
 func main() {
@@ -73,7 +73,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/redis` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/redis` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -113,12 +113,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/redis/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/redis/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/redis/compliance_test.go`
+- `packages/foundation/redis/compliance_test.go`
 
 ## API Reference
 

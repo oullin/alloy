@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	routegen "alloy.dev/go/httpx/routing/navigator"
-	"alloy.dev/go/inertia/protocol"
+	routegen "alloy.dev/foundation/httpx/routing/navigator"
+	"alloy.dev/foundation/inertia/protocol"
 )
 
 // Container contains the host application integrations required by the errors package.

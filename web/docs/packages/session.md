@@ -33,8 +33,8 @@ mgr.SetDriverConfig("file", map[string]any{
 })
 ```
 
-See [`packages/session/session_service_provider.go`](https://github.com/oullin/alloy/blob/main/packages/session/session_service_provider.go)
-and [`packages/session/manager.go:32`](https://github.com/oullin/alloy/blob/main/packages/session/manager.go#L32).
+See [`packages/foundation/session/session_service_provider.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/session_service_provider.go)
+and [`packages/foundation/session/manager.go:32`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/manager.go#L32).
 
 ## Basic Usage
 
@@ -53,30 +53,30 @@ token := store.Token() // CSRF
 
 In handlers, the session is usually injected via the session middleware
 in front of the router and exposed on `httpx.Request`. See
-[`packages/httpx/request.go`](https://github.com/oullin/alloy/blob/main/packages/httpx/request.go).
+[`packages/foundation/httpx/request.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/httpx/request.go).
 
 ## Drivers
 
-Built-in handlers (each is a `Handler` under `packages/session/handlers/`):
+Built-in handlers (each is a `Handler` under `packages/foundation/session/handlers/`):
 
 | Name       | Source                                                                                                       | When to use                            |
 | ---------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
-| `array`    | [`handlers/array.go`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/array.go)       | Tests; per-process state               |
-| `cookie`   | [`handlers/cookie.go`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/cookie.go)     | Stateless deployments                  |
-| `file`     | [`handlers/file.go`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/file.go)         | Single-server deployments              |
-| `cache`    | [`handlers/cache.go`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/cache.go)       | Multi-server with shared cache (Redis) |
-| `database` | [`handlers/database.go`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/database.go) | Multi-server with shared SQL           |
-| `null`     | [`handlers/null.go`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/null.go)         | Disable session writes                 |
+| `array`    | [`handlers/array.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/array.go)       | Tests; per-process state               |
+| `cookie`   | [`handlers/cookie.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/cookie.go)     | Stateless deployments                  |
+| `file`     | [`handlers/file.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/file.go)         | Single-server deployments              |
+| `cache`    | [`handlers/cache.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/cache.go)       | Multi-server with shared cache (Redis) |
+| `database` | [`handlers/database.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/database.go) | Multi-server with shared SQL           |
+| `null`     | [`handlers/null.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/null.go)         | Disable session writes                 |
 
 Note: the `cache` handler accepts any value satisfying the small
 `CacheStore` interface
-([`handlers/cache.go:8`](https://github.com/oullin/alloy/blob/main/packages/session/handlers/cache.go#L8)).
+([`handlers/cache.go:8`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/handlers/cache.go#L8)).
 Wire your `*cache.Manager`'s default store into it during bootstrap.
 
 ## Writing Custom Drivers
 
 Implement the `Handler` interface
-([`packages/session/handlers.go`](https://github.com/oullin/alloy/blob/main/packages/session))
+([`packages/foundation/session/handlers.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session))
 and register a creator on the manager:
 
 ```go
@@ -93,7 +93,7 @@ mgr.Extend("redis-direct", func(cfg map[string]any) (session.Handler, error) {
 ```
 
 `Manager.Extend` is the registration hook
-([`packages/session/manager.go:32`](https://github.com/oullin/alloy/blob/main/packages/session/manager.go#L32)).
+([`packages/foundation/session/manager.go:32`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/manager.go#L32)).
 
 ## See Also
 
@@ -115,13 +115,13 @@ Package session provides HTTP session management. It defines a Store with flash 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/session@latest
+go get alloy.dev/foundation/session@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/session/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/session/...
 ```
 
 ## Source Coverage
@@ -162,7 +162,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/session"
+    _ "alloy.dev/foundation/session"
 )
 
 func main() {
@@ -171,7 +171,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/session` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/session` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -211,7 +211,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/session/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/session/...
 ```
 
 Parity is tracked by these tests:

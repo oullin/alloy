@@ -18,13 +18,13 @@ Package mcp provides a complete Go implementation of the Model Context Protocol 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/ai/mcp@latest
+go get alloy.dev/foundation/ai/mcp@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/ai/mcp/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/ai/mcp/...
 ```
 
 ## Source Coverage
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/ai/mcp"
+    _ "alloy.dev/foundation/ai/mcp"
 )
 
 func main() {
@@ -72,7 +72,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/ai/mcp` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/ai/mcp` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -112,13 +112,13 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/ai/mcp/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/ai/mcp/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/ai/mcp/inventory_parity_additional_test.go`
-- `packages/ai/mcp/inventory_parity_test.go`
+- `packages/foundation/ai/mcp/inventory_parity_additional_test.go`
+- `packages/foundation/ai/mcp/inventory_parity_test.go`
 
 ## API Reference
 

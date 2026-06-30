@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"alloy.dev/go/inertia/protocol"
+	"alloy.dev/foundation/inertia/protocol"
 )
 
 type loginForm struct {

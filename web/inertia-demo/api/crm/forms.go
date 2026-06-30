@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/go/inertia/protocol"
-	"alloy.dev/go/validation"
+	"alloy.dev/foundation/inertia/protocol"
+	"alloy.dev/foundation/validation"
 	"alloy.dev/inertia-demo/internal/database"
 )
 

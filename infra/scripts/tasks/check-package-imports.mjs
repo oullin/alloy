@@ -6,14 +6,15 @@ import process from 'node:process';
 import ts from 'typescript';
 
 const rootPath = process.cwd();
-const tsPath = path.join(rootPath, 'ts');
+const packagePath = path.join(rootPath, 'packages');
 const relativeSpecifierPattern = /^\.{1,2}\//u;
 
 const trackedPackageFiles = () => {
 	try {
-		return execFileSync('git', ['-C', rootPath, 'ls-files', '-z', '--', 'ts'], { encoding: 'utf8' })
+		return execFileSync('git', ['-C', rootPath, 'ls-files', '-z', '--', 'packages'], { encoding: 'utf8' })
 			.split('\0')
-			.filter((file) => file.endsWith('.ts'));
+			.filter((file) => file.endsWith('.ts') || file.endsWith('.mts') || file.endsWith('.cts'))
+			.filter((file) => !file.startsWith('packages/foundation/'));
 	} catch {
 		return [];
 	}
@@ -47,7 +48,7 @@ const discoveredPackageFiles = (directory) => {
 };
 
 const trackedFiles = trackedPackageFiles();
-const packageFiles = trackedFiles.length > 0 ? trackedFiles : discoveredPackageFiles(tsPath);
+const packageFiles = trackedFiles.length > 0 ? trackedFiles : discoveredPackageFiles(packagePath).filter((file) => !file.startsWith('packages/foundation/'));
 const violations = [];
 
 const reportViolation = (sourceFile, specifier, message) => {
@@ -95,7 +96,7 @@ for (const file of packageFiles) {
 }
 
 if (violations.length > 0) {
-	console.error('Relative TypeScript imports are not allowed under ts/. Use package aliases instead.');
+	console.error('Relative TypeScript imports are not allowed under packages/. Use package aliases instead.');
 	console.error(violations.join('\n'));
 	process.exit(1);
 }

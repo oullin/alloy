@@ -32,7 +32,7 @@ application.Container.Instance("broadcasting", mgr)
 
 This pattern keeps the package free of cloud-credential dependencies at
 import time. See
-[`packages/broadcasting/manager.go`](https://github.com/oullin/alloy/blob/main/packages/broadcasting/manager.go).
+[`packages/foundation/broadcasting/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/manager.go).
 
 ## Basic Usage
 
@@ -58,9 +58,9 @@ Built-in broadcasters:
 
 | Name     | Source                                                                                      | When to use                             |
 | -------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `pusher` | [`pusher.go`](https://github.com/oullin/alloy/blob/main/packages/broadcasting/pusher.go) | Pusher Channels                         |
-| `ably`   | [`ably.go`](https://github.com/oullin/alloy/blob/main/packages/broadcasting/ably.go)     | Ably Realtime                           |
-| `redis`  | [`redis.go`](https://github.com/oullin/alloy/blob/main/packages/broadcasting/redis.go)   | Self-hosted Redis pub/sub fanout        |
+| `pusher` | [`pusher.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/pusher.go) | Pusher Channels                         |
+| `ably`   | [`ably.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/ably.go)     | Ably Realtime                           |
+| `redis`  | [`redis.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/redis.go)   | Self-hosted Redis pub/sub fanout        |
 | `log`    | base `LogBroadcaster` (`base.go`)                                                           | Local development; prints what would go |
 
 ## Writing Custom Drivers
@@ -76,7 +76,7 @@ mgr.Extend("sse", &sseBroadcaster{ /* ... */ })
 ```
 
 `Manager.Extend` is the registration hook
-([`packages/broadcasting/manager.go:16`](https://github.com/oullin/alloy/blob/main/packages/broadcasting/manager.go#L16)).
+([`packages/foundation/broadcasting/manager.go:16`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/manager.go#L16)).
 Note: unlike most Alloy managers this one stores broadcaster _instances_
 directly rather than factories — pass the ready broadcaster, not a
 constructor.
@@ -102,13 +102,13 @@ Package broadcasting provides server-side broadcasting for channel authorization
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/broadcasting@latest
+go get alloy.dev/foundation/broadcasting@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/broadcasting/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/broadcasting/...
 ```
 
 ## Source Coverage
@@ -147,7 +147,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/broadcasting"
+    _ "alloy.dev/foundation/broadcasting"
 )
 
 func main() {
@@ -156,7 +156,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/broadcasting` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/broadcasting` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -196,7 +196,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/broadcasting/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/broadcasting/...
 ```
 
 ## API Reference

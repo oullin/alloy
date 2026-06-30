@@ -10,11 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	routegen "alloy.dev/go/httpx/routing/navigator"
-	"alloy.dev/go/inertia"
-	"alloy.dev/go/inertia/flash"
-	"alloy.dev/go/inertia/middleware"
-	corei18n "alloy.dev/go/seo/i18n"
+	routegen "alloy.dev/foundation/httpx/routing/navigator"
+	"alloy.dev/foundation/inertia"
+	"alloy.dev/foundation/inertia/flash"
+	"alloy.dev/foundation/inertia/middleware"
+	corei18n "alloy.dev/foundation/seo/i18n"
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/seed"
 )

@@ -9,11 +9,11 @@ cd "${ROOT_PATH}"
 
 bash infra/scripts/tasks/cache-setup.sh
 
-if [ ! -f go/go.work ]; then
-	cp go/go.work.example go/go.work
+if [ ! -f packages/foundation/go.work ]; then
+	cp packages/foundation/go.work.example packages/foundation/go.work
 fi
 
 (
-	cd go
+	cd packages/foundation
 	go work sync
 )

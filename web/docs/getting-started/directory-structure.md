@@ -217,17 +217,22 @@ If you're contributing to Alloy or reading its source as you build:
 
 ```
 alloy/
-├── go/               ← Go packages — auth, cache, container, log, …
-├── ts/               ← TypeScript packages
+├── packages/
+│   ├── foundation/   ← Go packages — auth, cache, container, log, …
+│   ├── console/      ← TypeScript package
+│   ├── money/        ← TypeScript package
+│   ├── tempo/        ← TypeScript package and acceptance tests
+│   └── workflow/     ← TypeScript package
 ├── web/
 │   ├── inertia-demo/ ← reference Inertia demo app
 │   └── storage/      ← local runtime and cache data
 ├── infra/            ← repo automation
-└── go.work
+└── vite.config.ts
 ```
 
-The split is: `go/` and `ts/` contain reusable packages, while `web/` contains
-the documentation site, web demos, and local runtime data.
+The split is: `packages/foundation/` contains reusable Go packages, other
+`packages/*` directories contain TypeScript packages, and `web/` contains the
+documentation site, web demos, and local runtime data.
 
 ## See Also
 

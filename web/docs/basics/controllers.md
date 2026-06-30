@@ -18,7 +18,7 @@ package handlers
 import (
     "net/http"
 
-    "alloy.dev/go/routing/controllers"
+    "alloy.dev/foundation/routing/controllers"
 )
 
 type UserController struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	routegen "alloy.dev/go/httpx/routing/navigator"
+	routegen "alloy.dev/foundation/httpx/routing/navigator"
 )
 
 type app struct {

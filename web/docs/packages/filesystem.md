@@ -29,7 +29,7 @@ caller, and you mount additional disks at runtime:
 filesystem.NewFilesystemServiceProvider(application.Container),
 ```
 
-See [`packages/filesystem/filesystem_service_provider.go`](https://github.com/oullin/alloy/blob/main/packages/filesystem/filesystem_service_provider.go).
+See [`packages/foundation/filesystem/filesystem_service_provider.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/filesystem/filesystem_service_provider.go).
 
 ## Basic Usage
 
@@ -53,13 +53,13 @@ err = fs.Delete("archive/avatar-42.png")
 
 For directory operations, use `MakeDirectory`, `Files`, `Directories`,
 and `DeleteDirectory`. See
-[`packages/filesystem/filesystem_dir.go`](https://github.com/oullin/alloy/blob/main/packages/filesystem/filesystem_dir.go).
+[`packages/foundation/filesystem/filesystem_dir.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/filesystem/filesystem_dir.go).
 
 ## Drivers
 
 Today only the **`local`** driver ships; it covers POSIX-style file
 operations with optional advisory locking
-([`filesystem.go`](https://github.com/oullin/alloy/blob/main/packages/filesystem/filesystem.go)).
+([`filesystem.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/filesystem/filesystem.go)).
 
 Cloud drivers (S3, GCS, Azure Blob) are not in the box; see _Writing
 Custom Drivers_ below.
@@ -67,7 +67,7 @@ Custom Drivers_ below.
 ## Writing Custom Drivers
 
 Implement the `Filesystem` interface (see
-[`packages/filesystem/filesystem.go`](https://github.com/oullin/alloy/blob/main/packages/filesystem/filesystem.go))
+[`packages/foundation/filesystem/filesystem.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/filesystem/filesystem.go))
 and register your driver as a separate "disk" in your application's
 bootstrap:
 
@@ -112,13 +112,13 @@ Package filesystem provides local filesystem operations including reading, writi
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/filesystem@latest
+go get alloy.dev/foundation/filesystem@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/filesystem/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/filesystem/...
 ```
 
 ## Source Coverage
@@ -155,7 +155,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/filesystem"
+    _ "alloy.dev/foundation/filesystem"
 )
 
 func main() {
@@ -164,7 +164,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/filesystem` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/filesystem` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -204,7 +204,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/filesystem/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/filesystem/...
 ```
 
 Parity is tracked by these tests:

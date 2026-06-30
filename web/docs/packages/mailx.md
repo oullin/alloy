@@ -32,7 +32,7 @@ mailx.NewMailServiceProvider(application.Container, mailx.MailProviderConfig{
 })
 ```
 
-See [`packages/mailx/mail_service_provider.go:18`](https://github.com/oullin/alloy/blob/main/packages/mailx/mail_service_provider.go#L18).
+See [`packages/foundation/mailx/mail_service_provider.go:18`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/mail_service_provider.go#L18).
 
 ## Basic Usage
 
@@ -69,14 +69,14 @@ require.Len(t, arr.Messages(), 1)
 
 ## Drivers
 
-Built-in transports (each lives in `packages/mailx/`):
+Built-in transports (each lives in `packages/foundation/mailx/`):
 
 | Name        | Source                                                                                                         | When to use               |
 | ----------- | -------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `smtp`      | [`smtp_transport.go`](https://github.com/oullin/alloy/blob/main/packages/mailx/smtp_transport.go)           | Production                |
-| `log`       | [`log_transport.go`](https://github.com/oullin/alloy/blob/main/packages/mailx/log_transport.go)             | Local development         |
-| `array`     | [`array_transport.go`](https://github.com/oullin/alloy/blob/main/packages/mailx/array_transport.go)         | Tests                     |
-| `composite` | [`composite_transport.go`](https://github.com/oullin/alloy/blob/main/packages/mailx/composite_transport.go) | Fan out across transports |
+| `smtp`      | [`smtp_transport.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/smtp_transport.go)           | Production                |
+| `log`       | [`log_transport.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/log_transport.go)             | Local development         |
+| `array`     | [`array_transport.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/array_transport.go)         | Tests                     |
+| `composite` | [`composite_transport.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/composite_transport.go) | Fan out across transports |
 
 ## Writing Custom Drivers
 
@@ -94,12 +94,12 @@ mgr.Extend("ses", func(cfg map[string]any) (mailx.Transport, error) {
 ```
 
 `MailManager.Extend` is the registration hook
-([`packages/mailx/manager.go:110`](https://github.com/oullin/alloy/blob/main/packages/mailx/manager.go#L110)).
+([`packages/foundation/mailx/manager.go:110`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/manager.go#L110)).
 
 ## Events
 
 `MessageSending` fires before send, `MessageSent` fires after. See
-[`packages/mailx/events.go`](https://github.com/oullin/alloy/blob/main/packages/mailx/events.go).
+[`packages/foundation/mailx/events.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/events.go).
 Subscribe through the events package for tracing or interception.
 
 ## See Also
@@ -123,13 +123,13 @@ Package mailx provides driver-based email sending with support for SMTP, log, an
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/mailx@latest
+go get alloy.dev/foundation/mailx@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/mailx/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/mailx/...
 ```
 
 ## Source Coverage
@@ -166,7 +166,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/mailx"
+    _ "alloy.dev/foundation/mailx"
 )
 
 func main() {
@@ -175,7 +175,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/mailx` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/mailx` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -215,7 +215,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/mailx/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/mailx/...
 ```
 
 Parity is tracked by these tests:

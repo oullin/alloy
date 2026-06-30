@@ -23,8 +23,8 @@ package main
 import (
     "context"
 
-    ai "alloy.dev/go/ai/sdk"
-    contractsai "alloy.dev/go/contracts/ai"
+    ai "alloy.dev/foundation/ai/sdk"
+    contractsai "alloy.dev/foundation/contracts/ai"
 )
 
 func main() {
@@ -88,7 +88,7 @@ parentRec := parentMgr.Fake(
 )
 ```
 
-See `packages/ai/sdk/sub_agent_test.go` for executable parity examples.
+See `packages/foundation/ai/sdk/sub_agent_test.go` for executable parity examples.
 
 <!-- /ALLOY:HAND -->
 
@@ -105,13 +105,13 @@ Package ai provides a unified, expressive API for interacting with AI providers 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/ai/sdk@latest
+go get alloy.dev/foundation/ai/sdk@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/ai/sdk/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/ai/sdk/...
 ```
 
 ## Source Coverage
@@ -175,7 +175,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/ai/sdk"
+    _ "alloy.dev/foundation/ai/sdk"
 )
 
 func main() {
@@ -184,7 +184,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/ai/sdk` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/ai/sdk` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -224,14 +224,14 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/ai/sdk/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/ai/sdk/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/ai/sdk/inventory_parity_test.go`
-- `packages/ai/sdk/providers/inventory_provider_mapping_test.go`
-- `packages/ai/sdk/providers/inventory_provider_wrappers_test.go`
+- `packages/foundation/ai/sdk/inventory_parity_test.go`
+- `packages/foundation/ai/sdk/providers/inventory_provider_mapping_test.go`
+- `packages/foundation/ai/sdk/providers/inventory_provider_wrappers_test.go`
 
 ## API Reference
 

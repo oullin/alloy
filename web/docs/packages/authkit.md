@@ -20,13 +20,13 @@ Package authkit holds AuthKit parity tests for Alloy's Inception-backed team, pr
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/authkit@latest
+go get alloy.dev/foundation/authkit@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/authkit/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/authkit/...
 ```
 
 ## Source Coverage
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/authkit"
+    _ "alloy.dev/foundation/authkit"
 )
 
 func main() {
@@ -71,7 +71,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/authkit` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/authkit` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -111,12 +111,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/authkit/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/authkit/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/authkit/authkit_inventory_test.go`
+- `packages/foundation/authkit/authkit_inventory_test.go`
 
 ## API Reference
 

@@ -19,13 +19,13 @@ Package broadcastclient is a Go library for BroadcastClient JavaScript library. 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/broadcastclient@latest
+go get alloy.dev/foundation/broadcastclient@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/broadcastclient/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/broadcastclient/...
 ```
 
 ## Source Coverage
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/broadcastclient"
+    _ "alloy.dev/foundation/broadcastclient"
 )
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/broadcastclient` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/broadcastclient` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -110,12 +110,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/broadcastclient/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/broadcastclient/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/broadcastclient/inventory_parity_test.go`
+- `packages/foundation/broadcastclient/inventory_parity_test.go`
 
 ## API Reference
 

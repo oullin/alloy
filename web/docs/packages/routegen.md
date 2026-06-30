@@ -20,13 +20,13 @@ Package routegen generates fully-typed, importable TypeScript functions for your
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/routegen@latest
+go get alloy.dev/foundation/routegen@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/routegen/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/routegen/...
 ```
 
 ## Source Coverage
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ routegen "alloy.dev/go/httpx/routing/navigator"
+    _ routegen "alloy.dev/foundation/httpx/routing/navigator"
 )
 
 func main() {
@@ -71,7 +71,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/routegen` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/routegen` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -111,7 +111,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/routegen/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/routegen/...
 ```
 
 ## API Reference

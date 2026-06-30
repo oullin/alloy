@@ -20,13 +20,13 @@ The collection package provides Alloy's Go implementation for this surface.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/collection@latest
+go get alloy.dev/foundation/collection@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/collection/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/collection/...
 ```
 
 ## Source Coverage
@@ -67,7 +67,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/collection"
+    _ "alloy.dev/foundation/collection"
 )
 
 func main() {
@@ -76,7 +76,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/collection` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/collection` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -116,12 +116,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/collection/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/collection/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/collection/collection/inventory_parity_additional_test.go`
+- `packages/foundation/collection/collection/inventory_parity_additional_test.go`
 
 ## API Reference
 

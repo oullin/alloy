@@ -20,13 +20,13 @@ Package inertia is the server-side Go adapter for the Inertia.js protocol. It re
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/inertia@latest
+go get alloy.dev/foundation/inertia@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/inertia/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/inertia/...
 ```
 
 ## Source Coverage
@@ -71,7 +71,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/inertia"
+    _ "alloy.dev/foundation/inertia"
 )
 
 func main() {
@@ -80,7 +80,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/inertia` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/inertia` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -120,7 +120,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/inertia/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/inertia/...
 ```
 
 ## API Reference

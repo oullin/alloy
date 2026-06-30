@@ -1,8 +1,8 @@
 # Getting Started
 
 Alloy is a collection of foundational Go packages for building web applications.
-Each package is a standalone Go module with its own `go.mod`, so you import only
-what you need.
+The Go packages are published from the `alloy.dev/foundation` module, so you
+import only the packages you need.
 
 ## Requirements
 
@@ -17,16 +17,16 @@ what you need.
 Add any Alloy package directly with `go get`:
 
 ```bash
-go get alloy.dev/go/auth@latest
-go get alloy.dev/go/cache@latest
+go get alloy.dev/foundation/auth@latest
+go get alloy.dev/foundation/cache@latest
 ```
 
 ## Project Layout
 
 ```
-go/        Go library packages
-ts/        TypeScript packages
-web/       Documentation, web demos, and runtime storage
+packages/foundation/  Go library packages
+packages/             TypeScript packages and the foundation module
+web/                  Documentation, web demos, and runtime storage
 ```
 
 ## Development Setup

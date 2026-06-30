@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/go/inertia/protocol"
+	"alloy.dev/foundation/inertia/protocol"
 )
 
 func TestContainerValidate_ZeroValue(t *testing.T) {

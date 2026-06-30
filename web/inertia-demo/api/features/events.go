@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"alloy.dev/go/inertia/flash"
-	"alloy.dev/go/inertia/protocol"
+	"alloy.dev/foundation/inertia/flash"
+	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/httputil"
 )
 

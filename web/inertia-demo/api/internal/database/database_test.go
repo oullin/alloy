@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	frameworkdb "alloy.dev/go/database"
+	frameworkdb "alloy.dev/foundation/database"
 )
 
 type fakeResult struct {

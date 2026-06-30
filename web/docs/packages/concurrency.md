@@ -28,7 +28,7 @@ concurrency.NewConcurrencyServiceProvider(application.Container, o.ConcurrencyDe
 
 `o.ConcurrencyDefaultDriver` defaults to `"goroutine"` for production and
 `"sync"` for tests. See
-[`packages/concurrency/concurrency_service_provider.go`](https://github.com/oullin/alloy/blob/main/packages/concurrency/concurrency_service_provider.go).
+[`packages/foundation/concurrency/concurrency_service_provider.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/concurrency/concurrency_service_provider.go).
 
 ## Basic Usage
 
@@ -58,8 +58,8 @@ Built-in drivers:
 
 | Name        | Source                                                                                                         | When to use                   |
 | ----------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `goroutine` | [`goroutine_driver.go`](https://github.com/oullin/alloy/blob/main/packages/concurrency/goroutine_driver.go) | Production parallelism        |
-| `sync`      | [`sync_driver.go`](https://github.com/oullin/alloy/blob/main/packages/concurrency/sync_driver.go)           | Tests; deterministic ordering |
+| `goroutine` | [`goroutine_driver.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/concurrency/goroutine_driver.go) | Production parallelism        |
+| `sync`      | [`sync_driver.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/concurrency/sync_driver.go)           | Tests; deterministic ordering |
 
 ## Writing Custom Drivers
 
@@ -78,7 +78,7 @@ mgr.Extend("pool", func(cfg map[string]any) (concurrency.Driver, error) {
 ```
 
 `Manager.Extend` is the registration hook
-([`packages/concurrency/manager.go:41`](https://github.com/oullin/alloy/blob/main/packages/concurrency/manager.go#L41)).
+([`packages/foundation/concurrency/manager.go:41`](https://github.com/oullin/alloy/blob/main/packages/foundation/concurrency/manager.go#L41)).
 
 ## See Also
 
@@ -99,13 +99,13 @@ Package concurrency provides concurrent task execution. It defines a Driver inte
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/go/concurrency@latest
+go get alloy.dev/foundation/concurrency@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/concurrency/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/concurrency/...
 ```
 
 ## Source Coverage
@@ -141,7 +141,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/go/concurrency"
+    _ "alloy.dev/foundation/concurrency"
 )
 
 func main() {
@@ -150,7 +150,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/concurrency` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/concurrency` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -190,12 +190,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/concurrency/...
+GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/concurrency/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/concurrency/compliance_test.go`
+- `packages/foundation/concurrency/compliance_test.go`
 
 ## API Reference
 
