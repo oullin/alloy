@@ -24,7 +24,7 @@ go_work_for_module() {
 	printf '%s\n' "off"
 }
 
-# Shared Go code lives under go/. App Go entrypoints live under apps/*/api.
+# Shared Go code lives under go/. Web demo Go entrypoints live under web/*/api.
 while IFS= read -r -d '' gomod; do
 	module_dir="$(dirname "${gomod}")"
 	module_work_env="$(go_work_for_module "${module_dir}")"
@@ -37,7 +37,7 @@ while IFS= read -r -d '' gomod; do
 			exit 1
 		fi
 		module_path="$(go list -m)"
-		if [[ "${module_path}" != "alloy.dev/go" && "${module_path}" != alloy.dev/go/* && "${module_path}" != alloy.dev/apps/*/api ]]; then
+		if [[ "${module_path}" != "alloy.dev/go" && "${module_path}" != alloy.dev/go/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
 			echo "unexpected Go module path: ${module_path}" >&2
 			exit 1
 		fi
@@ -46,5 +46,5 @@ while IFS= read -r -d '' gomod; do
 	)
 done < <(
 	find "${GO_PATH}" -name go.mod -print0
-	find "${ROOT_PATH}/apps" -path '*/api/go.mod' -print0 2>/dev/null || true
+	find "${ROOT_PATH}/web" -path '*/api/go.mod' -print0 2>/dev/null || true
 )

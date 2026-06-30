@@ -21,9 +21,11 @@ needed, then runs `go work sync` inside `go/`.
 | `pnpm exec vp check` | Type-check and lint the TypeScript workspace. |
 | `pnpm exec vp test` | Run TypeScript tests through Vite+. |
 | `pnpm exec vp pack` | Build the TypeScript package output configured in `vite.config.ts`. |
-| `pnpm exec vp run go:test` | Run Go vet and race-enabled tests for Go module(s) under `go/`. |
+| `pnpm exec vp run go:test` | Run Go vet and race-enabled tests for Go module(s) under `go/` and web demo APIs. |
 | `pnpm exec vp run format` | Format changed Go and TypeScript files with the formatter container. |
 | `pnpm exec vp run format-all` | Format the repository and run `vp check --fix`. |
+| `pnpm web:build` | Build the VuePress documentation workspace. |
+| `pnpm inertia-demo:build` | Build the Inertia demo frontend into `web/storage/inertia-demo`. |
 
 The root package scripts map to the common TypeScript workflows:
 
@@ -47,12 +49,13 @@ Vite+ fixes.
 
 ## Go Workspace
 
-The Go code lives under `go/`. The current public module path is
+The framework Go code lives under `go/`. The current public module path is
 `alloy.dev/go`, declared in `go/go.mod`; `go/go.work` is optional local
-workspace glue.
+workspace glue. The Inertia demo API lives under `web/inertia-demo/api` as
+`alloy.dev/inertia-demo`.
 
-`go:test` iterates over Go module(s) under `go/`, uses `go/go.work` when it
-exists, then runs:
+`go:test` iterates over Go module(s) under `go/` and web demo APIs, uses
+`go/go.work` for the framework module when it exists, then runs:
 
 ```sh
 go vet ./...
@@ -67,6 +70,9 @@ surfaces are:
 - `@alloy/tempo` in `ts/tempo`.
 - `@alloy/tempo-acceptance` in `ts/tempo/tests`.
 - `@alloy/console` in `ts/console`.
+- `@alloy/web` in `web`.
+- `@alloy/inertia-demo-app` in `web/inertia-demo/app`.
+- `@alloy/inertia-demo-e2e` in `web/inertia-demo/tests/e2e`.
 - `@alloy/infra` in `infra`.
 
 Package paths should match the package family directly; avoid language suffixes

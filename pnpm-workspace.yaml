@@ -1,7 +1,7 @@
 packages:
-  - "apps/docs"
-  - "apps/inertia/app"
-  - "apps/inertia/tests/e2e"
+  - "web"
+  - "web/inertia-demo/app"
+  - "web/inertia-demo/tests/e2e"
   - "ts/console"
   - "ts/money"
   - "ts/tempo"

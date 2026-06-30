@@ -5,15 +5,20 @@
   "type": "module",
   "scripts": {
     "build": "vp run -r build",
-    "docs:build": "vp run -F @alloy/docs build",
-    "docs:dev": "vp run -F @alloy/docs dev",
+    "docs:build": "pnpm web:build",
+    "docs:dev": "pnpm web:dev",
     "imports:check": "vp run check:imports",
-    "inertia:build": "vp run inertia-app:build",
-    "inertia:dev": "vp run inertia-app:dev",
+    "inertia-demo:build": "vp run inertia-demo-app:build",
+    "inertia-demo:dev": "vp run inertia-demo-app:dev",
+    "inertia:build": "pnpm inertia-demo:build",
+    "inertia:dev": "pnpm inertia-demo:dev",
     "lint": "vp lint && vp run check:imports",
     "test": "vp test",
-    "test:e2e:inertia": "vp run inertia:e2e",
-    "typecheck": "vp check"
+    "test:e2e:inertia": "pnpm test:e2e:inertia-demo",
+    "test:e2e:inertia-demo": "vp run inertia-demo:e2e",
+    "typecheck": "vp check",
+    "web:build": "vp run -F @alloy/web --fail-if-no-match build",
+    "web:dev": "vp run -F @alloy/web --fail-if-no-match dev"
   },
   "devDependencies": {
     "@alloy/infra": "workspace:*",

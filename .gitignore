@@ -11,5 +11,6 @@ coverage/
 infra/.cache/
 infra/.logs/
 infra/dist/
+web/storage/
 ts/docs/src/.vitepress/
 .pnpm-store/

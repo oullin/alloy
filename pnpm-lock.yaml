@@ -27,118 +27,6 @@ importers:
         specifier: latest
         version: 0.2.1(@types/node@25.9.3)(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0)
 
-  apps/docs:
-    devDependencies:
-      '@tailwindcss/typography':
-        specifier: ^0.5.13
-        version: 0.5.20(tailwindcss@4.3.1)
-      '@tailwindcss/vite':
-        specifier: ^4.0.0
-        version: 4.3.1(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))
-      '@vuepress/bundler-vite':
-        specifier: next
-        version: 2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0)
-      '@vuepress/plugin-prismjs':
-        specifier: next
-        version: 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(@vueuse/core@14.3.0(vue@3.5.39(typescript@6.0.3)))(typescript@6.0.3)(vuepress@2.0.0-rc.30(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(@vue/compiler-sfc@3.5.39)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.0.3)(typescript@6.0.3)(vue@3.5.39(typescript@6.0.3)))
-      '@vueuse/core':
-        specifier: ^14.2.1
-        version: 14.3.0(vue@3.5.39(typescript@6.0.3))
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      lucide-vue-next:
-        specifier: ^0.378.0
-        version: 0.378.0(vue@3.5.39(typescript@6.0.3))
-      portless:
-        specifier: latest
-        version: 0.15.0
-      radix-vue:
-        specifier: ^1.9.9
-        version: 1.9.17(vue@3.5.39(typescript@6.0.3))
-      tailwind-merge:
-        specifier: ^2.3.0
-        version: 2.6.1
-      tailwindcss:
-        specifier: ^4.0.0
-        version: 4.3.1
-      vue:
-        specifier: ^3.5.0
-        version: 3.5.39(typescript@6.0.3)
-      vue-router:
-        specifier: ^4.5.0
-        version: 4.6.4(vue@3.5.39(typescript@6.0.3))
-      vuepress:
-        specifier: next
-        version: 2.0.0-rc.30(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(@vue/compiler-sfc@3.5.39)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.0.3)(typescript@6.0.3)(vue@3.5.39(typescript@6.0.3))
-
-  apps/inertia/app:
-    dependencies:
-      '@inertiajs/vue3':
-        specifier: ^3.0.0
-        version: 3.5.0(vue@3.5.39(typescript@6.0.3))
-      '@radix-icons/vue':
-        specifier: ^1.0.0
-        version: 1.0.0(vue@3.5.39(typescript@6.0.3))
-      '@tabler/icons-vue':
-        specifier: ^3.41.1
-        version: 3.44.0(vue@3.5.39(typescript@6.0.3))
-      '@tailwindcss/typography':
-        specifier: ^0.5.19
-        version: 0.5.20(tailwindcss@4.3.1)
-      '@tailwindcss/vite':
-        specifier: ^4.2.2
-        version: 4.3.1(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))
-      '@tanstack/vue-table':
-        specifier: ^8.21.3
-        version: 8.21.3(vue@3.5.39(typescript@6.0.3))
-      '@unovis/ts':
-        specifier: ^1.6.4
-        version: 1.6.7
-      '@unovis/vue':
-        specifier: ^1.6.4
-        version: 1.6.7(@unovis/ts@1.6.7)(vue@3.5.39(typescript@6.0.3))
-      '@vueuse/core':
-        specifier: ^14.2.1
-        version: 14.3.0(vue@3.5.39(typescript@6.0.3))
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
-      reka-ui:
-        specifier: ^2.9.3
-        version: 2.10.1(vue@3.5.39(typescript@6.0.3))
-      tailwind-merge:
-        specifier: ^3.5.0
-        version: 3.6.0
-      tailwindcss:
-        specifier: ^4.2.2
-        version: 4.3.1
-      tw-animate-css:
-        specifier: ^1.4.0
-        version: 1.4.0
-      vue:
-        specifier: ^3.5.0
-        version: 3.5.39(typescript@6.0.3)
-    devDependencies:
-      '@vitejs/plugin-vue':
-        specifier: ^5.2.0
-        version: 5.2.4(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.39(typescript@6.0.3))
-
-  apps/inertia/tests/e2e:
-    devDependencies:
-      agent-browser:
-        specifier: ^0.31.1
-        version: 0.31.1
-      playwright:
-        specifier: ^1.61.1
-        version: 1.61.1
-
   infra:
     devDependencies:
       prettier:
@@ -209,6 +97,118 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+
+  web:
+    devDependencies:
+      '@tailwindcss/typography':
+        specifier: ^0.5.13
+        version: 0.5.20(tailwindcss@4.3.1)
+      '@tailwindcss/vite':
+        specifier: ^4.0.0
+        version: 4.3.1(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))
+      '@vuepress/bundler-vite':
+        specifier: next
+        version: 2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0)
+      '@vuepress/plugin-prismjs':
+        specifier: next
+        version: 2.0.0-rc.130(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(@vueuse/core@14.3.0(vue@3.5.39(typescript@6.0.3)))(typescript@6.0.3)(vuepress@2.0.0-rc.30(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(@vue/compiler-sfc@3.5.39)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.0.3)(typescript@6.0.3)(vue@3.5.39(typescript@6.0.3)))
+      '@vueuse/core':
+        specifier: ^14.2.1
+        version: 14.3.0(vue@3.5.39(typescript@6.0.3))
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-vue-next:
+        specifier: ^0.378.0
+        version: 0.378.0(vue@3.5.39(typescript@6.0.3))
+      portless:
+        specifier: latest
+        version: 0.15.0
+      radix-vue:
+        specifier: ^1.9.9
+        version: 1.9.17(vue@3.5.39(typescript@6.0.3))
+      tailwind-merge:
+        specifier: ^2.3.0
+        version: 2.6.1
+      tailwindcss:
+        specifier: ^4.0.0
+        version: 4.3.1
+      vue:
+        specifier: ^3.5.0
+        version: 3.5.39(typescript@6.0.3)
+      vue-router:
+        specifier: ^4.5.0
+        version: 4.6.4(vue@3.5.39(typescript@6.0.3))
+      vuepress:
+        specifier: next
+        version: 2.0.0-rc.30(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(@vue/compiler-sfc@3.5.39)(@vuepress/bundler-vite@2.0.0-rc.30(@types/node@25.9.3)(@vue/compiler-sfc@3.5.39)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(esbuild@0.28.1)(rolldown@1.0.3)(typescript@6.0.3)(vue@3.5.39(typescript@6.0.3))
+
+  web/inertia-demo/app:
+    dependencies:
+      '@inertiajs/vue3':
+        specifier: ^3.0.0
+        version: 3.5.0(vue@3.5.39(typescript@6.0.3))
+      '@radix-icons/vue':
+        specifier: ^1.0.0
+        version: 1.0.0(vue@3.5.39(typescript@6.0.3))
+      '@tabler/icons-vue':
+        specifier: ^3.41.1
+        version: 3.44.0(vue@3.5.39(typescript@6.0.3))
+      '@tailwindcss/typography':
+        specifier: ^0.5.19
+        version: 0.5.20(tailwindcss@4.3.1)
+      '@tailwindcss/vite':
+        specifier: ^4.2.2
+        version: 4.3.1(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))
+      '@tanstack/vue-table':
+        specifier: ^8.21.3
+        version: 8.21.3(vue@3.5.39(typescript@6.0.3))
+      '@unovis/ts':
+        specifier: ^1.6.4
+        version: 1.6.7
+      '@unovis/vue':
+        specifier: ^1.6.4
+        version: 1.6.7(@unovis/ts@1.6.7)(vue@3.5.39(typescript@6.0.3))
+      '@vueuse/core':
+        specifier: ^14.2.1
+        version: 14.3.0(vue@3.5.39(typescript@6.0.3))
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      reka-ui:
+        specifier: ^2.9.3
+        version: 2.10.1(vue@3.5.39(typescript@6.0.3))
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.6.0
+      tailwindcss:
+        specifier: ^4.2.2
+        version: 4.3.1
+      tw-animate-css:
+        specifier: ^1.4.0
+        version: 1.4.0
+      vue:
+        specifier: ^3.5.0
+        version: 3.5.39(typescript@6.0.3)
+    devDependencies:
+      '@vitejs/plugin-vue':
+        specifier: ^5.2.0
+        version: 5.2.4(@voidzero-dev/vite-plus-core@0.2.1(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(typescript@6.0.3)(yaml@2.9.0))(vue@3.5.39(typescript@6.0.3))
+
+  web/inertia-demo/tests/e2e:
+    devDependencies:
+      agent-browser:
+        specifier: ^0.31.1
+        version: 0.31.1
+      playwright:
+        specifier: ^1.61.1
+        version: 1.61.1
 
 packages:
 

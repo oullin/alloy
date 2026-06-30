@@ -1,0 +1,164 @@
+# JSON Schema
+
+<!-- ref: @alloy/code-0184 -->
+
+<!-- ALLOY:HAND -->
+<!-- /ALLOY:HAND -->
+
+Package jsonx provides a fluent builder API for constructing JSON Schema objects programmatically, offering type-safe builders for all JSON Schema primitive types (string, integer, number, boolean, array, object) with support for validation constraints, nullable types, required fields, and recursive schema composition.
+
+<div class="docs-callout docs-callout-upstream"></div>
+
+<div class="docs-callout docs-callout-go">
+  <strong>Go adaptation.</strong>
+  </div>
+
+## Installation
+
+Install this module directly in applications that consume packages independently:
+
+```bash
+go get alloy.dev/go/jsonx@latest
+```
+
+When working inside this monorepo, use the repository workspace:
+
+```bash
+GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/jsonx/...
+```
+
+## Source Coverage
+
+| Package | Purpose                                                                                                                                                                                                                                                                                                                          |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `jsonx` | Package jsonx provides a fluent builder API for constructing JSON Schema objects programmatically, offering type-safe builders for all JSON Schema primitive types (string, integer, number, boolean, array, object) with support for validation constraints, nullable types, required fields, and recursive schema composition. |
+
+## Core Concepts
+
+The JSON Schema reference is organized around the exported Go surface for package `jsonx`. Start from the source coverage and public surface tables to identify the constructors, managers, interfaces, sentinel errors, and helper functions available to callers. Use the package tests as executable wiring examples for collaborators, default behavior.
+
+### Public Surface
+
+| Surface                    | Exported API                                                                                                                                                                                                               |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Types                      | `ArrayType`, `BooleanType`, `Factory`, `IntegerType`, `NumberType`, `ObjectType`, `SchemaType`, `StringType`, `TypeBuilder`                                                                                                |
+| Constructors and functions | `Array`, `Boolean`, `Default`, `Description`, `Enum`, `Format`, `Integer`, `Items`, `Max`, `Min`, `MultipleOf`, `Nullable`, `Number`, `Object`, `Pattern`, `Required`, `Serialize`, `String`, `Title`, `ToMap`, and 2 more |
+| Variables                  | `ErrUnknownType`                                                                                                                                                                                                           |
+| Constants                  | None exported from this package root.                                                                                                                                                                                      |
+
+### Capability Matrix
+
+| Capability                            | Documentation note                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Testing fakes or null implementations | Supported by exported API and package tests; use the API reference and parity tests below when wiring this behavior. |
+
+## Usage
+
+Start with the package constructor or manager type when one is exported. Alloy keeps dependencies explicit, so callers should pass repositories, stores, handlers, dispatchers, clocks, or clients directly instead of relying on global framework state.
+
+```go
+package main
+
+import (
+    _ "alloy.dev/go/jsonx"
+)
+
+func main() {
+    // Import the package you use, then wire the exported constructors,
+    // managers, stores, handlers, or helpers required by your application.
+}
+```
+
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/jsonx` cover the supported creation paths, default values, and parity behavior.
+
+## Configuration
+
+Alloy documents behavior through Go options and constructor arguments:
+
+| Upstream shape    | Alloy shape                                            |
+| ----------------- | -------------------------------------------------------- |
+| Config file keys  | Typed config structs, options, or constructor parameters |
+| Facade defaults   | Explicit manager/default-driver setup                    |
+| Service providers | Go service-provider structs or direct application wiring |
+| Runtime helpers   | Package functions and interfaces                         |
+
+Prefer narrow interfaces at package boundaries. When a package exposes a manager, register drivers or providers at startup, set the default once, and resolve named instances per request or job.
+
+## Advanced Features
+
+The package reference should be read through these parity lenses:
+
+| Area              | Documentation coverage                                                                  |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Drivers/providers | Available implementations, default selection, custom registration, and failure behavior |
+| Events            | Emitted structs, dispatcher hooks, listener timing, transaction or queue interaction    |
+| Errors            | Exported sentinel errors, wrapping, and `errors.Is` compatibility                       |
+| Context           | Which operations accept `context.Context` and how cancellation/deadlines propagate      |
+| Testing           | Fakes, null implementations, assertion helpers, and deterministic clocks/stores         |
+
+## Edge Cases
+
+- Do not translate PHP-only behavior literally. If upstream depends on PHP traits, request globals, Template, CLI, or Orm magic, document the Alloy Go equivalent instead.
+- Preserve error identity when the package exports sentinel errors; callers should be able to use `errors.Is` where the package promises it.
+- Treat driver compatibility as observable behavior. Unsupported store/driver combinations should be documented as errors or explicit no-ops, never as silent omissions.
+- For I/O paths, document cancellation and timeout behavior whenever the package accepts a `context.Context`.
+- For test fakes, document whether assertions inspect recorded calls, stored payloads, emitted events, or rendered output.
+
+## Testing
+
+Run the package tests before changing examples:
+
+```bash
+GOWORK=./web/storage/.cache/go.work go test -count=1 ./packages/jsonx/...
+```
+
+Parity is tracked by these tests:
+
+## API Reference
+
+### Exported Types
+
+| Type          | Notes                                                                              |
+| ------------- | ---------------------------------------------------------------------------------- |
+| `ArrayType`   | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `BooleanType` | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Factory`     | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IntegerType` | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `NumberType`  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `ObjectType`  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `SchemaType`  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `StringType`  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `TypeBuilder` | Source-backed public surface. See the Go package for exact signature and behavior. |
+
+### Exported Functions
+
+| Function                      | Notes                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| `Array`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Boolean`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Default`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Description`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Enum`                        | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Format`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Integer`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Items`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Max`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Min`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `MultipleOf`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Nullable`                    | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Number`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Object`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Pattern`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Required`                    | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Serialize`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `String`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Title`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `ToMap`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Unique`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `WithoutAdditionalProperties` | Source-backed public surface. See the Go package for exact signature and behavior. |
+
+### Exported Errors, Variables, and Constants
+
+| Name             | Notes                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| `ErrUnknownType` | Source-backed public surface. See the Go package for exact signature and behavior. |
