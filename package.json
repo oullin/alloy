@@ -27,6 +27,7 @@
       "esbuild"
     ],
     "overrides": {
+      "@alloy/inertia-app>vite": "^8.0.16",
       "vite": "npm:@voidzero-dev/vite-plus-core@latest",
       "vitest": "4.1.9"
     },

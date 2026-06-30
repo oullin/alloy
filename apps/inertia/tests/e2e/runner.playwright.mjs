@@ -174,6 +174,7 @@ async function runFeatureInteractions(baseUrl) {
 	await clickButtonText('Increment');
 	await fill('#name', 'E2E Remembered Name');
 	await clickLinkText('Navigate Away');
+	await waitForPath('/features/state/flash-data');
 	await waitForText('Flash Data');
 	await page.goBack({ waitUntil: 'domcontentloaded' });
 	await waitForUrl(/\/features\/state\/remember$/u);
@@ -270,16 +271,21 @@ async function waitForText(text) {
 }
 
 async function waitForUrl(pattern) {
-	if (pattern instanceof RegExp) {
-		await page.waitForFunction(({ source, flags }) => new RegExp(source, flags).test(window.location.href), {
-			source: pattern.source,
-			flags: pattern.flags,
-		});
+	try {
+		if (pattern instanceof RegExp) {
+			await page.waitForFunction(({ source, flags }) => new RegExp(source, flags).test(window.location.href), {
+				source: pattern.source,
+				flags: pattern.flags,
+			});
 
-		return;
+			return;
+		}
+
+		await page.waitForFunction((expected) => window.location.href === expected, pattern);
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		throw new Error(`wait for url "${pattern}" failed at ${page?.url() ?? 'no page'}: ${reason}`);
 	}
-
-	await page.waitForFunction((expected) => window.location.href === expected, pattern);
 }
 
 async function waitForPath(pathname) {
