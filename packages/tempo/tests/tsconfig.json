@@ -1,0 +1,13 @@
+{
+  "extends": "../../../infra/tsconfig/base.json",
+  "compilerOptions": {
+    "composite": false,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@alloy/tempo": ["../src"],
+      "#*": ["../src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

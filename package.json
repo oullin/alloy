@@ -5,15 +5,26 @@
   "type": "module",
   "scripts": {
     "build": "vp run -r build",
-    "imports:check": "node infra/scripts/tasks/check-package-imports.mjs",
-    "lint": "vp lint && node infra/scripts/tasks/check-package-imports.mjs",
+    "docs:build": "vp run -F @alloy/docs --fail-if-no-match build",
+    "docs:dev": "vp run -F @alloy/docs --fail-if-no-match dev",
+    "imports:check": "vp run check:imports",
+    "inertia-demo:build": "vp run inertia-demo-app:build",
+    "inertia-demo:dev": "vp run inertia-demo-app:dev",
+    "inertia:build": "pnpm inertia-demo:build",
+    "inertia:dev": "pnpm inertia-demo:dev",
+    "lint": "vp lint && vp run check:imports",
     "test": "vp test",
-    "typecheck": "vp check"
+    "test:e2e:inertia": "pnpm test:e2e:inertia-demo",
+    "test:e2e:inertia-demo": "vp run inertia-demo:e2e",
+    "typecheck": "vp check",
+    "web:build": "pnpm docs:build",
+    "web:dev": "pnpm docs:dev"
   },
   "devDependencies": {
     "@alloy/infra": "workspace:*",
     "@types/node": "^25.0.0",
     "typescript": "^6.0.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plus": "latest"
   },
   "packageManager": "pnpm@10.33.0",
@@ -22,8 +33,7 @@
       "esbuild"
     ],
     "overrides": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-      "vitest": "4.1.9"
+      "vite": "npm:@voidzero-dev/vite-plus-core@latest"
     },
     "peerDependencyRules": {
       "allowAny": [

@@ -1,0 +1,16 @@
+{
+	"name": "@alloy/inertia-demo-e2e",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"test": "pnpm --dir ../../../.. exec vp run inertia-demo:e2e",
+		"test:alloy": "pnpm --dir ../../../.. exec vp run inertia-demo:e2e",
+		"test:alloy:agent-browser": "pnpm --dir ../../../.. exec vp run inertia-demo:e2e:agent-browser",
+		"test:alloy:playwright": "pnpm --dir ../../../.. exec vp run inertia-demo:e2e:playwright",
+		"test:bedrock": "pnpm --dir ../../../.. exec vp run inertia-demo:e2e:bedrock"
+	},
+	"devDependencies": {
+		"agent-browser": "^0.31.1",
+		"playwright": "^1.61.1"
+	}
+}
