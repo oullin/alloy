@@ -31,3 +31,38 @@ jobs:
 
       - name: Pack
         run: pnpm exec vp pack
+
+  inertia-e2e:
+    name: Inertia E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PLAYWRIGHT_BROWSER_ARGS: --no-sandbox,--disable-dev-shm-usage
+      PLAYWRIGHT_HEADED: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          go-version: "1.26.4"
+
+      - name: Configure Playwright paths
+        run: |
+          echo "CODEX_BROWSER_ARTIFACTS_DIR=$RUNNER_TEMP/browser-artifacts" >> "$GITHUB_ENV"
+          echo "PLAYWRIGHT_BROWSERS_PATH=$RUNNER_TEMP/playwright" >> "$GITHUB_ENV"
+
+      - run: pnpm exec vp exec -F @alloy/inertia-demo-e2e -- playwright install --with-deps chromium
+
+      - run: pnpm exec vp run inertia-demo:e2e:playwright
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inertia-e2e-artifacts
+          path: ${{ runner.temp }}/browser-artifacts
+          if-no-files-found: ignore
+          retention-days: 7

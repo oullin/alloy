@@ -1,28 +1,30 @@
 # Alloy
 
 Alloy is a Go and TypeScript workspace for reusable application primitives.
-The repository currently includes the Go module under `go/`, the
-TypeScript packages under `ts/`, and the shared automation under
-`infra/`.
+The repository currently includes reusable packages under `packages/`, the web
+workspace under `web/`, and the shared automation under `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go package (`alloy.dev/go/tempo`) and a
+available as both a Go package (`alloy.dev/foundation/tempo`) and a
 TypeScript package (`@alloy/tempo`).
 
 ## Workspace
 
-- `go`: Go module containing the Alloy packages.
-- `go/tempo`: Go Tempo package.
-- `go/collection`: Go collection utilities and package docs.
-- `ts/tempo`: TypeScript Tempo package.
-- `ts/tempo/tests`: TypeScript Tempo acceptance tests.
-- `ts/money`: TypeScript Money package.
-- `ts/console`: TypeScript terminal UI helpers.
+- `packages/foundation`: Go module containing the Alloy packages.
+- `packages/foundation/tempo`: Go Tempo package.
+- `packages/foundation/collection`: Go collection utilities and package docs.
+- `packages/tempo`: TypeScript Tempo package.
+- `packages/tempo/tests`: TypeScript Tempo acceptance tests.
+- `packages/money`: TypeScript Money package.
+- `packages/console`: TypeScript terminal UI helpers.
+- `web/docs`: VuePress documentation site package.
+- `web/inertia-demo`: Inertia demo app, Go API, and browser E2E suite.
+- `web/storage`: local runtime and cache data for web demos.
 - `infra`: repo automation, cache paths, scripts, and shared TypeScript config.
 - `vite.config.ts`: Vite+ orchestration for checks, tests, packaging, and custom tasks.
 - `docker-compose.yml`: container definitions for Go execution and formatting.
 
-TypeScript packages live directly at their package directory under `ts/`.
+TypeScript packages live directly at their package directory under `packages/`.
 Do not add language suffixes such as `*-ts` to package paths.
 
 ## Requirements
@@ -39,7 +41,7 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-`monorepo:initialise` creates and syncs the optional Go workspace at `go/go.work`.
+`monorepo:initialise` creates and syncs the optional Go workspace at `packages/foundation/go.work`.
 
 ## Checks
 
@@ -48,6 +50,8 @@ pnpm exec vp check
 pnpm exec vp test
 pnpm exec vp pack
 pnpm exec vp run go:test
+pnpm docs:build
+pnpm inertia-demo:build
 pnpm exec vp run format-all
 ```
 
@@ -94,6 +98,6 @@ formatter commands.
 ## More Documentation
 
 - [Development workflow](docs/development.md)
-- [Go Tempo](go/tempo/README.md)
-- [Go Collection](go/collection/README.md)
-- [TypeScript Tempo](ts/tempo/README.md)
+- [Go Tempo](packages/foundation/tempo/README.md)
+- [Go Collection](packages/foundation/collection/README.md)
+- [TypeScript Tempo](packages/tempo/README.md)
