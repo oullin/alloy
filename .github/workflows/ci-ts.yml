@@ -1,34 +1,52 @@
 name: TypeScript CI
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
   typescript:
+    name: TypeScript
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
-      - uses: ./.github/actions/setup
+      - name: Setup
+        uses: ./.github/actions/setup
 
-      - run: pnpm imports:check
-      - run: pnpm exec vp check
-      - run: pnpm exec vp test
-      - run: pnpm exec vp pack
+      - name: Check package imports
+        run: pnpm imports:check
+
+      - name: Typecheck
+        run: pnpm exec vp check
+
+      - name: Tests
+        run: pnpm exec vp test
+
+      - name: Pack
+        run: pnpm exec vp pack
 
   inertia-e2e:
+    name: Inertia E2E
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
       PLAYWRIGHT_BROWSER_ARGS: --no-sandbox,--disable-dev-shm-usage
       PLAYWRIGHT_HEADED: "false"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
-      - uses: ./.github/actions/setup
+      - name: Setup
+        uses: ./.github/actions/setup
         with:
           go-version: "1.26.4"
 

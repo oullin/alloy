@@ -1,10 +1,9 @@
 import { defineUserConfig } from 'vuepress';
 import { viteBundler } from '@vuepress/bundler-vite';
 import tailwindcss from '@tailwindcss/vite';
-import type { PluginOption } from 'vite-plus';
 import { alloyTheme } from './theme/index';
 
-const tailwindPlugin = tailwindcss() as unknown as PluginOption;
+const tailwindPlugin = tailwindcss() as never;
 
 export default defineUserConfig({
 	lang: 'en-US',

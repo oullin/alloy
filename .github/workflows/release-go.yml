@@ -1,0 +1,94 @@
+name: Go Release
+
+"on":
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without the v prefix, for example 0.1.1.
+        required: true
+        type: string
+      phase_one_release:
+        description: Allow this manual release even when no Go files changed since the previous Go release.
+        required: false
+        default: false
+        type: boolean
+  push:
+    tags:
+      - go/v*
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-go-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+        with:
+          go-version: "1.26.4"
+
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        env:
+          RELEASE_NAMESPACE: go
+          RELEASE_VERSION: ${{ inputs.version || '' }}
+        run: bash infra/scripts/tasks/resolve-release-tag.sh
+
+      - name: Resolve previous Go release
+        id: previous
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          previous_tag="$(git tag --list 'go/v*' --sort=-version:refname | grep -Fxv "${RELEASE_TAG}" | head -n 1 || true)"
+
+          if [[ -n "${previous_tag}" ]]; then
+            echo "base=$(git rev-list -n 1 "${previous_tag}")" >> "${GITHUB_OUTPUT}"
+            echo "label=${previous_tag}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "base=$(git hash-object -t tree /dev/null)" >> "${GITHUB_OUTPUT}"
+            echo "label=empty tree" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Detect Go release changes
+        shell: bash
+        env:
+          DETECT_BASE_SHA: ${{ steps.previous.outputs.base }}
+          DETECT_HEAD_SHA: ${{ github.sha }}
+          DETECT_REQUIRED_ENGINE: go
+          DETECT_ALLOW_UNCHANGED: ${{ github.event_name == 'workflow_dispatch' && inputs.phase_one_release == true }}
+        run: bash infra/scripts/tasks/detect-changed-surfaces.sh
+
+      - run: pnpm exec vp run go:test
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          args=(
+            "${TAG}"
+            --title "Go ${VERSION}"
+            --notes "Go module release ${VERSION}."
+          )
+
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            args+=(--target "${GITHUB_SHA}")
+          fi
+
+          gh release create "${args[@]}"
