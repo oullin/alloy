@@ -12,4 +12,5 @@ infra/.cache/
 infra/.logs/
 infra/dist/
 ts/docs/src/.vitepress/
+web/docs/.vuepress/.temp/
 .pnpm-store/
