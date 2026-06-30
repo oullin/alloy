@@ -51,6 +51,7 @@ fi
 
 has_coverage_label=false
 has_e2e_label=false
+has_inertial_tests_label=false
 
 if grep -Fxq 'coverage-all' <<< "${labels}"; then
 	has_coverage_label=true
@@ -60,8 +61,12 @@ if grep -Eq '^e2e-' <<< "${labels}"; then
 	has_e2e_label=true
 fi
 
+if grep -Fxq 'inertial-tests' <<< "${labels}"; then
+	has_inertial_tests_label=true
+fi
+
 has_special_label=false
-if [[ "${has_coverage_label}" == "true" || "${has_e2e_label}" == "true" ]]; then
+if [[ "${has_coverage_label}" == "true" || "${has_e2e_label}" == "true" || "${has_inertial_tests_label}" == "true" ]]; then
 	has_special_label=true
 fi
 
@@ -73,13 +78,13 @@ while IFS= read -r file; do
 	[[ -n "${file}" ]] || continue
 
 	case "${file}" in
-		go/* | go.work | go.work.example | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
+		go/* | go.work | go.work.example | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
 			go_changed=true
 			;;
 	esac
 
 	case "${file}" in
-		ts/* | infra/* | packages/* | web/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-ts.yml | .github/workflows/release-ts.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | tsconfig.json | .npmrc)
+		ts/* | infra/* | packages/* | web/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/ci-ts.yml | .github/workflows/release-ts.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | tsconfig.json | .npmrc)
 			ts_changed=true
 			;;
 	esac
@@ -102,6 +107,7 @@ esac
 	echo "has_special_label=${has_special_label}"
 	echo "has_coverage_label=${has_coverage_label}"
 	echo "has_e2e_label=${has_e2e_label}"
+	echo "has_inertial_tests_label=${has_inertial_tests_label}"
 	echo "required_engine_changed=${required_engine_changed}"
 	echo "allow_unchanged=${allow_unchanged}"
 } >> "${GITHUB_OUTPUT}"
@@ -113,6 +119,7 @@ esac
 	echo "- Browser/E2E changed: ${browser_changed}"
 	echo "- coverage-all label: ${has_coverage_label}"
 	echo "- e2e-* label: ${has_e2e_label}"
+	echo "- inertial-tests label: ${has_inertial_tests_label}"
 	if [[ -n "${required_engine}" ]]; then
 		echo "- Required engine: ${required_engine}"
 		echo "- Required engine changed: ${required_engine_changed}"

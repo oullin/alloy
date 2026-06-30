@@ -31,6 +31,7 @@ jobs:
       has_special_label: ${{ steps.detect.outputs.has_special_label }}
       has_coverage_label: ${{ steps.detect.outputs.has_coverage_label }}
       has_e2e_label: ${{ steps.detect.outputs.has_e2e_label }}
+      has_inertial_tests_label: ${{ steps.detect.outputs.has_inertial_tests_label }}
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
@@ -58,6 +59,12 @@ jobs:
     if: needs.changes.outputs.ts_changed == 'true'
     uses: ./.github/workflows/ci-ts.yml
 
+  inertia_app_tests:
+    name: Inertia App Tests
+    needs: changes
+    if: needs.changes.outputs.has_inertial_tests_label == 'true'
+    uses: ./.github/workflows/ci-inertia-app-tests.yml
+
   label_requests:
     name: Label requests
     needs: changes
@@ -77,13 +84,16 @@ jobs:
             if [[ "${{ needs.changes.outputs.has_e2e_label }}" == "true" ]]; then
               echo "- e2e-* was requested, but Alloy does not have a stable E2E workflow wired into CI yet."
             fi
+            if [[ "${{ needs.changes.outputs.has_inertial_tests_label }}" == "true" ]]; then
+              echo "- inertial-tests requested the Inertia app test workflow."
+            fi
           } >> "${GITHUB_STEP_SUMMARY}"
 
   noop:
     name: No selected checks
     needs: changes
-    if: needs.changes.outputs.go_changed != 'true' && needs.changes.outputs.ts_changed != 'true' && needs.changes.outputs.has_special_label != 'true'
+    if: needs.changes.outputs.go_changed != 'true' && needs.changes.outputs.ts_changed != 'true' && needs.changes.outputs.has_special_label != 'true' && needs.changes.outputs.has_inertial_tests_label != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Report
-        run: echo "No Go, TypeScript, coverage, or E2E checks were selected for this PR update."
+        run: echo "No Go, TypeScript, coverage, E2E, or Inertia app checks were selected for this PR update."
