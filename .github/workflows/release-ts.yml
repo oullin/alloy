@@ -1,6 +1,6 @@
 name: TypeScript Release
 
-'on':
+"on":
   workflow_dispatch:
     inputs:
       version:
@@ -31,35 +31,10 @@ jobs:
       - name: Resolve release tag
         id: release
         shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            version="${{ inputs.version }}"
-
-            if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "version must match X.Y.Z, got: ${version}" >&2
-              exit 1
-            fi
-
-            tag="ts/v${version}"
-
-            if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
-              echo "tag already exists: ${tag}" >&2
-              exit 1
-            fi
-          else
-            tag="${GITHUB_REF_NAME}"
-            version="${tag#ts/v}"
-
-            if [[ "${tag}" == "${version}" || ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "expected a ts/vX.Y.Z tag, got: ${tag}" >&2
-              exit 1
-            fi
-          fi
-
-          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
-          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+        env:
+          RELEASE_NAMESPACE: ts
+          RELEASE_VERSION: ${{ inputs.version || '' }}
+        run: bash infra/scripts/tasks/resolve-release-tag.sh
 
       - run: pnpm imports:check
 
@@ -67,35 +42,7 @@ jobs:
         env:
           VERSION: ${{ steps.release.outputs.version }}
         shell: bash
-        run: |
-          set -euo pipefail
-
-          artifact_dir="${RUNNER_TEMP}/alloy-ts-packages"
-          mkdir -p "${artifact_dir}"
-
-          packages=(
-            "@alloy/console"
-            "@alloy/money"
-            "@alloy/navigator-routes"
-            "@alloy/tempo"
-            "@alloy/workflow"
-          )
-
-          for package in "${packages[@]}"; do
-            package_version="$(pnpm --filter "${package}" exec node -p "require('./package.json').version")"
-
-            if [[ "${package_version}" != "${VERSION}" ]]; then
-              echo "${package} version ${package_version} does not match release version ${VERSION}" >&2
-              exit 1
-            fi
-
-            pnpm --filter "${package}" typecheck
-            pnpm --filter "${package}" test
-            pnpm --filter "${package}" build
-            pnpm --filter "${package}" pack --pack-destination "${artifact_dir}"
-          done
-
-          ls -lh "${artifact_dir}"
+        run: bash infra/scripts/tasks/check-pack-ts-packages.sh
 
       - name: Create GitHub release
         env:

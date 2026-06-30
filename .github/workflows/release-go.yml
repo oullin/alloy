@@ -1,6 +1,6 @@
 name: Go Release
 
-'on':
+"on":
   workflow_dispatch:
     inputs:
       version:
@@ -33,35 +33,10 @@ jobs:
       - name: Resolve release tag
         id: release
         shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            version="${{ inputs.version }}"
-
-            if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "version must match X.Y.Z, got: ${version}" >&2
-              exit 1
-            fi
-
-            tag="go/v${version}"
-
-            if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
-              echo "tag already exists: ${tag}" >&2
-              exit 1
-            fi
-          else
-            tag="${GITHUB_REF_NAME}"
-            version="${tag#go/v}"
-
-            if [[ "${tag}" == "${version}" || ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "expected a go/vX.Y.Z tag, got: ${tag}" >&2
-              exit 1
-            fi
-          fi
-
-          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
-          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+        env:
+          RELEASE_NAMESPACE: go
+          RELEASE_VERSION: ${{ inputs.version || '' }}
+        run: bash infra/scripts/tasks/resolve-release-tag.sh
 
       - run: pnpm exec vp run go:test
 

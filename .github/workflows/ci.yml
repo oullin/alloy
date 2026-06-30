@@ -2,7 +2,16 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, labeled, unlabeled]
+    types:
+      [
+        opened,
+        synchronize,
+        reopened,
+        ready_for_review,
+        converted_to_draft,
+        labeled,
+        unlabeled,
+      ]
 
 permissions:
   contents: read
@@ -32,66 +41,10 @@ jobs:
       - name: Detect changed surfaces
         id: detect
         shell: bash
-        run: |
-          set -euo pipefail
-
-          changed_files="${RUNNER_TEMP}/changed-files.txt"
-          git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" > "${changed_files}"
-
-          labels="$(jq -r '.pull_request.labels[].name' "${GITHUB_EVENT_PATH}")"
-          has_coverage_label=false
-          has_e2e_label=false
-
-          if grep -Fxq 'coverage-all' <<< "${labels}"; then
-            has_coverage_label=true
-          fi
-
-          if grep -Eq '^e2e-' <<< "${labels}"; then
-            has_e2e_label=true
-          fi
-
-          has_special_label=false
-          if [[ "${has_coverage_label}" == "true" || "${has_e2e_label}" == "true" ]]; then
-            has_special_label=true
-          fi
-
-          go_changed=false
-          ts_changed=false
-          browser_changed=false
-
-          while IFS= read -r file; do
-            [[ -n "${file}" ]] || continue
-
-            case "${file}" in
-              go/*|go.work|go.work.example|.github/actions/setup/*|.github/workflows/ci.yml|.github/workflows/ci-go.yml|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|vite.config.ts|.npmrc|infra/scripts/tasks/go-test.sh|infra/scripts/tasks/cache-env.sh)
-                go_changed=true
-                ;;
-            esac
-
-            case "${file}" in
-              ts/*|infra/*|packages/*|web/*|.github/actions/setup/*|.github/workflows/ci.yml|.github/workflows/ci-ts.yml|package.json|pnpm-lock.yaml|pnpm-workspace.yaml|vite.config.ts|tsconfig.json|.npmrc)
-                ts_changed=true
-                ;;
-            esac
-          done < "${changed_files}"
-
-          {
-            echo "go_changed=${go_changed}"
-            echo "ts_changed=${ts_changed}"
-            echo "browser_changed=${browser_changed}"
-            echo "has_special_label=${has_special_label}"
-            echo "has_coverage_label=${has_coverage_label}"
-            echo "has_e2e_label=${has_e2e_label}"
-          } >> "${GITHUB_OUTPUT}"
-
-          {
-            echo "### CI selection"
-            echo "- Go changed: ${go_changed}"
-            echo "- TypeScript changed: ${ts_changed}"
-            echo "- Browser/E2E changed: ${browser_changed}"
-            echo "- coverage-all label: ${has_coverage_label}"
-            echo "- e2e-* label: ${has_e2e_label}"
-          } >> "${GITHUB_STEP_SUMMARY}"
+        env:
+          DETECT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          DETECT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: bash infra/scripts/tasks/detect-changed-surfaces.sh
 
   go:
     name: Go
