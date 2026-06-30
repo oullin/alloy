@@ -38,6 +38,32 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version || '' }}
         run: bash infra/scripts/tasks/resolve-release-tag.sh
 
+      - name: Resolve previous Go release
+        id: previous
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          previous_tag="$(git tag --list 'go/v*' --sort=-version:refname | grep -Fxv "${RELEASE_TAG}" | head -n 1 || true)"
+
+          if [[ -n "${previous_tag}" ]]; then
+            echo "base=$(git rev-list -n 1 "${previous_tag}")" >> "${GITHUB_OUTPUT}"
+            echo "label=${previous_tag}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "base=$(git hash-object -t tree /dev/null)" >> "${GITHUB_OUTPUT}"
+            echo "label=empty tree" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Detect Go release changes
+        shell: bash
+        env:
+          DETECT_BASE_SHA: ${{ steps.previous.outputs.base }}
+          DETECT_HEAD_SHA: ${{ github.sha }}
+          DETECT_REQUIRED_ENGINE: go
+        run: bash infra/scripts/tasks/detect-changed-surfaces.sh
+
       - run: pnpm exec vp run go:test
 
       - name: Create GitHub release

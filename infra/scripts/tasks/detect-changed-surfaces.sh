@@ -3,11 +3,21 @@ set -euo pipefail
 
 base_sha="${DETECT_BASE_SHA:-}"
 head_sha="${DETECT_HEAD_SHA:-}"
+required_engine="${DETECT_REQUIRED_ENGINE:-}"
 
 if [[ -z "${base_sha}" || -z "${head_sha}" ]]; then
 	echo "DETECT_BASE_SHA and DETECT_HEAD_SHA are required" >&2
 	exit 2
 fi
+
+case "${required_engine}" in
+	"" | go | ts)
+		;;
+	*)
+		echo "DETECT_REQUIRED_ENGINE must be go or ts, got: ${required_engine}" >&2
+		exit 2
+		;;
+esac
 
 if [[ -z "${GITHUB_OUTPUT:-}" ]]; then
 	echo "GITHUB_OUTPUT is required" >&2
@@ -19,7 +29,9 @@ if [[ -z "${GITHUB_STEP_SUMMARY:-}" ]]; then
 	exit 2
 fi
 
-changed_files="${RUNNER_TEMP:-/tmp}/changed-files.txt"
+changed_files="$(mktemp "${RUNNER_TEMP:-/tmp}/alloy-changed-files.XXXXXX")"
+trap 'rm -f "${changed_files}"' EXIT
+
 git diff --name-only "${base_sha}" "${head_sha}" > "${changed_files}"
 
 labels=""
@@ -51,17 +63,27 @@ while IFS= read -r file; do
 	[[ -n "${file}" ]] || continue
 
 	case "${file}" in
-		go/* | go.work | go.work.example | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
+		go/* | go.work | go.work.example | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
 			go_changed=true
 			;;
 	esac
 
 	case "${file}" in
-		ts/* | infra/* | packages/* | web/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-ts.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | tsconfig.json | .npmrc)
+		ts/* | infra/* | packages/* | web/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-ts.yml | .github/workflows/release-ts.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | tsconfig.json | .npmrc)
 			ts_changed=true
 			;;
 	esac
 done < "${changed_files}"
+
+required_engine_changed=true
+case "${required_engine}" in
+	go)
+		required_engine_changed="${go_changed}"
+		;;
+	ts)
+		required_engine_changed="${ts_changed}"
+		;;
+esac
 
 {
 	echo "go_changed=${go_changed}"
@@ -70,13 +92,23 @@ done < "${changed_files}"
 	echo "has_special_label=${has_special_label}"
 	echo "has_coverage_label=${has_coverage_label}"
 	echo "has_e2e_label=${has_e2e_label}"
+	echo "required_engine_changed=${required_engine_changed}"
 } >> "${GITHUB_OUTPUT}"
 
 {
-	echo "### CI selection"
+	echo "### Engine selection"
 	echo "- Go changed: ${go_changed}"
 	echo "- TypeScript changed: ${ts_changed}"
 	echo "- Browser/E2E changed: ${browser_changed}"
 	echo "- coverage-all label: ${has_coverage_label}"
 	echo "- e2e-* label: ${has_e2e_label}"
+	if [[ -n "${required_engine}" ]]; then
+		echo "- Required engine: ${required_engine}"
+		echo "- Required engine changed: ${required_engine_changed}"
+	fi
 } >> "${GITHUB_STEP_SUMMARY}"
+
+if [[ "${required_engine_changed}" != "true" ]]; then
+	echo "no ${required_engine} changes detected between ${base_sha} and ${head_sha}" >&2
+	exit 1
+fi

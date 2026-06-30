@@ -36,6 +36,32 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version || '' }}
         run: bash infra/scripts/tasks/resolve-release-tag.sh
 
+      - name: Resolve previous TypeScript release
+        id: previous
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          previous_tag="$(git tag --list 'ts/v*' --sort=-version:refname | grep -Fxv "${RELEASE_TAG}" | head -n 1 || true)"
+
+          if [[ -n "${previous_tag}" ]]; then
+            echo "base=$(git rev-list -n 1 "${previous_tag}")" >> "${GITHUB_OUTPUT}"
+            echo "label=${previous_tag}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "base=$(git hash-object -t tree /dev/null)" >> "${GITHUB_OUTPUT}"
+            echo "label=empty tree" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Detect TypeScript release changes
+        shell: bash
+        env:
+          DETECT_BASE_SHA: ${{ steps.previous.outputs.base }}
+          DETECT_HEAD_SHA: ${{ github.sha }}
+          DETECT_REQUIRED_ENGINE: ts
+        run: bash infra/scripts/tasks/detect-changed-surfaces.sh
+
       - run: pnpm imports:check
 
       - name: Check and pack TypeScript packages
