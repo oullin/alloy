@@ -4,6 +4,7 @@ set -euo pipefail
 base_sha="${DETECT_BASE_SHA:-}"
 head_sha="${DETECT_HEAD_SHA:-}"
 required_engine="${DETECT_REQUIRED_ENGINE:-}"
+allow_unchanged="${DETECT_ALLOW_UNCHANGED:-false}"
 
 if [[ -z "${base_sha}" || -z "${head_sha}" ]]; then
 	echo "DETECT_BASE_SHA and DETECT_HEAD_SHA are required" >&2
@@ -15,6 +16,15 @@ case "${required_engine}" in
 		;;
 	*)
 		echo "DETECT_REQUIRED_ENGINE must be go or ts, got: ${required_engine}" >&2
+		exit 2
+		;;
+esac
+
+case "${allow_unchanged}" in
+	true | false)
+		;;
+	*)
+		echo "DETECT_ALLOW_UNCHANGED must be true or false, got: ${allow_unchanged}" >&2
 		exit 2
 		;;
 esac
@@ -93,6 +103,7 @@ esac
 	echo "has_coverage_label=${has_coverage_label}"
 	echo "has_e2e_label=${has_e2e_label}"
 	echo "required_engine_changed=${required_engine_changed}"
+	echo "allow_unchanged=${allow_unchanged}"
 } >> "${GITHUB_OUTPUT}"
 
 {
@@ -105,10 +116,11 @@ esac
 	if [[ -n "${required_engine}" ]]; then
 		echo "- Required engine: ${required_engine}"
 		echo "- Required engine changed: ${required_engine_changed}"
+		echo "- Allow unchanged release: ${allow_unchanged}"
 	fi
 } >> "${GITHUB_STEP_SUMMARY}"
 
-if [[ "${required_engine_changed}" != "true" ]]; then
+if [[ "${required_engine_changed}" != "true" && "${allow_unchanged}" != "true" ]]; then
 	echo "no ${required_engine} changes detected between ${base_sha} and ${head_sha}" >&2
 	exit 1
 fi

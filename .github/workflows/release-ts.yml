@@ -7,6 +7,11 @@ name: TypeScript Release
         description: Release version without the v prefix, for example 0.1.1.
         required: true
         type: string
+      phase_one_release:
+        description: Allow this manual release even when no TypeScript files changed since the previous TypeScript release.
+        required: false
+        default: false
+        type: boolean
   push:
     tags:
       - ts/v*
@@ -60,6 +65,7 @@ jobs:
           DETECT_BASE_SHA: ${{ steps.previous.outputs.base }}
           DETECT_HEAD_SHA: ${{ github.sha }}
           DETECT_REQUIRED_ENGINE: ts
+          DETECT_ALLOW_UNCHANGED: ${{ github.event_name == 'workflow_dispatch' && inputs.phase_one_release == true }}
         run: bash infra/scripts/tasks/detect-changed-surfaces.sh
 
       - run: pnpm imports:check
