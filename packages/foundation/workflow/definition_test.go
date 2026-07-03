@@ -140,6 +140,56 @@ func TestDefinitionValidateRejectsUnreachablePlace(t *testing.T) {
 	}
 }
 
+func TestDefinitionCloneNilReturnsNil(t *testing.T) {
+	var def *workflow.Definition
+
+	if def.Clone() != nil {
+		t.Fatal("cloning a nil definition should return nil")
+	}
+}
+
+func TestDefinitionTransitionAttachesMetadataFromMap(t *testing.T) {
+	def := &workflow.Definition{
+		Places:             []string{"a", "b"},
+		InitialMarking:     workflow.Marking{Places: map[string]int{"a": 1}},
+		Transitions:        []workflow.Transition{{Name: "go", From: []string{"a"}, To: []string{"b"}}},
+		TransitionMetadata: map[string]map[string]any{"go": {"verb": "activate"}},
+	}
+
+	transition, ok := def.Transition("go")
+
+	if !ok {
+		t.Fatal("expected transition to be found")
+	}
+
+	if transition.Metadata["verb"] != "activate" {
+		t.Fatalf("expected metadata attached from the definition map, got %#v", transition.Metadata)
+	}
+
+	if _, ok := def.Transition("missing"); ok {
+		t.Fatal("unknown transition reported true")
+	}
+}
+
+func TestDefinitionValidateRejectsNoPlaces(t *testing.T) {
+	def := &workflow.Definition{}
+
+	if err := def.Validate(); err == nil {
+		t.Fatal("expected error for definition without places")
+	}
+}
+
+func TestDefinitionValidateRejectsUnknownInitialPlace(t *testing.T) {
+	def := &workflow.Definition{
+		Places:         []string{"a"},
+		InitialMarking: workflow.Marking{Places: map[string]int{"ghost": 1}},
+	}
+
+	if err := def.Validate(); err == nil {
+		t.Fatal("expected error for unknown place in initial marking")
+	}
+}
+
 func TestDefinitionValidateAllowsHappyPath(t *testing.T) {
 	def, err := workflow.NewDefinitionBuilder().
 		AddPlace("a").
