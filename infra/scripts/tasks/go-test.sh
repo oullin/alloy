@@ -45,9 +45,14 @@ while IFS= read -r -d '' gomod; do
 		go vet ./...
 		if [[ -n "${GO_COVERAGE_DIR:-}" ]]; then
 			mkdir -p "${GO_COVERAGE_DIR}"
-			profile="${GO_COVERAGE_DIR}/$(echo "${module_dir#"${ROOT_PATH}/"}" | tr '/' '-').out"
+			module_name="${module_dir#"${ROOT_PATH}/"}"
+			profile="${GO_COVERAGE_DIR}/$(echo "${module_name}" | tr '/' '-').out"
 			go test -race -coverprofile="${profile}" ./...
-			go tool cover -func="${profile}" | tail -1
+			# go tool cover resolves sources through the current module, so it
+			# must run here (inside the module) — not later from the repo root.
+			total="$(go tool cover -func="${profile}" | tail -1 | awk '{print $NF}')"
+			echo "${total}"
+			printf '%s\t%s\n' "${module_name}" "${total}" >> "${GO_COVERAGE_DIR}/summary.tsv"
 		else
 			go test -race ./...
 		fi

@@ -1,0 +1,57 @@
+name: Go Vulnerabilities
+
+# CodeQL code scanning requires GitHub Advanced Security on private repos.
+# govulncheck gives us real Go call-graph vulnerability analysis with no such
+# requirement, so it is the right fit for this private module.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "31 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@924ae3a1de1ea0f597a0f4e5a55e2b90ff42e5a2 # v6
+        with:
+          go-version: "1.26.4"
+
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+
+      - name: Run govulncheck on each Go module
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          status=0
+
+          while IFS= read -r -d '' gomod; do
+            module_dir="$(dirname "${gomod}")"
+            echo "==> ${module_dir}"
+            (
+              cd "${module_dir}"
+              export GOWORK=off
+              govulncheck ./...
+            ) || status=1
+          done < <(
+            find packages/foundation -name go.mod -print0
+            find web -path '*/api/go.mod' -print0 2>/dev/null || true
+          )
+
+          exit "${status}"

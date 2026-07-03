@@ -32,4 +32,6 @@ jobs:
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
 
-          /tmp/gitleaks git --redact --verbose --exit-code 1 .
+          # git mode scans tracked history only (excludes gitignored
+          # node_modules); the config allowlists fake credentials in fixtures.
+          /tmp/gitleaks git . --config .gitleaks.toml --redact --verbose --exit-code 1

@@ -28,18 +28,21 @@ jobs:
         run: pnpm exec vp run go:test
 
       - name: Coverage summary
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
 
+          summary="${RUNNER_TEMP}/go-coverage/summary.tsv"
           {
             echo "### Go coverage"
-            for profile in "${RUNNER_TEMP}/go-coverage"/*.out; do
-              [[ -f "${profile}" ]] || continue
-              module="$(basename "${profile}" .out)"
-              total="$(go tool cover -func="${profile}" | tail -1 | awk '{print $NF}')"
-              echo "- ${module}: ${total}"
-            done
+            if [[ -f "${summary}" ]]; then
+              while IFS=$'\t' read -r module total; do
+                echo "- ${module}: ${total}"
+              done < "${summary}"
+            else
+              echo "- no coverage summary produced"
+            fi
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload coverage profiles
