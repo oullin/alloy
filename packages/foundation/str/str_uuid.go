@@ -163,10 +163,18 @@ func Ulid() string {
 
 	entropy := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 	ms := ulid.Timestamp(time.Now())
+
+	if max := ulid.MaxTime(); ms > max {
+		ms = max
+	}
+
 	id, err := ulid.New(ms, entropy)
 
 	if err != nil {
-		panic("support: failed to generate ULID: " + err.Error())
+		// Unreachable in practice: the timestamp is clamped to MaxTime and
+		// math/rand entropy never fails. Regenerate at the zero timestamp,
+		// which cannot error, instead of panicking.
+		id, _ = ulid.New(0, entropy)
 	}
 
 	return id.String()

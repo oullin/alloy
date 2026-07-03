@@ -2,6 +2,10 @@ import { CompileError } from '#workflow/multisteps/errors';
 import { CompiledGraph } from '#workflow/multisteps/graph';
 import type { JobSpec } from '#workflow/multisteps/jobs';
 
+/**
+ * A named collection of job specs that compiles into a dependency graph for
+ * multi-step execution (see `@alloy/workflow/multisteps`).
+ */
 export class MultiStepWorkflow {
 	readonly #name: string;
 	readonly #jobs: JobSpec[];

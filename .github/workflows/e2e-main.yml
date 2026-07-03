@@ -1,0 +1,21 @@
+name: E2E (main)
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    # Nightly at 02:17 UTC — off the top of the hour to dodge scheduler congestion.
+    - cron: "17 2 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-main-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inertia_app_tests:
+    name: Inertia App Tests
+    uses: ./.github/workflows/ci-inertia-app-tests.yml

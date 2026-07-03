@@ -667,6 +667,427 @@ func TestPreviousKeysCopiesKeys(t *testing.T) {
 	}
 }
 
+func TestEncryptDecryptRoundTripSerializedAllCiphers(t *testing.T) {
+	t.Parallel()
+
+	for _, c := range []Cipher{AES128CBC, AES256CBC, AES128GCM, AES256GCM} {
+		t.Run(string(c), func(t *testing.T) {
+			t.Parallel()
+
+			enc := mustNewEncrypter(t, mustGenerateKey(t, c), c)
+
+			encrypted, err := enc.Encrypt([]any{"a", float64(1)}, true)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			result, err := enc.Decrypt(encrypted, true)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			list, ok := result.([]any)
+
+			if !ok || len(list) != 2 || list[0] != "a" || list[1] != float64(1) {
+				t.Fatalf("round-trip mismatch: %#v", result)
+			}
+		})
+	}
+}
+
+func TestWrongKeyFailsForAllCiphers(t *testing.T) {
+	t.Parallel()
+
+	for _, c := range []Cipher{AES128CBC, AES256CBC, AES128GCM, AES256GCM} {
+		t.Run(string(c), func(t *testing.T) {
+			t.Parallel()
+
+			encA := mustNewEncrypter(t, mustGenerateKey(t, c), c)
+			encB := mustNewEncrypter(t, mustGenerateKey(t, c), c)
+
+			encrypted, err := encA.EncryptString("secret")
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = encB.DecryptString(encrypted)
+
+			if !errors.Is(err, ErrDecryptFailed) {
+				t.Fatalf("expected ErrDecryptFailed, got %v", err)
+			}
+		})
+	}
+}
+
+func TestPreviousKeysRotationGCM(t *testing.T) {
+	t.Parallel()
+
+	keyOld := mustGenerateKey(t, AES256GCM)
+	keyNew := mustGenerateKey(t, AES256GCM)
+
+	encOld := mustNewEncrypter(t, keyOld, AES256GCM)
+	encrypted, err := encOld.EncryptString("rotated")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	encNew := mustNewEncrypter(t, keyNew, AES256GCM)
+	encNew.PreviousKeys([][]byte{keyOld})
+
+	result, err := encNew.DecryptString(encrypted)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if result != "rotated" {
+		t.Fatalf("expected rotated, got %s", result)
+	}
+}
+
+func TestEncryptRejectsNonStringWithoutSerialization(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+
+	_, err := enc.Encrypt(42, false)
+
+	if !errors.Is(err, ErrEncryptFailed) {
+		t.Fatalf("expected ErrEncryptFailed, got %v", err)
+	}
+}
+
+func TestEncryptRejectsUnserializableValue(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+
+	_, err := enc.Encrypt(make(chan int), true)
+
+	if !errors.Is(err, ErrEncryptFailed) {
+		t.Fatalf("expected ErrEncryptFailed, got %v", err)
+	}
+}
+
+func TestDecryptUnserializeRejectsInvalidJSON(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	encrypted, err := enc.EncryptString("not-json{")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = enc.Decrypt(encrypted, true)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestInvalidPayloadSentinel(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+
+	cases := []string{"", "not-base64!", "aGVsbG8=", base64.StdEncoding.EncodeToString([]byte("{}"))}
+
+	for _, c := range cases {
+		_, err := enc.DecryptString(c)
+
+		if !errors.Is(err, ErrInvalidPayload) {
+			t.Fatalf("expected ErrInvalidPayload for %q, got %v", c, err)
+		}
+	}
+}
+
+func TestTruncatedPayloadIsInvalid(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	encrypted, err := enc.EncryptString("truncate-me")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = enc.DecryptString(encrypted[:len(encrypted)/2])
+
+	if !errors.Is(err, ErrInvalidPayload) {
+		t.Fatalf("expected ErrInvalidPayload, got %v", err)
+	}
+}
+
+func TestMissingMACIsInvalidPayload(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	encrypted, err := enc.EncryptString("no-mac")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	p.MAC = ""
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrInvalidPayload) {
+		t.Fatalf("expected ErrInvalidPayload, got %v", err)
+	}
+}
+
+func TestMissingTagIsInvalidPayloadForGCM(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256GCM), AES256GCM)
+	encrypted, err := enc.EncryptString("no-tag")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	p.Tag = ""
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrInvalidPayload) {
+		t.Fatalf("expected ErrInvalidPayload, got %v", err)
+	}
+}
+
+func TestInvalidIVBase64IsInvalidPayload(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	encrypted, err := enc.EncryptString("bad-iv")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	p.IV = "%%%not-base64%%%"
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrInvalidPayload) {
+		t.Fatalf("expected ErrInvalidPayload, got %v", err)
+	}
+}
+
+func TestTamperedMACIsRejected(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	encrypted, err := enc.EncryptString("mac-tamper")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	macBytes, _ := base64.StdEncoding.DecodeString(p.MAC)
+	macBytes[0] ^= 0xff
+	p.MAC = base64.StdEncoding.EncodeToString(macBytes)
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestInvalidMACBase64IsRejected(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	encrypted, err := enc.EncryptString("mac-garbage")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	p.MAC = "%%%not-base64%%%"
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestInvalidValueBase64IsRejected(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256GCM), AES256GCM)
+	encrypted, err := enc.EncryptString("value-garbage")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	p.Value = "%%%not-base64%%%"
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestInvalidTagBase64IsRejected(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256GCM), AES256GCM)
+	encrypted, err := enc.EncryptString("tag-garbage")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	p.Tag = "%%%not-base64%%%"
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestTamperedGCMCiphertextIsRejected(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES128GCM), AES128GCM)
+	encrypted, err := enc.EncryptString("gcm-tamper")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	valBytes, _ := base64.StdEncoding.DecodeString(p.Value)
+	valBytes[0] ^= 0xff
+	p.Value = base64.StdEncoding.EncodeToString(valBytes)
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestTruncatedCiphertextWithForgedMACIsRejected(t *testing.T) {
+	t.Parallel()
+
+	key := mustGenerateKey(t, AES256CBC)
+	enc := mustNewEncrypter(t, key, AES256CBC)
+	encrypted, err := enc.EncryptString("block-size-check")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	p := decodePayload(t, encrypted)
+	valBytes, _ := base64.StdEncoding.DecodeString(p.Value)
+	p.Value = base64.StdEncoding.EncodeToString(valBytes[:len(valBytes)-1])
+	p.MAC = base64.StdEncoding.EncodeToString(computeMAC(key, p.IV, p.Value))
+	tampered := encodePayload(t, p)
+
+	_, err = enc.DecryptString(tampered)
+
+	if !errors.Is(err, ErrDecryptFailed) {
+		t.Fatalf("expected ErrDecryptFailed, got %v", err)
+	}
+}
+
+func TestPkcs7PadRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	for _, size := range []int{0, 1, 15, 16, 17, 32} {
+		data := make([]byte, size)
+
+		for i := range data {
+			data[i] = byte(i)
+		}
+
+		padded := pkcs7Pad(data, 16)
+
+		if len(padded)%16 != 0 {
+			t.Fatalf("padded length %d is not a block multiple", len(padded))
+		}
+
+		unpadded, err := pkcs7Unpad(padded)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(unpadded) != size {
+			t.Fatalf("expected %d bytes after unpad, got %d", size, len(unpadded))
+		}
+	}
+}
+
+func TestPkcs7UnpadRejectsInvalidPadding(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string][]byte{
+		"empty":              {},
+		"zero padding":       {1, 2, 3, 0},
+		"padding over block": append(make([]byte, 15), 17),
+		"padding over data":  {5},
+		"inconsistent bytes": {1, 2, 3, 3, 2, 3},
+	}
+
+	for name, data := range cases {
+		if _, err := pkcs7Unpad(data); !errors.Is(err, ErrDecryptFailed) {
+			t.Fatalf("%s: expected ErrDecryptFailed, got %v", name, err)
+		}
+	}
+}
+
+func TestPreviousKeysEmptyAndNilEntries(t *testing.T) {
+	t.Parallel()
+
+	enc := mustNewEncrypter(t, mustGenerateKey(t, AES256CBC), AES256CBC)
+	enc.PreviousKeys(nil)
+
+	if len(enc.GetPreviousKeys()) != 0 {
+		t.Fatal("expected no previous keys")
+	}
+
+	if len(enc.GetAllKeys()) != 1 {
+		t.Fatal("expected only the current key")
+	}
+
+	enc.PreviousKeys([][]byte{nil})
+
+	prev := enc.GetPreviousKeys()
+
+	if len(prev) != 1 || prev[0] != "" {
+		t.Fatalf("expected single empty previous key, got %v", prev)
+	}
+}
+
 // --- test helpers ---
 
 func mustGenerateKey(t *testing.T, c Cipher) []byte {

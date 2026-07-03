@@ -1,6 +1,13 @@
 {
   "name": "@alloy/navigator-routes",
   "version": "0.1.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "packages/navigator-routes"
+  },
   "type": "module",
   "exports": {
     ".": {
@@ -16,7 +23,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "vp pack src/index.ts --tsconfig tsconfig.json --out-dir dist --dts --clean",

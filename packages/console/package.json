@@ -1,15 +1,24 @@
 {
   "name": "@alloy/console",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "packages/console"
+  },
   "sideEffects": false,
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

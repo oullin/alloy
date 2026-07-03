@@ -262,7 +262,7 @@ func (r *DynamoBatchRepository) fetchCounts(ctx context.Context, id string) (*Up
 	}
 
 	if batch == nil {
-		return nil, fmt.Errorf("bus: batch %s not found", id)
+		return nil, fmt.Errorf("%w: %s", ErrBatchNotFound, id)
 	}
 
 	return &UpdatedBatchJobCounts{

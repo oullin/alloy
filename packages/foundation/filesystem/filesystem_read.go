@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"io"
 	"iter"
@@ -10,7 +11,11 @@ import (
 )
 
 // Get reads the entire contents of a file.
-func (f *Local) Get(path string) ([]byte, error) {
+func (f *Local) Get(ctx context.Context, path string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -25,8 +30,8 @@ func (f *Local) Get(path string) ([]byte, error) {
 }
 
 // JSON reads a file and unmarshals its JSON contents into v.
-func (f *Local) JSON(path string, v any) error {
-	data, err := f.Get(path)
+func (f *Local) JSON(ctx context.Context, path string, v any) error {
+	data, err := f.Get(ctx, path)
 
 	if err != nil {
 		return err
@@ -36,7 +41,11 @@ func (f *Local) JSON(path string, v any) error {
 }
 
 // SharedGet reads a file's contents while holding a shared (read) lock.
-func (f *Local) SharedGet(path string) ([]byte, error) {
+func (f *Local) SharedGet(ctx context.Context, path string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	file, err := os.Open(path)
 
 	if err != nil {
@@ -61,7 +70,12 @@ func (f *Local) SharedGet(path string) ([]byte, error) {
 }
 
 // Lines returns an iterator that yields each line of the file.
-func (f *Local) Lines(path string) (iter.Seq[string], error) {
+// The iterator stops yielding when ctx is cancelled.
+func (f *Local) Lines(ctx context.Context, path string) (iter.Seq[string], error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return nil, ErrNotFound
@@ -82,6 +96,10 @@ func (f *Local) Lines(path string) (iter.Seq[string], error) {
 		reader := bufio.NewReader(file)
 
 		for {
+			if ctx.Err() != nil {
+				return
+			}
+
 			line, err := reader.ReadString('\n')
 
 			if len(line) > 0 {

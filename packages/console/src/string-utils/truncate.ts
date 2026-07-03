@@ -2,6 +2,7 @@ import { ansiCloseSequence, parseAnsiSegments } from '#console/string-utils/ansi
 import { parseStringWidth } from '#console/string-utils/validators/width';
 import { visibleWidth } from '#console/string-utils/width';
 
+/** Truncates a string to the given visible width, appending a marker and keeping ANSI styling intact. */
 export const truncate = (value: string, width: number, marker = '...'): string => {
 	const parsedWidth = parseStringWidth(width);
 

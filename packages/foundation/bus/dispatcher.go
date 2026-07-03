@@ -151,7 +151,7 @@ func (d *DispatcherImpl) FlushDeferred(ctx context.Context) error {
 // DispatchToQueue serialises the command and pushes it to the queue backend.
 func (d *DispatcherImpl) DispatchToQueue(ctx context.Context, command any) error {
 	if d.queueBackend == nil {
-		return fmt.Errorf("bus: no queue backend configured")
+		return ErrNoQueueBackend
 	}
 
 	payload, err := marshalCommand(command)
@@ -182,7 +182,7 @@ func (d *DispatcherImpl) DispatchToQueue(ctx context.Context, command any) error
 // FindBatch retrieves a Batch by ID from the repository.
 func (d *DispatcherImpl) FindBatch(ctx context.Context, id string) (*Batch, error) {
 	if d.batchRepo == nil {
-		return nil, fmt.Errorf("bus: no batch repository configured")
+		return nil, ErrNoBatchRepository
 	}
 
 	return d.batchRepo.Get(ctx, id)
@@ -261,7 +261,7 @@ func (d *DispatcherImpl) execute(ctx context.Context, command any) (any, error) 
 			return h.Handle(ctx)
 		}
 
-		return nil, fmt.Errorf("bus: no handler registered for %T", command)
+		return nil, fmt.Errorf("%w for %T", ErrNoHandler, command)
 	}
 
 	return handler(ctx, command)

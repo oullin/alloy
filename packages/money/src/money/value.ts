@@ -11,16 +11,23 @@ export interface MoneyJsonValue {
 	readonly currency: string;
 }
 
+/**
+ * An immutable monetary amount: a bigint value in minor units paired with a
+ * currency definition. Arithmetic lives on {@link MoneyManager}; this class
+ * covers comparison, inspection, formatting, and (de)serialization.
+ */
 export class MoneyValueBase {
 	public constructor(
 		private readonly valueAmount: Amount,
 		private readonly valueCurrency: CurrencyDefinition | null,
 	) {}
 
+	/** Creates a money value in the given currency using the provided (or default) manager. */
 	public static fromCurrency(amount: Amount, code: string, manager: MoneyManager = MoneyManager.default()): MoneyValue {
 		return manager.create(amount, code);
 	}
 
+	/** Rehydrates a money value from an `amount|currency_code` database pair. */
 	public static fromDbValue(input: string | Uint8Array): MoneyValue {
 		const separator = getDbMoneyValueSeparator();
 		const value = typeof input === 'string' ? input : new TextDecoder().decode(input);
@@ -47,12 +54,18 @@ export class MoneyValueBase {
 		setDbMoneyValueSeparator(separator);
 	}
 
+	/** Returns the raw amount in the currency's minor units (e.g. cents). */
 	public amount(): Amount {
 		requireMoney(this as MoneyValue);
 
 		return this.valueAmount;
 	}
 
+	/**
+	 * Returns the currency definition attached to this value.
+	 *
+	 * @throws MoneyError `ERR_NO_CURRENCY_INSTANCE` when the value has no currency.
+	 */
 	public currency(): CurrencyDefinition {
 		if (this.valueCurrency === null) {
 			throw ERR_NO_CURRENCY_INSTANCE;
@@ -61,6 +74,11 @@ export class MoneyValueBase {
 		return this.valueCurrency;
 	}
 
+	/**
+	 * Asserts that both values share the same currency.
+	 *
+	 * @throws MoneyError `ERR_CURRENCY_MISMATCH` when the currencies differ.
+	 */
 	public assertSameCurrency(other: MoneyValue | null | undefined): void {
 		const value = requireMoney(this as MoneyValue);
 		const otherValue = requireMoney(other);
@@ -77,6 +95,11 @@ export class MoneyValueBase {
 		return value.currency().equals(otherValue.currency());
 	}
 
+	/**
+	 * Compares two same-currency values, returning -1, 0, or 1.
+	 *
+	 * @throws MoneyError `ERR_CURRENCY_MISMATCH` when the currencies differ.
+	 */
 	public compareAmount(other: MoneyValue): number {
 		this.assertSameCurrency(other);
 
@@ -129,10 +152,12 @@ export class MoneyValueBase {
 		return this.valueAmount < 0n;
 	}
 
+	/** Formats the value for display using the currency's formatting rules (e.g. `S$15.00`). */
 	public display(): string {
 		return this.currency().formatter().format(this.valueAmount);
 	}
 
+	/** Converts the minor-unit amount to a floating-point major-unit number (e.g. 1500n -> 15). */
 	public asMajorUnits(): number {
 		return this.currency().formatter().toMajorUnits(this.valueAmount);
 	}
@@ -141,6 +166,7 @@ export class MoneyValueBase {
 		return this.compareAmount(other);
 	}
 
+	/** Serializes the value as an `amount|currency_code` pair for database storage. */
 	public dbValue(): string {
 		return `${this.valueAmount.toString()}${getDbMoneyValueSeparator()}${this.currency().code}`;
 	}
@@ -161,6 +187,10 @@ const moneyValueFactories = Object.fromEntries(
 	CURRENCY_CODES.map((code) => [`from${code}`, (amount: Amount): MoneyValue => MoneyManager.default().create(amount, code)]),
 ) as MoneyValueFactories;
 
+/**
+ * {@link MoneyValueBase} augmented with per-currency static factories such as
+ * `MoneyValue.fromUSD(1500n)` for every known ISO currency code.
+ */
 export const MoneyValue = Object.assign(MoneyValueBase, moneyValueFactories) as typeof MoneyValueBase & MoneyValueFactories;
 
 export type MoneyValue = MoneyValueBase;

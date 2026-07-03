@@ -2,6 +2,7 @@ package bus_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"alloy.dev/foundation/bus"
@@ -74,8 +75,8 @@ func TestPendingChainEmptyError(t *testing.T) {
 
 	_, err := chain.Dispatch(context.Background())
 
-	if err == nil {
-		t.Error("expected error for empty chain")
+	if !errors.Is(err, bus.ErrEmptyChain) {
+		t.Errorf("expected ErrEmptyChain, got %v", err)
 	}
 }
 
@@ -151,8 +152,8 @@ func TestPendingChainDispatchAfterResponseEmptyError(t *testing.T) {
 
 	err := chain.DispatchAfterResponse(context.Background())
 
-	if err == nil {
-		t.Error("expected error for empty chain")
+	if !errors.Is(err, bus.ErrEmptyChain) {
+		t.Errorf("expected ErrEmptyChain, got %v", err)
 	}
 }
 

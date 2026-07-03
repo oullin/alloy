@@ -2,6 +2,7 @@ import { confirmHasDefault, normalizeConfirmPromptOptions } from '#console/promp
 import { runConfirmPrompt } from '#console/prompts/select/confirm-run';
 import type { ConfirmPromptOptions } from '#console/types';
 
+/** Asks a yes/no question and resolves with the choice. */
 export function confirm(options: ConfirmPromptOptions): Promise<boolean>;
 
 export function confirm(

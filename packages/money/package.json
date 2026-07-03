@@ -1,11 +1,17 @@
 {
   "name": "@alloy/money",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "packages/money"
+  },
   "sideEffects": false,
   "files": [
     "dist"
@@ -54,7 +60,7 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && rm -rf dist \"${ALLOY_CACHE_PATH}/tsbuild/money-build.tsbuildinfo\" && tsc -p tsconfig.build.json'",

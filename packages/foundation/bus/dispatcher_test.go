@@ -2,6 +2,7 @@ package bus_test
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 
@@ -231,8 +232,8 @@ func TestDispatchToQueueNoBackendError(t *testing.T) {
 
 	err := d.DispatchToQueue(context.Background(), testCommand{Value: "x"})
 
-	if err == nil {
-		t.Error("expected error when no queue backend configured")
+	if !errors.Is(err, bus.ErrNoQueueBackend) {
+		t.Errorf("expected ErrNoQueueBackend, got %v", err)
 	}
 }
 
@@ -423,8 +424,8 @@ func TestFindBatchNoRepoError(t *testing.T) {
 
 	_, err := d.FindBatch(context.Background(), "any-id")
 
-	if err == nil {
-		t.Error("expected error when no batch repository configured")
+	if !errors.Is(err, bus.ErrNoBatchRepository) {
+		t.Errorf("expected ErrNoBatchRepository, got %v", err)
 	}
 }
 

@@ -2,6 +2,7 @@ import { normalizeSelectPromptOptions, selectHasDefault } from '#console/prompts
 import { runSelectPrompt } from '#console/prompts/select/run';
 import type { ChoiceOptions, SelectPromptOptions } from '#console/types';
 
+/** Prompts the user to pick a single option from a list. */
 export function select<T>(options: SelectPromptOptions<T>): Promise<T>;
 
 export function select<T>(

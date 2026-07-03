@@ -11,6 +11,11 @@ import { MachineLogger } from '#workflow/machine/logger';
 import { assertTransitionAllowed } from '#workflow/machine/transition-gate';
 import { createTransitionPlan, resolveTransition } from '#workflow/machine/transition-plan';
 
+/**
+ * Workflow engine that applies transitions from a {@link Definition} to
+ * subjects of type `T`. Markings are persisted through a `MarkingStore` and
+ * every transition dispatches guard/leave/transition/enter lifecycle events.
+ */
 export class Machine<T> implements WorkflowEngine<T> {
 	readonly #name: string;
 	readonly #definition: Definition;
@@ -34,6 +39,7 @@ export class Machine<T> implements WorkflowEngine<T> {
 		this.#lifecycle = new WorkflowLifecycleDispatcher(name, dispatcher);
 	}
 
+	/** Routes the machine's debug/info/error output to the given sink. */
 	public setLogger(logger: Sink): this {
 		this.#logger.set(logger);
 
@@ -56,6 +62,7 @@ export class Machine<T> implements WorkflowEngine<T> {
 		return this.#dispatcher;
 	}
 
+	/** Reads the subject's current marking, falling back to the definition's initial marking. */
 	public getMarking(subject: T): Marking {
 		const marking = this.#store.getMarking(subject, this.#definition);
 
@@ -66,6 +73,7 @@ export class Machine<T> implements WorkflowEngine<T> {
 		return marking;
 	}
 
+	/** Reports whether the named transition can currently be applied to the subject. */
 	public can(subject: T, transitionName: string): boolean {
 		try {
 			this.transitionState(subject, transitionName, {});
@@ -80,14 +88,23 @@ export class Machine<T> implements WorkflowEngine<T> {
 		return !this.can(subject, transitionName);
 	}
 
+	/** Lists the transitions that can be applied from the subject's current marking. */
 	public enabledTransitions(subject: T): Transition[] {
 		return this.transitionsByState(subject, true);
 	}
 
+	/** Lists the transitions that are blocked from the subject's current marking. */
 	public disabledTransitions(subject: T): Transition[] {
 		return this.transitionsByState(subject, false);
 	}
 
+	/**
+	 * Applies the named transition: dispatches lifecycle events, persists the
+	 * new marking through the store, and returns it.
+	 *
+	 * @throws TransitionNotFoundError when the definition has no such transition.
+	 * @throws TransitionError when the transition is blocked by the marking or a guard.
+	 */
 	public apply(subject: T, transitionName: string, context: WorkflowContext = {}): Marking {
 		this.#logger.debug('applying transition', 'transition', transitionName, 'workflow', this.#name);
 

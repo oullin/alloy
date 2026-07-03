@@ -5,6 +5,11 @@ import { cloneNestedRecord, cloneRecord } from '#workflow/types';
 import type { DefinitionInput } from '#workflow/definition/types';
 import { validateDefinition } from '#workflow/definition/validation';
 
+/**
+ * Immutable description of a workflow: its places, transitions, initial
+ * marking, and metadata. Usually assembled with `DefinitionBuilder` and
+ * consumed by `Machine`/`StateMachine`.
+ */
 export class Definition {
 	public readonly places: string[];
 	public readonly transitions: Transition[];
@@ -34,6 +39,7 @@ export class Definition {
 		});
 	}
 
+	/** Finds a transition by name, returning a metadata-enriched clone or undefined. */
 	public transition(name: string): Transition | undefined {
 		const transition = this.transitions.find((item) => item.name === name);
 
@@ -78,6 +84,12 @@ export class Definition {
 		return Object.hasOwn(this.transitionMetadata[transition] ?? {}, key);
 	}
 
+	/**
+	 * Checks structural integrity: known places, a non-empty initial marking,
+	 * and no unreachable places.
+	 *
+	 * @throws Error when the definition is invalid.
+	 */
 	public validate(): void {
 		validateDefinition(this);
 	}

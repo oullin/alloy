@@ -1,6 +1,7 @@
 package filesystem_test
 
 import (
+	"context"
 	"errors"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,7 @@ func TestGet(t *testing.T) {
 
 	writeFile(t, path, "hello world")
 
-	data, err := fs.Get(path)
+	data, err := fs.Get(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -35,7 +36,7 @@ func TestGetNonexistentFile(t *testing.T) {
 	fs := newFilesystem()
 	dir := t.TempDir()
 
-	_, err := fs.Get(filepath.Join(dir, "nonexistent.txt"))
+	_, err := fs.Get(context.Background(), filepath.Join(dir, "nonexistent.txt"))
 
 	if !errors.Is(err, filesystem.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
@@ -53,7 +54,7 @@ func TestJSON(t *testing.T) {
 
 	var result map[string]any
 
-	if err := fs.JSON(path, &result); err != nil {
+	if err := fs.JSON(context.Background(), path, &result); err != nil {
 		t.Fatal(err)
 	}
 
@@ -77,7 +78,7 @@ func TestJSONInvalid(t *testing.T) {
 
 	var result map[string]any
 
-	if err := fs.JSON(path, &result); err == nil {
+	if err := fs.JSON(context.Background(), path, &result); err == nil {
 		t.Fatal("expected error for invalid JSON")
 	}
 }
@@ -89,7 +90,7 @@ func TestJSONNonexistentFile(t *testing.T) {
 	dir := t.TempDir()
 
 	var result map[string]any
-	err := fs.JSON(filepath.Join(dir, "missing.json"), &result)
+	err := fs.JSON(context.Background(), filepath.Join(dir, "missing.json"), &result)
 
 	if !errors.Is(err, filesystem.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
@@ -105,7 +106,7 @@ func TestSharedGet(t *testing.T) {
 
 	writeFile(t, path, "shared content")
 
-	data, err := fs.SharedGet(path)
+	data, err := fs.SharedGet(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -122,7 +123,7 @@ func TestSharedGetNonexistentFile(t *testing.T) {
 	fs := newFilesystem()
 	dir := t.TempDir()
 
-	_, err := fs.SharedGet(filepath.Join(dir, "missing.txt"))
+	_, err := fs.SharedGet(context.Background(), filepath.Join(dir, "missing.txt"))
 
 	if err == nil {
 		t.Fatal("expected error for nonexistent file")
@@ -138,7 +139,7 @@ func TestLines(t *testing.T) {
 
 	writeFile(t, path, "line1\nline2\nline3")
 
-	seq, err := fs.Lines(path)
+	seq, err := fs.Lines(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -165,7 +166,7 @@ func TestLinesNonexistentFile(t *testing.T) {
 	fs := newFilesystem()
 	dir := t.TempDir()
 
-	_, err := fs.Lines(filepath.Join(dir, "missing.txt"))
+	_, err := fs.Lines(context.Background(), filepath.Join(dir, "missing.txt"))
 
 	if !errors.Is(err, filesystem.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got %v", err)
@@ -181,7 +182,7 @@ func TestLinesEmptyFile(t *testing.T) {
 
 	writeFile(t, path, "")
 
-	seq, err := fs.Lines(path)
+	seq, err := fs.Lines(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -208,7 +209,7 @@ func TestLinesHandlesLongLines(t *testing.T) {
 
 	writeFile(t, path, longLine+"\nshort")
 
-	seq, err := fs.Lines(path)
+	seq, err := fs.Lines(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -238,7 +239,7 @@ func TestLinesBreakEarly(t *testing.T) {
 
 	writeFile(t, path, "line1\nline2\nline3\nline4\nline5")
 
-	seq, err := fs.Lines(path)
+	seq, err := fs.Lines(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -256,5 +257,57 @@ func TestLinesBreakEarly(t *testing.T) {
 
 	if len(lines) != 2 {
 		t.Fatalf("expected 2 lines, got %d", len(lines))
+	}
+}
+
+func TestGetCancelledContext(t *testing.T) {
+	t.Parallel()
+
+	fs := newFilesystem()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "file.txt")
+
+	writeFile(t, path, "hello world")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := fs.Get(ctx, path)
+
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
+	}
+}
+
+func TestLinesStopsWhenContextCancelled(t *testing.T) {
+	t.Parallel()
+
+	fs := newFilesystem()
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lines.txt")
+
+	writeFile(t, path, "line1\nline2\nline3\nline4\nline5")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	seq, err := fs.Lines(ctx, path)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var lines []string
+
+	for line := range seq {
+		lines = append(lines, line)
+
+		if len(lines) == 2 {
+			cancel()
+		}
+	}
+
+	if len(lines) != 2 {
+		t.Fatalf("expected iteration to stop after 2 lines, got %d", len(lines))
 	}
 }

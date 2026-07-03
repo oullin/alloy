@@ -23,11 +23,37 @@ jobs:
       - name: Check package imports
         run: pnpm imports:check
 
+      - name: Lint
+        run: pnpm exec vp lint
+
       - name: Typecheck
         run: pnpm exec vp check
 
       - name: Tests
-        run: pnpm exec vp test
+        run: pnpm exec vp test --coverage
+
+      - name: Coverage summary
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          summary="infra/.cache/vitest/coverage/coverage-summary.json"
+          {
+            echo "### TypeScript coverage"
+            if [[ -f "${summary}" ]]; then
+              node -e "const t=require('./${summary}').total; for (const k of ['statements','branches','functions','lines']) console.log('- ' + k + ': ' + t[k].pct + '%')"
+            else
+              echo "- summary file not generated; see the test step output"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ts-coverage
+          path: infra/.cache/vitest/coverage
+          if-no-files-found: ignore
 
       - name: Pack
         run: pnpm exec vp pack

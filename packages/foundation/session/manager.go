@@ -71,7 +71,7 @@ func (m *Manager) Driver(ctx context.Context, driverName string) (*Store, error)
 	creator, ok := m.drivers[driverName]
 
 	if !ok {
-		return nil, fmt.Errorf("session: unsupported driver %q", driverName)
+		return nil, fmt.Errorf("%w: %q", ErrUnsupportedDriver, driverName)
 	}
 
 	cfg := m.config[driverName]
