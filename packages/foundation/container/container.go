@@ -344,10 +344,11 @@ func (c *App) Parameters() map[string]any {
 
 // ---------- Aliases ----------
 
-// Alias creates an alias that resolves to the given abstract.
-func (c *App) Alias(abstract, alias string) {
+// Alias creates an alias that resolves to the given abstract. It returns
+// ErrSelfAlias when the alias and the abstract are the same name.
+func (c *App) Alias(abstract, alias string) error {
 	if abstract == alias {
-		panic(fmt.Sprintf("%s: %q", ErrSelfAlias.Error(), alias))
+		return fmt.Errorf("%w: %q", ErrSelfAlias, alias)
 	}
 
 	c.mu.Lock()
@@ -356,6 +357,8 @@ func (c *App) Alias(abstract, alias string) {
 
 	c.aliases[alias] = abstract
 	c.abstractAliases[abstract] = append(c.abstractAliases[abstract], alias)
+
+	return nil
 }
 
 // GetAlias resolves an alias chain to the actual abstract name.
