@@ -4,6 +4,7 @@ go 1.26.4
 
 require (
 	github.com/go-webauthn/webauthn v0.17.4
+	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/oklog/ulid/v2 v2.1.1

@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	dbpkg "alloy.dev/foundation/database"
-	_ "modernc.org/sqlite"
 )
 
 func TestWithTxCommitsOnSuccess(t *testing.T) {
