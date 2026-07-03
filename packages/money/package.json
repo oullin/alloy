@@ -1,11 +1,17 @@
 {
   "name": "@alloy/money",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "packages/money"
+  },
   "sideEffects": false,
   "files": [
     "dist"
