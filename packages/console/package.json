@@ -7,6 +7,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "packages/console"
+  },
   "sideEffects": false,
   "files": [
     "dist"

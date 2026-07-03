@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "packages/tempo"
+  },
   "type": "module",
   "exports": {
     ".": {
