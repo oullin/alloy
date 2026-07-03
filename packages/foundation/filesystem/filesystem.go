@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"context"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -128,7 +129,11 @@ func (f *Local) IsWritable(path string) bool {
 
 // Hash calculates the hash of a file. The algorithm defaults to "md5".
 // Supported algorithms: "md5", "sha1", "sha256", "sha512".
-func (f *Local) Hash(path string, algorithm ...string) (string, error) {
+func (f *Local) Hash(ctx context.Context, path string, algorithm ...string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+
 	algo := "md5"
 
 	if len(algorithm) > 0 {
@@ -158,7 +163,7 @@ func (f *Local) Hash(path string, algorithm ...string) (string, error) {
 
 	defer file.Close()
 
-	if _, err := io.Copy(h, file); err != nil {
+	if _, err := copyContext(ctx, h, file); err != nil {
 		return "", err
 	}
 
@@ -166,14 +171,14 @@ func (f *Local) Hash(path string, algorithm ...string) (string, error) {
 }
 
 // HasSameHash determines if two files have the same hash.
-func (f *Local) HasSameHash(firstFile, secondFile string) (bool, error) {
-	h1, err := f.Hash(firstFile)
+func (f *Local) HasSameHash(ctx context.Context, firstFile, secondFile string) (bool, error) {
+	h1, err := f.Hash(ctx, firstFile)
 
 	if err != nil {
 		return false, err
 	}
 
-	h2, err := f.Hash(secondFile)
+	h2, err := f.Hash(ctx, secondFile)
 
 	if err != nil {
 		return false, err

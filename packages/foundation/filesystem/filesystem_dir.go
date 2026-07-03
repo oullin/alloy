@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -10,7 +11,11 @@ import (
 // Files returns the files in the given directory (non-recursive by default).
 // When hidden is true (or omitted), hidden files (starting with ".") are included.
 // When hidden is explicitly set to false, hidden files are excluded.
-func (f *Local) Files(directory string, hidden ...bool) ([]string, error) {
+func (f *Local) Files(ctx context.Context, directory string, hidden ...bool) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	includeHidden := false
 
 	if len(hidden) > 0 {
@@ -26,6 +31,10 @@ func (f *Local) Files(directory string, hidden ...bool) ([]string, error) {
 	var files []string
 
 	for _, entry := range entries {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+
 		if entry.IsDir() {
 			continue
 		}
@@ -41,7 +50,12 @@ func (f *Local) Files(directory string, hidden ...bool) ([]string, error) {
 }
 
 // AllFiles returns all files in the directory tree recursively.
-func (f *Local) AllFiles(directory string, hidden ...bool) ([]string, error) {
+// The walk stops early when ctx is cancelled.
+func (f *Local) AllFiles(ctx context.Context, directory string, hidden ...bool) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	includeHidden := false
 
 	if len(hidden) > 0 {
@@ -52,6 +66,10 @@ func (f *Local) AllFiles(directory string, hidden ...bool) ([]string, error) {
 
 	err := filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
+			return err
+		}
+
+		if err := ctx.Err(); err != nil {
 			return err
 		}
 
@@ -76,7 +94,11 @@ func (f *Local) AllFiles(directory string, hidden ...bool) ([]string, error) {
 }
 
 // Directories returns the directories in the given directory (non-recursive).
-func (f *Local) Directories(directory string) ([]string, error) {
+func (f *Local) Directories(ctx context.Context, directory string) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {
@@ -86,6 +108,10 @@ func (f *Local) Directories(directory string) ([]string, error) {
 	var dirs []string
 
 	for _, entry := range entries {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+
 		if entry.IsDir() {
 			dirs = append(dirs, filepath.Join(directory, entry.Name()))
 		}
@@ -95,11 +121,20 @@ func (f *Local) Directories(directory string) ([]string, error) {
 }
 
 // AllDirectories returns all directories in the directory tree recursively.
-func (f *Local) AllDirectories(directory string) ([]string, error) {
+// The walk stops early when ctx is cancelled.
+func (f *Local) AllDirectories(ctx context.Context, directory string) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	var dirs []string
 
 	err := filepath.WalkDir(directory, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
+			return err
+		}
+
+		if err := ctx.Err(); err != nil {
 			return err
 		}
 
@@ -139,7 +174,11 @@ func (f *Local) MakeDirectory(path string, mode ...fs.FileMode) error {
 
 // MoveDirectory moves a directory from one location to another.
 // When overwrite is true, any existing destination directory is removed first.
-func (f *Local) MoveDirectory(from, to string, overwrite ...bool) error {
+func (f *Local) MoveDirectory(ctx context.Context, from, to string, overwrite ...bool) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	shouldOverwrite := false
 
 	if len(overwrite) > 0 {
@@ -164,7 +203,7 @@ func (f *Local) MoveDirectory(from, to string, overwrite ...bool) error {
 	}
 
 	// Fallback: copy + delete (handles cross-device moves).
-	if err := f.CopyDirectory(from, to); err != nil {
+	if err := f.CopyDirectory(ctx, from, to); err != nil {
 		return err
 	}
 
@@ -172,7 +211,12 @@ func (f *Local) MoveDirectory(from, to string, overwrite ...bool) error {
 }
 
 // CopyDirectory recursively copies a directory and its contents.
-func (f *Local) CopyDirectory(directory, destination string) error {
+// The walk stops early when ctx is cancelled.
+func (f *Local) CopyDirectory(ctx context.Context, directory, destination string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	info, err := os.Stat(directory)
 
 	if err != nil {
@@ -188,6 +232,10 @@ func (f *Local) CopyDirectory(directory, destination string) error {
 			return err
 		}
 
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		rel, err := filepath.Rel(directory, path)
 
 		if err != nil {
@@ -200,13 +248,17 @@ func (f *Local) CopyDirectory(directory, destination string) error {
 			return os.MkdirAll(target, 0o755)
 		}
 
-		return f.Copy(path, target)
+		return f.Copy(ctx, path, target)
 	})
 }
 
 // DeleteDirectory removes a directory and all of its contents.
 // When preserve is true, the directory itself is kept but its contents are removed.
-func (f *Local) DeleteDirectory(directory string, preserve ...bool) error {
+func (f *Local) DeleteDirectory(ctx context.Context, directory string, preserve ...bool) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	info, err := os.Stat(directory)
 
 	if err != nil {
@@ -228,7 +280,7 @@ func (f *Local) DeleteDirectory(directory string, preserve ...bool) error {
 	}
 
 	if shouldPreserve {
-		return f.cleanDir(directory)
+		return f.cleanDir(ctx, directory)
 	}
 
 	return os.RemoveAll(directory)
@@ -236,7 +288,11 @@ func (f *Local) DeleteDirectory(directory string, preserve ...bool) error {
 
 // DeleteDirectories removes all subdirectories within the given directory,
 // leaving files intact.
-func (f *Local) DeleteDirectories(directory string) error {
+func (f *Local) DeleteDirectories(ctx context.Context, directory string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {
@@ -244,6 +300,10 @@ func (f *Local) DeleteDirectories(directory string) error {
 	}
 
 	for _, entry := range entries {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		if entry.IsDir() {
 			if err := os.RemoveAll(filepath.Join(directory, entry.Name())); err != nil {
 				return err
@@ -255,11 +315,15 @@ func (f *Local) DeleteDirectories(directory string) error {
 }
 
 // CleanDirectory removes all contents of a directory but keeps the directory.
-func (f *Local) CleanDirectory(directory string) error {
-	return f.cleanDir(directory)
+func (f *Local) CleanDirectory(ctx context.Context, directory string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	return f.cleanDir(ctx, directory)
 }
 
-func (f *Local) cleanDir(directory string) error {
+func (f *Local) cleanDir(ctx context.Context, directory string) error {
 	entries, err := os.ReadDir(directory)
 
 	if err != nil {
@@ -267,6 +331,10 @@ func (f *Local) cleanDir(directory string) error {
 	}
 
 	for _, entry := range entries {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		path := filepath.Join(directory, entry.Name())
 
 		if err := os.RemoveAll(path); err != nil {

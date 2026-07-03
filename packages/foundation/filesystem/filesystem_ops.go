@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"context"
 	"io"
 	"os"
 	"path/filepath"
@@ -23,8 +24,13 @@ func (f *Local) Move(path, target string) error {
 	return os.Rename(path, target)
 }
 
-// Copy copies a file from path to target.
-func (f *Local) Copy(path, target string) error {
+// Copy copies a file from path to target. The copy stops early when ctx
+// is cancelled.
+func (f *Local) Copy(ctx context.Context, path, target string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	src, err := os.Open(path)
 
 	if err != nil {
@@ -53,7 +59,7 @@ func (f *Local) Copy(path, target string) error {
 		return err
 	}
 
-	if _, err := io.Copy(dst, src); err != nil {
+	if _, err := copyContext(ctx, dst, src); err != nil {
 		_ = dst.Close()
 		_ = src.Close()
 
@@ -85,4 +91,41 @@ func (f *Local) RelativeLink(target, link string) error {
 	}
 
 	return os.Symlink(rel, link)
+}
+
+// copyContext copies from src to dst in 1 MiB chunks, checking for context
+// cancellation between chunks.
+func copyContext(ctx context.Context, dst io.Writer, src io.Reader) (int64, error) {
+	buf := make([]byte, 1<<20)
+
+	var written int64
+
+	for {
+		if err := ctx.Err(); err != nil {
+			return written, err
+		}
+
+		n, readErr := src.Read(buf)
+
+		if n > 0 {
+			w, writeErr := dst.Write(buf[:n])
+			written += int64(w)
+
+			if writeErr != nil {
+				return written, writeErr
+			}
+
+			if w < n {
+				return written, io.ErrShortWrite
+			}
+		}
+
+		if readErr == io.EOF {
+			return written, nil
+		}
+
+		if readErr != nil {
+			return written, readErr
+		}
+	}
 }

@@ -1,6 +1,7 @@
 package filesystem_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -191,7 +192,7 @@ func TestHash(t *testing.T) {
 
 	writeFile(t, path, "hello")
 
-	h, err := fs.Hash(path)
+	h, err := fs.Hash(context.Background(), path)
 
 	if err != nil {
 		t.Fatal(err)
@@ -216,7 +217,7 @@ func TestHashSHA1(t *testing.T) {
 
 	writeFile(t, path, "hello")
 
-	h, err := fs.Hash(path, "sha1")
+	h, err := fs.Hash(context.Background(), path, "sha1")
 
 	if err != nil {
 		t.Fatal(err)
@@ -236,7 +237,7 @@ func TestHashSHA256(t *testing.T) {
 
 	writeFile(t, path, "hello")
 
-	h, err := fs.Hash(path, "sha256")
+	h, err := fs.Hash(context.Background(), path, "sha256")
 
 	if err != nil {
 		t.Fatal(err)
@@ -256,7 +257,7 @@ func TestHashUnsupportedAlgorithm(t *testing.T) {
 
 	writeFile(t, path, "hello")
 
-	_, err := fs.Hash(path, "blake2b")
+	_, err := fs.Hash(context.Background(), path, "blake2b")
 
 	if err != filesystem.ErrHashAlgorithm {
 		t.Fatalf("expected ErrHashAlgorithm, got %v", err)
@@ -276,7 +277,7 @@ func TestHasSameHash(t *testing.T) {
 	writeFile(t, path2, "hello")
 	writeFile(t, path3, "world")
 
-	same, err := fs.HasSameHash(path1, path2)
+	same, err := fs.HasSameHash(context.Background(), path1, path2)
 
 	if err != nil {
 		t.Fatal(err)
@@ -286,7 +287,7 @@ func TestHasSameHash(t *testing.T) {
 		t.Fatal("expected files with same content to have same hash")
 	}
 
-	same, err = fs.HasSameHash(path1, path3)
+	same, err = fs.HasSameHash(context.Background(), path1, path3)
 
 	if err != nil {
 		t.Fatal(err)
