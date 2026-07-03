@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
 )
 
 type stubProvider struct {

@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"alloy.dev/foundation/httpx/routing/compiler"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/compiler"
 )
 
 // boundRoute is the minimum surface RouteParameterBinder needs from a route.

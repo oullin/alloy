@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/queue"
-	"alloy.dev/foundation/queue/drivers"
+	"github.com/oullin/alloy/packages/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue/drivers"
 )
 
 func TestSyncDriverProcessesImmediately(t *testing.T) {

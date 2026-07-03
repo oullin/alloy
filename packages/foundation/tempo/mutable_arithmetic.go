@@ -1,7 +1,7 @@
 package tempo
 
 import (
-	"alloy.dev/foundation/tempo/arithmetic"
+	"github.com/oullin/alloy/packages/foundation/tempo/arithmetic"
 )
 
 func (mutable *MutableTime) Add(value int, unit Unit) *MutableTime {

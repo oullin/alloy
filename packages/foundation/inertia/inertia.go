@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	"alloy.dev/foundation/inertia/middleware"
-	"alloy.dev/foundation/inertia/props"
-	"alloy.dev/foundation/inertia/protocol"
-	"alloy.dev/foundation/inertia/response"
+	"github.com/oullin/alloy/packages/foundation/inertia/middleware"
+	"github.com/oullin/alloy/packages/foundation/inertia/props"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/response"
 )
 
 // Inertia is the central server-side adapter for the Inertia.js

@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/foundation/money/currency"
-	"alloy.dev/foundation/money/exception"
-	testutil "alloy.dev/foundation/money/tests"
+	"github.com/oullin/alloy/packages/foundation/money/currency"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
+	testutil "github.com/oullin/alloy/packages/foundation/money/tests"
 )
 
 func TestNewManager(t *testing.T) {

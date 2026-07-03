@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	contract "alloy.dev/foundation/contracts/validation"
-	"alloy.dev/foundation/validation/rules"
+	contract "github.com/oullin/alloy/packages/foundation/contracts/validation"
+	"github.com/oullin/alloy/packages/foundation/validation/rules"
 )
 
 // Ref: @alloy/code-0389

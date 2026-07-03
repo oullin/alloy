@@ -3,7 +3,7 @@ package collection
 import (
 	"slices"
 
-	"alloy.dev/foundation/collection/support"
+	"github.com/oullin/alloy/packages/foundation/collection/support"
 )
 
 // First returns the first element matching the optional predicate.

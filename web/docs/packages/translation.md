@@ -19,7 +19,7 @@ Package translation provides i18n support: key-based message lookup with namespa
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/translation@latest
+go get github.com/oullin/alloy/packages/foundation/translation@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/translation"
+    _ "github.com/oullin/alloy/packages/foundation/translation"
 )
 
 func main() {

@@ -19,7 +19,7 @@ Package str provides the string-oriented portion of Alloy's support port. It inc
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/str@latest
+go get github.com/oullin/alloy/packages/foundation/str@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/str"
+    _ "github.com/oullin/alloy/packages/foundation/str"
 )
 
 func main() {

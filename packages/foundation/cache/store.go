@@ -3,7 +3,7 @@ package cache
 import (
 	"errors"
 
-	ccache "alloy.dev/foundation/contracts/cache"
+	ccache "github.com/oullin/alloy/packages/foundation/contracts/cache"
 )
 
 // Store is a TTL-aware cache contract.

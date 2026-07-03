@@ -18,7 +18,7 @@ Package mcp provides a complete Go implementation of the Model Context Protocol 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/ai/mcp@latest
+go get github.com/oullin/alloy/packages/foundation/ai/mcp@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/ai/mcp"
+    _ "github.com/oullin/alloy/packages/foundation/ai/mcp"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package contracts
 import (
 	"reflect"
 
-	"alloy.dev/foundation/httpx/routing/contracts/compiler"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/contracts/compiler"
 )
 
 // CallableDispatcher dispatches callable route actions.

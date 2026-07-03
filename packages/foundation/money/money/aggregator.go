@@ -1,7 +1,7 @@
 package money
 
 import (
-	"alloy.dev/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
 )
 
 // Aggregator performs aggregate operations on Value objects using a shared Manager.

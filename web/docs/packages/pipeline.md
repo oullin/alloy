@@ -19,7 +19,7 @@ Package pipeline provides a middleware-style processing chain. It allows sending
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/pipeline@latest
+go get github.com/oullin/alloy/packages/foundation/pipeline@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/pipeline"
+    _ "github.com/oullin/alloy/packages/foundation/pipeline"
 )
 
 func main() {

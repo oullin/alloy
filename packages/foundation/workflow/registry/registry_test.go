@@ -3,9 +3,9 @@ package registry_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/registry"
-	"alloy.dev/foundation/workflow/store"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/registry"
+	"github.com/oullin/alloy/packages/foundation/workflow/store"
 )
 
 type subject struct {

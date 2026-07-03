@@ -1,6 +1,6 @@
 package tempo
 
-import "alloy.dev/foundation/tempo/arithmetic"
+import "github.com/oullin/alloy/packages/foundation/tempo/arithmetic"
 
 func (tempo Time) Add(value int, unit Unit) Time {
 	return arithmetic.Add(tempo, value, unit, tempo.settingsSnapshot().MonthsOverflow, tempo.settingsSnapshot().YearsOverflow)

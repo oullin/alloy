@@ -3,7 +3,7 @@ package diff_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/tempo"
+	"github.com/oullin/alloy/packages/foundation/tempo"
 )
 
 func TestDiffInDaysUsesUnixSeconds(t *testing.T) {

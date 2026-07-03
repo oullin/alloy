@@ -4,8 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 
-	"alloy.dev/foundation/money/exception"
-	"alloy.dev/foundation/money/format"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/format"
 )
 
 // Definition represents the formatting rules for a specific currency.

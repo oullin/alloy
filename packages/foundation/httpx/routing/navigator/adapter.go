@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/foundation/httpx/routing"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing"
 )
 
 // AdapterOptions configures how Alloy routes are converted to RouteInfo.

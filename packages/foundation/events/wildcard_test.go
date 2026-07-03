@@ -3,7 +3,7 @@ package events_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/events"
+	"github.com/oullin/alloy/packages/foundation/events"
 )
 
 func TestMatchesWildcard(t *testing.T) {

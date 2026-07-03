@@ -1,6 +1,6 @@
 package tempo
 
-import "alloy.dev/foundation/tempo/runtime"
+import "github.com/oullin/alloy/packages/foundation/tempo/runtime"
 
 type Context = runtime.Context
 

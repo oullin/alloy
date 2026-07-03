@@ -3,8 +3,8 @@ package inertia
 import (
 	"fmt"
 
-	"alloy.dev/foundation/config"
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/config"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // DefaultHead returns a Head with sensible defaults: lang "en", robots

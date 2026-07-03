@@ -31,7 +31,7 @@
 //
 //	package cache
 //
-//	import "alloy.dev/foundation/container"
+//	import "github.com/oullin/alloy/packages/foundation/container"
 //
 //	type CacheServiceProvider struct {
 //	    app           *container.App

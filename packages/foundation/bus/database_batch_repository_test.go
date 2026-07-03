@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/bus"
+	"github.com/oullin/alloy/packages/foundation/bus"
 )
 
 // mockDBExecutor implements bus.DBExecutor for unit testing.

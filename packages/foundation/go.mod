@@ -1,4 +1,4 @@
-module alloy.dev/foundation
+module github.com/oullin/alloy/packages/foundation
 
 go 1.26.4
 

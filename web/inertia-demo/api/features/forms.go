@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/database"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func (a app) useFormHandler(w http.ResponseWriter, r *http.Request) {

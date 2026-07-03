@@ -1,6 +1,6 @@
 package response
 
-import "alloy.dev/foundation/inertia/protocol"
+import "github.com/oullin/alloy/packages/foundation/inertia/protocol"
 
 // Page is the Inertia.js page object sent to the client. On XHR visits
 // it is the JSON body; on initial visits it is embedded in a

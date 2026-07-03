@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"alloy.dev/foundation/encryption"
+	"github.com/oullin/alloy/packages/foundation/encryption"
 )
 
 // Message carries a flash notification across requests.

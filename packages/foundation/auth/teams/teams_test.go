@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/foundation/auth/teams"
+	"github.com/oullin/alloy/packages/foundation/auth/teams"
 )
 
 func TestServiceCreatesListsAndSwitchesTeams(t *testing.T) {

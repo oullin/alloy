@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // DBExecer is the minimal database interface for the database queue driver.

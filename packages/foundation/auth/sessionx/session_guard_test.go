@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/foundation/auth/events"
-	"alloy.dev/foundation/auth/internal/authtest"
-	"alloy.dev/foundation/auth/security"
-	"alloy.dev/foundation/auth/sessionx"
-	"alloy.dev/foundation/auth/user"
-	cauth "alloy.dev/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/auth/events"
+	"github.com/oullin/alloy/packages/foundation/auth/internal/authtest"
+	"github.com/oullin/alloy/packages/foundation/auth/security"
+	"github.com/oullin/alloy/packages/foundation/auth/sessionx"
+	"github.com/oullin/alloy/packages/foundation/auth/user"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // --- SessionGuard: User resolution ---

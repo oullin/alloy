@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/tempo"
+	"github.com/oullin/alloy/packages/foundation/tempo"
 )
 
 type mapTranslator map[string]string

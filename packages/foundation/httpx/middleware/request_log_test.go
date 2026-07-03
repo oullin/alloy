@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/foundation/httpx/middleware"
+	"github.com/oullin/alloy/packages/foundation/httpx/middleware"
 )
 
 var slogMu sync.Mutex

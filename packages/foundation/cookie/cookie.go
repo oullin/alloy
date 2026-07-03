@@ -3,7 +3,7 @@ package cookie
 import (
 	"net/http"
 
-	ccookie "alloy.dev/foundation/contracts/cookie"
+	ccookie "github.com/oullin/alloy/packages/foundation/contracts/cookie"
 )
 
 // SameSite matches the http.SameSite constants for convenient use.

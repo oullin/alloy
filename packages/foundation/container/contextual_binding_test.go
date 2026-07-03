@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/container"
+	"github.com/oullin/alloy/packages/foundation/container"
 )
 
 // Direct resolution (not through service-a) should get the default.

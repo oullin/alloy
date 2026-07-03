@@ -1,6 +1,6 @@
 package props
 
-import "alloy.dev/foundation/inertia/protocol"
+import "github.com/oullin/alloy/packages/foundation/inertia/protocol"
 
 // MergeAll combines multiple prop maps in order. Later sources
 // override earlier ones, giving a natural precedence chain:

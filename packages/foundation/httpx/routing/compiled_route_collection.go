@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"alloy.dev/foundation/httpx/routing/matching"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/matching"
 )
 
 // CompiledRouteCollection is the production-mode counterpart to

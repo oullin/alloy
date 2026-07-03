@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/foundation/money/currency"
-	"alloy.dev/foundation/money/exception"
-	"alloy.dev/foundation/money/exchange"
-	testutil "alloy.dev/foundation/money/tests"
+	"github.com/oullin/alloy/packages/foundation/money/currency"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/exchange"
+	testutil "github.com/oullin/alloy/packages/foundation/money/tests"
 )
 
 func TestMoneyConverter_UnknownTargetCurrency(t *testing.T) {

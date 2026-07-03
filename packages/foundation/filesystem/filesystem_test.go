@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"alloy.dev/foundation/filesystem"
+	"github.com/oullin/alloy/packages/foundation/filesystem"
 )
 
 func TestExists(t *testing.T) {

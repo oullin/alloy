@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"alloy.dev/foundation/httpx/handlerx"
-	"alloy.dev/foundation/httpx/routing"
+	"github.com/oullin/alloy/packages/foundation/httpx/handlerx"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing"
 )
 
 func TestNewHandlerDispatchesRoute(t *testing.T) {

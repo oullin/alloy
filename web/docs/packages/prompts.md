@@ -21,7 +21,7 @@ Package prompts provides beautiful, user-friendly terminal UI forms for Go appli
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/prompts@latest
+go get github.com/oullin/alloy/packages/foundation/prompts@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/prompts"
+    _ "github.com/oullin/alloy/packages/foundation/prompts"
 )
 
 func main() {

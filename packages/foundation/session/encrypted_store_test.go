@@ -6,8 +6,8 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/foundation/session"
-	"alloy.dev/foundation/session/handlers"
+	"github.com/oullin/alloy/packages/foundation/session"
+	"github.com/oullin/alloy/packages/foundation/session/handlers"
 )
 
 // fakeEncrypter applies base64 encoding as a reversible transformation.

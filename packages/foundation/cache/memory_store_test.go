@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/cache"
+	"github.com/oullin/alloy/packages/foundation/cache"
 )
 
 func TestMemoryStorePutGetForgetAndExpiry(t *testing.T) {

@@ -16,7 +16,7 @@ You can always reach for the underlying manager directly when you need to.
 ## Calling a Facade
 
 ```go
-import "alloy.dev/foundation/facades/cache"
+import "github.com/oullin/alloy/packages/foundation/facades/cache"
 
 func ShowProduct(id int) Response {
     cached, _ := cache.Driver()                 // *cache.Store

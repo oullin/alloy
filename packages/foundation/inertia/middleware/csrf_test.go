@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/inertia/middleware"
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/middleware"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func testKey(t *testing.T) []byte {

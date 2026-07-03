@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/foundation/inertia/protocol"
-	"alloy.dev/foundation/validation"
 	"alloy.dev/inertia-demo/internal/database"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/validation"
 )
 
 type contactForm struct {

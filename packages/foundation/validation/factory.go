@@ -1,6 +1,6 @@
 package validation
 
-import "alloy.dev/foundation/validation/rules"
+import "github.com/oullin/alloy/packages/foundation/validation/rules"
 
 // Factory creates Validator instances.  It holds shared extensions and
 // replacers that are propagated to every validator it creates.

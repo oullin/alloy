@@ -43,7 +43,7 @@ Pull a store from the manager and use it. The simplest path goes through
 the facade:
 
 ```go
-import facadecache "alloy.dev/foundation/facades/cache"
+import facadecache "github.com/oullin/alloy/packages/foundation/facades/cache"
 
 store, err := facadecache.Driver()
 if err != nil {
@@ -171,7 +171,7 @@ Package cache provides caching primitives. It defines a two-level abstraction: S
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/cache@latest
+go get github.com/oullin/alloy/packages/foundation/cache@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -215,7 +215,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/cache"
+    _ "github.com/oullin/alloy/packages/foundation/cache"
 )
 
 func main() {

@@ -131,8 +131,8 @@ provider is the right shape.
 package userprovider
 
 import (
-    "alloy.dev/foundation/container"
-    "alloy.dev/foundation/contracts/provider"
+    "github.com/oullin/alloy/packages/foundation/container"
+    "github.com/oullin/alloy/packages/foundation/contracts/provider"
     "myapp/services/users"
 )
 

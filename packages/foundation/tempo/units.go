@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/foundation/tempo/duration"
+	"github.com/oullin/alloy/packages/foundation/tempo/duration"
 )
 
 func normalizeUnit(unit Unit) Unit {

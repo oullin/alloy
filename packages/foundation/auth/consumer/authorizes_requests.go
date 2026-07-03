@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"alloy.dev/foundation/auth/access"
+	"github.com/oullin/alloy/packages/foundation/auth/access"
 )
 
 // AuthorizesRequests provides gate-based authorization helpers for HTTP handlers.

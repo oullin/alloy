@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"alloy.dev/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia"
 )
 
 type middlewareConfig struct {

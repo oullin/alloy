@@ -1,7 +1,7 @@
 package exchange
 
 import (
-	"alloy.dev/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
 )
 
 // Converter provides a simple interface for currency conversion with a fixed exchange

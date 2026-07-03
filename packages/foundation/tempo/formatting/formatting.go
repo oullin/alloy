@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/foundation/tempo/calendar"
-	"alloy.dev/foundation/tempo/core"
+	"github.com/oullin/alloy/packages/foundation/tempo/calendar"
+	"github.com/oullin/alloy/packages/foundation/tempo/core"
 )
 
 type Object struct {

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/foundation/validation"
+	"github.com/oullin/alloy/packages/foundation/validation"
 )
 
 // ValidationValidatorTest::testValidateUrlWithProtocols

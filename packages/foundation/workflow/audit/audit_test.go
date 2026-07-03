@@ -3,9 +3,9 @@ package audit_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/audit"
-	"alloy.dev/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/audit"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
 )
 
 func completedEvent(subject string, transition string) *events.CompletedEvent[string] {

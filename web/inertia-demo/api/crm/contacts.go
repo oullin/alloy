@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/props"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/database"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/props"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 const contactsPerPage = 15

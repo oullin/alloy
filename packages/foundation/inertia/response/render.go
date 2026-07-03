@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // HTMLConfig groups the rendering parameters for WriteHTML, keeping the

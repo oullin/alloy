@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // signalingQueue is a minimal Backend that returns ErrNoJob from every

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	cauth "alloy.dev/foundation/contracts/auth"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // EmailVerificationRequest handles email verification logic for the current user.

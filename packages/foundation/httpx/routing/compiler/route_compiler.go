@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	ccompiler "alloy.dev/foundation/httpx/routing/contracts/compiler"
+	ccompiler "github.com/oullin/alloy/packages/foundation/httpx/routing/contracts/compiler"
 )
 
 // SourceRoute is the minimum surface a compilable route must expose.

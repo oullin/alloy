@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/foundation/bus"
+	"github.com/oullin/alloy/packages/foundation/bus"
 )
 
 type chainJob struct {

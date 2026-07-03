@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	routegen "alloy.dev/foundation/httpx/routing/navigator"
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/middleware"
-	corei18n "alloy.dev/foundation/seo/i18n"
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/seed"
+	routegen "github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/middleware"
+	corei18n "github.com/oullin/alloy/packages/foundation/seo/i18n"
 )
 
 //go:embed resources/views/app.html

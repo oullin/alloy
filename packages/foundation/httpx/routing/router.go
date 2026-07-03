@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	crouting "alloy.dev/foundation/httpx/routing/contracts"
-	"alloy.dev/foundation/httpx/routing/matching"
+	crouting "github.com/oullin/alloy/packages/foundation/httpx/routing/contracts"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/matching"
 )
 
 // EventDispatcher is the minimal event surface the router needs.

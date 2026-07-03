@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"alloy.dev/foundation/events"
+	"github.com/oullin/alloy/packages/foundation/events"
 )
 
 // Register listener.

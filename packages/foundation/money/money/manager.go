@@ -4,10 +4,10 @@ import (
 	"math"
 	"strings"
 
-	"alloy.dev/foundation/money/calculator"
-	"alloy.dev/foundation/money/currency"
-	"alloy.dev/foundation/money/exception"
-	"alloy.dev/foundation/money/parser"
+	"github.com/oullin/alloy/packages/foundation/money/calculator"
+	"github.com/oullin/alloy/packages/foundation/money/currency"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/parser"
 )
 
 // Manager handles Value creation and operations with a dependency-injected currency manager and calculator.

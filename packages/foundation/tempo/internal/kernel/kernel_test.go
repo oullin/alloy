@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/tempo/duration"
-	"alloy.dev/foundation/tempo/internal/kernel"
+	"github.com/oullin/alloy/packages/foundation/tempo/duration"
+	"github.com/oullin/alloy/packages/foundation/tempo/internal/kernel"
 )
 
 const (

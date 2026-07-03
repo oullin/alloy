@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/database"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func TestRouteIDAndAction(t *testing.T) {

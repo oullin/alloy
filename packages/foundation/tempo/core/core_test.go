@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/tempo"
-	"alloy.dev/foundation/tempo/core"
+	"github.com/oullin/alloy/packages/foundation/tempo"
+	"github.com/oullin/alloy/packages/foundation/tempo/core"
 )
 
 // Compile-time guarantees that Time and *MutableTime continue to satisfy

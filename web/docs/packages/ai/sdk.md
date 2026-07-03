@@ -23,8 +23,8 @@ package main
 import (
     "context"
 
-    ai "alloy.dev/foundation/ai/sdk"
-    contractsai "alloy.dev/foundation/contracts/ai"
+    ai "github.com/oullin/alloy/packages/foundation/ai/sdk"
+    contractsai "github.com/oullin/alloy/packages/foundation/contracts/ai"
 )
 
 func main() {
@@ -105,7 +105,7 @@ Package ai provides a unified, expressive API for interacting with AI providers 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/ai/sdk@latest
+go get github.com/oullin/alloy/packages/foundation/ai/sdk@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -175,7 +175,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/ai/sdk"
+    _ "github.com/oullin/alloy/packages/foundation/ai/sdk"
 )
 
 func main() {

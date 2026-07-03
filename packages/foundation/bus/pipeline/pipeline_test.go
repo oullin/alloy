@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/foundation/bus/pipeline"
+	"github.com/oullin/alloy/packages/foundation/bus/pipeline"
 )
 
 func TestPipelineExecution(t *testing.T) {

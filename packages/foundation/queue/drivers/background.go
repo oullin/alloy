@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // BackgroundDriver dispatches jobs by spawning OS subprocesses.

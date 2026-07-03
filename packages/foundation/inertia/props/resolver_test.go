@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/foundation/inertia/props"
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/props"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // No X-Inertia-Partial-Data header — onlySet is empty.

@@ -3,8 +3,8 @@ package money
 import (
 	"testing"
 
-	"alloy.dev/foundation/money/currency"
-	testutil "alloy.dev/foundation/money/tests"
+	"github.com/oullin/alloy/packages/foundation/money/currency"
+	testutil "github.com/oullin/alloy/packages/foundation/money/tests"
 )
 
 func TestFactoryHelpers(t *testing.T) {

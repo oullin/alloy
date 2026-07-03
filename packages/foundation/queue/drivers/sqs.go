@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // SQSClient is the interface for an AWS SQS client.

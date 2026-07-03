@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/foundation/auth/user"
-	cauth "alloy.dev/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/auth/user"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 type ormQuery struct {

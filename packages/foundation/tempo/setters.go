@@ -3,8 +3,8 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/foundation/tempo/duration"
-	"alloy.dev/foundation/tempo/setters"
+	"github.com/oullin/alloy/packages/foundation/tempo/duration"
+	"github.com/oullin/alloy/packages/foundation/tempo/setters"
 )
 
 func (tempo Time) SetTimezone(name string) (Time, error) {

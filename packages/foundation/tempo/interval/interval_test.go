@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/tempo/interval"
+	"github.com/oullin/alloy/packages/foundation/tempo/interval"
 )
 
 const (

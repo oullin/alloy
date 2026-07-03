@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/audit"
-	"alloy.dev/foundation/workflow/events"
-	"alloy.dev/foundation/workflow/registry"
-	"alloy.dev/foundation/workflow/store"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/audit"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow/registry"
+	"github.com/oullin/alloy/packages/foundation/workflow/store"
 )
 
 // Subscription is the canonical state-machine test subject: trial -> active -> cancelled.

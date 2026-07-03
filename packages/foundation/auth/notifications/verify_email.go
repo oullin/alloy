@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	cauth "alloy.dev/foundation/contracts/auth"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // VerificationURLBuilder builds a signed verification URL for a user.

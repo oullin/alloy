@@ -112,7 +112,7 @@ Package filesystem provides local filesystem operations including reading, writi
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/filesystem@latest
+go get github.com/oullin/alloy/packages/foundation/filesystem@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -155,7 +155,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/filesystem"
+    _ "github.com/oullin/alloy/packages/foundation/filesystem"
 )
 
 func main() {

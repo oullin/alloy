@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	collection "alloy.dev/foundation/collection/collection"
+	collection "github.com/oullin/alloy/packages/foundation/collection/collection"
 	"github.com/spf13/viper"
 )
 

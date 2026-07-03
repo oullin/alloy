@@ -1,7 +1,7 @@
 # Getting Started
 
 Alloy is a collection of foundational Go packages for building web applications.
-The Go packages are published from the `alloy.dev/foundation` module, so you
+The Go packages are published from the `github.com/oullin/alloy/packages/foundation` module, so you
 import only the packages you need.
 
 ## Requirements
@@ -14,7 +14,7 @@ import only the packages you need.
 
 ## Installation
 
-Alloy is developed and consumed privately. The `alloy.dev/foundation` module
+Alloy is developed and consumed privately. The `github.com/oullin/alloy/packages/foundation` module
 path is not served publicly, so the Go packages are consumed through a Go
 workspace instead of `go get`:
 
@@ -30,8 +30,8 @@ Then import the packages you need as usual:
 
 ```go
 import (
-	"alloy.dev/foundation/cache"
-	"alloy.dev/foundation/container"
+	"github.com/oullin/alloy/packages/foundation/cache"
+	"github.com/oullin/alloy/packages/foundation/container"
 )
 ```
 
@@ -69,7 +69,7 @@ pnpm run build --filter=@alloy/docs
 
 ## Package Index
 
-The packages below ship today from `alloy.dev/foundation`.
+The packages below ship today from `github.com/oullin/alloy/packages/foundation`.
 
 ### Architecture
 
@@ -127,7 +127,7 @@ The packages below ship today from `alloy.dev/foundation`.
 ## Roadmap
 
 The following packages are documented as design targets but are **not yet
-available** in `alloy.dev/foundation`:
+available** in `github.com/oullin/alloy/packages/foundation`:
 
 [routing](/packages/routing), [redis](/packages/redis),
 [pagination](/packages/pagination), [jobqueue](/packages/jobqueue),

@@ -3,8 +3,8 @@ package listeners
 import (
 	"context"
 
-	"alloy.dev/foundation/auth/events"
-	cauth "alloy.dev/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/auth/events"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // EmailVerificationSender is kept for backward compatibility. New code should

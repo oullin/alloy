@@ -19,7 +19,7 @@ Package redis ports the relevant upstream surface.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/redis@latest
+go get github.com/oullin/alloy/packages/foundation/redis@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/redis"
+    _ "github.com/oullin/alloy/packages/foundation/redis"
 )
 
 func main() {

@@ -37,7 +37,7 @@ while IFS= read -r -d '' gomod; do
 			exit 1
 		fi
 		while IFS= read -r module_path; do
-			if [[ "${module_path}" != "alloy.dev/foundation" && "${module_path}" != alloy.dev/foundation/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
+			if [[ "${module_path}" != "github.com/oullin/alloy/packages/foundation" && "${module_path}" != github.com/oullin/alloy/packages/foundation/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
 				echo "unexpected Go module path: ${module_path}" >&2
 				exit 1
 			fi

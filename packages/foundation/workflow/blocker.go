@@ -1,6 +1,6 @@
 package workflow
 
-import cworkflow "alloy.dev/foundation/contracts/workflow"
+import cworkflow "github.com/oullin/alloy/packages/foundation/contracts/workflow"
 
 // TransitionBlocker carries a reason a guard rejected a transition.
 type TransitionBlocker = cworkflow.TransitionBlocker

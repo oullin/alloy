@@ -1,4 +1,4 @@
-module alloy.dev/foundation/queue/drivers/sqs
+module github.com/oullin/alloy/packages/foundation/queue/drivers/sqs
 
 go 1.26.4
 

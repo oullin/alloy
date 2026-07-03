@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"alloy.dev/foundation/queue"
-	"alloy.dev/foundation/queue/events"
+	"github.com/oullin/alloy/packages/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue/events"
 )
 
 // FailoverDriver tries each driver in order; reads from the first that succeeds,

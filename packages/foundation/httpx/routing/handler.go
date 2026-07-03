@@ -1,6 +1,6 @@
 package routing
 
-import handlermiddleware "alloy.dev/foundation/httpx/handlerx/middleware"
+import handlermiddleware "github.com/oullin/alloy/packages/foundation/httpx/handlerx/middleware"
 
 // Handler is the embeddable base class for routing handlers.
 //

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/tempo"
+	"github.com/oullin/alloy/packages/foundation/tempo"
 )
 
 func assertEqual(t *testing.T, label string, got string, want string) {

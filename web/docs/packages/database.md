@@ -22,7 +22,7 @@ Package database provides a database abstraction layer with query builder, schem
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/database@latest
+go get github.com/oullin/alloy/packages/foundation/database@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -81,7 +81,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/database"
+    _ "github.com/oullin/alloy/packages/foundation/database"
 )
 
 func main() {

@@ -1,6 +1,6 @@
 package routing
 
-import crouting "alloy.dev/foundation/httpx/routing/contracts"
+import crouting "github.com/oullin/alloy/packages/foundation/httpx/routing/contracts"
 
 // ViewFactory is the minimum surface ViewHandler needs from the bedrock
 // view layer. The service provider in M11 wires in a real implementation.

@@ -106,7 +106,7 @@ meta, ok := observability.RequestContextFromContext(r.Context())
 
 ## Cache And Rate Limits
 
-Use `alloy.dev/foundation/cache` for shared TTL cache and fixed-window
+Use `github.com/oullin/alloy/packages/foundation/cache` for shared TTL cache and fixed-window
 rate-limit primitives. The memory store is suitable for tests and single-process
 apps; production multi-instance deployments should provide a distributed
 implementation of `cache.Store`.

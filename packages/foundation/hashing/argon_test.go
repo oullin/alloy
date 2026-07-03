@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/foundation/hashing"
+	"github.com/oullin/alloy/packages/foundation/hashing"
 )
 
 func TestArgon2iMakeAndCheck(t *testing.T) {

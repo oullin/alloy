@@ -20,7 +20,7 @@ Package console provides command, output, prompt, signal, mutex, and scheduler p
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/console@latest
+go get github.com/oullin/alloy/packages/foundation/console@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/console"
+    _ "github.com/oullin/alloy/packages/foundation/console"
 )
 
 func main() {

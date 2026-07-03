@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
 )
 
 func TestApply_EventOrder(t *testing.T) {

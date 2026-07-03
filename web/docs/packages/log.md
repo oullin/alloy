@@ -48,7 +48,7 @@ Internally the provider builds a `*config.Repository` keyed under
 Pull the default channel and log:
 
 ```go
-import facadelog "alloy.dev/foundation/facades/log"
+import facadelog "github.com/oullin/alloy/packages/foundation/facades/log"
 
 logger, _ := facadelog.Channel()         // default channel
 logger.Info("user.signed-in", "user_id", userID)
@@ -134,7 +134,7 @@ Package log provides driver-based logging with support for multiple channels, st
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/log@latest
+go get github.com/oullin/alloy/packages/foundation/log@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -178,7 +178,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/log"
+    _ "github.com/oullin/alloy/packages/foundation/log"
 )
 
 func main() {

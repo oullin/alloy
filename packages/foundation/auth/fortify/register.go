@@ -3,7 +3,7 @@ package fortify
 import (
 	"net/http"
 
-	cauth "alloy.dev/foundation/contracts/auth"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // RegisterConfig controls registration handler behavior.

@@ -20,7 +20,7 @@ Package support provides Go ports of alloy support utilities. It includes array 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/support@latest
+go get github.com/oullin/alloy/packages/foundation/support@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/support"
+    _ "github.com/oullin/alloy/packages/foundation/support"
 )
 
 func main() {
