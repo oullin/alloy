@@ -1,6 +1,7 @@
 package container_test
 
 import (
+	"errors"
 	"testing"
 
 	"alloy.dev/foundation/container"
@@ -18,12 +19,32 @@ func TestSetAppAndApp(t *testing.T) {
 	application := container.NewApplication()
 	container.SetApp(application)
 
-	if got := container.Global(); got != application {
+	got, err := container.Global()
+
+	if err != nil {
+		t.Fatalf("Global() returned error: %v", err)
+	}
+
+	if got != application {
 		t.Fatalf("Global() = %p, want %p", got, application)
 	}
 }
 
-func TestAppPanicsWhenUnset(t *testing.T) {
+func TestGlobalErrorsWhenUnset(t *testing.T) {
+	t.Cleanup(func() {
+		container.SetApp(nil)
+	})
+
+	container.SetApp(nil)
+
+	_, err := container.Global()
+
+	if !errors.Is(err, container.ErrNoApplication) {
+		t.Fatalf("Global() error = %v, want ErrNoApplication", err)
+	}
+}
+
+func TestMustGlobalPanicsWhenUnset(t *testing.T) {
 	t.Cleanup(func() {
 		container.SetApp(nil)
 	})
@@ -36,7 +57,7 @@ func TestAppPanicsWhenUnset(t *testing.T) {
 		}
 	}()
 
-	container.Global()
+	container.MustGlobal()
 }
 
 func TestHasApp(t *testing.T) {
@@ -54,6 +75,20 @@ func TestHasApp(t *testing.T) {
 
 	if !container.HasApp() {
 		t.Fatal("HasApp should be true after installing an app")
+	}
+}
+
+func TestMakeErrorsWhenUnset(t *testing.T) {
+	t.Cleanup(func() {
+		container.SetApp(nil)
+	})
+
+	container.SetApp(nil)
+
+	_, err := container.Make("anything")
+
+	if !errors.Is(err, container.ErrNoApplication) {
+		t.Fatalf("Make() error = %v, want ErrNoApplication", err)
 	}
 }
 
@@ -96,14 +131,78 @@ func TestResolve(t *testing.T) {
 	application.Instance("sample", &sample{Value: "ok"})
 	container.SetApp(application)
 
-	got := container.Resolve[*sample]("sample")
+	got, err := container.Resolve[*sample]("sample")
+
+	if err != nil {
+		t.Fatalf("Resolve returned error: %v", err)
+	}
 
 	if got.Value != "ok" {
 		t.Fatalf("Resolve returned %+v", got)
 	}
 }
 
-func TestResolvePanicsOnWrongType(t *testing.T) {
+func TestResolveErrorsOnWrongType(t *testing.T) {
+	t.Cleanup(func() {
+		container.SetApp(nil)
+	})
+
+	application := container.NewApplication()
+	application.Instance("sample", 123)
+	container.SetApp(application)
+
+	_, err := container.Resolve[*sample]("sample")
+
+	if err == nil {
+		t.Fatal("expected error for wrong type")
+	}
+}
+
+func TestResolveErrorsWhenMissing(t *testing.T) {
+	t.Cleanup(func() {
+		container.SetApp(nil)
+	})
+
+	container.SetApp(container.NewApplication())
+
+	_, err := container.Resolve[*sample]("nope")
+
+	if err == nil {
+		t.Fatal("expected error for missing binding")
+	}
+}
+
+func TestResolveErrorsWhenUnset(t *testing.T) {
+	t.Cleanup(func() {
+		container.SetApp(nil)
+	})
+
+	container.SetApp(nil)
+
+	_, err := container.Resolve[*sample]("anything")
+
+	if !errors.Is(err, container.ErrNoApplication) {
+		t.Fatalf("Resolve error = %v, want ErrNoApplication", err)
+	}
+}
+
+func TestMustResolve(t *testing.T) {
+	t.Cleanup(func() {
+		container.SetApp(nil)
+	})
+
+	application := container.NewApplication()
+	application.Instance("sample", &sample{Value: "ok"})
+	container.SetApp(application)
+
+	got := container.MustResolve[*sample]("sample")
+
+	if got.Value != "ok" {
+		t.Fatalf("MustResolve returned %+v", got)
+	}
+}
+
+func TestMustResolvePanicsOnWrongType(t *testing.T) {
 	t.Cleanup(func() {
 		container.SetApp(nil)
 	})
@@ -118,49 +217,5 @@ func TestResolvePanicsOnWrongType(t *testing.T) {
 		}
 	}()
 
-	container.Resolve[*sample]("sample")
-}
-
-func TestTryResolveMissing(t *testing.T) {
-	t.Cleanup(func() {
-		container.SetApp(nil)
-	})
-
-	container.SetApp(container.NewApplication())
-
-	_, err := container.TryResolve[*sample]("nope")
-
-	if err == nil {
-		t.Fatal("expected error for missing binding")
-	}
-}
-
-func TestTryResolveNoApp(t *testing.T) {
-	t.Cleanup(func() {
-		container.SetApp(nil)
-	})
-
-	container.SetApp(nil)
-
-	_, err := container.TryResolve[*sample]("anything")
-
-	if err == nil {
-		t.Fatal("expected error when app is unset")
-	}
-}
-
-func TestTryResolveWrongType(t *testing.T) {
-	t.Cleanup(func() {
-		container.SetApp(nil)
-	})
-
-	application := container.NewApplication()
-	application.Instance("sample", 123)
-	container.SetApp(application)
-
-	_, err := container.TryResolve[*sample]("sample")
-
-	if err == nil {
-		t.Fatal("expected error for wrong type")
-	}
+	container.MustResolve[*sample]("sample")
 }

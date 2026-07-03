@@ -2,7 +2,14 @@
 // global rule registry.
 package rules
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
+
+// ErrEmptyRuleName is returned by Register and RegisterImplicit when the
+// rule name is empty.
+var ErrEmptyRuleName = errors.New("validation/rules: rule name must not be empty")
 
 // RuleFunc is the signature every built-in (and user-registered) rule must
 // satisfy.  It returns true when the value is valid.
@@ -59,10 +66,11 @@ var global = &registry{
 	implicit: make(map[string]bool),
 }
 
-// Register adds a rule under name.  Panics if name is empty.
-func Register(name string, fn RuleFunc) {
+// Register adds a rule under name. It returns ErrEmptyRuleName when name is
+// empty.
+func Register(name string, fn RuleFunc) error {
 	if name == "" {
-		panic("validation/rules: rule name must not be empty")
+		return ErrEmptyRuleName
 	}
 
 	global.mu.Lock()
@@ -70,18 +78,25 @@ func Register(name string, fn RuleFunc) {
 	defer global.mu.Unlock()
 
 	global.rules[name] = fn
+
+	return nil
 }
 
 // RegisterImplicit registers an implicit rule — one that runs even when the
-// field is absent or its value is empty.
-func RegisterImplicit(name string, fn RuleFunc) {
-	Register(name, fn)
+// field is absent or its value is empty. It returns ErrEmptyRuleName when
+// name is empty.
+func RegisterImplicit(name string, fn RuleFunc) error {
+	if err := Register(name, fn); err != nil {
+		return err
+	}
 
 	global.mu.Lock()
 
 	defer global.mu.Unlock()
 
 	global.implicit[name] = true
+
+	return nil
 }
 
 // Lookup returns the RuleFunc for name, or (nil, false) if not found.

@@ -20,18 +20,31 @@ func SetApp(app *Application) {
 	application = app
 }
 
-// Global returns the process-wide Application. Panics if SetApp has not been
-// called.
-func Global() *Application {
+// Global returns the process-wide Application, or ErrNoApplication if SetApp
+// has not been called.
+func Global() (*Application, error) {
 	applicationMu.RLock()
 
 	defer applicationMu.RUnlock()
 
 	if application == nil {
-		panic("container: no Application installed; call container.SetApp(application) first")
+		return nil, ErrNoApplication
 	}
 
-	return application
+	return application, nil
+}
+
+// MustGlobal returns the process-wide Application. It panics if SetApp has
+// not been called; reserve it for wiring code that runs at startup, where a
+// missing application is a programming error.
+func MustGlobal() *Application {
+	app, err := Global()
+
+	if err != nil {
+		panic(err)
+	}
+
+	return app
 }
 
 // HasApp reports whether a global Application has been installed.
@@ -45,12 +58,19 @@ func HasApp() bool {
 
 // Make resolves an abstract from the global application.
 func Make(abstract string) (any, error) {
-	return Global().Make(abstract)
+	app, err := Global()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return app.Make(abstract)
 }
 
-// MustMake resolves an abstract from the global application or panics.
+// MustMake resolves an abstract from the global application. It panics on
+// failure; reserve it for wiring code that runs at startup.
 func MustMake(abstract string) any {
-	v, err := Global().Make(abstract)
+	v, err := Make(abstract)
 
 	if err != nil {
 		panic(fmt.Sprintf("container: MustMake(%q): %v", abstract, err))
@@ -59,30 +79,13 @@ func MustMake(abstract string) any {
 	return v
 }
 
-// Resolve is a generic, typed resolver.
-func Resolve[T any](abstract string) T {
-	raw := MustMake(abstract)
-
-	v, ok := raw.(T)
-
-	if !ok {
-		var zero T
-
-		panic(fmt.Sprintf("container: Resolve[%T](%q): wrong type %T", zero, abstract, raw))
-	}
-
-	return v
-}
-
-// TryResolve is the non-panicking variant of Resolve.
-func TryResolve[T any](abstract string) (T, error) {
+// Resolve is a generic, typed resolver. It returns ErrNoApplication when no
+// global application is installed, the resolution error when the abstract
+// cannot be made, or a type-mismatch error when the resolved value is not T.
+func Resolve[T any](abstract string) (T, error) {
 	var zero T
 
-	if !HasApp() {
-		return zero, fmt.Errorf("container: no Application installed")
-	}
-
-	raw, err := Global().Make(abstract)
+	raw, err := Make(abstract)
 
 	if err != nil {
 		return zero, err
@@ -91,8 +94,20 @@ func TryResolve[T any](abstract string) (T, error) {
 	v, ok := raw.(T)
 
 	if !ok {
-		return zero, fmt.Errorf("container: TryResolve[%T](%q): wrong type %T", zero, abstract, raw)
+		return zero, fmt.Errorf("container: Resolve[%T](%q): wrong type %T", zero, abstract, raw)
 	}
 
 	return v, nil
+}
+
+// MustResolve is the panicking variant of Resolve. Reserve it for wiring
+// code that runs at startup.
+func MustResolve[T any](abstract string) T {
+	v, err := Resolve[T](abstract)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return v
 }

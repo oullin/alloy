@@ -564,18 +564,14 @@ func TestIsAlias(t *testing.T) {
 	}
 }
 
-func TestSelfAliasPanics(t *testing.T) {
+func TestSelfAliasErrors(t *testing.T) {
 	t.Parallel()
 
 	c := newContainer()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatal("expected panic for self-alias")
-		}
-	}()
-
-	c.Alias("name", "name")
+	if err := c.Alias("name", "name"); !errors.Is(err, container.ErrSelfAlias) {
+		t.Fatalf("Alias error = %v, want ErrSelfAlias", err)
+	}
 }
 
 func TestBoundWithAlias(t *testing.T) {

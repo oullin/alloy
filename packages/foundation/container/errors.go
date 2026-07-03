@@ -3,6 +3,10 @@ package container
 import "errors"
 
 var (
+	// ErrNoApplication is returned when no process-wide Application has been
+	// installed via SetApp.
+	ErrNoApplication = errors.New("container: no Application installed; call container.SetApp(application) first")
+
 	// ErrNotBound is returned when an abstract has no binding, instance, or alias.
 	ErrNotBound = errors.New("container: abstract not bound")
 
