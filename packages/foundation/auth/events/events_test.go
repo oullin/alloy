@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/foundation/auth/events"
-	"alloy.dev/foundation/auth/user"
-	cauth "alloy.dev/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/auth/events"
+	"github.com/oullin/alloy/packages/foundation/auth/user"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 type resettableEventUser struct {

@@ -7,14 +7,14 @@ import (
 	"strings"
 	"testing"
 
-	routegen "alloy.dev/foundation/httpx/routing/navigator"
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/assert"
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/seed"
 	"alloy.dev/inertia-demo/internal/testutil"
+	routegen "github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/assert"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 type crmHarness struct {

@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"alloy.dev/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
 )
 
 func TestRationEdgeCases(t *testing.T) {

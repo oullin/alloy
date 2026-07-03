@@ -5,6 +5,6 @@
 //
 // This package is ported from github.com/oullin/inertia-go (MIT) and adapted
 // for the Alloy monorepo. The upstream httpx sub-package is renamed here to
-// protocol to avoid colliding with alloy.dev/foundation/httpx, which is
+// protocol to avoid colliding with github.com/oullin/alloy/packages/foundation/httpx, which is
 // a HTTP Request/Response wrapper for a different purpose.
 package inertia

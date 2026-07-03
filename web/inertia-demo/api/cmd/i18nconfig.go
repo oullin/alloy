@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"alloy.dev/foundation/config"
-	"alloy.dev/foundation/seo"
-	"alloy.dev/foundation/seo/i18n"
+	"github.com/oullin/alloy/packages/foundation/config"
+	"github.com/oullin/alloy/packages/foundation/seo"
+	"github.com/oullin/alloy/packages/foundation/seo/i18n"
 )
 
 // LoadI18n reads a YAML i18n config file and returns a populated I18nConfig.

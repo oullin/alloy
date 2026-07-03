@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/foundation/bus"
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/bus"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // mockQueue implements queue.Backend for testing.

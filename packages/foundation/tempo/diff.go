@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"alloy.dev/foundation/tempo/diff"
+	"github.com/oullin/alloy/packages/foundation/tempo/diff"
 )
 
 func (tempo Time) Diff(other Time, unit Unit, options ...DiffOptions) float64 {

@@ -3,7 +3,7 @@ package queue
 import (
 	"time"
 
-	"alloy.dev/foundation/queue/events"
+	"github.com/oullin/alloy/packages/foundation/queue/events"
 )
 
 // PauseResumer coordinates the pause/resume lifecycle across a

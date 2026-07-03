@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"alloy.dev/foundation/seo"
+	"github.com/oullin/alloy/packages/foundation/seo"
 )
 
 // Middleware returns an HTTP middleware that detects the locale from the

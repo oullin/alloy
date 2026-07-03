@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // NullDriver discards all jobs silently.

@@ -9,14 +9,14 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/encryption"
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/assert"
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/seed"
 	"alloy.dev/inertia-demo/internal/testutil"
+	"github.com/oullin/alloy/packages/foundation/encryption"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/assert"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // testCryptoKey is a zero-filled 32-byte key used only in tests.

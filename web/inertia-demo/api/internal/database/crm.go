@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	frameworkdb "alloy.dev/foundation/database"
+	frameworkdb "github.com/oullin/alloy/packages/foundation/database"
 	"golang.org/x/crypto/bcrypt"
 )
 

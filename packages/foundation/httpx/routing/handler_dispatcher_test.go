@@ -3,7 +3,7 @@ package routing
 import (
 	"testing"
 
-	handlermiddleware "alloy.dev/foundation/httpx/handlerx/middleware"
+	handlermiddleware "github.com/oullin/alloy/packages/foundation/httpx/handlerx/middleware"
 )
 
 // tests/Routing/RoutingHandlerAttributeTest.php and the handler

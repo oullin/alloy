@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	. "alloy.dev/foundation/auth/errorsx"
-	. "alloy.dev/foundation/auth/manager"
-	. "alloy.dev/foundation/auth/security"
-	. "alloy.dev/foundation/auth/sessionx"
-	. "alloy.dev/foundation/auth/user"
-	cauth "alloy.dev/foundation/contracts/auth"
-	"alloy.dev/foundation/contracts/auth/events"
+	. "github.com/oullin/alloy/packages/foundation/auth/errorsx"
+	. "github.com/oullin/alloy/packages/foundation/auth/manager"
+	. "github.com/oullin/alloy/packages/foundation/auth/security"
+	. "github.com/oullin/alloy/packages/foundation/auth/sessionx"
+	. "github.com/oullin/alloy/packages/foundation/auth/user"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/contracts/auth/events"
 )
 
 // --- Test helpers ---

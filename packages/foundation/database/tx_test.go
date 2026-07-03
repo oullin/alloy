@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	dbpkg "alloy.dev/foundation/database"
+	dbpkg "github.com/oullin/alloy/packages/foundation/database"
 )
 
 func TestWithTxCommitsOnSuccess(t *testing.T) {

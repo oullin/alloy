@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	intervalpkg "alloy.dev/foundation/tempo/interval"
+	intervalpkg "github.com/oullin/alloy/packages/foundation/tempo/interval"
 )
 
 func (interval Interval) span() intervalpkg.Span {

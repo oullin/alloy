@@ -3,7 +3,7 @@ package lazy
 import (
 	"cmp"
 
-	"alloy.dev/foundation/collection/support"
+	"github.com/oullin/alloy/packages/foundation/collection/support"
 )
 
 // Reduce reduces the lazy collection to a single value by applying the callback

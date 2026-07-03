@@ -3,7 +3,7 @@ package calendar_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/tempo/calendar"
+	"github.com/oullin/alloy/packages/foundation/tempo/calendar"
 )
 
 func TestMonthAndDayNames(t *testing.T) {

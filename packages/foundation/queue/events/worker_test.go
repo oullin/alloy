@@ -3,8 +3,8 @@ package events_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/queue"
-	"alloy.dev/foundation/queue/events"
+	"github.com/oullin/alloy/packages/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue/events"
 )
 
 func TestWorkerLifecycleEventFields(t *testing.T) {

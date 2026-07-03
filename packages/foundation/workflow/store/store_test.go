@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/store"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/store"
 )
 
 type entity struct {

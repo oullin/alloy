@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/bus"
+	"github.com/oullin/alloy/packages/foundation/bus"
 )
 
 type chainableJob struct {

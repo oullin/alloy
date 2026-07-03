@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	cauth "alloy.dev/foundation/contracts/auth"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // TokenGuard authenticates requests via a bearer token found in the query

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/httpx/routing"
-	"alloy.dev/foundation/httpx/routing/navigator"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────

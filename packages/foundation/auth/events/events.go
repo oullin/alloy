@@ -3,7 +3,7 @@ package events
 import (
 	"net/http"
 
-	cauth "alloy.dev/foundation/contracts/auth"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // Attempting is dispatched when an authentication attempt begins.

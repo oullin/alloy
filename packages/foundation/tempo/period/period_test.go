@@ -3,7 +3,7 @@ package period_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/tempo/period"
+	"github.com/oullin/alloy/packages/foundation/tempo/period"
 )
 
 func TestForwardBoundsContains(t *testing.T) {

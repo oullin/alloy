@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/auth/httpx"
-	"alloy.dev/foundation/auth/tokens"
-	"alloy.dev/foundation/auth/user"
-	cauth "alloy.dev/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/auth/httpx"
+	"github.com/oullin/alloy/packages/foundation/auth/tokens"
+	"github.com/oullin/alloy/packages/foundation/auth/user"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 type stubUserProvider struct {

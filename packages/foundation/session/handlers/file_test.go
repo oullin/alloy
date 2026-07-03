@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/session/handlers"
+	"github.com/oullin/alloy/packages/foundation/session/handlers"
 )
 
 func TestFileHandlerOpen(t *testing.T) {

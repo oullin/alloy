@@ -19,7 +19,7 @@ The facades package provides Alloy's Go implementation for this surface.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/facades@latest
+go get github.com/oullin/alloy/packages/foundation/facades@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -68,7 +68,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/facades"
+    _ "github.com/oullin/alloy/packages/foundation/facades"
 )
 
 func main() {

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia"
 
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // AssertableInertia holds a decoded Inertia page object for test

@@ -18,7 +18,7 @@ Package cookie provides cookie management primitives. It includes a queuing cook
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/cookie@latest
+go get github.com/oullin/alloy/packages/foundation/cookie@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/cookie"
+    _ "github.com/oullin/alloy/packages/foundation/cookie"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"alloy.dev/foundation/httpx/routing/matching"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/matching"
 )
 
 // HTTPVerbs is the canonical list of verbs the upstream Router considers when

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	cauth "alloy.dev/foundation/contracts/auth"
-	clog "alloy.dev/foundation/contracts/auth/log"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
+	clog "github.com/oullin/alloy/packages/foundation/contracts/auth/log"
 )
 
 // RequestIDResolver returns the request id for a request.

@@ -2,7 +2,7 @@
 
 Copyright (c) 2026 Gustavo Ocanto. All rights reserved.
 
-Alloy — including the Go module (`alloy.dev/foundation`), the `@alloy/*`
+Alloy — including the Go module (`github.com/oullin/alloy/packages/foundation`), the `@alloy/*`
 TypeScript packages, the documentation, and all related assets in this
 repository — is proprietary software.
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/foundation/config"
+	"github.com/oullin/alloy/packages/foundation/config"
 	"github.com/spf13/viper"
 )
 

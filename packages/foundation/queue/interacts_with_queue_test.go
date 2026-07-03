@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // recordingJob is a minimal queue.Job implementation that captures the

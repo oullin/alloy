@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/props"
-	"alloy.dev/foundation/inertia/protocol"
-	"alloy.dev/foundation/inertia/response"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/props"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/response"
 )
 
 // --- Constructor variants ---

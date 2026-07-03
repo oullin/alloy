@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/foundation/httpx/foundation"
+	"github.com/oullin/alloy/packages/foundation/httpx/foundation"
 )
 
 func TestResponseStatus(t *testing.T) {

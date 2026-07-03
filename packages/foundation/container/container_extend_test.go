@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/container"
+	"github.com/oullin/alloy/packages/foundation/container"
 )
 
 func TestExtendModifiesResolvedInstance(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // These tests cover Go-specific helpers (DisplayName, NewUUIDv4,

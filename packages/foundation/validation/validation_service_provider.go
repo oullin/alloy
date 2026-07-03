@@ -1,6 +1,6 @@
 package validation
 
-import "alloy.dev/foundation/container"
+import "github.com/oullin/alloy/packages/foundation/container"
 
 // ValidationServiceProvider registers the validator factory into the container.
 // Ref: @alloy/code-0390

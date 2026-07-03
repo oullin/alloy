@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/auth/browserx"
+	"github.com/oullin/alloy/packages/foundation/auth/browserx"
 )
 
 type sessionSQLDB struct {

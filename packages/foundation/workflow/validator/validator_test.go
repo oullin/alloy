@@ -3,8 +3,8 @@ package validator_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/validator"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/validator"
 )
 
 func stateMachineDef(t *testing.T) *workflow.Definition {

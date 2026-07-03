@@ -1,6 +1,6 @@
 package protocol
 
-import "alloy.dev/foundation/seo"
+import "github.com/oullin/alloy/packages/foundation/seo"
 
 // MetaTag is an alias for seo.MetaTag.
 type MetaTag = seo.MetaTag

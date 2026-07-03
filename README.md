@@ -5,7 +5,7 @@ The repository currently includes reusable packages under `packages/`, the web
 workspace under `web/`, and the shared automation under `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go package (`alloy.dev/foundation/tempo`) and a
+available as both a Go package (`github.com/oullin/alloy/packages/foundation/tempo`) and a
 TypeScript package (`@alloy/tempo`).
 
 ## Workspace

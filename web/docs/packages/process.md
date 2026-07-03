@@ -21,7 +21,7 @@ Package process provides a small process runner with fakes, assertions, pools, a
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/process@latest
+go get github.com/oullin/alloy/packages/foundation/process@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/process"
+    _ "github.com/oullin/alloy/packages/foundation/process"
 )
 
 func main() {

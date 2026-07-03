@@ -3,7 +3,7 @@ module alloy.dev/inertia-demo
 go 1.26.4
 
 require (
-	alloy.dev/foundation v0.0.0
+	github.com/oullin/alloy/packages/foundation v0.0.0
 	github.com/spf13/viper v1.21.0
 	golang.org/x/crypto v0.53.0
 	modernc.org/sqlite v1.53.0
@@ -33,4 +33,4 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 )
 
-replace alloy.dev/foundation => ../../../packages/foundation
+replace github.com/oullin/alloy/packages/foundation => ../../../packages/foundation

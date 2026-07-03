@@ -3,7 +3,7 @@ package protocol
 import (
 	"context"
 
-	"alloy.dev/foundation/seo"
+	"github.com/oullin/alloy/packages/foundation/seo"
 )
 
 type ctxKey struct{ name string }

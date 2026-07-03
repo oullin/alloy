@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	defaults "alloy.dev/foundation/tempo/config"
+	defaults "github.com/oullin/alloy/packages/foundation/tempo/config"
 )
 
 type Config struct {

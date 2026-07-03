@@ -3,8 +3,8 @@ package container_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/container"
-	"alloy.dev/foundation/container/contracts/provider"
+	"github.com/oullin/alloy/packages/foundation/container"
+	"github.com/oullin/alloy/packages/foundation/container/contracts/provider"
 )
 
 // fakeProvider records lifecycle calls for assertions.

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"alloy.dev/foundation/container"
+	"github.com/oullin/alloy/packages/foundation/container"
 )
 
 func TestCallInvokesCallable(t *testing.T) {

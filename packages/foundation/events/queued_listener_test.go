@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/events"
+	"github.com/oullin/alloy/packages/foundation/events"
 )
 
 func TestCallQueuedListener_New(t *testing.T) {

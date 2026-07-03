@@ -3,7 +3,7 @@ package features
 import (
 	"net/http"
 
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func (a app) linkPrefetchHandler(w http.ResponseWriter, r *http.Request) {

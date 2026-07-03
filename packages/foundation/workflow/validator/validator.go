@@ -4,7 +4,7 @@ package validator
 import (
 	"fmt"
 
-	"alloy.dev/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow"
 )
 
 // ValidateDefinition delegates to Definition.Validate (reachability + structural).

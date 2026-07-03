@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/httpx/foundation"
+	"github.com/oullin/alloy/packages/foundation/httpx/foundation"
 )
 
 func TestFilePath(t *testing.T) {

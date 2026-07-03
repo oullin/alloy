@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/collection/arr"
-	collectible "alloy.dev/foundation/collection/collectible"
-	"alloy.dev/foundation/collection/kv"
-	csupport "alloy.dev/foundation/collection/support"
+	"github.com/oullin/alloy/packages/foundation/collection/arr"
+	collectible "github.com/oullin/alloy/packages/foundation/collection/collectible"
+	"github.com/oullin/alloy/packages/foundation/collection/kv"
+	csupport "github.com/oullin/alloy/packages/foundation/collection/support"
 )
 
 type inventoryUser struct {

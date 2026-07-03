@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/filesystem"
+	"github.com/oullin/alloy/packages/foundation/filesystem"
 )
 
 func TestGet(t *testing.T) {

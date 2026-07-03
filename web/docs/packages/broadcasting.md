@@ -102,7 +102,7 @@ Package broadcasting provides server-side broadcasting for channel authorization
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/broadcasting@latest
+go get github.com/oullin/alloy/packages/foundation/broadcasting@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -147,7 +147,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/broadcasting"
+    _ "github.com/oullin/alloy/packages/foundation/broadcasting"
 )
 
 func main() {

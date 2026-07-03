@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/events"
-	"alloy.dev/foundation/workflow/store"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow/store"
 )
 
 type captureSink struct {

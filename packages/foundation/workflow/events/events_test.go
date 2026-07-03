@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"alloy.dev/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
 )
 
 func baseEvent() events.Base[string] {

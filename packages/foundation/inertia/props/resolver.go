@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // Result holds the output of prop resolution: the evaluated props,

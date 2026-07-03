@@ -4,13 +4,13 @@ import (
 	"errors"
 	"net/http"
 
-	routegen "alloy.dev/foundation/httpx/routing/navigator"
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/auth"
 	"alloy.dev/inertia-demo/crm"
 	demoerrors "alloy.dev/inertia-demo/errors"
 	"alloy.dev/inertia-demo/features"
+	routegen "github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func initRoutes() *routegen.Registry {

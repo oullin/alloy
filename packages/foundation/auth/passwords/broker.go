@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	authevents "alloy.dev/foundation/auth/events"
-	cauth "alloy.dev/foundation/contracts/auth"
-	cevents "alloy.dev/foundation/contracts/auth/events"
-	clog "alloy.dev/foundation/contracts/auth/log"
+	authevents "github.com/oullin/alloy/packages/foundation/auth/events"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
+	cevents "github.com/oullin/alloy/packages/foundation/contracts/auth/events"
+	clog "github.com/oullin/alloy/packages/foundation/contracts/auth/log"
 )
 
 // ErrResetLinkThrottled is returned when a reset link was requested too recently.

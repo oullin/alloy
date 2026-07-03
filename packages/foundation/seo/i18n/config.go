@@ -1,7 +1,7 @@
 package i18n
 
 import (
-	"alloy.dev/foundation/seo"
+	"github.com/oullin/alloy/packages/foundation/seo"
 )
 
 // I18nConfig holds the multilanguage configuration consumed by Middleware.

@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 type registerableJob struct {

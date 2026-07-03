@@ -3,7 +3,7 @@ package inertia
 import (
 	"context"
 
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 type contextKey struct{ name string }

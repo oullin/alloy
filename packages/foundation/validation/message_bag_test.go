@@ -3,7 +3,7 @@ package validation_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/validation"
+	"github.com/oullin/alloy/packages/foundation/validation"
 )
 
 func TestMessageBag_Add(t *testing.T) {

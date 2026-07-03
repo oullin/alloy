@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia"
 )
 
 func TestDefaultHead(t *testing.T) {

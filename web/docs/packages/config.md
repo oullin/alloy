@@ -20,7 +20,7 @@ Package config provides a configuration repository backed by Viper. It stores ke
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/config@latest
+go get github.com/oullin/alloy/packages/foundation/config@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/config"
+    _ "github.com/oullin/alloy/packages/foundation/config"
 )
 
 func main() {

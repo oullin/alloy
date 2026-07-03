@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"alloy.dev/foundation/bus/pipeline"
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/bus/pipeline"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // DispatcherImpl is the concrete implementation of QueueingDispatcher.

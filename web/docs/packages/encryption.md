@@ -19,7 +19,7 @@ Package encryption provides AES encryption with CBC and GCM modes. It implements
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/encryption@latest
+go get github.com/oullin/alloy/packages/foundation/encryption@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/encryption"
+    _ "github.com/oullin/alloy/packages/foundation/encryption"
 )
 
 func main() {

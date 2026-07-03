@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"alloy.dev/foundation/inertia/middleware"
+	"github.com/oullin/alloy/packages/foundation/inertia/middleware"
 )
 
 func TestDefaultCSRF(t *testing.T) {

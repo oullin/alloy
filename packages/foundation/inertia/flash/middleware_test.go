@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	"alloy.dev/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia"
 )
 
 func TestMiddlewareConsumesFlash(t *testing.T) {

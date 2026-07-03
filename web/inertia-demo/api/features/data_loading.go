@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"alloy.dev/foundation/inertia/props"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/httputil"
+	"github.com/oullin/alloy/packages/foundation/inertia/props"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 const contactsPerPage = 15

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"alloy.dev/foundation/auth/teams"
-	cauth "alloy.dev/foundation/contracts/auth"
+	"github.com/oullin/alloy/packages/foundation/auth/teams"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 type teamResponse struct {

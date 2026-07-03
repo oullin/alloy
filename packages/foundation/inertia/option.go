@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"os"
 
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // Option configures an Inertia instance during construction.

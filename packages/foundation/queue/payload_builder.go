@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"time"
 
-	cqueue "alloy.dev/foundation/contracts/queue"
+	cqueue "github.com/oullin/alloy/packages/foundation/contracts/queue"
 )
 
 // Payload builder helpers provide the shared queue-driver behavior that the

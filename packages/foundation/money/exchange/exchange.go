@@ -4,7 +4,7 @@ import (
 	"math"
 	"sync"
 
-	"alloy.dev/foundation/money/exception"
+	"github.com/oullin/alloy/packages/foundation/money/exception"
 )
 
 // Rates provides currency conversion functionality.

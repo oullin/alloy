@@ -18,7 +18,7 @@ Package boost provides a Go port of upstream boost — an IDE coding-assistant i
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/ai/boost@latest
+go get github.com/oullin/alloy/packages/foundation/ai/boost@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -71,7 +71,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/ai/boost"
+    _ "github.com/oullin/alloy/packages/foundation/ai/boost"
 )
 
 func main() {

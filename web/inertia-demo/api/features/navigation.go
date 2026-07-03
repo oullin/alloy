@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/protocol"
 	"alloy.dev/inertia-demo/internal/httputil"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func (a app) linksHandler(w http.ResponseWriter, r *http.Request) {

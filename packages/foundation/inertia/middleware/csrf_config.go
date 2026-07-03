@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"alloy.dev/foundation/config"
+	"github.com/oullin/alloy/packages/foundation/config"
 )
 
 // CSRFConfig holds configuration for the CSRF middleware.

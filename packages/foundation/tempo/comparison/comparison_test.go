@@ -3,9 +3,9 @@ package comparison_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/tempo"
-	"alloy.dev/foundation/tempo/comparison"
-	"alloy.dev/foundation/tempo/duration"
+	"github.com/oullin/alloy/packages/foundation/tempo"
+	"github.com/oullin/alloy/packages/foundation/tempo/comparison"
+	"github.com/oullin/alloy/packages/foundation/tempo/duration"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"alloy.dev/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue"
 )
 
 // SyncDriver executes jobs immediately in the same goroutine. It is

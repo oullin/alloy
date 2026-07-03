@@ -3,7 +3,7 @@ package props_test
 import (
 	"testing"
 
-	"alloy.dev/foundation/inertia/props"
+	"github.com/oullin/alloy/packages/foundation/inertia/props"
 )
 
 func TestAlwaysProp(t *testing.T) {

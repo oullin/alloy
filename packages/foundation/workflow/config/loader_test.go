@@ -3,11 +3,11 @@ package config_test
 import (
 	"testing"
 
-	bconfig "alloy.dev/foundation/config"
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/config"
-	"alloy.dev/foundation/workflow/events"
-	"alloy.dev/foundation/workflow/store"
+	bconfig "github.com/oullin/alloy/packages/foundation/config"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/config"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow/store"
 )
 
 type Subscription struct{ State string }

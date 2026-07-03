@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/queue"
-	"alloy.dev/foundation/queue/drivers"
+	"github.com/oullin/alloy/packages/foundation/queue"
+	"github.com/oullin/alloy/packages/foundation/queue/drivers"
 )
 
 // newTestJob creates a BaseJob-backed Job via the SyncDriver for testing.

@@ -3,8 +3,8 @@ package validation
 import (
 	"strings"
 
-	contract "alloy.dev/foundation/contracts/validation"
-	"alloy.dev/foundation/validation/rules"
+	contract "github.com/oullin/alloy/packages/foundation/contracts/validation"
+	"github.com/oullin/alloy/packages/foundation/validation/rules"
 )
 
 // RuleFunc is a validation function.  It receives the attribute name, the

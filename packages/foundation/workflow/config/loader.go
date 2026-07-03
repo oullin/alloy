@@ -29,8 +29,8 @@ package config
 import (
 	"fmt"
 
-	bconfig "alloy.dev/foundation/config"
-	"alloy.dev/foundation/workflow"
+	bconfig "github.com/oullin/alloy/packages/foundation/config"
+	"github.com/oullin/alloy/packages/foundation/workflow"
 )
 
 // Load builds a workflow Definition from the repository under root key "workflow".

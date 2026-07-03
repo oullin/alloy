@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/httpx/server"
+	"github.com/oullin/alloy/packages/foundation/httpx/server"
 )
 
 func TestRunListenerServesRequestAndStopsOnCancel(t *testing.T) {

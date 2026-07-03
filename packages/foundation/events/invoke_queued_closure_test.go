@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"alloy.dev/foundation/events"
+	"github.com/oullin/alloy/packages/foundation/events"
 )
 
 func TestInvokeQueuedClosure_Handle(t *testing.T) {

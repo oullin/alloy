@@ -13,9 +13,9 @@ import (
 	"slices"
 	"time"
 
-	"alloy.dev/foundation/tempo/core"
-	"alloy.dev/foundation/tempo/duration"
-	"alloy.dev/foundation/tempo/internal/kernel"
+	"github.com/oullin/alloy/packages/foundation/tempo/core"
+	"github.com/oullin/alloy/packages/foundation/tempo/duration"
+	"github.com/oullin/alloy/packages/foundation/tempo/internal/kernel"
 )
 
 func Add[T core.Bearer[T]](bearer T, amount int, unit duration.Unit, monthsOverflow bool, yearsOverflow bool) T {

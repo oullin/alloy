@@ -4,7 +4,7 @@ import (
 	"iter"
 	"maps"
 
-	"alloy.dev/foundation/collection/support"
+	"github.com/oullin/alloy/packages/foundation/collection/support"
 )
 
 // Collection wraps a map and provides a fluent API for working with

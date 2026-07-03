@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/foundation/inertia"
-	"alloy.dev/foundation/inertia/assert"
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia"
+	"github.com/oullin/alloy/packages/foundation/inertia/assert"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // --- Failure paths ---

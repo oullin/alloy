@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"alloy.dev/foundation/httpx/middleware"
+	"github.com/oullin/alloy/packages/foundation/httpx/middleware"
 )
 
 func TestRecoveryPanicWritesInternalServerError(t *testing.T) {

@@ -1,6 +1,6 @@
 package events
 
-import cevents "alloy.dev/foundation/contracts/events"
+import cevents "github.com/oullin/alloy/packages/foundation/contracts/events"
 
 // Listener handles an event. The returned value is collected by Dispatch and
 // used by Until to halt on the first non-nil response.

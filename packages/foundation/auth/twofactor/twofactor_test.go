@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/auth/twofactor"
+	"github.com/oullin/alloy/packages/foundation/auth/twofactor"
 )
 
 func TestCodeAndVerifyTOTP(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	authroot "alloy.dev/foundation/auth/httpx"
-	cauth "alloy.dev/foundation/contracts/auth"
+	authroot "github.com/oullin/alloy/packages/foundation/auth/httpx"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 type contextKey string

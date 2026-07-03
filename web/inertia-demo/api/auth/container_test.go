@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/inertia/flash"
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/inertia/flash"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 func TestContainerValidate_ZeroValue(t *testing.T) {

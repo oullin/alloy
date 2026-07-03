@@ -8,8 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"alloy.dev/foundation/encryption"
 	"alloy.dev/inertia-demo/internal/database"
+	"github.com/oullin/alloy/packages/foundation/encryption"
 )
 
 // SessionCookieName is the cookie used by the demo auth flow.

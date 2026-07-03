@@ -3,8 +3,8 @@
 package audit
 
 import (
-	"alloy.dev/foundation/workflow"
-	"alloy.dev/foundation/workflow/events"
+	"github.com/oullin/alloy/packages/foundation/workflow"
+	"github.com/oullin/alloy/packages/foundation/workflow/events"
 )
 
 // Entry is one recorded transition.

@@ -13,8 +13,8 @@ import (
 	"net/url"
 	"strings"
 
-	"alloy.dev/foundation/encryption"
-	"alloy.dev/foundation/inertia/protocol"
+	"github.com/oullin/alloy/packages/foundation/encryption"
+	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
 )
 
 // statusPageExpired is the 419 "Page Expired" status code used when

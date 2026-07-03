@@ -18,7 +18,7 @@ Package debugbar provides a debugging and introspection tool for Go applications
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/debugbar@latest
+go get github.com/oullin/alloy/packages/foundation/debugbar@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/debugbar"
+    _ "github.com/oullin/alloy/packages/foundation/debugbar"
 )
 
 func main() {

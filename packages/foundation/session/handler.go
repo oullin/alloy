@@ -1,6 +1,6 @@
 package session
 
-import csession "alloy.dev/foundation/contracts/session"
+import csession "github.com/oullin/alloy/packages/foundation/contracts/session"
 
 // Handler abstracts the session storage backend.
 // SessionHandlerInterface.

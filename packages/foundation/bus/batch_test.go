@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/bus"
+	"github.com/oullin/alloy/packages/foundation/bus"
 )
 
 func TestBatchFinished(t *testing.T) {

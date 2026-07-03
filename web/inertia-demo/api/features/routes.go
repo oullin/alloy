@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	routegen "alloy.dev/foundation/httpx/routing/navigator"
+	routegen "github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
 )
 
 // DefineRoutes registers all feature showcase route metadata (name, method,

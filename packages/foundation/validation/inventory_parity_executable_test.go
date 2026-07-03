@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/foundation/validation"
-	"alloy.dev/foundation/validation/rules"
+	"github.com/oullin/alloy/packages/foundation/validation"
+	"github.com/oullin/alloy/packages/foundation/validation/rules"
 )
 
 // ValidationRuleParserTest::testEmptyConditionalRulesArePreserved

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"alloy.dev/foundation/events"
+	"github.com/oullin/alloy/packages/foundation/events"
 )
 
 // Push via null should not store anything.

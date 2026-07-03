@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"alloy.dev/foundation/filesystem"
+	"github.com/oullin/alloy/packages/foundation/filesystem"
 )
 
 func TestLockableFileCreateAndClose(t *testing.T) {

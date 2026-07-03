@@ -46,7 +46,7 @@ when the connection is first resolved
 Push a job onto the default connection:
 
 ```go
-import facadequeue "alloy.dev/foundation/facades/queue"
+import facadequeue "github.com/oullin/alloy/packages/foundation/facades/queue"
 
 q, err := facadequeue.Connection(nil) // default
 if err != nil { return err }
@@ -141,7 +141,7 @@ Package queue provides job queue management. It defines Queue, Job, and Connecto
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get alloy.dev/foundation/queue@latest
+go get github.com/oullin/alloy/packages/foundation/queue@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -193,7 +193,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "alloy.dev/foundation/queue"
+    _ "github.com/oullin/alloy/packages/foundation/queue"
 )
 
 func main() {

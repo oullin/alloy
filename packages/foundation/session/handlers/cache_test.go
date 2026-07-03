@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"alloy.dev/foundation/session/handlers"
+	"github.com/oullin/alloy/packages/foundation/session/handlers"
 )
 
 // fakeCacheStore is an in-memory implementation of CacheStore for testing.

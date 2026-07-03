@@ -4,8 +4,8 @@ import (
 	"testing"
 	"testing/fstest"
 
-	dbpkg "alloy.dev/foundation/database"
 	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	dbpkg "github.com/oullin/alloy/packages/foundation/database"
 )
 
 func migrationFS(files map[string]string) fstest.MapFS {

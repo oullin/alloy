@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"alloy.dev/foundation/seo"
-	"alloy.dev/foundation/seo/i18n"
+	"github.com/oullin/alloy/packages/foundation/seo"
+	"github.com/oullin/alloy/packages/foundation/seo/i18n"
 )
 
 func newTestConfig() *i18n.I18nConfig {

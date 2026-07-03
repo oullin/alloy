@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"alloy.dev/foundation/collection/arr"
+	"github.com/oullin/alloy/packages/foundation/collection/arr"
 )
 
 // Each iterates over the items, passing each item and its index to the callback.

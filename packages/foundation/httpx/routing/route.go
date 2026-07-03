@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"alloy.dev/foundation/httpx/routing/compiler"
-	"alloy.dev/foundation/httpx/routing/matching"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/compiler"
+	"github.com/oullin/alloy/packages/foundation/httpx/routing/matching"
 )
 
 // In PHP, Route composes several traits (Conditionable, Macroable,

@@ -1,16 +1,16 @@
 # Collection
 
-[![Go Reference](https://pkg.go.dev/badge/alloy.dev/foundation/collection.svg)](https://pkg.go.dev/alloy.dev/foundation/collection)
+[![Go Reference](https://pkg.go.dev/badge/github.com/oullin/alloy/packages/foundation/collection.svg)](https://pkg.go.dev/github.com/oullin/alloy/packages/foundation/collection)
 [![Go Version](https://img.shields.io/badge/go-1.26-blue.svg)](https://golang.org/doc/devel/release.html#go1.26)
 [![CI](https://github.com/oullin/alloy/actions/workflows/ci.yml/badge.svg)](https://github.com/oullin/alloy/actions)
 [![codecov](https://codecov.io/gh/oullin/alloy/branch/main/graph/badge.svg)](https://codecov.io/gh/oullin/alloy)
-[![Go Report Card](https://goreportcard.com/badge/alloy.dev/foundation/collection)](https://goreportcard.com/report/alloy.dev/foundation/collection)
+[![Go Report Card](https://goreportcard.com/badge/github.com/oullin/alloy/packages/foundation/collection)](https://goreportcard.com/report/github.com/oullin/alloy/packages/foundation/collection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A powerful Go port of Collections (upstream) — fluent, type-safe, and powered by Go generics and `iter.Seq` lazy evaluation.
 
 ```bash
-go get alloy.dev/foundation/collection
+go get github.com/oullin/alloy/packages/foundation/collection
 ```
 
 ---
@@ -34,7 +34,7 @@ package main
 
 import (
     "fmt"
-    "alloy.dev/foundation/collection/collection"
+    "github.com/oullin/alloy/packages/foundation/collection/collection"
 )
 
 func main() {

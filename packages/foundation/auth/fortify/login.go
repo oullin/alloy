@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	cauth "alloy.dev/foundation/contracts/auth"
+	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // LoginConfig controls how credentials are read from a headless login request.

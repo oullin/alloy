@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"alloy.dev/foundation/tempo"
+	"github.com/oullin/alloy/packages/foundation/tempo"
 )
 
 func TestDurationsParseNormalizeSerializeAndApply(t *testing.T) {
