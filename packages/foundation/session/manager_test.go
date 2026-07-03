@@ -2,6 +2,7 @@ package session_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -50,8 +51,8 @@ func TestManagerDriverNotRegistered(t *testing.T) {
 
 	_, err := m.Driver(context.Background(), "redis")
 
-	if err == nil {
-		t.Error("expected error for unregistered driver")
+	if !errors.Is(err, session.ErrUnsupportedDriver) {
+		t.Errorf("expected ErrUnsupportedDriver, got %v", err)
 	}
 }
 
