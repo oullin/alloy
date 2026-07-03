@@ -54,7 +54,7 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && rm -rf dist \"${ALLOY_CACHE_PATH}/tsbuild/money-build.tsbuildinfo\" && tsc -p tsconfig.build.json'",

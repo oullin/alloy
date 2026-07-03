@@ -8,17 +8,31 @@ import only the packages you need.
 
 | Tool    | Version |
 | ------- | ------- |
-| Go      | ≥ 1.24  |
+| Go      | ≥ 1.26  |
 | Node.js | ≥ 22    |
 | pnpm    | ≥ 10.33 |
 
 ## Installation
 
-Add any Alloy package directly with `go get`:
+Alloy is developed and consumed privately. The `alloy.dev/foundation` module
+path is not served publicly, so the Go packages are consumed through a Go
+workspace instead of `go get`:
 
 ```bash
-go get alloy.dev/foundation/auth@latest
-go get alloy.dev/foundation/cache@latest
+git clone git@github.com:oullin/alloy.git
+
+# In your application repository, next to the alloy checkout:
+go work init .
+go work use ../alloy/packages/foundation
+```
+
+Then import the packages you need as usual:
+
+```go
+import (
+	"alloy.dev/foundation/cache"
+	"alloy.dev/foundation/container"
+)
 ```
 
 ## Project Layout
@@ -55,6 +69,8 @@ pnpm run build --filter=@alloy/docs
 
 ## Package Index
 
+The packages below ship today from `alloy.dev/foundation`.
+
 ### Architecture
 
 | Package                          | Purpose                                           |
@@ -67,11 +83,11 @@ pnpm run build --filter=@alloy/docs
 
 | Package                            | Purpose                                           |
 | ---------------------------------- | ------------------------------------------------- |
-| [routing](/packages/routing)       | HTTP routing                                      |
-| [httpx](/packages/httpx)           | HTTP utilities, middleware, and testing helpers   |
+| [httpx](/packages/httpx)           | HTTP utilities, routing, middleware, and testing helpers |
 | [session](/packages/session)       | Session management with multiple storage handlers |
 | [cookie](/packages/cookie)         | HTTP cookie handling                              |
 | [validation](/packages/validation) | Rule-based input validation (80+ built-in rules)  |
+| [inertia](/packages/inertia)       | Server-side Inertia.js protocol adapter           |
 
 ### Security
 
@@ -80,16 +96,14 @@ pnpm run build --filter=@alloy/docs
 | [auth](/packages/auth)             | Authentication, authorization, password management |
 | [encryption](/packages/encryption) | AES encryption with CBC and GCM mode support       |
 | [hashing](/packages/hashing)       | Password hashing with bcrypt and Argon2            |
-| [authflows](/packages/authflows)   | Rate limiting, two-factor auth, auth pipelines     |
 
 ### Data & Storage
 
 | Package                            | Purpose                                        |
 | ---------------------------------- | ---------------------------------------------- |
 | [cache](/packages/cache)           | Caching layer with multiple driver support     |
-| [redis](/packages/redis)           | Full Redis command surface, pipelines, pub/sub |
+| [database](/packages/database)     | Shared database errors and support utilities   |
 | [filesystem](/packages/filesystem) | Local filesystem operations                    |
-| [pagination](/packages/pagination) | Offset-based and cursor-based pagination       |
 
 ### Events & Jobs
 
@@ -98,61 +112,41 @@ pnpm run build --filter=@alloy/docs
 | [events](/packages/events)     | Event dispatching and listener management        |
 | [bus](/packages/bus)           | Command and event bus with pipeline support      |
 | [queue](/packages/queue)       | Background job processing with pluggable drivers |
-| [jobqueue](/packages/jobqueue)  | Queue monitoring snapshots and metrics           |
-| [pipeline](/packages/pipeline) | Middleware-style pipe-and-filter chains          |
-
-### Communication
-
-| Package                                  | Purpose                             |
-| ---------------------------------------- | ----------------------------------- |
-| [mailx](/packages/mailx)                 | Driver-based email sending          |
-| [notifications](/packages/notifications) | Multi-channel notification delivery |
-
-### AI & Integrations
-
-| Package                        | Purpose                                            |
-| ------------------------------ | -------------------------------------------------- |
-| [ai/sdk](/packages/ai/sdk)     | Unified AI provider API, agents, and RAG tools     |
-| [ai/mcp](/packages/ai/mcp)     | Model Context Protocol (MCP) server implementation |
-| [ai/boost](/packages/ai/boost) | IDE coding-assistant and agent integration layer   |
+| workflow                       | Petri-net based workflow and state-machine engine |
 
 ### Support & Utilities
 
-| Package                                  | Purpose                                          |
-| ---------------------------------------- | ------------------------------------------------ |
-| [collection](/packages/collection)       | Fluent collection helpers for slices and maps    |
-| [support](/packages/support)             | Helpers, Fluent, Optional, MessageBag, strings   |
-| [log](/packages/log)                     | Driver-based structured logging with channels    |
-| [translation](/packages/translation)     | Localisation and i18n with CLDR pluralisation    |
-| [concurrency](/packages/concurrency)     | Concurrent task execution with pluggable drivers |
-| [conditionable](/packages/conditionable) | Conditional method execution with a fluent proxy |
-| [jsonx](/packages/jsonx)                 | Fluent JSON Schema builder                       |
+| Package                            | Purpose                                        |
+| ---------------------------------- | ---------------------------------------------- |
+| [collection](/packages/collection) | Fluent collection helpers for slices and maps  |
+| [str](/packages/str)               | String helpers, UUID/ULID generation           |
+| tempo                              | Date/time library with timezones and localization |
+| [money](/packages/money)           | Money and currency primitives                  |
+| [seo](/packages/seo)               | SEO utilities and i18n locale handling         |
 
-### Developer Tools
+## Roadmap
 
-| Package                              | Purpose                                  |
-| ------------------------------------ | ---------------------------------------- |
-| [prompts](/packages/prompts)         | Interactive terminal prompt components   |
-| [logtail](/packages/logtail)         | Log tail parsing and filtering           |
-| [remotetasks](/packages/remotetasks) | Remote task planning and command running |
-| [debugbar](/packages/debugbar)       | Application introspection and watchers   |
+The following packages are documented as design targets but are **not yet
+available** in `alloy.dev/foundation`:
 
-### Products
-
-| Package                          | Purpose                                              |
-| -------------------------------- | ---------------------------------------------------- |
-| [inception](/packages/inception) | Unified auth scaffold — AuthFlows + AuthKit combined |
-| [authkit](/packages/authkit)     | Team and organization management                     |
-| [billing](/packages/billing)     | Subscription billing, checkout, and entitlements     |
+[routing](/packages/routing), [redis](/packages/redis),
+[pagination](/packages/pagination), [jobqueue](/packages/jobqueue),
+[pipeline](/packages/pipeline), [mailx](/packages/mailx),
+[notifications](/packages/notifications), [ai/sdk](/packages/ai/sdk),
+[ai/mcp](/packages/ai/mcp), [ai/boost](/packages/ai/boost),
+[support](/packages/support), [log](/packages/log),
+[translation](/packages/translation), [concurrency](/packages/concurrency),
+[conditionable](/packages/conditionable), [jsonx](/packages/jsonx),
+[prompts](/packages/prompts), [logtail](/packages/logtail),
+[remotetasks](/packages/remotetasks), [debugbar](/packages/debugbar),
+[inception](/packages/inception), [authkit](/packages/authkit),
+[billing](/packages/billing), [authflows](/packages/authflows)
 
 ## AI Assisted Development
 
 Alloy is built from the ground up to be AI-friendly. By providing clear
 interfaces, predictable patterns, and explicit dependencies, Alloy makes it
 easy for AI agents to understand and contribute to your codebase.
-
-Check out the [ai/boost](/packages/ai/boost) package to see how to integrate
-Alloy with your IDE coding assistants and agents.
 
 ## Concept Guides
 
