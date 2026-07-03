@@ -23,4 +23,32 @@ jobs:
           go-version: "1.26.4"
 
       - name: Go tests
+        env:
+          GO_COVERAGE_DIR: ${{ runner.temp }}/go-coverage
         run: pnpm exec vp run go:test
+
+      - name: Coverage summary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          summary="${RUNNER_TEMP}/go-coverage/summary.tsv"
+          {
+            echo "### Go coverage"
+            if [[ -f "${summary}" ]]; then
+              while IFS=$'\t' read -r module total; do
+                echo "- ${module}: ${total}"
+              done < "${summary}"
+            else
+              echo "- no coverage summary produced"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload coverage profiles
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: go-coverage
+          path: ${{ runner.temp }}/go-coverage
+          if-no-files-found: ignore

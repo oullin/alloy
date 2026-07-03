@@ -84,7 +84,7 @@ jobs:
           args=(
             "${TAG}"
             --title "Go ${VERSION}"
-            --notes "Go module release ${VERSION}."
+            --generate-notes
           )
 
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then

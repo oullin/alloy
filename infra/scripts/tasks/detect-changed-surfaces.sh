@@ -72,13 +72,12 @@ fi
 
 go_changed=false
 ts_changed=false
-browser_changed=false
 
 while IFS= read -r file; do
 	[[ -n "${file}" ]] || continue
 
 	case "${file}" in
-		go/* | go.work | go.work.example | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
+		go/* | go.work | go.work.example | packages/foundation/* | web/*/api/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
 			go_changed=true
 			;;
 	esac
@@ -103,7 +102,6 @@ esac
 {
 	echo "go_changed=${go_changed}"
 	echo "ts_changed=${ts_changed}"
-	echo "browser_changed=${browser_changed}"
 	echo "has_special_label=${has_special_label}"
 	echo "has_coverage_label=${has_coverage_label}"
 	echo "has_e2e_label=${has_e2e_label}"
@@ -116,7 +114,6 @@ esac
 	echo "### Engine selection"
 	echo "- Go changed: ${go_changed}"
 	echo "- TypeScript changed: ${ts_changed}"
-	echo "- Browser/E2E changed: ${browser_changed}"
 	echo "- coverage-all label: ${has_coverage_label}"
 	echo "- e2e-* label: ${has_e2e_label}"
 	echo "- inertial-tests label: ${has_inertial_tests_label}"

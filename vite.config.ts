@@ -55,6 +55,7 @@ export default defineConfig({
 		globals: false,
 		coverage: {
 			reportsDirectory: repoPath('./infra/.cache/vitest/coverage'),
+			reporter: ['text-summary', 'html', 'json-summary'],
 		},
 	},
 	pack: {

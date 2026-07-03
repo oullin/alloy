@@ -1,0 +1,37 @@
+name: Secret Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Run gitleaks
+        shell: bash
+        env:
+          GITLEAKS_VERSION: 8.24.3
+        run: |
+          set -euo pipefail
+
+          curl -fsSL -o /tmp/gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+
+          # git mode scans tracked history only (excludes gitignored
+          # node_modules); the config allowlists fake credentials in fixtures.
+          /tmp/gitleaks git . --config .gitleaks.toml --redact --verbose --exit-code 1

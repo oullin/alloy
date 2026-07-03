@@ -23,6 +23,7 @@
   "devDependencies": {
     "@alloy/infra": "workspace:*",
     "@types/node": "^25.0.0",
+    "@vitest/coverage-v8": "4.1.9",
     "typescript": "^6.0.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plus": "latest"
