@@ -1,6 +1,8 @@
 package filesystem_test
 
 import (
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -98,7 +100,7 @@ func TestCopy(t *testing.T) {
 
 	writeFile(t, src, "content")
 
-	if err := fs.Copy(src, dst); err != nil {
+	if err := fs.Copy(context.Background(), src, dst); err != nil {
 		t.Fatal(err)
 	}
 
@@ -135,7 +137,7 @@ func TestCopyPreservesPermissions(t *testing.T) {
 	writeFile(t, src, "content")
 	os.Chmod(src, 0o755)
 
-	if err := fs.Copy(src, dst); err != nil {
+	if err := fs.Copy(context.Background(), src, dst); err != nil {
 		t.Fatal(err)
 	}
 
@@ -218,5 +220,27 @@ func TestRelativeLink(t *testing.T) {
 
 	if string(data) != "relative" {
 		t.Fatalf("expected 'relative', got %q", string(data))
+	}
+}
+
+func TestCopyCancelledContext(t *testing.T) {
+	t.Parallel()
+
+	fs := newFilesystem()
+	dir := t.TempDir()
+	src := filepath.Join(dir, "source.txt")
+	dst := filepath.Join(dir, "dest.txt")
+
+	writeFile(t, src, "content")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if err := fs.Copy(ctx, src, dst); !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
+	}
+
+	if _, err := os.Stat(dst); !os.IsNotExist(err) {
+		t.Fatal("expected destination to not be created")
 	}
 }

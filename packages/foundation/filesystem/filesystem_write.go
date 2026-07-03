@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -9,7 +10,11 @@ import (
 
 // Put writes contents to a file, creating it if necessary.
 // An optional file mode can be provided; defaults to 0644.
-func (f *Local) Put(path string, contents []byte, mode ...fs.FileMode) error {
+func (f *Local) Put(ctx context.Context, path string, contents []byte, mode ...fs.FileMode) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	perm := fs.FileMode(0o644)
 
 	if len(mode) > 0 {
@@ -25,7 +30,11 @@ func (f *Local) Put(path string, contents []byte, mode ...fs.FileMode) error {
 
 // Replace atomically writes content to a file using a temporary file
 // and rename. An optional file mode can be provided.
-func (f *Local) Replace(path string, content []byte, mode ...fs.FileMode) error {
+func (f *Local) Replace(ctx context.Context, path string, content []byte, mode ...fs.FileMode) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	perm := fs.FileMode(0o644)
 
 	if len(mode) > 0 {
@@ -69,7 +78,11 @@ func (f *Local) Replace(path string, content []byte, mode ...fs.FileMode) error 
 }
 
 // ReplaceInFile replaces all occurrences of search with replace in the file.
-func (f *Local) ReplaceInFile(search, replace, path string) error {
+func (f *Local) ReplaceInFile(ctx context.Context, search, replace, path string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -78,17 +91,21 @@ func (f *Local) ReplaceInFile(search, replace, path string) error {
 
 	content := strings.ReplaceAll(string(data), search, replace)
 
-	return f.Replace(path, []byte(content))
+	return f.Replace(ctx, path, []byte(content))
 }
 
 // Prepend prepends data to the beginning of a file. If the file does not
 // exist, it is created with only the given data.
-func (f *Local) Prepend(path string, data []byte) error {
+func (f *Local) Prepend(ctx context.Context, path string, data []byte) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	existing, err := os.ReadFile(path)
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			return f.Put(path, data)
+			return f.Put(ctx, path, data)
 		}
 
 		return err
@@ -98,11 +115,15 @@ func (f *Local) Prepend(path string, data []byte) error {
 	combined = append(combined, data...)
 	combined = append(combined, existing...)
 
-	return f.Replace(path, combined)
+	return f.Replace(ctx, path, combined)
 }
 
 // Append appends data to the end of a file.
-func (f *Local) Append(path string, data []byte) error {
+func (f *Local) Append(ctx context.Context, path string, data []byte) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}

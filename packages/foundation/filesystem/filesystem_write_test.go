@@ -1,6 +1,7 @@
 package filesystem_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,7 +14,7 @@ func TestPut(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "file.txt")
 
-	if err := fs.Put(path, []byte("hello")); err != nil {
+	if err := fs.Put(context.Background(), path, []byte("hello")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -35,7 +36,7 @@ func TestPutCreatesDirectories(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "sub", "deep", "file.txt")
 
-	if err := fs.Put(path, []byte("nested")); err != nil {
+	if err := fs.Put(context.Background(), path, []byte("nested")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -57,7 +58,7 @@ func TestPutWithMode(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "file.txt")
 
-	if err := fs.Put(path, []byte("hello"), 0o755); err != nil {
+	if err := fs.Put(context.Background(), path, []byte("hello"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -81,7 +82,7 @@ func TestReplace(t *testing.T) {
 
 	writeFile(t, path, "original")
 
-	if err := fs.Replace(path, []byte("replaced")); err != nil {
+	if err := fs.Replace(context.Background(), path, []byte("replaced")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -103,7 +104,7 @@ func TestReplaceCreatesNewFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "new.txt")
 
-	if err := fs.Replace(path, []byte("new content")); err != nil {
+	if err := fs.Replace(context.Background(), path, []byte("new content")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -125,7 +126,7 @@ func TestReplaceWithMode(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "file.txt")
 
-	if err := fs.Replace(path, []byte("content"), 0o755); err != nil {
+	if err := fs.Replace(context.Background(), path, []byte("content"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -154,7 +155,7 @@ func TestReplaceSymlink(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := fs.Replace(link, []byte("via symlink")); err != nil {
+	if err := fs.Replace(context.Background(), link, []byte("via symlink")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -179,7 +180,7 @@ func TestReplaceInFile(t *testing.T) {
 
 	writeFile(t, path, "Hello World! Hello Go!")
 
-	if err := fs.ReplaceInFile("Hello", "Hi", path); err != nil {
+	if err := fs.ReplaceInFile(context.Background(), "Hello", "Hi", path); err != nil {
 		t.Fatal(err)
 	}
 
@@ -203,7 +204,7 @@ func TestPrepend(t *testing.T) {
 
 	writeFile(t, path, "World")
 
-	if err := fs.Prepend(path, []byte("Hello ")); err != nil {
+	if err := fs.Prepend(context.Background(), path, []byte("Hello ")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -225,7 +226,7 @@ func TestPrependNewFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "new.txt")
 
-	if err := fs.Prepend(path, []byte("first")); err != nil {
+	if err := fs.Prepend(context.Background(), path, []byte("first")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -249,7 +250,7 @@ func TestAppend(t *testing.T) {
 
 	writeFile(t, path, "Hello")
 
-	if err := fs.Append(path, []byte(" World")); err != nil {
+	if err := fs.Append(context.Background(), path, []byte(" World")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -271,7 +272,7 @@ func TestAppendNewFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "new.txt")
 
-	if err := fs.Append(path, []byte("appended")); err != nil {
+	if err := fs.Append(context.Background(), path, []byte("appended")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -295,11 +296,11 @@ func TestAppendMultiple(t *testing.T) {
 
 	writeFile(t, path, "a")
 
-	if err := fs.Append(path, []byte("b")); err != nil {
+	if err := fs.Append(context.Background(), path, []byte("b")); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := fs.Append(path, []byte("c")); err != nil {
+	if err := fs.Append(context.Background(), path, []byte("c")); err != nil {
 		t.Fatal(err)
 	}
 
