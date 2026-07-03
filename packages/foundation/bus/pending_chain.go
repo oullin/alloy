@@ -2,7 +2,6 @@ package bus
 
 import (
 	"context"
-	"fmt"
 )
 
 // PendingChain is a fluent builder for dispatching a chain of sequential jobs.
@@ -44,7 +43,7 @@ func (c *PendingChain) Catch(fn func(ctx context.Context, err error)) *PendingCh
 // jobs as the chain on the first job's Queueable.
 func (c *PendingChain) Dispatch(ctx context.Context) (any, error) {
 	if len(c.jobs) == 0 {
-		return nil, fmt.Errorf("bus: cannot dispatch an empty chain")
+		return nil, ErrEmptyChain
 	}
 
 	first, err := c.prepareFirstJob()
@@ -59,7 +58,7 @@ func (c *PendingChain) Dispatch(ctx context.Context) (any, error) {
 // DispatchAfterResponse dispatches the chain after the response is sent.
 func (c *PendingChain) DispatchAfterResponse(ctx context.Context) error {
 	if len(c.jobs) == 0 {
-		return fmt.Errorf("bus: cannot dispatch an empty chain")
+		return ErrEmptyChain
 	}
 
 	first, err := c.prepareFirstJob()
@@ -79,7 +78,7 @@ func (c *PendingChain) prepareFirstJob() (any, error) {
 	if q, ok := first.(interface{ Chain(jobs ...any) *Queueable }); ok {
 		q.Chain(remaining...)
 	} else if len(remaining) > 0 {
-		return nil, fmt.Errorf("bus: first chained job cannot accept remaining jobs")
+		return nil, ErrInvalidChainHead
 	}
 
 	if c.connection != "" {

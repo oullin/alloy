@@ -9,4 +9,7 @@ var (
 	ErrInvalidID = errors.New("session: invalid id")
 	// ErrNotStarted is returned when an operation requires a started session.
 	ErrNotStarted = errors.New("session: not started")
+	// ErrUnsupportedDriver is returned when the manager has no driver
+	// registered under the requested name.
+	ErrUnsupportedDriver = errors.New("session: unsupported driver")
 )
