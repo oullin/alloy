@@ -5,6 +5,7 @@ export type AnsiSegment = {
 	text: string;
 };
 
+/** Splits a string into text segments, each tagged with its active ANSI style codes. */
 export const parseAnsiSegments = (value: string): AnsiSegment[] => {
 	const segments: AnsiSegment[] = [];
 

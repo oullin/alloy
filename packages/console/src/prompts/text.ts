@@ -2,6 +2,7 @@ import { normalizeTextPromptOptions } from '#console/prompts/text/options';
 import { runTextPrompt } from '#console/prompts/text/run';
 import type { TextPromptOptions } from '#console/types';
 
+/** Prompts for a single line of free text. */
 export function text(options: TextPromptOptions): Promise<string>;
 
 export function text(

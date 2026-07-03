@@ -5,6 +5,7 @@ import { suggestOptions } from '#console/prompts/suggest/options';
 import type { SuggestOptions } from '#console/prompts/suggest/options';
 import type { MaybePromise, TextPromptOptions } from '#console/types';
 
+/** Prompts for text while showing a navigable suggestion list under the input. */
 export function suggest(options: SuggestOptions): Promise<string>;
 
 export function suggest(

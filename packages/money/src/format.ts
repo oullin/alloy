@@ -1,5 +1,9 @@
 import type { Amount } from '#money/calculator';
 
+/**
+ * Renders minor-unit amounts as display strings using a currency's fraction,
+ * separators, symbol (grapheme), and layout template (e.g. `$1`).
+ */
 export class MoneyFormatter {
 	public constructor(
 		public readonly fraction: number,
@@ -13,6 +17,7 @@ export class MoneyFormatter {
 		return new MoneyFormatter(fraction, decimal, thousand, grapheme, template);
 	}
 
+	/** Formats a minor-unit amount as a display string such as `$1,234.56`. */
 	public format(amount: Amount): string {
 		let raw = this.abs(amount).toString();
 
@@ -39,6 +44,7 @@ export class MoneyFormatter {
 		return output;
 	}
 
+	/** Converts a minor-unit amount to a floating-point major-unit number. */
 	public toMajorUnits(amount: Amount): number {
 		if (this.fraction === 0) {
 			return Number(amount);

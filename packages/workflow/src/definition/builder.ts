@@ -3,6 +3,11 @@ import { Transition } from '#workflow/transition';
 import { Definition } from '#workflow/definition/definition';
 import type { MutableDefinition } from '#workflow/definition/types';
 
+/**
+ * Fluent builder for {@link Definition} instances: declare places, initial
+ * places, transitions, and metadata, then call {@link build} to validate and
+ * freeze the result.
+ */
 export class DefinitionBuilder {
 	readonly #definition: MutableDefinition;
 
@@ -17,6 +22,7 @@ export class DefinitionBuilder {
 		};
 	}
 
+	/** Registers a place (state); empty names and duplicates are ignored. */
 	public addPlace(place: string): this {
 		if (place !== '' && !this.#definition.places.includes(place)) {
 			this.#definition.places.push(place);
@@ -25,12 +31,14 @@ export class DefinitionBuilder {
 		return this;
 	}
 
+	/** Sets the places a fresh subject starts in. */
 	public setInitialPlaces(...places: string[]): this {
 		this.#definition.initialMarking = Marking.fromPlaces(...places);
 
 		return this;
 	}
 
+	/** Adds a named transition from one set of places to another. */
 	public addTransition(name: string, from: string[], to: string[]): this {
 		this.#definition.transitions.push(new Transition(name, from, to));
 
@@ -57,6 +65,11 @@ export class DefinitionBuilder {
 		return this;
 	}
 
+	/**
+	 * Builds and validates the definition, merging transition metadata.
+	 *
+	 * @throws Error when the definition is invalid (unknown places, missing initial marking, unreachable places).
+	 */
 	public build(): Definition {
 		const transitions = this.#definition.transitions.map((transition) => {
 			const metadata = this.#definition.transitionMetadata[transition.name];

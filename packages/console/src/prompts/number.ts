@@ -2,6 +2,7 @@ import { normalizeNumberPromptOptions } from '#console/prompts/number/options';
 import { runNumberPrompt } from '#console/prompts/number/run';
 import type { NumberPromptOptions } from '#console/types';
 
+/** Prompts for a numeric value with optional min/max/step constraints. */
 export function number(options: NumberPromptOptions): Promise<number | string>;
 
 export function number(

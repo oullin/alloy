@@ -2,6 +2,7 @@ import { normalizeMultiSelectPromptOptions } from '#console/prompts/select/multi
 import { runMultiSelectPrompt } from '#console/prompts/select/multiselect/run';
 import type { ChoiceOptions, MultiSelectPromptOptions } from '#console/types';
 
+/** Prompts the user to pick any number of options from a list. */
 export function multiselect<T>(options: MultiSelectPromptOptions<T>): Promise<T[]>;
 
 export function multiselect<T>(

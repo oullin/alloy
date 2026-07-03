@@ -2,6 +2,7 @@ import { normalizeTextareaPromptOptions } from '#console/prompts/textarea/option
 import { runTextareaPrompt } from '#console/prompts/textarea/run';
 import type { TextareaPromptOptions } from '#console/types';
 
+/** Prompts for multi-line text in an inline editor. */
 export function textarea(options: TextareaPromptOptions): Promise<string>;
 
 export function textarea(

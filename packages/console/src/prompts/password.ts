@@ -2,6 +2,7 @@ import { normalizePasswordPromptOptions } from '#console/prompts/password/option
 import { runPasswordPrompt } from '#console/prompts/password/run';
 import type { TextPromptOptions } from '#console/types';
 
+/** Prompts for a secret, masking the typed characters. */
 export function password(options: TextPromptOptions): Promise<string>;
 
 export function password(

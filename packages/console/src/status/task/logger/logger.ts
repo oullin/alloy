@@ -10,6 +10,10 @@ import type { StableTaskMessage } from '#console/status/task/messages';
 
 import { clearTaskLoggerPartial, writeStableTaskLoggerMessage, writeTaskLoggerLine, writeTaskLoggerPartial } from '#console/status/task/logger/methods';
 
+/**
+ * Collects a task's live output: a rolling window of log lines plus stable
+ * success/warning/error messages, re-rendering the task frame on change.
+ */
 export class Logger {
 	labelValue: string;
 	readonly lines: string[] = [];
@@ -35,15 +39,18 @@ export class Logger {
 		return this.limits.line;
 	}
 
+	/** Appends a line to the rolling log window. */
 	line(message: string): void {
 		writeTaskLoggerLine(this.lines, message, this.limits.line);
 		this.changed();
 	}
 
+	/** Alias for {@link line}. */
 	log(message: string): void {
 		this.line(message);
 	}
 
+	/** Replaces the task's main label. */
 	label(message: string): void {
 		const next = syncTaskLoggerLabel(this.labels, message);
 
@@ -52,6 +59,7 @@ export class Logger {
 		this.changed();
 	}
 
+	/** Replaces the task's secondary label. */
 	subLabel(message: string): void {
 		const next = syncTaskLoggerSubLabel(this.labels, message);
 
@@ -60,28 +68,34 @@ export class Logger {
 		this.changed();
 	}
 
+	/** Streams a chunk into the current in-progress line without committing it. */
 	partial(chunk: string): void {
 		this.#partial = writeTaskLoggerPartial(this.lines, this.#partial, chunk, this.limits.line);
 		this.changed();
 	}
 
+	/** Finalizes the in-progress partial line. */
 	commitPartial(): void {
 		this.#partial = clearTaskLoggerPartial();
 		this.changed();
 	}
 
+	/** Alias for {@link line}. */
 	info(message: string): void {
 		this.line(message);
 	}
 
+	/** Records a stable success message that outlives the rolling log window. */
 	success(message: string): void {
 		this.stable('success', message);
 	}
 
+	/** Records a stable warning message that outlives the rolling log window. */
 	warning(message: string): void {
 		this.stable('warning', message);
 	}
 
+	/** Records a stable error message that outlives the rolling log window. */
 	error(message: string): void {
 		this.stable('error', message);
 	}

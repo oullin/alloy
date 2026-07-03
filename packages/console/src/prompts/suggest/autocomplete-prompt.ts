@@ -6,6 +6,7 @@ import { isSuggestPromptLabel } from '#console/prompts/suggest/validators/overlo
 import type { SuggestOptions } from '#console/prompts/suggest/options';
 import type { MaybePromise, TextPromptOptions } from '#console/types';
 
+/** Prompts for text with inline ghost-text completion of the best match. */
 export function autocomplete(options: SuggestOptions): Promise<string>;
 
 export function autocomplete(
