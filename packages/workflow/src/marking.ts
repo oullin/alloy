@@ -1,3 +1,7 @@
+/**
+ * The set of places a subject currently occupies, with a token count per
+ * place (petri-net style). State machines hold exactly one active place.
+ */
 export class Marking {
 	public readonly places: Record<string, number>;
 

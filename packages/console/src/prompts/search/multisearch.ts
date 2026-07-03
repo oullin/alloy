@@ -2,6 +2,7 @@ import { normalizeMultiSearchPromptOptions } from '#console/prompts/search/multi
 import { runMultiSearchPrompt } from '#console/prompts/search/multi-run';
 import type { ChoiceOptions, MultiSearchPromptOptions } from '#console/types';
 
+/** Prompts the user to filter choices by typing and pick any number of matches. */
 export function multisearch<T>(options: MultiSearchPromptOptions<T>): Promise<T[]>;
 
 export function multisearch<T>(

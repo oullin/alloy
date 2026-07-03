@@ -2,6 +2,7 @@ import { normalizeSearchPromptOptions } from '#console/prompts/search/options';
 import { runSearchPrompt } from '#console/prompts/search/run';
 import type { ChoiceOptions, SearchPromptOptions } from '#console/types';
 
+/** Prompts the user to filter choices by typing and pick a single match. */
 export function search<T>(options: SearchPromptOptions<T>): Promise<T>;
 
 export function search<T>(

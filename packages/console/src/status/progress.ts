@@ -8,6 +8,7 @@ import { isProgressTotalArgument, progressMessageArgument, progressStepsArgument
 export { Progress };
 export type { ProgressSignalTarget } from '#console/status/progress/progress';
 
+/** Creates a {@link Progress} bar, or drives one over steps when a callback is given. */
 export function progress(total: number, message?: string): Progress;
 
 export function progress<T>(label: string, steps: Iterable<T> | number): Progress;

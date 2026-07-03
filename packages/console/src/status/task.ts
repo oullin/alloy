@@ -7,6 +7,7 @@ import type { MaybePromise } from '#console/types';
 export { Logger };
 export type { TaskDefinition } from '#console/status/task/definition';
 
+/** Runs a labelled task with a scoped {@link Logger} that renders live output lines. */
 export async function task<T>(definition: TaskDefinition<T>): Promise<T>;
 
 export async function task<T>(label: string, callback: (logger: Logger) => MaybePromise<T>, limit?: number, keepSummary?: boolean, subLabel?: string): Promise<T>;

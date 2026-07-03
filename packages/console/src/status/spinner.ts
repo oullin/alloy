@@ -2,6 +2,7 @@ import { resolveSpinnerOptions } from '#console/status/spinner/options';
 import { runSpinnerLifecycle } from '#console/status/spinner/lifecycle';
 import type { MaybePromise, StatusOptions } from '#console/types';
 
+/** Runs a callback while showing a spinner, resolving with the callback's result. */
 export function spin<T>(callback: () => MaybePromise<T>, options?: StatusOptions): Promise<T>;
 
 export function spin<T>(message: string, callback: () => MaybePromise<T>): Promise<T>;
