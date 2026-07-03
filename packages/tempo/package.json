@@ -22,7 +22,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && cd \"${ALLOY_ROOT_PATH}\" && vp pack'",

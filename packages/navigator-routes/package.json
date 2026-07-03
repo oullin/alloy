@@ -23,7 +23,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "vp pack src/index.ts --tsconfig tsconfig.json --out-dir dist --dts --clean",
