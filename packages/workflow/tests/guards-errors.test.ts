@@ -98,8 +98,12 @@ describe('workflow guards and errors', () => {
 
 	it('rejects invalid definitions and config shapes with clear validation failures', () => {
 		expect(() => new StateMachine('ticket', new Definition({ places: ['draft'], initialMarking: Marking.fromPlaces('ghost') }), store())).toThrow('unknown place');
-		expect(() => new Definition({ places: ['draft', 'review'], initialMarking: Marking.fromPlaces('draft'), transitions: [new Transition('', ['draft'], ['review'])] }).validate()).toThrow('transition name cannot be empty');
-		expect(() => new Definition({ places: ['draft'], initialMarking: Marking.fromPlaces('draft'), transitions: [new Transition('submit', [], ['draft'])] }).validate()).toThrow('requires at least one from place');
+		expect(() => new Definition({ places: ['draft', 'review'], initialMarking: Marking.fromPlaces('draft'), transitions: [new Transition('', ['draft'], ['review'])] }).validate()).toThrow(
+			'transition name cannot be empty',
+		);
+		expect(() => new Definition({ places: ['draft'], initialMarking: Marking.fromPlaces('draft'), transitions: [new Transition('submit', [], ['draft'])] }).validate()).toThrow(
+			'requires at least one from place',
+		);
 		expect(() => new WorkflowConfigLoader({ workflow: { places: ['draft'], initial: 1 } }).load()).toThrow('requires an initial place list');
 		expect(() => new WorkflowConfigLoader({ workflow: { places: ['draft'], initial: ['draft'], transitions: [{ from: ['draft'], to: ['draft'] }] } }).load()).toThrow('transition name');
 	});
