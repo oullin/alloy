@@ -133,6 +133,9 @@ func StartSession(handler Handler, cfg StartSessionConfig) func(http.Handler) ht
 				return
 			}
 
+			// Expose the Store to downstream handlers via the request context.
+			r = r.WithContext(NewContext(r.Context(), store))
+
 			sw := &sessionResponseWriter{ResponseWriter: w, store: store, cfg: cfg}
 			next.ServeHTTP(sw, r)
 

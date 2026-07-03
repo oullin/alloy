@@ -46,6 +46,50 @@ func TestStartSessionWritesCookie(t *testing.T) {
 	}
 }
 
+func TestStartSessionExposesStoreViaContext(t *testing.T) {
+	h := handlers.NewArrayHandler()
+	mw := session.StartSession(h, session.StartSessionConfig{
+		CookieName:    "sess",
+		GCProbability: 0,
+	})
+
+	var (
+		got   *session.Store
+		found bool
+	)
+
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got, found = session.FromContext(r.Context())
+		w.WriteHeader(http.StatusOK)
+	})
+
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	mw(inner).ServeHTTP(rr, req)
+
+	if !found {
+		t.Fatal("expected store to be present in request context")
+	}
+
+	if got == nil {
+		t.Fatal("expected non-nil store from context")
+	}
+
+	// The store exposed to the handler must be the one the middleware started
+	// for this request, identified by the ID written to the response cookie.
+	var cookieID string
+
+	for _, c := range rr.Result().Cookies() {
+		if c.Name == "sess" {
+			cookieID = c.Value
+		}
+	}
+
+	if got.GetID() != cookieID {
+		t.Errorf("context store ID %q does not match cookie ID %q", got.GetID(), cookieID)
+	}
+}
+
 func TestStartSessionMergesPartialConfigWithDefaults(t *testing.T) {
 	h := handlers.NewArrayHandler()
 	mw := session.StartSession(h, session.StartSessionConfig{
