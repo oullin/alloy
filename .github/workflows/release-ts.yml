@@ -97,7 +97,7 @@ jobs:
             "${TAG}"
             "${artifacts[@]}"
             --title "TypeScript ${VERSION}"
-            --notes "TypeScript package release ${VERSION}."
+            --generate-notes
           )
 
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then

@@ -43,7 +43,14 @@ while IFS= read -r -d '' gomod; do
 			fi
 		done < <(go list -m)
 		go vet ./...
-		go test -race ./...
+		if [[ -n "${GO_COVERAGE_DIR:-}" ]]; then
+			mkdir -p "${GO_COVERAGE_DIR}"
+			profile="${GO_COVERAGE_DIR}/$(echo "${module_dir#"${ROOT_PATH}/"}" | tr '/' '-').out"
+			go test -race -coverprofile="${profile}" ./...
+			go tool cover -func="${profile}" | tail -1
+		else
+			go test -race ./...
+		fi
 	)
 done < <(
 	find "${GO_PATH}" -name go.mod -print0

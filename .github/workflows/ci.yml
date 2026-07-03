@@ -27,7 +27,6 @@ jobs:
     outputs:
       go_changed: ${{ steps.detect.outputs.go_changed }}
       ts_changed: ${{ steps.detect.outputs.ts_changed }}
-      browser_changed: ${{ steps.detect.outputs.browser_changed }}
       has_special_label: ${{ steps.detect.outputs.has_special_label }}
       has_coverage_label: ${{ steps.detect.outputs.has_coverage_label }}
       has_e2e_label: ${{ steps.detect.outputs.has_e2e_label }}
@@ -62,7 +61,7 @@ jobs:
   inertia_app_tests:
     name: Inertia App Tests
     needs: changes
-    if: needs.changes.outputs.has_inertial_tests_label == 'true'
+    if: needs.changes.outputs.has_inertial_tests_label == 'true' || needs.changes.outputs.has_e2e_label == 'true'
     uses: ./.github/workflows/ci-inertia-app-tests.yml
 
   label_requests:
@@ -79,10 +78,10 @@ jobs:
           {
             echo "### Label-triggered checks"
             if [[ "${{ needs.changes.outputs.has_coverage_label }}" == "true" ]]; then
-              echo "- coverage-all was requested, but Alloy does not have coverage scripts wired into CI yet."
+              echo "- coverage-all: coverage now runs on every Go and TypeScript CI job; see those job summaries."
             fi
             if [[ "${{ needs.changes.outputs.has_e2e_label }}" == "true" ]]; then
-              echo "- e2e-* was requested, but Alloy does not have a stable E2E workflow wired into CI yet."
+              echo "- e2e-*: triggered the Inertia app Playwright suite."
             fi
             if [[ "${{ needs.changes.outputs.has_inertial_tests_label }}" == "true" ]]; then
               echo "- inertial-tests requested the Inertia app test workflow."
