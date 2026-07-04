@@ -1,6 +1,7 @@
 package filesystem_test
 
 import (
+	"errors"
 	"path/filepath"
 	"testing"
 	"time"
@@ -359,5 +360,44 @@ func TestLockableFileWriteOverwrite(t *testing.T) {
 
 	if string(data) != "second" {
 		t.Fatalf("expected 'second', got %q", string(data))
+	}
+}
+
+func TestLockableFileTryExclusiveLock(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "try-lock.txt")
+
+	first, err := filesystem.NewLockableFile(path, 0o600)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer first.Close()
+
+	if err := first.TryExclusiveLock(); err != nil {
+		t.Fatalf("expected first lock to succeed, got %v", err)
+	}
+
+	second, err := filesystem.NewLockableFile(path, 0o600)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer second.Close()
+
+	if err := second.TryExclusiveLock(); !errors.Is(err, filesystem.ErrLocked) {
+		t.Fatalf("expected ErrLocked while lock is held, got %v", err)
+	}
+
+	if err := first.Unlock(); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := second.TryExclusiveLock(); err != nil {
+		t.Fatalf("expected lock to succeed after release, got %v", err)
 	}
 }

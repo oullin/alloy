@@ -28,6 +28,7 @@
   "scripts": {
     "build": "vp pack src/index.ts --tsconfig tsconfig.json --out-dir dist --dts --clean",
     "lint": "tsc -p tsconfig.json --noEmit",
+    "prepare": "tsc -p tsconfig.build.json && node scripts/prepare-dist.mjs",
     "test": "vp test run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
