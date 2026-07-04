@@ -27,11 +27,13 @@ import (
 // date.
 func Migrate(sourceFS fs.FS, dir string, driver migratedb.Driver, databaseName string) error {
 	source, err := iofs.New(sourceFS, dir)
+
 	if err != nil {
 		return fmt.Errorf("database: open migration source: %w", err)
 	}
 
 	migrator, err := migrate.NewWithInstance("iofs", source, databaseName, driver)
+
 	if err != nil {
 		return fmt.Errorf("database: create migrator: %w", err)
 	}

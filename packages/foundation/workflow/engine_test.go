@@ -17,11 +17,6 @@ type captureSink struct {
 	errs   []string
 }
 
-func (s *captureSink) Debug(msg string, args ...any) { s.debugs = append(s.debugs, msg) }
-func (s *captureSink) Info(msg string, args ...any)  { s.infos = append(s.infos, msg) }
-func (s *captureSink) Warn(msg string, args ...any)  { s.warns = append(s.warns, msg) }
-func (s *captureSink) Error(msg string, args ...any) { s.errs = append(s.errs, msg) }
-
 // failingStore wraps a MarkingStore and forces errors on selected operations.
 type failingStore struct {
 	inner        workflow.MarkingStore[*Subscription]
@@ -29,6 +24,17 @@ type failingStore struct {
 	failSet      bool
 	gets         int
 }
+
+// Order is the multi-token Petri-net test subject.
+type Order struct {
+	ID     string
+	Places []string
+}
+
+func (s *captureSink) Debug(msg string, args ...any) { s.debugs = append(s.debugs, msg) }
+func (s *captureSink) Info(msg string, args ...any)  { s.infos = append(s.infos, msg) }
+func (s *captureSink) Warn(msg string, args ...any)  { s.warns = append(s.warns, msg) }
+func (s *captureSink) Error(msg string, args ...any) { s.errs = append(s.errs, msg) }
 
 func (s *failingStore) GetMarking(subject *Subscription, definition *workflow.Definition) (workflow.Marking, error) {
 	s.gets++
@@ -46,12 +52,6 @@ func (s *failingStore) SetMarking(subject *Subscription, marking workflow.Markin
 	}
 
 	return s.inner.SetMarking(subject, marking, definition, context)
-}
-
-// Order is the multi-token Petri-net test subject.
-type Order struct {
-	ID     string
-	Places []string
 }
 
 func orderDef(t *testing.T) *workflow.Definition {

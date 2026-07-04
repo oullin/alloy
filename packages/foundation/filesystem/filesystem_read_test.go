@@ -289,6 +289,7 @@ func TestLinesStopsWhenContextCancelled(t *testing.T) {
 	writeFile(t, path, "line1\nline2\nline3\nline4\nline5")
 
 	ctx, cancel := context.WithCancel(context.Background())
+
 	defer cancel()
 
 	seq, err := fs.Lines(ctx, path)

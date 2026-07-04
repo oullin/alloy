@@ -11,6 +11,11 @@ import (
 	"github.com/oullin/alloy/packages/foundation/httpx/middleware"
 )
 
+type slogCapture struct {
+	mu      sync.Mutex
+	entries []slog.Record
+}
+
 var slogMu sync.Mutex
 
 func TestRequestLogCapturesStatusAndBytes(t *testing.T) {
@@ -98,6 +103,7 @@ func TestRequestLogFlusherPassthrough(t *testing.T) {
 	t.Parallel()
 
 	rec := httptest.NewRecorder()
+
 	var sawFlusher bool
 	handler := middleware.NewHandleRequestLog(middleware.RequestLogOptions{}).Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		flusher, ok := w.(http.Flusher)
@@ -117,11 +123,6 @@ func TestRequestLogFlusherPassthrough(t *testing.T) {
 	if !rec.Flushed {
 		t.Fatal("expected underlying response writer to be flushed")
 	}
-}
-
-type slogCapture struct {
-	mu      sync.Mutex
-	entries []slog.Record
 }
 
 func useSlogCapture(t *testing.T) *slogCapture {
@@ -147,6 +148,7 @@ func (h *slogCapture) Enabled(ctx context.Context, level slog.Level) bool {
 
 func (h *slogCapture) Handle(ctx context.Context, record slog.Record) error {
 	h.mu.Lock()
+
 	defer h.mu.Unlock()
 
 	h.entries = append(h.entries, record.Clone())
@@ -164,6 +166,7 @@ func (h *slogCapture) WithGroup(name string) slog.Handler {
 
 func (h *slogCapture) records(message string) []slog.Record {
 	h.mu.Lock()
+
 	defer h.mu.Unlock()
 
 	records := make([]slog.Record, 0, len(h.entries))

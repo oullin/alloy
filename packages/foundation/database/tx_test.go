@@ -16,6 +16,7 @@ func TestWithTxCommitsOnSuccess(t *testing.T) {
 	db := openTestDB(t)
 
 	_, err := db.ExecContext(ctx, "CREATE TABLE entries (name TEXT NOT NULL)")
+
 	if err != nil {
 		t.Fatalf("create table: %v", err)
 	}
@@ -43,6 +44,7 @@ func TestWithTxRollsBackOnError(t *testing.T) {
 	wantErr := errors.New("callback failed")
 
 	_, err := db.ExecContext(ctx, "CREATE TABLE entries (name TEXT NOT NULL)")
+
 	if err != nil {
 		t.Fatalf("create table: %v", err)
 	}
@@ -72,6 +74,7 @@ func TestWithTxRollsBackAndRepanics(t *testing.T) {
 	panicValue := "callback panicked"
 
 	_, err := db.ExecContext(ctx, "CREATE TABLE entries (name TEXT NOT NULL)")
+
 	if err != nil {
 		t.Fatalf("create table: %v", err)
 	}

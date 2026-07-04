@@ -10,11 +10,18 @@ import (
 type HandleRecovery struct{}
 
 // NewHandleRecovery creates the recovery middleware.
+
+// Wrap returns an http.Handler that recovers panics.
+
+type recoveryResponseWriter struct {
+	http.ResponseWriter
+	wroteHeader bool
+}
+
 func NewHandleRecovery() *HandleRecovery {
 	return &HandleRecovery{}
 }
 
-// Wrap returns an http.Handler that recovers panics.
 func (m *HandleRecovery) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := &recoveryResponseWriter{ResponseWriter: w}
@@ -43,11 +50,6 @@ func (m *HandleRecovery) Wrap(next http.Handler) http.Handler {
 
 		next.ServeHTTP(rec, r)
 	})
-}
-
-type recoveryResponseWriter struct {
-	http.ResponseWriter
-	wroteHeader bool
 }
 
 func (w *recoveryResponseWriter) Write(body []byte) (int, error) {

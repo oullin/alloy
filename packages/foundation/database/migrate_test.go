@@ -24,6 +24,7 @@ func TestMigrateAppliesPendingMigrations(t *testing.T) {
 	db := openTestDB(t)
 
 	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+
 	if err != nil {
 		t.Fatalf("sqlite driver: %v", err)
 	}
@@ -55,6 +56,7 @@ func TestMigrateIsIdempotent(t *testing.T) {
 	// untouched on the second pass.
 	for range 2 {
 		driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+
 		if err != nil {
 			t.Fatalf("sqlite driver: %v", err)
 		}
@@ -75,6 +77,7 @@ func TestMigrateReportsBrokenStatement(t *testing.T) {
 	db := openTestDB(t)
 
 	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+
 	if err != nil {
 		t.Fatalf("sqlite driver: %v", err)
 	}
@@ -94,6 +97,7 @@ func TestMigrateErrorsOnMissingDirectory(t *testing.T) {
 	db := openTestDB(t)
 
 	driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+
 	if err != nil {
 		t.Fatalf("sqlite driver: %v", err)
 	}

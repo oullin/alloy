@@ -11,6 +11,7 @@ func openTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
+
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
@@ -29,6 +30,7 @@ func countRows(t *testing.T, db *sql.DB, table string) int {
 	t.Helper()
 
 	var count int
+
 	if err := db.QueryRow("SELECT COUNT(*) FROM " + table).Scan(&count); err != nil {
 		t.Fatalf("count %s: %v", table, err)
 	}

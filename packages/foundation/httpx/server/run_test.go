@@ -14,6 +14,11 @@ import (
 	"github.com/oullin/alloy/packages/foundation/httpx/server"
 )
 
+type clientResult struct {
+	body string
+	err  error
+}
+
 func TestRunListenerServesRequestAndStopsOnCancel(t *testing.T) {
 	t.Parallel()
 
@@ -23,6 +28,7 @@ func TestRunListenerServesRequestAndStopsOnCancel(t *testing.T) {
 	}), time.Second)
 
 	body := getBody(t, baseURL)
+
 	if body != "ok" {
 		t.Fatalf("body = %q, want %q", body, "ok")
 	}
@@ -54,6 +60,7 @@ func TestRunListenerLetsInFlightRequestCompleteDuringShutdown(t *testing.T) {
 	cancel()
 
 	result := waitClient(t, response, time.Second)
+
 	if result.err != nil {
 		t.Fatalf("request error = %v, want nil", result.err)
 	}
@@ -88,6 +95,7 @@ func TestRunListenerClosesWhenShutdownTimeoutExpires(t *testing.T) {
 	cancel()
 
 	err := waitRun(t, runErr, time.Second)
+
 	if err == nil {
 		t.Fatal("RunListener error = nil, want shutdown timeout error")
 	}
@@ -107,6 +115,7 @@ func TestRunListenerReturnsWrappedServeError(t *testing.T) {
 	t.Parallel()
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
+
 	if err != nil {
 		t.Fatalf("listen: %v", err)
 	}
@@ -116,6 +125,7 @@ func TestRunListenerReturnsWrappedServeError(t *testing.T) {
 	}
 
 	err = server.RunListener(context.Background(), &http.Server{}, ln, time.Second)
+
 	if err == nil {
 		t.Fatal("RunListener error = nil, want serve error")
 	}
@@ -129,15 +139,11 @@ func TestRunListenerReturnsWrappedServeError(t *testing.T) {
 	}
 }
 
-type clientResult struct {
-	body string
-	err  error
-}
-
 func runListener(t *testing.T, ctx context.Context, handler http.Handler, shutdownTimeout time.Duration) (<-chan error, string) {
 	t.Helper()
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
+
 	if err != nil {
 		t.Fatalf("listen: %v", err)
 	}
@@ -158,6 +164,7 @@ func getBody(t *testing.T, url string) string {
 	t.Helper()
 
 	result := getBodyResult(url)
+
 	if result.err != nil {
 		t.Fatalf("GET %s: %v", url, result.err)
 	}
@@ -171,12 +178,15 @@ func getBodyResult(url string) clientResult {
 	}
 
 	resp, err := client.Get(url)
+
 	if err != nil {
 		return clientResult{err: err}
 	}
+
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
+
 	if err != nil {
 		return clientResult{err: err}
 	}
@@ -192,6 +202,7 @@ func waitRun(t *testing.T, runErr <-chan error, timeout time.Duration) error {
 		return err
 	case <-time.After(timeout):
 		t.Fatalf("RunListener did not return within %s", timeout)
+
 		return nil
 	}
 }
@@ -204,6 +215,7 @@ func waitClient(t *testing.T, response <-chan clientResult, timeout time.Duratio
 		return result
 	case <-time.After(timeout):
 		t.Fatalf("client did not return within %s", timeout)
+
 		return clientResult{}
 	}
 }

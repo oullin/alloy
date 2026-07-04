@@ -83,9 +83,13 @@ func TestApply_EventPayloads(t *testing.T) {
 	dispatcher := events.NewDispatcher[*Subscription]()
 
 	var leave *events.LeaveEvent[*Subscription]
+
 	var enter *events.EnterEvent[*Subscription]
+
 	var entered *events.EnteredEvent[*Subscription]
+
 	var completed *events.CompletedEvent[*Subscription]
+
 	var announce *events.AnnounceEvent[*Subscription]
 
 	dispatcher.On(workflow.EventNameLeave("subscription"), func(e events.Event[*Subscription]) {

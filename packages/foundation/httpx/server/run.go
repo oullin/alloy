@@ -52,6 +52,7 @@ func run(ctx context.Context, srv *http.Server, shutdownTimeout time.Duration, s
 	}
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {

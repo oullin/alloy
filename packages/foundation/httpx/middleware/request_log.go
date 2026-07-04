@@ -17,11 +17,25 @@ type HandleRequestLog struct {
 }
 
 // NewHandleRequestLog creates the request logging middleware.
+
+// Wrap returns an http.Handler that logs requests.
+
+type requestLogResponseWriter struct {
+	http.ResponseWriter
+	status      int
+	bytes       int
+	wroteHeader bool
+}
+
+type flushingRequestLogResponseWriter struct {
+	*requestLogResponseWriter
+	flusher http.Flusher
+}
+
 func NewHandleRequestLog(opts RequestLogOptions) *HandleRequestLog {
 	return &HandleRequestLog{opts: opts}
 }
 
-// Wrap returns an http.Handler that logs requests.
 func (m *HandleRequestLog) Wrap(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if m.shouldSkip(r.URL.Path) {
@@ -67,13 +81,6 @@ func (m *HandleRequestLog) shouldSkip(path string) bool {
 	return false
 }
 
-type requestLogResponseWriter struct {
-	http.ResponseWriter
-	status      int
-	bytes       int
-	wroteHeader bool
-}
-
 func (w *requestLogResponseWriter) Write(body []byte) (int, error) {
 	if !w.wroteHeader {
 		w.status = http.StatusOK
@@ -98,11 +105,6 @@ func (w *requestLogResponseWriter) WriteHeader(statusCode int) {
 
 func (w *requestLogResponseWriter) Unwrap() http.ResponseWriter {
 	return w.ResponseWriter
-}
-
-type flushingRequestLogResponseWriter struct {
-	*requestLogResponseWriter
-	flusher http.Flusher
 }
 
 func (w *flushingRequestLogResponseWriter) Flush() {

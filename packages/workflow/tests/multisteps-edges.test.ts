@@ -5,6 +5,7 @@ import { AsyncJob, CompileError, LiteralArg, MultiStepEngine, MultiStepResult, M
 describe('multisteps edge cases', () => {
 	it('marks skipped dependencies complete enough for downstream jobs', async () => {
 		const order: string[] = [];
+
 		const workflow = MultiStepWorkflow.machine(
 			'skipped-dependency',
 			new SyncJob('start', () => {

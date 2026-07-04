@@ -39,6 +39,14 @@ const definition = (): Definition =>
 		.addTransition('approve', ['review'], ['done'])
 		.build();
 
+const eventPlace = (event: unknown): string => {
+	if (typeof event !== 'object' || event === null || !('place' in event)) {
+		return '';
+	}
+
+	return typeof event.place === 'string' ? event.place : '';
+};
+
 describe('workflow guards and errors', () => {
 	it('collects transition blockers and preserves typed error classes', () => {
 		const dispatcher = new Dispatcher<Ticket>();
@@ -78,10 +86,10 @@ describe('workflow guards and errors', () => {
 		const order: string[] = [];
 		const trail = new AuditTrail<Ticket>().attach('ticket', dispatcher);
 
-		dispatcher.on(EventNames.leave('ticket'), (event) => order.push(`leave:${'place' in event ? event.place : ''}:${event.marking().draft ?? 0}`));
+		dispatcher.on(EventNames.leave('ticket'), (event) => order.push(`leave:${eventPlace(event)}:${event.marking().draft ?? 0}`));
 		dispatcher.on(EventNames.transition('ticket'), (event) => order.push(`transition:${event.transition().name}`));
-		dispatcher.on(EventNames.enter('ticket'), (event) => order.push(`enter:${'place' in event ? event.place : ''}`));
-		dispatcher.on(EventNames.entered('ticket'), (event) => order.push(`entered:${'place' in event ? event.place : ''}`));
+		dispatcher.on(EventNames.enter('ticket'), (event) => order.push(`enter:${eventPlace(event)}`));
+		dispatcher.on(EventNames.entered('ticket'), (event) => order.push(`entered:${eventPlace(event)}`));
 		dispatcher.on(EventNames.completed('ticket'), (event) => order.push(`completed:${event.marking().review ?? 0}`));
 		dispatcher.on(EventNames.announce('ticket'), (event) => order.push(`announce:${event instanceof AnnounceEvent ? event.enabled.map((transition) => transition.name).join(',') : ''}`));
 

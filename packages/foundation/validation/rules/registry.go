@@ -9,7 +9,6 @@ import (
 
 // ErrEmptyRuleName is returned by Register and RegisterImplicit when the
 // rule name is empty.
-var ErrEmptyRuleName = errors.New("validation/rules: rule name must not be empty")
 
 // RuleFunc is the signature every built-in (and user-registered) rule must
 // satisfy.  It returns true when the value is valid.
@@ -60,6 +59,8 @@ type registry struct {
 	rules    map[string]RuleFunc
 	implicit map[string]bool // rules that run even when the field is absent
 }
+
+var ErrEmptyRuleName = errors.New("validation/rules: rule name must not be empty")
 
 var global = &registry{
 	rules:    make(map[string]RuleFunc),
