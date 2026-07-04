@@ -89,10 +89,14 @@ export default defineUserConfig({
 						{ text: 'routing', link: '/packages/routing' },
 						{ text: 'controllers', link: '/basics/controllers' },
 						{ text: 'middleware', link: '/basics/middleware' },
+						{ text: 'http recovery middleware', link: '/packages/httpx-recovery' },
+						{ text: 'http request log middleware', link: '/packages/httpx-request-log' },
+						{ text: 'http server runner', link: '/packages/httpx-server' },
 						{ text: 'url generation', link: '/basics/url-generation' },
 						{ text: 'httpx', link: '/packages/httpx' },
 						{ text: 'inertia', link: '/packages/inertia' },
 						{ text: 'session', link: '/packages/session' },
+						{ text: 'session context', link: '/packages/session-context' },
 						{ text: 'cookie', link: '/packages/cookie' },
 						{ text: 'csrf protection', link: '/basics/csrf' },
 						{ text: 'validation', link: '/packages/validation' },
@@ -113,7 +117,11 @@ export default defineUserConfig({
 				{
 					text: 'Database',
 					collapsible: true,
-					children: [{ text: 'database', link: '/packages/database' }],
+					children: [
+						{ text: 'database', link: '/packages/database' },
+						{ text: 'database transactions', link: '/packages/database-transactions' },
+						{ text: 'database migrations', link: '/packages/database-migrations' },
+					],
 				},
 				{
 					text: 'Data & Storage',
