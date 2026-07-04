@@ -10,10 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/oullin/alloy/packages/foundation/auth/browserx"
 	"github.com/oullin/alloy/packages/foundation/auth/fortify"
-	"github.com/oullin/alloy/packages/foundation/auth/passkeys"
 	"github.com/oullin/alloy/packages/foundation/auth/passwords"
 	"github.com/oullin/alloy/packages/foundation/auth/teams"
 	patokens "github.com/oullin/alloy/packages/foundation/auth/tokens"
@@ -66,6 +64,33 @@ type stubHasher struct {
 
 type stubConfirmationSession struct {
 	values map[string]any
+}
+
+type stubPasskeyService struct {
+	registrationKey  string
+	registrationUser cauth.User
+	loginKey         string
+}
+
+func (s *stubPasskeyService) BeginRegistration(_ context.Context, key string, user cauth.User) (any, error) {
+	s.registrationKey = key
+	s.registrationUser = user
+
+	return map[string]any{"publicKey": map[string]any{"challenge": "registration"}}, nil
+}
+
+func (s *stubPasskeyService) FinishRegistration(context.Context, string, cauth.User, *http.Request) (any, error) {
+	return nil, nil
+}
+
+func (s *stubPasskeyService) BeginDiscoverableLogin(_ context.Context, key string) (any, error) {
+	s.loginKey = key
+
+	return map[string]any{"publicKey": map[string]any{"challenge": "login"}}, nil
+}
+
+func (s *stubPasskeyService) FinishPasskeyLogin(context.Context, string, *http.Request, fortify.PasskeyUserResolver) (cauth.User, any, error) {
+	return nil, nil, nil
 }
 
 func TestRoutesReturnsEnabledHeadlessRouteContracts(t *testing.T) {
@@ -655,7 +680,7 @@ func TestBrowserSessionHandlersListRevokeAndRevokeOther(t *testing.T) {
 }
 
 func TestPasskeyOptionHandlersStoreServerSideSessions(t *testing.T) {
-	service, sessions := newPasskeyService(t)
+	service := &stubPasskeyService{}
 	user := user.NewGenericUser(map[string]any{"id": "1"})
 	guard := &stubStatefulGuard{user: user}
 	key := func(*http.Request) string { return "ceremony" }
@@ -667,14 +692,8 @@ func TestPasskeyOptionHandlersStoreServerSideSessions(t *testing.T) {
 		t.Fatalf("registration options status = %d, want %d", rec.Code, http.StatusOK)
 	}
 
-	session, err := sessions.Get(context.Background(), "ceremony")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if session.Challenge == "" {
-		t.Fatal("expected registration challenge to be stored")
+	if service.registrationKey != "ceremony" || service.registrationUser != user {
+		t.Fatalf("registration call = (%q, %#v), want ceremony/user", service.registrationKey, service.registrationUser)
 	}
 
 	login := fortify.NewBeginPasskeyLoginHandler(service, key)
@@ -684,14 +703,8 @@ func TestPasskeyOptionHandlersStoreServerSideSessions(t *testing.T) {
 		t.Fatalf("login options status = %d, want %d", rec.Code, http.StatusOK)
 	}
 
-	session, err = sessions.Get(context.Background(), "ceremony")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if session.Challenge == "" {
-		t.Fatal("expected login challenge to be stored")
+	if service.loginKey != "ceremony" {
+		t.Fatalf("login key = %q, want ceremony", service.loginKey)
 	}
 }
 
@@ -782,23 +795,6 @@ func perform(handler http.HandlerFunc, method, path, body string) *httptest.Resp
 	handler.ServeHTTP(rec, req)
 
 	return rec
-}
-
-func newPasskeyService(t *testing.T) (*passkeys.Service, *passkeys.MemorySessionStore) {
-	t.Helper()
-
-	sessions := passkeys.NewMemorySessionStore()
-	service, err := passkeys.NewService(&webauthn.Config{
-		RPID:          "example.com",
-		RPDisplayName: "Alloy",
-		RPOrigins:     []string{"https://example.com"},
-	}, passkeys.NewMemoryRepository(), sessions)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return service, sessions
 }
 
 func (g *stubStatefulGuard) User(context.Context) (cauth.User, error) { return g.user, nil }

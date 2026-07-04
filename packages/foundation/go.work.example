@@ -4,6 +4,7 @@ toolchain go1.26.4
 
 use (
 	.
+	./auth/passkeys
 	./queue/drivers/sqs
 	../../web/inertia-demo/api
 )

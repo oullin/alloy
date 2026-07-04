@@ -3,12 +3,11 @@ package fortify
 import (
 	"net/http"
 
-	"github.com/oullin/alloy/packages/foundation/auth/passkeys"
 	cauth "github.com/oullin/alloy/packages/foundation/contracts/auth"
 )
 
 // NewBeginPasskeyRegistrationHandler returns WebAuthn registration options.
-func NewBeginPasskeyRegistrationHandler(guard cauth.Guard, service *passkeys.Service, key PasskeySessionKey) http.HandlerFunc {
+func NewBeginPasskeyRegistrationHandler(guard cauth.Guard, service PasskeyService, key PasskeySessionKey) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := authenticatedUser(w, r, guard)
 
@@ -29,7 +28,7 @@ func NewBeginPasskeyRegistrationHandler(guard cauth.Guard, service *passkeys.Ser
 }
 
 // NewFinishPasskeyRegistrationHandler validates and stores a passkey.
-func NewFinishPasskeyRegistrationHandler(guard cauth.Guard, service *passkeys.Service, key PasskeySessionKey) http.HandlerFunc {
+func NewFinishPasskeyRegistrationHandler(guard cauth.Guard, service PasskeyService, key PasskeySessionKey) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, ok := authenticatedUser(w, r, guard)
 
@@ -48,7 +47,7 @@ func NewFinishPasskeyRegistrationHandler(guard cauth.Guard, service *passkeys.Se
 }
 
 // NewBeginPasskeyLoginHandler returns discoverable passkey login options.
-func NewBeginPasskeyLoginHandler(service *passkeys.Service, key PasskeySessionKey) http.HandlerFunc {
+func NewBeginPasskeyLoginHandler(service PasskeyService, key PasskeySessionKey) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		options, err := service.BeginDiscoverableLogin(r.Context(), passkeySessionKey(r, key))
 
@@ -63,7 +62,7 @@ func NewBeginPasskeyLoginHandler(service *passkeys.Service, key PasskeySessionKe
 }
 
 // NewFinishPasskeyLoginHandler validates a passkey login and logs the user in.
-func NewFinishPasskeyLoginHandler(guard cauth.StatefulGuard, service *passkeys.Service, key PasskeySessionKey, resolve PasskeyUserResolver) http.HandlerFunc {
+func NewFinishPasskeyLoginHandler(guard cauth.StatefulGuard, service PasskeyService, key PasskeySessionKey, resolve PasskeyUserResolver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, _, err := service.FinishPasskeyLogin(r.Context(), passkeySessionKey(r, key), r, resolve)
 

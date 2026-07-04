@@ -53,6 +53,15 @@ type PasskeySessionKey func(r *http.Request) string
 // PasskeyUserResolver resolves a user by application user ID after passkey login.
 type PasskeyUserResolver func(ctx context.Context, userID string) (cauth.User, error)
 
+// PasskeyService is the passkey ceremony surface Fortify needs. Heavy WebAuthn
+// implementations live outside the parent foundation module.
+type PasskeyService interface {
+	BeginRegistration(ctx context.Context, key string, user cauth.User) (any, error)
+	FinishRegistration(ctx context.Context, key string, user cauth.User, r *http.Request) (any, error)
+	BeginDiscoverableLogin(ctx context.Context, key string) (any, error)
+	FinishPasskeyLogin(ctx context.Context, key string, r *http.Request, resolveUser PasskeyUserResolver) (cauth.User, any, error)
+}
+
 // LoginLimiter tracks failed login attempts and lockouts.
 type LoginLimiter interface {
 	TooManyAttempts(ctx context.Context, key string) bool
