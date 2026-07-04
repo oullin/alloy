@@ -52,6 +52,12 @@ func (m *HandleRecovery) Wrap(next http.Handler) http.Handler {
 	})
 }
 
+// Unwrap exposes the underlying writer so http.ResponseController can reach
+// Flusher/Hijacker implementations through the middleware chain.
+func (w *recoveryResponseWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
+}
+
 func (w *recoveryResponseWriter) Write(body []byte) (int, error) {
 	if !w.wroteHeader {
 		w.wroteHeader = true

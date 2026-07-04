@@ -46,6 +46,22 @@ func (lf *LockableFile) ExclusiveLock() error {
 	return nil
 }
 
+// TryExclusiveLock attempts to acquire an exclusive (write) lock without
+// blocking. It returns ErrLocked when the lock is already held elsewhere.
+func (lf *LockableFile) TryExclusiveLock() error {
+	acquired, err := tryLockExclusive(lf.file)
+
+	if err != nil {
+		return ErrLockFailed
+	}
+
+	if !acquired {
+		return ErrLocked
+	}
+
+	return nil
+}
+
 // Unlock releases the advisory lock on the file.
 func (lf *LockableFile) Unlock() error {
 	return unlockFile(lf.file)

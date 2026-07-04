@@ -3,6 +3,7 @@
 package filesystem
 
 import (
+	"errors"
 	"os"
 
 	"golang.org/x/sys/windows"
@@ -19,6 +20,20 @@ func lockShared(file *os.File) error {
 
 func lockExclusive(file *os.File) error {
 	return lockFileRegion(file, windows.LOCKFILE_EXCLUSIVE_LOCK)
+}
+
+func tryLockExclusive(file *os.File) (bool, error) {
+	err := lockFileRegion(file, windows.LOCKFILE_EXCLUSIVE_LOCK|windows.LOCKFILE_FAIL_IMMEDIATELY)
+
+	if err == nil {
+		return true, nil
+	}
+
+	if errors.Is(err, windows.ERROR_LOCK_VIOLATION) {
+		return false, nil
+	}
+
+	return false, err
 }
 
 func unlockFile(file *os.File) error {
