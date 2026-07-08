@@ -230,7 +230,7 @@ alloy/
 └── vite.config.ts
 ```
 
-The split is: `packages/foundation/` contains reusable Go packages, other
+The split is: `pkg/hub/` contains reusable Go packages, other
 `packages/*` directories contain TypeScript packages, and `web/` contains the
 documentation site, web demos, and local runtime data.
 

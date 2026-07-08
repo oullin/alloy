@@ -14,7 +14,7 @@ workflow; see [README.md](README.md) for the workspace layout.
 
 ```sh
 pnpm install
-pnpm exec vp run monorepo:initialise   # creates packages/foundation/go.work
+pnpm exec vp run monorepo:initialise   # creates pkg/hub/go.work
 ```
 
 ## Everyday tasks

@@ -33,7 +33,7 @@ import (
     "fmt"
 
     "github.com/golang-migrate/migrate/v4/database/sqlite"
-    "github.com/oullin/alloy/packages/foundation/database"
+    "github.com/oullin/alloy/pkg/hub/database"
     _ "modernc.org/sqlite"
 )
 

@@ -1,0 +1,38 @@
+{
+  "name": "@alloy/sdk/navigator-routes",
+  "version": "0.1.0",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "sdk/navigator-routes"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "imports": {
+    "#navigator-routes/*": "./src/*",
+    "#*": "./src/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "vp pack src/index.ts --tsconfig tsconfig.json --out-dir dist --dts --clean",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prepare": "tsc -p tsconfig.build.json && node scripts/prepare-dist.mjs",
+    "test": "vp test run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

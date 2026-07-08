@@ -16,7 +16,7 @@ You can always reach for the underlying manager directly when you need to.
 ## Calling a Facade
 
 ```go
-import "github.com/oullin/alloy/packages/foundation/facades/cache"
+import "github.com/oullin/alloy/pkg/hub/facades/cache"
 
 func ShowProduct(id int) Response {
     cached, _ := cache.Driver()                 // *cache.Store
@@ -44,7 +44,7 @@ application slot — see [Setup](#setup) below.
 The whole `facades/cache` package is 65 lines. It's worth reading once:
 
 ```go
-// packages/foundation/facades/cache/cache.go:22
+// pkg/hub/facades/cache/cache.go:22
 var (
     mu     sync.Mutex
     cached *cachepkg.Manager
@@ -100,7 +100,7 @@ container.SetApp(application)
 ```
 
 Without `SetApp`, the first facade call panics with a clear message
-([`packages/foundation/container/application_registry.go:26`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application_registry.go#L26)):
+([`pkg/hub/container/application_registry.go:26`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application_registry.go#L26)):
 
 ```
 container: no Application installed; call container.SetApp(application) first
@@ -154,14 +154,14 @@ The current facade set:
 
 | Facade                                                                                   | Resolves            | Common helpers                                |
 | ---------------------------------------------------------------------------------------- | ------------------- | --------------------------------------------- |
-| [`facades/cache`](https://github.com/oullin/alloy/tree/main/packages/foundation/facades/cache)   | `*cache.Manager`    | `Driver()`, `Store(name)`, `Repository(name)` |
-| [`facades/queue`](https://github.com/oullin/alloy/tree/main/packages/foundation/facades/queue)   | `*queue.Manager`    | `Connection(name)`                            |
-| [`facades/log`](https://github.com/oullin/alloy/tree/main/packages/foundation/facades/log)       | `*log.LogManager`   | `Channel(name)`, `Stack(...)`                 |
-| [`facades/auth`](https://github.com/oullin/alloy/tree/main/packages/foundation/facades/auth)     | `*auth.Manager`     | `Guard(name)`, `User()`                       |
-| [`facades/events`](https://github.com/oullin/alloy/tree/main/packages/foundation/facades/events) | `events.Dispatcher` | `Listen(...)`, `Dispatch(...)`                |
+| [`facades/cache`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/cache)   | `*cache.Manager`    | `Driver()`, `Store(name)`, `Repository(name)` |
+| [`facades/queue`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/queue)   | `*queue.Manager`    | `Connection(name)`                            |
+| [`facades/log`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/log)       | `*log.LogManager`   | `Channel(name)`, `Stack(...)`                 |
+| [`facades/auth`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/auth)     | `*auth.Manager`     | `Guard(name)`, `User()`                       |
+| [`facades/events`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/events) | `events.Dispatcher` | `Listen(...)`, `Dispatch(...)`                |
 
 If a service you use often isn't in this list, you can write a facade for
-it in 30 lines. Copy `packages/foundation/facades/cache/cache.go` as a template,
+it in 30 lines. Copy `pkg/hub/facades/cache/cache.go` as a template,
 swap the type and the abstract key.
 
 ## See Also
@@ -170,5 +170,5 @@ swap the type and the abstract key.
   helper that facades wrap.
 - [Service Providers](/architecture/service-providers) — what binds the
   abstracts that facades resolve.
-- [`packages/foundation/facades/cache/cache.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/facades/cache/cache.go)
+- [`pkg/hub/facades/cache/cache.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/facades/cache/cache.go)
   — the canonical 65-line example.

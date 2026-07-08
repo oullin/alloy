@@ -18,13 +18,13 @@ Package jsonx provides a fluent builder API for constructing JSON Schema objects
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/jsonx@latest
+go get github.com/oullin/alloy/pkg/hub/jsonx@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/jsonx/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/jsonx/...
 ```
 
 ## Source Coverage
@@ -60,7 +60,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/jsonx"
+    _ "github.com/oullin/alloy/pkg/hub/jsonx"
 )
 
 func main() {
@@ -69,7 +69,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/jsonx` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/jsonx` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -109,7 +109,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/jsonx/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/jsonx/...
 ```
 
 Parity is tracked by these tests:

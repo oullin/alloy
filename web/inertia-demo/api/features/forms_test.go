@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
 )
 
 func TestFormHandlers_RenderAndMethodGuards(t *testing.T) {

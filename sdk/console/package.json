@@ -1,0 +1,216 @@
+{
+  "name": "@alloy/sdk/console",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "sdk/console"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./environment": {
+      "types": "./dist/environment.d.ts",
+      "import": "./dist/environment.js",
+      "default": "./dist/environment.js"
+    },
+    "./form": {
+      "types": "./dist/form.d.ts",
+      "import": "./dist/form.js",
+      "default": "./dist/form.js"
+    },
+    "./key": {
+      "types": "./dist/key.d.ts",
+      "import": "./dist/key.js",
+      "default": "./dist/key.js"
+    },
+    "./opentui": {
+      "types": "./dist/opentui.d.ts",
+      "import": "./dist/opentui.js",
+      "default": "./dist/opentui.js"
+    },
+    "./output": {
+      "types": "./dist/output.d.ts",
+      "import": "./dist/output.js",
+      "default": "./dist/output.js"
+    },
+    "./output/data-table": {
+      "types": "./dist/output/data-table.d.ts",
+      "import": "./dist/output/data-table.js",
+      "default": "./dist/output/data-table.js"
+    },
+    "./output/grid": {
+      "types": "./dist/output/grid-output.d.ts",
+      "import": "./dist/output/grid-output.js",
+      "default": "./dist/output/grid-output.js"
+    },
+    "./output/notes": {
+      "types": "./dist/output/notes.d.ts",
+      "import": "./dist/output/notes.js",
+      "default": "./dist/output/notes.js"
+    },
+    "./output/notify": {
+      "types": "./dist/output/notify.d.ts",
+      "import": "./dist/output/notify.js",
+      "default": "./dist/output/notify.js"
+    },
+    "./output/table": {
+      "types": "./dist/output/table.d.ts",
+      "import": "./dist/output/table.js",
+      "default": "./dist/output/table.js"
+    },
+    "./output/terminal": {
+      "types": "./dist/output/terminal.d.ts",
+      "import": "./dist/output/terminal.js",
+      "default": "./dist/output/terminal.js"
+    },
+    "./prompt": {
+      "types": "./dist/prompt.d.ts",
+      "import": "./dist/prompt.js",
+      "default": "./dist/prompt.js"
+    },
+    "./prompts": {
+      "types": "./dist/prompts.d.ts",
+      "import": "./dist/prompts.js",
+      "default": "./dist/prompts.js"
+    },
+    "./prompts/basic": {
+      "types": "./dist/prompts/basic.d.ts",
+      "import": "./dist/prompts/basic.js",
+      "default": "./dist/prompts/basic.js"
+    },
+    "./prompts/choices": {
+      "types": "./dist/prompts/choices.d.ts",
+      "import": "./dist/prompts/choices.js",
+      "default": "./dist/prompts/choices.js"
+    },
+    "./prompts/number": {
+      "types": "./dist/prompts/number.d.ts",
+      "import": "./dist/prompts/number.js",
+      "default": "./dist/prompts/number.js"
+    },
+    "./prompts/password": {
+      "types": "./dist/prompts/password.d.ts",
+      "import": "./dist/prompts/password.js",
+      "default": "./dist/prompts/password.js"
+    },
+    "./prompts/pause": {
+      "types": "./dist/prompts/pause.d.ts",
+      "import": "./dist/prompts/pause.js",
+      "default": "./dist/prompts/pause.js"
+    },
+    "./prompts/search": {
+      "types": "./dist/prompts/search/index.d.ts",
+      "import": "./dist/prompts/search/index.js",
+      "default": "./dist/prompts/search/index.js"
+    },
+    "./prompts/select": {
+      "types": "./dist/prompts/select/index.d.ts",
+      "import": "./dist/prompts/select/index.js",
+      "default": "./dist/prompts/select/index.js"
+    },
+    "./prompts/suggest": {
+      "types": "./dist/prompts/suggest/index.d.ts",
+      "import": "./dist/prompts/suggest/index.js",
+      "default": "./dist/prompts/suggest/index.js"
+    },
+    "./prompts/text": {
+      "types": "./dist/prompts/text.d.ts",
+      "import": "./dist/prompts/text.js",
+      "default": "./dist/prompts/text.js"
+    },
+    "./prompts/textarea": {
+      "types": "./dist/prompts/textarea.d.ts",
+      "import": "./dist/prompts/textarea.js",
+      "default": "./dist/prompts/textarea.js"
+    },
+    "./status": {
+      "types": "./dist/status.d.ts",
+      "import": "./dist/status.js",
+      "default": "./dist/status.js"
+    },
+    "./status/progress": {
+      "types": "./dist/status/progress.d.ts",
+      "import": "./dist/status/progress.js",
+      "default": "./dist/status/progress.js"
+    },
+    "./status/spinner": {
+      "types": "./dist/status/spinner.d.ts",
+      "import": "./dist/status/spinner.js",
+      "default": "./dist/status/spinner.js"
+    },
+    "./status/stream": {
+      "types": "./dist/status/stream.d.ts",
+      "import": "./dist/status/stream.js",
+      "default": "./dist/status/stream.js"
+    },
+    "./status/task": {
+      "types": "./dist/status/task.d.ts",
+      "import": "./dist/status/task.js",
+      "default": "./dist/status/task.js"
+    },
+    "./strings": {
+      "types": "./dist/strings.d.ts",
+      "import": "./dist/strings.js",
+      "default": "./dist/strings.js"
+    },
+    "./terminal": {
+      "types": "./dist/terminal.d.ts",
+      "import": "./dist/terminal.js",
+      "default": "./dist/terminal.js"
+    },
+    "./typed-value": {
+      "types": "./dist/typed-value.d.ts",
+      "import": "./dist/typed-value.js",
+      "default": "./dist/typed-value.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js",
+      "default": "./dist/types.js"
+    }
+  },
+  "imports": {
+    "#console/*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "#console/prompts/*": {
+      "types": "./dist/prompts/*.d.ts",
+      "default": "./dist/prompts/*.js"
+    }
+  },
+  "scripts": {
+    "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.build.json'",
+    "prepack": "pnpm build",
+    "test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && vp test run'",
+    "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.4.2",
+    "string-width": "^7.2.0",
+    "strip-ansi": "^7.1.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@alloy/infra": "workspace:*",
+    "@types/node": "^26.1.0",
+    "typescript": "^6.0.3"
+  }
+}

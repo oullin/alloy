@@ -29,7 +29,7 @@ notifications.NewNotificationsServiceProvider(application.Container),
 
 The provider's `Boot()` resolves the bus and event dispatchers and
 registers the built-in mail/database/broadcast channels. See
-[`packages/foundation/notifications/notifications_service_provider.go:41`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/notifications_service_provider.go#L41).
+[`pkg/hub/notifications/notifications_service_provider.go:41`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/notifications_service_provider.go#L41).
 
 ## Basic Usage
 
@@ -58,7 +58,7 @@ err := mgr.Send(ctx, user, WelcomeNotification{UserName: user.Name})
 
 For ad-hoc destinations (an email address that's not a user record), use
 the anonymous notifiable
-([`anonymous_notifiable.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/anonymous_notifiable.go)):
+([`anonymous_notifiable.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/anonymous_notifiable.go)):
 
 ```go
 ad := notifications.NewAnonymousNotifiable().
@@ -73,14 +73,14 @@ Built-in channels:
 
 | Name        | Source                                                                                                             | Maps to                                |
 | ----------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
-| `mail`      | [`mail_channel.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/mail_channel.go)           | the [mailx](/packages/mailx) manager   |
-| `database`  | [`database_channel.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/database_channel.go)   | the database manager                   |
-| `broadcast` | [`broadcast_channel.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/broadcast_channel.go) | [broadcasting](/packages/broadcasting) |
+| `mail`      | [`mail_channel.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/mail_channel.go)           | the [mailx](/packages/mailx) manager   |
+| `database`  | [`database_channel.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/database_channel.go)   | the database manager                   |
+| `broadcast` | [`broadcast_channel.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/broadcast_channel.go) | [broadcasting](/packages/broadcasting) |
 
 ## Writing Custom Channels
 
 Implement `cn.Channel` (defined in
-[`packages/foundation/contracts/notifications`](https://github.com/oullin/alloy/tree/main/packages/foundation/contracts/notifications))
+[`pkg/hub/contracts/notifications`](https://github.com/oullin/alloy/tree/main/pkg/hub/contracts/notifications))
 and register it on the manager:
 
 ```go
@@ -93,7 +93,7 @@ mgr.Register("slack", newSlackChannel(cfg))
 ```
 
 `Manager.Register` is the registration hook
-([`packages/foundation/notifications/manager.go:86`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/manager.go#L86)).
+([`pkg/hub/notifications/manager.go:86`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/manager.go#L86)).
 A notification can then opt into the new channel by listing `"slack"` in
 its `Channels()`.
 
@@ -124,13 +124,13 @@ Package notifications provides a notification system for sending messages across
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/notifications@latest
+go get github.com/oullin/alloy/pkg/hub/notifications@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/notifications/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/notifications/...
 ```
 
 ## Source Coverage
@@ -166,7 +166,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/notifications"
+    _ "github.com/oullin/alloy/pkg/hub/notifications"
 )
 
 func main() {
@@ -175,7 +175,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/notifications` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/notifications` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -215,7 +215,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/notifications/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/notifications/...
 ```
 
 Parity is tracked by these tests:

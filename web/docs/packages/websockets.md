@@ -20,13 +20,13 @@ Package websockets implements a Go port of the upstream WebSockets WebSocket ser
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/websockets@latest
+go get github.com/oullin/alloy/pkg/hub/websockets@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/websockets/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/websockets/...
 ```
 
 ## Source Coverage
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/websockets"
+    _ "github.com/oullin/alloy/pkg/hub/websockets"
 )
 
 func main() {
@@ -72,7 +72,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/websockets` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/websockets` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -112,13 +112,13 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/websockets/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/websockets/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/foundation/websockets/http_inventory_additional_test.go`
-- `packages/foundation/websockets/inventory_parity_test.go`
+- `pkg/hub/websockets/http_inventory_additional_test.go`
+- `pkg/hub/websockets/inventory_parity_test.go`
 
 ## API Reference
 

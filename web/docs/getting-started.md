@@ -1,7 +1,7 @@
 # Getting Started
 
 Alloy is a collection of foundational Go packages for building web applications.
-The Go packages are published from the `github.com/oullin/alloy/packages/foundation` module, so you
+The Go packages are published from the `github.com/oullin/alloy/pkg/hub` module, so you
 import only the packages you need.
 
 ## Requirements
@@ -14,7 +14,7 @@ import only the packages you need.
 
 ## Installation
 
-Alloy is developed and consumed privately. The `github.com/oullin/alloy/packages/foundation` module
+Alloy is developed and consumed privately. The `github.com/oullin/alloy/pkg/hub` module
 path is not served publicly, so the Go packages are consumed through a Go
 workspace instead of `go get`:
 
@@ -23,22 +23,22 @@ git clone git@github.com:oullin/alloy.git
 
 # In your application repository, next to the alloy checkout:
 go work init .
-go work use ../alloy/packages/foundation
+go work use ../alloy/pkg/hub
 ```
 
 Then import the packages you need as usual:
 
 ```go
 import (
-	"github.com/oullin/alloy/packages/foundation/cache"
-	"github.com/oullin/alloy/packages/foundation/container"
+	"github.com/oullin/alloy/pkg/hub/cache"
+	"github.com/oullin/alloy/pkg/hub/container"
 )
 ```
 
 ## Project Layout
 
 ```
-packages/foundation/  Go library packages
+pkg/hub/  Go library packages
 packages/             TypeScript packages and the foundation module
 web/                  Documentation, web demos, and runtime storage
 ```
@@ -69,7 +69,7 @@ pnpm run build --filter=@alloy/docs
 
 ## Package Index
 
-The packages below ship today from `github.com/oullin/alloy/packages/foundation`.
+The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
 
 ### Architecture
 
@@ -121,13 +121,13 @@ The packages below ship today from `github.com/oullin/alloy/packages/foundation`
 | [collection](/packages/collection) | Fluent collection helpers for slices and maps  |
 | [str](/packages/str)               | String helpers, UUID/ULID generation           |
 | tempo                              | Date/time library with timezones and localization |
-| [money](/packages/money)           | Money and currency primitives                  |
+| [money](/sdk/money)           | Money and currency primitives                  |
 | [seo](/packages/seo)               | SEO utilities and i18n locale handling         |
 
 ## Roadmap
 
 The following packages are documented as design targets but are **not yet
-available** in `github.com/oullin/alloy/packages/foundation`:
+available** in `github.com/oullin/alloy/pkg/hub`:
 
 [routing](/packages/routing), [redis](/packages/redis),
 [pagination](/packages/pagination), [jobqueue](/packages/jobqueue),

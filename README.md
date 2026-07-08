@@ -5,18 +5,18 @@ The repository currently includes reusable packages under `packages/`, the web
 workspace under `web/`, and the shared automation under `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go package (`github.com/oullin/alloy/packages/foundation/tempo`) and a
-TypeScript package (`@alloy/tempo`).
+available as both a Go package (`github.com/oullin/alloy/pkg/hub/tempo`) and a
+TypeScript package (`@alloy/sdk/tempo`).
 
 ## Workspace
 
-- `packages/foundation`: Go module containing the Alloy packages.
-- `packages/foundation/tempo`: Go Tempo package.
-- `packages/foundation/collection`: Go collection utilities and package docs.
-- `packages/tempo`: TypeScript Tempo package.
-- `packages/tempo/tests`: TypeScript Tempo acceptance tests.
-- `packages/money`: TypeScript Money package.
-- `packages/console`: TypeScript terminal UI helpers.
+- `pkg/hub`: Go module containing the Alloy packages.
+- `pkg/hub/tempo`: Go Tempo package.
+- `pkg/hub/collection`: Go collection utilities and package docs.
+- `sdk/tempo`: TypeScript Tempo package.
+- `sdk/tempo/tests`: TypeScript Tempo acceptance tests.
+- `sdk/money`: TypeScript Money package.
+- `sdk/console`: TypeScript terminal UI helpers.
 - `web/docs`: VuePress documentation site package.
 - `web/inertia-demo`: Inertia demo app, Go API, and browser E2E suite.
 - `web/storage`: local runtime and cache data for web demos.
@@ -41,7 +41,7 @@ pnpm install
 pnpm exec vp run monorepo:initialise
 ```
 
-`monorepo:initialise` creates and syncs the optional Go workspace at `packages/foundation/go.work`.
+`monorepo:initialise` creates and syncs the optional Go workspace at `pkg/hub/go.work`.
 
 ## Checks
 
@@ -58,7 +58,7 @@ pnpm exec vp run format-all
 Tempo-specific acceptance coverage can also be run directly:
 
 ```sh
-pnpm --filter @alloy/tempo-acceptance test:tempo
+pnpm --filter @alloy/sdk/tempo-tests test:tempo
 ```
 
 The root package scripts are aliases for the main TypeScript checks:
@@ -98,6 +98,6 @@ formatter commands.
 ## More Documentation
 
 - [Development workflow](docs/development.md)
-- [Go Tempo](packages/foundation/tempo/README.md)
-- [Go Collection](packages/foundation/collection/README.md)
-- [TypeScript Tempo](packages/tempo/README.md)
+- [Go Tempo](pkg/hub/tempo/README.md)
+- [Go Collection](pkg/hub/collection/README.md)
+- [TypeScript Tempo](sdk/tempo/README.md)

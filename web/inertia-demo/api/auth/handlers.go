@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/oullin/alloy/packages/foundation/inertia"
-	"github.com/oullin/alloy/packages/foundation/inertia/flash"
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/pkg/hub/inertia"
+	"github.com/oullin/alloy/pkg/hub/inertia/flash"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
 )
 
 func (a App) loginHandler(w http.ResponseWriter, r *http.Request) {

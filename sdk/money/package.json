@@ -1,0 +1,74 @@
+{
+  "name": "@alloy/sdk/money",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oullin/alloy.git",
+    "directory": "sdk/money"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./calculator": {
+      "types": "./dist/calculator.d.ts",
+      "import": "./dist/calculator.js",
+      "default": "./dist/calculator.js"
+    },
+    "./currency": {
+      "types": "./dist/currency.d.ts",
+      "import": "./dist/currency.js",
+      "default": "./dist/currency.js"
+    },
+    "./errors": {
+      "types": "./dist/errors.d.ts",
+      "import": "./dist/errors.js",
+      "default": "./dist/errors.js"
+    },
+    "./exchange": {
+      "types": "./dist/exchange.d.ts",
+      "import": "./dist/exchange.js",
+      "default": "./dist/exchange.js"
+    },
+    "./format": {
+      "types": "./dist/format.d.ts",
+      "import": "./dist/format.js",
+      "default": "./dist/format.js"
+    },
+    "./parser": {
+      "types": "./dist/parser.d.ts",
+      "import": "./dist/parser.js",
+      "default": "./dist/parser.js"
+    }
+  },
+  "imports": {
+    "#money/*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && rm -rf dist \"${ALLOY_CACHE_PATH}/tsbuild/money-build.tsbuildinfo\" && tsc -p tsconfig.build.json'",
+    "prepack": "pnpm build",
+    "test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && vp test run tests'",
+    "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

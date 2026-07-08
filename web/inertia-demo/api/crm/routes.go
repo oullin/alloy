@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	routegen "github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
+	routegen "github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
 )
 
 type app struct {

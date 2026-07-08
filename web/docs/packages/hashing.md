@@ -25,7 +25,7 @@ hashing.NewHashingServiceProviderWithDefaults(application.Container, o.HashDefau
 ```
 
 `o.HashDefaultDriver` is one of the `Driver` constants in
-[`packages/foundation/hashing/driver.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/hashing/driver.go):
+[`pkg/hub/hashing/driver.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/driver.go):
 `DriverBcrypt`, `DriverArgon2i`, or `DriverArgon2id`.
 
 ## Basic Usage
@@ -45,7 +45,7 @@ needs, _ := hasher.NeedsRehash(storedHash)
 ```
 
 The manager itself implements the `contracts.Hasher` interface
-([`packages/foundation/hashing/manager.go:15`](https://github.com/oullin/alloy/blob/main/packages/foundation/hashing/manager.go#L15)),
+([`pkg/hub/hashing/manager.go:15`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/manager.go#L15)),
 so handler code that just wants "the default hasher" can accept the
 contract type and get any driver.
 
@@ -55,9 +55,9 @@ Built-in drivers:
 
 | Name       | Source                                                                                     | Notes                                       |
 | ---------- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
-| `bcrypt`   | [`bcrypt.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/hashing/bcrypt.go)     | Sane production default; tunable cost       |
-| `argon2i`  | [`argon.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/hashing/argon.go)       | Memory-hard, side-channel resistant         |
-| `argon2id` | [`argon2id.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/hashing/argon2id.go) | Argon2 hybrid; current OWASP recommendation |
+| `bcrypt`   | [`bcrypt.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/bcrypt.go)     | Sane production default; tunable cost       |
+| `argon2i`  | [`argon.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/argon.go)       | Memory-hard, side-channel resistant         |
+| `argon2id` | [`argon2id.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/argon2id.go) | Argon2 hybrid; current OWASP recommendation |
 
 Pick a non-default driver at runtime when you need to verify a hash
 produced by a different algorithm:
@@ -70,7 +70,7 @@ ok, _ := argon.Check(plaintext, storedArgonHash)
 ## Writing Custom Drivers
 
 Implement the `contracts.Hasher` interface
-([`packages/foundation/contracts/hashing/hasher.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/contracts/hashing))
+([`pkg/hub/contracts/hashing/hasher.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/contracts/hashing))
 and pass it into the manager via the constructor's `drivers` map:
 
 ```go
@@ -109,13 +109,13 @@ Package hashing provides driver-based password hashing with support for bcrypt, 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/hashing@latest
+go get github.com/oullin/alloy/pkg/hub/hashing@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/hashing/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/hashing/...
 ```
 
 ## Source Coverage
@@ -151,7 +151,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/hashing"
+    _ "github.com/oullin/alloy/pkg/hub/hashing"
 )
 
 func main() {
@@ -160,7 +160,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/hashing` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/hashing` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -200,7 +200,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/hashing/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/hashing/...
 ```
 
 Parity is tracked by these tests:

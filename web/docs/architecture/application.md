@@ -110,7 +110,7 @@ safely resolve each other and wire listeners, attach guards, etc.
 The application enforces this for you:
 
 ```go
-// packages/foundation/container/application.go:170
+// pkg/hub/container/application.go:170
 func (a *Application) Boot() {
     if a.booted {
         return

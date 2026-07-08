@@ -39,14 +39,14 @@ mgr.SetConfig("redis", map[string]any{
 
 The connection's `"driver"` key picks which factory the manager runs
 when the connection is first resolved
-([`packages/foundation/queue/manager.go:241`](https://github.com/oullin/alloy/blob/main/packages/foundation/queue/manager.go#L241)).
+([`pkg/hub/queue/manager.go:241`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go#L241)).
 
 ## Basic Usage
 
 Push a job onto the default connection:
 
 ```go
-import facadequeue "github.com/oullin/alloy/packages/foundation/facades/queue"
+import facadequeue "github.com/oullin/alloy/pkg/hub/facades/queue"
 
 q, err := facadequeue.Connection(nil) // default
 if err != nil { return err }
@@ -80,7 +80,7 @@ Two registration paths:
   Use when construction needs its own state.
 
 Built-in drivers: `sync`, `redis`, `sqs`, `null`, `database`, `failover`.
-Their sources live alongside the manager in `packages/foundation/queue/`.
+Their sources live alongside the manager in `pkg/hub/queue/`.
 
 ## Writing Custom Drivers
 
@@ -107,7 +107,7 @@ mgr.SetConfig("nats-default", map[string]any{
 ```
 
 `Manager.Register` and `Manager.AddConnector` both live in
-[`packages/foundation/queue/manager.go:96`](https://github.com/oullin/alloy/blob/main/packages/foundation/queue/manager.go#L96).
+[`pkg/hub/queue/manager.go:96`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go#L96).
 
 ## Events
 
@@ -119,7 +119,7 @@ mgr.Before(func(e any) { /* ... */ })
 mgr.Failing(func(e any) { metrics.IncrementCounter("queue.failed") })
 ```
 
-See [`packages/foundation/queue/manager.go:333`](https://github.com/oullin/alloy/blob/main/packages/foundation/queue/manager.go#L333).
+See [`pkg/hub/queue/manager.go:333`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go#L333).
 
 ## See Also
 
@@ -141,13 +141,13 @@ Package queue provides job queue management. It defines Queue, Job, and Connecto
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/queue@latest
+go get github.com/oullin/alloy/pkg/hub/queue@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/queue/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/queue/...
 ```
 
 ## Source Coverage
@@ -193,7 +193,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/queue"
+    _ "github.com/oullin/alloy/pkg/hub/queue"
 )
 
 func main() {
@@ -202,7 +202,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/queue` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/queue` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -242,7 +242,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/queue/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/queue/...
 ```
 
 Parity is tracked by these tests:
