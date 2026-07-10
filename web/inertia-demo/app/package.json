@@ -10,7 +10,7 @@
     "fmt:check": "pnpm --dir ../../.. exec vp fmt --check web/inertia-demo/app"
   },
   "dependencies": {
-    "@inertiajs/vue3": "^3.6.0",
+    "@inertiajs/vue3": "^3.6.1",
     "@radix-icons/vue": "^1.0.0",
     "@tabler/icons-vue": "^3.41.1",
     "@tailwindcss/typography": "^0.5.19",
