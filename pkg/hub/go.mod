@@ -8,7 +8,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/spf13/viper v1.21.0
-	github.com/yuin/goldmark v1.8.2
+	github.com/yuin/goldmark v1.8.4
 	golang.org/x/crypto v0.53.0
 	golang.org/x/sys v0.46.0
 	modernc.org/sqlite v1.53.0
