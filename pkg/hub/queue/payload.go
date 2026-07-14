@@ -23,6 +23,7 @@ type PayloadHook func(connection, queue string, payload *Payload)
 // this just before Marshal so custom metadata lands in the final JSON.
 
 // Payload is the JSON envelope wrapping a queued job.
+// Decision: The Payload envelope already carries a 'tries' field representing the attempt count.
 type Payload struct {
 	UUID          string         `json:"uuid"`
 	DisplayName   string         `json:"displayName"`
