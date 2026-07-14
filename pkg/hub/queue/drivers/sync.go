@@ -119,7 +119,6 @@ func (d *SyncDriver) runFire(ctx context.Context, job queue.Job) (err error) {
 	return job.Fire(ctx)
 }
 
-
 func (d *SyncDriver) emit(event any) {
 	if d.emitter != nil {
 		d.emitter.Emit(event)

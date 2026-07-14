@@ -565,4 +565,3 @@ func TestRedisDriverAttemptsTracking(t *testing.T) {
 		t.Errorf("expected 1 attempt after release, got %d", job2.Attempts())
 	}
 }
-

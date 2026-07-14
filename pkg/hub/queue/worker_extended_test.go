@@ -651,4 +651,3 @@ func TestSyncDriverPanicRecovery(t *testing.T) {
 		t.Errorf("expected 1 processed job, got %d", processed)
 	}
 }
-

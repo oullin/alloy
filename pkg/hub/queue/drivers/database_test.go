@@ -407,4 +407,3 @@ func TestDatabaseDriverFailFuncError(t *testing.T) {
 		}
 	}
 }
-

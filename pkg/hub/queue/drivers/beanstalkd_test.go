@@ -309,4 +309,3 @@ func TestBeanstalkdDriverAttemptsTracking(t *testing.T) {
 		t.Errorf("expected 5 attempts from payload fallback, got %d", job2.Attempts())
 	}
 }
-

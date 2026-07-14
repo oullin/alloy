@@ -337,4 +337,3 @@ func TestSQSDriverAttemptsTracking(t *testing.T) {
 		t.Errorf("expected 7 attempts from payload fallback, got %d", job2.Attempts())
 	}
 }
-
