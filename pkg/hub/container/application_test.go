@@ -65,6 +65,23 @@ type depProvider struct {
 	log      *[]string
 }
 
+// C depends on B which depends on A. Register them in REVERSE order
+// to prove the sort actually runs.
+
+// ---------- Phase 4: Introspection ----------
+
+// Sanity check: the provider package is imported and used.
+
+type reentrantDeferredProvider struct {
+	app      *container.Application
+	register func()
+}
+
+type reentrantBootableProvider struct {
+	app  *container.Application
+	boot func()
+}
+
 func (p *fakeProvider) Register()          { p.registerCalls++ }
 func (p *fakeProvider) Boot()              { p.bootCalls++ }
 func (p *fakeProvider) Provides() []string { return p.provides }
@@ -342,8 +359,6 @@ func TestApplication_RegisterMany_TopoSortsByDependsOn(t *testing.T) {
 
 	log := []string{}
 
-	// C depends on B which depends on A. Register them in REVERSE order
-	// to prove the sort actually runs.
 	pA := &depProvider{name: "A", provides: []string{"a"}, log: &log}
 	pB := &depProvider{name: "B", provides: []string{"b"}, depends: []string{"a"}, log: &log}
 	pC := &depProvider{name: "C", provides: []string{"c"}, depends: []string{"b"}, log: &log}
@@ -380,8 +395,6 @@ func TestApplication_RegisterMany_PanicsOnCycle(t *testing.T) {
 
 	container.NewApplication().RegisterMany([]provider.ServiceProvider{pA, pB})
 }
-
-// ---------- Phase 4: Introspection ----------
 
 func TestApplication_HasProviderAndProviderFor(t *testing.T) {
 	t.Parallel()
@@ -432,11 +445,15 @@ func TestDeferredConcurrent(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+
 			val, err := app.Make("deferred-key")
+
 			if err != nil {
 				errs <- err
+
 				return
 			}
+
 			if val != "resolved-value" {
 				errs <- fmt.Errorf("expected resolved-value, got %v", val)
 			}
@@ -451,25 +468,14 @@ func TestDeferredConcurrent(t *testing.T) {
 	}
 }
 
-// Sanity check: the provider package is imported and used.
 var _ provider.ServiceProvider = (*fakeProvider)(nil)
 var _ provider.Bootable = (*fakeProvider)(nil)
 var _ provider.Deferred = (*deferredProvider)(nil)
 var _ provider.DependsOn = (*depProvider)(nil)
 
-type reentrantDeferredProvider struct {
-	app      *container.Application
-	register func()
-}
-
 func (p *reentrantDeferredProvider) Register()          { p.register() }
 func (p *reentrantDeferredProvider) Provides() []string { return []string{"deferred-key"} }
 func (p *reentrantDeferredProvider) Deferred() bool     { return true }
-
-type reentrantBootableProvider struct {
-	app  *container.Application
-	boot func()
-}
 
 func (p *reentrantBootableProvider) Register() {}
 func (p *reentrantBootableProvider) Boot()     { p.boot() }
@@ -494,9 +500,11 @@ func TestApplicationReentrancyDeferred(t *testing.T) {
 	app.Register(dp)
 
 	val, err := app.Make("deferred-key")
+
 	if err != nil {
 		t.Fatalf("unexpected error resolving deferred-key: %v", err)
 	}
+
 	if val != "deferred-val" {
 		t.Fatalf("expected deferred-val, got %v", val)
 	}
