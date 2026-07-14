@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
 )
@@ -23,6 +24,7 @@ import (
 // it keeps the App itself free of provider lifecycle concerns.
 type Application struct {
 	*App
+	mu            sync.Mutex
 	providers     []provider.ServiceProvider
 	deferredByKey map[string]provider.ServiceProvider
 	registered    map[provider.ServiceProvider]bool
@@ -46,6 +48,9 @@ func NewApplication() *Application {
 // abstract keys are tracked, and Register() runs the first time any
 // tracked key is resolved through Application.Make.
 func (a *Application) Register(p provider.ServiceProvider) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	if isDeferred(p) {
 		a.recordDeferred(p)
 
@@ -95,6 +100,9 @@ func (a *Application) recordDeferred(p provider.ServiceProvider) {
 // flushDeferredFor runs the deferred provider that owns abstract, if any,
 // and removes its tracking entries.
 func (a *Application) flushDeferredFor(abstract string) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	p, ok := a.deferredByKey[abstract]
 
 	if !ok {
@@ -167,6 +175,9 @@ func (a *Application) RegisterMany(providers []provider.ServiceProvider) {
 // provider.Bootable. Deferred providers that have not yet been flushed are
 // NOT booted until their first Make() call. Idempotent.
 func (a *Application) Boot() {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	if a.booted {
 		return
 	}
@@ -186,6 +197,9 @@ func (a *Application) Boot() {
 
 // Booted reports whether Boot has been called.
 func (a *Application) Booted() bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	return a.booted
 }
 
@@ -193,6 +207,9 @@ func (a *Application) Booted() bool {
 // application, including deferred providers that have not yet been flushed.
 // The returned slice is a copy.
 func (a *Application) Providers() []provider.ServiceProvider {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	out := make([]provider.ServiceProvider, len(a.providers))
 	copy(out, a.providers)
 
@@ -202,6 +219,9 @@ func (a *Application) Providers() []provider.ServiceProvider {
 // HasProvider reports whether any registered or deferred provider declares
 // the given abstract key via provider.Provides.
 func (a *Application) HasProvider(abstract string) bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	if _, ok := a.deferredByKey[abstract]; ok {
 		return true
 	}
@@ -222,6 +242,9 @@ func (a *Application) HasProvider(abstract string) bool {
 // ProviderFor returns the (first) provider that declares the given abstract,
 // or nil if none does.
 func (a *Application) ProviderFor(abstract string) provider.ServiceProvider {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+
 	if p, ok := a.deferredByKey[abstract]; ok {
 		return p
 	}

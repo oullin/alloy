@@ -1,6 +1,8 @@
 package container_test
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/container"
@@ -409,8 +411,49 @@ func TestApplication_HasProviderAndProviderFor(t *testing.T) {
 	}
 }
 
+func TestDeferredConcurrent(t *testing.T) {
+	app := container.NewApplication()
+
+	dp := &deferredProvider{
+		keys: []string{"deferred-key"},
+		register: func(_ *container.App) {
+			app.Singleton("deferred-key", func(cc *container.App) (any, error) {
+				return "resolved-value", nil
+			})
+		},
+	}
+
+	app.Register(dp)
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 100)
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			val, err := app.Make("deferred-key")
+			if err != nil {
+				errs <- err
+				return
+			}
+			if val != "resolved-value" {
+				errs <- fmt.Errorf("expected resolved-value, got %v", val)
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
 // Sanity check: the provider package is imported and used.
 var _ provider.ServiceProvider = (*fakeProvider)(nil)
 var _ provider.Bootable = (*fakeProvider)(nil)
 var _ provider.Deferred = (*deferredProvider)(nil)
 var _ provider.DependsOn = (*depProvider)(nil)
+
