@@ -116,6 +116,7 @@ func (d *SyncDriver) runFire(ctx context.Context, job queue.Job) (err error) {
 			err = fmt.Errorf("queue: handler panicked: %v", r)
 		}
 	}()
+
 	return job.Fire(ctx)
 }
 

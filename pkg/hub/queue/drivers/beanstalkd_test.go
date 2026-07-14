@@ -288,9 +288,11 @@ func TestBeanstalkdDriverAttemptsTracking(t *testing.T) {
 	client.jobStats[1] = map[string]string{"reserves": "3"}
 
 	job, err := drv.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if job.Attempts() != 3 {
 		t.Errorf("expected 3 attempts from StatsJob, got %d", job.Attempts())
 	}
@@ -302,9 +304,11 @@ func TestBeanstalkdDriverAttemptsTracking(t *testing.T) {
 	_, _ = drv2.Push(context.Background(), "default", []byte(`{"tries":5}`))
 
 	job2, err := drv2.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if job2.Attempts() != 5 {
 		t.Errorf("expected 5 attempts from payload fallback, got %d", job2.Attempts())
 	}

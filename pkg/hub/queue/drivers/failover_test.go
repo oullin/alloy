@@ -13,6 +13,25 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue/events"
 )
 
+// First-seen order preserved across drivers.
+
+type errorBackend struct {
+	queue.Backend
+	popErr  error
+	sizeErr error
+}
+
+// 1. Pop should return the wrapped error because all backends failed
+
+// 2. Size should return the error instead of 0, nil
+
+// 3. PendingSize, DelayedSize, ReservedSize should also return the error
+
+type mockEventEmitter struct {
+	events []any
+	mu     sync.Mutex
+}
+
 func TestFailoverDriverPushUsesFirstSuccessful(t *testing.T) {
 	t.Parallel()
 
@@ -229,7 +248,6 @@ func TestFailoverDriverQueueNamesUnionAndDedupe(t *testing.T) {
 		t.Fatalf("got %d names, want 3: %v", len(names), names)
 	}
 
-	// First-seen order preserved across drivers.
 	if names[0] != "a" || names[1] != "b" || names[2] != "c" {
 		t.Errorf("ordering: got %v, want [a b c]", names)
 	}
@@ -307,12 +325,6 @@ func TestFailoverDriverInspectionAllBareReturnsErrNotSupported(t *testing.T) {
 	}
 }
 
-type errorBackend struct {
-	queue.Backend
-	popErr  error
-	sizeErr error
-}
-
 func (e *errorBackend) Pop(_ context.Context, _ string) (queue.Job, error) {
 	return nil, e.popErr
 }
@@ -349,49 +361,50 @@ func TestFailoverDriverSurfacesBackendErrors(t *testing.T) {
 	drv := drivers.NewFailoverDriver("failover", b1, b2)
 	ctx := context.Background()
 
-	// 1. Pop should return the wrapped error because all backends failed
 	_, err := drv.Pop(ctx, "q")
+
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
+
 	if errors.Is(err, queue.ErrNoJob) {
 		t.Errorf("expected wrapped backend error, got ErrNoJob: %v", err)
 	}
+
 	if !strings.Contains(err.Error(), "pop failed") {
 		t.Errorf("expected 'pop failed' in error, got %v", err)
 	}
 
-	// 2. Size should return the error instead of 0, nil
 	_, err = drv.Size(ctx, "q")
+
 	if !errors.Is(err, sizeErr) {
 		t.Errorf("Size: expected %v, got %v", sizeErr, err)
 	}
 
-	// 3. PendingSize, DelayedSize, ReservedSize should also return the error
 	_, err = drv.PendingSize(ctx, "q")
+
 	if !errors.Is(err, sizeErr) {
 		t.Errorf("PendingSize: expected %v, got %v", sizeErr, err)
 	}
 
 	_, err = drv.DelayedSize(ctx, "q")
+
 	if !errors.Is(err, sizeErr) {
 		t.Errorf("DelayedSize: expected %v, got %v", sizeErr, err)
 	}
 
 	_, err = drv.ReservedSize(ctx, "q")
+
 	if !errors.Is(err, sizeErr) {
 		t.Errorf("ReservedSize: expected %v, got %v", sizeErr, err)
 	}
 }
 
-type mockEventEmitter struct {
-	events []any
-	mu     sync.Mutex
-}
-
 func (m *mockEventEmitter) Emit(event any) {
 	m.mu.Lock()
+
 	defer m.mu.Unlock()
+
 	m.events = append(m.events, event)
 }
 
@@ -424,12 +437,14 @@ func TestFailoverDriverPopFailedOverEvents(t *testing.T) {
 
 	// Verify the event content
 	evt, ok := emitter2.events[0].(events.FailedOver)
+
 	if !ok {
 		t.Errorf("expected event of type FailedOver, got %T", emitter2.events[0])
 	} else {
 		if evt.From != "error-backend" || evt.To != "error-backend" {
 			t.Errorf("expected event details, got %+v", evt)
 		}
+
 		if evt.Err == nil || evt.Err.Error() != "real error" {
 			t.Errorf("expected event error, got %v", evt.Err)
 		}

@@ -539,24 +539,29 @@ func TestRedisDriverAttemptsTracking(t *testing.T) {
 	drv := drivers.NewRedisDriver(client, "redis")
 
 	_, err := drv.Push(context.Background(), "default", []byte(`{"uuid":"t1","tries":0}`))
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	job, err := drv.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if job.Attempts() != 0 {
 		t.Errorf("expected 0 attempts, got %d", job.Attempts())
 	}
 
 	err = job.Release(0)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	job2, err := drv.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}

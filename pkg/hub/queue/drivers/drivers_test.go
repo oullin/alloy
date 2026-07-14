@@ -460,7 +460,9 @@ func newMockSQSClient() *mockSQSClient {
 
 func (c *mockSQSClient) PushMessageWithAttributes(queueURL string, body string, attributes map[string]string) {
 	c.mu.Lock()
+
 	defer c.mu.Unlock()
+
 	c.nextMsgID++
 	c.messages[queueURL] = append(c.messages[queueURL], mockSQSMsg{
 		id:         fmt.Sprintf("msg-%d", c.nextMsgID),

@@ -608,16 +608,19 @@ func TestWorkerPanicRecovery(t *testing.T) {
 
 	w := queue.NewWorker(q, handler, recorder, queue.WorkerOptions{StopOnEmpty: true})
 	err := w.Run(context.Background(), "q")
+
 	if err != nil {
 		t.Fatalf("worker Run returned error: %v", err)
 	}
 
 	failed := recorder.count(func(e any) bool { _, ok := e.(queue.JobFailed); return ok })
+
 	if failed != 1 {
 		t.Errorf("expected 1 JobFailed event, got %d", failed)
 	}
 
 	exception := recorder.count(func(e any) bool { _, ok := e.(queue.JobExceptionOccurred); return ok })
+
 	if exception != 1 {
 		t.Errorf("expected 1 JobExceptionOccurred event, got %d", exception)
 	}

@@ -565,6 +565,7 @@ func (w *Worker) runHandler(ctx context.Context, job Job) (err error) {
 			err = fmt.Errorf("queue: handler panicked: %v", r)
 		}
 	}()
+
 	return w.handler.Handle(ctx, job)
 }
 

@@ -316,9 +316,11 @@ func TestSQSDriverAttemptsTracking(t *testing.T) {
 	})
 
 	job, err := drv.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if job.Attempts() != 4 {
 		t.Errorf("expected 4 attempts from system attribute, got %d", job.Attempts())
 	}
@@ -330,9 +332,11 @@ func TestSQSDriverAttemptsTracking(t *testing.T) {
 	_, _ = drv2.Push(context.Background(), "default", []byte(`{"tries":7}`))
 
 	job2, err := drv2.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if job2.Attempts() != 7 {
 		t.Errorf("expected 7 attempts from payload fallback, got %d", job2.Attempts())
 	}

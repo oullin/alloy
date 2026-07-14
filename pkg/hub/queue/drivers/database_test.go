@@ -11,6 +11,17 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 )
 
+// available_at should be in the future.
+
+// Reset after reservation UPDATE.
+
+// Should INSERT into failed_jobs and DELETE from jobs.
+
+type errorExecer struct {
+	drivers.DBExecer
+	execFunc func(query string, args ...any) error
+}
+
 func TestDatabaseDriverPush(t *testing.T) {
 	t.Parallel()
 
@@ -48,7 +59,6 @@ func TestDatabaseDriverPushDelayed(t *testing.T) {
 		t.Fatalf("expected 1 exec call, got %d", len(db.execCalls))
 	}
 
-	// available_at should be in the future.
 	args := db.execCalls[0].Args
 
 	if len(args) < 3 {
@@ -160,7 +170,7 @@ func TestDatabaseDriverJobRelease(t *testing.T) {
 	drv := drivers.NewDatabaseDriver(db, "jobs", "database")
 
 	job, _ := drv.Pop(context.Background(), "default")
-	db.execCalls = nil // Reset after reservation UPDATE.
+	db.execCalls = nil
 
 	err := job.Release(5 * time.Second)
 
@@ -218,7 +228,6 @@ func TestDatabaseDriverJobFail(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Should INSERT into failed_jobs and DELETE from jobs.
 	if len(db.execCalls) < 2 {
 		t.Fatalf("expected at least 2 exec calls, got %d", len(db.execCalls))
 	}
@@ -354,15 +363,11 @@ func TestDatabaseDriverConnectionName(t *testing.T) {
 	}
 }
 
-type errorExecer struct {
-	drivers.DBExecer
-	execFunc func(query string, args ...any) error
-}
-
 func (e *errorExecer) Exec(ctx context.Context, query string, args ...any) error {
 	if e.execFunc != nil {
 		return e.execFunc(query, args...)
 	}
+
 	return e.DBExecer.Exec(ctx, query, args...)
 }
 
@@ -378,12 +383,14 @@ func TestDatabaseDriverFailFuncError(t *testing.T) {
 			if strings.Contains(query, "INSERT INTO failed_jobs") {
 				return errors.New("database connection lost")
 			}
+
 			return nil
 		},
 	}
 
 	drv := drivers.NewDatabaseDriver(db, "jobs", "database")
 	job, err := drv.Pop(context.Background(), "default")
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -393,6 +400,7 @@ func TestDatabaseDriverFailFuncError(t *testing.T) {
 	}
 
 	err = job.Fail(errors.New("job failed"))
+
 	if err == nil {
 		t.Fatal("expected error from Fail because failed_jobs insert failed, got nil")
 	}

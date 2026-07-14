@@ -207,6 +207,7 @@ func (d *SQSDriver) Pop(ctx context.Context, queueName string) (queue.Job, error
 	queueURL := d.url(queueName)
 
 	var attempts int
+
 	if msg.Attributes != nil {
 		if valStr, ok := msg.Attributes["ApproximateReceiveCount"]; ok {
 			if val, err := strconv.Atoi(valStr); err == nil {
@@ -214,8 +215,10 @@ func (d *SQSDriver) Pop(ctx context.Context, queueName string) (queue.Job, error
 			}
 		}
 	}
+
 	if attempts == 0 {
 		p, pErr := queue.UnmarshalPayload([]byte(msg.Body))
+
 		if pErr == nil && p != nil {
 			attempts = p.Tries
 		}

@@ -144,7 +144,9 @@ func (d *BeanstalkdDriver) Pop(ctx context.Context, queueName string) (queue.Job
 	}
 
 	var attempts int
+
 	var gotAttempts bool
+
 	if statter, ok := d.client.(BeanstalkdJobStatter); ok {
 		if stats, err := statter.StatsJob(ctx, id); err == nil {
 			if reservesStr, ok := stats["reserves"]; ok {
@@ -155,8 +157,10 @@ func (d *BeanstalkdDriver) Pop(ctx context.Context, queueName string) (queue.Job
 			}
 		}
 	}
+
 	if !gotAttempts {
 		p, pErr := queue.UnmarshalPayload(body)
+
 		if pErr == nil && p != nil {
 			attempts = p.Tries
 		}
