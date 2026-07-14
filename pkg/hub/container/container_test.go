@@ -3,6 +3,7 @@ package container_test
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -1474,5 +1475,61 @@ func TestSingleFlightPanicSafety(t *testing.T) {
 
 	if !strings.Contains(errWaiter.Error(), "factory panicked") {
 		t.Fatalf("expected error containing 'factory panicked', got: %v", errWaiter)
+	}
+}
+
+// TestSingleFlightGoexitSafety verifies that a factory terminating via
+// runtime.Goexit (e.g. t.FailNow inside a test factory) still releases the
+// single-flight key, so later Makes for the same abstract retry instead of
+// blocking forever on a leader that never completed.
+func TestSingleFlightGoexitSafety(t *testing.T) {
+	c := newContainer()
+
+	calls := 0
+
+	c.Singleton("goexit-singleton", func(_ *container.App) (any, error) {
+		calls++
+
+		if calls == 1 {
+			runtime.Goexit()
+		}
+
+		return "ok", nil
+	})
+
+	leaderDone := make(chan struct{})
+
+	go func() {
+		// Deferred functions still run on runtime.Goexit.
+		defer close(leaderDone)
+
+		_, _ = c.Make("goexit-singleton")
+	}()
+
+	<-leaderDone
+
+	type result struct {
+		val any
+		err error
+	}
+
+	retry := make(chan result, 1)
+
+	go func() {
+		v, err := c.Make("goexit-singleton")
+		retry <- result{val: v, err: err}
+	}()
+
+	select {
+	case r := <-retry:
+		if r.err != nil {
+			t.Fatalf("expected successful retry after Goexit leader, got error: %v", r.err)
+		}
+
+		if r.val != "ok" {
+			t.Fatalf("expected %q, got %v", "ok", r.val)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Make deadlocked: single-flight key was not released after runtime.Goexit")
 	}
 }

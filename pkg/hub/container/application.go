@@ -52,6 +52,15 @@ func NewApplication() *Application {
 func (a *Application) Register(p provider.ServiceProvider) {
 	a.mu.Lock()
 
+	// Guards both paths: an eagerly-registered provider and a deferred
+	// provider that has already been flushed must not be re-tracked, or
+	// a.providers would accumulate duplicates and Boot would run twice.
+	if a.registered[p] {
+		a.mu.Unlock()
+
+		return
+	}
+
 	if isDeferred(p) {
 		provides, ok := p.(provider.Provides)
 
@@ -59,6 +68,16 @@ func (a *Application) Register(p provider.ServiceProvider) {
 			keys := provides.Provides()
 
 			if len(keys) > 0 {
+				// Already tracked as deferred (registered twice before its
+				// first flush): keep the single existing entry.
+				for _, tracked := range a.deferredByKey {
+					if tracked == p {
+						a.mu.Unlock()
+
+						return
+					}
+				}
+
 				a.providers = append(a.providers, p)
 
 				for _, key := range keys {
@@ -70,12 +89,6 @@ func (a *Application) Register(p provider.ServiceProvider) {
 				return
 			}
 		}
-	}
-
-	if a.registered[p] {
-		a.mu.Unlock()
-
-		return
 	}
 
 	a.providers = append(a.providers, p)
