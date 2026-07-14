@@ -2,11 +2,11 @@
   "files": [],
   "references": [
     { "path": "./infra" },
-    { "path": "./packages/tempo" },
-    { "path": "./packages/tempo/tests" },
-    { "path": "./packages/console" },
-    { "path": "./packages/navigator-routes" },
-    { "path": "./packages/money" },
-    { "path": "./packages/workflow" }
+    { "path": "./sdk/tempo" },
+    { "path": "./sdk/tempo/tests" },
+    { "path": "./sdk/console" },
+    { "path": "./sdk/navigator-routes" },
+    { "path": "./sdk/money" },
+    { "path": "./sdk/workflow" }
   ]
 }

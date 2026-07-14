@@ -27,7 +27,7 @@ log.NewLogServiceProvider(application.Container, o.LogConfig),
 ```
 
 `LogProviderConfig` declares the default channel and the per-channel
-options ([`packages/foundation/log/log_service_provider.go:12`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/log_service_provider.go#L12)):
+options ([`pkg/hub/log/log_service_provider.go:12`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/log_service_provider.go#L12)):
 
 ```go
 log.LogProviderConfig{
@@ -48,7 +48,7 @@ Internally the provider builds a `*config.Repository` keyed under
 Pull the default channel and log:
 
 ```go
-import facadelog "github.com/oullin/alloy/packages/foundation/facades/log"
+import facadelog "github.com/oullin/alloy/pkg/hub/facades/log"
 
 logger, _ := facadelog.Channel()         // default channel
 logger.Info("user.signed-in", "user_id", userID)
@@ -72,16 +72,16 @@ combined.Warn("disk-pressure", "available_pct", 8)
 
 ## Drivers
 
-Built-in drivers (each has a handler under `packages/foundation/log/`):
+Built-in drivers (each has a handler under `pkg/hub/log/`):
 
 | Name       | Source                                                                                                 | When to use                       |
 | ---------- | ------------------------------------------------------------------------------------------------------ | --------------------------------- |
-| `single`   | [`stream_handler.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/stream_handler.go)     | One file/stream                   |
-| `stack`    | [`stack_handler.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/stack_handler.go)       | Fan out to several channels       |
-| `stderr`   | [`stderr_handler.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/stderr_handler.go)     | Local development, container logs |
-| `syslog`   | [`syslog_handler.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/syslog_handler.go)     | Unix syslog                       |
-| `rotating` | [`rotating_handler.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/rotating_handler.go) | Daily-rotated file                |
-| `null`     | [`null_handler.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/null_handler.go)         | Discard everything (tests)        |
+| `single`   | [`stream_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/stream_handler.go)     | One file/stream                   |
+| `stack`    | [`stack_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/stack_handler.go)       | Fan out to several channels       |
+| `stderr`   | [`stderr_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/stderr_handler.go)     | Local development, container logs |
+| `syslog`   | [`syslog_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/syslog_handler.go)     | Unix syslog                       |
+| `rotating` | [`rotating_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/rotating_handler.go) | Daily-rotated file                |
+| `null`     | [`null_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/null_handler.go)         | Discard everything (tests)        |
 
 ## Writing Custom Drivers
 
@@ -105,13 +105,13 @@ mgr.Extend("sentry", func(cc log.ChannelConfig) (log.Handler, error) {
 ```
 
 `LogManager.Extend` is the registration hook
-([`packages/foundation/log/manager.go:13`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/manager.go#L13)).
+([`pkg/hub/log/manager.go:13`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/manager.go#L13)).
 
 ## Events
 
 The manager dispatches a `MessageLogged` event on every write when an
 event dispatcher is wired in (`WithEventDispatcher`). See
-[`packages/foundation/log/events.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/events.go).
+[`pkg/hub/log/events.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/events.go).
 
 ## See Also
 
@@ -134,13 +134,13 @@ Package log provides driver-based logging with support for multiple channels, st
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/log@latest
+go get github.com/oullin/alloy/pkg/hub/log@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/log/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/log/...
 ```
 
 ## Source Coverage
@@ -178,7 +178,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/log"
+    _ "github.com/oullin/alloy/pkg/hub/log"
 )
 
 func main() {
@@ -187,7 +187,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/log` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/log` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -227,7 +227,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/log/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/log/...
 ```
 
 Parity is tracked by these tests:

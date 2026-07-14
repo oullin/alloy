@@ -125,7 +125,7 @@ for layered TOML/YAML, or your own loader.
 Some providers read their per-feature configuration from a
 `*config.Repository` rather than from individual constructor arguments —
 the log manager is the prominent example
-([`packages/foundation/log/manager.go:47`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/manager.go#L47)).
+([`pkg/hub/log/manager.go:47`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/manager.go#L47)).
 The repository gives you:
 
 - Dot-notation keys (`logging.channels.stack.driver`)
@@ -135,7 +135,7 @@ The repository gives you:
 Build one from a plain map and pass it to whatever provider needs it:
 
 ```go
-import "github.com/oullin/alloy/packages/foundation/config"
+import "github.com/oullin/alloy/pkg/hub/config"
 
 repo := config.New(map[string]any{
     "logging": map[string]any{
@@ -151,8 +151,8 @@ value := repo.Get("logging.default")            // "stack"
 level := repo.GetString("logging.channels.stderr.level") // "info"
 ```
 
-See [`packages/foundation/config/repository.go:34`](https://github.com/oullin/alloy/blob/main/packages/foundation/config/repository.go#L34)
-for the constructor and [`Has`/`Get`/`Set`](https://github.com/oullin/alloy/blob/main/packages/foundation/config/repository.go#L64)
+See [`pkg/hub/config/repository.go:34`](https://github.com/oullin/alloy/blob/main/pkg/hub/config/repository.go#L34)
+for the constructor and [`Has`/`Get`/`Set`](https://github.com/oullin/alloy/blob/main/pkg/hub/config/repository.go#L64)
 for the lookup API.
 
 ### Pre-shaped configs from typed structs
@@ -162,7 +162,7 @@ collapses to a `*config.Repository` on registration. This is the bridge
 between the typed-options world and the runtime-repository world:
 
 ```go
-// packages/foundation/log/log_service_provider.go:12
+// pkg/hub/log/log_service_provider.go:12
 type LogProviderConfig struct {
     Default  string
     Channels map[string]map[string]any
@@ -219,5 +219,5 @@ without a global. See
   `Options` and what reads `*config.Repository`.
 - [Drivers](/architecture/drivers) — the link between
   `o.CacheDefaultDriver = "redis"` and `cache.Manager.Build(...)`.
-- [`packages/foundation/config/repository.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/config/repository.go)
+- [`pkg/hub/config/repository.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/config/repository.go)
   — the full repository API.

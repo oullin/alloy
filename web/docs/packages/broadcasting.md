@@ -32,7 +32,7 @@ application.Container.Instance("broadcasting", mgr)
 
 This pattern keeps the package free of cloud-credential dependencies at
 import time. See
-[`packages/foundation/broadcasting/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/manager.go).
+[`pkg/hub/broadcasting/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/manager.go).
 
 ## Basic Usage
 
@@ -58,9 +58,9 @@ Built-in broadcasters:
 
 | Name     | Source                                                                                      | When to use                             |
 | -------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `pusher` | [`pusher.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/pusher.go) | Pusher Channels                         |
-| `ably`   | [`ably.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/ably.go)     | Ably Realtime                           |
-| `redis`  | [`redis.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/redis.go)   | Self-hosted Redis pub/sub fanout        |
+| `pusher` | [`pusher.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/pusher.go) | Pusher Channels                         |
+| `ably`   | [`ably.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/ably.go)     | Ably Realtime                           |
+| `redis`  | [`redis.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/redis.go)   | Self-hosted Redis pub/sub fanout        |
 | `log`    | base `LogBroadcaster` (`base.go`)                                                           | Local development; prints what would go |
 
 ## Writing Custom Drivers
@@ -76,7 +76,7 @@ mgr.Extend("sse", &sseBroadcaster{ /* ... */ })
 ```
 
 `Manager.Extend` is the registration hook
-([`packages/foundation/broadcasting/manager.go:16`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/manager.go#L16)).
+([`pkg/hub/broadcasting/manager.go:16`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/manager.go#L16)).
 Note: unlike most Alloy managers this one stores broadcaster _instances_
 directly rather than factories — pass the ready broadcaster, not a
 constructor.
@@ -102,13 +102,13 @@ Package broadcasting provides server-side broadcasting for channel authorization
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/broadcasting@latest
+go get github.com/oullin/alloy/pkg/hub/broadcasting@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/broadcasting/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/broadcasting/...
 ```
 
 ## Source Coverage
@@ -147,7 +147,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/broadcasting"
+    _ "github.com/oullin/alloy/pkg/hub/broadcasting"
 )
 
 func main() {
@@ -156,7 +156,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/broadcasting` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/broadcasting` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -196,7 +196,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/broadcasting/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/broadcasting/...
 ```
 
 ## API Reference

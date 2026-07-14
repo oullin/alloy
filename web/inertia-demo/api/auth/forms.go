@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
 )
 
 type loginForm struct {

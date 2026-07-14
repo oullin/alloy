@@ -8,9 +8,9 @@ import (
 	"alloy.dev/inertia-demo/crm"
 	demoerrors "alloy.dev/inertia-demo/errors"
 	"alloy.dev/inertia-demo/features"
-	routegen "github.com/oullin/alloy/packages/foundation/httpx/routing/navigator"
-	"github.com/oullin/alloy/packages/foundation/inertia"
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	routegen "github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
+	"github.com/oullin/alloy/pkg/hub/inertia"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
 )
 
 func initRoutes() *routegen.Registry {

@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/packages/foundation/inertia/flash"
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/pkg/hub/inertia/flash"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
 )
 
 func TestRegisterRoutes_MountsHandlers(t *testing.T) {

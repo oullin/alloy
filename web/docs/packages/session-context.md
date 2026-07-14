@@ -16,8 +16,8 @@ import (
     "context"
     "fmt"
 
-    "github.com/oullin/alloy/packages/foundation/session"
-    "github.com/oullin/alloy/packages/foundation/session/handlers"
+    "github.com/oullin/alloy/pkg/hub/session"
+    "github.com/oullin/alloy/pkg/hub/session/handlers"
 )
 
 func main() {

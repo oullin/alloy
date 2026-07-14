@@ -11,12 +11,12 @@ updates:
           - patch
 
   - package-ecosystem: gomod
-    directory: /packages/foundation
+    directory: /pkg/hub
     schedule:
       interval: weekly
 
   - package-ecosystem: gomod
-    directory: /packages/foundation/queue/drivers/sqs
+    directory: /pkg/hub/queue/drivers/sqs
     schedule:
       interval: weekly
 

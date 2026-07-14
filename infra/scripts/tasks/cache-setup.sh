@@ -8,11 +8,12 @@ VITE_CACHE_LINK="${NODE_MODULES_PATH}/.vite"
 VITE_TEMP_PATHS=(
 	"${NODE_MODULES_PATH}/.vite-temp"
 	"${ALLOY_ROOT_PATH}/infra/node_modules/.vite-temp"
-	"${ALLOY_ROOT_PATH}/packages/console/node_modules/.vite-temp"
-	"${ALLOY_ROOT_PATH}/packages/money/node_modules/.vite-temp"
-	"${ALLOY_ROOT_PATH}/packages/tempo/node_modules/.vite-temp"
-	"${ALLOY_ROOT_PATH}/packages/tempo/tests/node_modules/.vite-temp"
-	"${ALLOY_ROOT_PATH}/packages/workflow/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/console/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/money/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/navigator-routes/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/tempo/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/tempo/tests/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/workflow/node_modules/.vite-temp"
 )
 
 mkdir -p "${NODE_MODULES_PATH}"

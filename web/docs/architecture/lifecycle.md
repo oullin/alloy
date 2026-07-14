@@ -80,7 +80,7 @@ The first thing `Run` does is build an `*container.Application`. An
 `Application` is a `*Container` plus a service-provider lifecycle:
 
 ```go
-// packages/foundation/container/application.go:25
+// pkg/hub/container/application.go:25
 type Application struct {
     *Container
     providers     []provider.ServiceProvider
@@ -114,12 +114,12 @@ Three phases:
 1. **Construct** — `container.NewApplication()` returns an empty container.
 2. **Register** — `RegisterMany` walks the provider list, topologically
    sorted by any `provider.DependsOn` declarations
-   ([`application.go:155`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L155)),
+   ([`application.go:155`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application.go#L155)),
    and calls each provider's `Register()`. Register binds factories into the
    container; nothing is constructed yet.
 3. **Boot** — `application.Boot()` calls `Boot()` on every provider that
    implements `provider.Bootable`
-   ([`application.go:170`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L170)).
+   ([`application.go:170`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application.go#L170)).
    This is where providers do post-registration work that depends on other
    providers being bound — for example, subscribing event listeners.
 

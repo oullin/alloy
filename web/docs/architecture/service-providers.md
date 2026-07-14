@@ -19,7 +19,7 @@ The whole interface is three optional methods. Only `Register()` is
 required:
 
 ```go
-// packages/foundation/contracts/provider/provider.go
+// pkg/hub/contracts/provider/provider.go
 type ServiceProvider interface {
     Register()
 }
@@ -83,7 +83,7 @@ The simplest interesting provider in the codebase. It binds one key and
 declares it:
 
 ```go
-// packages/foundation/cache/cache_service_provider.go
+// pkg/hub/cache/cache_service_provider.go
 type CacheServiceProvider struct {
     app           *container.Container
     defaultDriver string
@@ -131,8 +131,8 @@ provider is the right shape.
 package userprovider
 
 import (
-    "github.com/oullin/alloy/packages/foundation/container"
-    "github.com/oullin/alloy/packages/foundation/contracts/provider"
+    "github.com/oullin/alloy/pkg/hub/container"
+    "github.com/oullin/alloy/pkg/hub/contracts/provider"
     "myapp/services/users"
 )
 
@@ -193,14 +193,14 @@ func (p *UserServiceProvider) Boot() {
 ```
 
 Implement `Boot()` and the application will call it automatically — see
-[`application.go:170`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L170).
+[`application.go:170`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application.go#L170).
 
 ### Declaring dependencies
 
 If your provider's `Register()` resolves keys bound by other providers,
 declare them with `DependsOn()`. The application topologically sorts the
 provider list before registering, so dependencies always come first
-([`application.go:265`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L265)):
+([`application.go:265`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application.go#L265)):
 
 ```go
 func (p *UserServiceProvider) DependsOn() []string {
@@ -225,7 +225,7 @@ func (p *ReportingServiceProvider) Provides() []string {
 
 Deferred providers must implement _both_ `Deferred()` and `Provides()` —
 otherwise the application has no way to know which keys to watch for
-([`application.go:243`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go#L243)).
+([`application.go:243`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application.go#L243)).
 The first time anyone calls `application.Make("reporting.exporter")`, the
 application flushes the deferred provider: calls `Register()`, then
 `Boot()` if it's bootable, then resolves the key normally.
@@ -266,7 +266,7 @@ application.Make("foo")
   uses.
 - [Drivers](/architecture/drivers) — when your provider's `Boot()` should
   call `Manager.Extend(...)` to register a custom driver.
-- [`packages/foundation/container/application.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/container/application.go)
+- [`pkg/hub/container/application.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/container/application.go)
   — the full provider lifecycle implementation.
-- [`packages/foundation/contracts/provider/provider.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/contracts/provider/provider.go)
+- [`pkg/hub/contracts/provider/provider.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/contracts/provider/provider.go)
   — the interface definitions.

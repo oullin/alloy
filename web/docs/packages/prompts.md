@@ -21,13 +21,13 @@ Package prompts provides beautiful, user-friendly terminal UI forms for Go appli
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/prompts@latest
+go get github.com/oullin/alloy/pkg/hub/prompts@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/prompts/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/prompts/...
 ```
 
 ## Source Coverage
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/prompts"
+    _ "github.com/oullin/alloy/pkg/hub/prompts"
 )
 
 func main() {
@@ -73,7 +73,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/prompts` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/prompts` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -113,16 +113,16 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/prompts/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/prompts/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/foundation/prompts/compliance_inventory_additional_test.go`
-- `packages/foundation/prompts/compliance_inventory_more_test.go`
-- `packages/foundation/prompts/compliance_inventory_terminal_test.go`
-- `packages/foundation/prompts/compliance_inventory_test.go`
-- `packages/foundation/prompts/inventory_parity_test.go`
+- `pkg/hub/prompts/compliance_inventory_additional_test.go`
+- `pkg/hub/prompts/compliance_inventory_more_test.go`
+- `pkg/hub/prompts/compliance_inventory_terminal_test.go`
+- `pkg/hub/prompts/compliance_inventory_test.go`
+- `pkg/hub/prompts/inventory_parity_test.go`
 
 ## API Reference
 

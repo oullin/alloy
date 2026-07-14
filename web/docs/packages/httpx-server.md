@@ -21,7 +21,7 @@ import (
     "syscall"
     "time"
 
-    "github.com/oullin/alloy/packages/foundation/httpx/server"
+    "github.com/oullin/alloy/pkg/hub/httpx/server"
 )
 
 func main() {

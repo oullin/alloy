@@ -23,13 +23,13 @@ Package auth provides HTTP authentication and authorization. It defines a Manage
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/auth@latest
+go get github.com/oullin/alloy/pkg/hub/auth@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/auth/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/auth/...
 ```
 
 ## Source Coverage
@@ -73,7 +73,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/auth"
+    _ "github.com/oullin/alloy/pkg/hub/auth"
 )
 
 func main() {
@@ -82,7 +82,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/auth` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/auth` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -122,7 +122,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/auth/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/auth/...
 ```
 
 Parity is tracked by these tests:

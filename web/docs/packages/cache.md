@@ -31,7 +31,7 @@ cache.NewCacheServiceProvider(application.Container, o.CacheDefaultDriver),
 
 `o.CacheDefaultDriver` is a string like `"array"`, `"file"`, or
 `"redis"`. The provider records it on the manager
-([`packages/foundation/cache/cache_service_provider.go:19`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/cache_service_provider.go#L19))
+([`pkg/hub/cache/cache_service_provider.go:19`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/cache_service_provider.go#L19))
 so that `manager.Driver()` returns the corresponding `Store`.
 
 To switch between dev and prod, change the value in your `Options`. No
@@ -43,7 +43,7 @@ Pull a store from the manager and use it. The simplest path goes through
 the facade:
 
 ```go
-import facadecache "github.com/oullin/alloy/packages/foundation/facades/cache"
+import facadecache "github.com/oullin/alloy/pkg/hub/facades/cache"
 
 store, err := facadecache.Driver()
 if err != nil {
@@ -77,18 +77,18 @@ redis, _ := mgr.Store("redis")
 
 ## Drivers
 
-Built-in drivers (each lives in its own file under `packages/foundation/cache/`):
+Built-in drivers (each lives in its own file under `pkg/hub/cache/`):
 
 | Name       | Source                                                                                               | When to use                                              |
 | ---------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `array`    | [`array_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/array_store.go)       | Tests, single-process scratch cache                      |
-| `file`     | [`file_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/file_store.go)         | Single-server deployments without an external cache      |
-| `redis`    | [`redis_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/redis_store.go)       | Production, shared cache, distributed locks              |
-| `database` | [`database_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/database_store.go) | When you already have SQL and don't want another service |
-| `dynamodb` | [`dynamodb_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/dynamodb_store.go) | Serverless deployments on AWS                            |
-| `null`     | [`null_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/null_store.go)         | Disable caching at runtime                               |
-| `failover` | [`failover_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/failover_store.go) | Wrap two stores; second takes over when the first fails  |
-| `memoized` | [`memoized_store.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/memoized_store.go) | Per-request memoisation in front of a slower store       |
+| `array`    | [`array_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/array_store.go)       | Tests, single-process scratch cache                      |
+| `file`     | [`file_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/file_store.go)         | Single-server deployments without an external cache      |
+| `redis`    | [`redis_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/redis_store.go)       | Production, shared cache, distributed locks              |
+| `database` | [`database_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/database_store.go) | When you already have SQL and don't want another service |
+| `dynamodb` | [`dynamodb_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/dynamodb_store.go) | Serverless deployments on AWS                            |
+| `null`     | [`null_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/null_store.go)         | Disable caching at runtime                               |
+| `failover` | [`failover_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/failover_store.go) | Wrap two stores; second takes over when the first fails  |
+| `memoized` | [`memoized_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/memoized_store.go) | Per-request memoisation in front of a slower store       |
 
 Switch between them by setting the default driver in your `Options`, or
 ask for a non-default by name:
@@ -125,9 +125,9 @@ mgr.Register("memcached", store)
 ```
 
 `Manager.Extend` registers the factory
-([`manager.go:36`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/manager.go#L36)).
+([`manager.go:36`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/manager.go#L36)).
 `Manager.Build` runs it
-([`manager.go:84`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/manager.go#L84)).
+([`manager.go:84`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/manager.go#L84)).
 `Manager.Register` stores the resulting `Store` under a name so future
 `Store(name)` calls hit the cache.
 
@@ -136,7 +136,7 @@ mgr.Register("memcached", store)
 The repository emits events on every operation when an `EventDispatcher`
 is wired in: `CacheHit`, `CacheMissed`, `KeyWritten`, `KeyForgotten`,
 and the `*Failed` variants. See
-[`packages/foundation/cache/event.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/event.go)
+[`pkg/hub/cache/event.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/event.go)
 for the full set. Subscribe to them through the events package:
 
 ```go
@@ -154,7 +154,7 @@ events.Listen(cache.CacheMissed{}, func(ctx context.Context, e any) error {
 - [Service Providers](/architecture/service-providers) — what the
   `CacheServiceProvider` does and how to add custom drivers from a
   provider's `Boot()`.
-- [`packages/foundation/facades/cache`](/architecture/facades) — the ergonomic
+- [`pkg/hub/facades/cache`](/architecture/facades) — the ergonomic
 shortcut.
 <!-- /ALLOY:HAND -->
 
@@ -171,13 +171,13 @@ Package cache provides caching primitives. It defines a two-level abstraction: S
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/cache@latest
+go get github.com/oullin/alloy/pkg/hub/cache@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/cache/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/cache/...
 ```
 
 ## Source Coverage
@@ -215,7 +215,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/cache"
+    _ "github.com/oullin/alloy/pkg/hub/cache"
 )
 
 func main() {
@@ -224,7 +224,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/cache` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/cache` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -264,12 +264,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/cache/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/cache/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/foundation/cache/compliance_test.go`
+- `pkg/hub/cache/compliance_test.go`
 
 ## API Reference
 

@@ -12,11 +12,11 @@ artifact_dir="${RUNNER_TEMP:-/tmp}/alloy-ts-packages"
 mkdir -p "${artifact_dir}"
 
 packages=(
-	"@alloy/console"
-	"@alloy/money"
-	"@alloy/navigator-routes"
-	"@alloy/tempo"
-	"@alloy/workflow"
+	"@alloy/sdk/console"
+	"@alloy/sdk/money"
+	"@alloy/sdk/navigator-routes"
+	"@alloy/sdk/tempo"
+	"@alloy/sdk/workflow"
 )
 
 for package in "${packages[@]}"; do

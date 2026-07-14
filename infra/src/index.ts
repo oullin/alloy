@@ -13,12 +13,14 @@ export const distDir = (...segments: string[]): string => infraPath('dist', ...s
 
 export const logDir = (...segments: string[]): string => infraPath('.logs', ...segments);
 
-const packageRoot = resolve(repoRoot, 'packages');
+const sdkRoot = resolve(repoRoot, 'sdk');
 
 export const workspaceAliases = (): Record<string, string> => ({
 	'@alloy/infra': resolve(infraRoot, 'src'),
-	'@alloy/tempo': resolve(packageRoot, 'tempo', 'src'),
-	'@alloy/tempo-tests': resolve(packageRoot, 'tempo', 'tests', 'src'),
-	'@alloy/console': resolve(packageRoot, 'console', 'src'),
-	'@alloy/navigator-routes': resolve(packageRoot, 'navigator-routes', 'src'),
+	'@alloy/sdk/tempo': resolve(sdkRoot, 'tempo', 'src'),
+	'@alloy/sdk/tempo-tests': resolve(sdkRoot, 'tempo', 'tests', 'src'),
+	'@alloy/sdk/money': resolve(sdkRoot, 'money', 'src'),
+	'@alloy/sdk/console': resolve(sdkRoot, 'console', 'src'),
+	'@alloy/sdk/navigator-routes': resolve(sdkRoot, 'navigator-routes', 'src'),
+	'@alloy/sdk/workflow': resolve(sdkRoot, 'workflow', 'src'),
 });

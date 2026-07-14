@@ -21,13 +21,13 @@ The oauthserver package provides Alloy's Go implementation for this surface.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/oauthserver@latest
+go get github.com/oullin/alloy/pkg/hub/oauthserver@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/oauthserver/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/oauthserver/...
 ```
 
 ## Source Coverage
@@ -64,7 +64,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/oauthserver"
+    _ "github.com/oullin/alloy/pkg/hub/oauthserver"
 )
 
 func main() {
@@ -73,7 +73,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/oauthserver` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/oauthserver` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -113,12 +113,12 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/oauthserver/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/oauthserver/...
 ```
 
 Parity is tracked by these tests:
 
-- `packages/foundation/oauthserver/oauthserver_inventory_test.go`
+- `pkg/hub/oauthserver/oauthserver_inventory_test.go`
 
 ## API Reference
 

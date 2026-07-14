@@ -44,7 +44,7 @@ mgr.Store("redis") ─┘
 The cache manager is the cleanest illustration of the pattern:
 
 ```go
-// packages/foundation/cache/manager.go:8
+// pkg/hub/cache/manager.go:8
 type DriverFactory func(config map[string]any) (Store, error)
 
 type Manager struct {
@@ -61,7 +61,7 @@ runs the factory; `Manager.Store(name)` returns a previously-registered
 named instance:
 
 ```go
-// packages/foundation/cache/manager.go:84
+// pkg/hub/cache/manager.go:84
 func (m *Manager) Build(driver string, config map[string]any) (Store, error) {
     m.mu.RLock()
     factory, ok := m.drivers[driver]
@@ -97,7 +97,7 @@ Queue is the same idea, but with two registration paths because the
 The upstream original distinguishes "drivers" from "connectors":
 
 ```go
-// packages/foundation/queue/manager.go:9
+// pkg/hub/queue/manager.go:9
 type DriverCreator    func(config map[string]any) (Queue, error)
 type ConnectorFactory func() Connector
 ```
@@ -105,9 +105,9 @@ type ConnectorFactory func() Connector
 `Register("driver", creator)` is the simple path: one function, returns a
 ready-to-use Queue. `AddConnector("driver", factory)` is the two-step path:
 the factory returns a `Connector`, the manager later calls
-`Connector.Connect(config)` ([`queue/manager.go:115`](https://github.com/oullin/alloy/blob/main/packages/foundation/queue/manager.go#L115)).
+`Connector.Connect(config)` ([`queue/manager.go:115`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go#L115)).
 
-Both end up at the same `instantiateLocked` function ([`queue/manager.go:295`](https://github.com/oullin/alloy/blob/main/packages/foundation/queue/manager.go#L295))
+Both end up at the same `instantiateLocked` function ([`queue/manager.go:295`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go#L295))
 which prefers the connector path when both are registered.
 
 If you're implementing a new queue backend and the connection setup is
@@ -209,16 +209,16 @@ section on each page is the source of truth. Quick index:
 
 | Manager                                    | Manager source                                                                                                        | Built-ins (read alongside the source)                            |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| [`cache`](/packages/cache)                 | [`packages/foundation/cache/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/cache/manager.go)                 | array, file, redis, dynamodb, database, null, memoized, failover |
-| [`queue`](/packages/queue)                 | [`packages/foundation/queue/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/queue/manager.go)                 | sync, redis, sqs, null                                           |
-| [`log`](/packages/log)                     | [`packages/foundation/log/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/log/manager.go)                     | single, stack, stderr, syslog, rotating, null                    |
-| [`mailx`](/packages/mailx)                 | [`packages/foundation/mailx/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/mailx/manager.go)                 | smtp, log, array, composite                                      |
-| [`session`](/packages/session)             | [`packages/foundation/session/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/session/manager.go)             | cookie, file, cache, database, array                             |
-| [`concurrency`](/packages/concurrency)     | [`packages/foundation/concurrency/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/concurrency/manager.go)     | sync, goroutine                                                  |
-| [`hashing`](/packages/hashing)             | [`packages/foundation/hashing/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/hashing/manager.go)             | bcrypt, argon, argon2id                                          |
-| [`filesystem`](/packages/filesystem)       | [`packages/foundation/filesystem/filesystem.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/filesystem/filesystem.go) | local                                                            |
-| [`notifications`](/packages/notifications) | [`packages/foundation/notifications/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/notifications/manager.go) | mail, database, broadcast, slack                                 |
-| [`broadcasting`](/packages/broadcasting)   | [`packages/foundation/broadcasting/manager.go`](https://github.com/oullin/alloy/blob/main/packages/foundation/broadcasting/manager.go)   | log, redis, pusher, ably                                         |
+| [`cache`](/packages/cache)                 | [`pkg/hub/cache/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/manager.go)                 | array, file, redis, dynamodb, database, null, memoized, failover |
+| [`queue`](/packages/queue)                 | [`pkg/hub/queue/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go)                 | sync, redis, sqs, null                                           |
+| [`log`](/packages/log)                     | [`pkg/hub/log/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/manager.go)                     | single, stack, stderr, syslog, rotating, null                    |
+| [`mailx`](/packages/mailx)                 | [`pkg/hub/mailx/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/mailx/manager.go)                 | smtp, log, array, composite                                      |
+| [`session`](/packages/session)             | [`pkg/hub/session/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/session/manager.go)             | cookie, file, cache, database, array                             |
+| [`concurrency`](/packages/concurrency)     | [`pkg/hub/concurrency/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/concurrency/manager.go)     | sync, goroutine                                                  |
+| [`hashing`](/packages/hashing)             | [`pkg/hub/hashing/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/manager.go)             | bcrypt, argon, argon2id                                          |
+| [`filesystem`](/packages/filesystem)       | [`pkg/hub/filesystem/filesystem.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/filesystem/filesystem.go) | local                                                            |
+| [`notifications`](/packages/notifications) | [`pkg/hub/notifications/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/manager.go) | mail, database, broadcast, slack                                 |
+| [`broadcasting`](/packages/broadcasting)   | [`pkg/hub/broadcasting/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/manager.go)   | log, redis, pusher, ably                                         |
 
 ## See Also
 

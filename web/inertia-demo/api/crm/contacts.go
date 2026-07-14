@@ -8,10 +8,10 @@ import (
 	"strings"
 
 	"alloy.dev/inertia-demo/internal/database"
-	"github.com/oullin/alloy/packages/foundation/inertia"
-	"github.com/oullin/alloy/packages/foundation/inertia/flash"
-	"github.com/oullin/alloy/packages/foundation/inertia/props"
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
+	"github.com/oullin/alloy/pkg/hub/inertia"
+	"github.com/oullin/alloy/pkg/hub/inertia/flash"
+	"github.com/oullin/alloy/pkg/hub/inertia/props"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
 )
 
 const contactsPerPage = 15

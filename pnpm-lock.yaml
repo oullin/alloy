@@ -39,7 +39,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/console:
+  sdk/console:
     dependencies:
       '@opentui/core':
         specifier: ^0.4.2
@@ -64,27 +64,27 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/money:
+  sdk/money:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/navigator-routes:
+  sdk/navigator-routes:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/tempo:
+  sdk/tempo:
     devDependencies:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/tempo/tests:
+  sdk/tempo/tests:
     dependencies:
-      '@alloy/tempo':
+      '@alloy/sdk/tempo':
         specifier: workspace:*
         version: link:..
     devDependencies:
@@ -92,7 +92,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  packages/workflow:
+  sdk/workflow:
     devDependencies:
       '@types/node':
         specifier: ^26.1.0

@@ -18,13 +18,13 @@ Package cookie provides cookie management primitives. It includes a queuing cook
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/packages/foundation/cookie@latest
+go get github.com/oullin/alloy/pkg/hub/cookie@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/cookie/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/cookie/...
 ```
 
 ## Source Coverage
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/packages/foundation/cookie"
+    _ "github.com/oullin/alloy/pkg/hub/cookie"
 )
 
 func main() {
@@ -70,7 +70,7 @@ func main() {
 }
 ```
 
-Use package tests as executable examples when the exact constructor requires collaborators. The tests under `packages/foundation/cookie` cover the supported creation paths, default values, and parity behavior.
+Use package tests as executable examples when the exact constructor requires collaborators. The tests under `pkg/hub/cookie` cover the supported creation paths, default values, and parity behavior.
 
 ## Configuration
 
@@ -110,7 +110,7 @@ The package reference should be read through these parity lenses:
 Run the package tests before changing examples:
 
 ```bash
-GOWORK=./packages/foundation/go.work go test -count=1 ./packages/foundation/cookie/...
+GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/cookie/...
 ```
 
 Parity is tracked by these tests:

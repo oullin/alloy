@@ -50,7 +50,7 @@ jobs:
               govulncheck ./...
             ) || status=1
           done < <(
-            find packages/foundation -name go.mod -print0
+            find pkg/hub -name go.mod -print0
             find web -path '*/api/go.mod' -print0 2>/dev/null || true
           )
 

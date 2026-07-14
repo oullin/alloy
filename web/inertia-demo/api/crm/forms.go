@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"alloy.dev/inertia-demo/internal/database"
-	"github.com/oullin/alloy/packages/foundation/inertia/protocol"
-	"github.com/oullin/alloy/packages/foundation/validation"
+	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"github.com/oullin/alloy/pkg/hub/validation"
 )
 
 type contactForm struct {

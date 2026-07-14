@@ -77,13 +77,13 @@ while IFS= read -r file; do
 	[[ -n "${file}" ]] || continue
 
 	case "${file}" in
-		*.go | go.mod | */go.mod | go.sum | */go.sum | go.work | go.work.example | packages/foundation/* | web/*/api/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
+		*.go | go.mod | */go.mod | go.sum | */go.sum | go.work | go.work.example | pkg/hub/* | web/*/api/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-go.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/release-go.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | .npmrc | infra/scripts/tasks/detect-changed-surfaces.sh | infra/scripts/tasks/go-test.sh | infra/scripts/tasks/cache-env.sh)
 			go_changed=true
 			;;
 	esac
 
 	case "${file}" in
-		ts/* | infra/* | packages/* | web/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/ci-ts.yml | .github/workflows/release-ts.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | tsconfig.json | .npmrc)
+		ts/* | infra/* | sdk/* | web/* | .github/actions/setup/* | .github/workflows/ci.yml | .github/workflows/ci-inertia-app-tests.yml | .github/workflows/ci-ts.yml | .github/workflows/release-ts.yml | package.json | pnpm-lock.yaml | pnpm-workspace.yaml | vite.config.ts | tsconfig.json | .npmrc)
 			ts_changed=true
 			;;
 	esac
