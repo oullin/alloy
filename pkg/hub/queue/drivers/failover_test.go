@@ -3,6 +3,7 @@ package drivers_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -301,5 +302,82 @@ func TestFailoverDriverInspectionAllBareReturnsErrNotSupported(t *testing.T) {
 
 	if _, err := drv.ReservedJobs(ctx, "default"); !errors.Is(err, queue.ErrNotSupported) {
 		t.Errorf("ReservedJobs: want ErrNotSupported, got %v", err)
+	}
+}
+
+type errorBackend struct {
+	queue.Backend
+	popErr  error
+	sizeErr error
+}
+
+func (e *errorBackend) Pop(_ context.Context, _ string) (queue.Job, error) {
+	return nil, e.popErr
+}
+
+func (e *errorBackend) Size(_ context.Context, _ string) (int64, error) {
+	return 0, e.sizeErr
+}
+
+func (e *errorBackend) PendingSize(_ context.Context, _ string) (int64, error) {
+	return 0, e.sizeErr
+}
+
+func (e *errorBackend) DelayedSize(_ context.Context, _ string) (int64, error) {
+	return 0, e.sizeErr
+}
+
+func (e *errorBackend) ReservedSize(_ context.Context, _ string) (int64, error) {
+	return 0, e.sizeErr
+}
+
+func (e *errorBackend) ConnectionName() string {
+	return "error-backend"
+}
+
+func TestFailoverDriverSurfacesBackendErrors(t *testing.T) {
+	t.Parallel()
+
+	popErr := errors.New("pop failed")
+	sizeErr := errors.New("size failed")
+
+	b1 := &errorBackend{popErr: popErr, sizeErr: sizeErr}
+	b2 := &errorBackend{popErr: popErr, sizeErr: sizeErr}
+
+	drv := drivers.NewFailoverDriver("failover", b1, b2)
+	ctx := context.Background()
+
+	// 1. Pop should return the wrapped error because all backends failed
+	_, err := drv.Pop(ctx, "q")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if errors.Is(err, queue.ErrNoJob) {
+		t.Errorf("expected wrapped backend error, got ErrNoJob: %v", err)
+	}
+	if !strings.Contains(err.Error(), "pop failed") {
+		t.Errorf("expected 'pop failed' in error, got %v", err)
+	}
+
+	// 2. Size should return the error instead of 0, nil
+	_, err = drv.Size(ctx, "q")
+	if !errors.Is(err, sizeErr) {
+		t.Errorf("Size: expected %v, got %v", sizeErr, err)
+	}
+
+	// 3. PendingSize, DelayedSize, ReservedSize should also return the error
+	_, err = drv.PendingSize(ctx, "q")
+	if !errors.Is(err, sizeErr) {
+		t.Errorf("PendingSize: expected %v, got %v", sizeErr, err)
+	}
+
+	_, err = drv.DelayedSize(ctx, "q")
+	if !errors.Is(err, sizeErr) {
+		t.Errorf("DelayedSize: expected %v, got %v", sizeErr, err)
+	}
+
+	_, err = drv.ReservedSize(ctx, "q")
+	if !errors.Is(err, sizeErr) {
+		t.Errorf("ReservedSize: expected %v, got %v", sizeErr, err)
 	}
 }
