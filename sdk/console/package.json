@@ -204,7 +204,7 @@
   },
   "dependencies": {
     "@opentui/core": "^0.4.2",
-    "string-width": "^7.2.0",
+    "string-width": "^8.2.2",
     "strip-ansi": "^7.1.2",
     "zod": "^4.4.3"
   },
