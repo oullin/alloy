@@ -456,4 +456,3 @@ var _ provider.ServiceProvider = (*fakeProvider)(nil)
 var _ provider.Bootable = (*fakeProvider)(nil)
 var _ provider.Deferred = (*deferredProvider)(nil)
 var _ provider.DependsOn = (*depProvider)(nil)
-
