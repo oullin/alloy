@@ -29,10 +29,12 @@ type Binding struct {
 	scoped  bool
 }
 
-// App is a inversion-of-control container. It manages
+// App is an inversion-of-control container. It manages
 // service bindings, resolution, contextual bindings, tagging, extension,
 // lifecycle callbacks, and method invocation. All methods are safe for
-// concurrent use.
+// concurrent use. Note that a zero-value App is not usable; always construct
+// one using New(). Also, mutually-dependent shared bindings resolved concurrently
+// from different goroutines may block rather than return ErrCircularDependency.
 type App struct {
 	mu *sync.RWMutex
 
@@ -58,17 +60,24 @@ type App struct {
 	afterCbs        map[string][]BindingCallback
 }
 
+// call represents an in-flight or completed single-flight resolution.
 type call struct {
 	wg  sync.WaitGroup
 	val any
 	err error
 }
 
+// singleflight manages concurrent duplicate resolutions so that the factory
+// only executes once.
 type singleflight struct {
 	mu sync.Mutex
 	m  map[string]*call
 }
 
+// Do executes and returns the results of the given function, making sure that
+// only one execution is in-flight for a given key at a time. If a duplicate
+// comes in, the duplicate caller waits for the original to complete and receives
+// the same results.
 func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
 	g.mu.Lock()
 	if g.m == nil {
@@ -84,22 +93,39 @@ func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
 	g.m[key] = c
 	g.mu.Unlock()
 
+	defer func() {
+		if r := recover(); r != nil {
+			c.err = fmt.Errorf("factory panicked: %v", r)
+			g.mu.Lock()
+			delete(g.m, key)
+			g.mu.Unlock()
+			c.wg.Done()
+			panic(r)
+		}
+	}()
+
 	c.val, c.err = fn()
-	c.wg.Done()
 
 	g.mu.Lock()
 	delete(g.m, key)
 	g.mu.Unlock()
+	c.wg.Done()
 
 	return c.val, c.err
 }
 
+// resolution holds the goroutine-local build stack and parameter stack
+// for a dependency resolution chain.
 type resolution struct {
 	buildStack []string
 	with       []map[string]any
+	done       bool
 }
 
+// withResolution returns a cloned App referencing the given resolution context.
 func (c *App) withResolution(r *resolution) *App {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	clone := *c
 	clone.resolution = r
 	if c.parent == nil {
@@ -251,7 +277,10 @@ func (c *App) FactoryFunc(abstract string) func() (any, error) {
 
 // resolve is the core resolution engine.
 func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
-	if c.resolution == nil {
+	c.mu.RLock()
+	needsNewRes := c.resolution == nil || c.resolution.done
+	c.mu.RUnlock()
+	if needsNewRes {
 		c = c.withResolution(&resolution{})
 	}
 
@@ -338,23 +367,30 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	var instance any
 	var err error
 
-	if b.shared {
+	runFactoryAndPop := func() (any, error) {
+		inst, fErr := factory(c)
+		if fErr == nil && inst == c {
+			inst = c.parent
+		}
+
+		c.mu.Lock()
+		if len(c.resolution.buildStack) > 0 {
+			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+		}
+		if len(c.resolution.with) > 0 {
+			c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
+		}
+		if len(c.resolution.buildStack) == 0 {
+			c.resolution.done = true
+		}
+		c.mu.Unlock()
+
+		return inst, fErr
+	}
+
+	if b.shared && len(parameters) == 0 {
 		instance, err = c.sf.Do(abstract, func() (any, error) {
-			inst, fErr := factory(c)
-			if fErr == nil && inst == c {
-				inst = c.parent
-			}
-
-			c.mu.Lock()
-			// Pop build stack for the executing goroutine
-			if len(c.resolution.buildStack) > 0 {
-				c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
-			}
-			if len(c.resolution.with) > 0 {
-				c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
-			}
-			c.mu.Unlock()
-
+			inst, fErr := runFactoryAndPop()
 			if fErr != nil {
 				return nil, fErr
 			}
@@ -368,13 +404,8 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 			}
 
 			// Cache shared instances.
-			if len(parameters) == 0 {
-				c.mu.Lock()
-				c.instances[abstract] = inst
-				c.mu.Unlock()
-			}
-
 			c.mu.Lock()
+			c.instances[abstract] = inst
 			c.resolved[abstract] = true
 			c.mu.Unlock()
 
@@ -389,30 +420,16 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 				c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
 			}
 		}
+		if len(c.resolution.buildStack) == 0 {
+			c.resolution.done = true
+		}
 		c.mu.Unlock()
 
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		instance, err = factory(c)
-		if err == nil && instance == c {
-			instance = c.parent
-		}
-
-		c.mu.Lock()
-
-		// Pop build stack.
-		if len(c.resolution.buildStack) > 0 {
-			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
-		}
-
-		if len(c.resolution.with) > 0 {
-			c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
-		}
-
-		c.mu.Unlock()
-
+		instance, err = runFactoryAndPop()
 		if err != nil {
 			return nil, err
 		}
