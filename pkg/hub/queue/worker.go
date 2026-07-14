@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -562,7 +563,7 @@ func (w *Worker) processJob(ctx context.Context, job Job) {
 func (w *Worker) runHandler(ctx context.Context, job Job) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("queue: handler panicked: %v", r)
+			err = fmt.Errorf("queue: handler panicked: %v\n%s", r, debug.Stack())
 		}
 	}()
 
