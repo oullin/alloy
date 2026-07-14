@@ -43,6 +43,7 @@ type App struct {
 	resolved        map[string]bool
 	resolution      *resolution
 	parent          *App
+	sf              *singleflight
 	contextual      map[string]map[string]any
 	tags            map[string][]string
 	extenders       map[string][]ExtenderFunc
@@ -55,6 +56,42 @@ type App struct {
 	resolvCbs       map[string][]BindingCallback
 	globalAfterCbs  []BindingCallback
 	afterCbs        map[string][]BindingCallback
+}
+
+type call struct {
+	wg  sync.WaitGroup
+	val any
+	err error
+}
+
+type singleflight struct {
+	mu sync.Mutex
+	m  map[string]*call
+}
+
+func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
+	g.mu.Lock()
+	if g.m == nil {
+		g.m = make(map[string]*call)
+	}
+	if c, ok := g.m[key]; ok {
+		g.mu.Unlock()
+		c.wg.Wait()
+		return c.val, c.err
+	}
+	c := new(call)
+	c.wg.Add(1)
+	g.m[key] = c
+	g.mu.Unlock()
+
+	c.val, c.err = fn()
+	c.wg.Done()
+
+	g.mu.Lock()
+	delete(g.m, key)
+	g.mu.Unlock()
+
+	return c.val, c.err
 }
 
 type resolution struct {
@@ -80,6 +117,7 @@ func New() *App {
 		aliases:         make(map[string]string),
 		abstractAliases: make(map[string][]string),
 		resolved:        make(map[string]bool),
+		sf:              new(singleflight),
 		contextual:      make(map[string]map[string]any),
 		tags:            make(map[string][]string),
 		extenders:       make(map[string][]ExtenderFunc),
@@ -297,47 +335,101 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	fireBeforeCallbacks(beforeSpecific, abstract, parameters, c)
 
 	// Execute factory.
-	instance, err := factory(c)
-	if err == nil && instance == c {
-		instance = c.parent
-	}
+	var instance any
+	var err error
 
-	c.mu.Lock()
+	if b.shared {
+		instance, err = c.sf.Do(abstract, func() (any, error) {
+			inst, fErr := factory(c)
+			if fErr == nil && inst == c {
+				inst = c.parent
+			}
 
-	// Pop build stack.
-	if len(c.resolution.buildStack) > 0 {
-		c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
-	}
+			c.mu.Lock()
+			// Pop build stack for the executing goroutine
+			if len(c.resolution.buildStack) > 0 {
+				c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+			}
+			if len(c.resolution.with) > 0 {
+				c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
+			}
+			c.mu.Unlock()
 
-	if len(c.resolution.with) > 0 {
-		c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
-	}
+			if fErr != nil {
+				return nil, fErr
+			}
 
-	c.mu.Unlock()
+			// Apply extenders.
+			for _, ext := range extenders {
+				inst, fErr = ext(inst, c)
+				if fErr != nil {
+					return nil, fErr
+				}
+			}
 
-	if err != nil {
-		return nil, err
-	}
+			// Cache shared instances.
+			if len(parameters) == 0 {
+				c.mu.Lock()
+				c.instances[abstract] = inst
+				c.mu.Unlock()
+			}
 
-	// Apply extenders.
-	for _, ext := range extenders {
-		instance, err = ext(instance, c)
+			c.mu.Lock()
+			c.resolved[abstract] = true
+			c.mu.Unlock()
+
+			return inst, nil
+		})
+
+		// Pop build stack for waiting goroutines if they didn't run the inner func
+		c.mu.Lock()
+		if len(c.resolution.buildStack) > 0 && c.resolution.buildStack[len(c.resolution.buildStack)-1] == abstract {
+			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+			if len(c.resolution.with) > 0 {
+				c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
+			}
+		}
+		c.mu.Unlock()
 
 		if err != nil {
 			return nil, err
 		}
-	}
+	} else {
+		instance, err = factory(c)
+		if err == nil && instance == c {
+			instance = c.parent
+		}
 
-	// Cache shared instances.
-	if b.shared && len(parameters) == 0 {
 		c.mu.Lock()
-		c.instances[abstract] = instance
+
+		// Pop build stack.
+		if len(c.resolution.buildStack) > 0 {
+			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+		}
+
+		if len(c.resolution.with) > 0 {
+			c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
+		}
+
+		c.mu.Unlock()
+
+		if err != nil {
+			return nil, err
+		}
+
+		// Apply extenders.
+		for _, ext := range extenders {
+			instance, err = ext(instance, c)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		c.mu.Lock()
+		c.resolved[abstract] = true
 		c.mu.Unlock()
 	}
-
-	c.mu.Lock()
-	c.resolved[abstract] = true
-	c.mu.Unlock()
 
 	// Fire resolving callbacks.
 	fireCallbacks(resolvGlobal, instance, c)

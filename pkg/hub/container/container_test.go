@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/oullin/alloy/pkg/hub/container"
 )
@@ -1164,6 +1166,61 @@ func TestConcurrent(t *testing.T) {
 
 	for err := range errs {
 		t.Error(err)
+	}
+}
+
+func TestConcurrentSingleton(t *testing.T) {
+	c := newContainer()
+
+	var counter int64
+	var factoryStart sync.WaitGroup
+	var factoryDone sync.WaitGroup
+
+	factoryStart.Add(1)
+	factoryDone.Add(1)
+
+	c.Singleton("singleton", func(cc *container.App) (any, error) {
+		atomic.AddInt64(&counter, 1)
+		factoryStart.Done()
+		factoryDone.Wait()
+		return "instance", nil
+	})
+
+	var wg sync.WaitGroup
+	var inst1, inst2 any
+	var err1, err2 error
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		inst1, err1 = c.Make("singleton")
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// Wait for the first goroutine to enter the factory, ensuring concurrency
+		factoryStart.Wait()
+		inst2, err2 = c.Make("singleton")
+	}()
+
+	// Give it a tiny bit of time to make sure goroutine 2 blocks on Make
+	time.Sleep(50 * time.Millisecond)
+	factoryDone.Done()
+
+	wg.Wait()
+
+	if err1 != nil {
+		t.Fatalf("unexpected error 1: %v", err1)
+	}
+	if err2 != nil {
+		t.Fatalf("unexpected error 2: %v", err2)
+	}
+	if inst1 != "instance" || inst2 != "instance" {
+		t.Fatalf("expected 'instance', got %v and %v", inst1, inst2)
+	}
+	if atomic.LoadInt64(&counter) != 1 {
+		t.Fatalf("expected factory to run exactly once, ran %d times", counter)
 	}
 }
 
