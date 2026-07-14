@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/events"
 )
 
 func TestFailoverDriverPushUsesFirstSuccessful(t *testing.T) {
@@ -379,5 +381,57 @@ func TestFailoverDriverSurfacesBackendErrors(t *testing.T) {
 	_, err = drv.ReservedSize(ctx, "q")
 	if !errors.Is(err, sizeErr) {
 		t.Errorf("ReservedSize: expected %v, got %v", sizeErr, err)
+	}
+}
+
+type mockEventEmitter struct {
+	events []any
+	mu     sync.Mutex
+}
+
+func (m *mockEventEmitter) Emit(event any) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.events = append(m.events, event)
+}
+
+func TestFailoverDriverPopFailedOverEvents(t *testing.T) {
+	t.Parallel()
+
+	// Case 1: When all backends return ErrNoJob, no FailedOver event is emitted
+	emitter1 := &mockEventEmitter{}
+	d1 := &errorBackend{popErr: queue.ErrNoJob}
+	d2 := &errorBackend{popErr: queue.ErrNoJob}
+	drv1 := drivers.NewFailoverDriver("failover", d1, d2).SetEmitter(emitter1)
+
+	_, _ = drv1.Pop(context.Background(), "q")
+
+	if len(emitter1.events) != 0 {
+		t.Errorf("expected 0 FailedOver events when backends are empty (ErrNoJob), got %d", len(emitter1.events))
+	}
+
+	// Case 2: When a backend returns a real error, one FailedOver event is emitted
+	emitter2 := &mockEventEmitter{}
+	d3 := &errorBackend{popErr: errors.New("real error")}
+	d4 := &errorBackend{popErr: queue.ErrNoJob}
+	drv2 := drivers.NewFailoverDriver("failover", d3, d4).SetEmitter(emitter2)
+
+	_, _ = drv2.Pop(context.Background(), "q")
+
+	if len(emitter2.events) != 1 {
+		t.Errorf("expected 1 FailedOver event when backend has a real error, got %d", len(emitter2.events))
+	}
+
+	// Verify the event content
+	evt, ok := emitter2.events[0].(events.FailedOver)
+	if !ok {
+		t.Errorf("expected event of type FailedOver, got %T", emitter2.events[0])
+	} else {
+		if evt.From != "error-backend" || evt.To != "error-backend" {
+			t.Errorf("expected event details, got %+v", evt)
+		}
+		if evt.Err == nil || evt.Err.Error() != "real error" {
+			t.Errorf("expected event error, got %v", evt.Err)
+		}
 	}
 }

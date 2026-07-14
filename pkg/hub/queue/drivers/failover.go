@@ -136,7 +136,7 @@ func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 			lastRealErr = err
 		}
 
-		if i+1 < len(d.drivers) {
+		if i+1 < len(d.drivers) && !errors.Is(err, queue.ErrNoJob) {
 			d.emitFailover(drv, d.drivers[i+1], err)
 		}
 	}
