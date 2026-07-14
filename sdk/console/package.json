@@ -203,14 +203,14 @@
     "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
   },
   "dependencies": {
-    "@opentui/core": "^0.4.2",
+    "@opentui/core": "^0.4.3",
     "string-width": "^7.2.0",
     "strip-ansi": "^7.1.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@alloy/infra": "workspace:*",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "typescript": "^6.0.3"
   }
 }
