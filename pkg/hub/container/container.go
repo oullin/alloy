@@ -78,16 +78,29 @@ type singleflight struct {
 // only one execution is in-flight for a given key at a time. If a duplicate
 // comes in, the duplicate caller waits for the original to complete and receives
 // the same results.
+
+// resolution holds the goroutine-local build stack and parameter stack
+// for a dependency resolution chain.
+type resolution struct {
+	buildStack []string
+	with       []map[string]any
+	done       bool
+}
+
 func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
 	g.mu.Lock()
+
 	if g.m == nil {
 		g.m = make(map[string]*call)
 	}
+
 	if c, ok := g.m[key]; ok {
 		g.mu.Unlock()
 		c.wg.Wait()
+
 		return c.val, c.err
 	}
+
 	c := new(call)
 	c.wg.Add(1)
 	g.m[key] = c
@@ -114,23 +127,19 @@ func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
 	return c.val, c.err
 }
 
-// resolution holds the goroutine-local build stack and parameter stack
-// for a dependency resolution chain.
-type resolution struct {
-	buildStack []string
-	with       []map[string]any
-	done       bool
-}
-
 // withResolution returns a cloned App referencing the given resolution context.
 func (c *App) withResolution(r *resolution) *App {
 	c.mu.RLock()
+
 	defer c.mu.RUnlock()
+
 	clone := *c
 	clone.resolution = r
+
 	if c.parent == nil {
 		clone.parent = c
 	}
+
 	return &clone
 }
 
@@ -280,6 +289,7 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	c.mu.RLock()
 	needsNewRes := c.resolution == nil || c.resolution.done
 	c.mu.RUnlock()
+
 	if needsNewRes {
 		c = c.withResolution(&resolution{})
 	}
@@ -365,24 +375,30 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 
 	// Execute factory.
 	var instance any
+
 	var err error
 
 	runFactoryAndPop := func() (any, error) {
 		inst, fErr := factory(c)
+
 		if fErr == nil && inst == c {
 			inst = c.parent
 		}
 
 		c.mu.Lock()
+
 		if len(c.resolution.buildStack) > 0 {
 			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
 		}
+
 		if len(c.resolution.with) > 0 {
 			c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
 		}
+
 		if len(c.resolution.buildStack) == 0 {
 			c.resolution.done = true
 		}
+
 		c.mu.Unlock()
 
 		return inst, fErr
@@ -391,6 +407,7 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	if b.shared && len(parameters) == 0 {
 		instance, err = c.sf.Do(abstract, func() (any, error) {
 			inst, fErr := runFactoryAndPop()
+
 			if fErr != nil {
 				return nil, fErr
 			}
@@ -398,6 +415,7 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 			// Apply extenders.
 			for _, ext := range extenders {
 				inst, fErr = ext(inst, c)
+
 				if fErr != nil {
 					return nil, fErr
 				}
@@ -414,15 +432,19 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 
 		// Pop build stack for waiting goroutines if they didn't run the inner func
 		c.mu.Lock()
+
 		if len(c.resolution.buildStack) > 0 && c.resolution.buildStack[len(c.resolution.buildStack)-1] == abstract {
 			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+
 			if len(c.resolution.with) > 0 {
 				c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
 			}
 		}
+
 		if len(c.resolution.buildStack) == 0 {
 			c.resolution.done = true
 		}
+
 		c.mu.Unlock()
 
 		if err != nil {
@@ -430,6 +452,7 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 		}
 	} else {
 		instance, err = runFactoryAndPop()
+
 		if err != nil {
 			return nil, err
 		}

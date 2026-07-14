@@ -54,14 +54,19 @@ func (a *Application) Register(p provider.ServiceProvider) {
 
 	if isDeferred(p) {
 		provides, ok := p.(provider.Provides)
+
 		if ok {
 			keys := provides.Provides()
+
 			if len(keys) > 0 {
 				a.providers = append(a.providers, p)
+
 				for _, key := range keys {
 					a.deferredByKey[key] = p
 				}
+
 				a.mu.Unlock()
+
 				return
 			}
 		}
@@ -69,6 +74,7 @@ func (a *Application) Register(p provider.ServiceProvider) {
 
 	if a.registered[p] {
 		a.mu.Unlock()
+
 		return
 	}
 
@@ -92,17 +98,21 @@ func (a *Application) flushDeferredFor(abstract string) {
 	a.mu.Lock()
 
 	p, ok := a.deferredByKey[abstract]
+
 	if !ok {
 		a.mu.Unlock()
+
 		return
 	}
 
 	if a.registered[p] {
 		wg, running := a.inFlight[p]
 		a.mu.Unlock()
+
 		if running {
 			wg.Wait()
 		}
+
 		return
 	}
 
@@ -118,11 +128,13 @@ func (a *Application) flushDeferredFor(abstract string) {
 	defer func() {
 		a.mu.Lock()
 		delete(a.inFlight, p)
+
 		if provides, ok := p.(provider.Provides); ok {
 			for _, k := range provides.Provides() {
 				delete(a.deferredByKey, k)
 			}
 		}
+
 		a.mu.Unlock()
 		wg.Done()
 	}()
@@ -184,6 +196,7 @@ func (a *Application) Boot() {
 
 	if a.booted {
 		a.mu.Unlock()
+
 		return
 	}
 
@@ -194,11 +207,13 @@ func (a *Application) Boot() {
 	copy(providers, a.providers)
 
 	var bootedProviders []provider.ServiceProvider
+
 	for _, p := range providers {
 		if a.registered[p] {
 			bootedProviders = append(bootedProviders, p)
 		}
 	}
+
 	a.mu.Unlock()
 
 	for _, p := range bootedProviders {
@@ -211,6 +226,7 @@ func (a *Application) Boot() {
 // Booted reports whether Boot has been called.
 func (a *Application) Booted() bool {
 	a.mu.Lock()
+
 	defer a.mu.Unlock()
 
 	return a.booted
@@ -221,6 +237,7 @@ func (a *Application) Booted() bool {
 // The returned slice is a copy.
 func (a *Application) Providers() []provider.ServiceProvider {
 	a.mu.Lock()
+
 	defer a.mu.Unlock()
 
 	out := make([]provider.ServiceProvider, len(a.providers))
@@ -233,6 +250,7 @@ func (a *Application) Providers() []provider.ServiceProvider {
 // the given abstract key via provider.Provides.
 func (a *Application) HasProvider(abstract string) bool {
 	a.mu.Lock()
+
 	defer a.mu.Unlock()
 
 	if _, ok := a.deferredByKey[abstract]; ok {
@@ -256,6 +274,7 @@ func (a *Application) HasProvider(abstract string) bool {
 // or nil if none does.
 func (a *Application) ProviderFor(abstract string) provider.ServiceProvider {
 	a.mu.Lock()
+
 	defer a.mu.Unlock()
 
 	if p, ok := a.deferredByKey[abstract]; ok {
