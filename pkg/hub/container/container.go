@@ -34,15 +34,15 @@ type Binding struct {
 // lifecycle callbacks, and method invocation. All methods are safe for
 // concurrent use.
 type App struct {
-	mu sync.RWMutex
+	mu *sync.RWMutex
 
 	bindings        map[string]Binding
 	instances       map[string]any
 	aliases         map[string]string
 	abstractAliases map[string][]string
 	resolved        map[string]bool
-	buildStack      []string
-	with            []map[string]any
+	resolution      *resolution
+	parent          *App
 	contextual      map[string]map[string]any
 	tags            map[string][]string
 	extenders       map[string][]ExtenderFunc
@@ -57,9 +57,24 @@ type App struct {
 	afterCbs        map[string][]BindingCallback
 }
 
+type resolution struct {
+	buildStack []string
+	with       []map[string]any
+}
+
+func (c *App) withResolution(r *resolution) *App {
+	clone := *c
+	clone.resolution = r
+	if c.parent == nil {
+		clone.parent = c
+	}
+	return &clone
+}
+
 // New creates an empty, fully initialized App.
 func New() *App {
 	return &App{
+		mu:              new(sync.RWMutex),
 		bindings:        make(map[string]Binding),
 		instances:       make(map[string]any),
 		aliases:         make(map[string]string),
@@ -198,6 +213,10 @@ func (c *App) FactoryFunc(abstract string) func() (any, error) {
 
 // resolve is the core resolution engine.
 func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
+	if c.resolution == nil {
+		c = c.withResolution(&resolution{})
+	}
+
 	c.mu.Lock()
 
 	original := abstract
@@ -248,11 +267,11 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	}
 
 	// Circular dependency detection.
-	if slices.Contains(c.buildStack, abstract) {
+	if slices.Contains(c.resolution.buildStack, abstract) {
 		// Snapshot the stack while still holding the lock; otherwise
 		// the deferred fmt.Errorf read would race with concurrent
-		// resolve() calls mutating c.buildStack at lines 265/283.
-		stackSnapshot := slices.Clone(c.buildStack)
+		// resolve() calls mutating c.resolution.buildStack.
+		stackSnapshot := slices.Clone(c.resolution.buildStack)
 		c.mu.Unlock()
 
 		return nil, fmt.Errorf("%w: %q (build stack: %v)", ErrCircularDependency, abstract, stackSnapshot)
@@ -266,11 +285,11 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	afterGlobal := slices.Clone(c.globalAfterCbs)
 	afterSpecific := slices.Clone(c.afterCbs[abstract])
 
-	c.buildStack = append(c.buildStack, abstract)
+	c.resolution.buildStack = append(c.resolution.buildStack, abstract)
 
 	// Always push parameters (even nil) so nested Make calls get their own
 	// scope and don't inherit the parent's parameters.
-	c.with = append(c.with, parameters)
+	c.resolution.with = append(c.resolution.with, parameters)
 
 	c.mu.Unlock()
 
@@ -279,16 +298,19 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 
 	// Execute factory.
 	instance, err := factory(c)
+	if err == nil && instance == c {
+		instance = c.parent
+	}
 
 	c.mu.Lock()
 
 	// Pop build stack.
-	if len(c.buildStack) > 0 {
-		c.buildStack = c.buildStack[:len(c.buildStack)-1]
+	if len(c.resolution.buildStack) > 0 {
+		c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
 	}
 
-	if len(c.with) > 0 {
-		c.with = c.with[:len(c.with)-1]
+	if len(c.resolution.with) > 0 {
+		c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
 	}
 
 	c.mu.Unlock()
@@ -335,11 +357,11 @@ func (c *App) Parameters() map[string]any {
 
 	defer c.mu.RUnlock()
 
-	if len(c.with) == 0 {
+	if c.resolution == nil || len(c.resolution.with) == 0 {
 		return nil
 	}
 
-	return c.with[len(c.with)-1]
+	return c.resolution.with[len(c.resolution.with)-1]
 }
 
 // ---------- Aliases ----------
@@ -461,11 +483,11 @@ func (c *App) CurrentlyResolving() string {
 
 	defer c.mu.RUnlock()
 
-	if len(c.buildStack) == 0 {
+	if c.resolution == nil || len(c.resolution.buildStack) == 0 {
 		return ""
 	}
 
-	return c.buildStack[len(c.buildStack)-1]
+	return c.resolution.buildStack[len(c.resolution.buildStack)-1]
 }
 
 // ---------- Tagging ----------
@@ -692,11 +714,11 @@ func (c *App) AddContextualBinding(concrete, abstract string, implementation any
 // getContextualConcrete looks up a contextual binding for the given abstract
 // based on the current build stack. Caller must hold the lock.
 func (c *App) getContextualConcrete(abstract string) any {
-	if len(c.buildStack) == 0 {
+	if c.resolution == nil || len(c.resolution.buildStack) == 0 {
 		return nil
 	}
 
-	current := c.buildStack[len(c.buildStack)-1]
+	current := c.resolution.buildStack[len(c.resolution.buildStack)-1]
 
 	if bindings, ok := c.contextual[current]; ok {
 		if impl, ok := bindings[abstract]; ok {
@@ -801,8 +823,7 @@ func (c *App) Flush() {
 	c.aliases = make(map[string]string)
 	c.abstractAliases = make(map[string][]string)
 	c.resolved = make(map[string]bool)
-	c.buildStack = nil
-	c.with = nil
+	c.resolution = nil
 	c.contextual = make(map[string]map[string]any)
 	c.tags = make(map[string][]string)
 	c.extenders = make(map[string][]ExtenderFunc)
