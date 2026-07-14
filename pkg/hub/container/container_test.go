@@ -1223,4 +1223,3 @@ func TestConcurrentSingleton(t *testing.T) {
 		t.Fatalf("expected factory to run exactly once, ran %d times", counter)
 	}
 }
-
