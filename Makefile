@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-GO_IMAGE ?= golang:1.26.4-alpine
+GO_IMAGE ?= golang:1.26.5-alpine
 TASK_VERSION ?= latest
 
 export GO_IMAGE

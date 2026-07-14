@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${GO_IMAGE:-golang:1.26.4-alpine}
+    image: ${GO_IMAGE:-golang:1.26.5-alpine}
     volumes:
       - .:/workspace
       - ./infra/.cache/go/path/bin:/go/bin

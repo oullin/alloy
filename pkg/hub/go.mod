@@ -1,6 +1,6 @@
 module github.com/oullin/alloy/pkg/hub
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
