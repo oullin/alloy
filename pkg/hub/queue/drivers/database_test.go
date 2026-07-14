@@ -353,3 +353,58 @@ func TestDatabaseDriverConnectionName(t *testing.T) {
 		t.Errorf("expected 'my-db', got %q", drv.ConnectionName())
 	}
 }
+
+type errorExecer struct {
+	drivers.DBExecer
+	execFunc func(query string, args ...any) error
+}
+
+func (e *errorExecer) Exec(ctx context.Context, query string, args ...any) error {
+	if e.execFunc != nil {
+		return e.execFunc(query, args...)
+	}
+	return e.DBExecer.Exec(ctx, query, args...)
+}
+
+func TestDatabaseDriverFailFuncError(t *testing.T) {
+	t.Parallel()
+
+	dbMock := newMockDBExecer()
+	dbMock.addRow(int64(42), `{"uuid":"job-uuid-123"}`, int(0))
+
+	db := &errorExecer{
+		DBExecer: dbMock,
+		execFunc: func(query string, args ...any) error {
+			if strings.Contains(query, "INSERT INTO failed_jobs") {
+				return errors.New("database connection lost")
+			}
+			return nil
+		},
+	}
+
+	drv := drivers.NewDatabaseDriver(db, "jobs", "database")
+	job, err := drv.Pop(context.Background(), "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if job.UUID() != "job-uuid-123" {
+		t.Errorf("expected UUID 'job-uuid-123', got %q", job.UUID())
+	}
+
+	err = job.Fail(errors.New("job failed"))
+	if err == nil {
+		t.Fatal("expected error from Fail because failed_jobs insert failed, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "database connection lost") {
+		t.Errorf("expected original insert error, got %v", err)
+	}
+
+	for _, call := range dbMock.execCalls {
+		if strings.Contains(call.Query, "DELETE FROM jobs") {
+			t.Error("job was deleted even though failed_jobs insert failed")
+		}
+	}
+}
+

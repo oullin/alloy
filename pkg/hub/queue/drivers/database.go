@@ -184,9 +184,18 @@ func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 		return nil, err
 	}
 
+	var uuidStr string
+	if p, err := queue.UnmarshalPayload([]byte(payload)); err == nil && p != nil {
+		uuidStr = p.UUID
+	}
+	if uuidStr == "" {
+		uuidStr = queue.NewUUIDv4()
+	}
+
 	job := &dbJob{
 		BaseJob: BaseJob{
 			id:       fmt.Sprintf("%d", id),
+			uuid:     uuidStr,
 			payload:  []byte(payload),
 			queue:    queueName,
 			attempts: attempts,
@@ -213,10 +222,12 @@ func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 		}
 
 		errBytes, _ := json.Marshal(map[string]string{"exception": errMsg})
-		_ = d.db.Exec(ctx,
+		if insertErr := d.db.Exec(ctx,
 			"INSERT INTO failed_jobs (uuid, connection, queue, payload, exception) VALUES ($1,$2,$3,$4,$5)",
 			job.uuid, d.connection, queueName, payload, string(errBytes),
-		)
+		); insertErr != nil {
+			return fmt.Errorf("queue: failed to insert job into failed_jobs: %w", insertErr)
+		}
 
 		return job.deleteFunc()
 	}
