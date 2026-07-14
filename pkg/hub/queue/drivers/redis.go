@@ -70,8 +70,9 @@ type RedisClusterAware interface {
 
 // RedisDriver stores jobs in Redis lists and sorted sets.
 type RedisDriver struct {
-	client     RedisClient
-	connection string
+	client            RedisClient
+	connection        string
+	visibilityTimeout time.Duration
 
 	// isCluster caches the cluster-connection check result. It is nil
 	// the upstream null-coalescing assignment ($this->isCluster ??= ...).
@@ -111,6 +112,14 @@ if #jobs > 0 then
 end
 
 return #jobs
+`
+
+const popAndReserveLua = `
+local job = redis.call('rpop', KEYS[1])
+if job then
+	redis.call('zadd', KEYS[2], ARGV[1], job)
+end
+return job
 `
 
 func (d *RedisDriver) SetClusterClient(cluster bool) {
@@ -167,7 +176,20 @@ func hasHashTag(key string) bool {
 }
 
 func NewRedisDriver(client RedisClient, connection string) *RedisDriver {
-	return &RedisDriver{client: client, connection: connection}
+	return &RedisDriver{
+		client:            client,
+		connection:        connection,
+		visibilityTimeout: 60 * time.Second,
+	}
+}
+
+// SetVisibilityTimeout sets the visibility timeout for reserved jobs.
+func (d *RedisDriver) SetVisibilityTimeout(timeout time.Duration) {
+	d.visibilityTimeout = timeout
+}
+
+func (d *RedisDriver) migrateExpired(ctx context.Context, queueName string) {
+	_, _ = d.client.Eval(ctx, migrateDueLua, []string{d.reservedKey(queueName), d.queueKey(queueName)}, time.Now().Unix())
 }
 
 func (d *RedisDriver) Push(ctx context.Context, queueName string, payload []byte) (string, error) {
@@ -199,11 +221,32 @@ func (d *RedisDriver) PushMultiple(ctx context.Context, queueName string, payloa
 func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
 
 	d.migrateDue(ctx, queueName)
+	d.migrateExpired(ctx, queueName)
 
-	raw, err := d.client.RPop(ctx, d.queueKey(queueName))
+	score := float64(time.Now().Add(d.visibilityTimeout).Unix())
+	res, err := d.client.Eval(ctx, popAndReserveLua, []string{d.queueKey(queueName), d.reservedKey(queueName)}, score)
 
-	if err != nil || raw == "" {
-		return nil, queue.ErrNoJob
+	var raw string
+	var popped bool
+
+	if err == nil {
+		if resStr, ok := res.(string); ok && resStr != "" {
+			raw = resStr
+			popped = true
+		} else if res == nil {
+			return nil, queue.ErrNoJob
+		}
+	}
+
+	if !popped {
+		// Fallback to non-atomic RPop + ZAdd. This has a small race exposure
+		// if the worker crashes between RPop and ZAdd, which is documented.
+		var rpopErr error
+		raw, rpopErr = d.client.RPop(ctx, d.queueKey(queueName))
+		if rpopErr != nil || raw == "" {
+			return nil, queue.ErrNoJob
+		}
+		_ = d.client.ZAdd(ctx, d.reservedKey(queueName), score, raw)
 	}
 
 	p, pErr := queue.UnmarshalPayload([]byte(raw))
@@ -222,8 +265,15 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 			attempts:   attempts,
 		},
 	}
-	job.deleteFunc = func() error { return nil }
+	job.deleteFunc = func() error {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		return d.client.ZRem(cleanupCtx, d.reservedKey(queueName), raw)
+	}
 	job.releaseFunc = func(delay time.Duration) error {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
 		releasedPayload := []byte(raw)
 
 		// Unmarshal into a generic map rather than the strict queue.Payload
@@ -239,17 +289,26 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 		}
 
 		if delay > 0 {
-			_, err := d.PushDelayed(ctx, queueName, releasedPayload, delay)
+			_, err := d.PushDelayed(cleanupCtx, queueName, releasedPayload, delay)
 
-			return err
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := d.Push(cleanupCtx, queueName, releasedPayload)
+
+			if err != nil {
+				return err
+			}
 		}
 
-		_, err := d.Push(ctx, queueName, releasedPayload)
-
-		return err
+		return d.client.ZRem(cleanupCtx, d.reservedKey(queueName), raw)
 	}
 
 	job.failFunc = func(err error) error {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
 		errMsg := ""
 
 		if err != nil {
@@ -259,7 +318,11 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 		failed := map[string]string{"exception": errMsg, "payload": raw}
 		b, _ := json.Marshal(failed)
 
-		return d.client.LPush(ctx, d.failedKey(queueName), string(b))
+		if err := d.client.LPush(cleanupCtx, d.failedKey(queueName), string(b)); err != nil {
+			return err
+		}
+
+		return d.client.ZRem(cleanupCtx, d.reservedKey(queueName), raw)
 	}
 
 	return job, nil
@@ -276,7 +339,7 @@ func (d *RedisDriver) ClearQueue(ctx context.Context, queueName string) error {
 		return nil
 	}
 
-	_, err := deleter.Del(ctx, d.queueKey(queueName), d.delayedKey(queueName), d.failedKey(queueName))
+	_, err := deleter.Del(ctx, d.queueKey(queueName), d.delayedKey(queueName), d.reservedKey(queueName), d.failedKey(queueName))
 
 	return err
 }
@@ -289,9 +352,8 @@ func (d *RedisDriver) DelayedSize(ctx context.Context, queueName string) (int64,
 	return d.client.ZCard(ctx, d.delayedKey(queueName))
 }
 
-func (d *RedisDriver) ReservedSize(_ context.Context, _ string) (int64, error) {
-
-	return 0, nil
+func (d *RedisDriver) ReservedSize(ctx context.Context, queueName string) (int64, error) {
+	return d.client.ZCard(ctx, d.reservedKey(queueName))
 }
 
 func (d *RedisDriver) ConnectionName() string { return d.connection }
@@ -389,8 +451,20 @@ func (d *RedisDriver) DelayedJobs(ctx context.Context, queueName string) ([]queu
 // in-flight jobs the snapshot could enumerate. Distinct from a clean
 // empty slice so callers can decide between "no reserved jobs" and
 // "this driver cannot report reserved jobs".
-func (d *RedisDriver) ReservedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
-	return nil, queue.ErrNotSupported
+func (d *RedisDriver) ReservedJobs(ctx context.Context, queueName string) ([]queue.InspectedJob, error) {
+	ranger, ok := d.client.(RedisSortedSetRanger)
+
+	if !ok {
+		return nil, queue.ErrNotSupported
+	}
+
+	raws, err := ranger.ZRange(ctx, d.reservedKey(queueName), 0, -1)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return d.snapshotsFromPayloads(queueName, raws, nil), nil
 }
 
 // snapshotsFromPayloads converts raw Redis payload strings into
@@ -437,6 +511,7 @@ func (d *RedisDriver) migrateDue(ctx context.Context, queueName string) {
 	_, _ = d.client.Eval(ctx, migrateDueLua, []string{d.delayedKey(queueName), d.queueKey(queueName)}, time.Now().Unix())
 }
 
-func (d *RedisDriver) queueKey(q string) string   { return d.getRedisKey(q) }
-func (d *RedisDriver) delayedKey(q string) string { return d.getRedisKey(q) + ":delayed" }
-func (d *RedisDriver) failedKey(q string) string  { return d.getRedisKey(q) + ":failed" }
+func (d *RedisDriver) queueKey(q string) string    { return d.getRedisKey(q) }
+func (d *RedisDriver) delayedKey(q string) string  { return d.getRedisKey(q) + ":delayed" }
+func (d *RedisDriver) reservedKey(q string) string { return d.getRedisKey(q) + ":reserved" }
+func (d *RedisDriver) failedKey(q string) string   { return d.getRedisKey(q) + ":failed" }

@@ -218,6 +218,30 @@ func (c *mockRedisClient) Eval(_ context.Context, script string, keys []string, 
 		return nil, c.evalErr
 	}
 
+	if strings.Contains(script, "rpop") && strings.Contains(script, "zadd") {
+		if len(keys) < 2 || len(args) == 0 {
+			return nil, nil
+		}
+		listKey := keys[0]
+		reservedKey := keys[1]
+		score, ok := evalScore(args[0])
+		if !ok {
+			return nil, nil
+		}
+
+		list := c.lists[listKey]
+		if len(list) == 0 {
+			return nil, nil
+		}
+
+		val := list[len(list)-1]
+		c.lists[listKey] = list[:len(list)-1]
+
+		c.sorted[reservedKey] = append(c.sorted[reservedKey], sortedEntry{score: score, member: val})
+
+		return val, nil
+	}
+
 	if len(keys) < 2 || len(args) == 0 {
 		return int64(0), nil
 	}
