@@ -73,6 +73,7 @@ export default defineConfig({
 			'vite-plus/prefer-vite-plus-imports': 'error',
 		},
 		options: { typeAware: true, typeCheck: true },
+		ignorePatterns: ['.agents/**', '.claude/**'],
 	},
 	fmt: {
 		singleQuote: true,
