@@ -2,6 +2,8 @@ package container_test
 
 import (
 	"errors"
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/container"
@@ -1063,3 +1065,105 @@ func TestRefreshUpdatesTarget(t *testing.T) {
 		t.Fatalf("expected Dayle after refresh, got %v", updated)
 	}
 }
+
+func TestConcurrent(t *testing.T) {
+	c := newContainer()
+
+	// Define two graphs
+	// Graph 1: A -> B
+	c.Bind("A", func(cc *container.App) (any, error) {
+		return cc.Make("B")
+	}, false)
+	c.Bind("B", func(cc *container.App) (any, error) {
+		return "val-B", nil
+	}, false)
+
+	// Graph 2: X -> Y
+	c.Bind("X", func(cc *container.App) (any, error) {
+		return cc.Make("Y")
+	}, false)
+	c.Bind("Y", func(cc *container.App) (any, error) {
+		return "val-Y", nil
+	}, false)
+
+	// Contextual bindings for concurrent goroutines
+	// Concrete type "client1" wants dependency "dep" as "val1"
+	// Concrete type "client2" wants dependency "dep" as "val2"
+	c.AddContextualBinding("client1", "dep", "val1")
+	c.AddContextualBinding("client2", "dep", "val2")
+
+	// Resolvers that check contextual binding based on stack
+	c.Bind("client1", func(cc *container.App) (any, error) {
+		return cc.Make("dep")
+	}, false)
+	c.Bind("client2", func(cc *container.App) (any, error) {
+		return cc.Make("dep")
+	}, false)
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 100)
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// Resolve Graph 1
+			valA, err := c.Make("A")
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving A: %w", err)
+				return
+			}
+			if valA != "val-B" {
+				errs <- fmt.Errorf("expected val-B, got %v", valA)
+				return
+			}
+
+			// Resolve client1 to check contextual binding
+			valC1, err := c.Make("client1")
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving client1: %w", err)
+				return
+			}
+			if valC1 != "val1" {
+				errs <- fmt.Errorf("expected contextual binding val1, got %v", valC1)
+				return
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// Resolve Graph 2
+			valX, err := c.Make("X")
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving X: %w", err)
+				return
+			}
+			if valX != "val-Y" {
+				errs <- fmt.Errorf("expected val-Y, got %v", valX)
+				return
+			}
+
+			// Resolve client2 to check contextual binding
+			valC2, err := c.Make("client2")
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving client2: %w", err)
+				return
+			}
+			if valC2 != "val2" {
+				errs <- fmt.Errorf("expected contextual binding val2, got %v", valC2)
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
