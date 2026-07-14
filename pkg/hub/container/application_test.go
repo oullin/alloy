@@ -456,3 +456,66 @@ var _ provider.ServiceProvider = (*fakeProvider)(nil)
 var _ provider.Bootable = (*fakeProvider)(nil)
 var _ provider.Deferred = (*deferredProvider)(nil)
 var _ provider.DependsOn = (*depProvider)(nil)
+
+type reentrantDeferredProvider struct {
+	app      *container.Application
+	register func()
+}
+
+func (p *reentrantDeferredProvider) Register()          { p.register() }
+func (p *reentrantDeferredProvider) Provides() []string { return []string{"deferred-key"} }
+func (p *reentrantDeferredProvider) Deferred() bool     { return true }
+
+type reentrantBootableProvider struct {
+	app  *container.Application
+	boot func()
+}
+
+func (p *reentrantBootableProvider) Register() {}
+func (p *reentrantBootableProvider) Boot()     { p.boot() }
+
+func TestApplicationReentrancyDeferred(t *testing.T) {
+	app := container.NewApplication()
+
+	dp := &reentrantDeferredProvider{
+		app: app,
+		register: func() {
+			app.Singleton("deferred-key", func(cc *container.App) (any, error) {
+				return "deferred-val", nil
+			})
+			_, _ = app.Make("other-key")
+		},
+	}
+
+	app.Singleton("other-key", func(cc *container.App) (any, error) {
+		return "other-val", nil
+	})
+
+	app.Register(dp)
+
+	val, err := app.Make("deferred-key")
+	if err != nil {
+		t.Fatalf("unexpected error resolving deferred-key: %v", err)
+	}
+	if val != "deferred-val" {
+		t.Fatalf("expected deferred-val, got %v", val)
+	}
+}
+
+func TestApplicationReentrancyBoot(t *testing.T) {
+	app := container.NewApplication()
+
+	bp := &reentrantBootableProvider{
+		app: app,
+		boot: func() {
+			_, _ = app.Make("key")
+		},
+	}
+
+	app.Singleton("key", func(cc *container.App) (any, error) {
+		return "val", nil
+	})
+
+	app.Register(bp)
+	app.Boot()
+}

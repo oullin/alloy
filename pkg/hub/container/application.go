@@ -29,6 +29,7 @@ type Application struct {
 	deferredByKey map[string]provider.ServiceProvider
 	registered    map[provider.ServiceProvider]bool
 	booted        bool
+	inFlight      map[provider.ServiceProvider]*sync.WaitGroup
 }
 
 // NewApplication creates an Application backed by a fresh App.
@@ -37,6 +38,7 @@ func NewApplication() *Application {
 		App:           New(),
 		deferredByKey: make(map[string]provider.ServiceProvider),
 		registered:    make(map[provider.ServiceProvider]bool),
+		inFlight:      make(map[provider.ServiceProvider]*sync.WaitGroup),
 	}
 }
 
@@ -49,51 +51,38 @@ func NewApplication() *Application {
 // tracked key is resolved through Application.Make.
 func (a *Application) Register(p provider.ServiceProvider) {
 	a.mu.Lock()
-	defer a.mu.Unlock()
 
 	if isDeferred(p) {
-		a.recordDeferred(p)
-
-		return
+		provides, ok := p.(provider.Provides)
+		if ok {
+			keys := provides.Provides()
+			if len(keys) > 0 {
+				a.providers = append(a.providers, p)
+				for _, key := range keys {
+					a.deferredByKey[key] = p
+				}
+				a.mu.Unlock()
+				return
+			}
+		}
 	}
 
-	a.doRegister(p)
-}
-
-// doRegister performs the actual provider registration.
-func (a *Application) doRegister(p provider.ServiceProvider) {
 	if a.registered[p] {
+		a.mu.Unlock()
 		return
 	}
 
-	p.Register()
 	a.providers = append(a.providers, p)
 	a.registered[p] = true
-}
+	isBooted := a.booted
+	a.mu.Unlock()
 
-// recordDeferred remembers the provider's keys without calling Register.
-// The provider IS appended to a.providers so introspection sees it.
-func (a *Application) recordDeferred(p provider.ServiceProvider) {
-	provides, ok := p.(provider.Provides)
+	p.Register()
 
-	if !ok {
-		a.doRegister(p)
-
-		return
-	}
-
-	keys := provides.Provides()
-
-	if len(keys) == 0 {
-		a.doRegister(p)
-
-		return
-	}
-
-	a.providers = append(a.providers, p)
-
-	for _, key := range keys {
-		a.deferredByKey[key] = p
+	if isBooted {
+		if b, ok := p.(provider.Bootable); ok {
+			b.Boot()
+		}
 	}
 }
 
@@ -101,30 +90,46 @@ func (a *Application) recordDeferred(p provider.ServiceProvider) {
 // and removes its tracking entries.
 func (a *Application) flushDeferredFor(abstract string) {
 	a.mu.Lock()
-	defer a.mu.Unlock()
 
 	p, ok := a.deferredByKey[abstract]
-
 	if !ok {
+		a.mu.Unlock()
 		return
 	}
 
 	if a.registered[p] {
+		wg, running := a.inFlight[p]
+		a.mu.Unlock()
+		if running {
+			wg.Wait()
+		}
 		return
 	}
 
-	if provides, ok := p.(provider.Provides); ok {
-		for _, k := range provides.Provides() {
-			delete(a.deferredByKey, k)
-		}
-	}
-
-	p.Register()
 	a.registered[p] = true
 
-	// If the application has already booted, give the freshly-registered
-	// provider a chance to Boot too.
-	if a.booted {
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	a.inFlight[p] = wg
+
+	isBooted := a.booted
+	a.mu.Unlock()
+
+	defer func() {
+		a.mu.Lock()
+		delete(a.inFlight, p)
+		if provides, ok := p.(provider.Provides); ok {
+			for _, k := range provides.Provides() {
+				delete(a.deferredByKey, k)
+			}
+		}
+		a.mu.Unlock()
+		wg.Done()
+	}()
+
+	p.Register()
+
+	if isBooted {
 		if b, ok := p.(provider.Bootable); ok {
 			b.Boot()
 		}
@@ -176,23 +181,31 @@ func (a *Application) RegisterMany(providers []provider.ServiceProvider) {
 // NOT booted until their first Make() call. Idempotent.
 func (a *Application) Boot() {
 	a.mu.Lock()
-	defer a.mu.Unlock()
 
 	if a.booted {
+		a.mu.Unlock()
 		return
 	}
 
-	for _, p := range a.providers {
-		if !a.registered[p] {
-			continue // deferred-and-not-yet-flushed
-		}
+	a.booted = true
 
+	// Snapshot currently registered providers to boot outside the lock
+	providers := make([]provider.ServiceProvider, len(a.providers))
+	copy(providers, a.providers)
+
+	var bootedProviders []provider.ServiceProvider
+	for _, p := range providers {
+		if a.registered[p] {
+			bootedProviders = append(bootedProviders, p)
+		}
+	}
+	a.mu.Unlock()
+
+	for _, p := range bootedProviders {
 		if b, ok := p.(provider.Bootable); ok {
 			b.Boot()
 		}
 	}
-
-	a.booted = true
 }
 
 // Booted reports whether Boot has been called.

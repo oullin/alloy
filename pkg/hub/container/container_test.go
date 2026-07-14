@@ -3,6 +3,7 @@ package container_test
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -1221,5 +1222,173 @@ func TestConcurrentSingleton(t *testing.T) {
 	}
 	if atomic.LoadInt64(&counter) != 1 {
 		t.Fatalf("expected factory to run exactly once, ran %d times", counter)
+	}
+}
+
+type storedContainerService struct {
+	cc *container.App
+}
+
+func TestStoredCloneEscape(t *testing.T) {
+	c := newContainer()
+
+	c.Bind("service", func(cc *container.App) (any, error) {
+		return &storedContainerService{cc: cc}, nil
+	}, false)
+
+	// Two-level graph for Make on the stored container: X -> Y
+	c.Bind("X", func(cc *container.App) (any, error) {
+		return cc.Make("Y")
+	}, false)
+	c.Bind("Y", func(cc *container.App) (any, error) {
+		return "val-Y", nil
+	}, false)
+
+	// Contextual binding to verify
+	c.AddContextualBinding("clientX", "depX", "valX")
+	c.Bind("clientX", func(cc *container.App) (any, error) {
+		return cc.Make("depX")
+	}, false)
+
+	// Resolve the service first (this executes the factory and populates the stored reference cc)
+	sVal, err := c.Make("service")
+	if err != nil {
+		t.Fatalf("failed to resolve service: %v", err)
+	}
+	service := sVal.(*storedContainerService)
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 100)
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// Call Make("X") through the stored reference
+			val, err := service.cc.Make("X")
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error on stored Make: %w", err)
+				return
+			}
+			if val != "val-Y" {
+				errs <- fmt.Errorf("expected val-Y, got %v", val)
+				return
+			}
+
+			// Call Make("clientX") to verify contextual bindings are correct and not cross-contaminated
+			valCtx, err := service.cc.Make("clientX")
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error on stored contextual Make: %w", err)
+				return
+			}
+			if valCtx != "valX" {
+				errs <- fmt.Errorf("expected valX, got %v", valCtx)
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
+func TestConcurrentMakeAndFlush(t *testing.T) {
+	c := newContainer()
+
+	c.Bind("A", func(cc *container.App) (any, error) {
+		return "val-A", nil
+	}, false)
+
+	var wg sync.WaitGroup
+	stop := make(chan struct{})
+
+	// Loop 1: Concurrently call Make("A")
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					_, _ = c.Make("A")
+				}
+			}
+		}()
+	}
+
+	// Loop 2: Concurrently call Flush()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+				c.Flush()
+			}
+		}
+	}()
+
+	// Run for 100 milliseconds
+	time.Sleep(100 * time.Millisecond)
+	close(stop)
+	wg.Wait()
+}
+
+func TestSingleFlightPanicSafety(t *testing.T) {
+	c := newContainer()
+
+	var entered sync.WaitGroup
+	var resume sync.WaitGroup
+	entered.Add(1)
+	resume.Add(1)
+
+	c.Singleton("panic-singleton", func(cc *container.App) (any, error) {
+		entered.Done()
+		resume.Wait()
+		panic("intentional factory panic")
+	})
+
+	var wg sync.WaitGroup
+	var errWaiter error
+
+	// Leader goroutine
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer func() {
+			_ = recover() // recover from the intentional panic
+		}()
+		_, _ = c.Make("panic-singleton")
+	}()
+
+	// Waiter goroutine
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		entered.Wait()
+		// Now call Make concurrently, it will block in single-flight
+		_, errWaiter = c.Make("panic-singleton")
+	}()
+
+	// Let them both get in position
+	time.Sleep(10 * time.Millisecond)
+	resume.Done()
+
+	wg.Wait()
+
+	if errWaiter == nil {
+		t.Fatal("expected waiter goroutine to receive non-nil error after leader panicked, but got nil")
+	}
+	if !strings.Contains(errWaiter.Error(), "factory panicked") {
+		t.Fatalf("expected error containing 'factory panicked', got: %v", errWaiter)
 	}
 }
