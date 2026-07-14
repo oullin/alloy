@@ -1,6 +1,6 @@
 module alloy.dev/inertia-demo
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/oullin/alloy/pkg/hub v0.0.0
