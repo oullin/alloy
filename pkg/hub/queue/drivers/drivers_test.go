@@ -124,7 +124,11 @@ func newMockRedisClient() *mockRedisClient {
 	}
 }
 
-func (c *mockRedisClient) LPush(_ context.Context, key string, values ...any) error {
+func (c *mockRedisClient) LPush(ctx context.Context, key string, values ...any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -140,7 +144,11 @@ func (c *mockRedisClient) LPush(_ context.Context, key string, values ...any) er
 	return nil
 }
 
-func (c *mockRedisClient) RPop(_ context.Context, key string) (string, error) {
+func (c *mockRedisClient) RPop(ctx context.Context, key string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -157,7 +165,11 @@ func (c *mockRedisClient) RPop(_ context.Context, key string) (string, error) {
 	return val, nil
 }
 
-func (c *mockRedisClient) ZAdd(_ context.Context, key string, score float64, member string) error {
+func (c *mockRedisClient) ZAdd(ctx context.Context, key string, score float64, member string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -167,7 +179,11 @@ func (c *mockRedisClient) ZAdd(_ context.Context, key string, score float64, mem
 	return nil
 }
 
-func (c *mockRedisClient) ZRangeByScore(_ context.Context, key string, min, max float64) ([]string, error) {
+func (c *mockRedisClient) ZRangeByScore(ctx context.Context, key string, min, max float64) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -183,7 +199,11 @@ func (c *mockRedisClient) ZRangeByScore(_ context.Context, key string, min, max 
 	return result, nil
 }
 
-func (c *mockRedisClient) ZRem(_ context.Context, key string, members ...any) error {
+func (c *mockRedisClient) ZRem(ctx context.Context, key string, members ...any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -207,7 +227,11 @@ func (c *mockRedisClient) ZRem(_ context.Context, key string, members ...any) er
 	return nil
 }
 
-func (c *mockRedisClient) Eval(_ context.Context, script string, keys []string, args ...any) (any, error) {
+func (c *mockRedisClient) Eval(ctx context.Context, script string, keys []string, args ...any) (any, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -288,7 +312,11 @@ func evalScore(value any) (float64, bool) {
 	}
 }
 
-func (c *mockRedisClient) LLen(_ context.Context, key string) (int64, error) {
+func (c *mockRedisClient) LLen(ctx context.Context, key string) (int64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -296,7 +324,11 @@ func (c *mockRedisClient) LLen(_ context.Context, key string) (int64, error) {
 	return int64(len(c.lists[key])), nil
 }
 
-func (c *mockRedisClient) ZCard(_ context.Context, key string) (int64, error) {
+func (c *mockRedisClient) ZCard(ctx context.Context, key string) (int64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()

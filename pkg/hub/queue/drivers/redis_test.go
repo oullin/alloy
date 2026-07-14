@@ -616,6 +616,33 @@ func TestRedisDriverReserve(t *testing.T) {
 	if reservedSize2 != 0 {
 		t.Errorf("expected reserved size 0 after delete, got %d", reservedSize2)
 	}
+
+	// Test Fail behaves correctly (removing from reserved, pushing to failed)
+	_, _ = drv.Push(ctx, "default", []byte("fail-payload"))
+	job2, err := drv.Pop(ctx, "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reservedSize3, _ := drv.ReservedSize(ctx, "default")
+	if reservedSize3 != 1 {
+		t.Errorf("expected reserved size 1, got %d", reservedSize3)
+	}
+
+	err = job2.Fail(errors.New("some error"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reservedSize4, _ := drv.ReservedSize(ctx, "default")
+	if reservedSize4 != 0 {
+		t.Errorf("expected reserved size 0 after fail, got %d", reservedSize4)
+	}
+
+	failedSize, _ := client.LLen(ctx, "queues:default:failed")
+	if failedSize != 1 {
+		t.Errorf("expected 1 failed entry, got %d", failedSize)
+	}
 }
 
 func TestRedisDriverReclaim(t *testing.T) {
@@ -669,5 +696,16 @@ func TestRedisDriverShutdown(t *testing.T) {
 	err = job.Release(0)
 	if err != nil {
 		t.Errorf("expected Release to succeed even if Pop ctx cancelled, got: %v", err)
+	}
+
+	// Verify that after Release the job is back in ready and gone from reserved
+	readySize, _ := drv.Size(context.Background(), "default")
+	if readySize != 1 {
+		t.Errorf("expected ready size 1, got %d", readySize)
+	}
+
+	reservedSize, _ := drv.ReservedSize(context.Background(), "default")
+	if reservedSize != 0 {
+		t.Errorf("expected reserved size 0, got %d", reservedSize)
 	}
 }

@@ -69,6 +69,23 @@ type RedisClusterAware interface {
 }
 
 // RedisDriver stores jobs in Redis lists and sorted sets.
+//
+// At-Least-Once Semantics:
+// The driver provides at-least-once delivery guarantees using a reserved sorted set
+// for job visibility timeout. When a worker pops a job, the job is atomically moved to
+// the reserved set. If the worker crashes or fails to delete/release the job within
+// the visibility timeout, the job is reclaimed and re-queued.
+//
+// Duplicate Delivery Tradeoff:
+// A job can be delivered more than once if:
+//  1. A handler takes longer to run than the visibility timeout.
+//  2. The worker crashes in the brief window between pushing a job back to the list
+//     (release/fail) and removing it from the reserved set.
+//
+// Therefore, handlers running on this driver should be designed to be idempotent.
+// Choosing the right visibility timeout is a tradeoff: a timeout shorter than the
+// longest handler runtime leads to double processing, while a timeout too long results
+// in slow reclaim of jobs after worker crashes.
 type RedisDriver struct {
 	client            RedisClient
 	connection        string
@@ -121,6 +138,12 @@ if job then
 end
 return job
 `
+
+const defaultCleanupTimeout = 5 * time.Second
+
+func cleanupContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), defaultCleanupTimeout)
+}
 
 func (d *RedisDriver) SetClusterClient(cluster bool) {
 	v := cluster
@@ -184,6 +207,8 @@ func NewRedisDriver(client RedisClient, connection string) *RedisDriver {
 }
 
 // SetVisibilityTimeout sets the visibility timeout for reserved jobs.
+// Tradeoff: a timeout shorter than the longest handler runtime leads to double processing,
+// while a timeout too long results in slow reclaim after worker crashes.
 func (d *RedisDriver) SetVisibilityTimeout(timeout time.Duration) {
 	d.visibilityTimeout = timeout
 }
@@ -230,23 +255,49 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	var popped bool
 
 	if err == nil {
-		if resStr, ok := res.(string); ok && resStr != "" {
-			raw = resStr
-			popped = true
-		} else if res == nil {
+		switch v := res.(type) {
+		case string:
+			if v != "" {
+				raw = v
+				popped = true
+			}
+		case []byte:
+			if len(v) > 0 {
+				raw = string(v)
+				popped = true
+			}
+		case nil:
 			return nil, queue.ErrNoJob
 		}
 	}
 
+	var shouldFallback bool
+	if err != nil {
+		shouldFallback = true
+	} else if res != nil {
+		switch res.(type) {
+		case int, int32, int64:
+			shouldFallback = true
+		}
+	}
+
 	if !popped {
-		// Fallback to non-atomic RPop + ZAdd. This has a small race exposure
-		// if the worker crashes between RPop and ZAdd, which is documented.
-		var rpopErr error
-		raw, rpopErr = d.client.RPop(ctx, d.queueKey(queueName))
-		if rpopErr != nil || raw == "" {
+		if shouldFallback {
+			// Fallback to non-atomic RPop + ZAdd. Triggered by client implementations that
+			// lack Lua script execution support.
+			// Exposure: A worker crash between RPop and ZAdd, or after a failed ZAdd,
+			// will cause the job to be lost (at-most-once semantics during this window).
+			var rpopErr error
+			raw, rpopErr = d.client.RPop(ctx, d.queueKey(queueName))
+			if rpopErr != nil || raw == "" {
+				return nil, queue.ErrNoJob
+			}
+			if zerr := d.client.ZAdd(ctx, d.reservedKey(queueName), score, raw); zerr != nil {
+				// Proceed processing the job, but it is unreserved (at-most-once) if the worker crashes.
+			}
+		} else {
 			return nil, queue.ErrNoJob
 		}
-		_ = d.client.ZAdd(ctx, d.reservedKey(queueName), score, raw)
 	}
 
 	p, pErr := queue.UnmarshalPayload([]byte(raw))
@@ -266,12 +317,12 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 		},
 	}
 	job.deleteFunc = func() error {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		cleanupCtx, cancel := cleanupContext()
 		defer cancel()
 		return d.client.ZRem(cleanupCtx, d.reservedKey(queueName), raw)
 	}
 	job.releaseFunc = func(delay time.Duration) error {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		cleanupCtx, cancel := cleanupContext()
 		defer cancel()
 
 		releasedPayload := []byte(raw)
@@ -306,7 +357,7 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	}
 
 	job.failFunc = func(err error) error {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		cleanupCtx, cancel := cleanupContext()
 		defer cancel()
 
 		errMsg := ""
@@ -318,8 +369,8 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 		failed := map[string]string{"exception": errMsg, "payload": raw}
 		b, _ := json.Marshal(failed)
 
-		if err := d.client.LPush(cleanupCtx, d.failedKey(queueName), string(b)); err != nil {
-			return err
+		if pushErr := d.client.LPush(cleanupCtx, d.failedKey(queueName), string(b)); pushErr != nil {
+			return pushErr
 		}
 
 		return d.client.ZRem(cleanupCtx, d.reservedKey(queueName), raw)
@@ -446,11 +497,9 @@ func (d *RedisDriver) DelayedJobs(ctx context.Context, queueName string) ([]queu
 	return d.snapshotsFromPayloads(queueName, raws, nil), nil
 }
 
-// ReservedJobs returns ErrNotSupported on the default Redis layout —
-// the current driver does not maintain a reserved-set, so there are no
-// in-flight jobs the snapshot could enumerate. Distinct from a clean
-// empty slice so callers can decide between "no reserved jobs" and
-// "this driver cannot report reserved jobs".
+// ReservedJobs returns the raw payloads currently reserved (in-flight) in the
+// reserved sorted set for queueName. The driver requires its client to satisfy
+// the optional RedisSortedSetRanger interface; otherwise it returns ErrNotSupported.
 func (d *RedisDriver) ReservedJobs(ctx context.Context, queueName string) ([]queue.InspectedJob, error) {
 	ranger, ok := d.client.(RedisSortedSetRanger)
 
