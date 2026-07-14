@@ -72,9 +72,10 @@ type mockSQSClient struct {
 }
 
 type mockSQSMsg struct {
-	id      string
-	receipt string
-	body    string
+	id         string
+	receipt    string
+	body       string
+	attributes map[string]string
 }
 
 // --- Mock Beanstalkd Client ---
@@ -89,6 +90,7 @@ type mockBeanstalkdClient struct {
 	buryErr    error
 	putErr     error
 	stats      map[string]map[string]string
+	jobStats   map[uint64]map[string]string
 	lastPut    struct {
 		tube     string
 		priority uint32
@@ -456,6 +458,18 @@ func newMockSQSClient() *mockSQSClient {
 	}
 }
 
+func (c *mockSQSClient) PushMessageWithAttributes(queueURL string, body string, attributes map[string]string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.nextMsgID++
+	c.messages[queueURL] = append(c.messages[queueURL], mockSQSMsg{
+		id:         fmt.Sprintf("msg-%d", c.nextMsgID),
+		receipt:    fmt.Sprintf("receipt-%d", c.nextMsgID),
+		body:       body,
+		attributes: attributes,
+	})
+}
+
 func (c *mockSQSClient) SendMessage(_ context.Context, queueURL string, body string, _ time.Duration) (string, error) {
 	c.mu.Lock()
 
@@ -529,6 +543,7 @@ func (c *mockSQSClient) ReceiveMessage(_ context.Context, queueURL string, maxMe
 			MessageID:     msgs[i].id,
 			ReceiptHandle: msgs[i].receipt,
 			Body:          msgs[i].body,
+			Attributes:    msgs[i].attributes,
 		}
 	}
 
@@ -555,8 +570,9 @@ func (c *mockSQSClient) GetQueueAttributes(_ context.Context, _ string, _ []stri
 
 func newMockBeanstalkdClient() *mockBeanstalkdClient {
 	return &mockBeanstalkdClient{
-		tubes: make(map[string][]mockBeanstalkdJob),
-		stats: make(map[string]map[string]string),
+		tubes:    make(map[string][]mockBeanstalkdJob),
+		stats:    make(map[string]map[string]string),
+		jobStats: make(map[uint64]map[string]string),
 	}
 }
 
@@ -622,4 +638,16 @@ func (c *mockBeanstalkdClient) StatsTube(_ context.Context, tube string) (map[st
 	}
 
 	return map[string]string{}, nil
+}
+
+func (c *mockBeanstalkdClient) StatsJob(_ context.Context, id uint64) (map[string]string, error) {
+	c.mu.Lock()
+
+	defer c.mu.Unlock()
+
+	if s, ok := c.jobStats[id]; ok {
+		return s, nil
+	}
+
+	return nil, errors.New("not found")
 }

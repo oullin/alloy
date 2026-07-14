@@ -206,22 +206,36 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 		return nil, queue.ErrNoJob
 	}
 
+	p, pErr := queue.UnmarshalPayload([]byte(raw))
+	var attempts int
+	if pErr == nil && p != nil {
+		attempts = p.Tries
+	}
+
 	job := &redisJob{
 		BaseJob: BaseJob{
 			payload:    []byte(raw),
 			queue:      queueName,
 			connection: d.connection,
+			attempts:   attempts,
 		},
 	}
 	job.deleteFunc = func() error { return nil }
 	job.releaseFunc = func(delay time.Duration) error {
+		releasedPayload := []byte(raw)
+		if pErr == nil && p != nil {
+			p.Tries = job.attempts + 1
+			if updatedRaw, err := json.Marshal(p); err == nil {
+				releasedPayload = updatedRaw
+			}
+		}
 		if delay > 0 {
-			_, err := d.PushDelayed(ctx, queueName, []byte(raw), delay)
+			_, err := d.PushDelayed(ctx, queueName, releasedPayload, delay)
 
 			return err
 		}
 
-		_, err := d.Push(ctx, queueName, []byte(raw))
+		_, err := d.Push(ctx, queueName, releasedPayload)
 
 		return err
 	}

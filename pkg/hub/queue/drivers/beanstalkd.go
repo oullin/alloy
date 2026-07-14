@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
@@ -133,12 +134,34 @@ func (d *BeanstalkdDriver) Pop(ctx context.Context, queueName string) (queue.Job
 		return nil, queue.ErrNoJob
 	}
 
+	var attempts int
+	var gotAttempts bool
+	if statter, ok := d.client.(interface {
+		StatsJob(ctx context.Context, id uint64) (map[string]string, error)
+	}); ok {
+		if stats, err := statter.StatsJob(ctx, id); err == nil {
+			if reservesStr, ok := stats["reserves"]; ok {
+				if val, err := strconv.Atoi(reservesStr); err == nil {
+					attempts = val
+					gotAttempts = true
+				}
+			}
+		}
+	}
+	if !gotAttempts {
+		p, pErr := queue.UnmarshalPayload(body)
+		if pErr == nil && p != nil {
+			attempts = p.Tries
+		}
+	}
+
 	job := &bsJob{
 		BaseJob: BaseJob{
 			id:         toString(id),
 			payload:    body,
 			queue:      tube,
 			connection: d.connection,
+			attempts:   attempts,
 		},
 	}
 	job.deleteFunc = func() error {

@@ -303,3 +303,38 @@ func TestSQSDriverSizeError(t *testing.T) {
 		t.Errorf("expected 0 on error, got %d", n)
 	}
 }
+
+func TestSQSDriverAttemptsTracking(t *testing.T) {
+	t.Parallel()
+
+	// Test 1: SQS system attribute ApproximateReceiveCount
+	client := newMockSQSClient()
+	drv := drivers.NewSQSDriver(client, map[string]string{"default": "https://sqs/default"}, "sqs")
+
+	client.PushMessageWithAttributes("https://sqs/default", `{"tries":0}`, map[string]string{
+		"ApproximateReceiveCount": "4",
+	})
+
+	job, err := drv.Pop(context.Background(), "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if job.Attempts() != 4 {
+		t.Errorf("expected 4 attempts from system attribute, got %d", job.Attempts())
+	}
+
+	// Test 2: Fallback to payload tries
+	client2 := newMockSQSClient()
+	drv2 := drivers.NewSQSDriver(client2, map[string]string{"default": "https://sqs/default"}, "sqs")
+
+	_, _ = drv2.Push(context.Background(), "default", []byte(`{"tries":7}`))
+
+	job2, err := drv2.Pop(context.Background(), "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if job2.Attempts() != 7 {
+		t.Errorf("expected 7 attempts from payload fallback, got %d", job2.Attempts())
+	}
+}
+

@@ -531,3 +531,38 @@ func TestRedisDriverInspectionRangerErrorPropagates(t *testing.T) {
 		t.Errorf("DelayedJobs: want %v, got %v", wantErr, err)
 	}
 }
+
+func TestRedisDriverAttemptsTracking(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	_, err := drv.Push(context.Background(), "default", []byte(`{"uuid":"t1","tries":0}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job, err := drv.Pop(context.Background(), "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if job.Attempts() != 0 {
+		t.Errorf("expected 0 attempts, got %d", job.Attempts())
+	}
+
+	err = job.Release(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job2, err := drv.Pop(context.Background(), "default")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if job2.Attempts() != 1 {
+		t.Errorf("expected 1 attempt after release, got %d", job2.Attempts())
+	}
+}
+

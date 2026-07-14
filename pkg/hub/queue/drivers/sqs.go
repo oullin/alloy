@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,6 +48,7 @@ type SQSMessage struct {
 	MessageID     string
 	ReceiptHandle string
 	Body          string
+	Attributes    map[string]string
 }
 
 // SQSDriver enqueues jobs via AWS SQS.
@@ -194,12 +196,28 @@ func (d *SQSDriver) Pop(ctx context.Context, queueName string) (queue.Job, error
 	msg := msgs[0]
 	queueURL := d.url(queueName)
 
+	var attempts int
+	if msg.Attributes != nil {
+		if valStr, ok := msg.Attributes["ApproximateReceiveCount"]; ok {
+			if val, err := strconv.Atoi(valStr); err == nil {
+				attempts = val
+			}
+		}
+	}
+	if attempts == 0 {
+		p, pErr := queue.UnmarshalPayload([]byte(msg.Body))
+		if pErr == nil && p != nil {
+			attempts = p.Tries
+		}
+	}
+
 	job := &sqsJob{
 		BaseJob: BaseJob{
 			id:         msg.MessageID,
 			payload:    []byte(msg.Body),
 			queue:      queueName,
 			connection: d.connection,
+			attempts:   attempts,
 		},
 	}
 	job.deleteFunc = func() error {
