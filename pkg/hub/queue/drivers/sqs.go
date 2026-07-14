@@ -16,6 +16,12 @@ type SQSClient interface {
 	// SendMessageBatch sends multiple messages. Returns a slice of message IDs.
 	SendMessageBatch(ctx context.Context, queueURL string, bodies []string) ([]string, error)
 	// ReceiveMessage polls for messages. Returns up to maxMessages.
+	//
+	// Note: Implementations should request the ApproximateReceiveCount
+	// system attribute in their receive call and populate the Attributes
+	// map of the returned SQSMessage. Without it, the driver falls back
+	// to the payload tries count, which SQS cannot increment on release
+	// (release is a visibility change, the body is immutable).
 	ReceiveMessage(ctx context.Context, queueURL string, maxMessages int, waitSeconds int) ([]SQSMessage, error)
 	// DeleteMessage deletes a message by receipt handle.
 	DeleteMessage(ctx context.Context, queueURL string, receiptHandle string) error
@@ -48,7 +54,11 @@ type SQSMessage struct {
 	MessageID     string
 	ReceiptHandle string
 	Body          string
-	Attributes    map[string]string
+	// Attributes contains message system attributes (e.g. ApproximateReceiveCount).
+	// SQSClient implementations should populate this with system attributes
+	// requested during ReceiveMessage. If ApproximateReceiveCount is missing,
+	// the driver falls back to the payload tries count.
+	Attributes map[string]string
 }
 
 // SQSDriver enqueues jobs via AWS SQS.

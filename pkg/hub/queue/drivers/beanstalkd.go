@@ -42,6 +42,15 @@ type BeanstalkdPeeker interface {
 	PeekDelayed(ctx context.Context, tube string) (uint64, []byte, error)
 }
 
+// BeanstalkdJobStatter is an optional interface implemented by BeanstalkdClient
+// implementations that support retrieving stats for a specific job (the "stats-job"
+// protocol command). The BeanstalkdDriver probes for this interface via
+// a type assertion in Pop to extract the reserves count; without it the driver
+// falls back to the payload tries count.
+type BeanstalkdJobStatter interface {
+	StatsJob(ctx context.Context, id uint64) (map[string]string, error)
+}
+
 // BeanstalkdDriver enqueues jobs via a Beanstalkd client. It is the
 // Two knobs are tunable after construction:
 //
@@ -136,9 +145,7 @@ func (d *BeanstalkdDriver) Pop(ctx context.Context, queueName string) (queue.Job
 
 	var attempts int
 	var gotAttempts bool
-	if statter, ok := d.client.(interface {
-		StatsJob(ctx context.Context, id uint64) (map[string]string, error)
-	}); ok {
+	if statter, ok := d.client.(BeanstalkdJobStatter); ok {
 		if stats, err := statter.StatsJob(ctx, id); err == nil {
 			if reservesStr, ok := stats["reserves"]; ok {
 				if val, err := strconv.Atoi(reservesStr); err == nil {
