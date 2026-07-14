@@ -3,6 +3,7 @@ package drivers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
@@ -21,7 +22,13 @@ type RedisClient interface {
 	ZRangeByScore(ctx context.Context, key string, min, max float64) ([]string, error)
 	// ZRem removes members from a sorted set.
 	ZRem(ctx context.Context, key string, members ...any) error
-	// Eval runs a Lua script atomically.
+	// Eval runs a Lua script atomically. Implementations MUST return a nil
+	// result with a nil error when the script yields no value (for example an
+	// empty queue); they must not surface a client-specific "nil" sentinel
+	// (go-redis' redis.Nil, redigo's ErrNil) as an error. The driver relies on
+	// this to distinguish an empty queue (nil, nil) from an unsupported-Lua or
+	// real backend error, so a well-behaved client never triggers the fallback
+	// RPop path on an empty poll.
 	Eval(ctx context.Context, script string, keys []string, args ...any) (any, error)
 	// LLen returns the length of a list.
 	LLen(ctx context.Context, key string) (int64, error)
@@ -275,6 +282,13 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	var shouldFallback bool
 
 	if err != nil {
+		// A cancelled or expired context is terminal: falling back to the
+		// non-atomic RPop path would only fail again (or run a second,
+		// unnecessary round-trip), so surface the error instead.
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			return nil, err
+		}
+
 		shouldFallback = true
 	} else if res != nil {
 		switch res.(type) {

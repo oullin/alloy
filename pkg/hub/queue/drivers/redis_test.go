@@ -726,3 +726,26 @@ func TestRedisDriverShutdown(t *testing.T) {
 		t.Errorf("expected reserved size 0, got %d", reservedSize)
 	}
 }
+
+// TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
+// Lua Eval fails because the context was cancelled, Pop surfaces the context
+// error instead of masking it by falling back to the non-atomic RPop path.
+func TestRedisDriverPopContextCanceledNoFallback(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Push(context.Background(), "default", []byte(`{"uuid":"c1","tries":0}`)); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := drv.Pop(ctx, "default")
+
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled to be surfaced, got %v", err)
+	}
+}
