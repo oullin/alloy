@@ -246,14 +246,17 @@ func (c *mockRedisClient) Eval(ctx context.Context, script string, keys []string
 		if len(keys) < 2 || len(args) == 0 {
 			return nil, nil
 		}
+
 		listKey := keys[0]
 		reservedKey := keys[1]
 		score, ok := evalScore(args[0])
+
 		if !ok {
 			return nil, nil
 		}
 
 		list := c.lists[listKey]
+
 		if len(list) == 0 {
 			return nil, nil
 		}

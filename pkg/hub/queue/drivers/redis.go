@@ -252,6 +252,7 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	res, err := d.client.Eval(ctx, popAndReserveLua, []string{d.queueKey(queueName), d.reservedKey(queueName)}, score)
 
 	var raw string
+
 	var popped bool
 
 	if err == nil {
@@ -272,6 +273,7 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	}
 
 	var shouldFallback bool
+
 	if err != nil {
 		shouldFallback = true
 	} else if res != nil {
@@ -288,10 +290,13 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 			// Exposure: A worker crash between RPop and ZAdd, or after a failed ZAdd,
 			// will cause the job to be lost (at-most-once semantics during this window).
 			var rpopErr error
+
 			raw, rpopErr = d.client.RPop(ctx, d.queueKey(queueName))
+
 			if rpopErr != nil || raw == "" {
 				return nil, queue.ErrNoJob
 			}
+
 			if zerr := d.client.ZAdd(ctx, d.reservedKey(queueName), score, raw); zerr != nil {
 				// Proceed processing the job, but it is unreserved (at-most-once) if the worker crashes.
 			}
@@ -318,11 +323,15 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	}
 	job.deleteFunc = func() error {
 		cleanupCtx, cancel := cleanupContext()
+
 		defer cancel()
+
 		return d.client.ZRem(cleanupCtx, d.reservedKey(queueName), raw)
 	}
+
 	job.releaseFunc = func(delay time.Duration) error {
 		cleanupCtx, cancel := cleanupContext()
+
 		defer cancel()
 
 		releasedPayload := []byte(raw)
@@ -358,6 +367,7 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 
 	job.failFunc = func(err error) error {
 		cleanupCtx, cancel := cleanupContext()
+
 		defer cancel()
 
 		errMsg := ""
