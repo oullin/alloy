@@ -1,6 +1,7 @@
 package container
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -106,18 +107,41 @@ func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
 	g.m[key] = c
 	g.mu.Unlock()
 
+	completed := false
+
 	defer func() {
-		if r := recover(); r != nil {
+		if completed {
+			return
+		}
+
+		// fn never returned: either it panicked, or the goroutine is
+		// unwinding via runtime.Goexit (e.g. t.FailNow inside a test
+		// factory). Keying cleanup off a completion flag instead of
+		// recover() alone guarantees the key is removed and waiters are
+		// released in both cases; otherwise every future Do for this
+		// key would block forever.
+		r := recover()
+
+		if r != nil {
 			c.err = fmt.Errorf("factory panicked: %v", r)
-			g.mu.Lock()
-			delete(g.m, key)
-			g.mu.Unlock()
-			c.wg.Done()
+		} else {
+			c.err = errors.New("factory did not complete (runtime.Goexit)")
+		}
+
+		g.mu.Lock()
+		delete(g.m, key)
+		g.mu.Unlock()
+		c.wg.Done()
+
+		if r != nil {
+			// Re-raise real panics so the leader's caller still observes
+			// them. A Goexit must not be converted into a panic.
 			panic(r)
 		}
 	}()
 
 	c.val, c.err = fn()
+	completed = true
 
 	g.mu.Lock()
 	delete(g.m, key)

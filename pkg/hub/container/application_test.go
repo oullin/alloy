@@ -350,6 +350,53 @@ func TestApplication_DeferredProvider_BootRunsAfterFlush(t *testing.T) {
 	}
 }
 
+func TestApplication_DeferredProvider_RegisterTwiceNoDuplicates(t *testing.T) {
+	t.Parallel()
+
+	app := container.NewApplication()
+
+	registerCalls := 0
+
+	dp := &deferredProvider{
+		keys: []string{"deferred.dup"},
+		register: func(_ *container.App) {
+			registerCalls++
+			app.Instance("deferred.dup", "value")
+		},
+	}
+
+	// Duplicate registration before the first flush must be a no-op:
+	// without deduplication the provider lands in the providers slice
+	// twice and Boot() would run it twice after the flush.
+	app.Register(dp)
+	app.Register(dp)
+
+	if _, err := app.Make("deferred.dup"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	app.Boot()
+
+	if registerCalls != 1 {
+		t.Fatalf("expected one Register call, got %d", registerCalls)
+	}
+
+	if dp.bootCalls != 1 {
+		t.Fatalf("expected one Boot call, got %d", dp.bootCalls)
+	}
+
+	// Re-registering after the flush must not re-track the provider.
+	app.Register(dp)
+
+	if _, err := app.Make("deferred.dup"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if registerCalls != 1 || dp.bootCalls != 1 {
+		t.Fatalf("expected no re-registration after flush, got register=%d boot=%d", registerCalls, dp.bootCalls)
+	}
+}
+
 func (p *depProvider) Register()           { *p.log = append(*p.log, p.name) }
 func (p *depProvider) Provides() []string  { return p.provides }
 func (p *depProvider) DependsOn() []string { return p.depends }
