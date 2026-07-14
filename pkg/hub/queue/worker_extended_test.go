@@ -3,6 +3,7 @@ package queue_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -646,7 +647,7 @@ func TestSyncDriverPanicRecovery(t *testing.T) {
 		t.Fatal("expected panic to be returned as an error, got nil")
 	}
 
-	if err.Error() != "queue: handler panicked: sync handler panic" {
+	if !strings.HasPrefix(err.Error(), "queue: handler panicked: sync handler panic") {
 		t.Errorf("unexpected error message: %v", err)
 	}
 

@@ -226,10 +226,14 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	job.releaseFunc = func(delay time.Duration) error {
 		releasedPayload := []byte(raw)
 
-		if pErr == nil && p != nil {
-			p.Tries = job.attempts + 1
+		// Unmarshal into a generic map rather than the strict queue.Payload
+		// struct so that any unrecognized or custom top-level fields in the
+		// original payload survive the release round-trip; only "tries" is bumped.
+		var pMap map[string]any
+		if err := json.Unmarshal([]byte(raw), &pMap); err == nil && pMap != nil {
+			pMap["tries"] = job.attempts + 1
 
-			if updatedRaw, err := json.Marshal(p); err == nil {
+			if updatedRaw, err := json.Marshal(pMap); err == nil {
 				releasedPayload = updatedRaw
 			}
 		}

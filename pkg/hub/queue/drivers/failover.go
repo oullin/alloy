@@ -117,7 +117,6 @@ func (d *FailoverDriver) PushMultiple(ctx context.Context, queueName string, pay
 
 func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
 	var lastRealErr error
-	hasNoJob := false
 
 	for i, drv := range d.drivers {
 		job, err := drv.Pop(ctx, queueName)
@@ -130,9 +129,7 @@ func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 			err = queue.ErrNoJob
 		}
 
-		if errors.Is(err, queue.ErrNoJob) {
-			hasNoJob = true
-		} else {
+		if !errors.Is(err, queue.ErrNoJob) {
 			lastRealErr = err
 		}
 
@@ -141,7 +138,7 @@ func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 		}
 	}
 
-	if lastRealErr != nil && !hasNoJob {
+	if lastRealErr != nil {
 		return nil, fmt.Errorf("queue: failover Pop failed: %w", lastRealErr)
 	}
 

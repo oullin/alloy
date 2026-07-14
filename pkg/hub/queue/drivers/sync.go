@@ -3,6 +3,7 @@ package drivers
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
@@ -113,7 +114,7 @@ func (d *SyncDriver) executeJob(ctx context.Context, job queue.Job) error {
 func (d *SyncDriver) runFire(ctx context.Context, job queue.Job) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("queue: handler panicked: %v", r)
+			err = fmt.Errorf("queue: handler panicked: %v\n%s", r, debug.Stack())
 		}
 	}()
 
