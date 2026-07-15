@@ -19,6 +19,13 @@ type CompiledRouteCollection struct {
 	routes     []*Route
 	nameList   map[string]*Route
 	actionList map[string]*Route
+
+	// byMethod indexes routes by HTTP verb in registration order, mirroring the
+	// dev [RouteCollection]. It turns Get(method) into an O(1) map read instead
+	// of a per-call scan+alloc over every route. Built once at construction and
+	// kept in sync by Add so routes registered after the first dispatch are
+	// still visible to the matcher.
+	byMethod map[string][]*Route
 }
 
 // NewCompiledRouteCollection builds a compiled collection from the supplied
@@ -29,16 +36,36 @@ func NewCompiledRouteCollection(routes []*Route, _ map[string]any) *CompiledRout
 		routes:     append([]*Route(nil), routes...),
 		nameList:   map[string]*Route{},
 		actionList: map[string]*Route{},
+		byMethod:   map[string][]*Route{},
 	}
 	c.RefreshNameLookups()
 	c.RefreshActionLookups()
+	c.rebuildMethodIndex()
 
 	return c
+}
+
+// rebuildMethodIndex rebuilds the method → routes index from the current route
+// slice, preserving registration order within each verb.
+func (c *CompiledRouteCollection) rebuildMethodIndex() {
+	c.byMethod = make(map[string][]*Route, len(c.byMethod))
+
+	for _, r := range c.routes {
+		c.indexRouteByMethod(r)
+	}
+}
+
+// indexRouteByMethod appends a single route to each of its verb buckets.
+func (c *CompiledRouteCollection) indexRouteByMethod(route *Route) {
+	for _, m := range route.Methods() {
+		c.byMethod[m] = append(c.byMethod[m], route)
+	}
 }
 
 // Add appends a route and updates the lookup tables.
 func (c *CompiledRouteCollection) Add(route *Route) *Route {
 	c.routes = append(c.routes, route)
+	c.indexRouteByMethod(route)
 
 	if name := route.GetName(); name != "" {
 		if _, ok := c.nameList[name]; !ok {
@@ -98,24 +125,16 @@ func (c *CompiledRouteCollection) Match(request matching.MatchableRequest) (*Rou
 }
 
 // Get returns routes filtered by method, or all routes when method is "".
+//
+// The method-specific lookup is an O(1) read of the pre-built index; callers
+// must treat the returned slice as read-only (same contract as the dev
+// [RouteCollection.Get]).
 func (c *CompiledRouteCollection) Get(method string) []*Route {
 	if method == "" {
 		return c.GetRoutes()
 	}
 
-	out := make([]*Route, 0, len(c.routes))
-
-	for _, r := range c.routes {
-		for _, m := range r.Methods() {
-			if m == method {
-				out = append(out, r)
-
-				break
-			}
-		}
-	}
-
-	return out
+	return c.byMethod[method]
 }
 
 // HasNamedRoute reports whether name is registered.
