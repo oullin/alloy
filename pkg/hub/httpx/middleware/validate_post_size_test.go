@@ -75,6 +75,7 @@ func TestValidatePostSizeChunkedOversizeRejectedOnRead(t *testing.T) {
 	srv := httptest.NewServer(
 		middleware.NewValidatePostSize(10).Wrap(http.HandlerFunc(chunkedBodyHandler)),
 	)
+
 	defer srv.Close()
 
 	// io.NopCloser hides the concrete reader type, so the client cannot compute
@@ -109,6 +110,7 @@ func TestValidatePostSizeChunkedWithinLimitPasses(t *testing.T) {
 	srv := httptest.NewServer(
 		middleware.NewValidatePostSize(100).Wrap(http.HandlerFunc(chunkedBodyHandler)),
 	)
+
 	defer srv.Close()
 
 	body := io.NopCloser(strings.NewReader(strings.Repeat("a", 10)))
