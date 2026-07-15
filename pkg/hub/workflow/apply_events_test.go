@@ -1,12 +1,195 @@
 package workflow_test
 
 import (
+	"errors"
 	"slices"
+	"sync"
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/workflow"
 	"github.com/oullin/alloy/pkg/hub/workflow/events"
 )
+
+// failingSetStore reads the marking from the subject's state but always fails
+// the write, letting a test assert which events fire when SetMarking errors.
+type failingSetStore struct {
+	getter func(*Subscription) string
+	setErr error
+}
+
+func (s *failingSetStore) GetMarking(subject *Subscription, _ *workflow.Definition) (workflow.Marking, error) {
+	place := s.getter(subject)
+
+	if place == "" {
+		return workflow.Marking{}, nil
+	}
+
+	return workflow.NewMarking(place), nil
+}
+
+func (s *failingSetStore) SetMarking(_ *Subscription, _ workflow.Marking, _ *workflow.Definition, _ map[string]any) error {
+	return s.setErr
+}
+
+func TestApply_FailedWriteEventsDoNotFire(t *testing.T) {
+	def := subscriptionDef(t)
+	dispatcher := events.NewDispatcher[*Subscription]()
+
+	fired := map[string]bool{}
+
+	record := func(name string) events.Listener[*Subscription] {
+		return func(events.Event[*Subscription]) { fired[name] = true }
+	}
+
+	for _, name := range []string{
+		workflow.EventNameLeave("subscription"),
+		workflow.EventNameTransition("subscription"),
+		workflow.EventNameEnter("subscription"),
+		workflow.EventNameEntered("subscription"),
+		workflow.EventNameCompleted("subscription"),
+		workflow.EventNameAnnounce("subscription"),
+	} {
+		dispatcher.On(name, record(name))
+	}
+
+	// The guard must still fire — it is part of the pre-write decision.
+	var guarded bool
+
+	dispatcher.On(workflow.EventNameGuard("subscription"), func(events.Event[*Subscription]) { guarded = true })
+
+	writeErr := errors.New("store unavailable")
+	store := &failingSetStore{
+		getter: func(s *Subscription) string { return s.State },
+		setErr: writeErr,
+	}
+
+	sm, err := workflow.NewStateMachine("subscription", def, store, dispatcher)
+
+	if err != nil {
+		t.Fatalf("new state machine: %v", err)
+	}
+
+	sub := &Subscription{ID: "s1", State: "trial"}
+
+	if _, err := sm.Apply(sub, "activate", nil); !errors.Is(err, writeErr) {
+		t.Fatalf("expected write error, got %v", err)
+	}
+
+	if !guarded {
+		t.Fatal("guard event should still fire before the write")
+	}
+
+	for name, ok := range fired {
+		if ok {
+			t.Errorf("event %q must not fire when SetMarking fails", name)
+		}
+	}
+
+	if fired[workflow.EventNameEnter("subscription")] || fired[workflow.EventNameEntered("subscription")] {
+		t.Fatal("enter/entered events must not fire on a failed write")
+	}
+}
+
+func TestApply_ConcurrentConflictingTransitions(t *testing.T) {
+	// A single token in "start" enables two mutually exclusive transitions.
+	// Two goroutines racing to consume it must produce exactly one winner and
+	// one guard/conflict error — never a double-consume.
+	def, err := workflow.NewDefinitionBuilder().
+		AddPlace("start").
+		AddPlace("left").
+		AddPlace("right").
+		SetInitialPlaces("start").
+		AddTransition("goLeft", []string{"start"}, []string{"left"}).
+		AddTransition("goRight", []string{"start"}, []string{"right"}).
+		Build()
+
+	if err != nil {
+		t.Fatalf("build definition: %v", err)
+	}
+
+	sub := &Subscription{ID: "race", State: "start"}
+
+	sm, err := workflow.NewStateMachine("fork", def, &raceStore{subject: sub}, nil)
+
+	if err != nil {
+		t.Fatalf("new state machine: %v", err)
+	}
+
+	var wg sync.WaitGroup
+
+	results := make([]error, 2)
+	transitions := []string{"goLeft", "goRight"}
+
+	start := make(chan struct{})
+
+	for i := range transitions {
+		wg.Add(1)
+
+		go func(idx int) {
+			defer wg.Done()
+
+			<-start
+
+			_, results[idx] = sm.Apply(sub, transitions[idx], nil)
+		}(i)
+	}
+
+	close(start)
+	wg.Wait()
+
+	var successes, failures int
+
+	for _, err := range results {
+		if err == nil {
+			successes++
+
+			continue
+		}
+
+		failures++
+
+		var te *workflow.TransitionError
+
+		if !errors.As(err, &te) {
+			t.Fatalf("expected *TransitionError for the loser, got %T: %v", err, err)
+		}
+	}
+
+	if successes != 1 || failures != 1 {
+		t.Fatalf("expected exactly one winner and one failure, got %d successes / %d failures", successes, failures)
+	}
+
+	if sub.State != "left" && sub.State != "right" {
+		t.Fatalf("subject must land in exactly one target place, got %q", sub.State)
+	}
+}
+
+// raceStore serializes reads/writes to the shared subject's state through the
+// same SingleState semantics; the machine lock is what makes the composite
+// read-guard-write atomic, which this test exercises under -race.
+type raceStore struct {
+	subject *Subscription
+}
+
+func (s *raceStore) GetMarking(subject *Subscription, _ *workflow.Definition) (workflow.Marking, error) {
+	if subject.State == "" {
+		return workflow.Marking{}, nil
+	}
+
+	return workflow.NewMarking(subject.State), nil
+}
+
+func (s *raceStore) SetMarking(subject *Subscription, marking workflow.Marking, _ *workflow.Definition, _ map[string]any) error {
+	places := marking.ActivePlaces()
+
+	if len(places) == 1 {
+		subject.State = places[0]
+	} else {
+		subject.State = ""
+	}
+
+	return nil
+}
 
 func TestApply_EventOrder(t *testing.T) {
 	def := subscriptionDef(t)
