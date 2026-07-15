@@ -1,6 +1,7 @@
 package session
 
 import (
+	"context"
 	"math/rand/v2"
 	"net/http"
 	"time"
@@ -120,8 +121,21 @@ func (w *sessionResponseWriter) flush() {
 
 // StartSession is HTTP middleware that manages the full session lifecycle for
 // each request: read → start → handle → save → write cookie.
+//
+// Background GC is scheduled against a background context. Use
+// StartSessionWithContext to bind GC to a server lifecycle so it stops cleanly
+// on shutdown.
 func StartSession(handler Handler, cfg StartSessionConfig) func(http.Handler) http.Handler {
+	return StartSessionWithContext(context.Background(), handler, cfg)
+}
+
+// StartSessionWithContext is StartSession with an explicit lifecycle context
+// that bounds background session GC: when ctx is cancelled (e.g. on server
+// shutdown) no new sweep starts and any in-flight sweep is cancelled through
+// the context handed to the handler.
+func StartSessionWithContext(ctx context.Context, handler Handler, cfg StartSessionConfig) func(http.Handler) http.Handler {
 	cfg = mergeConfig(cfg)
+	gc := newGCScheduler(ctx, handler, cfg.GCMaxLifetime)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -171,9 +185,11 @@ func StartSession(handler Handler, cfg StartSessionConfig) func(http.Handler) ht
 			// If the handler never wrote, flush the cookie now.
 			sw.flush()
 
-			// Probabilistic GC.
+			// Probabilistic GC, scheduled off the request path so the
+			// directory walk / bulk DELETE never lands in this request's
+			// latency budget. The scheduler is single-flight and panic-safe.
 			if cfg.GCProbability > 0 && rand.IntN(100) < cfg.GCProbability {
-				_ = handler.GC(r.Context(), cfg.GCMaxLifetime)
+				gc.trigger()
 			}
 		})
 	}
