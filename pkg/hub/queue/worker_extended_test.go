@@ -9,6 +9,7 @@ import (
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
 // mockQueue wraps a real queue to control behavior in tests.
@@ -329,7 +330,7 @@ func TestWorkerMaxTimeLimit(t *testing.T) {
 	t.Parallel()
 
 	client := newWorkerMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	inner := redis.NewDriver(client, "redis")
 
 	for i := 0; i < 100; i++ {
 		_, _ = inner.Push(context.Background(), "q", []byte("p"))

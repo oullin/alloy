@@ -1,4 +1,4 @@
-package drivers
+package redis
 
 // ExportQueueKey exposes queueKey for testing.
 var ExportQueueKey = queueKey

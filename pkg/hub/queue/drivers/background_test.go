@@ -8,6 +8,8 @@ import (
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
 // Use a non-existent command so spawn is a harmless no-op.
@@ -36,8 +38,8 @@ type noInspectorInner struct{ connection string }
 func TestBackgroundDriverPushDelegatesToInner(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
@@ -59,8 +61,8 @@ func TestBackgroundDriverPushDelegatesToInner(t *testing.T) {
 func TestBackgroundDriverPushDelayedDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	_, err := drv.PushDelayed(context.Background(), "default", []byte("payload"), time.Millisecond)
@@ -79,8 +81,8 @@ func TestBackgroundDriverPushDelayedDelegates(t *testing.T) {
 func TestBackgroundDriverPopDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	_, _ = inner.Push(context.Background(), "default", []byte("payload"))
@@ -99,8 +101,8 @@ func TestBackgroundDriverPopDelegates(t *testing.T) {
 func TestBackgroundDriverPopEmptyDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	_, err := drv.Pop(context.Background(), "default")
@@ -113,8 +115,8 @@ func TestBackgroundDriverPopEmptyDelegates(t *testing.T) {
 func TestBackgroundDriverSizeDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	_, _ = inner.Push(context.Background(), "default", []byte("a"))
@@ -145,8 +147,8 @@ func TestBackgroundDriverConnectionName(t *testing.T) {
 func TestBackgroundDriverPendingSizeDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	n, err := drv.PendingSize(context.Background(), "default")
@@ -163,8 +165,8 @@ func TestBackgroundDriverPendingSizeDelegates(t *testing.T) {
 func TestBackgroundDriverDelayedSizeDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	n, err := drv.DelayedSize(context.Background(), "default")
@@ -181,8 +183,8 @@ func TestBackgroundDriverDelayedSizeDelegates(t *testing.T) {
 func TestBackgroundDriverReservedSizeDelegates(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	inner := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	inner := redis.NewDriver(client, "redis")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 
 	n, err := drv.ReservedSize(context.Background(), "default")

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/jobs"
 )
 
 // SQSClient is the interface for an AWS SQS client.
@@ -61,7 +62,7 @@ type SQSDriver struct {
 
 // NewSQSDriver creates an SQSDriver. queueURLs maps logical queue names to SQS queue URLs.
 
-type sqsJob struct{ BaseJob }
+type sqsJob struct{ jobs.Base }
 
 func NewSQSDriver(client SQSClient, queueURLs map[string]string, connection string) *SQSDriver {
 	return &SQSDriver{client: client, queueURLs: queueURLs, connection: connection}
@@ -195,24 +196,29 @@ func (d *SQSDriver) Pop(ctx context.Context, queueName string) (queue.Job, error
 	queueURL := d.url(queueName)
 
 	job := &sqsJob{
-		BaseJob: BaseJob{
-			id:         msg.MessageID,
-			payload:    []byte(msg.Body),
-			queue:      queueName,
-			connection: d.connection,
-		},
+		Base: jobs.New(jobs.Config{
+			ID:         msg.MessageID,
+			Payload:    []byte(msg.Body),
+			Queue:      queueName,
+			Connection: d.connection,
+		}),
 	}
-	job.deleteFunc = func() error {
+
+	// Held in a local so OnFail can reuse it: failing an SQS job just deletes
+	// the message, letting the redrive policy move it to the DLQ.
+	deleteMessage := func() error {
 		return d.client.DeleteMessage(ctx, queueURL, msg.ReceiptHandle)
 	}
 
-	job.releaseFunc = func(delay time.Duration) error {
-		return d.client.ChangeMessageVisibility(ctx, queueURL, msg.ReceiptHandle, delay)
-	}
+	job.OnDelete(deleteMessage)
 
-	job.failFunc = func(_ error) error {
-		return job.deleteFunc()
-	}
+	job.OnRelease(func(delay time.Duration) error {
+		return d.client.ChangeMessageVisibility(ctx, queueURL, msg.ReceiptHandle, delay)
+	})
+
+	job.OnFail(func(_ error) error {
+		return deleteMessage()
+	})
 
 	return job, nil
 }

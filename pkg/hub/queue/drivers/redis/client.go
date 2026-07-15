@@ -1,9 +1,9 @@
-package drivers
+package redis
 
 import "context"
 
-// RedisClient is the minimal Redis interface required by the Redis queue driver.
-type RedisClient interface {
+// Client is the minimal Redis interface required by the Redis queue driver.
+type Client interface {
 	// LPush prepends values to a list.
 	LPush(ctx context.Context, key string, values ...any) error
 	// RPop removes and returns the last element of a list.
@@ -22,31 +22,31 @@ type RedisClient interface {
 	ZCard(ctx context.Context, key string) (int64, error)
 }
 
-// RedisDeleter is the optional Redis capability needed by ClearQueue.
-type RedisDeleter interface {
+// Deleter is the optional Redis capability needed by ClearQueue.
+type Deleter interface {
 	Del(ctx context.Context, keys ...string) (int64, error)
 }
 
-// RedisScanner is the optional Redis capability needed by QueueNames.
+// Scanner is the optional Redis capability needed by QueueNames.
 // A driver supports queue enumeration only when its underlying client
 // can iterate keys matching a pattern — go-redis exposes this via
 // the SCAN command, and most cluster-aware clients fan out a SCAN
 // across nodes for the caller.
-type RedisScanner interface {
+type Scanner interface {
 	ScanMatch(ctx context.Context, match string) ([]string, error)
 }
 
-// RedisListRanger is the optional capability needed by PendingJobs to
+// ListRanger is the optional capability needed by PendingJobs to
 // return the raw payloads currently waiting on the queue list. Without
 // it the driver can still report a size (LLen) but cannot snapshot
 // payloads.
-type RedisListRanger interface {
+type ListRanger interface {
 	LRange(ctx context.Context, key string, start, stop int64) ([]string, error)
 }
 
-// RedisSortedSetRanger is the optional capability needed by DelayedJobs.
+// SortedSetRanger is the optional capability needed by DelayedJobs.
 // It returns the members of a sorted set ordered by score, which
 // matches the upstream ZRANGE semantics for the delayed-job set.
-type RedisSortedSetRanger interface {
+type SortedSetRanger interface {
 	ZRange(ctx context.Context, key string, start, stop int64) ([]string, error)
 }

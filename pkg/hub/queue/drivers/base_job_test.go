@@ -8,6 +8,8 @@ import (
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
 // newTestJob creates a BaseJob-backed Job via the SyncDriver for testing.
@@ -127,8 +129,8 @@ func TestBaseJobFireWithFunc(t *testing.T) {
 func TestBaseJobReleaseSetsFlag(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "q", []byte("p"))
 
@@ -148,8 +150,8 @@ func TestBaseJobReleaseSetsFlag(t *testing.T) {
 func TestBaseJobDeleteSetsFlag(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "q", []byte("p"))
 
@@ -169,8 +171,8 @@ func TestBaseJobDeleteSetsFlag(t *testing.T) {
 func TestBaseJobFailSetsFlag(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "q", []byte("p"))
 
@@ -190,8 +192,8 @@ func TestBaseJobFailSetsFlag(t *testing.T) {
 func TestBaseJobMarkAsFailedIsAlias(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "q", []byte("p"))
 
@@ -212,8 +214,8 @@ func TestBaseJobFireWithoutFunc(t *testing.T) {
 	t.Parallel()
 
 	// Pop from redis gives a job without fireFunc set.
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "q", []byte("p"))
 

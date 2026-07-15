@@ -8,6 +8,8 @@ import (
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
 func TestFailoverDriverPushUsesFirstSuccessful(t *testing.T) {
@@ -97,13 +99,13 @@ func TestFailoverDriverPushMultipleFallback(t *testing.T) {
 func TestFailoverDriverPopTriesEach(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	redis := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	redisDrv := redis.NewDriver(client, "redis")
 	null := drivers.NewNullDriver("null")
 
-	_, _ = redis.Push(context.Background(), "q", []byte("from-redis"))
+	_, _ = redisDrv.Push(context.Background(), "q", []byte("from-redis"))
 
-	drv := drivers.NewFailoverDriver("failover", null, redis)
+	drv := drivers.NewFailoverDriver("failover", null, redisDrv)
 
 	job, err := drv.Pop(context.Background(), "q")
 

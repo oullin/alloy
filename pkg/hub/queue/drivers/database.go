@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/jobs"
 )
 
 // DBExecer is the minimal database interface for the database queue driver.
@@ -80,7 +81,7 @@ type DatabaseDriver struct {
 	locker     DatabasePopLockProvider
 }
 
-type dbJob struct{ BaseJob }
+type dbJob struct{ jobs.Base }
 
 // NewDatabaseDriver creates a DatabaseDriver.
 func NewDatabaseDriver(db DBExecer, table, connection string) *DatabaseDriver {
@@ -185,27 +186,32 @@ func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 	}
 
 	job := &dbJob{
-		BaseJob: BaseJob{
-			id:       fmt.Sprintf("%d", id),
-			payload:  []byte(payload),
-			queue:    queueName,
-			attempts: attempts,
-		},
+		Base: jobs.New(jobs.Config{
+			ID:       fmt.Sprintf("%d", id),
+			Payload:  []byte(payload),
+			Queue:    queueName,
+			Attempts: attempts,
+		}),
 	}
-	job.releaseFunc = func(delay time.Duration) error {
+
+	// Held in a local so OnFail can delete the row after recording the
+	// failure, the way it did when both were fields on the same struct.
+	deleteRow := func() error {
+		return d.db.Exec(ctx, fmt.Sprintf("DELETE FROM %s WHERE id=$1", d.table), id)
+	}
+
+	job.OnRelease(func(delay time.Duration) error {
 		availAt := time.Now().Add(delay).Unix()
 
 		return d.db.Exec(ctx,
 			fmt.Sprintf("UPDATE %s SET reserved_at=NULL, available_at=$1 WHERE id=$2", d.table),
 			availAt, id,
 		)
-	}
+	})
 
-	job.deleteFunc = func() error {
-		return d.db.Exec(ctx, fmt.Sprintf("DELETE FROM %s WHERE id=$1", d.table), id)
-	}
+	job.OnDelete(deleteRow)
 
-	job.failFunc = func(err error) error {
+	job.OnFail(func(err error) error {
 		var errMsg string
 
 		if err != nil {
@@ -215,11 +221,11 @@ func (d *DatabaseDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 		errBytes, _ := json.Marshal(map[string]string{"exception": errMsg})
 		_ = d.db.Exec(ctx,
 			"INSERT INTO failed_jobs (uuid, connection, queue, payload, exception) VALUES ($1,$2,$3,$4,$5)",
-			job.uuid, d.connection, queueName, payload, string(errBytes),
+			job.UUID(), d.connection, queueName, payload, string(errBytes),
 		)
 
-		return job.deleteFunc()
-	}
+		return deleteRow()
+	})
 
 	return job, nil
 }

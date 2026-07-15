@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/jobs"
 )
 
 // SyncDriver executes jobs immediately in the same goroutine. It is
@@ -30,7 +31,7 @@ type SyncDriver struct {
 	tx         TransactionCallbackRegistrar
 }
 
-type syncJob struct{ BaseJob }
+type syncJob struct{ jobs.Base }
 
 // TransactionCallbackRegistrar is the small transaction hook SyncDriver
 // needs to mirror the upstream after-commit dispatch registration.
@@ -65,10 +66,10 @@ func (d *SyncDriver) Push(ctx context.Context, queueName string, payload []byte)
 // PushJob dispatches payload with the original job value and connection
 // config available for after-commit precedence checks.
 func (d *SyncDriver) PushJob(ctx context.Context, queueName string, jobValue any, payload []byte, config map[string]any) (string, error) {
-	job := &syncJob{BaseJob: BaseJob{payload: payload, queue: queueName, connection: d.connection}}
-	job.fireFunc = func(ctx context.Context) error {
+	job := &syncJob{Base: jobs.New(jobs.Config{Payload: payload, Queue: queueName, Connection: d.connection})}
+	job.OnFire(func(ctx context.Context) error {
 		return d.handler.Handle(ctx, job)
-	}
+	})
 
 	if d.tx != nil && queue.ShouldDispatchAfterCommit(jobValue, config) {
 		d.tx.AddCallback(func() {

@@ -1,4 +1,4 @@
-package drivers_test
+package redis_test
 
 import (
 	"context"
@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
-// deleterRedisClient extends mockRedisClient with the optional RedisDeleter
+// deleterRedisClient extends redistest.Client with the optional Deleter
 // contract that ClearQueue needs, recording the keys it was asked to delete.
 type deleterRedisClient struct {
-	*mockRedisClient
+	*redistest.Client
 	deleted []string
 	delErr  error
 }
@@ -31,8 +32,8 @@ func (c *deleterRedisClient) Del(_ context.Context, keys ...string) (int64, erro
 func TestRedisDriverPush(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, err := drv.Push(context.Background(), "default", []byte("payload"))
 
@@ -50,8 +51,8 @@ func TestRedisDriverPush(t *testing.T) {
 func TestRedisDriverPushDelayed(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, err := drv.PushDelayed(context.Background(), "default", []byte("payload"), 5*time.Second)
 
@@ -69,8 +70,8 @@ func TestRedisDriverPushDelayed(t *testing.T) {
 func TestRedisDriverPushMultiple(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	ids, err := drv.PushMultiple(context.Background(), "default", [][]byte{
 		[]byte("a"), []byte("b"), []byte("c"),
@@ -94,8 +95,8 @@ func TestRedisDriverPushMultiple(t *testing.T) {
 func TestRedisDriverPopFromMainQueue(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("test-payload"))
 
@@ -121,8 +122,8 @@ func TestRedisDriverPopFromMainQueue(t *testing.T) {
 func TestRedisDriverPopEmptyQueueReturnsErrNoJob(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, err := drv.Pop(context.Background(), "empty")
 
@@ -134,8 +135,8 @@ func TestRedisDriverPopEmptyQueueReturnsErrNoJob(t *testing.T) {
 func TestRedisDriverJobRelease(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("release-me"))
 
@@ -157,8 +158,8 @@ func TestRedisDriverJobRelease(t *testing.T) {
 func TestRedisDriverJobReleaseWithDelay(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("delay-me"))
 
@@ -180,8 +181,8 @@ func TestRedisDriverJobReleaseWithDelay(t *testing.T) {
 func TestRedisDriverJobDelete(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("delete-me"))
 
@@ -197,8 +198,8 @@ func TestRedisDriverJobDelete(t *testing.T) {
 func TestRedisDriverJobFail(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("fail-me"))
 
@@ -220,8 +221,8 @@ func TestRedisDriverJobFail(t *testing.T) {
 func TestRedisDriverSize(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("a"))
 	_, _ = drv.Push(context.Background(), "default", []byte("b"))
@@ -240,8 +241,8 @@ func TestRedisDriverSize(t *testing.T) {
 func TestRedisDriverPendingSize(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.Push(context.Background(), "default", []byte("a"))
 
@@ -259,8 +260,8 @@ func TestRedisDriverPendingSize(t *testing.T) {
 func TestRedisDriverDelayedSize(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	_, _ = drv.PushDelayed(context.Background(), "default", []byte("a"), time.Hour)
 
@@ -278,8 +279,8 @@ func TestRedisDriverDelayedSize(t *testing.T) {
 func TestRedisDriverReservedSizeAlwaysZero(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	n, err := drv.ReservedSize(context.Background(), "default")
 
@@ -295,8 +296,8 @@ func TestRedisDriverReservedSizeAlwaysZero(t *testing.T) {
 func TestRedisDriverConnectionName(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "my-redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "my-redis")
 
 	if drv.ConnectionName() != "my-redis" {
 		t.Errorf("expected 'my-redis', got %q", drv.ConnectionName())
@@ -306,8 +307,8 @@ func TestRedisDriverConnectionName(t *testing.T) {
 func TestRedisDriverClearQueueDeletesQueueDelayedAndFailedKeys(t *testing.T) {
 	t.Parallel()
 
-	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := &deleterRedisClient{Client: redistest.NewClient()}
+	drv := redis.NewDriver(client, "redis")
 
 	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
 		t.Fatalf("ClearQueue: %v", err)
@@ -329,8 +330,8 @@ func TestRedisDriverClearQueueDeletesQueueDelayedAndFailedKeys(t *testing.T) {
 func TestRedisDriverClearQueueUsesDefaultForEmptyName(t *testing.T) {
 	t.Parallel()
 
-	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := &deleterRedisClient{Client: redistest.NewClient()}
+	drv := redis.NewDriver(client, "redis")
 
 	if err := drv.ClearQueue(context.Background(), ""); err != nil {
 		t.Fatalf("ClearQueue: %v", err)
@@ -345,8 +346,8 @@ func TestRedisDriverClearQueuePropagatesDeleterError(t *testing.T) {
 	t.Parallel()
 
 	boom := errors.New("del failed")
-	client := &deleterRedisClient{mockRedisClient: newMockRedisClient(), delErr: boom}
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := &deleterRedisClient{Client: redistest.NewClient(), delErr: boom}
+	drv := redis.NewDriver(client, "redis")
 
 	if err := drv.ClearQueue(context.Background(), "emails"); !errors.Is(err, boom) {
 		t.Fatalf("ClearQueue error = %v, want %v", err, boom)
@@ -354,13 +355,13 @@ func TestRedisDriverClearQueuePropagatesDeleterError(t *testing.T) {
 }
 
 // A client that cannot Del silently does nothing rather than erroring, because
-// RedisDeleter is an optional capability. Pin that: it is easy to "fix" into an
+// Deleter is an optional capability. Pin that: it is easy to "fix" into an
 // ErrNotSupported and break callers that clear queues opportunistically.
 func TestRedisDriverClearQueueWithoutDeleterIsSilentNoOp(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 
 	if _, err := drv.Push(context.Background(), "emails", []byte(`{"job":"x"}`)); err != nil {
 		t.Fatalf("Push: %v", err)

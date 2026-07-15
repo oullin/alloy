@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/jobs"
 )
 
 // BeanstalkdClient is the interface for a Beanstalkd client.
@@ -59,7 +60,7 @@ type BeanstalkdDriver struct {
 
 // NewBeanstalkdDriver creates a BeanstalkdDriver. ttr is the job TTR.
 
-type bsJob struct{ BaseJob }
+type bsJob struct{ jobs.Base }
 
 func NewBeanstalkdDriver(client BeanstalkdClient, connection string, ttr time.Duration) *BeanstalkdDriver {
 	if ttr == 0 {
@@ -134,24 +135,25 @@ func (d *BeanstalkdDriver) Pop(ctx context.Context, queueName string) (queue.Job
 	}
 
 	job := &bsJob{
-		BaseJob: BaseJob{
-			id:         toString(id),
-			payload:    body,
-			queue:      tube,
-			connection: d.connection,
-		},
+		Base: jobs.New(jobs.Config{
+			ID:         toString(id),
+			Payload:    body,
+			Queue:      tube,
+			Connection: d.connection,
+		}),
 	}
-	job.deleteFunc = func() error {
+
+	job.OnDelete(func() error {
 		return d.client.Delete(ctx, id)
-	}
+	})
 
-	job.releaseFunc = func(delay time.Duration) error {
+	job.OnRelease(func(delay time.Duration) error {
 		return d.client.Release(ctx, id, 1024, delay)
-	}
+	})
 
-	job.failFunc = func(_ error) error {
+	job.OnFail(func(_ error) error {
 		return d.client.Bury(ctx, id, 1024)
-	}
+	})
 
 	return job, nil
 }

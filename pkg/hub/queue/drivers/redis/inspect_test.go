@@ -1,4 +1,4 @@
-package drivers_test
+package redis_test
 
 import (
 	"context"
@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
-// rangerRedisClient extends mockRedisClient with the optional Scanner /
+// rangerRedisClient extends redistest.Client with the optional Scanner /
 // ListRanger / SortedSetRanger contracts used by the Redis driver's
 // inspection methods.
 type rangerRedisClient struct {
-	*mockRedisClient
+	*redistest.Client
 	keys      []string
 	scanErr   error
 	lrangeErr error
@@ -34,7 +35,7 @@ func (c *rangerRedisClient) LRange(_ context.Context, key string, _, _ int64) ([
 		return nil, c.lrangeErr
 	}
 
-	return c.lists[key], nil
+	return c.List(key), nil
 }
 
 func (c *rangerRedisClient) ZRange(_ context.Context, key string, _, _ int64) ([]string, error) {
@@ -42,21 +43,14 @@ func (c *rangerRedisClient) ZRange(_ context.Context, key string, _, _ int64) ([
 		return nil, c.zrangeErr
 	}
 
-	entries := c.sorted[key]
-	out := make([]string, 0, len(entries))
-
-	for _, e := range entries {
-		out = append(out, e.member)
-	}
-
-	return out, nil
+	return c.SortedMembers(key), nil
 }
 
 func TestRedisDriverInspectionWithoutCapabilityReturnsErrNotSupported(t *testing.T) {
 	t.Parallel()
 
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := redistest.NewClient()
+	drv := redis.NewDriver(client, "redis")
 	ctx := context.Background()
 
 	if _, err := drv.QueueNames(ctx); !errors.Is(err, queue.ErrNotSupported) {
@@ -80,7 +74,7 @@ func TestRedisDriverQueueNamesDedupesAndUnwraps(t *testing.T) {
 	t.Parallel()
 
 	client := &rangerRedisClient{
-		mockRedisClient: newMockRedisClient(),
+		Client: redistest.NewClient(),
 		keys: []string{
 			"queues:default",
 			"queues:default:delayed",
@@ -89,7 +83,7 @@ func TestRedisDriverQueueNamesDedupesAndUnwraps(t *testing.T) {
 			"queues:", // empty after trim — must be skipped
 		},
 	}
-	drv := drivers.NewRedisDriver(client, "redis")
+	drv := redis.NewDriver(client, "redis")
 
 	names, err := drv.QueueNames(context.Background())
 
@@ -115,10 +109,10 @@ func TestRedisDriverQueueNamesScannerErrorPropagates(t *testing.T) {
 
 	wantErr := errors.New("scan boom")
 	client := &rangerRedisClient{
-		mockRedisClient: newMockRedisClient(),
-		scanErr:         wantErr,
+		Client:  redistest.NewClient(),
+		scanErr: wantErr,
 	}
-	drv := drivers.NewRedisDriver(client, "redis")
+	drv := redis.NewDriver(client, "redis")
 
 	_, err := drv.QueueNames(context.Background())
 
@@ -130,8 +124,8 @@ func TestRedisDriverQueueNamesScannerErrorPropagates(t *testing.T) {
 func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
 	t.Parallel()
 
-	client := &rangerRedisClient{mockRedisClient: newMockRedisClient()}
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := &rangerRedisClient{Client: redistest.NewClient()}
+	drv := redis.NewDriver(client, "redis")
 	ctx := context.Background()
 
 	// Push two real payloads via the driver so the queue key matches.
@@ -171,8 +165,8 @@ func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
 func TestRedisDriverDelayedJobsReturnsSnapshots(t *testing.T) {
 	t.Parallel()
 
-	client := &rangerRedisClient{mockRedisClient: newMockRedisClient()}
-	drv := drivers.NewRedisDriver(client, "redis")
+	client := &rangerRedisClient{Client: redistest.NewClient()}
+	drv := redis.NewDriver(client, "redis")
 	ctx := context.Background()
 
 	_, _ = drv.PushDelayed(ctx, "default", []byte(`{"uuid":"d1"}`), 24*time.Hour)
@@ -193,11 +187,11 @@ func TestRedisDriverInspectionRangerErrorPropagates(t *testing.T) {
 
 	wantErr := errors.New("range boom")
 	client := &rangerRedisClient{
-		mockRedisClient: newMockRedisClient(),
-		lrangeErr:       wantErr,
-		zrangeErr:       wantErr,
+		Client:    redistest.NewClient(),
+		lrangeErr: wantErr,
+		zrangeErr: wantErr,
 	}
-	drv := drivers.NewRedisDriver(client, "redis")
+	drv := redis.NewDriver(client, "redis")
 	ctx := context.Background()
 
 	if _, err := drv.PendingJobs(ctx, "default"); !errors.Is(err, wantErr) {

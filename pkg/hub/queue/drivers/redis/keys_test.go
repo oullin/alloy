@@ -1,9 +1,9 @@
-package drivers_test
+package redis_test
 
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
 func TestRedisQueueKey(t *testing.T) {
@@ -24,7 +24,7 @@ func TestRedisQueueKey(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got := drivers.ExportQueueKey(tc.in); got != tc.want {
+			if got := redis.ExportQueueKey(tc.in); got != tc.want {
 				t.Fatalf("queueKey(%q) = %q, want %q", tc.in, got, tc.want)
 			}
 		})
@@ -44,11 +44,11 @@ func TestRedisDelayedAndFailedKeysSuffixTheQueueKey(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		if got := drivers.ExportDelayedKey(tc.in); got != tc.wantDelayed {
+		if got := redis.ExportDelayedKey(tc.in); got != tc.wantDelayed {
 			t.Fatalf("delayedKey(%q) = %q, want %q", tc.in, got, tc.wantDelayed)
 		}
 
-		if got := drivers.ExportFailedKey(tc.in); got != tc.wantFailed {
+		if got := redis.ExportFailedKey(tc.in); got != tc.wantFailed {
 			t.Fatalf("failedKey(%q) = %q, want %q", tc.in, got, tc.wantFailed)
 		}
 	}
@@ -78,7 +78,7 @@ func TestRedisQueueNameFromKey(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got := drivers.ExportQueueNameFromKey(tc.in); got != tc.want {
+			if got := redis.ExportQueueNameFromKey(tc.in); got != tc.want {
 				t.Fatalf("queueNameFromKey(%q) = %q, want %q", tc.in, got, tc.want)
 			}
 		})
@@ -91,15 +91,15 @@ func TestRedisQueueKeyRoundTrip(t *testing.T) {
 	t.Parallel()
 
 	for _, name := range []string{"default", "emails", "high-priority"} {
-		if got := drivers.ExportQueueNameFromKey(drivers.ExportQueueKey(name)); got != name {
+		if got := redis.ExportQueueNameFromKey(redis.ExportQueueKey(name)); got != name {
 			t.Fatalf("round trip of %q produced %q", name, got)
 		}
 	}
 
 	// The delayed and failed keys must round-trip to the same logical queue,
 	// which is what stops QueueNames reporting them as separate queues.
-	for _, key := range []string{drivers.ExportDelayedKey("emails"), drivers.ExportFailedKey("emails")} {
-		if got := drivers.ExportQueueNameFromKey(key); got != "emails" {
+	for _, key := range []string{redis.ExportDelayedKey("emails"), redis.ExportFailedKey("emails")} {
+		if got := redis.ExportQueueNameFromKey(key); got != "emails" {
 			t.Fatalf("queueNameFromKey(%q) = %q, want %q", key, got, "emails")
 		}
 	}

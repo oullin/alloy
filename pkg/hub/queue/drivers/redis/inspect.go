@@ -1,4 +1,4 @@
-package drivers
+package redis
 
 import (
 	"context"
@@ -11,10 +11,10 @@ import (
 // QueueNames enumerates the queues currently known to the underlying Redis
 // instance by scanning for keys matching `queues:*`, reporting each logical
 // queue once (see queueNameFromKey). The driver returns ErrNotSupported when
-// its client cannot SCAN — that capability is optional via the RedisScanner
+// its client cannot SCAN — that capability is optional via the Scanner
 // interface.
-func (d *RedisDriver) QueueNames(ctx context.Context) ([]string, error) {
-	scanner, ok := d.client.(RedisScanner)
+func (d *Driver) QueueNames(ctx context.Context) ([]string, error) {
+	scanner, ok := d.client.(Scanner)
 
 	if !ok {
 		return nil, queue.ErrNotSupported
@@ -51,9 +51,9 @@ func (d *RedisDriver) QueueNames(ctx context.Context) ([]string, error) {
 
 // PendingJobs returns the raw payloads currently waiting on the queue
 // list. The driver requires its client to satisfy the optional
-// RedisListRanger interface; otherwise it returns ErrNotSupported.
-func (d *RedisDriver) PendingJobs(ctx context.Context, queueName string) ([]queue.InspectedJob, error) {
-	ranger, ok := d.client.(RedisListRanger)
+// ListRanger interface; otherwise it returns ErrNotSupported.
+func (d *Driver) PendingJobs(ctx context.Context, queueName string) ([]queue.InspectedJob, error) {
+	ranger, ok := d.client.(ListRanger)
 
 	if !ok {
 		return nil, queue.ErrNotSupported
@@ -70,9 +70,9 @@ func (d *RedisDriver) PendingJobs(ctx context.Context, queueName string) ([]queu
 
 // DelayedJobs returns the raw payloads parked in the delayed sorted
 // set for queueName. The driver requires its client to satisfy the
-// optional RedisSortedSetRanger interface.
-func (d *RedisDriver) DelayedJobs(ctx context.Context, queueName string) ([]queue.InspectedJob, error) {
-	ranger, ok := d.client.(RedisSortedSetRanger)
+// optional SortedSetRanger interface.
+func (d *Driver) DelayedJobs(ctx context.Context, queueName string) ([]queue.InspectedJob, error) {
+	ranger, ok := d.client.(SortedSetRanger)
 
 	if !ok {
 		return nil, queue.ErrNotSupported
@@ -92,7 +92,7 @@ func (d *RedisDriver) DelayedJobs(ctx context.Context, queueName string) ([]queu
 // in-flight jobs the snapshot could enumerate. Distinct from a clean
 // empty slice so callers can decide between "no reserved jobs" and
 // "this driver cannot report reserved jobs".
-func (d *RedisDriver) ReservedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+func (d *Driver) ReservedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
 	return nil, queue.ErrNotSupported
 }
 
@@ -102,7 +102,7 @@ func (d *RedisDriver) ReservedJobs(_ context.Context, _ string) ([]queue.Inspect
 //
 // InspectedJob.ReservedAt is left nil: the Redis layout keeps no reserved set,
 // which is also why ReservedJobs reports ErrNotSupported.
-func (d *RedisDriver) snapshotsFromPayloads(queueName string, raws []string) []queue.InspectedJob {
+func (d *Driver) snapshotsFromPayloads(queueName string, raws []string) []queue.InspectedJob {
 	if len(raws) == 0 {
 		return nil
 	}

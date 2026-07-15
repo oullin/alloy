@@ -1,4 +1,4 @@
-package drivers
+package redis
 
 import (
 	"context"
@@ -31,6 +31,6 @@ return #jobs
 // Errors are ignored deliberately: a failed migration leaves the jobs parked
 // in the delayed set for the next Pop to retry, which is preferable to failing
 // a Pop that could still serve an already-ready job.
-func (d *RedisDriver) migrateDue(ctx context.Context, queueName string) {
+func (d *Driver) migrateDue(ctx context.Context, queueName string) {
 	_, _ = d.client.Eval(ctx, migrateDueLua, []string{delayedKey(queueName), queueKey(queueName)}, time.Now().Unix())
 }
