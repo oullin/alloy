@@ -256,7 +256,9 @@ func TestRound(t *testing.T) {
 	}{
 		{"round down", c, 1234, 2, 1200},
 		{"round up", c, 1251, 2, 1300},
-		{"round down (half)", c, 1250, 2, 1200},
+		{"round up (half away from zero)", c, 1250, 2, 1300},
+		{"negative half away", c, -1250, 2, -1300},
+		{"small half away", c, 250, 2, 300},
 		{"negative round down", c, -1234, 2, -1200},
 		{"negative round up", c, -1251, 2, -1300},
 		{"nil calculator", nil, 100, 2, 0},

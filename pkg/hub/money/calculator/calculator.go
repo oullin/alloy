@@ -121,7 +121,8 @@ func (c *Engine) Negative(amount Amount) Amount {
 	return amount
 }
 
-// Round rounds an amount to a specified exponent (precision).
+// Round rounds an amount to a specified exponent (precision), half away from zero,
+// matching CreateFromFloat.
 func (c *Engine) Round(amount Amount, exponent int) Amount {
 	// Guard against nil calculator to prevent panics
 	if c == nil {
@@ -146,9 +147,9 @@ func (c *Engine) Round(amount Amount, exponent int) Amount {
 	// Get the remainder to determine if we need to round up or down
 	module := absolute % reminder
 
-	// Implement round-to-nearest with ties rounded down (toward zero):
-	// only remainders strictly greater than half the unit trigger a round up
-	if module > (reminder / 2) {
+	// Implement round-to-nearest with ties rounded away from zero:
+	// remainders at least half the unit trigger a round up
+	if module >= (reminder / 2) {
 		absolute += reminder
 	}
 

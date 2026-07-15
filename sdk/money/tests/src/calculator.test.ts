@@ -39,7 +39,10 @@ describe('money calculator', () => {
 		expect(calculator.round(1549n, 2)).toBe(1500n);
 		expect(calculator.round(1551n, 2)).toBe(1600n);
 		expect(calculator.round(-1551n, 2)).toBe(-1600n);
-		expect(calculator.round(1550n, 2)).toBe(1500n);
+		expect(calculator.round(1550n, 2)).toBe(1600n);
+		expect(calculator.round(1250n, 2)).toBe(1300n);
+		expect(calculator.round(-1250n, 2)).toBe(-1300n);
+		expect(calculator.round(250n, 2)).toBe(300n);
 		expect(calculator.round(123n, 0)).toBe(123n);
 		expect(calculator.round(123n, 19)).toBe(123n);
 	});

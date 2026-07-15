@@ -49,7 +49,7 @@ func (mm *Manager) Create(amount int64, code string) *Value {
 }
 
 // CreateFromFloat creates a Value instance from a float64 amount.
-// Uses banker's rounding (round half to even) for precision (e.g. 12.345 SGD -> 1235 cents, 12.344 SGD -> 1234 cents).
+// Rounds half away from zero for precision (e.g. 12.345 SGD -> 1235 cents, 12.344 SGD -> 1234 cents).
 //
 // WARNING: Floats are imprecise and should NOT be used for exact financial calculations.
 // Use this function only for user input conversion or external system integration.

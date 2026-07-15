@@ -1,4 +1,5 @@
 import { ERR_INVALID_AGGREGATOR_PROVIDER, ERR_NO_MONEY_PROVIDED } from '#money/errors';
+import { divideRoundAwayFromZero } from '#money/internal/rounding';
 import type { MoneyManager, MoneyValue } from '#money/money/core';
 
 export class MoneyAggregator {
@@ -58,6 +59,7 @@ export class MoneyAggregator {
 		return money;
 	}
 
+	/** Returns the average, rounding a fractional minor unit half away from zero. */
 	public avg(...items: MoneyValue[]): MoneyValue {
 		const manager = this.requireManager();
 
@@ -67,7 +69,7 @@ export class MoneyAggregator {
 
 		const sum = this.sum(...items);
 
-		return manager.create(sum.amount() / BigInt(items.length), sum.currency().code);
+		return manager.create(divideRoundAwayFromZero(sum.amount(), BigInt(items.length)), sum.currency().code);
 	}
 
 	private requireManager(): MoneyManager {

@@ -101,6 +101,8 @@ describe('@alloy/sdk/money OOP port', () => {
 		expect(aggregator.min(high, low, mid)).toBe(low);
 		expect(aggregator.max(low, high, mid)).toBe(high);
 		expect(aggregator.avg(low, mid, high).amount()).toBe(200n);
+		expect(aggregator.avg(manager.create(100n, 'EUR'), manager.create(101n, 'EUR')).amount()).toBe(101n);
+		expect(aggregator.avg(manager.create(-100n, 'EUR'), manager.create(-101n, 'EUR')).amount()).toBe(-101n);
 		expect(() => low.assertSameCurrency(usd)).toThrow(ERR_CURRENCY_MISMATCH.message);
 	});
 

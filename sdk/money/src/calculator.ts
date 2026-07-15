@@ -111,7 +111,7 @@ export class MoneyCalculator {
 		const reminder = 10n ** BigInt(exponent);
 		const module = absolute % reminder;
 
-		if (module > reminder / 2n) {
+		if (module >= reminder / 2n) {
 			absolute += reminder;
 		}
 
