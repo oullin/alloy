@@ -20,6 +20,12 @@ type StartSessionConfig struct {
 	GCProbability int
 	// GCMaxLifetime is the max session age in seconds for GC.
 	GCMaxLifetime int
+	// ActivityRefresh is the sliding-expiry interval: on a read-only request,
+	// the session's backend record is refreshed at most once per this interval
+	// (rather than once per request) so an active user's session does not
+	// expire while unchanged. A negative value disables the refresh entirely.
+	// When zero, it defaults to half the Lifetime.
+	ActivityRefresh time.Duration
 }
 
 // sessionResponseWriter intercepts WriteHeader / Write to flush the session
@@ -66,6 +72,18 @@ func mergeConfig(cfg StartSessionConfig) StartSessionConfig {
 
 	if cfg.GCMaxLifetime != 0 {
 		defaults.GCMaxLifetime = cfg.GCMaxLifetime
+	}
+
+	// Sliding-expiry refresh: zero means "derive from Lifetime" so an active
+	// session is kept alive without a per-request write; a negative value is an
+	// explicit opt-out and is preserved as-is (TouchActivity treats it as off).
+	switch {
+	case cfg.ActivityRefresh < 0:
+		defaults.ActivityRefresh = cfg.ActivityRefresh
+	case cfg.ActivityRefresh > 0:
+		defaults.ActivityRefresh = cfg.ActivityRefresh
+	default:
+		defaults.ActivityRefresh = defaults.Lifetime / 2
 	}
 
 	return defaults
@@ -138,6 +156,12 @@ func StartSession(handler Handler, cfg StartSessionConfig) func(http.Handler) ht
 
 			sw := &sessionResponseWriter{ResponseWriter: w, store: store, cfg: cfg}
 			next.ServeHTTP(sw, r)
+
+			// Sliding expiry: refresh the activity marker at most once per
+			// ActivityRefresh interval so an unchanged but active session is
+			// still persisted periodically. Save itself skips the write when
+			// the session is clean.
+			store.TouchActivity(time.Now(), cfg.ActivityRefresh)
 
 			if err := store.Save(r.Context()); err != nil {
 				// Best-effort; session save errors should not abort the response.
