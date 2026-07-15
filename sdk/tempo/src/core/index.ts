@@ -1059,13 +1059,19 @@ export class TempoImmutable {
 	add(value: number, unit: TimeUnit): this {
 		assertFiniteNumber(value, 'Amount');
 
-		const fixed = fixedUnitMilliseconds(unit);
-
-		if (fixed !== null) {
-			return this.make(new Date(this.value.getTime() + value * fixed));
-		}
-
+		// Calendar-aware units (day/week/month/quarter/year) are resolved by
+		// shifting wall-clock components in the active time zone so the result
+		// is DST-correct — a calendar day is 23h/24h/25h, not a fixed 86_400_000
+		// ms. This must run before the fixed-millisecond fast path below.
+		// `fixedUnitMilliseconds` still reports fixed sizes for day/week because
+		// elapsed-time consumers (diff/round/duration) need them.
 		switch (normalizeUnit(unit)) {
+			case 'day':
+				return this.addCalendarDays(value);
+
+			case 'week':
+				return this.addCalendarDays(value * 7);
+
 			case 'month':
 				return this.addMonths(value);
 
@@ -1074,10 +1080,29 @@ export class TempoImmutable {
 
 			case 'year':
 				return this.addYears(value);
-
-			default:
-				return this.make(this.value);
 		}
+
+		const fixed = fixedUnitMilliseconds(unit);
+
+		if (fixed !== null) {
+			return this.make(new Date(this.value.getTime() + value * fixed));
+		}
+
+		return this.make(this.value);
+	}
+
+	private addCalendarDays(days: number): this {
+		const parts = this.toObject();
+
+		return this.make(
+			dateFromZonedComponents(
+				{
+					...parts,
+					day: parts.day + days,
+				},
+				this.zone,
+			),
+		);
 	}
 
 	sub(value: number, unit: TimeUnit): this {
