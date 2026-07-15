@@ -90,7 +90,7 @@ export default defineConfig({
 			'check:imports': { command: 'vp exec node infra/scripts/tasks/check-package-imports.mjs', cache: false },
 			'inertia-demo-app:build': { command: 'vp build --config web/inertia-demo/app/vite.config.js', cache: false },
 			'inertia-demo-app:dev': { command: 'vp dev --config web/inertia-demo/app/vite.config.js', cache: false },
-			'inertia-demo:e2e': { command: 'vp run inertia-demo:e2e:agent-browser', cache: false },
+			'inertia-demo:e2e': { command: 'vp run inertia-demo:e2e:playwright', cache: false },
 			'inertia-demo:e2e:agent-browser': { command: 'vp run inertia-demo-app:build && vp exec node web/inertia-demo/tests/e2e/runner.mjs --target alloy', cache: false },
 			'inertia-demo:e2e:playwright': { command: 'vp run inertia-demo-app:build && vp exec node web/inertia-demo/tests/e2e/runner.playwright.mjs --target alloy', cache: false },
 			'inertia-demo:e2e:bedrock': { command: 'vp exec node web/inertia-demo/tests/e2e/runner.mjs --target bedrock --build-app', cache: false },
