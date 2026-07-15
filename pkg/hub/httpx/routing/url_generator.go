@@ -345,6 +345,7 @@ func canonicalizeQuery(rawQuery string) string {
 	}
 
 	values, err := url.ParseQuery(rawQuery)
+
 	if err != nil {
 		// Preserve the raw query rather than canonicalizing to ""; a
 		// malformed query then simply fails the signature comparison.
