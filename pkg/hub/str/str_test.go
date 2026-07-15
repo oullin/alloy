@@ -181,6 +181,33 @@ func TestStrSnake(t *testing.T) {
 	}
 }
 
+// TestStrSnakeCacheKeyDisambiguation guards against the cache key collision
+// where value+sep is ambiguous: Snake("a","_") and Snake("a_","") both hashed
+// to "a_", so the second call returned the first call's cached result.
+func TestStrSnakeCacheKeyDisambiguation(t *testing.T) {
+	// Not parallel: mutates the shared snake cache via FlushCache.
+	FlushCache()
+
+	if got := Snake("a", "_"); got != "a" {
+		t.Fatalf("Snake(\"a\",\"_\") = %q, want %q", got, "a")
+	}
+
+	if got := Snake("a_", ""); got != "a_" {
+		t.Fatalf("Snake(\"a_\",\"\") = %q, want %q (cache key collision)", got, "a_")
+	}
+
+	// Same collision, opposite computation order.
+	FlushCache()
+
+	if got := Snake("a_", ""); got != "a_" {
+		t.Fatalf("Snake(\"a_\",\"\") = %q, want %q", got, "a_")
+	}
+
+	if got := Snake("a", "_"); got != "a" {
+		t.Fatalf("Snake(\"a\",\"_\") = %q, want %q (cache key collision)", got, "a")
+	}
+}
+
 // Ref: @alloy/code-0380
 func TestStrCamel(t *testing.T) {
 	t.Parallel()

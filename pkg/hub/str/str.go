@@ -401,7 +401,9 @@ func Snake(value string, delimiter ...string) string {
 		sep = delimiter[0]
 	}
 
-	key := value + sep
+	// Separate value and sep with a NUL so distinct (value, sep) pairs cannot
+	// collide on the cache key: e.g. Snake("a","_") and Snake("a_","").
+	key := value + "\x00" + sep
 
 	if cached, ok := snakeCache.Load(key); ok {
 		return cached.(string)
