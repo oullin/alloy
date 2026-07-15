@@ -11,10 +11,6 @@ import (
 	"time"
 )
 
-// lastActivityKey is the attribute holding the sliding-expiry timestamp
-// refreshed by TouchActivity.
-const lastActivityKey = "_last_activity"
-
 // Store manages HTTP session state including attributes, flash data, and
 // CSRF tokens. It is safe for concurrent use.
 type Store struct {
@@ -33,6 +29,10 @@ type Store struct {
 	// regenerated) must always be written even when no attribute changed.
 	stored bool
 }
+
+// lastActivityKey is the attribute holding the sliding-expiry timestamp
+// refreshed by TouchActivity.
+const lastActivityKey = "_last_activity"
 
 // New creates a session store with a generated ID.
 func New(name string, handler Handler) *Store {

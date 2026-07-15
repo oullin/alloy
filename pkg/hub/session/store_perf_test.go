@@ -37,6 +37,7 @@ func cleanSeeded(t *testing.T, seed map[string]any) *session.Store {
 	h := handlers.NewArrayHandler()
 
 	s1 := session.New("t", h)
+
 	if err := s1.Start(ctx); err != nil {
 		t.Fatalf("seed start: %v", err)
 	}
@@ -50,6 +51,7 @@ func cleanSeeded(t *testing.T, seed map[string]any) *session.Store {
 	}
 
 	s2 := session.NewWithID("t", h, s1.GetID())
+
 	if err := s2.Start(ctx); err != nil {
 		t.Fatalf("reload start: %v", err)
 	}
@@ -145,6 +147,7 @@ func TestStoreSaveSkipsCleanReadOnlyRequest(t *testing.T) {
 
 	// First request: a brand-new session persists once.
 	s1 := session.New("t", h)
+
 	if err := s1.Start(ctx); err != nil {
 		t.Fatalf("start: %v", err)
 	}
@@ -163,6 +166,7 @@ func TestStoreSaveSkipsCleanReadOnlyRequest(t *testing.T) {
 	h.writes.Store(0)
 
 	s2 := session.NewWithID("t", h, s1.GetID())
+
 	if err := s2.Start(ctx); err != nil {
 		t.Fatalf("reload start: %v", err)
 	}

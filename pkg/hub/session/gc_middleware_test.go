@@ -45,6 +45,7 @@ func TestStartSessionGCRunsOffRequestPath(t *testing.T) {
 	h := newBlockingGCHandler()
 
 	ctx, cancel := context.WithCancel(context.Background())
+
 	defer cancel()
 
 	mw := session.StartSessionWithContext(ctx, h, session.StartSessionConfig{
