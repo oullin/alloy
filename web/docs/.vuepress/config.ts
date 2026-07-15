@@ -65,6 +65,7 @@ export default defineUserConfig({
 						{ text: 'Facades', link: '/architecture/facades' },
 						{ text: 'Configuration', link: '/architecture/configuration' },
 						{ text: 'Drivers', link: '/architecture/drivers' },
+						{ text: 'Cross-Runtime Parity', link: '/architecture/parity' },
 					],
 				},
 				{
