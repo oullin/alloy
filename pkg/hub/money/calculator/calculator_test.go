@@ -1,8 +1,11 @@
 package calculator
 
 import (
+	"errors"
 	"math"
 	"testing"
+
+	"github.com/oullin/alloy/pkg/hub/money/exception"
 )
 
 func TestNew(t *testing.T) {
@@ -308,5 +311,66 @@ func TestCalculatorSafeMultiplyMethodDelegates(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("SafeMultiply(MinInt64, -1) expected overflow error")
+	}
+}
+
+func TestSafeAdd(t *testing.T) {
+	c := NewCalculator()
+	tests := []struct {
+		name    string
+		calc    *Engine
+		a, b    Amount
+		want    Amount
+		wantErr error
+	}{
+		{"positive numbers", c, 100, 50, 150, nil},
+		{"negative numbers", c, -100, -50, -150, nil},
+		{"positive overflow", c, math.MaxInt64, 1, 0, exception.ErrOverflow},
+		{"max int64 plus zero", c, math.MaxInt64, 0, math.MaxInt64, nil},
+		{"nil calculator", nil, 100, 50, 0, nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.calc.SafeAdd(tt.a, tt.b)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Fatalf("SafeAdd(%d, %d) error = %v; want %v", tt.a, tt.b, err, tt.wantErr)
+			}
+
+			if got != tt.want {
+				t.Errorf("SafeAdd(%d, %d) = %d; want %d", tt.a, tt.b, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSafeSubtract(t *testing.T) {
+	c := NewCalculator()
+	tests := []struct {
+		name    string
+		calc    *Engine
+		a, b    Amount
+		want    Amount
+		wantErr error
+	}{
+		{"positive numbers", c, 100, 50, 50, nil},
+		{"negative numbers", c, -100, -50, -50, nil},
+		{"negative overflow", c, math.MinInt64, 1, 0, exception.ErrOverflow},
+		{"nil calculator", nil, 100, 50, 0, nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.calc.SafeSubtract(tt.a, tt.b)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Fatalf("SafeSubtract(%d, %d) error = %v; want %v", tt.a, tt.b, err, tt.wantErr)
+			}
+
+			if got != tt.want {
+				t.Errorf("SafeSubtract(%d, %d) = %d; want %d", tt.a, tt.b, got, tt.want)
+			}
+		})
 	}
 }

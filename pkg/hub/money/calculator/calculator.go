@@ -1,6 +1,10 @@
 package calculator
 
-import "math"
+import (
+	"math"
+
+	"github.com/oullin/alloy/pkg/hub/money/exception"
+)
 
 // Amount represents the integer value of a monetary amount.
 type Amount = int64
@@ -35,6 +39,32 @@ func (c *Engine) SafeMultiply(initial int64, multipliers ...int64) (int64, error
 	}
 
 	return SafeMultiply(initial, multipliers...)
+}
+
+// SafeAdd adds two amounts, returning exception.ErrOverflow if the result overflows int64.
+func (c *Engine) SafeAdd(a, b Amount) (Amount, error) {
+	if c == nil {
+		return 0, nil
+	}
+
+	if (b > 0 && a > math.MaxInt64-b) || (b < 0 && a < math.MinInt64-b) {
+		return 0, exception.ErrOverflow
+	}
+
+	return a + b, nil
+}
+
+// SafeSubtract subtracts b from a, returning exception.ErrOverflow if the result overflows int64.
+func (c *Engine) SafeSubtract(a, b Amount) (Amount, error) {
+	if c == nil {
+		return 0, nil
+	}
+
+	if (b > 0 && a < math.MinInt64+b) || (b < 0 && a > math.MaxInt64+b) {
+		return 0, exception.ErrOverflow
+	}
+
+	return a - b, nil
 }
 
 // Divide divides an amount by a seed. Returns 0 if the seed is 0.

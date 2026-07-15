@@ -124,7 +124,13 @@ func (mm *Manager) Add(m *Value, ms ...*Value) (*Value, error) {
 			return nil, err
 		}
 
-		result.amount += m2.amount
+		amount, err := mm.calculator.SafeAdd(result.amount, m2.amount)
+
+		if err != nil {
+			return nil, err
+		}
+
+		result.amount = amount
 	}
 
 	return result, nil
@@ -147,7 +153,13 @@ func (mm *Manager) Subtract(m *Value, ms ...*Value) (*Value, error) {
 			return nil, err
 		}
 
-		result.amount -= m2.amount
+		amount, err := mm.calculator.SafeSubtract(result.amount, m2.amount)
+
+		if err != nil {
+			return nil, err
+		}
+
+		result.amount = amount
 	}
 
 	return result, nil
