@@ -9,9 +9,9 @@ Verification commands are the same repo-wide (each plan repeats the subset it ne
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | Queue reliability: attempt tracking, panic recovery, fail-job integrity | P1 | L | — | TODO |
-| 002 | Redis driver job visibility (reservation / at-most-once decision) | P1 | L | 001 | TODO |
-| 003 | Container concurrency safety | P1 | L | — | TODO |
+| 001 | Queue reliability: attempt tracking, panic recovery, fail-job integrity | P1 | L | — | DONE |
+| 002 | Redis driver job visibility (reservation / at-most-once decision) | P1 | L | 001 | DONE |
+| 003 | Container concurrency safety | P1 | L | — | DONE |
 | 004 | Router per-request route scope | P1 | M | — | TODO |
 | 005 | Money arithmetic overflow safety & rounding policy (Go+TS) | P1 | M | — | TODO |
 | 006 | Money exchange integer conversion (Go+TS) | P2 | M | — | TODO |
@@ -37,6 +37,12 @@ Verification commands are the same repo-wide (each plan repeats the subset it ne
 | 026 | Cross-runtime parity matrix & policy doc | P3 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale).
+
+Execution record — CONSOLIDATED: plans 001+002+003 now ship together as PR https://github.com/oullin/alloy/pull/76 (branch `advisor/hub-hardening-001-003`, 23 linear commits); the per-plan PRs #72/#73/#75 below were individually reviewed, taken CI-green, then closed in favor of #76 at the owner's request (branches preserved).
+
+001 executed 2026-07-14 by an Antigravity (Gemini 3.5 Flash High) executor on branch `advisor/001-queue-reliability` (based on `396e371`, 10 commits incl. repo-formatter pass `d28124d`) — reviewed, approved, and published as draft PR https://github.com/oullin/alloy/pull/72 (base `main`); merge is the owner's call. 002 executed 2026-07-14 by the same Antigravity executor on branch `advisor/002-redis-visibility` (rebased onto `d28124d`, commits `d2f1131`+`c4942cb`) — reservation path chosen: Lua pop+reserve, migrateExpired reclaim, 60s configurable visibility timeout, at-least-once semantics documented. Reviewed and approved; published as draft PR https://github.com/oullin/alloy/pull/73 (stacked on #72, plus formatter commit `8548765`). Post-publication: a PR-babysitter pass addressed gemini bot reviews on both PRs (001: `f4add63` — failover Pop now surfaces a real backend error even when another backend returns ErrNoJob (accepted deviation from plan 001 step 5's "every backend" wording; aligns with the plan-010 no-swallowed-errors direction, and FailedOver events already fire either way), sync panic recovery gained debug.Stack(), redis release preserves unknown payload fields via generic-map tries bump; 002: `0c29d80` — Pop surfaces context.Canceled/DeadlineExceeded instead of falling back, Eval contract documented on RedisClient). Both PRs ready-for-review; after the Go 1.26.5 toolchain bump merged (#74, fixing GO-2026-5856) both were rebased onto main (heads `03cf6cc` / `5d6dabe`) and CI is fully green including govulncheck. OPEN DECISION for the owner: reclaimed-after-crash jobs keep their `tries` count, so a hard-crashing (non-panicking) handler redelivers forever on redis; fixing it means incrementing tries at reserve time (Laravel-style cjson in the Lua script), which is also the 0-based/1-based attempt harmonization across drivers. Needs a small follow-up plan if wanted.
+
+003 executed 2026-07-14 by the Antigravity executor on branch `advisor/003-container-concurrency` (based on `c85dd42`): goroutine-local resolution contexts (cloned-App + done-flag), panic-safe per-abstract single-flight (unparameterized shared bindings only), Application locks that never hold across provider hooks (in-flight waiters), Make∥Flush race fixed. One REVISE round caught: stored-clone escape, unlocked clone race, two provider-hook deadlock vectors, single-flight panic-stranding and parameter-coalescing. Accepted documented tradeoff: cross-goroutine mutually-dependent singleton cycles block instead of erroring (invalid configs; noted on App doc). Full -race suite + repo gate green; published as PR https://github.com/oullin/alloy/pull/75 — ready-for-review, CI fully green (govulncheck included). Post-publication bot round added `5ee5855` (reviewer-audited and accepted): singleflight releases waiters on runtime.Goexit (completion-flag cleanup, x/sync semantics) and Application.Register dedupes re-registration of deferred providers. Known follow-up for plan 002: redis reports 0-based attempts on first pop while database/SQS/beanstalkd-stats report 1-based; harmonize when reworking redis visibility.
 
 ## Dependency notes
 
