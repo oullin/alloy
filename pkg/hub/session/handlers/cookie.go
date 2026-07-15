@@ -19,9 +19,15 @@ type CookieHandler struct {
 	name    string
 	request *http.Request
 	writer  http.ResponseWriter
+	// secure is a tri-state Secure flag for the emitted cookie: nil (the
+	// default) means secure-by-default (true); an explicit false set via
+	// SetSecure is honored so local HTTP dev can opt out.
+	secure *bool
 }
 
-// NewCookieHandler creates a CookieHandler. name is the cookie name.
+// NewCookieHandler creates a CookieHandler. name is the cookie name. The
+// session cookie is emitted with Secure=true by default; call SetSecure(false)
+// to opt out for local HTTP development.
 func NewCookieHandler(enc CookieEncrypter, name string) *CookieHandler {
 	return &CookieHandler{enc: enc, name: name}
 }
@@ -31,6 +37,13 @@ func (h *CookieHandler) SetRequest(r *http.Request) { h.request = r }
 
 // SetWriter sets the response writer for cookie writing.
 func (h *CookieHandler) SetWriter(w http.ResponseWriter) { h.writer = w }
+
+// SetSecure overrides the Secure flag on emitted cookies. Unset, the handler
+// defaults to Secure=true; pass false to opt out for local HTTP development.
+func (h *CookieHandler) SetSecure(secure bool) { h.secure = &secure }
+
+// isSecure resolves the tri-state: nil defaults to true.
+func (h *CookieHandler) isSecure() bool { return h.secure == nil || *h.secure }
 
 func (h *CookieHandler) Open(_ context.Context, _, _ string) error { return nil }
 
@@ -72,6 +85,7 @@ func (h *CookieHandler) Write(_ context.Context, _, data string) error {
 		Value:    ciphertext,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   h.isSecure(),
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -88,6 +102,7 @@ func (h *CookieHandler) Destroy(_ context.Context, _ string) error {
 		Value:  "",
 		Path:   "/",
 		MaxAge: -1,
+		Secure: h.isSecure(),
 	})
 
 	return nil
