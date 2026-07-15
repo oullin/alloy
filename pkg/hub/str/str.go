@@ -1600,9 +1600,10 @@ func Random(length ...int) string {
 func generateRandom(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
+	maxLimit := big.NewInt(int64(len(charset)))
 
 	for i := range result {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		n, err := rand.Int(rand.Reader, maxLimit)
 
 		if err != nil {
 			panic(fmt.Errorf("str: generate random: %w", err))
