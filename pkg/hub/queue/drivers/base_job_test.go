@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
+	syncdriver "github.com/oullin/alloy/pkg/hub/queue/drivers/sync"
 )
 
 // newTestJob creates a BaseJob-backed Job via the SyncDriver for testing.
@@ -22,7 +22,7 @@ func newTestJob() queue.Job {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("test", handler)
+	drv := syncdriver.NewDriver("test", handler)
 	_, _ = drv.Push(context.Background(), "q", []byte("payload"))
 
 	return captured
@@ -118,7 +118,7 @@ func TestBaseJobFireWithFunc(t *testing.T) {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("test", handler)
+	drv := syncdriver.NewDriver("test", handler)
 	_, _ = drv.Push(context.Background(), "q", []byte("p"))
 
 	if !fired {

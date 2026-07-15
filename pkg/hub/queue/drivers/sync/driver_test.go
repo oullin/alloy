@@ -1,4 +1,4 @@
-package drivers_test
+package sync_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	syncdriver "github.com/oullin/alloy/pkg/hub/queue/drivers/sync"
 )
 
 func TestSyncDriverPushExecutesImmediately(t *testing.T) {
@@ -19,7 +19,7 @@ func TestSyncDriverPushExecutesImmediately(t *testing.T) {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	_, err := drv.Push(context.Background(), "default", []byte(`{"job":"test"}`))
 
 	if err != nil {
@@ -41,7 +41,7 @@ func TestSyncDriverPushMultipleExecutesAll(t *testing.T) {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	ids, err := drv.PushMultiple(context.Background(), "default", [][]byte{
 		[]byte("a"), []byte("b"), []byte("c"),
 	})
@@ -63,7 +63,7 @@ func TestSyncDriverPopAlwaysReturnsErrNoJob(t *testing.T) {
 	t.Parallel()
 
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 
 	_, err := drv.Pop(context.Background(), "default")
 
@@ -76,7 +76,7 @@ func TestSyncDriverSizeAlwaysZero(t *testing.T) {
 	t.Parallel()
 
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	ctx := context.Background()
 
 	for _, fn := range []func(context.Context, string) (int64, error){
@@ -98,7 +98,7 @@ func TestSyncDriverConnectionName(t *testing.T) {
 	t.Parallel()
 
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
-	drv := drivers.NewSyncDriver("my-conn", handler)
+	drv := syncdriver.NewDriver("my-conn", handler)
 
 	if drv.ConnectionName() != "my-conn" {
 		t.Errorf("expected 'my-conn', got %q", drv.ConnectionName())
@@ -112,7 +112,7 @@ func TestSyncDriverHandlerError(t *testing.T) {
 		return errors.New("handler failed")
 	})
 
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	_, err := drv.Push(context.Background(), "default", []byte("payload"))
 
 	if err == nil {
@@ -135,7 +135,7 @@ func TestSyncDriverPushJobHasCorrectPayload(t *testing.T) {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	payload := []byte(`{"job":"test","data":{"key":"val"}}`)
 	_, _ = drv.Push(context.Background(), "q1", payload)
 
@@ -155,7 +155,7 @@ func TestSyncDriverPushJobHasCorrectQueue(t *testing.T) {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	_, _ = drv.Push(context.Background(), "emails", []byte("p"))
 
 	if queueName != "emails" {
@@ -167,7 +167,7 @@ func TestSyncDriverInspectionAlwaysEmpty(t *testing.T) {
 	t.Parallel()
 
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
-	drv := drivers.NewSyncDriver("sync", handler)
+	drv := syncdriver.NewDriver("sync", handler)
 	ctx := context.Background()
 
 	names, err := drv.QueueNames(ctx)

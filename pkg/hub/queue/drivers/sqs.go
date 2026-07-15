@@ -7,6 +7,7 @@ import (
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/jobs"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/stats"
 )
 
 // SQSClient is the interface for an AWS SQS client.
@@ -234,9 +235,9 @@ func (d *SQSDriver) Size(ctx context.Context, queueName string) (int64, error) {
 		return 0, err
 	}
 
-	return parseStatInt(attrs, "ApproximateNumberOfMessages") +
-		parseStatInt(attrs, "ApproximateNumberOfMessagesDelayed") +
-		parseStatInt(attrs, "ApproximateNumberOfMessagesNotVisible"), nil
+	return stats.ParseInt(attrs, "ApproximateNumberOfMessages") +
+		stats.ParseInt(attrs, "ApproximateNumberOfMessagesDelayed") +
+		stats.ParseInt(attrs, "ApproximateNumberOfMessagesNotVisible"), nil
 }
 
 func (d *SQSDriver) PendingSize(ctx context.Context, queueName string) (int64, error) {
@@ -252,7 +253,7 @@ func (d *SQSDriver) ReservedSize(ctx context.Context, queueName string) (int64, 
 		return 0, err
 	}
 
-	return parseStatInt(attrs, "ApproximateNumberOfMessagesNotVisible"), nil
+	return stats.ParseInt(attrs, "ApproximateNumberOfMessagesNotVisible"), nil
 }
 
 func (d *SQSDriver) ConnectionName() string { return d.connection }

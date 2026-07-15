@@ -9,6 +9,7 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/null"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
@@ -136,7 +137,7 @@ func TestBackgroundDriverSizeDelegates(t *testing.T) {
 func TestBackgroundDriverConnectionName(t *testing.T) {
 	t.Parallel()
 
-	inner := drivers.NewNullDriver("null")
+	inner := null.NewDriver("null")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "my-bg")
 
 	if drv.ConnectionName() != "my-bg" {
@@ -201,7 +202,7 @@ func TestBackgroundDriverReservedSizeDelegates(t *testing.T) {
 func TestBackgroundDriverInspectionDelegatesErrNotSupported(t *testing.T) {
 	t.Parallel()
 
-	inner := drivers.NewNullDriver("null")
+	inner := null.NewDriver("null")
 	drv := drivers.NewBackgroundDriver("true", nil, inner, "bg")
 	ctx := context.Background()
 

@@ -7,6 +7,8 @@ import (
 
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/null"
+	syncdriver "github.com/oullin/alloy/pkg/hub/queue/drivers/sync"
 )
 
 func TestSyncDriverProcessesImmediately(t *testing.T) {
@@ -17,7 +19,7 @@ func TestSyncDriverProcessesImmediately(t *testing.T) {
 		return nil
 	})
 
-	drv := drivers.NewSyncDriver("default", handler)
+	drv := syncdriver.NewDriver("default", handler)
 	_, err := drv.Push(context.Background(), "default", []byte(`{"job":"test"}`))
 
 	if err != nil {
@@ -30,7 +32,7 @@ func TestSyncDriverProcessesImmediately(t *testing.T) {
 }
 
 func TestNullDriverDiscardsJobs(t *testing.T) {
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	id, err := drv.Push(context.Background(), "default", []byte("payload"))
 
 	if err != nil {
@@ -47,7 +49,7 @@ func TestNullDriverDiscardsJobs(t *testing.T) {
 }
 
 func TestWorkerStopsOnEmpty(t *testing.T) {
-	drv := drivers.NewNullDriver("default")
+	drv := null.NewDriver("default")
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
 
 	w := queue.NewWorker(drv, handler, nil, queue.WorkerOptions{
@@ -67,8 +69,8 @@ func TestWorkerStopsOnEmpty(t *testing.T) {
 func TestFailoverDriverFallsBack(t *testing.T) {
 	// A null driver always succeeds (even though it discards). FailoverDriver
 	// should return the first successful push.
-	d1 := drivers.NewNullDriver("d1")
-	d2 := drivers.NewNullDriver("d2")
+	d1 := null.NewDriver("d1")
+	d2 := null.NewDriver("d2")
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	_, err := drv.Push(context.Background(), "q", []byte("payload"))

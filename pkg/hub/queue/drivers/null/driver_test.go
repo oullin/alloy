@@ -1,4 +1,4 @@
-package drivers_test
+package null_test
 
 import (
 	"context"
@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/null"
 )
 
 func TestNullDriverPushDiscardsJob(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	id, err := drv.Push(context.Background(), "default", []byte("payload"))
 
 	if err != nil {
@@ -28,7 +28,7 @@ func TestNullDriverPushDiscardsJob(t *testing.T) {
 func TestNullDriverPushDelayedDiscardsJob(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	id, err := drv.PushDelayed(context.Background(), "default", []byte("payload"), 5*time.Second)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func TestNullDriverPushDelayedDiscardsJob(t *testing.T) {
 func TestNullDriverPushMultipleReturnsCorrectIDCount(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	ids, err := drv.PushMultiple(context.Background(), "default", [][]byte{
 		[]byte("a"), []byte("b"), []byte("c"),
 	})
@@ -60,7 +60,7 @@ func TestNullDriverPushMultipleReturnsCorrectIDCount(t *testing.T) {
 func TestNullDriverPopReturnsErrNoJob(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	_, err := drv.Pop(context.Background(), "default")
 
 	if !errors.Is(err, queue.ErrNoJob) {
@@ -71,7 +71,7 @@ func TestNullDriverPopReturnsErrNoJob(t *testing.T) {
 func TestNullDriverAllSizesReturnZero(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	ctx := context.Background()
 
 	for _, fn := range []func(context.Context, string) (int64, error){
@@ -92,7 +92,7 @@ func TestNullDriverAllSizesReturnZero(t *testing.T) {
 func TestNullDriverInspectionAlwaysEmpty(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 	ctx := context.Background()
 
 	names, err := drv.QueueNames(ctx)
@@ -123,7 +123,7 @@ func TestNullDriverInspectionAlwaysEmpty(t *testing.T) {
 func TestNullDriverConnectionName(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("my-null")
+	drv := null.NewDriver("my-null")
 
 	if drv.ConnectionName() != "my-null" {
 		t.Errorf("expected 'my-null', got %q", drv.ConnectionName())

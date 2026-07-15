@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/null"
 )
 
 // inspectorQueue is a queue.Backend that satisfies the optional
@@ -29,7 +29,7 @@ func TestManagerRegisterAndDriver(t *testing.T) {
 	m := queue.NewManager()
 
 	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -58,7 +58,7 @@ func TestManagerDriverCachesInstance(t *testing.T) {
 	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
 		calls++
 
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -110,7 +110,7 @@ func TestManagerExtendIsAlias(t *testing.T) {
 	m := queue.NewManager()
 
 	m.Extend("null", func(_ map[string]any) (queue.Backend, error) {
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -132,7 +132,7 @@ func TestManagerConcurrentAccess(t *testing.T) {
 	m := queue.NewManager()
 
 	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -158,7 +158,7 @@ func TestManagerConnectionIsAliasForDriver(t *testing.T) {
 	m := queue.NewManager()
 
 	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -196,7 +196,7 @@ func TestManagerPurge(t *testing.T) {
 	m := queue.NewManager()
 
 	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -216,7 +216,7 @@ func TestManagerForgetDriver(t *testing.T) {
 	m := queue.NewManager()
 
 	m.Register("null", func(_ map[string]any) (queue.Backend, error) {
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 
 	m.SetConfig("default", map[string]any{"driver": "null"})
@@ -397,7 +397,7 @@ func TestManagerAllPendingJobsConnectionWithoutContractErrors(t *testing.T) {
 		// NullDriver does satisfy QueueNames/JobInspector (returns nil),
 		// so to hit the "no contract" branch we use a thin driver here
 		// — but NullDriver returns nil names so the fan-out returns empty.
-		return drivers.NewNullDriver("null"), nil
+		return null.NewDriver("null"), nil
 	})
 	m.SetConfig("default", map[string]any{"driver": "null"})
 

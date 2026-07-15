@@ -1,4 +1,4 @@
-package drivers
+package sync
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/jobs"
 )
 
-// SyncDriver executes jobs immediately in the same goroutine. It is
+// Driver executes jobs immediately in the same goroutine. It is
 // The Go API differs from the upstream in one ergonomic way: the handler
 // that runs every job is injected at construction time rather than
 // resolved from a container per-push. This keeps the existing bedrock
@@ -24,7 +24,7 @@ import (
 //
 // If the handler also implements queue.FailureHandler, its Failed
 // method is invoked between the Fail call and the JobFailed emission,
-type SyncDriver struct {
+type Driver struct {
 	connection string
 	handler    queue.Handler
 	emitter    queue.EventEmitter
@@ -33,39 +33,39 @@ type SyncDriver struct {
 
 type syncJob struct{ jobs.Base }
 
-// TransactionCallbackRegistrar is the small transaction hook SyncDriver
+// TransactionCallbackRegistrar is the small transaction hook Driver
 // needs to mirror the upstream after-commit dispatch registration.
 type TransactionCallbackRegistrar interface {
 	AddCallback(func())
 }
 
-// NewSyncDriver creates a SyncDriver. handler is called synchronously
+// NewDriver creates a Driver. handler is called synchronously
 // for every Push. The emitter is nil until SetEmitter is called.
-func NewSyncDriver(connection string, handler queue.Handler) *SyncDriver {
-	return &SyncDriver{connection: connection, handler: handler}
+func NewDriver(connection string, handler queue.Handler) *Driver {
+	return &Driver{connection: connection, handler: handler}
 }
 
 // SetEmitter installs an EventEmitter. A nil emitter disables event
 // emission (the default). Returns the driver for chaining.
-func (d *SyncDriver) SetEmitter(e queue.EventEmitter) *SyncDriver {
+func (d *Driver) SetEmitter(e queue.EventEmitter) *Driver {
 	d.emitter = e
 
 	return d
 }
 
-func (d *SyncDriver) SetTransactionManager(tx TransactionCallbackRegistrar) *SyncDriver {
+func (d *Driver) SetTransactionManager(tx TransactionCallbackRegistrar) *Driver {
 	d.tx = tx
 
 	return d
 }
 
-func (d *SyncDriver) Push(ctx context.Context, queueName string, payload []byte) (string, error) {
+func (d *Driver) Push(ctx context.Context, queueName string, payload []byte) (string, error) {
 	return d.PushJob(ctx, queueName, nil, payload, nil)
 }
 
 // PushJob dispatches payload with the original job value and connection
 // config available for after-commit precedence checks.
-func (d *SyncDriver) PushJob(ctx context.Context, queueName string, jobValue any, payload []byte, config map[string]any) (string, error) {
+func (d *Driver) PushJob(ctx context.Context, queueName string, jobValue any, payload []byte, config map[string]any) (string, error) {
 	job := &syncJob{Base: jobs.New(jobs.Config{Payload: payload, Queue: queueName, Connection: d.connection})}
 	job.OnFire(func(ctx context.Context) error {
 		return d.handler.Handle(ctx, job)
@@ -84,7 +84,7 @@ func (d *SyncDriver) PushJob(ctx context.Context, queueName string, jobValue any
 
 // executeJob runs the upstream-style lifecycle around the
 // handler.Handle call and returns whatever error the handler produced.
-func (d *SyncDriver) executeJob(ctx context.Context, job queue.Job) error {
+func (d *Driver) executeJob(ctx context.Context, job queue.Job) error {
 	d.emit(queue.JobProcessing{ConnectionName: d.connection, Job: job})
 
 	err := job.Fire(ctx)
@@ -110,19 +110,19 @@ func (d *SyncDriver) executeJob(ctx context.Context, job queue.Job) error {
 	return nil
 }
 
-func (d *SyncDriver) emit(event any) {
+func (d *Driver) emit(event any) {
 	if d.emitter != nil {
 		d.emitter.Emit(event)
 	}
 }
 
-func (d *SyncDriver) PushDelayed(ctx context.Context, queueName string, payload []byte, delay time.Duration) (string, error) {
+func (d *Driver) PushDelayed(ctx context.Context, queueName string, payload []byte, delay time.Duration) (string, error) {
 	time.Sleep(delay)
 
 	return d.Push(ctx, queueName, payload)
 }
 
-func (d *SyncDriver) PushMultiple(ctx context.Context, queueName string, payloads [][]byte) ([]string, error) {
+func (d *Driver) PushMultiple(ctx context.Context, queueName string, payloads [][]byte) ([]string, error) {
 	ids := make([]string, 0, len(payloads))
 
 	for _, p := range payloads {
@@ -138,30 +138,30 @@ func (d *SyncDriver) PushMultiple(ctx context.Context, queueName string, payload
 	return ids, nil
 }
 
-func (d *SyncDriver) Pop(_ context.Context, _ string) (queue.Job, error) { return nil, queue.ErrNoJob }
+func (d *Driver) Pop(_ context.Context, _ string) (queue.Job, error) { return nil, queue.ErrNoJob }
 
-func (d *SyncDriver) Size(_ context.Context, _ string) (int64, error)         { return 0, nil }
-func (d *SyncDriver) PendingSize(_ context.Context, _ string) (int64, error)  { return 0, nil }
-func (d *SyncDriver) DelayedSize(_ context.Context, _ string) (int64, error)  { return 0, nil }
-func (d *SyncDriver) ReservedSize(_ context.Context, _ string) (int64, error) { return 0, nil }
-func (d *SyncDriver) ConnectionName() string                                  { return d.connection }
+func (d *Driver) Size(_ context.Context, _ string) (int64, error)         { return 0, nil }
+func (d *Driver) PendingSize(_ context.Context, _ string) (int64, error)  { return 0, nil }
+func (d *Driver) DelayedSize(_ context.Context, _ string) (int64, error)  { return 0, nil }
+func (d *Driver) ReservedSize(_ context.Context, _ string) (int64, error) { return 0, nil }
+func (d *Driver) ConnectionName() string                                  { return d.connection }
 
 // QueueNames returns an empty slice — sync jobs are executed inline
 // and never persisted, so there is nothing to enumerate.
-func (d *SyncDriver) QueueNames(_ context.Context) ([]string, error) { return nil, nil }
+func (d *Driver) QueueNames(_ context.Context) ([]string, error) { return nil, nil }
 
 // PendingJobs returns an empty slice. The sync driver never has
 // pending work — jobs are processed inside the Push call itself.
-func (d *SyncDriver) PendingJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+func (d *Driver) PendingJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
 	return nil, nil
 }
 
 // DelayedJobs returns an empty slice.
-func (d *SyncDriver) DelayedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+func (d *Driver) DelayedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
 	return nil, nil
 }
 
 // ReservedJobs returns an empty slice.
-func (d *SyncDriver) ReservedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
+func (d *Driver) ReservedJobs(_ context.Context, _ string) ([]queue.InspectedJob, error) {
 	return nil, nil
 }

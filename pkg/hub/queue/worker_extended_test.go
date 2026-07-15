@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/null"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
 )
 
@@ -356,7 +356,7 @@ func TestWorkerMaxTimeLimit(t *testing.T) {
 func TestWorkerDefaultSleep(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
 
@@ -373,7 +373,7 @@ func TestWorkerDefaultSleep(t *testing.T) {
 func TestWorkerContextCancellation(t *testing.T) {
 	t.Parallel()
 
-	drv := drivers.NewNullDriver("null")
+	drv := null.NewDriver("null")
 
 	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error { return nil })
 

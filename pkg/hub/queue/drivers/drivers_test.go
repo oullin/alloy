@@ -57,36 +57,15 @@ type mockSQSMsg struct {
 	body    string
 }
 
-// --- Mock Beanstalkd Client ---
-
-type mockBeanstalkdClient struct {
-	mu         sync.Mutex
-	tubes      map[string][]mockBeanstalkdJob
-	nextID     uint64
-	reserveErr error
-	deleteErr  error
-	releaseErr error
-	buryErr    error
-	putErr     error
-	stats      map[string]map[string]string
-	lastPut    struct {
-		tube     string
-		priority uint32
-		delay    time.Duration
-		ttr      time.Duration
-	}
-}
-
-type mockBeanstalkdJob struct {
-	id   uint64
-	body []byte
-}
-
 // addQueryRow stages a single row to be returned by the next Query call.
 // Call multiple times to stage a multi-row result set.
 
 // Hand the staged rows to a fresh iterator and clear the slot.
 
+// mockDBRows iterates a pre-staged slice of rows. It is the minimal
+// drivers.DBRows implementation tests need.
+// mockDBRows iterates a pre-staged slice of rows. It is the minimal
+// drivers.DBRows implementation tests need.
 // mockDBRows iterates a pre-staged slice of rows. It is the minimal
 // drivers.DBRows implementation tests need.
 // mockDBRows iterates a pre-staged slice of rows. It is the minimal
@@ -370,75 +349,4 @@ func (c *mockSQSClient) GetQueueAttributes(_ context.Context, _ string, _ []stri
 	}
 
 	return c.attrs, nil
-}
-
-func newMockBeanstalkdClient() *mockBeanstalkdClient {
-	return &mockBeanstalkdClient{
-		tubes: make(map[string][]mockBeanstalkdJob),
-		stats: make(map[string]map[string]string),
-	}
-}
-
-func (c *mockBeanstalkdClient) Put(_ context.Context, tube string, body []byte, priority uint32, delay, ttr time.Duration) (uint64, error) {
-	c.mu.Lock()
-
-	defer c.mu.Unlock()
-
-	if c.putErr != nil {
-		return 0, c.putErr
-	}
-
-	c.nextID++
-	c.tubes[tube] = append(c.tubes[tube], mockBeanstalkdJob{id: c.nextID, body: body})
-	c.lastPut.tube = tube
-	c.lastPut.priority = priority
-	c.lastPut.delay = delay
-	c.lastPut.ttr = ttr
-
-	return c.nextID, nil
-}
-
-func (c *mockBeanstalkdClient) ReserveWithTimeout(_ context.Context, tube string, _ time.Duration) (uint64, []byte, error) {
-	c.mu.Lock()
-
-	defer c.mu.Unlock()
-
-	if c.reserveErr != nil {
-		return 0, nil, c.reserveErr
-	}
-
-	jobs := c.tubes[tube]
-
-	if len(jobs) == 0 {
-		return 0, nil, errors.New("empty")
-	}
-
-	job := jobs[0]
-	c.tubes[tube] = jobs[1:]
-
-	return job.id, job.body, nil
-}
-
-func (c *mockBeanstalkdClient) Delete(_ context.Context, _ uint64) error {
-	return c.deleteErr
-}
-
-func (c *mockBeanstalkdClient) Release(_ context.Context, _ uint64, _ uint32, _ time.Duration) error {
-	return c.releaseErr
-}
-
-func (c *mockBeanstalkdClient) Bury(_ context.Context, _ uint64, _ uint32) error {
-	return c.buryErr
-}
-
-func (c *mockBeanstalkdClient) StatsTube(_ context.Context, tube string) (map[string]string, error) {
-	c.mu.Lock()
-
-	defer c.mu.Unlock()
-
-	if s, ok := c.stats[tube]; ok {
-		return s, nil
-	}
-
-	return map[string]string{}, nil
 }

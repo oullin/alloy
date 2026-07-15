@@ -9,14 +9,16 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/internal/redistest"
+	"github.com/oullin/alloy/pkg/hub/queue/drivers/null"
 	"github.com/oullin/alloy/pkg/hub/queue/drivers/redis"
+	syncdriver "github.com/oullin/alloy/pkg/hub/queue/drivers/sync"
 )
 
 func TestFailoverDriverPushUsesFirstSuccessful(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
-	d2 := drivers.NewNullDriver("d2")
+	d1 := null.NewDriver("d1")
+	d2 := null.NewDriver("d2")
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	_, err := drv.Push(context.Background(), "q", []byte("payload"))
@@ -33,9 +35,9 @@ func TestFailoverDriverPushFallsBackOnError(t *testing.T) {
 		return errors.New("fail")
 	})
 
-	failing := drivers.NewSyncDriver("d1", handler)
+	failing := syncdriver.NewDriver("d1", handler)
 
-	ok := drivers.NewNullDriver("d2")
+	ok := null.NewDriver("d2")
 
 	drv := drivers.NewFailoverDriver("failover", failing, ok)
 
@@ -53,8 +55,8 @@ func TestFailoverDriverPushAllFail(t *testing.T) {
 		return errors.New("fail")
 	})
 
-	d1 := drivers.NewSyncDriver("d1", handler)
-	d2 := drivers.NewSyncDriver("d2", handler)
+	d1 := syncdriver.NewDriver("d1", handler)
+	d2 := syncdriver.NewDriver("d2", handler)
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	_, err := drv.Push(context.Background(), "q", []byte("payload"))
@@ -67,8 +69,8 @@ func TestFailoverDriverPushAllFail(t *testing.T) {
 func TestFailoverDriverPushDelayedFallback(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
-	d2 := drivers.NewNullDriver("d2")
+	d1 := null.NewDriver("d1")
+	d2 := null.NewDriver("d2")
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	_, err := drv.PushDelayed(context.Background(), "q", []byte("payload"), 5*time.Second)
@@ -81,8 +83,8 @@ func TestFailoverDriverPushDelayedFallback(t *testing.T) {
 func TestFailoverDriverPushMultipleFallback(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
-	d2 := drivers.NewNullDriver("d2")
+	d1 := null.NewDriver("d1")
+	d2 := null.NewDriver("d2")
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	ids, err := drv.PushMultiple(context.Background(), "q", [][]byte{[]byte("a"), []byte("b")})
@@ -101,7 +103,7 @@ func TestFailoverDriverPopTriesEach(t *testing.T) {
 
 	client := redistest.NewClient()
 	redisDrv := redis.NewDriver(client, "redis")
-	null := drivers.NewNullDriver("null")
+	null := null.NewDriver("null")
 
 	_, _ = redisDrv.Push(context.Background(), "q", []byte("from-redis"))
 
@@ -121,8 +123,8 @@ func TestFailoverDriverPopTriesEach(t *testing.T) {
 func TestFailoverDriverPopAllEmpty(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
-	d2 := drivers.NewNullDriver("d2")
+	d1 := null.NewDriver("d1")
+	d2 := null.NewDriver("d2")
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	_, err := drv.Pop(context.Background(), "q")
@@ -135,8 +137,8 @@ func TestFailoverDriverPopAllEmpty(t *testing.T) {
 func TestFailoverDriverSizeFallback(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
-	d2 := drivers.NewNullDriver("d2")
+	d1 := null.NewDriver("d1")
+	d2 := null.NewDriver("d2")
 	drv := drivers.NewFailoverDriver("failover", d1, d2)
 
 	n, err := drv.Size(context.Background(), "q")
@@ -163,7 +165,7 @@ func TestFailoverDriverConnectionName(t *testing.T) {
 func TestFailoverDriverPendingSizeFallback(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
+	d1 := null.NewDriver("d1")
 	drv := drivers.NewFailoverDriver("failover", d1)
 
 	n, err := drv.PendingSize(context.Background(), "q")
@@ -180,7 +182,7 @@ func TestFailoverDriverPendingSizeFallback(t *testing.T) {
 func TestFailoverDriverDelayedSizeFallback(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
+	d1 := null.NewDriver("d1")
 	drv := drivers.NewFailoverDriver("failover", d1)
 
 	n, err := drv.DelayedSize(context.Background(), "q")
@@ -197,7 +199,7 @@ func TestFailoverDriverDelayedSizeFallback(t *testing.T) {
 func TestFailoverDriverReservedSizeFallback(t *testing.T) {
 	t.Parallel()
 
-	d1 := drivers.NewNullDriver("d1")
+	d1 := null.NewDriver("d1")
 	drv := drivers.NewFailoverDriver("failover", d1)
 
 	n, err := drv.ReservedSize(context.Background(), "q")

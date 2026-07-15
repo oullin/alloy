@@ -128,7 +128,7 @@ See [`pkg/hub/queue/manager.go:333`](https://github.com/oullin/alloy/blob/main/p
 - [Bus](/packages/bus) — for command dispatch on top of this queue.
 <!-- /ALLOY:HAND -->
 
-Package queue provides job queue management. It defines Queue, Job, and Connector interfaces with multiple driver implementations (sync, database, redis, beanstalkd, sqs, null, background, deferred, failover) and a Worker for processing jobs.
+Package queue provides job queue management. It defines Queue, Job, and Connector interfaces with multiple driver implementations (sync, database, redis, sqs, null, background, deferred, failover) and a Worker for processing jobs.
 
 <div class="docs-callout docs-callout-upstream"></div>
 
@@ -154,7 +154,7 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/queue/...
 
 | Package   | Purpose                                                                                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `queue`   | Package queue provides job queue management. It defines Queue, Job, and Connector interfaces with multiple driver implementations (sync, database, redis, beanstalkd, sqs, null, background, deferred, failover) and a Worker for processing jobs. |
+| `queue`   | Package queue provides job queue management. It defines Queue, Job, and Connector interfaces with multiple driver implementations (sync, database, redis, sqs, null, background, deferred, failover) and a Worker for processing jobs. |
 | `drivers` | Public drivers API surface for this module.                                                                                                                                                                                                        |
 | `events`  | Package events contains the alloy Queue\Events\* event surface. Each upstream event is a plain Go struct; the worker, manager, and drivers emit them via the queue package's EventEmitter interface.                                             |
 | `failed`  | Package failed contains the alloy Queue\Failed\* surface. It defines the FailedJobProvider contract plus the optional Countable and Prunable extensions, and ships five implementations that ship as alloy providers:                          |
@@ -167,7 +167,7 @@ The queue reference is organized around the exported Go surface for package `que
 
 | Surface                    | Exported API                                                                                                                                                                                                                                                                                                                                                                                       |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Types                      | `AfterCommitMarker`, `BackgroundDriver`, `BaseJob`, `BeanstalkdClient`, `BeanstalkdDriver`, `BeforeCommitMarker`, `ConnectionNameSetter`, `Connector`, `ConnectorFactory`, `ContainerAware`, `Countable`, `DBExecer`, `DBRow`, `DBRows`, `DatabaseDriver`, `DatabaseFailedJobProvider`, `DatabasePopLockProvider`, `DatabaseUuidFailedJobProvider`, `DeferredDriver`, `DeferredEntry`, and 77 more |
+| Types                      | `AfterCommitMarker`, `BackgroundDriver`, `BaseJob`, `BeforeCommitMarker`, `ConnectionNameSetter`, `Connector`, `ConnectorFactory`, `ContainerAware`, `Countable`, `DBExecer`, `DBRow`, `DBRows`, `DatabaseDriver`, `DatabaseFailedJobProvider`, `DatabasePopLockProvider`, `DatabaseUuidFailedJobProvider`, `DeferredDriver`, `DeferredEntry`, and 77 more |
 | Constructors and functions | `AddConnector`, `After`, `AfterHooks`, `All`, `ApplyPayloadHooks`, `Attempts`, `Backoff`, `Before`, `BeforeHooks`, `Bulk`, `ClearPayloadHooks`, `ClearQueue`, `CommandParts`, `CommandPath`, `Connected`, `Connection`, `ConnectionName`, `Count`, `CreatePayloadFor`, `CreatePayloadUsing`, and 133 more                                                                                          |
 | Variables                  | `ErrDynamoDbFlushUnsupported`, `ErrInvalidDriver`, `ErrNoJob`                                                                                                                                                                                                                                                                                                                                      |
 | Constants                  | `WorkerStopReasonLostConnection`, `WorkerStopReasonMaxJobsExceeded`, `WorkerStopReasonMaxTimeExceeded`, `WorkerStopReasonMemoryLimitReached`, `WorkerStopReasonNone`, `WorkerStopReasonStopOnEmpty`                                                                                                                                                                                                |
@@ -256,8 +256,6 @@ Parity is tracked by these tests:
 | `AfterCommitMarker`             | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `BackgroundDriver`              | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `BaseJob`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `BeanstalkdClient`              | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `BeanstalkdDriver`              | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `BeforeCommitMarker`            | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `ConnectionNameSetter`          | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Connector`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
@@ -416,7 +414,6 @@ Parity is tracked by these tests:
 | `MemoryExceeded`                    | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Names`                             | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `NewBackgroundDriver`               | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `NewBeanstalkdDriver`               | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `NewDatabaseDriver`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `NewDatabaseFailedJobProvider`      | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `NewDatabaseUuidFailedJobProvider`  | Source-backed public surface. See the Go package for exact signature and behavior. |
