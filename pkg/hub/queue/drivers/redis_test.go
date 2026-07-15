@@ -36,6 +36,28 @@ type rangerRedisClient struct {
 	zrangeErr error
 }
 
+// empty after trim — must be skipped
+
+// Push two real payloads via the driver so the queue key matches.
+
+// Find the JSON one and assert decoded fields.
+
+// Test Fail behaves correctly (removing from reserved, pushing to failed)
+
+// Verify that after Release the job is back in ready and gone from reserved
+
+// TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
+// Lua Eval fails because the context was cancelled, Pop surfaces the context
+// error instead of masking it by falling back to the non-atomic RPop path.
+
+// deleterRedisClient extends mockRedisClient with the optional RedisDeleter
+// contract that ClearQueue needs, recording the keys it was asked to delete.
+type deleterRedisClient struct {
+	*mockRedisClient
+	deleted []string
+	delErr  error
+}
+
 func TestRedisDriverPush(t *testing.T) {
 	t.Parallel()
 
@@ -417,7 +439,7 @@ func TestRedisDriverQueueNamesDedupesAndUnwraps(t *testing.T) {
 			"queues:default:delayed",
 			"queues:emails",
 			"queues:{cluster}",
-			"queues:", // empty after trim — must be skipped
+			"queues:",
 		},
 	}
 	drv := drivers.NewRedisDriver(client, "redis")
@@ -465,7 +487,6 @@ func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
 	drv := drivers.NewRedisDriver(client, "redis")
 	ctx := context.Background()
 
-	// Push two real payloads via the driver so the queue key matches.
 	_, _ = drv.Push(ctx, "default", []byte(`{"uuid":"u1","displayName":"Job1","createdAt":1000000}`))
 	_, _ = drv.Push(ctx, "default", []byte(`not-json`))
 
@@ -479,7 +500,6 @@ func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
 		t.Fatalf("got %d jobs, want 2", len(jobs))
 	}
 
-	// Find the JSON one and assert decoded fields.
 	var decoded *queue.InspectedJob
 
 	for i := range jobs {
@@ -622,7 +642,6 @@ func TestRedisDriverReserve(t *testing.T) {
 		t.Errorf("expected reserved size 0 after delete, got %d", reservedSize2)
 	}
 
-	// Test Fail behaves correctly (removing from reserved, pushing to failed)
 	_, _ = drv.Push(ctx, "default", []byte("fail-payload"))
 	job2, err := drv.Pop(ctx, "default")
 
@@ -713,7 +732,6 @@ func TestRedisDriverShutdown(t *testing.T) {
 		t.Errorf("expected Release to succeed even if Pop ctx cancelled, got: %v", err)
 	}
 
-	// Verify that after Release the job is back in ready and gone from reserved
 	readySize, _ := drv.Size(context.Background(), "default")
 
 	if readySize != 1 {
@@ -727,9 +745,6 @@ func TestRedisDriverShutdown(t *testing.T) {
 	}
 }
 
-// TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
-// Lua Eval fails because the context was cancelled, Pop surfaces the context
-// error instead of masking it by falling back to the non-atomic RPop path.
 func TestRedisDriverPopContextCanceledNoFallback(t *testing.T) {
 	t.Parallel()
 
@@ -747,5 +762,100 @@ func TestRedisDriverPopContextCanceledNoFallback(t *testing.T) {
 
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled to be surfaced, got %v", err)
+	}
+}
+
+func (c *deleterRedisClient) Del(_ context.Context, keys ...string) (int64, error) {
+	if c.delErr != nil {
+		return 0, c.delErr
+	}
+
+	c.deleted = append(c.deleted, keys...)
+
+	return int64(len(keys)), nil
+}
+
+func TestRedisDriverClearQueueDeletesEveryPerQueueKey(t *testing.T) {
+	t.Parallel()
+
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
+		t.Fatalf("ClearQueue: %v", err)
+	}
+
+	// The reserved key must be in here: a clear that leaves reserved jobs behind
+	// would let them be reclaimed onto a queue the caller believes is empty.
+	want := []string{
+		"queues:emails",
+		"queues:emails:delayed",
+		"queues:emails:reserved",
+		"queues:emails:failed",
+	}
+
+	if len(client.deleted) != len(want) {
+		t.Fatalf("deleted %v, want %v", client.deleted, want)
+	}
+
+	for i, k := range want {
+		if client.deleted[i] != k {
+			t.Fatalf("deleted %v, want %v", client.deleted, want)
+		}
+	}
+}
+
+func TestRedisDriverClearQueueUsesDefaultForEmptyName(t *testing.T) {
+	t.Parallel()
+
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), ""); err != nil {
+		t.Fatalf("ClearQueue: %v", err)
+	}
+
+	if len(client.deleted) == 0 || client.deleted[0] != "queues:default" {
+		t.Fatalf("deleted %v, want the default queue key first", client.deleted)
+	}
+}
+
+func TestRedisDriverClearQueuePropagatesDeleterError(t *testing.T) {
+	t.Parallel()
+
+	boom := errors.New("del failed")
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient(), delErr: boom}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), "emails"); !errors.Is(err, boom) {
+		t.Fatalf("ClearQueue error = %v, want %v", err, boom)
+	}
+}
+
+// A client that cannot Del silently does nothing rather than erroring, because
+// RedisDeleter is an optional capability. Pin that: it is easy to "fix" into an
+// ErrNotSupported and break callers that clear queues opportunistically.
+func TestRedisDriverClearQueueWithoutDeleterIsSilentNoOp(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Push(context.Background(), "emails", []byte(`{"job":"x"}`)); err != nil {
+		t.Fatalf("Push: %v", err)
+	}
+
+	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
+		t.Fatalf("ClearQueue without a deleter must be a no-op, got %v", err)
+	}
+
+	size, err := drv.Size(context.Background(), "emails")
+
+	if err != nil {
+		t.Fatalf("Size: %v", err)
+	}
+
+	if size != 1 {
+		t.Fatalf("size = %d, want 1 (ClearQueue must not have removed anything)", size)
 	}
 }
