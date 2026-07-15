@@ -35,7 +35,7 @@ The `Makefile` forwards any target to `vp run` (e.g. `make go-test`).
 
 ## Conventions
 
-- TypeScript packages live directly under `packages/<name>` — no language
+- TypeScript packages live directly under `sdk/<name>` — no language
   suffixes in paths.
 - All `@alloy/*` packages are `"private": true` and are consumed as
   `workspace:*` dependencies or release tarballs — never published to a
