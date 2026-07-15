@@ -9,6 +9,7 @@ import {
 	MultiStepResult,
 	MultiStepWorkflow,
 	ResponseArg,
+	RetryPolicy,
 	SyncJob,
 	type Task,
 	UnresolvedResponseError,
@@ -236,6 +237,63 @@ describe('multisteps workflow', () => {
 		expect(result.as<number>('a', 'id')).toBe(7);
 		expect(new MultiStepResult({ job: { a: 1 } }).as<number>('job', 'a')).toBe(1);
 		expect(() => new MultiStepResult({ job: { a: 1 } }).as<number>('job', 'missing')).toThrow(UnresolvedResponseError);
+	});
+
+	it('stops retrying once maxExceptions is reached', async () => {
+		const maxExceptions = 3;
+		let calls = 0;
+
+		const workflow = MultiStepWorkflow.machine(
+			'cap',
+			new SyncJob('always-fails', () => {
+				calls += 1;
+
+				throw new Error('boom');
+			}).withRetryPolicy(new RetryPolicy({ maxTries: 10, maxExceptions })),
+		);
+
+		await expect(new MultiStepEngine().run(workflow)).rejects.toMatchObject({ attempts: maxExceptions });
+
+		// The cap binds before maxTries: the handler runs exactly maxExceptions times.
+		expect(calls).toBe(maxExceptions);
+	});
+
+	it('lets maxTries bind independently when it is the tighter limit', async () => {
+		let calls = 0;
+
+		const workflow = MultiStepWorkflow.machine(
+			'tries',
+			new SyncJob('always-fails', () => {
+				calls += 1;
+
+				throw new Error('boom');
+			}).withRetryPolicy(new RetryPolicy({ maxTries: 2, maxExceptions: 5 })),
+		);
+
+		await expect(new MultiStepEngine().run(workflow)).rejects.toMatchObject({ attempts: 2 });
+
+		expect(calls).toBe(2);
+	});
+
+	it('lets an abort signal win over the remaining retry budget', async () => {
+		const controller = new AbortController();
+		let calls = 0;
+
+		const workflow = MultiStepWorkflow.machine(
+			'abort',
+			new SyncJob('flaky', () => {
+				calls += 1;
+
+				controller.abort(new Error('cancelled'));
+
+				throw new Error('boom');
+			}).withRetryPolicy(new RetryPolicy({ maxTries: 5, maxExceptions: 5 })),
+		);
+
+		await expect(new MultiStepEngine().run(workflow, {}, controller.signal)).rejects.toBeInstanceOf(WorkflowError);
+
+		// Abort short-circuits the loop despite budget for four more attempts.
+		expect(calls).toBe(1);
 	});
 });
 
