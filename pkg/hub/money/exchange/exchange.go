@@ -129,9 +129,18 @@ func (e *Rates) ConvertAmountWithRate(amount int64, fromFraction int, toFraction
 // returns exception.ErrOverflow when the scaled rate or converted result cannot
 // be represented by int64.
 func convertScaledAmount(amount int64, fromFraction, toFraction int, rate float64) (int64, error) {
+	// Negative fractions would silently corrupt the math below: big.Int.Exp
+	// returns 1 for a negative exponent instead of failing.
+	if fromFraction < 0 || toFraction < 0 {
+		return 0, exception.ErrInvalidAmountFraction
+	}
+
 	scaledRateFloat := rate * math.Pow10(rateScaleExponent)
 
-	if math.IsNaN(scaledRateFloat) || math.Round(scaledRateFloat) > float64(math.MaxInt64) {
+	// float64(math.MaxInt64) rounds up to 2^63, which int64 cannot hold, so
+	// the comparison must be >= — a scaled rate of exactly 2^63 would slip
+	// past > and wrap in the int64 conversion below.
+	if math.IsNaN(scaledRateFloat) || math.Round(scaledRateFloat) >= float64(math.MaxInt64) {
 		return 0, exception.ErrOverflow
 	}
 
@@ -140,10 +149,7 @@ func convertScaledAmount(amount int64, fromFraction, toFraction int, rate float6
 	ten := big.NewInt(10)
 	numerator := new(big.Int).Mul(big.NewInt(amount), big.NewInt(rateScaled))
 	numerator.Mul(numerator, new(big.Int).Exp(ten, big.NewInt(int64(toFraction)), nil))
-	denominator := new(big.Int).Mul(
-		new(big.Int).Exp(ten, big.NewInt(rateScaleExponent), nil),
-		new(big.Int).Exp(ten, big.NewInt(int64(fromFraction)), nil),
-	)
+	denominator := new(big.Int).Exp(ten, big.NewInt(int64(rateScaleExponent+fromFraction)), nil)
 
 	sign := numerator.Sign()
 	absNumerator := new(big.Int).Abs(numerator)

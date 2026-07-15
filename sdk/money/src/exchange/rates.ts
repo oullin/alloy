@@ -1,5 +1,5 @@
 import { MAX_INT64, MIN_INT64, type Amount } from '#money/calculator';
-import { ERR_CURRENCY_CONVERSION_NOT_FOUND, ERR_INVALID_EXCHANGE_RATE, ERR_OVERFLOW } from '#money/errors';
+import { ERR_CURRENCY_CONVERSION_NOT_FOUND, ERR_INVALID_AMOUNT_FRACTION, ERR_INVALID_EXCHANGE_RATE, ERR_OVERFLOW } from '#money/errors';
 
 export class ExchangeRates {
 	private readonly rates = new Map<string, Map<string, number>>();
@@ -73,16 +73,30 @@ export class ExchangeRates {
 			throw ERR_INVALID_EXCHANGE_RATE;
 		}
 
+		// Negative fractions would make the 10n ** exponents below throw a raw
+		// RangeError; reject them with the package's own error instead.
+		if (fromFraction < 0 || toFraction < 0) {
+			throw ERR_INVALID_AMOUNT_FRACTION;
+		}
+
 		const RATE_SCALE = 12;
 		const scaledRate = Math.round(rate * 10 ** RATE_SCALE);
 
-		if (!Number.isFinite(scaledRate) || scaledRate > Number(MAX_INT64)) {
+		if (!Number.isFinite(scaledRate)) {
 			throw ERR_OVERFLOW;
 		}
 
+		// Compare as bigint: Number(MAX_INT64) rounds up to 2^63, so a float
+		// comparison lets a scaled rate of exactly 2^63 through even though it
+		// exceeds int64 — and Go rejects it, so parity requires we do too.
 		const rateScaled = BigInt(scaledRate);
+
+		if (rateScaled > MAX_INT64) {
+			throw ERR_OVERFLOW;
+		}
+
 		const numerator = amount * rateScaled * 10n ** BigInt(toFraction);
-		const denominator = 10n ** BigInt(RATE_SCALE) * 10n ** BigInt(fromFraction);
+		const denominator = 10n ** BigInt(RATE_SCALE + fromFraction);
 		const negative = numerator < 0n;
 		const absoluteNumerator = negative ? -numerator : numerator;
 

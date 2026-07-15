@@ -281,6 +281,52 @@ func TestConvertAmount_OverflowReturnsErr(t *testing.T) {
 	}
 }
 
+func TestConvertAmount_ScaledRateBoundaryReturnsErr(t *testing.T) {
+	e := NewExchange()
+
+	// This rate scales to exactly 2^63. float64(math.MaxInt64) also rounds up
+	// to 2^63, so a > comparison would let the value through and wrap in the
+	// int64 conversion; the guard must reject it.
+	rate := math.Ldexp(1, 63) / 1e12
+
+	converted, err := e.ConvertAmountWithRate(100, 2, 2, rate)
+
+	if !errors.Is(err, exception.ErrOverflow) {
+		t.Errorf("ConvertAmountWithRate() error = %v, want ErrOverflow", err)
+	}
+
+	if converted != 0 {
+		t.Errorf("ConvertAmountWithRate() = %d, want 0 on overflow", converted)
+	}
+}
+
+func TestConvertAmount_NegativeFractionReturnsErr(t *testing.T) {
+	e := NewExchange()
+
+	cases := []struct {
+		name     string
+		fromFrac int
+		toFrac   int
+	}{
+		{"negative from fraction", -1, 2},
+		{"negative to fraction", 2, -1},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			converted, err := e.ConvertAmountWithRate(1000, tc.fromFrac, tc.toFrac, 1.5)
+
+			if !errors.Is(err, exception.ErrInvalidAmountFraction) {
+				t.Errorf("err = %v, want ErrInvalidAmountFraction", err)
+			}
+
+			if converted != 0 {
+				t.Errorf("converted = %d, want 0", converted)
+			}
+		})
+	}
+}
+
 func TestConvertAmount_HalfAwayFromZeroRounding(t *testing.T) {
 	e := NewExchange()
 

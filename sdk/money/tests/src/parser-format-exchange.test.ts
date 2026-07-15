@@ -73,5 +73,14 @@ describe('money parser, formatter, and exchange', () => {
 		expect(() => rates.convertAmountWithRate(9223372036854775807n, 0, 0, 2)).toThrow(ERR_OVERFLOW.message);
 		expect(rates.convertAmountWithRate(1999n, 2, 0, 1.5)).toBe(30n);
 		expect(rates.convertAmountWithRate(-2999n, 2, 0, 1.5)).toBe(-45n);
+
+		// A rate that scales to exactly 2^63: a float comparison against
+		// Number(MAX_INT64) (which rounds up to 2^63) would let it through.
+		expect(() => rates.convertAmountWithRate(100n, 2, 2, 2 ** 63 / 1e12)).toThrow(ERR_OVERFLOW.message);
+
+		// Negative fractions are rejected with the package error instead of a
+		// raw RangeError from the bigint exponentiation.
+		expect(() => rates.convertAmountWithRate(100n, -1, 2, 1.5)).toThrow(ERR_INVALID_AMOUNT_FRACTION.message);
+		expect(() => rates.convertAmountWithRate(100n, 2, -1, 1.5)).toThrow(ERR_INVALID_AMOUNT_FRACTION.message);
 	});
 });
