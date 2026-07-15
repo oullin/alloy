@@ -624,6 +624,23 @@ describe('Tempo TypeScript behavior', () => {
 		expect(todayNy.addDays(1).isTomorrow(todayNy)).toBe(true);
 	});
 
+	it('keeps fractional day additions as elapsed time on top of calendar day shifts', () => {
+		// Away from any DST transition: addDays(1.5) is one calendar day plus
+		// twelve elapsed hours, not a truncated single day.
+		const base = Tempo.create({ day: 15, hour: 6, month: 1, timeZone: 'America/New_York', year: 2024 });
+
+		expect(base.addDays(1.5).toDateTimeString()).toBe('2024-01-16 18:00:00');
+		expect(base.addDays(0.5).toDateTimeString()).toBe('2024-01-15 18:00:00');
+		expect(base.addDays(-0.5).toDateTimeString()).toBe('2024-01-14 18:00:00');
+
+		// Across spring-forward: the whole day keeps the wall clock, the
+		// fractional remainder stays fixed elapsed milliseconds.
+		const springEve = Tempo.create({ day: 9, hour: 18, month: 3, timeZone: 'America/New_York', year: 2024 });
+
+		expect(springEve.addDays(1).toDateTimeString()).toBe('2024-03-10 18:00:00');
+		expect(springEve.addDays(1.25).toISOString()).toBe(springEve.addDays(1).addHours(6).toISOString());
+	});
+
 	it('keeps unzoned (UTC/default) day and week arithmetic bit-identical to fixed math', () => {
 		const utc = Tempo.create({ day: 15, hour: 10, minute: 34, month: 1, second: 45, timeZone: 'UTC', year: 2024 });
 		const dayMs = 24 * 60 * 60 * 1000;

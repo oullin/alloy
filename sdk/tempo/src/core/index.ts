@@ -1092,17 +1092,29 @@ export class TempoImmutable {
 	}
 
 	private addCalendarDays(days: number): this {
-		const parts = this.toObject();
+		// Whole days shift the calendar day component (DST-correct); any
+		// fractional remainder is elapsed time by definition and is added as
+		// fixed milliseconds. Date.UTC truncates fractional components, so
+		// routing the fraction through dateFromZonedComponents would silently
+		// drop it.
+		const wholeDays = Math.trunc(days);
+		const fractionalMs = (days - wholeDays) * 86_400_000;
 
-		return this.make(
-			dateFromZonedComponents(
+		let baseMs = this.value.getTime();
+
+		if (wholeDays !== 0) {
+			const parts = this.toObject();
+
+			baseMs = dateFromZonedComponents(
 				{
 					...parts,
-					day: parts.day + days,
+					day: parts.day + wholeDays,
 				},
 				this.zone,
-			),
-		);
+			).getTime();
+		}
+
+		return this.make(new Date(baseMs + fractionalMs));
 	}
 
 	sub(value: number, unit: TimeUnit): this {
