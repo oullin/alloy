@@ -28,6 +28,10 @@ type Store struct {
 	// backend. A session that was never persisted (or whose ID was
 	// regenerated) must always be written even when no attribute changed.
 	stored bool
+	// version counts mutations. Save snapshots it before the backend write
+	// (which runs outside the lock) and only clears dirty when no mutation
+	// landed in between, so a concurrent change is never silently dropped.
+	version uint64
 }
 
 // lastActivityKey is the attribute holding the sliding-expiry timestamp
@@ -112,6 +116,7 @@ func (s *Store) Save(ctx context.Context) error {
 	needsWrite := s.dirty || !s.stored
 	data, err := serialize(s.attributes)
 	id := s.id
+	snapshotVersion := s.version
 	s.mu.RUnlock()
 
 	if err != nil {
@@ -127,17 +132,24 @@ func (s *Store) Save(ctx context.Context) error {
 	}
 
 	s.mu.Lock()
-	s.dirty = false
+	// Only clear dirty when nothing mutated while the backend write ran
+	// outside the lock; otherwise the interleaved change must survive so the
+	// next Save persists it.
+	if s.version == snapshotVersion {
+		s.dirty = false
+	}
+
 	s.stored = true
 	s.mu.Unlock()
 
 	return nil
 }
 
-// markDirty flags the session as having unsaved changes. The caller must hold
-// the write lock.
+// markDirty flags the session as having unsaved changes and bumps the mutation
+// version consulted by Save. The caller must hold the write lock.
 func (s *Store) markDirty() {
 	s.dirty = true
+	s.version++
 }
 
 // IsDirty reports whether the session has unsaved mutations.
@@ -173,7 +185,7 @@ func (s *Store) TouchActivity(now time.Time, interval time.Duration) bool {
 	}
 
 	s.attributes[lastActivityKey] = nowSec
-	s.dirty = true
+	s.markDirty()
 
 	return true
 }
@@ -630,7 +642,7 @@ func (s *Store) Regenerate(ctx context.Context, destroy bool) error {
 	// The freshly generated ID has no record in the backend yet, so the
 	// session must be written on the next Save regardless of attribute state.
 	s.stored = false
-	s.dirty = true
+	s.markDirty()
 	s.mu.Unlock()
 
 	return nil

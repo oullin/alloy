@@ -295,3 +295,62 @@ func TestStoreSaveTouchActivityRefreshesOnInterval(t *testing.T) {
 		t.Error("a session with no marker must touch on first activity")
 	}
 }
+
+// hookedWriteHandler wraps ArrayHandler and runs a callback at the start of
+// every backend Write, letting tests interleave store mutations with the
+// out-of-lock write that Save performs.
+type hookedWriteHandler struct {
+	*handlers.ArrayHandler
+	onWrite func()
+}
+
+func (h *hookedWriteHandler) Write(ctx context.Context, id, data string) error {
+	if h.onWrite != nil {
+		h.onWrite()
+	}
+
+	return h.ArrayHandler.Write(ctx, id, data)
+}
+
+func TestSaveKeepsDirtyWhenMutatedDuringBackendWrite(t *testing.T) {
+	ctx := context.Background()
+	h := &hookedWriteHandler{ArrayHandler: handlers.NewArrayHandler()}
+	s := session.New("t", h)
+
+	if err := s.Start(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	s.Put("k", "v1")
+
+	// Mutate the session while Save's backend write is in flight (Save holds
+	// no lock during handler.Write). The interleaved change must keep the
+	// session dirty; clearing it would silently drop v2.
+	h.onWrite = func() {
+		h.onWrite = nil
+
+		s.Put("k", "v2")
+	}
+
+	if err := s.Save(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if !s.IsDirty() {
+		t.Fatal("mutation during the backend write must leave the session dirty")
+	}
+
+	if err := s.Save(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	reloaded := session.NewWithID("t", h, s.GetID())
+
+	if err := reloaded.Start(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := reloaded.Get("k", nil); got != "v2" {
+		t.Fatalf("k = %v, want v2 after the follow-up save", got)
+	}
+}
