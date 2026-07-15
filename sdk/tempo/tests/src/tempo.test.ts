@@ -376,6 +376,33 @@ describe('Tempo TypeScript behavior', () => {
 		expect(() => Tempo.fromFormat('2024-05-15', 'YYYY/MM/DD')).toThrow('Input does not match Tempo format');
 	});
 
+	it('round-trips localized month names and rejects unmatched ones', () => {
+		const base = Tempo.create({ day: 14, month: 7, timeZone: 'UTC', year: 2026 });
+
+		// format(locale) -> fromFormat(locale) must round-trip for non-English locales.
+		const cases = [
+			{ locale: 'fr-FR', formatted: '14 juillet 2026' },
+			{ locale: 'de-DE', formatted: '14 Juli 2026' },
+			{ locale: 'es-ES', formatted: '14 julio 2026' },
+		] as const;
+
+		for (const { locale, formatted } of cases) {
+			expect(base.format('D MMMM YYYY', { locale })).toBe(formatted);
+
+			const parsed = Tempo.fromFormat(formatted, 'D MMMM YYYY', { locale, timeZone: 'UTC' });
+
+			expect(parsed.month).toBe(7);
+			expect(parsed.toDateString()).toBe('2026-07-14');
+		}
+
+		// en-US default is preserved when no locale is supplied.
+		expect(Tempo.fromFormat('14 July 2026', 'D MMMM YYYY', { timeZone: 'UTC' }).month).toBe(7);
+
+		// A present-but-unmatched month name is a hard failure, not a silent January.
+		expect(() => Tempo.fromFormat('14 juillet 2026', 'D MMMM YYYY', { locale: 'en-US', timeZone: 'UTC' })).toThrow('Input does not match Tempo format');
+		expect(() => Tempo.fromFormat('14 notamonth 2026', 'D MMMM YYYY', { locale: 'fr-FR', timeZone: 'UTC' })).toThrow('Input does not match Tempo format');
+	});
+
 	it('exposes calendar predicates and humanized diffs', () => {
 		const base = Tempo.parse('2024-02-29T00:00:00Z');
 		const saturday = Tempo.parse('2024-03-02T00:00:00Z');
