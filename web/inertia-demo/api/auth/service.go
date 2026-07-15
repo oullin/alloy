@@ -14,6 +14,22 @@ type service struct {
 
 var errInvalidCredentials = errors.New("auth: invalid credentials")
 
+// dummyPasswordHash is a precomputed bcrypt hash compared against when no user
+// matches the supplied email. Running bcrypt in the user-not-found branch makes
+// it cost the same as the wrong-password branch, so the login endpoint does not
+// leak account existence through response timing.
+var dummyPasswordHash = mustDummyPasswordHash()
+
+func mustDummyPasswordHash() []byte {
+	hash, err := bcrypt.GenerateFromPassword([]byte("timing-equalization-dummy-password"), bcrypt.DefaultCost)
+
+	if err != nil {
+		panic("auth: failed to generate dummy password hash: " + err.Error())
+	}
+
+	return hash
+}
+
 func newService(db *sql.DB) (service, error) {
 	if db == nil {
 		return service{}, errors.New("auth: database connection must not be nil")
@@ -29,7 +45,16 @@ func (s service) authenticate(form loginForm) (*database.User, error) {
 		return nil, err
 	}
 
-	if user == nil || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(form.Password)) != nil {
+	if user == nil {
+		// Compare against a fixed dummy hash so this branch performs the same
+		// bcrypt work as the wrong-password branch below, keeping login timing
+		// independent of whether the account exists.
+		_ = bcrypt.CompareHashAndPassword(dummyPasswordHash, []byte(form.Password))
+
+		return nil, errInvalidCredentials
+	}
+
+	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(form.Password)) != nil {
 		return nil, errInvalidCredentials
 	}
 
