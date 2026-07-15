@@ -164,7 +164,7 @@ func ListOrganizations(db *sql.DB, search string) ([]Organization, error) {
 		}
 
 		return org, nil
-	}), nil
+	})
 }
 
 func GetOrganization(db *sql.DB, id int64) (*Organization, error) {
@@ -270,7 +270,7 @@ func ListContacts(db *sql.DB, search string, favoritesOnly bool) ([]Contact, err
 
 	return scanRows(rows, func(scan func(...any) error) (Contact, error) {
 		return scanContact(scan)
-	}), nil
+	})
 }
 
 func ListRecentContacts(db *sql.DB, limit int) ([]Contact, error) {
@@ -300,7 +300,7 @@ func ListRecentContacts(db *sql.DB, limit int) ([]Contact, error) {
 
 	return scanRows(rows, func(scan func(...any) error) (Contact, error) {
 		return scanContact(scan)
-	}), nil
+	})
 }
 
 func ListContactsByOrganization(db *sql.DB, organizationID int64) ([]Contact, error) {
@@ -330,7 +330,7 @@ func ListContactsByOrganization(db *sql.DB, organizationID int64) ([]Contact, er
 
 	return scanRows(rows, func(scan func(...any) error) (Contact, error) {
 		return scanContact(scan)
-	}), nil
+	})
 }
 
 func GetContact(db *sql.DB, id int64) (*Contact, error) {
@@ -524,9 +524,13 @@ func ListContactsPaginated(db *sql.DB, search string, favoritesOnly bool, cursor
 
 	defer rows.Close()
 
-	all := scanRows(rows, func(scan func(...any) error) (Contact, error) {
+	all, err := scanRows(rows, func(scan func(...any) error) (Contact, error) {
 		return scanContact(scan)
 	})
+
+	if err != nil {
+		return CursorPage[Contact]{}, err
+	}
 
 	hasExtra := len(all) > perPage
 
@@ -616,7 +620,7 @@ func ListOrganizationsPaginated(db *sql.DB, search string, page int, perPage int
 
 	defer rows.Close()
 
-	orgs := scanRows(rows, func(scan func(...any) error) (Organization, error) {
+	orgs, err := scanRows(rows, func(scan func(...any) error) (Organization, error) {
 		var org Organization
 
 		if err := scan(&org.ID, &org.Name, &org.ContactsCount); err != nil {
@@ -625,6 +629,10 @@ func ListOrganizationsPaginated(db *sql.DB, search string, page int, perPage int
 
 		return org, nil
 	})
+
+	if err != nil {
+		return OffsetPage[Organization]{}, err
+	}
 
 	return OffsetPage[Organization]{
 		Data:        orgs,
@@ -684,9 +692,13 @@ func ListContactsByOrgPaginated(db *sql.DB, organizationID int64, cursor *string
 
 	defer rows.Close()
 
-	all := scanRows(rows, func(scan func(...any) error) (Contact, error) {
+	all, err := scanRows(rows, func(scan func(...any) error) (Contact, error) {
 		return scanContact(scan)
 	})
+
+	if err != nil {
+		return CursorPage[Contact]{}, err
+	}
 
 	hasExtra := len(all) > perPage
 
@@ -795,7 +807,7 @@ func ListContactNotes(db *sql.DB, contactID int64) ([]Note, error) {
 		}
 
 		return note, nil
-	}), nil
+	})
 }
 
 func ListRecentNotes(db *sql.DB, limit int) ([]Note, error) {
@@ -837,7 +849,7 @@ func ListRecentNotes(db *sql.DB, limit int) ([]Note, error) {
 		}
 
 		return note, nil
-	}), nil
+	})
 }
 
 func CountNotes(db *sql.DB) (int, error) {

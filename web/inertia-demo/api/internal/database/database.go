@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -128,11 +129,11 @@ func Truncate(db *sql.DB) error {
 	return err
 }
 
-func ListInvites(db *sql.DB) []map[string]any {
+func ListInvites(db *sql.DB) ([]map[string]any, error) {
 	rows, err := db.Query("SELECT id, name, email, role, status, created_at FROM invites ORDER BY created_at DESC")
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -175,19 +176,19 @@ func CreateInviteAt(db *sql.DB, id, name, email, role, status string, createdAt 
 	return err
 }
 
-func InviteCount(db *sql.DB) int {
+func InviteCount(db *sql.DB) (int, error) {
 	var count int
 
-	db.QueryRow("SELECT COUNT(*) FROM invites").Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM invites").Scan(&count)
 
-	return count
+	return count, err
 }
 
-func ListUploads(db *sql.DB) []map[string]any {
+func ListUploads(db *sql.DB) ([]map[string]any, error) {
 	rows, err := db.Query("SELECT id, label, filename, size, status, created_at FROM uploads ORDER BY created_at DESC")
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -230,19 +231,19 @@ func CreateUploadAt(db *sql.DB, id, label, filename, size, status string, create
 	return err
 }
 
-func UploadCount(db *sql.DB) int {
+func UploadCount(db *sql.DB) (int, error) {
 	var count int
 
-	db.QueryRow("SELECT COUNT(*) FROM uploads").Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM uploads").Scan(&count)
 
-	return count
+	return count, err
 }
 
-func ListApprovals(db *sql.DB) []map[string]any {
+func ListApprovals(db *sql.DB) ([]map[string]any, error) {
 	rows, err := db.Query("SELECT id, label, status, created_at FROM approvals ORDER BY created_at DESC")
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -283,20 +284,25 @@ func CreateApprovalAt(db *sql.DB, id, label, status string, createdAt time.Time)
 	return err
 }
 
-func ApprovalCount(db *sql.DB) int {
+func ApprovalCount(db *sql.DB) (int, error) {
 	var count int
 
-	db.QueryRow("SELECT COUNT(*) FROM approvals").Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM approvals").Scan(&count)
 
-	return count
+	return count, err
 }
 
-func GetCounter(db *sql.DB, key string) int {
+func GetCounter(db *sql.DB, key string) (int, error) {
 	var value int
 
-	db.QueryRow("SELECT value FROM counters WHERE key = ?", key).Scan(&value)
+	err := db.QueryRow("SELECT value FROM counters WHERE key = ?", key).Scan(&value)
 
-	return value
+	// A missing key is not an error: the counter defaults to zero.
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+
+	return value, err
 }
 
 func IncrementCounter(db *sql.DB, key string) error {
@@ -338,18 +344,22 @@ func TimeAgo(t time.Time) string {
 	}
 }
 
-func scanRows[T any](rows *sql.Rows, fn func(scan func(...any) error) (T, error)) []T {
+func scanRows[T any](rows *sql.Rows, fn func(scan func(...any) error) (T, error)) ([]T, error) {
 	var result []T
 
 	for rows.Next() {
 		item, err := fn(rows.Scan)
 
 		if err != nil {
-			continue
+			return nil, err
 		}
 
 		result = append(result, item)
 	}
 
-	return result
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

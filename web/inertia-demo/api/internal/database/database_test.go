@@ -126,20 +126,20 @@ func TestOpenAndTruncate(t *testing.T) {
 		t.Fatalf("CountContacts() = %d, %v, want 0, nil", got, err)
 	}
 
-	if got := InviteCount(db); got != 0 {
-		t.Fatalf("InviteCount() = %d, want 0", got)
+	if got, err := InviteCount(db); err != nil || got != 0 {
+		t.Fatalf("InviteCount() = %d, %v, want 0, nil", got, err)
 	}
 
-	if got := UploadCount(db); got != 0 {
-		t.Fatalf("UploadCount() = %d, want 0", got)
+	if got, err := UploadCount(db); err != nil || got != 0 {
+		t.Fatalf("UploadCount() = %d, %v, want 0, nil", got, err)
 	}
 
-	if got := ApprovalCount(db); got != 0 {
-		t.Fatalf("ApprovalCount() = %d, want 0", got)
+	if got, err := ApprovalCount(db); err != nil || got != 0 {
+		t.Fatalf("ApprovalCount() = %d, %v, want 0, nil", got, err)
 	}
 
-	if got := GetCounter(db, "counter"); got != 0 {
-		t.Fatalf("GetCounter(counter) = %d, want 0", got)
+	if got, err := GetCounter(db, "counter"); err != nil || got != 0 {
+		t.Fatalf("GetCounter(counter) = %d, %v, want 0, nil", got, err)
 	}
 
 	id, err := CreateOrganization(db, "Reset Sequence")
@@ -167,12 +167,12 @@ func TestInviteUploadApprovalAndCounterQueries(t *testing.T) {
 		t.Fatalf("CreateInvite() error = %v", err)
 	}
 
-	if invites := ListInvites(db); len(invites) != 2 {
-		t.Fatalf("ListInvites() len = %d, want 2", len(invites))
+	if invites, err := ListInvites(db); err != nil || len(invites) != 2 {
+		t.Fatalf("ListInvites() len = %d, %v, want 2, nil", len(invites), err)
 	}
 
-	if got := InviteCount(db); got != 2 {
-		t.Fatalf("InviteCount() = %d, want 2", got)
+	if got, err := InviteCount(db); err != nil || got != 2 {
+		t.Fatalf("InviteCount() = %d, %v, want 2, nil", got, err)
 	}
 
 	if err := CreateUploadAt(db, "upload_2", "Import", "import.csv", "24 KB", "Processed", now.Add(-3*time.Hour)); err != nil {
@@ -183,14 +183,18 @@ func TestInviteUploadApprovalAndCounterQueries(t *testing.T) {
 		t.Fatalf("CreateUpload() error = %v", err)
 	}
 
-	uploads := ListUploads(db)
+	uploads, err := ListUploads(db)
+
+	if err != nil {
+		t.Fatalf("ListUploads() error = %v", err)
+	}
 
 	if len(uploads) != 2 {
 		t.Fatalf("ListUploads() len = %d, want 2", len(uploads))
 	}
 
-	if got := UploadCount(db); got != 2 {
-		t.Fatalf("UploadCount() = %d, want 2", got)
+	if got, err := UploadCount(db); err != nil || got != 2 {
+		t.Fatalf("UploadCount() = %d, %v, want 2, nil", got, err)
 	}
 
 	if err := CreateApprovalAt(db, "approval_2", "Approve launch", "Synced", now.Add(-time.Hour)); err != nil {
@@ -201,16 +205,16 @@ func TestInviteUploadApprovalAndCounterQueries(t *testing.T) {
 		t.Fatalf("CreateApproval() error = %v", err)
 	}
 
-	if approvals := ListApprovals(db); len(approvals) != 2 {
-		t.Fatalf("ListApprovals() len = %d, want 2", len(approvals))
+	if approvals, err := ListApprovals(db); err != nil || len(approvals) != 2 {
+		t.Fatalf("ListApprovals() len = %d, %v, want 2, nil", len(approvals), err)
 	}
 
-	if got := ApprovalCount(db); got != 2 {
-		t.Fatalf("ApprovalCount() = %d, want 2", got)
+	if got, err := ApprovalCount(db); err != nil || got != 2 {
+		t.Fatalf("ApprovalCount() = %d, %v, want 2, nil", got, err)
 	}
 
-	if got := GetCounter(db, "jobs"); got != 0 {
-		t.Fatalf("GetCounter(jobs) = %d, want 0", got)
+	if got, err := GetCounter(db, "jobs"); err != nil || got != 0 {
+		t.Fatalf("GetCounter(jobs) = %d, %v, want 0, nil", got, err)
 	}
 
 	if err := IncrementCounter(db, "jobs"); err != nil {
@@ -221,16 +225,16 @@ func TestInviteUploadApprovalAndCounterQueries(t *testing.T) {
 		t.Fatalf("IncrementCounter() second call error = %v", err)
 	}
 
-	if got := GetCounter(db, "jobs"); got != 2 {
-		t.Fatalf("GetCounter(jobs) = %d, want 2", got)
+	if got, err := GetCounter(db, "jobs"); err != nil || got != 2 {
+		t.Fatalf("GetCounter(jobs) = %d, %v, want 2, nil", got, err)
 	}
 
 	if err := SetCounter(db, "jobs", 7); err != nil {
 		t.Fatalf("SetCounter() error = %v", err)
 	}
 
-	if got := GetCounter(db, "jobs"); got != 7 {
-		t.Fatalf("GetCounter(jobs) after SetCounter = %d, want 7", got)
+	if got, err := GetCounter(db, "jobs"); err != nil || got != 7 {
+		t.Fatalf("GetCounter(jobs) after SetCounter = %d, %v, want 7, nil", got, err)
 	}
 }
 
@@ -272,7 +276,10 @@ func TestScanRowsAndHelpers(t *testing.T) {
 		rows.Close()
 	})
 
-	values := scanRows(rows, func(scan func(...any) error) (int, error) {
+	// scanRows must surface a mid-stream scan error rather than silently
+	// skipping the offending row and returning a truncated success. The middle
+	// row ('bad') fails to scan into an int.
+	values, err := scanRows(rows, func(scan func(...any) error) (int, error) {
 		var value int
 
 		if err := scan(&value); err != nil {
@@ -282,8 +289,8 @@ func TestScanRowsAndHelpers(t *testing.T) {
 		return value, nil
 	})
 
-	if len(values) != 2 || values[0] != 1 || values[1] != 3 {
-		t.Fatalf("scanRows() = %#v, want [1 3]", values)
+	if err == nil {
+		t.Fatalf("scanRows() = %#v, nil; want an error on the mid-stream bad row", values)
 	}
 
 	var id int64 = 42
@@ -401,10 +408,28 @@ func TestListHelpersReturnHumanTimes(t *testing.T) {
 		t.Fatalf("CreateApprovalAt() error = %v", err)
 	}
 
+	invites, err := ListInvites(db)
+
+	if err != nil {
+		t.Fatalf("ListInvites() error = %v", err)
+	}
+
+	uploads, err := ListUploads(db)
+
+	if err != nil {
+		t.Fatalf("ListUploads() error = %v", err)
+	}
+
+	approvals, err := ListApprovals(db)
+
+	if err != nil {
+		t.Fatalf("ListApprovals() error = %v", err)
+	}
+
 	for _, item := range []map[string]any{
-		ListInvites(db)[0],
-		ListUploads(db)[0],
-		ListApprovals(db)[0],
+		invites[0],
+		uploads[0],
+		approvals[0],
 	} {
 		timeValue, ok := item["time"].(string)
 
@@ -521,15 +546,31 @@ func TestClosedDatabaseErrorPaths(t *testing.T) {
 		t.Fatal("CountNotes() error = nil, want error on closed DB")
 	}
 
-	if invites := ListInvites(db); invites != nil {
-		t.Fatalf("ListInvites() = %#v, want nil on closed DB", invites)
+	if _, err := ListInvites(db); err == nil {
+		t.Fatal("ListInvites() error = nil, want error on closed DB")
 	}
 
-	if uploads := ListUploads(db); uploads != nil {
-		t.Fatalf("ListUploads() = %#v, want nil on closed DB", uploads)
+	if _, err := ListUploads(db); err == nil {
+		t.Fatal("ListUploads() error = nil, want error on closed DB")
 	}
 
-	if approvals := ListApprovals(db); approvals != nil {
-		t.Fatalf("ListApprovals() = %#v, want nil on closed DB", approvals)
+	if _, err := ListApprovals(db); err == nil {
+		t.Fatal("ListApprovals() error = nil, want error on closed DB")
+	}
+
+	if _, err := InviteCount(db); err == nil {
+		t.Fatal("InviteCount() error = nil, want error on closed DB")
+	}
+
+	if _, err := UploadCount(db); err == nil {
+		t.Fatal("UploadCount() error = nil, want error on closed DB")
+	}
+
+	if _, err := ApprovalCount(db); err == nil {
+		t.Fatal("ApprovalCount() error = nil, want error on closed DB")
+	}
+
+	if _, err := GetCounter(db, "jobs"); err == nil {
+		t.Fatal("GetCounter() error = nil, want error on closed DB")
 	}
 }

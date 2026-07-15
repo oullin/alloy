@@ -23,20 +23,20 @@ func TestRunSeedsDatabase(t *testing.T) {
 		t.Fatalf("Run() error = %v", err)
 	}
 
-	if got := database.GetCounter(db, "priority_escalations"); got != 18 {
-		t.Fatalf("GetCounter(priority_escalations) = %d, want 18", got)
+	if got, err := database.GetCounter(db, "priority_escalations"); err != nil || got != 18 {
+		t.Fatalf("GetCounter(priority_escalations) = %d, %v, want 18, nil", got, err)
 	}
 
-	if got := database.InviteCount(db); got != 20 {
-		t.Fatalf("InviteCount() = %d, want 20", got)
+	if got, err := database.InviteCount(db); err != nil || got != 20 {
+		t.Fatalf("InviteCount() = %d, %v, want 20, nil", got, err)
 	}
 
-	if got := database.UploadCount(db); got != 15 {
-		t.Fatalf("UploadCount() = %d, want 15", got)
+	if got, err := database.UploadCount(db); err != nil || got != 15 {
+		t.Fatalf("UploadCount() = %d, %v, want 15, nil", got, err)
 	}
 
-	if got := database.ApprovalCount(db); got != 15 {
-		t.Fatalf("ApprovalCount() = %d, want 15", got)
+	if got, err := database.ApprovalCount(db); err != nil || got != 15 {
+		t.Fatalf("ApprovalCount() = %d, %v, want 15, nil", got, err)
 	}
 
 	users := []struct {
@@ -89,16 +89,16 @@ func TestRunSeedsDatabase(t *testing.T) {
 		t.Fatal("ListRecentNotes() returned no notes")
 	}
 
-	if invites := database.ListInvites(db); len(invites) != 20 {
-		t.Fatalf("ListInvites() len = %d, want 20", len(invites))
+	if invites, err := database.ListInvites(db); err != nil || len(invites) != 20 {
+		t.Fatalf("ListInvites() len = %d, %v, want 20, nil", len(invites), err)
 	}
 
-	if uploads := database.ListUploads(db); len(uploads) != 15 {
-		t.Fatalf("ListUploads() len = %d, want 15", len(uploads))
+	if uploads, err := database.ListUploads(db); err != nil || len(uploads) != 15 {
+		t.Fatalf("ListUploads() len = %d, %v, want 15, nil", len(uploads), err)
 	}
 
-	if approvals := database.ListApprovals(db); len(approvals) != 15 {
-		t.Fatalf("ListApprovals() len = %d, want 15", len(approvals))
+	if approvals, err := database.ListApprovals(db); err != nil || len(approvals) != 15 {
+		t.Fatalf("ListApprovals() len = %d, %v, want 15, nil", len(approvals), err)
 	}
 }
 
@@ -137,7 +137,7 @@ func TestRunTruncatesExistingData(t *testing.T) {
 		t.Fatalf("FindUserByEmail(extra@example.com) = %#v, want nil after truncate", user)
 	}
 
-	if invites := database.ListInvites(db); len(invites) != 20 {
-		t.Fatalf("ListInvites() len = %d, want 20 after reseed", len(invites))
+	if invites, err := database.ListInvites(db); err != nil || len(invites) != 20 {
+		t.Fatalf("ListInvites() len = %d, %v, want 20, nil after reseed", len(invites), err)
 	}
 }
