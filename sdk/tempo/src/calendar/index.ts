@@ -98,7 +98,9 @@ const numberFormatCache = new Map<string, Intl.NumberFormat>();
 const relativeTimeFormatCache = new Map<string, Intl.RelativeTimeFormat>();
 
 export const getDateTimeFormatter = (locale: string | undefined, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat => {
-	const key = `${locale ?? ''}|${JSON.stringify(options)}`;
+	// Sorted-key serialization keeps the key deterministic regardless of the
+	// property order the caller used, so equivalent options share one entry.
+	const key = `${locale ?? ''}|${JSON.stringify(options, Object.keys(options).sort())}`;
 	const cached = dateTimeFormatCache.get(key);
 
 	if (cached !== undefined) {
@@ -128,7 +130,10 @@ export const getNumberFormatter = (locale?: string): Intl.NumberFormat => {
 };
 
 export const getRelativeTimeFormatter = (locale: string | undefined, options: Intl.RelativeTimeFormatOptions): Intl.RelativeTimeFormat => {
-	const key = `${locale ?? ''}|${options.numeric ?? ''}|${options.style ?? ''}`;
+	// Serialize every option (sorted for determinism) rather than a fixed
+	// subset, so a caller passing options beyond numeric/style can never be
+	// handed a cached formatter built with different settings.
+	const key = `${locale ?? ''}|${JSON.stringify(options, Object.keys(options).sort())}`;
 	const cached = relativeTimeFormatCache.get(key);
 
 	if (cached !== undefined) {
