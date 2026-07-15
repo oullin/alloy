@@ -75,7 +75,7 @@ export class MoneyManager {
 	/**
 	 * Returns the sum of the given money values.
 	 *
-	 * @throws MoneyError `ERR_CURRENCY_MISMATCH` when the currencies differ.
+	 * @throws MoneyError `ERR_CURRENCY_MISMATCH` when the currencies differ, `ERR_OVERFLOW` when the result leaves the int64 range.
 	 */
 	public add(money: MoneyValue, ...items: MoneyValue[]): MoneyValue {
 		const base = requireMoney(money);
@@ -84,7 +84,7 @@ export class MoneyManager {
 
 		for (const item of items) {
 			base.assertSameCurrency(item);
-			amount += item.amount();
+			amount = this.calculator.add(amount, item.amount());
 		}
 
 		return this.create(amount, base.currency().code);
@@ -93,7 +93,7 @@ export class MoneyManager {
 	/**
 	 * Subtracts the given money values from the first one.
 	 *
-	 * @throws MoneyError `ERR_CURRENCY_MISMATCH` when the currencies differ.
+	 * @throws MoneyError `ERR_CURRENCY_MISMATCH` when the currencies differ, `ERR_OVERFLOW` when the result leaves the int64 range.
 	 */
 	public subtract(money: MoneyValue, ...items: MoneyValue[]): MoneyValue {
 		const base = requireMoney(money);
@@ -102,7 +102,7 @@ export class MoneyManager {
 
 		for (const item of items) {
 			base.assertSameCurrency(item);
-			amount -= item.amount();
+			amount = this.calculator.subtract(amount, item.amount());
 		}
 
 		return this.create(amount, base.currency().code);
