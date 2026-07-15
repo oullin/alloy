@@ -16,6 +16,7 @@ func validateRegex(_ string, value any, params []string, _ RuleContext) bool {
 	}
 
 	re, err := compilePattern(params[0])
+
 	if err != nil {
 		return false
 	}
@@ -29,6 +30,7 @@ func validateNotRegex(_ string, value any, params []string, _ RuleContext) bool 
 	}
 
 	re, err := compilePattern(params[0])
+
 	if err != nil {
 		return false
 	}
@@ -42,11 +44,13 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 	}
 
 	closing := lastUnescapedSlash(pattern)
+
 	if closing == 0 {
 		return regexp.Compile(pattern)
 	}
 
 	flags := pattern[closing+1:]
+
 	if !allASCIILetters(flags) {
 		return regexp.Compile(pattern)
 	}
@@ -58,6 +62,7 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 	}
 
 	compiled := pattern[1:closing]
+
 	if flags != "" {
 		compiled = "(?" + flags + ")" + compiled
 	}
@@ -80,9 +85,11 @@ func lastUnescapedSlash(pattern string) int {
 		}
 
 		backslashes := 0
+
 		for j := i - 1; j >= 0 && pattern[j] == '\\'; j-- {
 			backslashes++
 		}
+
 		if backslashes%2 == 0 {
 			return i
 		}
