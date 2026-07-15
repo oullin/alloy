@@ -22,6 +22,10 @@ import (
 // testCryptoKey is a zero-filled 32-byte key used only in tests.
 var testCryptoKey = make([]byte, 32)
 
+// testSeedPassword is the deterministic password assigned to seeded users in
+// tests so login flows can authenticate without relying on a shipped default.
+const testSeedPassword = "auth-test-password"
+
 func encryptForTest(t *testing.T, plaintext string) string {
 	t.Helper()
 
@@ -96,7 +100,7 @@ func TestLoginHandlerCreatesSession(t *testing.T) {
 
 	body := strings.NewReader(url.Values{
 		"email":    {"test@example.com"},
-		"password": {"password"},
+		"password": {testSeedPassword},
 		"remember": {"true"},
 	}.Encode())
 
@@ -138,7 +142,7 @@ func TestLoginHandlerCreatesSessionFromJSON(t *testing.T) {
 
 	wantID := strconv.FormatInt(user.ID, 10)
 
-	body := strings.NewReader(`{"email":"test@example.com","password":"password","remember":true}`)
+	body := strings.NewReader(`{"email":"test@example.com","password":"` + testSeedPassword + `","remember":true}`)
 
 	req := httptest.NewRequest(http.MethodPost, "/login", body)
 
@@ -307,7 +311,7 @@ func newAuthTestHandler(t *testing.T) (App, http.Handler, *sql.DB) {
 		t.Fatal(err)
 	}
 
-	if err := seed.Run(testDB); err != nil {
+	if err := seed.RunWithPassword(testDB, testSeedPassword); err != nil {
 		t.Fatal(err)
 	}
 

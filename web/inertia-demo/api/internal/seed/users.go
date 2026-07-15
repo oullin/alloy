@@ -7,7 +7,7 @@ import (
 	"alloy.dev/inertia-demo/internal/database"
 )
 
-func seedUsers(db *sql.DB, now time.Time) error {
+func seedUsers(db *sql.DB, now time.Time, password string) error {
 	users := []struct {
 		name, email string
 	}{
@@ -18,7 +18,7 @@ func seedUsers(db *sql.DB, now time.Time) error {
 	}
 
 	for _, u := range users {
-		if _, err := database.CreateUser(db, u.name, u.email, "password", &now); err != nil {
+		if _, err := database.CreateUser(db, u.name, u.email, password, &now); err != nil {
 			return err
 		}
 	}

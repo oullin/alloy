@@ -46,8 +46,8 @@ func newCRMHarness(t *testing.T) *crmHarness {
 		db.Close()
 	})
 
-	if err := seed.Run(db); err != nil {
-		t.Fatalf("seed.Run() error = %v", err)
+	if err := seed.RunWithPassword(db, "crm-test-password"); err != nil {
+		t.Fatalf("seed.RunWithPassword() error = %v", err)
 	}
 
 	user, err := database.FindUserByEmail(db, "test@example.com")

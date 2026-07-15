@@ -1,6 +1,7 @@
 package seed
 
 import (
+	"strings"
 	"testing"
 
 	"alloy.dev/inertia-demo/internal/database"
@@ -19,8 +20,8 @@ func TestRunSeedsDatabase(t *testing.T) {
 		db.Close()
 	})
 
-	if err := Run(db); err != nil {
-		t.Fatalf("Run() error = %v", err)
+	if err := RunWithPassword(db, "seed-test-password"); err != nil {
+		t.Fatalf("RunWithPassword() error = %v", err)
 	}
 
 	if got, err := database.GetCounter(db, "priority_escalations"); err != nil || got != 18 {
@@ -123,8 +124,8 @@ func TestRunTruncatesExistingData(t *testing.T) {
 		t.Fatalf("CreateInvite() error = %v", err)
 	}
 
-	if err := Run(db); err != nil {
-		t.Fatalf("Run() error = %v", err)
+	if err := RunWithPassword(db, "seed-test-password"); err != nil {
+		t.Fatalf("RunWithPassword() error = %v", err)
 	}
 
 	user, err := database.FindUserByEmail(db, "extra@example.com")
@@ -139,5 +140,43 @@ func TestRunTruncatesExistingData(t *testing.T) {
 
 	if invites, err := database.ListInvites(db); err != nil || len(invites) != 20 {
 		t.Fatalf("ListInvites() len = %d, %v, want 20, nil after reseed", len(invites), err)
+	}
+}
+
+func TestResolveSeedPasswordUsesEnv(t *testing.T) {
+	t.Setenv(SeedPasswordEnvVar, "from-env-password")
+
+	got, err := resolveSeedPassword()
+
+	if err != nil {
+		t.Fatalf("resolveSeedPassword() error = %v", err)
+	}
+
+	if got != "from-env-password" {
+		t.Fatalf("resolveSeedPassword() = %q, want %q", got, "from-env-password")
+	}
+}
+
+func TestResolveSeedPasswordGeneratesRandomWhenUnset(t *testing.T) {
+	t.Setenv(SeedPasswordEnvVar, "")
+
+	first, err := resolveSeedPassword()
+
+	if err != nil {
+		t.Fatalf("resolveSeedPassword() error = %v", err)
+	}
+
+	if strings.TrimSpace(first) == "" {
+		t.Fatal("resolveSeedPassword() returned empty password when env unset")
+	}
+
+	second, err := resolveSeedPassword()
+
+	if err != nil {
+		t.Fatalf("resolveSeedPassword() error = %v", err)
+	}
+
+	if first == second {
+		t.Fatal("resolveSeedPassword() returned identical passwords across calls; want random")
 	}
 }
