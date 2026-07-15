@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+// CryptoConfig holds the encryption key used for cookie encryption.
+// The key must be a base64-encoded 32-byte value for AES-256-CBC.
+type CryptoConfig struct {
+	Key string
+}
+
 // CryptoKeyEnvVar is the environment variable that supplies the base64-encoded
 // AES-256 key used for cookie encryption, CSRF, and the flash store.
 //
@@ -15,12 +21,6 @@ import (
 //
 //	openssl rand -base64 32
 const CryptoKeyEnvVar = "INERTIA_CRYPTO_KEY"
-
-// CryptoConfig holds the encryption key used for cookie encryption.
-// The key must be a base64-encoded 32-byte value for AES-256-CBC.
-type CryptoConfig struct {
-	Key string
-}
 
 // LoadCrypto reads the encryption key from the environment.
 //
