@@ -33,6 +33,21 @@ type deleterRedisClient struct {
 	delErr  error
 }
 
+// The reserved key must be in here: a clear that leaves reserved jobs behind
+// would let them be reclaimed onto a queue the caller believes is empty.
+
+// A client that cannot Del silently does nothing rather than erroring, because
+// RedisDeleter is an optional capability. Pin that: it is easy to "fix" into an
+// ErrNotSupported and break callers that clear queues opportunistically.
+
+// noLuaRedisClient forces the non-atomic RPop fallback by rejecting Eval the
+// way a client without Lua support would, and fails RPop with the context's
+// error so the fallback's cancellation handling can be exercised.
+type noLuaRedisClient struct {
+	*mockRedisClient
+	rpopErr error
+}
+
 func TestRedisDriverPush(t *testing.T) {
 	t.Parallel()
 
@@ -760,8 +775,6 @@ func TestRedisDriverClearQueueDeletesEveryPerQueueKey(t *testing.T) {
 		t.Fatalf("ClearQueue: %v", err)
 	}
 
-	// The reserved key must be in here: a clear that leaves reserved jobs behind
-	// would let them be reclaimed onto a queue the caller believes is empty.
 	want := []string{
 		"queues:emails",
 		"queues:emails:delayed",
@@ -807,9 +820,6 @@ func TestRedisDriverClearQueuePropagatesDeleterError(t *testing.T) {
 	}
 }
 
-// A client that cannot Del silently does nothing rather than erroring, because
-// RedisDeleter is an optional capability. Pin that: it is easy to "fix" into an
-// ErrNotSupported and break callers that clear queues opportunistically.
 func TestRedisDriverClearQueueWithoutDeleterIsSilentNoOp(t *testing.T) {
 	t.Parallel()
 
@@ -832,5 +842,85 @@ func TestRedisDriverClearQueueWithoutDeleterIsSilentNoOp(t *testing.T) {
 
 	if size != 1 {
 		t.Fatalf("size = %d, want 1 (ClearQueue must not have removed anything)", size)
+	}
+}
+
+func (c *noLuaRedisClient) Eval(_ context.Context, _ string, _ []string, _ ...any) (any, error) {
+	return nil, errors.New("ERR unknown command 'EVAL'")
+}
+
+func (c *noLuaRedisClient) RPop(ctx context.Context, key string) (string, error) {
+	if c.rpopErr != nil {
+		return "", c.rpopErr
+	}
+
+	return c.mockRedisClient.RPop(ctx, key)
+}
+
+// A cancelled context on the fallback path must surface, not be reported as an
+// empty queue: a shutting-down worker would otherwise conclude it had drained
+// the backlog. Mirrors the guard the Eval path already had.
+func TestRedisDriverPopFallbackSurfacesContextError(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name string
+		err  error
+	}{
+		{"cancelled", context.Canceled},
+		{"deadline exceeded", context.DeadlineExceeded},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			client := &noLuaRedisClient{mockRedisClient: newMockRedisClient(), rpopErr: tc.err}
+			drv := drivers.NewRedisDriver(client, "redis")
+
+			_, err := drv.Pop(context.Background(), "default")
+
+			if !errors.Is(err, tc.err) {
+				t.Fatalf("Pop = %v, want %v", err, tc.err)
+			}
+
+			if errors.Is(err, queue.ErrNoJob) {
+				t.Fatal("a terminal context error must not be reported as an empty queue")
+			}
+		})
+	}
+}
+
+// The fallback must still report a genuinely empty queue as ErrNoJob — the
+// context guard above must not swallow the ordinary case.
+func TestRedisDriverPopFallbackEmptyQueueIsErrNoJob(t *testing.T) {
+	t.Parallel()
+
+	client := &noLuaRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Pop(context.Background(), "default"); !errors.Is(err, queue.ErrNoJob) {
+		t.Fatalf("Pop on empty queue = %v, want ErrNoJob", err)
+	}
+}
+
+// And the fallback must still actually work: a pushed job is popped via
+// RPop+ZAdd when the client cannot run Lua.
+func TestRedisDriverPopFallbackDeliversJob(t *testing.T) {
+	t.Parallel()
+
+	client := &noLuaRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Push(context.Background(), "default", []byte("fallback-payload")); err != nil {
+		t.Fatalf("Push: %v", err)
+	}
+
+	job, err := drv.Pop(context.Background(), "default")
+
+	if err != nil {
+		t.Fatalf("Pop: %v", err)
+	}
+
+	if string(job.Payload()) != "fallback-payload" {
+		t.Fatalf("payload = %q, want %q", job.Payload(), "fallback-payload")
 	}
 }

@@ -69,11 +69,10 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	c.mu.Lock()
 
 	original := abstract
-	abstract = c.getAlias(abstract)
+	abstract = c.aliases.Resolve(abstract)
 
 	// Fire before-resolving callbacks.
-	beforeGlobal := slices.Clone(c.globalBeforeCbs)
-	beforeSpecific := slices.Clone(c.beforeCbs[abstract])
+	beforeGlobal, beforeSpecific := c.before.Snapshot(abstract)
 
 	// Check contextual binding first (takes precedence over cached instances).
 	concrete := c.getContextualConcrete(abstract)
@@ -129,10 +128,8 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	// Capture binding metadata before unlocking.
 	b := c.bindings[abstract]
 	extenders := slices.Clone(c.extenders[abstract])
-	resolvGlobal := slices.Clone(c.globalResolvCbs)
-	resolvSpecific := slices.Clone(c.resolvCbs[abstract])
-	afterGlobal := slices.Clone(c.globalAfterCbs)
-	afterSpecific := slices.Clone(c.afterCbs[abstract])
+	resolvGlobal, resolvSpecific := c.resolv.Snapshot(abstract)
+	afterGlobal, afterSpecific := c.after.Snapshot(abstract)
 
 	c.resolution.buildStack = append(c.resolution.buildStack, abstract)
 

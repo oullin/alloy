@@ -17,6 +17,10 @@ var (
 	// ErrSelfAlias is returned when an alias points to itself.
 	ErrSelfAlias = errors.New("container: alias cannot be the same as the abstract")
 
+	// ErrAliasCycle is returned when registering an alias would close a loop in
+	// the alias chain, which would make resolution non-terminating.
+	ErrAliasCycle = errors.New("container: alias would create a cycle")
+
 	// ErrMethodNotBound is returned when a method binding does not exist.
 	ErrMethodNotBound = errors.New("container: method binding not found")
 )

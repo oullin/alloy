@@ -8,7 +8,7 @@ import "slices"
 func (c *App) Rebinding(abstract string, callback BindingCallback) (any, error) {
 	c.mu.Lock()
 
-	abs := c.getAlias(abstract)
+	abs := c.aliases.Resolve(abstract)
 	c.reboundCbs[abs] = append(c.reboundCbs[abs], callback)
 
 	wasBound := c.isBound(abs)
@@ -42,7 +42,7 @@ func (c *App) Refresh(abstract string, setter func(any)) {
 func (c *App) rebound(abstract string) {
 	c.mu.RLock()
 
-	abs := c.getAlias(abstract)
+	abs := c.aliases.Resolve(abstract)
 	cbs := slices.Clone(c.reboundCbs[abs])
 
 	c.mu.RUnlock()

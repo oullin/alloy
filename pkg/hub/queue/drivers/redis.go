@@ -143,6 +143,13 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 
 			raw, rpopErr = d.client.RPop(ctx, queueKey(queueName))
 
+			// Same reasoning as the Eval path above: a cancelled or expired
+			// context is terminal, and reporting it as an empty queue would
+			// tell a shutting-down worker it had drained the backlog.
+			if errors.Is(rpopErr, context.Canceled) || errors.Is(rpopErr, context.DeadlineExceeded) {
+				return nil, rpopErr
+			}
+
 			if rpopErr != nil || raw == "" {
 				return nil, queue.ErrNoJob
 			}

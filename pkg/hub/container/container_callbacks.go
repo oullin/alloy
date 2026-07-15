@@ -7,7 +7,7 @@ func (c *App) BeforeResolving(abstract string, callback BeforeResolvingCallback)
 
 	defer c.mu.Unlock()
 
-	c.beforeCbs[abstract] = append(c.beforeCbs[abstract], callback)
+	c.before.Add(abstract, callback)
 }
 
 // BeforeResolvingAny registers a global before-resolving callback.
@@ -16,7 +16,7 @@ func (c *App) BeforeResolvingAny(callback BeforeResolvingCallback) {
 
 	defer c.mu.Unlock()
 
-	c.globalBeforeCbs = append(c.globalBeforeCbs, callback)
+	c.before.AddGlobal(callback)
 }
 
 // Resolving registers a callback that fires when the given abstract is being
@@ -26,7 +26,7 @@ func (c *App) Resolving(abstract string, callback BindingCallback) {
 
 	defer c.mu.Unlock()
 
-	c.resolvCbs[abstract] = append(c.resolvCbs[abstract], callback)
+	c.resolv.Add(abstract, callback)
 }
 
 // ResolvingAny registers a global resolving callback.
@@ -35,7 +35,7 @@ func (c *App) ResolvingAny(callback BindingCallback) {
 
 	defer c.mu.Unlock()
 
-	c.globalResolvCbs = append(c.globalResolvCbs, callback)
+	c.resolv.AddGlobal(callback)
 }
 
 // AfterResolving registers a callback that fires after the given abstract is
@@ -45,7 +45,7 @@ func (c *App) AfterResolving(abstract string, callback BindingCallback) {
 
 	defer c.mu.Unlock()
 
-	c.afterCbs[abstract] = append(c.afterCbs[abstract], callback)
+	c.after.Add(abstract, callback)
 }
 
 // AfterResolvingAny registers a global after-resolving callback.
@@ -54,7 +54,7 @@ func (c *App) AfterResolvingAny(callback BindingCallback) {
 
 	defer c.mu.Unlock()
 
-	c.globalAfterCbs = append(c.globalAfterCbs, callback)
+	c.after.AddGlobal(callback)
 }
 
 // fireCallbacks invokes each callback with the given instance and container.

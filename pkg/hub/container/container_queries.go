@@ -13,7 +13,7 @@ func (c *App) Bound(abstract string) bool {
 func (c *App) isBound(abstract string) bool {
 	_, hasBind := c.bindings[abstract]
 	_, hasInst := c.instances[abstract]
-	_, hasAlias := c.aliases[abstract]
+	hasAlias := c.aliases.Has(abstract)
 
 	return hasBind || hasInst || hasAlias
 }
@@ -29,7 +29,7 @@ func (c *App) Resolved(abstract string) bool {
 
 	defer c.mu.RUnlock()
 
-	abs := c.getAlias(abstract)
+	abs := c.aliases.Resolve(abstract)
 
 	if _, ok := c.instances[abs]; ok {
 		return true
@@ -44,7 +44,7 @@ func (c *App) IsShared(abstract string) bool {
 
 	defer c.mu.RUnlock()
 
-	abs := c.getAlias(abstract)
+	abs := c.aliases.Resolve(abstract)
 
 	if _, ok := c.instances[abs]; ok {
 		return true

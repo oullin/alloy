@@ -5,7 +5,7 @@ package container
 func (c *App) Extend(abstract string, extender ExtenderFunc) {
 	c.mu.Lock()
 
-	abs := c.getAlias(abstract)
+	abs := c.aliases.Resolve(abstract)
 
 	if inst, ok := c.instances[abs]; ok {
 		c.mu.Unlock()
@@ -38,5 +38,5 @@ func (c *App) ForgetExtenders(abstract string) {
 
 	defer c.mu.Unlock()
 
-	delete(c.extenders, c.getAlias(abstract))
+	delete(c.extenders, c.aliases.Resolve(abstract))
 }

@@ -1,6 +1,11 @@
 package container
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/oullin/alloy/pkg/hub/container/internal/alias"
+	"github.com/oullin/alloy/pkg/hub/container/internal/callbacks"
+)
 
 // Factory creates a value from the container.
 type Factory func(c *App) (any, error)
@@ -34,26 +39,22 @@ type Binding struct {
 type App struct {
 	mu *sync.RWMutex
 
-	bindings        map[string]Binding
-	instances       map[string]any
-	aliases         map[string]string
-	abstractAliases map[string][]string
-	resolved        map[string]bool
-	resolution      *resolution
-	parent          *App
-	sf              *singleflight
-	contextual      map[string]map[string]any
-	tags            map[string][]string
-	extenders       map[string][]ExtenderFunc
-	reboundCbs      map[string][]BindingCallback
-	methodBindings  map[string]MethodCallable
+	bindings       map[string]Binding
+	instances      map[string]any
+	aliases        *alias.Table
+	resolved       map[string]bool
+	resolution     *resolution
+	parent         *App
+	sf             *singleflight
+	contextual     map[string]map[string]any
+	tags           map[string][]string
+	extenders      map[string][]ExtenderFunc
+	reboundCbs     map[string][]BindingCallback
+	methodBindings map[string]MethodCallable
 
-	globalBeforeCbs []BeforeResolvingCallback
-	beforeCbs       map[string][]BeforeResolvingCallback
-	globalResolvCbs []BindingCallback
-	resolvCbs       map[string][]BindingCallback
-	globalAfterCbs  []BindingCallback
-	afterCbs        map[string][]BindingCallback
+	before *callbacks.Registry[BeforeResolvingCallback]
+	resolv *callbacks.Registry[BindingCallback]
+	after  *callbacks.Registry[BindingCallback]
 }
 
 // resolution holds the goroutine-local build stack and parameter stack
@@ -67,21 +68,20 @@ type resolution struct {
 // New creates an empty, fully initialized App.
 func New() *App {
 	return &App{
-		mu:              new(sync.RWMutex),
-		bindings:        make(map[string]Binding),
-		instances:       make(map[string]any),
-		aliases:         make(map[string]string),
-		abstractAliases: make(map[string][]string),
-		resolved:        make(map[string]bool),
-		sf:              new(singleflight),
-		contextual:      make(map[string]map[string]any),
-		tags:            make(map[string][]string),
-		extenders:       make(map[string][]ExtenderFunc),
-		reboundCbs:      make(map[string][]BindingCallback),
-		methodBindings:  make(map[string]MethodCallable),
-		beforeCbs:       make(map[string][]BeforeResolvingCallback),
-		resolvCbs:       make(map[string][]BindingCallback),
-		afterCbs:        make(map[string][]BindingCallback),
+		mu:             new(sync.RWMutex),
+		bindings:       make(map[string]Binding),
+		instances:      make(map[string]any),
+		aliases:        alias.NewTable(),
+		resolved:       make(map[string]bool),
+		sf:             new(singleflight),
+		contextual:     make(map[string]map[string]any),
+		tags:           make(map[string][]string),
+		extenders:      make(map[string][]ExtenderFunc),
+		reboundCbs:     make(map[string][]BindingCallback),
+		methodBindings: make(map[string]MethodCallable),
+		before:         callbacks.NewRegistry[BeforeResolvingCallback](),
+		resolv:         callbacks.NewRegistry[BindingCallback](),
+		after:          callbacks.NewRegistry[BindingCallback](),
 	}
 }
 
@@ -94,8 +94,7 @@ func (c *App) Flush() {
 
 	c.bindings = make(map[string]Binding)
 	c.instances = make(map[string]any)
-	c.aliases = make(map[string]string)
-	c.abstractAliases = make(map[string][]string)
+	c.aliases.Reset()
 	c.resolved = make(map[string]bool)
 	c.resolution = nil
 	c.contextual = make(map[string]map[string]any)
@@ -103,10 +102,7 @@ func (c *App) Flush() {
 	c.extenders = make(map[string][]ExtenderFunc)
 	c.reboundCbs = make(map[string][]BindingCallback)
 	c.methodBindings = make(map[string]MethodCallable)
-	c.globalBeforeCbs = nil
-	c.beforeCbs = make(map[string][]BeforeResolvingCallback)
-	c.globalResolvCbs = nil
-	c.resolvCbs = make(map[string][]BindingCallback)
-	c.globalAfterCbs = nil
-	c.afterCbs = make(map[string][]BindingCallback)
+	c.before.Reset()
+	c.resolv.Reset()
+	c.after.Reset()
 }

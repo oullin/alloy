@@ -1,23 +1,34 @@
 package container
 
-import (
-	"fmt"
-	"slices"
-)
+import "fmt"
 
-// Alias creates an alias that resolves to the given abstract. It returns
-// ErrSelfAlias when the alias and the abstract are the same name.
-func (c *App) Alias(abstract, alias string) error {
-	if abstract == alias {
-		return fmt.Errorf("%w: %q", ErrSelfAlias, alias)
+// Alias creates an alias that resolves to the given abstract.
+//
+// It returns ErrSelfAlias when the alias and the abstract are the same name,
+// and ErrAliasCycle when registering the alias would close a loop — for
+// example Alias("a", "b") followed by Alias("b", "a").
+//
+// Rejecting cycles here rather than defending against them in GetAlias is what
+// keeps resolution cheap: the table stays acyclic by construction, so walking a
+// chain needs no visited-set bookkeeping. GetAlias sits on the hot path of
+// every Make, and a cyclic alias is a wiring bug that should surface at
+// registration anyway.
+func (c *App) Alias(abstract, name string) error {
+	if abstract == name {
+		return fmt.Errorf("%w: %q", ErrSelfAlias, name)
 	}
 
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
 
-	c.aliases[alias] = abstract
-	c.abstractAliases[abstract] = append(c.abstractAliases[abstract], alias)
+	// The table is acyclic, so this walk terminates. Adding name -> abstract
+	// closes a loop exactly when abstract's chain already ends at name.
+	if c.aliases.Resolve(abstract) == name {
+		return fmt.Errorf("%w: %q -> %q", ErrAliasCycle, name, abstract)
+	}
+
+	c.aliases.Add(abstract, name)
 
 	return nil
 }
@@ -28,7 +39,7 @@ func (c *App) GetAlias(abstract string) string {
 
 	defer c.mu.RUnlock()
 
-	return c.getAlias(abstract)
+	return c.aliases.Resolve(abstract)
 }
 
 // IsAlias reports whether the given name is a registered alias.
@@ -37,37 +48,5 @@ func (c *App) IsAlias(name string) bool {
 
 	defer c.mu.RUnlock()
 
-	_, ok := c.aliases[name]
-
-	return ok
-}
-
-// getAlias resolves the full alias chain without locking. Caller must hold the
-// lock.
-func (c *App) getAlias(abstract string) string {
-	for {
-		target, ok := c.aliases[abstract]
-
-		if !ok {
-			return abstract
-		}
-
-		abstract = target
-	}
-}
-
-// removeAlias removes the abstract from all alias mappings. Caller must hold
-// the write lock.
-func (c *App) removeAlias(abstract string) {
-	for abs, aliases := range c.abstractAliases {
-		for i, alias := range aliases {
-			if alias == abstract {
-				c.abstractAliases[abs] = slices.Delete(aliases, i, i+1)
-
-				break
-			}
-		}
-	}
-
-	delete(c.aliases, abstract)
+	return c.aliases.Has(name)
 }

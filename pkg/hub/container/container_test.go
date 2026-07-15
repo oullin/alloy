@@ -1533,3 +1533,58 @@ func TestSingleFlightGoexitSafety(t *testing.T) {
 		t.Fatal("Make deadlocked: single-flight key was not released after runtime.Goexit")
 	}
 }
+
+// A cyclic alias chain is rejected at registration rather than defended against
+// on every resolve: the table stays acyclic by construction, so GetAlias needs
+// no visited-set bookkeeping on the hot path of every Make.
+func TestAliasRejectsDirectCycle(t *testing.T) {
+	t.Parallel()
+
+	c := newContainer()
+
+	if err := c.Alias("a", "b"); err != nil {
+		t.Fatalf("first alias: %v", err)
+	}
+
+	err := c.Alias("b", "a")
+
+	if !errors.Is(err, container.ErrAliasCycle) {
+		t.Fatalf("Alias(b, a) = %v, want ErrAliasCycle", err)
+	}
+
+	// The rejected alias must not have been recorded.
+	if c.IsAlias("a") {
+		t.Fatal("a rejected alias must not be registered")
+	}
+}
+
+func TestAliasRejectsTransitiveCycle(t *testing.T) {
+	t.Parallel()
+
+	c := newContainer()
+	_ = c.Alias("a", "b")
+	_ = c.Alias("b", "c")
+
+	// c -> a would close a -> b -> c -> a.
+	if err := c.Alias("c", "a"); !errors.Is(err, container.ErrAliasCycle) {
+		t.Fatalf("Alias(c, a) = %v, want ErrAliasCycle", err)
+	}
+}
+
+// Guard the guard: a chain that merely converges is not a cycle and must stay
+// legal, or the check would reject ordinary multi-alias wiring.
+func TestAliasAllowsConvergentChains(t *testing.T) {
+	t.Parallel()
+
+	c := newContainer()
+
+	for _, pair := range [][2]string{{"db", "database"}, {"db", "conn"}, {"database", "primary"}} {
+		if err := c.Alias(pair[0], pair[1]); err != nil {
+			t.Fatalf("Alias(%q, %q): %v", pair[0], pair[1], err)
+		}
+	}
+
+	if got := c.GetAlias("primary"); got != "db" {
+		t.Fatalf("GetAlias(primary) = %q, want %q", got, "db")
+	}
+}

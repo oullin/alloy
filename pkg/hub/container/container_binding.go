@@ -67,7 +67,7 @@ func (c *App) ScopedIf(abstract string, factory Factory) {
 func (c *App) Instance(abstract string, instance any) any {
 	c.mu.Lock()
 
-	c.removeAlias(abstract)
+	c.aliases.Remove(abstract)
 
 	wasBound := c.isBound(abstract)
 	c.instances[abstract] = instance
@@ -85,5 +85,5 @@ func (c *App) Instance(abstract string, instance any) any {
 // abstract. Caller must hold the write lock.
 func (c *App) dropStale(abstract string) {
 	delete(c.instances, abstract)
-	delete(c.aliases, abstract)
+	c.aliases.Drop(abstract)
 }
