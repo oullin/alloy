@@ -1,5 +1,14 @@
 # Plan 005: Overflow-safe money Add/Subtract, fixed Absolute guard, and one consistent rounding policy (Go + TS)
 
+> **REVISION 2026-07-15 (reviewer reconciliation — this section OVERRIDES the stale parts of the plan below).**
+> Executor verification against live code (and against `bfface5` itself) found the original "Current state" partially wrong. Corrections, authoritative:
+>
+> 1. **Naming collision (Step 1)**: `pkg/hub/money/calculator/ration.go:10,19` ALREADY defines package funcs `SafeAdd(a, b Amount) Amount` / `SafeSubtract(a, b Amount) Amount` that silently return 0 on overflow; they back `Engine.Add`/`Engine.Subtract`, which `Manager.Split`/`Allocate` use. DO NOT redefine or change them. Instead add **methods** `Engine.SafeAdd(a, b Amount) (Amount, error)` and `Engine.SafeSubtract(a, b Amount) (Amount, error)` mirroring `Engine.SafeMultiply` (calculator.go:32), returning `exception.ErrOverflow`. `Manager.Add`/`Subtract` (manager.go:127,150) route through these new methods exactly as `Multiply` does. Leave `Split`/`Allocate` and the ration.go funcs untouched — their silent-0 behavior is recorded as a separate follow-up finding, out of this plan's scope.
+> 2. **Step 2 TS half is already done**: TS `add`/`subtract` already route through throwing `safeAdd`/`safeSubtract`. TS work in step 2 is verification only (a passing test may be added, no production change).
+> 3. **Step 3 (Absolute)**: Go fix stands — replace the always-false guard so `Absolute(math.MinInt64)` returns `0` (matching the package's existing silent-0 overflow convention in ration.go; document it on the method). TS `absolute` has NO MinInt64 guard and bigint can represent 2^63; for cross-runtime parity add a guard returning `0n` when the input is `MIN_INT64` (i.e. when negation exits int64 range), documented the same way. Plan 008's fixtures will lock this pair.
+> 4. **Step 4**: Go `calculator.Round` and TS `round` tie-handling changes stand (half away from zero — pre-approved). TS `aggregator.avg` truncation fix stands. There is NO Go `Aggregator.Avg` — ignore the plan's instruction to align it; do not add one.
+> 5. Everything else (verification commands, scope, STOP conditions, git workflow) stands. Scope explicitly includes `pkg/hub/money/calculator/ration.go` ONLY if a doc comment is added there; its behavior must not change.
+
 > **Executor instructions**: Follow step by step; verify each step; STOP on any STOP condition; update `plans/README.md` when done.
 >
 > **Drift check (run first)**: `git diff --stat bfface5..HEAD -- pkg/hub/money sdk/money`
