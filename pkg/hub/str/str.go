@@ -307,6 +307,7 @@ func cachedRegex(pattern string) (*regexp.Regexp, error) {
 	}
 
 	re, err := regexp.Compile(pattern)
+
 	if err != nil {
 		return nil, err
 	}
@@ -656,6 +657,7 @@ func Is(pattern, value string, ignoreCase ...bool) bool {
 	}
 
 	re, err := cachedRegex(globToRegex(pattern))
+
 	if err != nil {
 		return false
 	}
@@ -836,6 +838,7 @@ func Replace(search, replace any, subject string, caseSensitive ...bool) string 
 		}
 
 		re, err := cachedRegex(`(?i)` + regexp.QuoteMeta(s))
+
 		if err != nil {
 			return subject
 		}
@@ -987,6 +990,7 @@ func Deduplicate(str string, characters ...string) string {
 
 	for _, ch := range chars {
 		re, err := cachedRegex(regexp.QuoteMeta(string(ch)) + `+`)
+
 		if err != nil {
 			continue
 		}
