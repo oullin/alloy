@@ -26,11 +26,7 @@ export class RetryPolicy {
 	}
 }
 
-export const runWithRetry = async (
-	signal: AbortSignal,
-	policy: RetryPolicy | undefined,
-	handler: (signal: AbortSignal) => unknown,
-): Promise<{ value: unknown; attempts: number; error?: unknown }> => {
+export const runWithRetry = async (signal: AbortSignal, policy: RetryPolicy | undefined, handler: (signal: AbortSignal) => unknown): Promise<{ value: unknown; attempts: number; error?: unknown }> => {
 	const activePolicy = policy ?? new RetryPolicy();
 
 	let lastError: unknown;
@@ -39,6 +35,7 @@ export const runWithRetry = async (
 
 	for (let attempt = 0; attempt < activePolicy.maxTries; attempt++) {
 		const attemptSignal = createAttemptSignal(signal, activePolicy.timeout);
+
 		attempts = attempt + 1;
 
 		try {

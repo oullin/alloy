@@ -42,6 +42,7 @@ func (w *Machine[T]) Apply(subject T, transitionName string, context map[string]
 // of the guard decision itself).
 func (w *Machine[T]) commitApply(subject T, transitionName string, context map[string]any) (Transition, Marking, error) {
 	w.applyMu.Lock()
+
 	defer w.applyMu.Unlock()
 
 	transition, next, err := w.prepareApply(subject, transitionName, context)

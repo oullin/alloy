@@ -241,6 +241,7 @@ describe('multisteps workflow', () => {
 
 	it('stops retrying once maxExceptions is reached', async () => {
 		const maxExceptions = 3;
+
 		let calls = 0;
 
 		const workflow = MultiStepWorkflow.machine(
@@ -277,6 +278,7 @@ describe('multisteps workflow', () => {
 
 	it('lets an abort signal win over the remaining retry budget', async () => {
 		const controller = new AbortController();
+
 		let calls = 0;
 
 		const workflow = MultiStepWorkflow.machine(

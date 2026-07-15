@@ -17,6 +17,13 @@ type failingSetStore struct {
 	setErr error
 }
 
+// raceStore serializes reads/writes to the shared subject's state through the
+// same SingleState semantics; the machine lock is what makes the composite
+// read-guard-write atomic, which this test exercises under -race.
+type raceStore struct {
+	subject *Subscription
+}
+
 func (s *failingSetStore) GetMarking(subject *Subscription, _ *workflow.Definition) (workflow.Marking, error) {
 	place := s.getter(subject)
 
@@ -162,13 +169,6 @@ func TestApply_ConcurrentConflictingTransitions(t *testing.T) {
 	if sub.State != "left" && sub.State != "right" {
 		t.Fatalf("subject must land in exactly one target place, got %q", sub.State)
 	}
-}
-
-// raceStore serializes reads/writes to the shared subject's state through the
-// same SingleState semantics; the machine lock is what makes the composite
-// read-guard-write atomic, which this test exercises under -race.
-type raceStore struct {
-	subject *Subscription
 }
 
 func (s *raceStore) GetMarking(subject *Subscription, _ *workflow.Definition) (workflow.Marking, error) {
