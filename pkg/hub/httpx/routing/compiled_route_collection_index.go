@@ -40,32 +40,37 @@ type routePlan struct {
 	prefix string // staticPrefix used to gate the regex for dynamic routes
 }
 
-// add appends a route to the bucket and refreshes its fast-path metadata.
+// add appends a route to the bucket and incrementally maintains its fast-path
+// metadata in O(1). Once any route disqualifies the bucket (dynamic, fallback,
+// or constrained), fastStatic can never become true again under append-only
+// registration, so a disqualified bucket skips all bookkeeping. The resulting
+// state is identical to recomputing from scratch on every add.
 func (b *methodBucket) add(route *Route) {
 	b.routes = append(b.routes, route)
-	b.plans = append(b.plans, planFor(route))
-	b.refreshFastStatic()
-}
+	plan := planFor(route)
+	b.plans = append(b.plans, plan)
 
-// refreshFastStatic recomputes fastStatic and, when applicable, the exact map.
-func (b *methodBucket) refreshFastStatic() {
-	for i, route := range b.routes {
-		if !b.plans[i].static || route.IsFallback || !routeUnconstrained(route) {
-			b.fastStatic = false
-			b.exact = nil
+	// Already disqualified by an earlier route: false is sticky.
+	if len(b.routes) > 1 && !b.fastStatic {
+		return
+	}
 
-			return
-		}
+	if !plan.static || route.IsFallback || !routeUnconstrained(route) {
+		b.fastStatic = false
+		b.exact = nil
+
+		return
+	}
+
+	if b.exact == nil {
+		b.exact = make(map[string]*Route)
 	}
 
 	b.fastStatic = true
-	b.exact = make(map[string]*Route, len(b.routes))
 
 	// First registration wins for a duplicate path, mirroring the linear scan.
-	for i, route := range b.routes {
-		if _, ok := b.exact[b.plans[i].exact]; !ok {
-			b.exact[b.plans[i].exact] = route
-		}
+	if _, ok := b.exact[plan.exact]; !ok {
+		b.exact[plan.exact] = route
 	}
 }
 
