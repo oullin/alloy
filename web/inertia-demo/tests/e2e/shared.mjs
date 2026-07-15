@@ -126,6 +126,13 @@ function runCommand(command, args, options = {}) {
 		maxBuffer: 20 * 1024 * 1024,
 	});
 
+	// spawnSync reports a failure to launch (command missing from PATH) via
+	// result.error with a null status; surface that instead of a generic
+	// message with undefined output.
+	if (result.error) {
+		throw result.error;
+	}
+
 	if (result.status !== 0) {
 		throw new Error(`${command} ${args.join(' ')} failed:\n${result.stdout}\n${result.stderr}`);
 	}
@@ -232,12 +239,22 @@ export async function startServer(app, { target, logsPath, onReady } = {}) {
 
 	const handle = new ServerHandle(child, [stdout, stderr]);
 	let exitCode = null;
+	let spawnError = null;
 	child.on('exit', (code, signal) => {
 		exitCode = signal ?? code;
+	});
+	// Without a listener a failed spawn (go missing from PATH) raises an
+	// uncaught 'error' event instead of a readable failure.
+	child.on('error', (error) => {
+		spawnError = error;
 	});
 
 	const timeoutAt = Date.now() + 120_000;
 	while (Date.now() < timeoutAt) {
+		if (spawnError) {
+			throw new Error(`server failed to start: ${spawnError.message}`);
+		}
+
 		if (handle.exited) {
 			throw new Error(`server exited before becoming ready: ${exitCode}`);
 		}

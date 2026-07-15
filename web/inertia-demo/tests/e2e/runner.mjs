@@ -102,6 +102,10 @@ function createDriver({ screenshotsPath, tracesPath, downloadsPath, logsPath, he
 		appendFileSync(commandLogPath, result.stdout ? `${result.stdout}\n` : '');
 		appendFileSync(commandLogPath, result.stderr ? `${result.stderr}\n` : '');
 
+		if (result.error && !options.optional) {
+			throw result.error;
+		}
+
 		if (result.status !== 0 && !options.optional) {
 			throw new Error(`agent-browser ${command} failed (${result.status}):\n${result.stdout}\n${result.stderr}`);
 		}
@@ -143,6 +147,10 @@ function createDriver({ screenshotsPath, tracesPath, downloadsPath, logsPath, he
 				encoding: 'utf8',
 				env: browserEnv,
 			});
+
+			if (result.error) {
+				throw new Error(`agent-browser is not available via "${browserBin}": ${result.error.message}`);
+			}
 
 			if (result.status !== 0) {
 				throw new Error(`agent-browser is not available via "${browserBin}".\n${result.stdout}\n${result.stderr}`);
