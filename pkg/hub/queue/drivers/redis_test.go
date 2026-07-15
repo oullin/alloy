@@ -10,21 +10,6 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 )
 
-// Add a delayed job with a past score (already due).
-
-// Delayed set should be empty after migration.
-
-// Should be back on the main queue.
-
-// Should be in the delayed set.
-
-// Should have an entry in the failed key.
-
-// The default mockRedisClient does not satisfy RedisScanner,
-// RedisListRanger, or RedisSortedSetRanger.
-
-// ReservedJobs always returns ErrNotSupported for the Redis driver.
-
 // rangerRedisClient extends mockRedisClient with the optional Scanner /
 // ListRanger / SortedSetRanger contracts used by the Redis driver's
 // inspection methods.
@@ -34,6 +19,33 @@ type rangerRedisClient struct {
 	scanErr   error
 	lrangeErr error
 	zrangeErr error
+}
+
+// TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
+// Lua Eval fails because the context was cancelled, Pop surfaces the context
+// error instead of masking it by falling back to the non-atomic RPop path.
+
+// deleterRedisClient extends mockRedisClient with the optional RedisDeleter
+// contract that ClearQueue needs, recording the keys it was asked to delete.
+type deleterRedisClient struct {
+	*mockRedisClient
+	deleted []string
+	delErr  error
+}
+
+// The reserved key must be in here: a clear that leaves reserved jobs behind
+// would let them be reclaimed onto a queue the caller believes is empty.
+
+// A client that cannot Del silently does nothing rather than erroring, because
+// RedisDeleter is an optional capability. Pin that: it is easy to "fix" into an
+// ErrNotSupported and break callers that clear queues opportunistically.
+
+// noLuaRedisClient forces the non-atomic RPop fallback by rejecting Eval the
+// way a client without Lua support would, and fails RPop with the context's
+// error so the fallback's cancellation handling can be exercised.
+type noLuaRedisClient struct {
+	*mockRedisClient
+	rpopErr error
 }
 
 func TestRedisDriverPush(t *testing.T) {
@@ -417,7 +429,7 @@ func TestRedisDriverQueueNamesDedupesAndUnwraps(t *testing.T) {
 			"queues:default:delayed",
 			"queues:emails",
 			"queues:{cluster}",
-			"queues:", // empty after trim — must be skipped
+			"queues:",
 		},
 	}
 	drv := drivers.NewRedisDriver(client, "redis")
@@ -465,7 +477,6 @@ func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
 	drv := drivers.NewRedisDriver(client, "redis")
 	ctx := context.Background()
 
-	// Push two real payloads via the driver so the queue key matches.
 	_, _ = drv.Push(ctx, "default", []byte(`{"uuid":"u1","displayName":"Job1","createdAt":1000000}`))
 	_, _ = drv.Push(ctx, "default", []byte(`not-json`))
 
@@ -479,7 +490,6 @@ func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
 		t.Fatalf("got %d jobs, want 2", len(jobs))
 	}
 
-	// Find the JSON one and assert decoded fields.
 	var decoded *queue.InspectedJob
 
 	for i := range jobs {
@@ -622,7 +632,6 @@ func TestRedisDriverReserve(t *testing.T) {
 		t.Errorf("expected reserved size 0 after delete, got %d", reservedSize2)
 	}
 
-	// Test Fail behaves correctly (removing from reserved, pushing to failed)
 	_, _ = drv.Push(ctx, "default", []byte("fail-payload"))
 	job2, err := drv.Pop(ctx, "default")
 
@@ -713,7 +722,6 @@ func TestRedisDriverShutdown(t *testing.T) {
 		t.Errorf("expected Release to succeed even if Pop ctx cancelled, got: %v", err)
 	}
 
-	// Verify that after Release the job is back in ready and gone from reserved
 	readySize, _ := drv.Size(context.Background(), "default")
 
 	if readySize != 1 {
@@ -727,9 +735,6 @@ func TestRedisDriverShutdown(t *testing.T) {
 	}
 }
 
-// TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
-// Lua Eval fails because the context was cancelled, Pop surfaces the context
-// error instead of masking it by falling back to the non-atomic RPop path.
 func TestRedisDriverPopContextCanceledNoFallback(t *testing.T) {
 	t.Parallel()
 
@@ -747,5 +752,175 @@ func TestRedisDriverPopContextCanceledNoFallback(t *testing.T) {
 
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled to be surfaced, got %v", err)
+	}
+}
+
+func (c *deleterRedisClient) Del(_ context.Context, keys ...string) (int64, error) {
+	if c.delErr != nil {
+		return 0, c.delErr
+	}
+
+	c.deleted = append(c.deleted, keys...)
+
+	return int64(len(keys)), nil
+}
+
+func TestRedisDriverClearQueueDeletesEveryPerQueueKey(t *testing.T) {
+	t.Parallel()
+
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
+		t.Fatalf("ClearQueue: %v", err)
+	}
+
+	want := []string{
+		"queues:emails",
+		"queues:emails:delayed",
+		"queues:emails:reserved",
+		"queues:emails:failed",
+	}
+
+	if len(client.deleted) != len(want) {
+		t.Fatalf("deleted %v, want %v", client.deleted, want)
+	}
+
+	for i, k := range want {
+		if client.deleted[i] != k {
+			t.Fatalf("deleted %v, want %v", client.deleted, want)
+		}
+	}
+}
+
+func TestRedisDriverClearQueueUsesDefaultForEmptyName(t *testing.T) {
+	t.Parallel()
+
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), ""); err != nil {
+		t.Fatalf("ClearQueue: %v", err)
+	}
+
+	if len(client.deleted) == 0 || client.deleted[0] != "queues:default" {
+		t.Fatalf("deleted %v, want the default queue key first", client.deleted)
+	}
+}
+
+func TestRedisDriverClearQueuePropagatesDeleterError(t *testing.T) {
+	t.Parallel()
+
+	boom := errors.New("del failed")
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient(), delErr: boom}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), "emails"); !errors.Is(err, boom) {
+		t.Fatalf("ClearQueue error = %v, want %v", err, boom)
+	}
+}
+
+func TestRedisDriverClearQueueWithoutDeleterIsSilentNoOp(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Push(context.Background(), "emails", []byte(`{"job":"x"}`)); err != nil {
+		t.Fatalf("Push: %v", err)
+	}
+
+	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
+		t.Fatalf("ClearQueue without a deleter must be a no-op, got %v", err)
+	}
+
+	size, err := drv.Size(context.Background(), "emails")
+
+	if err != nil {
+		t.Fatalf("Size: %v", err)
+	}
+
+	if size != 1 {
+		t.Fatalf("size = %d, want 1 (ClearQueue must not have removed anything)", size)
+	}
+}
+
+func (c *noLuaRedisClient) Eval(_ context.Context, _ string, _ []string, _ ...any) (any, error) {
+	return nil, errors.New("ERR unknown command 'EVAL'")
+}
+
+func (c *noLuaRedisClient) RPop(ctx context.Context, key string) (string, error) {
+	if c.rpopErr != nil {
+		return "", c.rpopErr
+	}
+
+	return c.mockRedisClient.RPop(ctx, key)
+}
+
+// A cancelled context on the fallback path must surface, not be reported as an
+// empty queue: a shutting-down worker would otherwise conclude it had drained
+// the backlog. Mirrors the guard the Eval path already had.
+func TestRedisDriverPopFallbackSurfacesContextError(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name string
+		err  error
+	}{
+		{"cancelled", context.Canceled},
+		{"deadline exceeded", context.DeadlineExceeded},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			client := &noLuaRedisClient{mockRedisClient: newMockRedisClient(), rpopErr: tc.err}
+			drv := drivers.NewRedisDriver(client, "redis")
+
+			_, err := drv.Pop(context.Background(), "default")
+
+			if !errors.Is(err, tc.err) {
+				t.Fatalf("Pop = %v, want %v", err, tc.err)
+			}
+
+			if errors.Is(err, queue.ErrNoJob) {
+				t.Fatal("a terminal context error must not be reported as an empty queue")
+			}
+		})
+	}
+}
+
+// The fallback must still report a genuinely empty queue as ErrNoJob — the
+// context guard above must not swallow the ordinary case.
+func TestRedisDriverPopFallbackEmptyQueueIsErrNoJob(t *testing.T) {
+	t.Parallel()
+
+	client := &noLuaRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Pop(context.Background(), "default"); !errors.Is(err, queue.ErrNoJob) {
+		t.Fatalf("Pop on empty queue = %v, want ErrNoJob", err)
+	}
+}
+
+// And the fallback must still actually work: a pushed job is popped via
+// RPop+ZAdd when the client cannot run Lua.
+func TestRedisDriverPopFallbackDeliversJob(t *testing.T) {
+	t.Parallel()
+
+	client := &noLuaRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Push(context.Background(), "default", []byte("fallback-payload")); err != nil {
+		t.Fatalf("Push: %v", err)
+	}
+
+	job, err := drv.Pop(context.Background(), "default")
+
+	if err != nil {
+		t.Fatalf("Pop: %v", err)
+	}
+
+	if string(job.Payload()) != "fallback-payload" {
+		t.Fatalf("payload = %q, want %q", job.Payload(), "fallback-payload")
 	}
 }
