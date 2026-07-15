@@ -10,21 +10,6 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 )
 
-// Add a delayed job with a past score (already due).
-
-// Delayed set should be empty after migration.
-
-// Should be back on the main queue.
-
-// Should be in the delayed set.
-
-// Should have an entry in the failed key.
-
-// The default mockRedisClient does not satisfy RedisScanner,
-// RedisListRanger, or RedisSortedSetRanger.
-
-// ReservedJobs always returns ErrNotSupported for the Redis driver.
-
 // rangerRedisClient extends mockRedisClient with the optional Scanner /
 // ListRanger / SortedSetRanger contracts used by the Redis driver's
 // inspection methods.
@@ -35,16 +20,6 @@ type rangerRedisClient struct {
 	lrangeErr error
 	zrangeErr error
 }
-
-// empty after trim — must be skipped
-
-// Push two real payloads via the driver so the queue key matches.
-
-// Find the JSON one and assert decoded fields.
-
-// Test Fail behaves correctly (removing from reserved, pushing to failed)
-
-// Verify that after Release the job is back in ready and gone from reserved
 
 // TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
 // Lua Eval fails because the context was cancelled, Pop surfaces the context
