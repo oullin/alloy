@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
@@ -39,6 +40,15 @@ type BeanstalkdTubeLister interface {
 type BeanstalkdPeeker interface {
 	PeekReady(ctx context.Context, tube string) (uint64, []byte, error)
 	PeekDelayed(ctx context.Context, tube string) (uint64, []byte, error)
+}
+
+// BeanstalkdJobStatter is an optional interface implemented by BeanstalkdClient
+// implementations that support retrieving stats for a specific job (the "stats-job"
+// protocol command). The BeanstalkdDriver probes for this interface via
+// a type assertion in Pop to extract the reserves count; without it the driver
+// falls back to the payload tries count.
+type BeanstalkdJobStatter interface {
+	StatsJob(ctx context.Context, id uint64) (map[string]string, error)
 }
 
 // BeanstalkdDriver enqueues jobs via a Beanstalkd client. It is the
@@ -133,12 +143,36 @@ func (d *BeanstalkdDriver) Pop(ctx context.Context, queueName string) (queue.Job
 		return nil, queue.ErrNoJob
 	}
 
+	var attempts int
+
+	var gotAttempts bool
+
+	if statter, ok := d.client.(BeanstalkdJobStatter); ok {
+		if stats, err := statter.StatsJob(ctx, id); err == nil {
+			if reservesStr, ok := stats["reserves"]; ok {
+				if val, err := strconv.Atoi(reservesStr); err == nil {
+					attempts = val
+					gotAttempts = true
+				}
+			}
+		}
+	}
+
+	if !gotAttempts {
+		p, pErr := queue.UnmarshalPayload(body)
+
+		if pErr == nil && p != nil {
+			attempts = p.Tries
+		}
+	}
+
 	job := &bsJob{
 		BaseJob: BaseJob{
 			id:         toString(id),
 			payload:    body,
 			queue:      tube,
 			connection: d.connection,
+			attempts:   attempts,
 		},
 	}
 	job.deleteFunc = func() error {

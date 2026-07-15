@@ -2,6 +2,8 @@ package drivers
 
 import (
 	"context"
+	"fmt"
+	"runtime/debug"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
@@ -86,7 +88,7 @@ func (d *SyncDriver) PushJob(ctx context.Context, queueName string, jobValue any
 func (d *SyncDriver) executeJob(ctx context.Context, job queue.Job) error {
 	d.emit(queue.JobProcessing{ConnectionName: d.connection, Job: job})
 
-	err := job.Fire(ctx)
+	err := d.runFire(ctx, job)
 
 	if err != nil {
 		d.emit(queue.JobExceptionOccurred{ConnectionName: d.connection, Job: job, Err: err})
@@ -107,6 +109,16 @@ func (d *SyncDriver) executeJob(ctx context.Context, job queue.Job) error {
 	d.emit(queue.JobAttempted{ConnectionName: d.connection, Job: job})
 
 	return nil
+}
+
+func (d *SyncDriver) runFire(ctx context.Context, job queue.Job) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("queue: handler panicked: %v\n%s", r, debug.Stack())
+		}
+	}()
+
+	return job.Fire(ctx)
 }
 
 func (d *SyncDriver) emit(event any) {

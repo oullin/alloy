@@ -3,6 +3,7 @@ package queue_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -593,3 +594,64 @@ func (c *workerRedisClient) LLen(_ context.Context, key string) (int64, error) {
 }
 
 func (c *workerRedisClient) ZCard(_ context.Context, _ string) (int64, error) { return 0, nil }
+
+func TestWorkerPanicRecovery(t *testing.T) {
+	t.Parallel()
+
+	job := &mockJob{payload: []byte("p"), queue: "q", connection: "test", maxTries: 1, attempts: 1}
+	q := &mockQueue{connection: "test", jobs: []queue.Job{job}}
+
+	recorder := &eventRecorder{}
+
+	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error {
+		panic("something went terribly wrong")
+	})
+
+	w := queue.NewWorker(q, handler, recorder, queue.WorkerOptions{StopOnEmpty: true})
+	err := w.Run(context.Background(), "q")
+
+	if err != nil {
+		t.Fatalf("worker Run returned error: %v", err)
+	}
+
+	failed := recorder.count(func(e any) bool { _, ok := e.(queue.JobFailed); return ok })
+
+	if failed != 1 {
+		t.Errorf("expected 1 JobFailed event, got %d", failed)
+	}
+
+	exception := recorder.count(func(e any) bool { _, ok := e.(queue.JobExceptionOccurred); return ok })
+
+	if exception != 1 {
+		t.Errorf("expected 1 JobExceptionOccurred event, got %d", exception)
+	}
+
+	if !job.failed {
+		t.Error("expected job to be marked as failed due to panic")
+	}
+}
+
+func TestSyncDriverPanicRecovery(t *testing.T) {
+	t.Parallel()
+
+	processed := 0
+	handler := queue.HandlerFunc(func(_ context.Context, _ queue.Job) error {
+		processed++
+		panic("sync handler panic")
+	})
+
+	drv := drivers.NewSyncDriver("default", handler)
+	_, err := drv.Push(context.Background(), "default", []byte(`{"job":"test"}`))
+
+	if err == nil {
+		t.Fatal("expected panic to be returned as an error, got nil")
+	}
+
+	if !strings.HasPrefix(err.Error(), "queue: handler panicked: sync handler panic") {
+		t.Errorf("unexpected error message: %v", err)
+	}
+
+	if processed != 1 {
+		t.Errorf("expected 1 processed job, got %d", processed)
+	}
+}

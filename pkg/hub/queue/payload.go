@@ -24,17 +24,20 @@ type PayloadHook func(connection, queue string, payload *Payload)
 
 // Payload is the JSON envelope wrapping a queued job.
 type Payload struct {
-	UUID          string         `json:"uuid"`
-	DisplayName   string         `json:"displayName"`
-	Job           string         `json:"job"`
-	Data          map[string]any `json:"data"`
-	Tries         int            `json:"tries"`
-	MaxTries      int            `json:"maxTries,omitempty"`
-	Timeout       int            `json:"timeout,omitempty"`
-	Backoff       []int          `json:"backoff,omitempty"`
-	MaxExceptions int            `json:"maxExceptions,omitempty"`
-	RetryUntil    *time.Time     `json:"retryUntil,omitempty"`
-	CreatedAt     *time.Time     `json:"createdAt,omitempty"`
+	UUID        string         `json:"uuid"`
+	DisplayName string         `json:"displayName"`
+	Job         string         `json:"job"`
+	Data        map[string]any `json:"data"`
+	// Tries is the number of completed attempts for this job. Drivers read it on Pop and,
+	// where the backend allows rewriting the payload on release (redis), persist the
+	// incremented value; beanstalkd and SQS prefer their native redelivery counters.
+	Tries         int        `json:"tries"`
+	MaxTries      int        `json:"maxTries,omitempty"`
+	Timeout       int        `json:"timeout,omitempty"`
+	Backoff       []int      `json:"backoff,omitempty"`
+	MaxExceptions int        `json:"maxExceptions,omitempty"`
+	RetryUntil    *time.Time `json:"retryUntil,omitempty"`
+	CreatedAt     *time.Time `json:"createdAt,omitempty"`
 }
 
 var (

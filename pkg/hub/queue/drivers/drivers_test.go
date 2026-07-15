@@ -72,9 +72,10 @@ type mockSQSClient struct {
 }
 
 type mockSQSMsg struct {
-	id      string
-	receipt string
-	body    string
+	id         string
+	receipt    string
+	body       string
+	attributes map[string]string
 }
 
 // --- Mock Beanstalkd Client ---
@@ -89,6 +90,7 @@ type mockBeanstalkdClient struct {
 	buryErr    error
 	putErr     error
 	stats      map[string]map[string]string
+	jobStats   map[uint64]map[string]string
 	lastPut    struct {
 		tube     string
 		priority uint32
@@ -122,7 +124,11 @@ func newMockRedisClient() *mockRedisClient {
 	}
 }
 
-func (c *mockRedisClient) LPush(_ context.Context, key string, values ...any) error {
+func (c *mockRedisClient) LPush(ctx context.Context, key string, values ...any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -138,7 +144,11 @@ func (c *mockRedisClient) LPush(_ context.Context, key string, values ...any) er
 	return nil
 }
 
-func (c *mockRedisClient) RPop(_ context.Context, key string) (string, error) {
+func (c *mockRedisClient) RPop(ctx context.Context, key string) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -155,7 +165,11 @@ func (c *mockRedisClient) RPop(_ context.Context, key string) (string, error) {
 	return val, nil
 }
 
-func (c *mockRedisClient) ZAdd(_ context.Context, key string, score float64, member string) error {
+func (c *mockRedisClient) ZAdd(ctx context.Context, key string, score float64, member string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -165,7 +179,11 @@ func (c *mockRedisClient) ZAdd(_ context.Context, key string, score float64, mem
 	return nil
 }
 
-func (c *mockRedisClient) ZRangeByScore(_ context.Context, key string, min, max float64) ([]string, error) {
+func (c *mockRedisClient) ZRangeByScore(ctx context.Context, key string, min, max float64) ([]string, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -181,7 +199,11 @@ func (c *mockRedisClient) ZRangeByScore(_ context.Context, key string, min, max 
 	return result, nil
 }
 
-func (c *mockRedisClient) ZRem(_ context.Context, key string, members ...any) error {
+func (c *mockRedisClient) ZRem(ctx context.Context, key string, members ...any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -205,7 +227,11 @@ func (c *mockRedisClient) ZRem(_ context.Context, key string, members ...any) er
 	return nil
 }
 
-func (c *mockRedisClient) Eval(_ context.Context, script string, keys []string, args ...any) (any, error) {
+func (c *mockRedisClient) Eval(ctx context.Context, script string, keys []string, args ...any) (any, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -214,6 +240,33 @@ func (c *mockRedisClient) Eval(_ context.Context, script string, keys []string, 
 
 	if c.evalErr != nil {
 		return nil, c.evalErr
+	}
+
+	if strings.Contains(script, "rpop") && strings.Contains(script, "zadd") {
+		if len(keys) < 2 || len(args) == 0 {
+			return nil, nil
+		}
+
+		listKey := keys[0]
+		reservedKey := keys[1]
+		score, ok := evalScore(args[0])
+
+		if !ok {
+			return nil, nil
+		}
+
+		list := c.lists[listKey]
+
+		if len(list) == 0 {
+			return nil, nil
+		}
+
+		val := list[len(list)-1]
+		c.lists[listKey] = list[:len(list)-1]
+
+		c.sorted[reservedKey] = append(c.sorted[reservedKey], sortedEntry{score: score, member: val})
+
+		return val, nil
 	}
 
 	if len(keys) < 2 || len(args) == 0 {
@@ -262,7 +315,11 @@ func evalScore(value any) (float64, bool) {
 	}
 }
 
-func (c *mockRedisClient) LLen(_ context.Context, key string) (int64, error) {
+func (c *mockRedisClient) LLen(ctx context.Context, key string) (int64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -270,7 +327,11 @@ func (c *mockRedisClient) LLen(_ context.Context, key string) (int64, error) {
 	return int64(len(c.lists[key])), nil
 }
 
-func (c *mockRedisClient) ZCard(_ context.Context, key string) (int64, error) {
+func (c *mockRedisClient) ZCard(ctx context.Context, key string) (int64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+
 	c.mu.Lock()
 
 	defer c.mu.Unlock()
@@ -456,6 +517,20 @@ func newMockSQSClient() *mockSQSClient {
 	}
 }
 
+func (c *mockSQSClient) PushMessageWithAttributes(queueURL string, body string, attributes map[string]string) {
+	c.mu.Lock()
+
+	defer c.mu.Unlock()
+
+	c.nextMsgID++
+	c.messages[queueURL] = append(c.messages[queueURL], mockSQSMsg{
+		id:         fmt.Sprintf("msg-%d", c.nextMsgID),
+		receipt:    fmt.Sprintf("receipt-%d", c.nextMsgID),
+		body:       body,
+		attributes: attributes,
+	})
+}
+
 func (c *mockSQSClient) SendMessage(_ context.Context, queueURL string, body string, _ time.Duration) (string, error) {
 	c.mu.Lock()
 
@@ -529,6 +604,7 @@ func (c *mockSQSClient) ReceiveMessage(_ context.Context, queueURL string, maxMe
 			MessageID:     msgs[i].id,
 			ReceiptHandle: msgs[i].receipt,
 			Body:          msgs[i].body,
+			Attributes:    msgs[i].attributes,
 		}
 	}
 
@@ -555,8 +631,9 @@ func (c *mockSQSClient) GetQueueAttributes(_ context.Context, _ string, _ []stri
 
 func newMockBeanstalkdClient() *mockBeanstalkdClient {
 	return &mockBeanstalkdClient{
-		tubes: make(map[string][]mockBeanstalkdJob),
-		stats: make(map[string]map[string]string),
+		tubes:    make(map[string][]mockBeanstalkdJob),
+		stats:    make(map[string]map[string]string),
+		jobStats: make(map[uint64]map[string]string),
 	}
 }
 
@@ -622,4 +699,16 @@ func (c *mockBeanstalkdClient) StatsTube(_ context.Context, tube string) (map[st
 	}
 
 	return map[string]string{}, nil
+}
+
+func (c *mockBeanstalkdClient) StatsJob(_ context.Context, id uint64) (map[string]string, error) {
+	c.mu.Lock()
+
+	defer c.mu.Unlock()
+
+	if s, ok := c.jobStats[id]; ok {
+		return s, nil
+	}
+
+	return nil, errors.New("not found")
 }

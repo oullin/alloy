@@ -2,6 +2,8 @@ package drivers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/queue"
@@ -114,63 +116,97 @@ func (d *FailoverDriver) PushMultiple(ctx context.Context, queueName string, pay
 }
 
 func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
-	for _, drv := range d.drivers {
+	var lastRealErr error
+
+	for i, drv := range d.drivers {
 		job, err := drv.Pop(ctx, queueName)
 
 		if err == nil && job != nil {
 			return job, nil
 		}
+
+		if err == nil {
+			err = queue.ErrNoJob
+		}
+
+		if !errors.Is(err, queue.ErrNoJob) {
+			lastRealErr = err
+		}
+
+		if i+1 < len(d.drivers) && !errors.Is(err, queue.ErrNoJob) {
+			d.emitFailover(drv, d.drivers[i+1], err)
+		}
+	}
+
+	if lastRealErr != nil {
+		return nil, fmt.Errorf("queue: failover Pop failed: %w", lastRealErr)
 	}
 
 	return nil, queue.ErrNoJob
 }
 
 func (d *FailoverDriver) Size(ctx context.Context, queueName string) (int64, error) {
+	var lastErr error
+
 	for _, drv := range d.drivers {
 		n, err := drv.Size(ctx, queueName)
 
 		if err == nil {
 			return n, nil
 		}
+
+		lastErr = err
 	}
 
-	return 0, nil
+	return 0, lastErr
 }
 
 func (d *FailoverDriver) PendingSize(ctx context.Context, queueName string) (int64, error) {
+	var lastErr error
+
 	for _, drv := range d.drivers {
 		n, err := drv.PendingSize(ctx, queueName)
 
 		if err == nil {
 			return n, nil
 		}
+
+		lastErr = err
 	}
 
-	return 0, nil
+	return 0, lastErr
 }
 
 func (d *FailoverDriver) DelayedSize(ctx context.Context, queueName string) (int64, error) {
+	var lastErr error
+
 	for _, drv := range d.drivers {
 		n, err := drv.DelayedSize(ctx, queueName)
 
 		if err == nil {
 			return n, nil
 		}
+
+		lastErr = err
 	}
 
-	return 0, nil
+	return 0, lastErr
 }
 
 func (d *FailoverDriver) ReservedSize(ctx context.Context, queueName string) (int64, error) {
+	var lastErr error
+
 	for _, drv := range d.drivers {
 		n, err := drv.ReservedSize(ctx, queueName)
 
 		if err == nil {
 			return n, nil
 		}
+
+		lastErr = err
 	}
 
-	return 0, nil
+	return 0, lastErr
 }
 
 func (d *FailoverDriver) ConnectionName() string { return d.connection }

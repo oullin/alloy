@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
 )
@@ -23,10 +24,12 @@ import (
 // it keeps the App itself free of provider lifecycle concerns.
 type Application struct {
 	*App
+	mu            sync.Mutex
 	providers     []provider.ServiceProvider
 	deferredByKey map[string]provider.ServiceProvider
 	registered    map[provider.ServiceProvider]bool
 	booted        bool
+	inFlight      map[provider.ServiceProvider]*sync.WaitGroup
 }
 
 // NewApplication creates an Application backed by a fresh App.
@@ -35,6 +38,7 @@ func NewApplication() *Application {
 		App:           New(),
 		deferredByKey: make(map[string]provider.ServiceProvider),
 		registered:    make(map[provider.ServiceProvider]bool),
+		inFlight:      make(map[provider.ServiceProvider]*sync.WaitGroup),
 	}
 }
 
@@ -46,77 +50,111 @@ func NewApplication() *Application {
 // abstract keys are tracked, and Register() runs the first time any
 // tracked key is resolved through Application.Make.
 func (a *Application) Register(p provider.ServiceProvider) {
-	if isDeferred(p) {
-		a.recordDeferred(p)
+	a.mu.Lock()
 
-		return
-	}
-
-	a.doRegister(p)
-}
-
-// doRegister performs the actual provider registration.
-func (a *Application) doRegister(p provider.ServiceProvider) {
+	// Guards both paths: an eagerly-registered provider and a deferred
+	// provider that has already been flushed must not be re-tracked, or
+	// a.providers would accumulate duplicates and Boot would run twice.
 	if a.registered[p] {
+		a.mu.Unlock()
+
 		return
 	}
 
-	p.Register()
+	if isDeferred(p) {
+		provides, ok := p.(provider.Provides)
+
+		if ok {
+			keys := provides.Provides()
+
+			if len(keys) > 0 {
+				// Already tracked as deferred (registered twice before its
+				// first flush): keep the single existing entry.
+				for _, tracked := range a.deferredByKey {
+					if tracked == p {
+						a.mu.Unlock()
+
+						return
+					}
+				}
+
+				a.providers = append(a.providers, p)
+
+				for _, key := range keys {
+					a.deferredByKey[key] = p
+				}
+
+				a.mu.Unlock()
+
+				return
+			}
+		}
+	}
+
 	a.providers = append(a.providers, p)
 	a.registered[p] = true
-}
+	isBooted := a.booted
+	a.mu.Unlock()
 
-// recordDeferred remembers the provider's keys without calling Register.
-// The provider IS appended to a.providers so introspection sees it.
-func (a *Application) recordDeferred(p provider.ServiceProvider) {
-	provides, ok := p.(provider.Provides)
+	p.Register()
 
-	if !ok {
-		a.doRegister(p)
-
-		return
-	}
-
-	keys := provides.Provides()
-
-	if len(keys) == 0 {
-		a.doRegister(p)
-
-		return
-	}
-
-	a.providers = append(a.providers, p)
-
-	for _, key := range keys {
-		a.deferredByKey[key] = p
+	if isBooted {
+		if b, ok := p.(provider.Bootable); ok {
+			b.Boot()
+		}
 	}
 }
 
 // flushDeferredFor runs the deferred provider that owns abstract, if any,
 // and removes its tracking entries.
 func (a *Application) flushDeferredFor(abstract string) {
+	a.mu.Lock()
+
 	p, ok := a.deferredByKey[abstract]
 
 	if !ok {
+		a.mu.Unlock()
+
 		return
 	}
 
 	if a.registered[p] {
+		wg, running := a.inFlight[p]
+		a.mu.Unlock()
+
+		if running {
+			wg.Wait()
+		}
+
 		return
 	}
 
-	if provides, ok := p.(provider.Provides); ok {
-		for _, k := range provides.Provides() {
-			delete(a.deferredByKey, k)
-		}
-	}
-
-	p.Register()
 	a.registered[p] = true
 
-	// If the application has already booted, give the freshly-registered
-	// provider a chance to Boot too.
-	if a.booted {
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	a.inFlight[p] = wg
+
+	isBooted := a.booted
+	a.mu.Unlock()
+
+	defer func() {
+		a.mu.Lock()
+		delete(a.inFlight, p)
+
+		if provides, ok := p.(provider.Provides); ok {
+			for _, k := range provides.Provides() {
+				delete(a.deferredByKey, k)
+			}
+		}
+
+		a.mu.Unlock()
+		wg.Done()
+	}()
+
+	p.Register()
+
+	if isBooted {
 		if b, ok := p.(provider.Bootable); ok {
 			b.Boot()
 		}
@@ -167,25 +205,43 @@ func (a *Application) RegisterMany(providers []provider.ServiceProvider) {
 // provider.Bootable. Deferred providers that have not yet been flushed are
 // NOT booted until their first Make() call. Idempotent.
 func (a *Application) Boot() {
+	a.mu.Lock()
+
 	if a.booted {
+		a.mu.Unlock()
+
 		return
 	}
 
-	for _, p := range a.providers {
-		if !a.registered[p] {
-			continue // deferred-and-not-yet-flushed
-		}
+	a.booted = true
 
+	// Snapshot currently registered providers to boot outside the lock
+	providers := make([]provider.ServiceProvider, len(a.providers))
+	copy(providers, a.providers)
+
+	var bootedProviders []provider.ServiceProvider
+
+	for _, p := range providers {
+		if a.registered[p] {
+			bootedProviders = append(bootedProviders, p)
+		}
+	}
+
+	a.mu.Unlock()
+
+	for _, p := range bootedProviders {
 		if b, ok := p.(provider.Bootable); ok {
 			b.Boot()
 		}
 	}
-
-	a.booted = true
 }
 
 // Booted reports whether Boot has been called.
 func (a *Application) Booted() bool {
+	a.mu.Lock()
+
+	defer a.mu.Unlock()
+
 	return a.booted
 }
 
@@ -193,6 +249,10 @@ func (a *Application) Booted() bool {
 // application, including deferred providers that have not yet been flushed.
 // The returned slice is a copy.
 func (a *Application) Providers() []provider.ServiceProvider {
+	a.mu.Lock()
+
+	defer a.mu.Unlock()
+
 	out := make([]provider.ServiceProvider, len(a.providers))
 	copy(out, a.providers)
 
@@ -202,6 +262,10 @@ func (a *Application) Providers() []provider.ServiceProvider {
 // HasProvider reports whether any registered or deferred provider declares
 // the given abstract key via provider.Provides.
 func (a *Application) HasProvider(abstract string) bool {
+	a.mu.Lock()
+
+	defer a.mu.Unlock()
+
 	if _, ok := a.deferredByKey[abstract]; ok {
 		return true
 	}
@@ -222,6 +286,10 @@ func (a *Application) HasProvider(abstract string) bool {
 // ProviderFor returns the (first) provider that declares the given abstract,
 // or nil if none does.
 func (a *Application) ProviderFor(abstract string) provider.ServiceProvider {
+	a.mu.Lock()
+
+	defer a.mu.Unlock()
+
 	if p, ok := a.deferredByKey[abstract]; ok {
 		return p
 	}

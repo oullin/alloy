@@ -2,16 +2,94 @@ package container_test
 
 import (
 	"errors"
+	"fmt"
+	"runtime"
+	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/oullin/alloy/pkg/hub/container"
 )
 
+// ---------- Binding & Resolution ----------
+
+// ---------- Aliases ----------
+
+//nolint:errcheck
+
+// ---------- Queries ----------
+
+//nolint:errcheck
+
+//nolint:errcheck
+
+// ---------- Instance Management ----------
+
+//nolint:errcheck
+//nolint:errcheck
+
+// Shared should still return cached instance.
+
+//nolint:errcheck
+
+// ---------- Static Instance ----------
+
+// Cleanup.
+
+// ---------- Concurrent Access ----------
+
+//nolint:errcheck
+
+// ---------- Rebinding ----------
+
+//nolint:errcheck
+
+//nolint:errcheck
+
+// Rebinding triggers the callback because "name" is already bound.
+
+//nolint:errcheck
+
+//nolint:errcheck
+
+//nolint:errcheck
+
+//nolint:errcheck
+
+// Rebind.
+
+// Define two graphs
+// Graph 1: A -> B
+
+// Graph 2: X -> Y
+
+// Contextual bindings for concurrent goroutines
+// Concrete type "client1" wants dependency "dep" as "val1"
+// Concrete type "client2" wants dependency "dep" as "val2"
+
+// Resolvers that check contextual binding based on stack
+
+// Resolve Graph 1
+
+// Resolve client1 to check contextual binding
+
+// Resolve Graph 2
+
+// Resolve client2 to check contextual binding
+
+// Wait for the first goroutine to enter the factory, ensuring concurrency
+
+// Give it a tiny bit of time to make sure goroutine 2 blocks on Make
+
+type storedContainerService struct {
+	cc *container.App
+}
+
 func newContainer() *container.App {
 	return container.New()
 }
-
-// ---------- Binding & Resolution ----------
 
 func TestClosureResolution(t *testing.T) {
 	t.Parallel()
@@ -490,8 +568,6 @@ func TestCircularDependencyDetection(t *testing.T) {
 	}
 }
 
-// ---------- Aliases ----------
-
 func TestAliasResolvesToAbstract(t *testing.T) {
 	t.Parallel()
 
@@ -598,14 +674,12 @@ func TestResolvedResolvesAlias(t *testing.T) {
 	}, false)
 
 	c.Alias("name", "shortName")
-	c.Make("name") //nolint:errcheck
+	c.Make("name")
 
 	if !c.Resolved("shortName") {
 		t.Fatal("alias should show as resolved")
 	}
 }
-
-// ---------- Queries ----------
 
 func TestBound(t *testing.T) {
 	t.Parallel()
@@ -665,7 +739,7 @@ func TestResolved(t *testing.T) {
 		t.Fatal("should not be resolved before Make")
 	}
 
-	c.Make("name") //nolint:errcheck
+	c.Make("name")
 
 	if !c.Resolved("name") {
 		t.Fatal("should be resolved after Make")
@@ -741,7 +815,7 @@ func TestCurrentlyResolving(t *testing.T) {
 		return "outer", nil
 	}, false)
 
-	c.Make("outer") //nolint:errcheck
+	c.Make("outer")
 
 	if resolving != "outer" {
 		t.Fatalf("expected outer, got %s", resolving)
@@ -757,8 +831,6 @@ func TestCurrentlyResolvingEmpty(t *testing.T) {
 		t.Fatal("expected empty string when not resolving")
 	}
 }
-
-// ---------- Instance Management ----------
 
 func TestForgetInstanceForgetsInstance(t *testing.T) {
 	t.Parallel()
@@ -799,12 +871,11 @@ func TestForgetScopedInstancesOnlyClearsScoped(t *testing.T) {
 		return "scoped", nil
 	})
 
-	c.Make("shared") //nolint:errcheck
-	c.Make("scoped") //nolint:errcheck
+	c.Make("shared")
+	c.Make("scoped")
 
 	c.ForgetScopedInstances()
 
-	// Shared should still return cached instance.
 	a, _ := c.Make("shared")
 
 	if a != "shared" {
@@ -822,7 +893,7 @@ func TestFlushResetsEverything(t *testing.T) {
 
 	c.Alias("name", "shortName")
 	c.Instance("inst", "value")
-	c.Make("name") //nolint:errcheck
+	c.Make("name")
 
 	c.Flush()
 
@@ -866,8 +937,6 @@ func TestUnsetRemovesBoundInstances(t *testing.T) {
 	}
 }
 
-// ---------- Static Instance ----------
-
 func TestGetSetInstance(t *testing.T) {
 	t.Parallel()
 
@@ -890,11 +959,8 @@ func TestGetSetInstance(t *testing.T) {
 		t.Fatal("should be a new container")
 	}
 
-	// Cleanup.
 	container.SetInstance(nil)
 }
-
-// ---------- Concurrent Access ----------
 
 func TestConcurrentAccess(t *testing.T) {
 	t.Parallel()
@@ -914,7 +980,7 @@ func TestConcurrentAccess(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		go func() {
-			c.Make("name") //nolint:errcheck
+			c.Make("name")
 			done <- true
 		}()
 	}
@@ -957,8 +1023,6 @@ func TestMakeWithIsAliasForMake(t *testing.T) {
 	}
 }
 
-// ---------- Rebinding ----------
-
 func TestReboundListeners(t *testing.T) {
 	t.Parallel()
 
@@ -970,13 +1034,12 @@ func TestReboundListeners(t *testing.T) {
 		return "Taylor", nil
 	}, false)
 
-	c.Make("name") //nolint:errcheck
+	c.Make("name")
 
-	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) {
 		rebound = true
 	})
 
-	// Rebinding triggers the callback because "name" is already bound.
 	if !rebound {
 		t.Fatal("expected rebound callback to fire")
 	}
@@ -990,7 +1053,7 @@ func TestReboundListenersOnInstances(t *testing.T) {
 
 	var called bool
 
-	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) {
 		called = true
 	})
 
@@ -1006,7 +1069,7 @@ func TestReboundListenersNotCalledWhenNotBound(t *testing.T) {
 
 	var called bool
 
-	c.Rebinding("name", func(_ any, _ *container.App) { //nolint:errcheck
+	c.Rebinding("name", func(_ any, _ *container.App) {
 		called = true
 	})
 
@@ -1023,15 +1086,14 @@ func TestReboundListenersFiredOnRebind(t *testing.T) {
 		return "Taylor", nil
 	}, false)
 
-	c.Make("name") //nolint:errcheck
+	c.Make("name")
 
 	var newVal any
 
-	c.Rebinding("name", func(instance any, _ *container.App) { //nolint:errcheck
+	c.Rebinding("name", func(instance any, _ *container.App) {
 		newVal = instance
 	})
 
-	// Rebind.
 	c.Bind("name", func(_ *container.App) (any, error) {
 		return "Dayle", nil
 	}, false)
@@ -1061,5 +1123,413 @@ func TestRefreshUpdatesTarget(t *testing.T) {
 
 	if updated != "Dayle" {
 		t.Fatalf("expected Dayle after refresh, got %v", updated)
+	}
+}
+
+func TestConcurrent(t *testing.T) {
+	c := newContainer()
+
+	c.Bind("A", func(cc *container.App) (any, error) {
+		return cc.Make("B")
+	}, false)
+	c.Bind("B", func(cc *container.App) (any, error) {
+		return "val-B", nil
+	}, false)
+
+	c.Bind("X", func(cc *container.App) (any, error) {
+		return cc.Make("Y")
+	}, false)
+	c.Bind("Y", func(cc *container.App) (any, error) {
+		return "val-Y", nil
+	}, false)
+
+	c.AddContextualBinding("client1", "dep", "val1")
+	c.AddContextualBinding("client2", "dep", "val2")
+
+	c.Bind("client1", func(cc *container.App) (any, error) {
+		return cc.Make("dep")
+	}, false)
+	c.Bind("client2", func(cc *container.App) (any, error) {
+		return cc.Make("dep")
+	}, false)
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 100)
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			valA, err := c.Make("A")
+
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving A: %w", err)
+
+				return
+			}
+
+			if valA != "val-B" {
+				errs <- fmt.Errorf("expected val-B, got %v", valA)
+
+				return
+			}
+
+			valC1, err := c.Make("client1")
+
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving client1: %w", err)
+
+				return
+			}
+
+			if valC1 != "val1" {
+				errs <- fmt.Errorf("expected contextual binding val1, got %v", valC1)
+
+				return
+			}
+		}()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			valX, err := c.Make("X")
+
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving X: %w", err)
+
+				return
+			}
+
+			if valX != "val-Y" {
+				errs <- fmt.Errorf("expected val-Y, got %v", valX)
+
+				return
+			}
+
+			valC2, err := c.Make("client2")
+
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error resolving client2: %w", err)
+
+				return
+			}
+
+			if valC2 != "val2" {
+				errs <- fmt.Errorf("expected contextual binding val2, got %v", valC2)
+
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
+func TestConcurrentSingleton(t *testing.T) {
+	c := newContainer()
+
+	var counter int64
+
+	var factoryStart sync.WaitGroup
+
+	var factoryDone sync.WaitGroup
+
+	factoryStart.Add(1)
+	factoryDone.Add(1)
+
+	c.Singleton("singleton", func(cc *container.App) (any, error) {
+		atomic.AddInt64(&counter, 1)
+		factoryStart.Done()
+		factoryDone.Wait()
+
+		return "instance", nil
+	})
+
+	var wg sync.WaitGroup
+
+	var inst1, inst2 any
+
+	var err1, err2 error
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		inst1, err1 = c.Make("singleton")
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		factoryStart.Wait()
+		inst2, err2 = c.Make("singleton")
+	}()
+
+	time.Sleep(50 * time.Millisecond)
+	factoryDone.Done()
+
+	wg.Wait()
+
+	if err1 != nil {
+		t.Fatalf("unexpected error 1: %v", err1)
+	}
+
+	if err2 != nil {
+		t.Fatalf("unexpected error 2: %v", err2)
+	}
+
+	if inst1 != "instance" || inst2 != "instance" {
+		t.Fatalf("expected 'instance', got %v and %v", inst1, inst2)
+	}
+
+	if atomic.LoadInt64(&counter) != 1 {
+		t.Fatalf("expected factory to run exactly once, ran %d times", counter)
+	}
+}
+
+func TestStoredCloneEscape(t *testing.T) {
+	c := newContainer()
+
+	c.Bind("service", func(cc *container.App) (any, error) {
+		return &storedContainerService{cc: cc}, nil
+	}, false)
+
+	// Two-level graph for Make on the stored container: X -> Y
+	c.Bind("X", func(cc *container.App) (any, error) {
+		return cc.Make("Y")
+	}, false)
+	c.Bind("Y", func(cc *container.App) (any, error) {
+		return "val-Y", nil
+	}, false)
+
+	// Contextual binding to verify
+	c.AddContextualBinding("clientX", "depX", "valX")
+	c.Bind("clientX", func(cc *container.App) (any, error) {
+		return cc.Make("depX")
+	}, false)
+
+	// Resolve the service first (this executes the factory and populates the stored reference cc)
+	sVal, err := c.Make("service")
+
+	if err != nil {
+		t.Fatalf("failed to resolve service: %v", err)
+	}
+
+	service := sVal.(*storedContainerService)
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 100)
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// Call Make("X") through the stored reference
+			val, err := service.cc.Make("X")
+
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error on stored Make: %w", err)
+
+				return
+			}
+
+			if val != "val-Y" {
+				errs <- fmt.Errorf("expected val-Y, got %v", val)
+
+				return
+			}
+
+			// Call Make("clientX") to verify contextual bindings are correct and not cross-contaminated
+			valCtx, err := service.cc.Make("clientX")
+
+			if err != nil {
+				errs <- fmt.Errorf("unexpected error on stored contextual Make: %w", err)
+
+				return
+			}
+
+			if valCtx != "valX" {
+				errs <- fmt.Errorf("expected valX, got %v", valCtx)
+
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
+func TestConcurrentMakeAndFlush(t *testing.T) {
+	c := newContainer()
+
+	c.Bind("A", func(cc *container.App) (any, error) {
+		return "val-A", nil
+	}, false)
+
+	var wg sync.WaitGroup
+	stop := make(chan struct{})
+
+	// Loop 1: Concurrently call Make("A")
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					_, _ = c.Make("A")
+				}
+			}
+		}()
+	}
+
+	// Loop 2: Concurrently call Flush()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+				c.Flush()
+			}
+		}
+	}()
+
+	// Run for 100 milliseconds
+	time.Sleep(100 * time.Millisecond)
+	close(stop)
+	wg.Wait()
+}
+
+func TestSingleFlightPanicSafety(t *testing.T) {
+	c := newContainer()
+
+	var entered sync.WaitGroup
+
+	var resume sync.WaitGroup
+
+	entered.Add(1)
+	resume.Add(1)
+
+	c.Singleton("panic-singleton", func(cc *container.App) (any, error) {
+		entered.Done()
+		resume.Wait()
+		panic("intentional factory panic")
+	})
+
+	var wg sync.WaitGroup
+
+	var errWaiter error
+
+	// Leader goroutine
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		defer func() {
+			_ = recover() // recover from the intentional panic
+		}()
+
+		_, _ = c.Make("panic-singleton")
+	}()
+
+	// Waiter goroutine
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		entered.Wait()
+		// Now call Make concurrently, it will block in single-flight
+		_, errWaiter = c.Make("panic-singleton")
+	}()
+
+	// Let them both get in position
+	time.Sleep(10 * time.Millisecond)
+	resume.Done()
+
+	wg.Wait()
+
+	if errWaiter == nil {
+		t.Fatal("expected waiter goroutine to receive non-nil error after leader panicked, but got nil")
+	}
+
+	if !strings.Contains(errWaiter.Error(), "factory panicked") {
+		t.Fatalf("expected error containing 'factory panicked', got: %v", errWaiter)
+	}
+}
+
+// TestSingleFlightGoexitSafety verifies that a factory terminating via
+// runtime.Goexit (e.g. t.FailNow inside a test factory) still releases the
+// single-flight key, so later Makes for the same abstract retry instead of
+// blocking forever on a leader that never completed.
+func TestSingleFlightGoexitSafety(t *testing.T) {
+	c := newContainer()
+
+	calls := 0
+
+	c.Singleton("goexit-singleton", func(_ *container.App) (any, error) {
+		calls++
+
+		if calls == 1 {
+			runtime.Goexit()
+		}
+
+		return "ok", nil
+	})
+
+	leaderDone := make(chan struct{})
+
+	go func() {
+		// Deferred functions still run on runtime.Goexit.
+		defer close(leaderDone)
+
+		_, _ = c.Make("goexit-singleton")
+	}()
+
+	<-leaderDone
+
+	type result struct {
+		val any
+		err error
+	}
+
+	retry := make(chan result, 1)
+
+	go func() {
+		v, err := c.Make("goexit-singleton")
+		retry <- result{val: v, err: err}
+	}()
+
+	select {
+	case r := <-retry:
+		if r.err != nil {
+			t.Fatalf("expected successful retry after Goexit leader, got error: %v", r.err)
+		}
+
+		if r.val != "ok" {
+			t.Fatalf("expected %q, got %v", "ok", r.val)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Make deadlocked: single-flight key was not released after runtime.Goexit")
 	}
 }

@@ -1,6 +1,8 @@
 package container_test
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/container"
@@ -61,6 +63,23 @@ type depProvider struct {
 	provides []string
 	depends  []string
 	log      *[]string
+}
+
+// C depends on B which depends on A. Register them in REVERSE order
+// to prove the sort actually runs.
+
+// ---------- Phase 4: Introspection ----------
+
+// Sanity check: the provider package is imported and used.
+
+type reentrantDeferredProvider struct {
+	app      *container.Application
+	register func()
+}
+
+type reentrantBootableProvider struct {
+	app  *container.Application
+	boot func()
 }
 
 func (p *fakeProvider) Register()          { p.registerCalls++ }
@@ -331,6 +350,53 @@ func TestApplication_DeferredProvider_BootRunsAfterFlush(t *testing.T) {
 	}
 }
 
+func TestApplication_DeferredProvider_RegisterTwiceNoDuplicates(t *testing.T) {
+	t.Parallel()
+
+	app := container.NewApplication()
+
+	registerCalls := 0
+
+	dp := &deferredProvider{
+		keys: []string{"deferred.dup"},
+		register: func(_ *container.App) {
+			registerCalls++
+			app.Instance("deferred.dup", "value")
+		},
+	}
+
+	// Duplicate registration before the first flush must be a no-op:
+	// without deduplication the provider lands in the providers slice
+	// twice and Boot() would run it twice after the flush.
+	app.Register(dp)
+	app.Register(dp)
+
+	if _, err := app.Make("deferred.dup"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	app.Boot()
+
+	if registerCalls != 1 {
+		t.Fatalf("expected one Register call, got %d", registerCalls)
+	}
+
+	if dp.bootCalls != 1 {
+		t.Fatalf("expected one Boot call, got %d", dp.bootCalls)
+	}
+
+	// Re-registering after the flush must not re-track the provider.
+	app.Register(dp)
+
+	if _, err := app.Make("deferred.dup"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if registerCalls != 1 || dp.bootCalls != 1 {
+		t.Fatalf("expected no re-registration after flush, got register=%d boot=%d", registerCalls, dp.bootCalls)
+	}
+}
+
 func (p *depProvider) Register()           { *p.log = append(*p.log, p.name) }
 func (p *depProvider) Provides() []string  { return p.provides }
 func (p *depProvider) DependsOn() []string { return p.depends }
@@ -340,8 +406,6 @@ func TestApplication_RegisterMany_TopoSortsByDependsOn(t *testing.T) {
 
 	log := []string{}
 
-	// C depends on B which depends on A. Register them in REVERSE order
-	// to prove the sort actually runs.
 	pA := &depProvider{name: "A", provides: []string{"a"}, log: &log}
 	pB := &depProvider{name: "B", provides: []string{"b"}, depends: []string{"a"}, log: &log}
 	pC := &depProvider{name: "C", provides: []string{"c"}, depends: []string{"b"}, log: &log}
@@ -379,8 +443,6 @@ func TestApplication_RegisterMany_PanicsOnCycle(t *testing.T) {
 	container.NewApplication().RegisterMany([]provider.ServiceProvider{pA, pB})
 }
 
-// ---------- Phase 4: Introspection ----------
-
 func TestApplication_HasProviderAndProviderFor(t *testing.T) {
 	t.Parallel()
 
@@ -409,8 +471,106 @@ func TestApplication_HasProviderAndProviderFor(t *testing.T) {
 	}
 }
 
-// Sanity check: the provider package is imported and used.
+func TestDeferredConcurrent(t *testing.T) {
+	app := container.NewApplication()
+
+	dp := &deferredProvider{
+		keys: []string{"deferred-key"},
+		register: func(_ *container.App) {
+			app.Singleton("deferred-key", func(cc *container.App) (any, error) {
+				return "resolved-value", nil
+			})
+		},
+	}
+
+	app.Register(dp)
+
+	var wg sync.WaitGroup
+	errs := make(chan error, 100)
+
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			val, err := app.Make("deferred-key")
+
+			if err != nil {
+				errs <- err
+
+				return
+			}
+
+			if val != "resolved-value" {
+				errs <- fmt.Errorf("expected resolved-value, got %v", val)
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Error(err)
+	}
+}
+
 var _ provider.ServiceProvider = (*fakeProvider)(nil)
 var _ provider.Bootable = (*fakeProvider)(nil)
 var _ provider.Deferred = (*deferredProvider)(nil)
 var _ provider.DependsOn = (*depProvider)(nil)
+
+func (p *reentrantDeferredProvider) Register()          { p.register() }
+func (p *reentrantDeferredProvider) Provides() []string { return []string{"deferred-key"} }
+func (p *reentrantDeferredProvider) Deferred() bool     { return true }
+
+func (p *reentrantBootableProvider) Register() {}
+func (p *reentrantBootableProvider) Boot()     { p.boot() }
+
+func TestApplicationReentrancyDeferred(t *testing.T) {
+	app := container.NewApplication()
+
+	dp := &reentrantDeferredProvider{
+		app: app,
+		register: func() {
+			app.Singleton("deferred-key", func(cc *container.App) (any, error) {
+				return "deferred-val", nil
+			})
+			_, _ = app.Make("other-key")
+		},
+	}
+
+	app.Singleton("other-key", func(cc *container.App) (any, error) {
+		return "other-val", nil
+	})
+
+	app.Register(dp)
+
+	val, err := app.Make("deferred-key")
+
+	if err != nil {
+		t.Fatalf("unexpected error resolving deferred-key: %v", err)
+	}
+
+	if val != "deferred-val" {
+		t.Fatalf("expected deferred-val, got %v", val)
+	}
+}
+
+func TestApplicationReentrancyBoot(t *testing.T) {
+	app := container.NewApplication()
+
+	bp := &reentrantBootableProvider{
+		app: app,
+		boot: func() {
+			_, _ = app.Make("key")
+		},
+	}
+
+	app.Singleton("key", func(cc *container.App) (any, error) {
+		return "val", nil
+	})
+
+	app.Register(bp)
+	app.Boot()
+}

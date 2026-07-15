@@ -2,7 +2,9 @@ package queue
 
 import (
 	"context"
+	"fmt"
 	"runtime"
+	"runtime/debug"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -549,13 +551,23 @@ func (w *Worker) processJob(ctx context.Context, job Job) {
 		defer cancel()
 	}
 
-	if err := w.handler.Handle(jobCtx, job); err != nil {
+	if err := w.runHandler(jobCtx, job); err != nil {
 		w.handleJobException(job, err)
 
 		return
 	}
 
 	w.emit(JobProcessed{ConnectionName: w.queue.ConnectionName(), Job: job})
+}
+
+func (w *Worker) runHandler(ctx context.Context, job Job) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("queue: handler panicked: %v\n%s", r, debug.Stack())
+		}
+	}()
+
+	return w.handler.Handle(ctx, job)
 }
 
 func (w *Worker) handleJobException(job Job, err error) {

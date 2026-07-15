@@ -1,6 +1,7 @@
 package container
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"sync"
@@ -29,20 +30,23 @@ type Binding struct {
 	scoped  bool
 }
 
-// App is a inversion-of-control container. It manages
+// App is an inversion-of-control container. It manages
 // service bindings, resolution, contextual bindings, tagging, extension,
 // lifecycle callbacks, and method invocation. All methods are safe for
-// concurrent use.
+// concurrent use. Note that a zero-value App is not usable; always construct
+// one using New(). Also, mutually-dependent shared bindings resolved concurrently
+// from different goroutines may block rather than return ErrCircularDependency.
 type App struct {
-	mu sync.RWMutex
+	mu *sync.RWMutex
 
 	bindings        map[string]Binding
 	instances       map[string]any
 	aliases         map[string]string
 	abstractAliases map[string][]string
 	resolved        map[string]bool
-	buildStack      []string
-	with            []map[string]any
+	resolution      *resolution
+	parent          *App
+	sf              *singleflight
 	contextual      map[string]map[string]any
 	tags            map[string][]string
 	extenders       map[string][]ExtenderFunc
@@ -57,14 +61,122 @@ type App struct {
 	afterCbs        map[string][]BindingCallback
 }
 
+// call represents an in-flight or completed single-flight resolution.
+type call struct {
+	wg  sync.WaitGroup
+	val any
+	err error
+}
+
+// singleflight manages concurrent duplicate resolutions so that the factory
+// only executes once.
+type singleflight struct {
+	mu sync.Mutex
+	m  map[string]*call
+}
+
+// Do executes and returns the results of the given function, making sure that
+// only one execution is in-flight for a given key at a time. If a duplicate
+// comes in, the duplicate caller waits for the original to complete and receives
+// the same results.
+
+// resolution holds the goroutine-local build stack and parameter stack
+// for a dependency resolution chain.
+type resolution struct {
+	buildStack []string
+	with       []map[string]any
+	done       bool
+}
+
+func (g *singleflight) Do(key string, fn func() (any, error)) (any, error) {
+	g.mu.Lock()
+
+	if g.m == nil {
+		g.m = make(map[string]*call)
+	}
+
+	if c, ok := g.m[key]; ok {
+		g.mu.Unlock()
+		c.wg.Wait()
+
+		return c.val, c.err
+	}
+
+	c := new(call)
+	c.wg.Add(1)
+	g.m[key] = c
+	g.mu.Unlock()
+
+	completed := false
+
+	defer func() {
+		if completed {
+			return
+		}
+
+		// fn never returned: either it panicked, or the goroutine is
+		// unwinding via runtime.Goexit (e.g. t.FailNow inside a test
+		// factory). Keying cleanup off a completion flag instead of
+		// recover() alone guarantees the key is removed and waiters are
+		// released in both cases; otherwise every future Do for this
+		// key would block forever.
+		r := recover()
+
+		if r != nil {
+			c.err = fmt.Errorf("factory panicked: %v", r)
+		} else {
+			c.err = errors.New("factory did not complete (runtime.Goexit)")
+		}
+
+		g.mu.Lock()
+		delete(g.m, key)
+		g.mu.Unlock()
+		c.wg.Done()
+
+		if r != nil {
+			// Re-raise real panics so the leader's caller still observes
+			// them. A Goexit must not be converted into a panic.
+			panic(r)
+		}
+	}()
+
+	c.val, c.err = fn()
+	completed = true
+
+	g.mu.Lock()
+	delete(g.m, key)
+	g.mu.Unlock()
+	c.wg.Done()
+
+	return c.val, c.err
+}
+
+// withResolution returns a cloned App referencing the given resolution context.
+func (c *App) withResolution(r *resolution) *App {
+	c.mu.RLock()
+
+	defer c.mu.RUnlock()
+
+	clone := *c
+	clone.resolution = r
+
+	if c.parent == nil {
+		clone.parent = c
+	}
+
+	return &clone
+}
+
 // New creates an empty, fully initialized App.
 func New() *App {
 	return &App{
+		mu:              new(sync.RWMutex),
 		bindings:        make(map[string]Binding),
 		instances:       make(map[string]any),
 		aliases:         make(map[string]string),
 		abstractAliases: make(map[string][]string),
 		resolved:        make(map[string]bool),
+		sf:              new(singleflight),
 		contextual:      make(map[string]map[string]any),
 		tags:            make(map[string][]string),
 		extenders:       make(map[string][]ExtenderFunc),
@@ -198,6 +310,14 @@ func (c *App) FactoryFunc(abstract string) func() (any, error) {
 
 // resolve is the core resolution engine.
 func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
+	c.mu.RLock()
+	needsNewRes := c.resolution == nil || c.resolution.done
+	c.mu.RUnlock()
+
+	if needsNewRes {
+		c = c.withResolution(&resolution{})
+	}
+
 	c.mu.Lock()
 
 	original := abstract
@@ -248,11 +368,11 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	}
 
 	// Circular dependency detection.
-	if slices.Contains(c.buildStack, abstract) {
+	if slices.Contains(c.resolution.buildStack, abstract) {
 		// Snapshot the stack while still holding the lock; otherwise
 		// the deferred fmt.Errorf read would race with concurrent
-		// resolve() calls mutating c.buildStack at lines 265/283.
-		stackSnapshot := slices.Clone(c.buildStack)
+		// resolve() calls mutating c.resolution.buildStack.
+		stackSnapshot := slices.Clone(c.resolution.buildStack)
 		c.mu.Unlock()
 
 		return nil, fmt.Errorf("%w: %q (build stack: %v)", ErrCircularDependency, abstract, stackSnapshot)
@@ -266,11 +386,11 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	afterGlobal := slices.Clone(c.globalAfterCbs)
 	afterSpecific := slices.Clone(c.afterCbs[abstract])
 
-	c.buildStack = append(c.buildStack, abstract)
+	c.resolution.buildStack = append(c.resolution.buildStack, abstract)
 
 	// Always push parameters (even nil) so nested Make calls get their own
 	// scope and don't inherit the parent's parameters.
-	c.with = append(c.with, parameters)
+	c.resolution.with = append(c.resolution.with, parameters)
 
 	c.mu.Unlock()
 
@@ -278,44 +398,102 @@ func (c *App) resolve(abstract string, parameters map[string]any) (any, error) {
 	fireBeforeCallbacks(beforeSpecific, abstract, parameters, c)
 
 	// Execute factory.
-	instance, err := factory(c)
+	var instance any
 
-	c.mu.Lock()
+	var err error
 
-	// Pop build stack.
-	if len(c.buildStack) > 0 {
-		c.buildStack = c.buildStack[:len(c.buildStack)-1]
+	runFactoryAndPop := func() (any, error) {
+		inst, fErr := factory(c)
+
+		if fErr == nil && inst == c {
+			inst = c.parent
+		}
+
+		c.mu.Lock()
+
+		if len(c.resolution.buildStack) > 0 {
+			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+		}
+
+		if len(c.resolution.with) > 0 {
+			c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
+		}
+
+		if len(c.resolution.buildStack) == 0 {
+			c.resolution.done = true
+		}
+
+		c.mu.Unlock()
+
+		return inst, fErr
 	}
 
-	if len(c.with) > 0 {
-		c.with = c.with[:len(c.with)-1]
-	}
+	if b.shared && len(parameters) == 0 {
+		instance, err = c.sf.Do(abstract, func() (any, error) {
+			inst, fErr := runFactoryAndPop()
 
-	c.mu.Unlock()
+			if fErr != nil {
+				return nil, fErr
+			}
 
-	if err != nil {
-		return nil, err
-	}
+			// Apply extenders.
+			for _, ext := range extenders {
+				inst, fErr = ext(inst, c)
 
-	// Apply extenders.
-	for _, ext := range extenders {
-		instance, err = ext(instance, c)
+				if fErr != nil {
+					return nil, fErr
+				}
+			}
+
+			// Cache shared instances.
+			c.mu.Lock()
+			c.instances[abstract] = inst
+			c.resolved[abstract] = true
+			c.mu.Unlock()
+
+			return inst, nil
+		})
+
+		// Pop build stack for waiting goroutines if they didn't run the inner func
+		c.mu.Lock()
+
+		if len(c.resolution.buildStack) > 0 && c.resolution.buildStack[len(c.resolution.buildStack)-1] == abstract {
+			c.resolution.buildStack = c.resolution.buildStack[:len(c.resolution.buildStack)-1]
+
+			if len(c.resolution.with) > 0 {
+				c.resolution.with = c.resolution.with[:len(c.resolution.with)-1]
+			}
+		}
+
+		if len(c.resolution.buildStack) == 0 {
+			c.resolution.done = true
+		}
+
+		c.mu.Unlock()
 
 		if err != nil {
 			return nil, err
 		}
-	}
+	} else {
+		instance, err = runFactoryAndPop()
 
-	// Cache shared instances.
-	if b.shared && len(parameters) == 0 {
+		if err != nil {
+			return nil, err
+		}
+
+		// Apply extenders.
+		for _, ext := range extenders {
+			instance, err = ext(instance, c)
+
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		c.mu.Lock()
-		c.instances[abstract] = instance
+		c.resolved[abstract] = true
 		c.mu.Unlock()
 	}
-
-	c.mu.Lock()
-	c.resolved[abstract] = true
-	c.mu.Unlock()
 
 	// Fire resolving callbacks.
 	fireCallbacks(resolvGlobal, instance, c)
@@ -335,11 +513,11 @@ func (c *App) Parameters() map[string]any {
 
 	defer c.mu.RUnlock()
 
-	if len(c.with) == 0 {
+	if c.resolution == nil || len(c.resolution.with) == 0 {
 		return nil
 	}
 
-	return c.with[len(c.with)-1]
+	return c.resolution.with[len(c.resolution.with)-1]
 }
 
 // ---------- Aliases ----------
@@ -461,11 +639,11 @@ func (c *App) CurrentlyResolving() string {
 
 	defer c.mu.RUnlock()
 
-	if len(c.buildStack) == 0 {
+	if c.resolution == nil || len(c.resolution.buildStack) == 0 {
 		return ""
 	}
 
-	return c.buildStack[len(c.buildStack)-1]
+	return c.resolution.buildStack[len(c.resolution.buildStack)-1]
 }
 
 // ---------- Tagging ----------
@@ -692,11 +870,11 @@ func (c *App) AddContextualBinding(concrete, abstract string, implementation any
 // getContextualConcrete looks up a contextual binding for the given abstract
 // based on the current build stack. Caller must hold the lock.
 func (c *App) getContextualConcrete(abstract string) any {
-	if len(c.buildStack) == 0 {
+	if c.resolution == nil || len(c.resolution.buildStack) == 0 {
 		return nil
 	}
 
-	current := c.buildStack[len(c.buildStack)-1]
+	current := c.resolution.buildStack[len(c.resolution.buildStack)-1]
 
 	if bindings, ok := c.contextual[current]; ok {
 		if impl, ok := bindings[abstract]; ok {
@@ -801,8 +979,7 @@ func (c *App) Flush() {
 	c.aliases = make(map[string]string)
 	c.abstractAliases = make(map[string][]string)
 	c.resolved = make(map[string]bool)
-	c.buildStack = nil
-	c.with = nil
+	c.resolution = nil
 	c.contextual = make(map[string]map[string]any)
 	c.tags = make(map[string][]string)
 	c.extenders = make(map[string][]ExtenderFunc)

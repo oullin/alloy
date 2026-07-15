@@ -275,3 +275,41 @@ func TestBeanstalkdDriverPendingSize(t *testing.T) {
 		t.Errorf("expected 4, got %d", n)
 	}
 }
+
+func TestBeanstalkdDriverAttemptsTracking(t *testing.T) {
+	t.Parallel()
+
+	// Test 1: StatsJob returns attempts
+	client := newMockBeanstalkdClient()
+	drv := drivers.NewBeanstalkdDriver(client, "beanstalkd", 60*time.Second)
+
+	_, _ = drv.Push(context.Background(), "default", []byte(`{"tries":0}`))
+	// The mock client nextID will be 1
+	client.jobStats[1] = map[string]string{"reserves": "3"}
+
+	job, err := drv.Pop(context.Background(), "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if job.Attempts() != 3 {
+		t.Errorf("expected 3 attempts from StatsJob, got %d", job.Attempts())
+	}
+
+	// Test 2: Fallback to payload tries
+	client2 := newMockBeanstalkdClient()
+	drv2 := drivers.NewBeanstalkdDriver(client2, "beanstalkd", 60*time.Second)
+
+	_, _ = drv2.Push(context.Background(), "default", []byte(`{"tries":5}`))
+
+	job2, err := drv2.Pop(context.Background(), "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if job2.Attempts() != 5 {
+		t.Errorf("expected 5 attempts from payload fallback, got %d", job2.Attempts())
+	}
+}

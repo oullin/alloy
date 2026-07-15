@@ -144,12 +144,20 @@ func TestRedisDriverPopMigratesDueDelayedJobs(t *testing.T) {
 		t.Errorf("expected 'due-payload', got %q", job.Payload())
 	}
 
-	if len(client.evalCalls) != 1 {
-		t.Fatalf("expected delayed migration to use one Lua Eval call, got %d", len(client.evalCalls))
+	if len(client.evalCalls) != 3 {
+		t.Fatalf("expected 3 Lua Eval calls, got %d", len(client.evalCalls))
 	}
 
 	if got := client.evalCalls[0].Keys; len(got) != 2 || got[0] != "queues:default:delayed" || got[1] != "queues:default" {
-		t.Fatalf("unexpected Eval keys: %v", got)
+		t.Fatalf("unexpected Eval 1 keys: %v", got)
+	}
+
+	if got := client.evalCalls[1].Keys; len(got) != 2 || got[0] != "queues:default:reserved" || got[1] != "queues:default" {
+		t.Fatalf("unexpected Eval 2 keys: %v", got)
+	}
+
+	if got := client.evalCalls[2].Keys; len(got) != 2 || got[0] != "queues:default" || got[1] != "queues:default:reserved" {
+		t.Fatalf("unexpected Eval 3 keys: %v", got)
 	}
 
 	n, _ := client.ZCard(context.Background(), "queues:default:delayed")
@@ -529,5 +537,215 @@ func TestRedisDriverInspectionRangerErrorPropagates(t *testing.T) {
 
 	if _, err := drv.DelayedJobs(ctx, "default"); !errors.Is(err, wantErr) {
 		t.Errorf("DelayedJobs: want %v, got %v", wantErr, err)
+	}
+}
+
+func TestRedisDriverAttemptsTracking(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	_, err := drv.Push(context.Background(), "default", []byte(`{"uuid":"t1","tries":0}`))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job, err := drv.Pop(context.Background(), "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if job.Attempts() != 0 {
+		t.Errorf("expected 0 attempts, got %d", job.Attempts())
+	}
+
+	err = job.Release(0)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	job2, err := drv.Pop(context.Background(), "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if job2.Attempts() != 1 {
+		t.Errorf("expected 1 attempt after release, got %d", job2.Attempts())
+	}
+}
+
+func TestRedisDriverReserve(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+	ctx := context.Background()
+
+	_, _ = drv.Push(ctx, "default", []byte("reserve-payload"))
+
+	job, err := drv.Pop(ctx, "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(job.Payload()) != "reserve-payload" {
+		t.Errorf("expected 'reserve-payload', got %q", job.Payload())
+	}
+
+	size, _ := drv.Size(ctx, "default")
+
+	if size != 0 {
+		t.Errorf("expected ready size 0, got %d", size)
+	}
+
+	reservedSize, _ := drv.ReservedSize(ctx, "default")
+
+	if reservedSize != 1 {
+		t.Errorf("expected reserved size 1, got %d", reservedSize)
+	}
+
+	err = job.Delete()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reservedSize2, _ := drv.ReservedSize(ctx, "default")
+
+	if reservedSize2 != 0 {
+		t.Errorf("expected reserved size 0 after delete, got %d", reservedSize2)
+	}
+
+	// Test Fail behaves correctly (removing from reserved, pushing to failed)
+	_, _ = drv.Push(ctx, "default", []byte("fail-payload"))
+	job2, err := drv.Pop(ctx, "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reservedSize3, _ := drv.ReservedSize(ctx, "default")
+
+	if reservedSize3 != 1 {
+		t.Errorf("expected reserved size 1, got %d", reservedSize3)
+	}
+
+	err = job2.Fail(errors.New("some error"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	reservedSize4, _ := drv.ReservedSize(ctx, "default")
+
+	if reservedSize4 != 0 {
+		t.Errorf("expected reserved size 0 after fail, got %d", reservedSize4)
+	}
+
+	failedSize, _ := client.LLen(ctx, "queues:default:failed")
+
+	if failedSize != 1 {
+		t.Errorf("expected 1 failed entry, got %d", failedSize)
+	}
+}
+
+func TestRedisDriverReclaim(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+	drv.SetVisibilityTimeout(1 * time.Second)
+	ctx := context.Background()
+
+	_, _ = drv.Push(ctx, "default", []byte("reclaim-payload"))
+
+	_, err := drv.Pop(ctx, "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = drv.Pop(ctx, "default")
+
+	if !errors.Is(err, queue.ErrNoJob) {
+		t.Fatalf("expected ErrNoJob, got %v", err)
+	}
+
+	time.Sleep(1100 * time.Millisecond)
+
+	job2, err := drv.Pop(ctx, "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(job2.Payload()) != "reclaim-payload" {
+		t.Errorf("expected reclaimed job payload, got %q", job2.Payload())
+	}
+}
+
+func TestRedisDriverShutdown(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+	ctx, cancel := context.WithCancel(context.Background())
+
+	_, _ = drv.Push(ctx, "default", []byte("shutdown-payload"))
+
+	job, err := drv.Pop(ctx, "default")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cancel()
+
+	err = job.Release(0)
+
+	if err != nil {
+		t.Errorf("expected Release to succeed even if Pop ctx cancelled, got: %v", err)
+	}
+
+	// Verify that after Release the job is back in ready and gone from reserved
+	readySize, _ := drv.Size(context.Background(), "default")
+
+	if readySize != 1 {
+		t.Errorf("expected ready size 1, got %d", readySize)
+	}
+
+	reservedSize, _ := drv.ReservedSize(context.Background(), "default")
+
+	if reservedSize != 0 {
+		t.Errorf("expected reserved size 0, got %d", reservedSize)
+	}
+}
+
+// TestRedisDriverPopContextCanceledNoFallback verifies that when the atomic
+// Lua Eval fails because the context was cancelled, Pop surfaces the context
+// error instead of masking it by falling back to the non-atomic RPop path.
+func TestRedisDriverPopContextCanceledNoFallback(t *testing.T) {
+	t.Parallel()
+
+	client := newMockRedisClient()
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if _, err := drv.Push(context.Background(), "default", []byte(`{"uuid":"c1","tries":0}`)); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := drv.Pop(ctx, "default")
+
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled to be surfaced, got %v", err)
 	}
 }
