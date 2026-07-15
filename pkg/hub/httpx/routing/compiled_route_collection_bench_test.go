@@ -49,3 +49,17 @@ func BenchmarkMatchDynamicHit(b *testing.B) {
 func BenchmarkMatchNotFound(b *testing.B) {
 	benchmarkMatch(b, fakeRequest{method: "GET", path: "/nope/does/not/exist"}, 200, 40)
 }
+
+// BenchmarkRouteMatches exercises Route.Matches directly (the per-candidate
+// validator loop used by the dev RouteCollection). It documents the singleton
+// validator set removing the per-call slice allocation.
+func BenchmarkRouteMatches(b *testing.B) {
+	route := NewRoute("GET", "/api/v1/entity/{id}", func() {})
+	req := fakeRequest{method: "GET", path: "/api/v1/entity/42"}
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		route.Matches(req, true)
+	}
+}

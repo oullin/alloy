@@ -320,13 +320,13 @@ func (r *Route) Matches(req matching.MatchableRequest, includingMethod bool) boo
 		return false
 	}
 
-	for _, v := range matching.All() {
-		if !includingMethod {
-			if _, isMethod := v.(matching.MethodValidator); isMethod {
-				continue
-			}
-		}
+	validators := matching.All()
 
+	if !includingMethod {
+		validators = matching.AllExceptMethod()
+	}
+
+	for _, v := range validators {
 		if !v.Matches(r, req) {
 			return false
 		}
