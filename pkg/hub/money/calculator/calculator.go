@@ -94,9 +94,10 @@ func (c *Engine) Allocate(amount Amount, ration, scale int64) Amount {
 	return Ration(amount, ration) / scale
 }
 
-// Absolute returns the absolute value of an amount.
+// Absolute returns the absolute value of an amount. It returns 0 for math.MinInt64,
+// whose absolute value is not representable in int64, matching the package's silent-0 overflow convention.
 func (c *Engine) Absolute(amount Amount) Amount {
-	if c == nil || amount < math.MinInt64 {
+	if c == nil || amount == math.MinInt64 {
 		return 0
 	}
 

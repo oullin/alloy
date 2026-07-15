@@ -211,6 +211,8 @@ func TestAbsolute(t *testing.T) {
 		{"positive", 100, 100},
 		{"negative", -100, 100},
 		{"zero", 0, 0},
+		{"min int64 unrepresentable", math.MinInt64, 0},
+		{"min int64 + 1", math.MinInt64 + 1, math.MaxInt64},
 	}
 
 	for _, tt := range tests {

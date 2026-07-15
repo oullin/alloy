@@ -76,7 +76,15 @@ export class MoneyCalculator {
 		return MoneyCalculator.ration(amount, ration) / scale;
 	}
 
+	/**
+	 * Returns the absolute value of an amount. Returns 0n for MIN_INT64, whose
+	 * absolute value exits the int64 range, for parity with the Go twin.
+	 */
 	public absolute(amount: Amount): Amount {
+		if (amount === MIN_INT64) {
+			return 0n;
+		}
+
 		if (amount < 0n) {
 			return -amount;
 		}
