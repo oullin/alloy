@@ -85,7 +85,9 @@ export class ExchangeRates {
 		const denominator = 10n ** BigInt(RATE_SCALE) * 10n ** BigInt(fromFraction);
 		const negative = numerator < 0n;
 		const absoluteNumerator = negative ? -numerator : numerator;
+
 		let quotient = absoluteNumerator / denominator;
+
 		const remainder = absoluteNumerator % denominator;
 
 		if (remainder * 2n >= denominator) {

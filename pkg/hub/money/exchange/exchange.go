@@ -8,17 +8,17 @@ import (
 	"github.com/oullin/alloy/pkg/hub/money/exception"
 )
 
-// rateScaleExponent stores exchange rates as scaled integers with 12 decimal
-// places, so conversions retain exact amount precision across the full int64
-// range, including amounts above 2^53 minor units.
-const rateScaleExponent = 12
-
 // Rates provides currency conversion functionality.
 // Safe for concurrent use by multiple goroutines.
 type Rates struct {
 	mu    sync.RWMutex
 	rates map[string]map[string]float64
 }
+
+// rateScaleExponent stores exchange rates as scaled integers with 12 decimal
+// places, so conversions retain exact amount precision across the full int64
+// range, including amounts above 2^53 minor units.
+const rateScaleExponent = 12
 
 // NewExchange creates a new Rates instance.
 func NewExchange() *Rates {
