@@ -88,6 +88,60 @@ export const getFormatter = (timeZone: string, timeZoneName?: TimeZoneNameStyle,
 	return formatter;
 };
 
+// The caches below mirror the getFormatter convention: Intl.* constructors are
+// among the most expensive date operations, so we build each formatter once and
+// reuse it. Keys are derived from caller-supplied locale/options, so a caller
+// passing an unbounded set of distinct locales/options can grow these maps
+// without bound (the same tradeoff getFormatter already accepts).
+const dateTimeFormatCache = new Map<string, Intl.DateTimeFormat>();
+const numberFormatCache = new Map<string, Intl.NumberFormat>();
+const relativeTimeFormatCache = new Map<string, Intl.RelativeTimeFormat>();
+
+export const getDateTimeFormatter = (locale: string | undefined, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat => {
+	const key = `${locale ?? ''}|${JSON.stringify(options)}`;
+	const cached = dateTimeFormatCache.get(key);
+
+	if (cached !== undefined) {
+		return cached;
+	}
+
+	const formatter = new Intl.DateTimeFormat(locale, options);
+
+	dateTimeFormatCache.set(key, formatter);
+
+	return formatter;
+};
+
+export const getNumberFormatter = (locale?: string): Intl.NumberFormat => {
+	const key = locale ?? '';
+	const cached = numberFormatCache.get(key);
+
+	if (cached !== undefined) {
+		return cached;
+	}
+
+	const formatter = new Intl.NumberFormat(locale);
+
+	numberFormatCache.set(key, formatter);
+
+	return formatter;
+};
+
+export const getRelativeTimeFormatter = (locale: string | undefined, options: Intl.RelativeTimeFormatOptions): Intl.RelativeTimeFormat => {
+	const key = `${locale ?? ''}|${options.numeric ?? ''}|${options.style ?? ''}`;
+	const cached = relativeTimeFormatCache.get(key);
+
+	if (cached !== undefined) {
+		return cached;
+	}
+
+	const formatter = new Intl.RelativeTimeFormat(locale, options);
+
+	relativeTimeFormatCache.set(key, formatter);
+
+	return formatter;
+};
+
 export const readPart = (parts: readonly DateTimePart[], type: string): string => {
 	const part = parts.find((item) => item.type === type);
 
@@ -330,12 +384,12 @@ export const monthNames = (locale: string, width: 'short' | 'long'): readonly st
 		return cached;
 	}
 
-	const names = Array.from({ length: 12 }, (_, index) =>
-		new Intl.DateTimeFormat(locale, {
-			month: width,
-			timeZone: defaultTimeZone,
-		}).format(new Date(Date.UTC(2024, index, 1))),
-	);
+	const formatter = getDateTimeFormatter(locale, {
+		month: width,
+		timeZone: defaultTimeZone,
+	});
+
+	const names = Array.from({ length: 12 }, (_, index) => formatter.format(new Date(Date.UTC(2024, index, 1))));
 
 	monthNameCache.set(key, names);
 
@@ -350,12 +404,12 @@ export const weekdayNames = (locale: string, width: 'short' | 'long'): readonly 
 		return cached;
 	}
 
-	const names = Array.from({ length: 7 }, (_, index) =>
-		new Intl.DateTimeFormat(locale, {
-			timeZone: defaultTimeZone,
-			weekday: width,
-		}).format(new Date(Date.UTC(2024, 0, 7 + index))),
-	);
+	const formatter = getDateTimeFormatter(locale, {
+		timeZone: defaultTimeZone,
+		weekday: width,
+	});
+
+	const names = Array.from({ length: 7 }, (_, index) => formatter.format(new Date(Date.UTC(2024, 0, 7 + index))));
 
 	weekdayNameCache.set(key, names);
 
