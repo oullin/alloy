@@ -10,6 +10,7 @@ func TestCompiledRouteCollection_MethodIndex(t *testing.T) {
 		c := NewCompiledRouteCollection([]*Route{a, b, p}, nil)
 
 		got := c.Get("GET")
+
 		if len(got) != 2 || got[0] != a || got[1] != b {
 			t.Fatalf("Get(GET) = %v, want [a b] in order", got)
 		}
@@ -61,6 +62,7 @@ func TestCompiledRouteCollection_IndexedMatchSemantics(t *testing.T) {
 		c := NewCompiledRouteCollection([]*Route{dynamic, static}, nil)
 
 		got, err := c.Match(fakeRequest{method: "GET", path: "/users"})
+
 		if err != nil {
 			t.Fatalf("match: %v", err)
 		}
@@ -76,6 +78,7 @@ func TestCompiledRouteCollection_IndexedMatchSemantics(t *testing.T) {
 		c := NewCompiledRouteCollection([]*Route{static, dynamic}, nil)
 
 		got, err := c.Match(fakeRequest{method: "GET", path: "/users"})
+
 		if err != nil {
 			t.Fatalf("match: %v", err)
 		}
@@ -93,6 +96,7 @@ func TestCompiledRouteCollection_IndexedMatchSemantics(t *testing.T) {
 		// Even though the fallback is registered first and matches /users, the
 		// concrete route must win.
 		got, err := c.Match(fakeRequest{method: "GET", path: "/users"})
+
 		if err != nil {
 			t.Fatalf("match: %v", err)
 		}
@@ -103,6 +107,7 @@ func TestCompiledRouteCollection_IndexedMatchSemantics(t *testing.T) {
 
 		// A path only the fallback matches resolves to the fallback.
 		got, err = c.Match(fakeRequest{method: "GET", path: "/anything"})
+
 		if err != nil {
 			t.Fatalf("match: %v", err)
 		}
@@ -133,6 +138,7 @@ func TestCompiledRouteCollection_IndexedMatchSemantics(t *testing.T) {
 		}, nil)
 
 		got, err := c.Match(fakeRequest{method: "OPTIONS", path: "/users"})
+
 		if err != nil {
 			t.Fatalf("options match: %v", err)
 		}
