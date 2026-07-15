@@ -5,7 +5,7 @@ workflow; see [README.md](README.md) for the workspace layout.
 
 ## Requirements
 
-- Node.js 20 or newer, pnpm 10.33.0
+- Node.js 24 or newer, pnpm 10.33.0
 - Go 1.26.5 (for Go package checks)
 - Docker or Docker Compose (formatting and Go test tasks are Docker-backed
   so local output matches CI)

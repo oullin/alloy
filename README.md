@@ -30,7 +30,7 @@ Do not add language suffixes such as `*-ts` to package paths.
 
 ## Requirements
 
-- Node.js 22 or newer.
+- Node.js 24 or newer.
 - pnpm 10.33.0.
 - Go 1.26.5 for Go package checks.
 - Docker or Docker Compose for the formatter tasks.

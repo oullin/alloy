@@ -9,7 +9,7 @@ import only the packages you need.
 | Tool    | Version |
 | ------- | ------- |
 | Go      | ≥ 1.26  |
-| Node.js | ≥ 22    |
+| Node.js | ≥ 24    |
 | pnpm    | ≥ 10.33 |
 
 ## Installation
