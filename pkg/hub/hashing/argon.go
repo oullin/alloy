@@ -69,12 +69,9 @@ const (
 	argonDefaultTime uint32 = 2
 	// argonDefaultThreads is the default parallelism (lanes). Two lanes meets
 	// or exceeds the RFC 9106/OWASP p>=1 guidance.
-	argonDefaultThreads uint8 = 2
-	// argonMinMemory is the enforced floor for the shipped default memory cost;
-	// a regression test asserts the default never drops below it.
-	argonMinMemory uint32 = 19 * 1024
-	argonSaltLen          = 16
-	argonHashLen   uint32 = 32
+	argonDefaultThreads uint8  = 2
+	argonSaltLen               = 16
+	argonHashLen        uint32 = 32
 )
 
 var _ Hasher = (*ArgonHasher)(nil)

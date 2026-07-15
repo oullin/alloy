@@ -103,7 +103,7 @@ func (w *sessionResponseWriter) flush() {
 		Path:     "/",
 		MaxAge:   maxAge,
 		HttpOnly: true,
-		Secure:   w.cfg.Secure != nil && *w.cfg.Secure,
+		Secure:   w.cfg.Secure == nil || *w.cfg.Secure,
 		SameSite: w.cfg.SameSite,
 	})
 }
