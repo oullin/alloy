@@ -297,6 +297,32 @@ describe('multisteps workflow', () => {
 		// Abort short-circuits the loop despite budget for four more attempts.
 		expect(calls).toBe(1);
 	});
+
+	it('wraps an abort that fires during retry backoff in a WorkflowError', async () => {
+		const controller = new AbortController();
+
+		let calls = 0;
+
+		const workflow = MultiStepWorkflow.machine(
+			'abort-backoff',
+			new SyncJob('flaky', () => {
+				calls += 1;
+
+				// Abort while runWithRetry is sleeping between attempts; the
+				// rejected backoff sleep must resolve through the result
+				// contract, not escape as a raw error.
+				setTimeout(() => {
+					controller.abort(new Error('cancelled'));
+				}, 5);
+
+				throw new Error('boom');
+			}).withRetryPolicy(new RetryPolicy({ maxTries: 5, backoff: [30_000] })),
+		);
+
+		await expect(new MultiStepEngine().run(workflow, {}, controller.signal)).rejects.toBeInstanceOf(WorkflowError);
+
+		expect(calls).toBe(1);
+	});
 });
 
 const delay = async (ms: number): Promise<void> => {

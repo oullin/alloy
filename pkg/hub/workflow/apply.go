@@ -30,7 +30,10 @@ func (w *Machine[T]) Apply(subject T, transitionName string, context map[string]
 	if err := w.dispatchCompletionEvents(subject, transition, next, context); err != nil {
 		w.logError("failed to dispatch completion events", "transition", transitionName, "workflow", w.name, "error", err)
 
-		return Marking{}, err
+		// The transition itself committed; only the post-commit completion
+		// dispatch failed. Return the committed marking alongside the error so
+		// callers can tell the store state advanced.
+		return next, err
 	}
 
 	return next, nil

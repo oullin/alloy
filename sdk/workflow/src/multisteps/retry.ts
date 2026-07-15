@@ -62,7 +62,16 @@ export const runWithRetry = async (
 			const backoff = activePolicy.backoffFor(attempt);
 
 			if (backoff > 0) {
-				await sleep(backoff, signal);
+				try {
+					await sleep(backoff, signal);
+				} catch (sleepError) {
+					// The run signal aborted mid-backoff; surface it through the
+					// normal result contract instead of letting the rejection
+					// escape runWithRetry uncaught.
+					lastError = signal.aborted ? signal.reason : sleepError;
+
+					break;
+				}
 			}
 		}
 	}

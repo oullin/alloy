@@ -260,8 +260,16 @@ func TestMachine_ApplyFailsWhenCompletionMarkingLookupFails(t *testing.T) {
 
 	sm, _ := workflow.NewStateMachine("subscription", def, failing, nil)
 
-	if _, err := sm.Apply(&Subscription{State: "trial"}, "activate", nil); err == nil {
+	marking, err := sm.Apply(&Subscription{State: "trial"}, "activate", nil)
+
+	if err == nil {
 		t.Fatal("expected error when the post-transition marking lookup fails")
+	}
+
+	// The write itself committed before the completion dispatch failed, so the
+	// returned marking must reflect the new state rather than a zero Marking.
+	if !marking.Has("active") {
+		t.Fatalf("expected committed marking with 'active' place alongside the error, got %v", marking.ActivePlaces())
 	}
 }
 
