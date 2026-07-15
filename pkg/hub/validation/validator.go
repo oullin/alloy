@@ -653,10 +653,16 @@ func (v *Validator) buildValidated() {
 			continue
 		}
 
-		val := v.getValue(attr)
+		for _, resolvedAttr := range ExpandWildcards(attr, v.flatData) {
+			if v.excludedAttrs[resolvedAttr] {
+				continue
+			}
 
-		if val != nil || v.flatDataHas(attr) {
-			result[attr] = val
+			val := v.getValue(resolvedAttr)
+
+			if val != nil || v.flatDataHas(resolvedAttr) {
+				result[resolvedAttr] = val
+			}
 		}
 	}
 
