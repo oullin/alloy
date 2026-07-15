@@ -12,8 +12,10 @@ type StartSessionConfig struct {
 	CookieName string
 	// Lifetime is the session cookie max-age (default: 2 hours).
 	Lifetime time.Duration
-	// Secure sets the Secure flag on the session cookie.
-	Secure bool
+	// Secure sets the Secure flag on the session cookie. It is a tri-state:
+	// nil (the default) means secure-by-default (true); an explicit false is
+	// honored so local HTTP dev can opt out. Use BoolPtr to set it.
+	Secure *bool
 	// SameSite is the SameSite attribute for the session cookie.
 	SameSite http.SameSite
 	// GCProbability controls the chance (0–100) of running GC on a request.
@@ -31,10 +33,14 @@ type sessionResponseWriter struct {
 	flushed bool
 }
 
+// BoolPtr returns a pointer to v, for setting the tri-state Secure config.
+func BoolPtr(v bool) *bool { return &v }
+
 func defaultConfig() StartSessionConfig {
 	return StartSessionConfig{
 		CookieName:    "session",
 		Lifetime:      2 * time.Hour,
+		Secure:        BoolPtr(true),
 		SameSite:      http.SameSiteLaxMode,
 		GCProbability: 2,
 		GCMaxLifetime: 7200,
@@ -52,7 +58,9 @@ func mergeConfig(cfg StartSessionConfig) StartSessionConfig {
 		defaults.Lifetime = cfg.Lifetime
 	}
 
-	if cfg.Secure {
+	// Tri-state: nil keeps the secure-by-default; an explicit value (true or
+	// false) is honored so local HTTP dev can opt out with BoolPtr(false).
+	if cfg.Secure != nil {
 		defaults.Secure = cfg.Secure
 	}
 
@@ -95,7 +103,7 @@ func (w *sessionResponseWriter) flush() {
 		Path:     "/",
 		MaxAge:   maxAge,
 		HttpOnly: true,
-		Secure:   w.cfg.Secure,
+		Secure:   w.cfg.Secure != nil && *w.cfg.Secure,
 		SameSite: w.cfg.SameSite,
 	})
 }
