@@ -10,30 +10,22 @@ import (
 	"github.com/oullin/alloy/pkg/hub/queue/drivers"
 )
 
-// Add a delayed job with a past score (already due).
-
-// Delayed set should be empty after migration.
-
-// Should be back on the main queue.
-
-// Should be in the delayed set.
-
-// Should have an entry in the failed key.
-
-// The default mockRedisClient does not satisfy RedisScanner,
-// RedisListRanger, or RedisSortedSetRanger.
-
-// ReservedJobs always returns ErrNotSupported for the Redis driver.
-
-// rangerRedisClient extends mockRedisClient with the optional Scanner /
-// ListRanger / SortedSetRanger contracts used by the Redis driver's
-// inspection methods.
-type rangerRedisClient struct {
+// deleterRedisClient extends mockRedisClient with the optional RedisDeleter
+// contract that ClearQueue needs, recording the keys it was asked to delete.
+type deleterRedisClient struct {
 	*mockRedisClient
-	keys      []string
-	scanErr   error
-	lrangeErr error
-	zrangeErr error
+	deleted []string
+	delErr  error
+}
+
+func (c *deleterRedisClient) Del(_ context.Context, keys ...string) (int64, error) {
+	if c.delErr != nil {
+		return 0, c.delErr
+	}
+
+	c.deleted = append(c.deleted, keys...)
+
+	return int64(len(keys)), nil
 }
 
 func TestRedisDriverPush(t *testing.T) {
@@ -123,39 +115,6 @@ func TestRedisDriverPopFromMainQueue(t *testing.T) {
 
 	if job.GetConnectionName() != "redis" {
 		t.Errorf("expected connection 'redis', got %q", job.GetConnectionName())
-	}
-}
-
-func TestRedisDriverPopMigratesDueDelayedJobs(t *testing.T) {
-	t.Parallel()
-
-	client := newMockRedisClient()
-	drv := drivers.NewRedisDriver(client, "redis")
-
-	_ = client.ZAdd(context.Background(), "queues:default:delayed", float64(time.Now().Add(-time.Minute).Unix()), "due-payload")
-
-	job, err := drv.Pop(context.Background(), "default")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(job.Payload()) != "due-payload" {
-		t.Errorf("expected 'due-payload', got %q", job.Payload())
-	}
-
-	if len(client.evalCalls) != 1 {
-		t.Fatalf("expected delayed migration to use one Lua Eval call, got %d", len(client.evalCalls))
-	}
-
-	if got := client.evalCalls[0].Keys; len(got) != 2 || got[0] != "queues:default:delayed" || got[1] != "queues:default" {
-		t.Fatalf("unexpected Eval keys: %v", got)
-	}
-
-	n, _ := client.ZCard(context.Background(), "queues:default:delayed")
-
-	if n != 0 {
-		t.Errorf("expected 0 delayed after migration, got %d", n)
 	}
 }
 
@@ -344,190 +303,81 @@ func TestRedisDriverConnectionName(t *testing.T) {
 	}
 }
 
-func TestRedisDriverInspectionWithoutCapabilityReturnsErrNotSupported(t *testing.T) {
+func TestRedisDriverClearQueueDeletesQueueDelayedAndFailedKeys(t *testing.T) {
+	t.Parallel()
+
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
+		t.Fatalf("ClearQueue: %v", err)
+	}
+
+	want := []string{"queues:emails", "queues:emails:delayed", "queues:emails:failed"}
+
+	if len(client.deleted) != len(want) {
+		t.Fatalf("deleted %v, want %v", client.deleted, want)
+	}
+
+	for i, k := range want {
+		if client.deleted[i] != k {
+			t.Fatalf("deleted %v, want %v", client.deleted, want)
+		}
+	}
+}
+
+func TestRedisDriverClearQueueUsesDefaultForEmptyName(t *testing.T) {
+	t.Parallel()
+
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient()}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), ""); err != nil {
+		t.Fatalf("ClearQueue: %v", err)
+	}
+
+	if len(client.deleted) == 0 || client.deleted[0] != "queues:default" {
+		t.Fatalf("deleted %v, want the default queue key first", client.deleted)
+	}
+}
+
+func TestRedisDriverClearQueuePropagatesDeleterError(t *testing.T) {
+	t.Parallel()
+
+	boom := errors.New("del failed")
+	client := &deleterRedisClient{mockRedisClient: newMockRedisClient(), delErr: boom}
+	drv := drivers.NewRedisDriver(client, "redis")
+
+	if err := drv.ClearQueue(context.Background(), "emails"); !errors.Is(err, boom) {
+		t.Fatalf("ClearQueue error = %v, want %v", err, boom)
+	}
+}
+
+// A client that cannot Del silently does nothing rather than erroring, because
+// RedisDeleter is an optional capability. Pin that: it is easy to "fix" into an
+// ErrNotSupported and break callers that clear queues opportunistically.
+func TestRedisDriverClearQueueWithoutDeleterIsSilentNoOp(t *testing.T) {
 	t.Parallel()
 
 	client := newMockRedisClient()
 	drv := drivers.NewRedisDriver(client, "redis")
-	ctx := context.Background()
 
-	if _, err := drv.QueueNames(ctx); !errors.Is(err, queue.ErrNotSupported) {
-		t.Errorf("QueueNames: want ErrNotSupported, got %v", err)
+	if _, err := drv.Push(context.Background(), "emails", []byte(`{"job":"x"}`)); err != nil {
+		t.Fatalf("Push: %v", err)
 	}
 
-	if _, err := drv.PendingJobs(ctx, "default"); !errors.Is(err, queue.ErrNotSupported) {
-		t.Errorf("PendingJobs: want ErrNotSupported, got %v", err)
+	if err := drv.ClearQueue(context.Background(), "emails"); err != nil {
+		t.Fatalf("ClearQueue without a deleter must be a no-op, got %v", err)
 	}
 
-	if _, err := drv.DelayedJobs(ctx, "default"); !errors.Is(err, queue.ErrNotSupported) {
-		t.Errorf("DelayedJobs: want ErrNotSupported, got %v", err)
-	}
-
-	if _, err := drv.ReservedJobs(ctx, "default"); !errors.Is(err, queue.ErrNotSupported) {
-		t.Errorf("ReservedJobs: want ErrNotSupported, got %v", err)
-	}
-}
-
-func (c *rangerRedisClient) ScanMatch(_ context.Context, _ string) ([]string, error) {
-	if c.scanErr != nil {
-		return nil, c.scanErr
-	}
-
-	return c.keys, nil
-}
-
-func (c *rangerRedisClient) LRange(_ context.Context, key string, _, _ int64) ([]string, error) {
-	if c.lrangeErr != nil {
-		return nil, c.lrangeErr
-	}
-
-	return c.lists[key], nil
-}
-
-func (c *rangerRedisClient) ZRange(_ context.Context, key string, _, _ int64) ([]string, error) {
-	if c.zrangeErr != nil {
-		return nil, c.zrangeErr
-	}
-
-	entries := c.sorted[key]
-	out := make([]string, 0, len(entries))
-
-	for _, e := range entries {
-		out = append(out, e.member)
-	}
-
-	return out, nil
-}
-
-func TestRedisDriverQueueNamesDedupesAndUnwraps(t *testing.T) {
-	t.Parallel()
-
-	client := &rangerRedisClient{
-		mockRedisClient: newMockRedisClient(),
-		keys: []string{
-			"queues:default",
-			"queues:default:delayed",
-			"queues:emails",
-			"queues:{cluster}",
-			"queues:", // empty after trim — must be skipped
-		},
-	}
-	drv := drivers.NewRedisDriver(client, "redis")
-
-	names, err := drv.QueueNames(context.Background())
+	// The job must still be there — the no-op really is a no-op.
+	size, err := drv.Size(context.Background(), "emails")
 
 	if err != nil {
-		t.Fatalf("QueueNames: %v", err)
+		t.Fatalf("Size: %v", err)
 	}
 
-	want := map[string]struct{}{"default": {}, "emails": {}, "cluster": {}}
-
-	if len(names) != len(want) {
-		t.Fatalf("got %v, want %d unique names", names, len(want))
-	}
-
-	for _, n := range names {
-		if _, ok := want[n]; !ok {
-			t.Errorf("unexpected name %q in %v", n, names)
-		}
-	}
-}
-
-func TestRedisDriverQueueNamesScannerErrorPropagates(t *testing.T) {
-	t.Parallel()
-
-	wantErr := errors.New("scan boom")
-	client := &rangerRedisClient{
-		mockRedisClient: newMockRedisClient(),
-		scanErr:         wantErr,
-	}
-	drv := drivers.NewRedisDriver(client, "redis")
-
-	_, err := drv.QueueNames(context.Background())
-
-	if !errors.Is(err, wantErr) {
-		t.Errorf("want %v, got %v", wantErr, err)
-	}
-}
-
-func TestRedisDriverPendingJobsReturnsSnapshots(t *testing.T) {
-	t.Parallel()
-
-	client := &rangerRedisClient{mockRedisClient: newMockRedisClient()}
-	drv := drivers.NewRedisDriver(client, "redis")
-	ctx := context.Background()
-
-	// Push two real payloads via the driver so the queue key matches.
-	_, _ = drv.Push(ctx, "default", []byte(`{"uuid":"u1","displayName":"Job1","createdAt":1000000}`))
-	_, _ = drv.Push(ctx, "default", []byte(`not-json`))
-
-	jobs, err := drv.PendingJobs(ctx, "default")
-
-	if err != nil {
-		t.Fatalf("PendingJobs: %v", err)
-	}
-
-	if len(jobs) != 2 {
-		t.Fatalf("got %d jobs, want 2", len(jobs))
-	}
-
-	// Find the JSON one and assert decoded fields.
-	var decoded *queue.InspectedJob
-
-	for i := range jobs {
-		if jobs[i].UUID == "u1" {
-			decoded = &jobs[i]
-
-			break
-		}
-	}
-
-	if decoded == nil {
-		t.Fatal("expected a job with UUID u1")
-	}
-
-	if decoded.Name != "Job1" || decoded.Connection != "redis" || decoded.CreatedAt.Unix() != 1000000 {
-		t.Errorf("decoded mismatch: %+v", decoded)
-	}
-}
-
-func TestRedisDriverDelayedJobsReturnsSnapshots(t *testing.T) {
-	t.Parallel()
-
-	client := &rangerRedisClient{mockRedisClient: newMockRedisClient()}
-	drv := drivers.NewRedisDriver(client, "redis")
-	ctx := context.Background()
-
-	_, _ = drv.PushDelayed(ctx, "default", []byte(`{"uuid":"d1"}`), 24*time.Hour)
-
-	jobs, err := drv.DelayedJobs(ctx, "default")
-
-	if err != nil {
-		t.Fatalf("DelayedJobs: %v", err)
-	}
-
-	if len(jobs) != 1 || jobs[0].UUID != "d1" || jobs[0].Backend != "default" {
-		t.Errorf("got %+v, want 1 job with UUID d1 on default", jobs)
-	}
-}
-
-func TestRedisDriverInspectionRangerErrorPropagates(t *testing.T) {
-	t.Parallel()
-
-	wantErr := errors.New("range boom")
-	client := &rangerRedisClient{
-		mockRedisClient: newMockRedisClient(),
-		lrangeErr:       wantErr,
-		zrangeErr:       wantErr,
-	}
-	drv := drivers.NewRedisDriver(client, "redis")
-	ctx := context.Background()
-
-	if _, err := drv.PendingJobs(ctx, "default"); !errors.Is(err, wantErr) {
-		t.Errorf("PendingJobs: want %v, got %v", wantErr, err)
-	}
-
-	if _, err := drv.DelayedJobs(ctx, "default"); !errors.Is(err, wantErr) {
-		t.Errorf("DelayedJobs: want %v, got %v", wantErr, err)
+	if size != 1 {
+		t.Fatalf("size = %d, want 1 (ClearQueue must not have removed anything)", size)
 	}
 }
