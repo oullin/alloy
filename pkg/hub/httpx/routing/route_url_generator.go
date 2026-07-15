@@ -1,9 +1,11 @@
 package routing
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	contracts "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
@@ -143,7 +145,10 @@ func stringify(v any) string {
 		return stringify(x.GetRouteKey())
 	}
 
-	return ""
+	// Best-effort fallback for unhandled types. Dropping the value (returning
+	// "") would silently omit a route/query parameter, which is worse than
+	// emitting a reasonable string representation the caller can inspect.
+	return fmt.Sprint(v)
 }
 
 func intToString(i int64) string {
@@ -177,6 +182,10 @@ func intToString(i int64) string {
 }
 
 func floatToString(f float64) string {
-	// Minimal float formatting; tests use integer parameters predominantly.
-	return intToString(int64(f))
+	// 'f' (decimal, no exponent) with precision -1 emits the shortest string
+	// that round-trips back to f: 3.14 -> "3.14", -0.5 -> "-0.5", and large
+	// magnitudes print in full ("100000000000000000000") rather than being
+	// truncated to an int64 (which overflowed and dropped the fraction). This
+	// keeps values friendly for URL route/query params and constraint regexes.
+	return strconv.FormatFloat(f, 'f', -1, 64)
 }
