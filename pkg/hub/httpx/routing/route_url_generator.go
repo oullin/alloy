@@ -117,6 +117,12 @@ func buildQuery(parameters map[string]any, consumed map[string]struct{}) string 
 }
 
 func stringify(v any) string {
+	// nil keeps its historical empty-string rendering; letting it reach the
+	// fmt.Sprint fallback would leak the literal "<nil>" into generated URLs.
+	if v == nil {
+		return ""
+	}
+
 	switch x := v.(type) {
 	case string:
 		return x

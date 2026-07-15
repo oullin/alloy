@@ -41,6 +41,14 @@ func TestStringify_UnknownTypeNotDropped(t *testing.T) {
 	}
 }
 
+func TestStringify_NilStaysEmpty(t *testing.T) {
+	// nil must keep its historical empty-string rendering rather than
+	// leaking fmt.Sprint's "<nil>" into generated URLs.
+	if got := stringify(nil); got != "" {
+		t.Errorf("stringify(nil) = %q, want empty string", got)
+	}
+}
+
 func TestStringify_CommonTypesPreserved(t *testing.T) {
 	cases := []struct {
 		name string
