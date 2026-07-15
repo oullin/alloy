@@ -269,6 +269,9 @@ func TestRound(t *testing.T) {
 		{"exponent 18 boundary", c, 1234567890123456789, 18, 1000000000000000000},
 		{"exponent 19 overflow protection", c, 1234567890123456789, 19, 1234567890123456789},
 		{"exponent 20 overflow protection", c, 1234567890123456789, 20, 1234567890123456789},
+		{"round-up overflow guard near MaxInt64", c, 9223372036854775799, 2, 0},
+		{"round-up overflow guard near MinInt64", c, -9223372036854775799, 2, 0},
+		{"round up just below the overflow boundary", c, 9223372036854775650, 2, 9223372036854775700},
 	}
 
 	for _, tt := range tests {

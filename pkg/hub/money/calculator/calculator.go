@@ -150,6 +150,13 @@ func (c *Engine) Round(amount Amount, exponent int) Amount {
 	// Implement round-to-nearest with ties rounded away from zero:
 	// remainders at least half the unit trigger a round up
 	if module >= (reminder / 2) {
+		// Rounding up an amount this close to MaxInt64 would wrap around and
+		// produce a garbage negative result; return 0 to match the package's
+		// silent-zero overflow convention (see Absolute for MinInt64).
+		if absolute > math.MaxInt64-reminder {
+			return 0
+		}
+
 		absolute += reminder
 	}
 
