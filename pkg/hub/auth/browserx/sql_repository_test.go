@@ -26,6 +26,9 @@ type sessionSQLDB struct {
 	scanErr   error
 	rowsErr   error
 	execErr   error
+	// lastRows tracks the rows handle returned by Query so tests can assert
+	// the repository always closes it (connection-leak guard).
+	lastRows *sessionSQLRows
 }
 
 type sessionSQLRows struct {
@@ -78,6 +81,10 @@ func TestSQLRepositoryFindForUserMapsRowsAndBindsUser(t *testing.T) {
 	if !got.LastActiveAt.Equal(time.Unix(lastActive, 0)) {
 		t.Fatalf("last active = %v", got.LastActiveAt)
 	}
+
+	if db.lastRows == nil || !db.lastRows.closed {
+		t.Fatal("expected rows to be closed")
+	}
 }
 
 func TestSQLRepositoryFindForUserReturnsEmptySliceWhenNoRows(t *testing.T) {
@@ -92,6 +99,10 @@ func TestSQLRepositoryFindForUserReturnsEmptySliceWhenNoRows(t *testing.T) {
 
 	if sessions == nil || len(sessions) != 0 {
 		t.Fatalf("sessions = %#v", sessions)
+	}
+
+	if db.lastRows == nil || !db.lastRows.closed {
+		t.Fatal("expected rows to be closed even with no rows returned")
 	}
 }
 
@@ -120,6 +131,14 @@ func TestSQLRepositoryFindForUserPropagatesErrors(t *testing.T) {
 
 			if sessions != nil {
 				t.Fatalf("sessions = %#v", sessions)
+			}
+
+			// On the query-error path no rows handle is ever produced; every
+			// other error path must still close the handle it received.
+			if tc.name != "query error" {
+				if tc.db.lastRows == nil || !tc.db.lastRows.closed {
+					t.Fatal("expected rows to be closed on error paths")
+				}
 			}
 		})
 	}
@@ -211,7 +230,10 @@ func (db *sessionSQLDB) Query(_ context.Context, query string, args ...any) (SQL
 		return nil, db.queryErr
 	}
 
-	return &sessionSQLRows{records: db.records, scanErr: db.scanErr, rowsErr: db.rowsErr}, nil
+	rows := &sessionSQLRows{records: db.records, scanErr: db.scanErr, rowsErr: db.rowsErr}
+	db.lastRows = rows
+
+	return rows, nil
 }
 
 func (db *sessionSQLDB) Exec(_ context.Context, query string, args ...any) error {
