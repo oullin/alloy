@@ -59,11 +59,22 @@ type argonParams struct {
 }
 
 const (
-	argonDefaultMemory  uint32 = 1024
-	argonDefaultTime    uint32 = 2
-	argonDefaultThreads uint8  = 2
-	argonSaltLen               = 16
-	argonHashLen        uint32 = 32
+	// argonDefaultMemory is the default memory cost in KiB. 19456 KiB = 19 MiB,
+	// the minimum recommended by RFC 9106 (second recommended option) and OWASP
+	// for argon2id. The previous 1 MiB default was ~19x below this floor and
+	// left password hashes cheap to crack on GPU/ASIC hardware.
+	argonDefaultMemory uint32 = 19 * 1024
+	// argonDefaultTime is the default iteration (time) cost, matching the
+	// OWASP/RFC 9106 recommendation of t=2 for the 19 MiB memory profile.
+	argonDefaultTime uint32 = 2
+	// argonDefaultThreads is the default parallelism (lanes). Two lanes meets
+	// or exceeds the RFC 9106/OWASP p>=1 guidance.
+	argonDefaultThreads uint8 = 2
+	// argonMinMemory is the enforced floor for the shipped default memory cost;
+	// a regression test asserts the default never drops below it.
+	argonMinMemory uint32 = 19 * 1024
+	argonSaltLen          = 16
+	argonHashLen   uint32 = 32
 )
 
 var _ Hasher = (*ArgonHasher)(nil)
