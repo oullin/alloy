@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"net/url"
 	"regexp"
@@ -1599,7 +1600,12 @@ func generateRandom(length int) string {
 	result := make([]byte, length)
 
 	for i := range result {
-		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+
+		if err != nil {
+			panic(fmt.Errorf("str: generate random: %w", err))
+		}
+
 		result[i] = charset[n.Int64()]
 	}
 
