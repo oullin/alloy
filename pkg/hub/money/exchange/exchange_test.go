@@ -252,6 +252,59 @@ func TestConvertAmountWithRate(t *testing.T) {
 	}
 }
 
+func TestConvertAmount_PrecisionAbove2Pow53(t *testing.T) {
+	e := NewExchange()
+	amount := int64(9007199254740993)
+
+	converted, err := e.ConvertAmountWithRate(amount, 0, 0, 2.0)
+
+	if err != nil {
+		t.Fatalf("ConvertAmountWithRate() error = %v, want nil", err)
+	}
+
+	if converted != 18014398509481986 {
+		t.Errorf("ConvertAmountWithRate() = %d, want 18014398509481986", converted)
+	}
+}
+
+func TestConvertAmount_OverflowReturnsErr(t *testing.T) {
+	e := NewExchange()
+
+	converted, err := e.ConvertAmountWithRate(int64(math.MaxInt64), 0, 0, 2.0)
+
+	if !errors.Is(err, exception.ErrOverflow) {
+		t.Errorf("ConvertAmountWithRate() error = %v, want ErrOverflow", err)
+	}
+
+	if converted != 0 {
+		t.Errorf("ConvertAmountWithRate() = %d, want 0 on overflow", converted)
+	}
+}
+
+func TestConvertAmount_HalfAwayFromZeroRounding(t *testing.T) {
+	e := NewExchange()
+
+	converted, err := e.ConvertAmountWithRate(1999, 2, 0, 1.5)
+
+	if err != nil {
+		t.Fatalf("ConvertAmountWithRate() error = %v, want nil", err)
+	}
+
+	if converted != 30 {
+		t.Errorf("ConvertAmountWithRate() = %d, want 30", converted)
+	}
+
+	converted, err = e.ConvertAmountWithRate(-2999, 2, 0, 1.5)
+
+	if err != nil {
+		t.Fatalf("ConvertAmountWithRate() error = %v, want nil", err)
+	}
+
+	if converted != -45 {
+		t.Errorf("ConvertAmountWithRate() = %d, want -45", converted)
+	}
+}
+
 func TestConvertAmountDifferentFractions(t *testing.T) {
 	e := NewExchange()
 
