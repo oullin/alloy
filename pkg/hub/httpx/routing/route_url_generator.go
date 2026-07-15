@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -101,26 +100,20 @@ func substituteParameters(uri string, parameters map[string]any, consumed map[st
 // flat associative arrays (key=value joined by "&", values URL-encoded with
 // '+' for spaces, RFC 1738).
 func buildQuery(parameters map[string]any, consumed map[string]struct{}) string {
-	keys := make([]string, 0, len(parameters))
+	values := url.Values{}
 
-	for k := range parameters {
+	for k, v := range parameters {
 		if _, ok := consumed[k]; ok {
 			continue
 		}
 
-		keys = append(keys, k)
+		values.Set(k, stringify(v))
 	}
 
-	sort.Strings(keys)
-
-	parts := make([]string, 0, len(keys))
-
-	for _, k := range keys {
-		v := stringify(parameters[k])
-		parts = append(parts, url.QueryEscape(k)+"="+url.QueryEscape(v))
-	}
-
-	return strings.Join(parts, "&")
+	// Route through the shared canonical encoder so the signing side (here)
+	// and the verifying side (HasCorrectSignature -> canonicalizeQuery)
+	// produce byte-for-byte identical HMAC inputs.
+	return canonicalQueryEncode(values)
 }
 
 func stringify(v any) string {

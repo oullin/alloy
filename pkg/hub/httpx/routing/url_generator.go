@@ -289,7 +289,7 @@ func (u *UrlGenerator) HasCorrectSignature(request URLRequest, absolute bool) bo
 		urlStr = urlStr[:idx]
 	}
 
-	queryString := stripSignatureFromQuery(request.QueryString())
+	queryString := canonicalizeQuery(request.QueryString())
 	original := urlStr
 
 	if queryString != "" {
@@ -322,23 +322,38 @@ func (u *UrlGenerator) SignatureHasNotExpired(request URLRequest) bool {
 	return time.Now().Unix() <= exp
 }
 
-func stripSignatureFromQuery(qs string) string {
-	if qs == "" {
+// canonicalQueryEncode is the single source of truth for how signed-URL query
+// strings are encoded: keys sorted, keys and values escaped with
+// url.QueryEscape (via url.Values.Encode). buildQuery (signing) and
+// canonicalizeQuery (verifying) both route through it so their HMAC inputs are
+// byte-for-byte identical. Any change here MUST move sign and verify together
+// — they are only symmetric because they share this function.
+func canonicalQueryEncode(values url.Values) string {
+	return values.Encode()
+}
+
+// canonicalizeQuery normalizes a raw request query string for HMAC
+// verification: it parses the pairs, drops the reserved "signature" parameter,
+// and re-encodes them canonically. Because both '+' and %20 decode to a space
+// (and re-encode to '+'), and keys are sorted, a signed URL still verifies
+// after a proxy reorders its query parameters or rewrites space encodings in
+// transit. It only ever normalizes encodings/orderings of the SAME values, so
+// it never accepts a different value than the one that was signed.
+func canonicalizeQuery(rawQuery string) string {
+	if rawQuery == "" {
 		return ""
 	}
 
-	parts := strings.Split(qs, "&")
-	out := make([]string, 0, len(parts))
-
-	for _, p := range parts {
-		if strings.HasPrefix(p, "signature=") {
-			continue
-		}
-
-		out = append(out, p)
+	values, err := url.ParseQuery(rawQuery)
+	if err != nil {
+		// Preserve the raw query rather than canonicalizing to ""; a
+		// malformed query then simply fails the signature comparison.
+		return rawQuery
 	}
 
-	return strings.Join(out, "&")
+	delete(values, "signature")
+
+	return canonicalQueryEncode(values)
 }
 
 func isAbsoluteURL(path string) bool {
