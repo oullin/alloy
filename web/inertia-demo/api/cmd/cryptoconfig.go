@@ -3,47 +3,42 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strings"
-
-	"github.com/spf13/viper"
 )
+
+// CryptoKeyEnvVar is the environment variable that supplies the base64-encoded
+// AES-256 key used for cookie encryption, CSRF, and the flash store.
+//
+// The key is a secret and must never be committed to the repository. Generate a
+// value with a CSPRNG, for example:
+//
+//	openssl rand -base64 32
+const CryptoKeyEnvVar = "INERTIA_CRYPTO_KEY"
 
 // CryptoConfig holds the encryption key used for cookie encryption.
 // The key must be a base64-encoded 32-byte value for AES-256-CBC.
 type CryptoConfig struct {
-	Key string `json:"key" yaml:"key" mapstructure:"key"`
+	Key string
 }
 
-// DefaultCrypto returns a CryptoConfig with empty defaults.
-func DefaultCrypto() CryptoConfig {
-	return CryptoConfig{}
-}
+// LoadCrypto reads the encryption key from the environment.
+//
+// The key is a secret and is supplied only through the CryptoKeyEnvVar
+// environment variable; it is never read from a committed file. A missing key
+// is a fatal misconfiguration and returns an error so that startup fails fast
+// rather than falling back to a built-in default.
+func LoadCrypto() (CryptoConfig, error) {
+	key := strings.TrimSpace(os.Getenv(CryptoKeyEnvVar))
 
-// LoadCrypto reads a YAML config file and returns a CryptoConfig.
-// Defaults are applied first, then the file values are merged on top,
-// and finally environment variable overrides (INERTIA_CRYPTO_*) are applied.
-func LoadCrypto(path string) (CryptoConfig, error) {
-	v := viper.New()
-
-	v.SetDefault("key", "")
-
-	v.SetConfigFile(path)
-
-	if err := v.ReadInConfig(); err != nil {
-		return CryptoConfig{}, fmt.Errorf("crypto: read config: %w", err)
+	if key == "" {
+		return CryptoConfig{}, fmt.Errorf(
+			"crypto: %s environment variable is required; generate one with `openssl rand -base64 32`",
+			CryptoKeyEnvVar,
+		)
 	}
 
-	v.SetEnvPrefix("INERTIA_CRYPTO")
-
-	v.AutomaticEnv()
-
-	var cfg CryptoConfig
-
-	if err := v.Unmarshal(&cfg); err != nil {
-		return CryptoConfig{}, fmt.Errorf("crypto: parse config: %w", err)
-	}
-
-	return cfg, nil
+	return CryptoConfig{Key: key}, nil
 }
 
 // DecodedKey returns the raw 32-byte AES-256 key from the base64-encoded

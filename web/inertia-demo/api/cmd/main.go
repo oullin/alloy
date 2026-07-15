@@ -69,7 +69,7 @@ func main() {
 	// still consuming locale-driven head defaults from config.
 	localeCfg.URLPrefix = false
 
-	cryptoCfg, err := LoadCrypto(mustResolveResourcePath("crypto.yml"))
+	cryptoCfg, err := LoadCrypto()
 
 	if err != nil {
 		log.Fatal(err)

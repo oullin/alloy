@@ -2,81 +2,48 @@ package main
 
 import (
 	"encoding/base64"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 )
 
-func TestDefaultCrypto(t *testing.T) {
-	t.Parallel()
+func TestLoadCrypto_FromEnv(t *testing.T) {
+	envKey := base64.StdEncoding.EncodeToString(make([]byte, 32))
 
-	cfg := DefaultCrypto()
+	t.Setenv(CryptoKeyEnvVar, envKey)
 
-	if strings.TrimSpace(cfg.Key) != "" {
-		t.Errorf("Key = %q, want empty", cfg.Key)
-	}
-}
-
-func TestLoadCrypto(t *testing.T) {
-	t.Parallel()
-
-	dir := t.TempDir()
-	path := filepath.Join(dir, "crypto.yml")
-
-	// 32-byte key, base64-encoded.
-	key := base64.StdEncoding.EncodeToString(make([]byte, 32))
-
-	content := `key: "` + key + `"`
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	cfg, err := LoadCrypto(path)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if cfg.Key != key {
-		t.Errorf("Key = %q, want %q", cfg.Key, key)
-	}
-}
-
-func TestLoadCrypto_EnvOverride(t *testing.T) {
-	envKey := base64.StdEncoding.EncodeToString([]byte("env-key-32-bytes-exactly-here!!!"))
-
-	t.Setenv("INERTIA_CRYPTO_KEY", envKey)
-
-	dir := t.TempDir()
-	path := filepath.Join(dir, "crypto.yml")
-
-	fileKey := base64.StdEncoding.EncodeToString(make([]byte, 32))
-	content := `key: "` + fileKey + `"`
-
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	cfg, err := LoadCrypto(path)
+	cfg, err := LoadCrypto()
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if cfg.Key != envKey {
-		t.Errorf("Key = %q, want %q (env override)", cfg.Key, envKey)
+		t.Errorf("Key = %q, want %q", cfg.Key, envKey)
 	}
 }
 
-func TestLoadCrypto_FileNotFound(t *testing.T) {
-	t.Parallel()
+func TestLoadCrypto_MissingEnvFailsFast(t *testing.T) {
+	t.Setenv(CryptoKeyEnvVar, "")
 
-	_, err := LoadCrypto("/nonexistent/crypto.yml")
+	_, err := LoadCrypto()
 
 	if err == nil {
-		t.Error("expected error for missing file")
+		t.Fatal("expected error when crypto key env var is unset")
+	}
+}
+
+func TestLoadCrypto_TrimsWhitespace(t *testing.T) {
+	envKey := base64.StdEncoding.EncodeToString(make([]byte, 32))
+
+	t.Setenv(CryptoKeyEnvVar, "  "+envKey+"  ")
+
+	cfg, err := LoadCrypto()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if cfg.Key != envKey {
+		t.Errorf("Key = %q, want %q (whitespace trimmed)", cfg.Key, envKey)
 	}
 }
 
