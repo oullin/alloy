@@ -17,7 +17,6 @@
     "typecheck": "bash -lc 'source scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
   },
   "devDependencies": {
-    "prettier": "^3.9.4",
     "typescript": "^6.0.3"
   }
 }

@@ -10,7 +10,7 @@
 		"test:bedrock": "pnpm --dir ../../../.. exec vp run inertia-demo:e2e:bedrock"
 	},
 	"devDependencies": {
-		"agent-browser": "^0.31.1",
+		"agent-browser": "^0.31.2",
 		"playwright": "^1.61.1"
 	}
 }
