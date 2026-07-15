@@ -65,6 +65,57 @@ func TestLockableFileWriteAndRead(t *testing.T) {
 	}
 }
 
+// TestLockableFileWriteShorterTruncates asserts a shorter rewrite leaves no
+// stale trailing bytes from the previous, longer contents.
+func TestLockableFileWriteShorterTruncates(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lockable.txt")
+
+	lf, err := filesystem.NewLockableFile(path, 0o644)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer lf.Close()
+
+	if _, err := lf.Write([]byte("hello world")); err != nil {
+		t.Fatal(err)
+	}
+
+	n, err := lf.Write([]byte("hi"))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if n != 2 {
+		t.Fatalf("expected 2 bytes written, got %d", n)
+	}
+
+	data, err := lf.Read()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(data) != "hi" {
+		t.Fatalf("expected %q with no stale trailing bytes, got %q", "hi", string(data))
+	}
+
+	size, err := lf.Size()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if size != 2 {
+		t.Fatalf("expected file size 2, got %d", size)
+	}
+}
+
 func TestLockableFileReadPartial(t *testing.T) {
 	t.Parallel()
 
