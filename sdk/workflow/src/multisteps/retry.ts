@@ -26,7 +26,11 @@ export class RetryPolicy {
 	}
 }
 
-export const runWithRetry = async (signal: AbortSignal, policy: RetryPolicy | undefined, handler: (signal: AbortSignal) => unknown): Promise<{ value: unknown; attempts: number; error?: unknown }> => {
+export const runWithRetry = async (
+	signal: AbortSignal,
+	policy: RetryPolicy | undefined,
+	handler: (signal: AbortSignal) => unknown,
+): Promise<{ value: unknown; attempts: number; error?: unknown }> => {
 	const activePolicy = policy ?? new RetryPolicy();
 
 	let lastError: unknown;
