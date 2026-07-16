@@ -75,6 +75,8 @@ func TestAggregatorAvgRoundsHalfAwayFromZero(t *testing.T) {
 		{name: "small positive half rounds up", amounts: []int64{2, 1}, want: 2},
 		{name: "below half rounds toward zero", amounts: []int64{100, 200, 301}, want: 200},
 		{name: "above half rounds away", amounts: []int64{100, 200, 302}, want: 201},
+		{name: "negative below half rounds toward zero", amounts: []int64{-100, -200, -301}, want: -200},
+		{name: "negative above half rounds away", amounts: []int64{-100, -200, -302}, want: -201},
 		{name: "exact average unchanged", amounts: []int64{100, 200, 300}, want: 200},
 	}
 

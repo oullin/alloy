@@ -151,6 +151,18 @@
       "args": ["USD", "100", "200", "302"],
       "expected": "201",
       "note": "aggregator average: above-half fraction rounds away from zero"
+    },
+    {
+      "op": "avg",
+      "args": ["USD", "-100", "-200", "-301"],
+      "expected": "-200",
+      "note": "aggregator average: negative below-half fraction rounds toward zero"
+    },
+    {
+      "op": "avg",
+      "args": ["USD", "-100", "-200", "-302"],
+      "expected": "-201",
+      "note": "aggregator average: negative above-half fraction rounds away from zero"
     }
   ]
 }
