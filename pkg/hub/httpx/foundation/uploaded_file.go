@@ -2,10 +2,12 @@ package foundation
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"io"
+	"io/fs"
 	"mime"
 	"mime/multipart"
 	"net/http"
@@ -13,10 +15,19 @@ import (
 	"strings"
 )
 
+// publicFileMode is the mode used by the StorePublicly helpers: readable by
+// anyone, writable only by the owner.
+const publicFileMode = fs.FileMode(0o644)
+
 // FileStore abstracts file storage for uploaded files. Implementations may
 // write to local disk, S3, GCS, or any other backend.
+//
+// The method is named PutStream, and not Put, to match filesystem.Local and
+// filesystem.Rooted, whose Put takes a []byte. Both satisfy this interface as
+// they are. Prefer filesystem.Rooted: an uploaded filename is attacker-supplied
+// and a rooted store cannot be walked out of.
 type FileStore interface {
-	Put(path string, contents io.Reader) error
+	PutStream(ctx context.Context, path string, contents io.Reader, mode ...fs.FileMode) error
 }
 
 // UploadedFile represents a file received via a multipart upload.
@@ -99,13 +110,17 @@ func (f *UploadedFile) Get() ([]byte, error) {
 	return io.ReadAll(rc)
 }
 
-// Store saves the file to the given directory using a random hash name.
-func (f *UploadedFile) Store(directory string, fs FileStore) (string, error) {
-	return f.StoreAs(directory, f.HashName(), fs)
+// Store saves the file to the given directory using a random hash name and
+// returns the path written. An optional file mode can be provided; the store's
+// default applies otherwise.
+func (f *UploadedFile) Store(ctx context.Context, directory string, store FileStore, mode ...fs.FileMode) (string, error) {
+	return f.StoreAs(ctx, directory, f.HashName(), store, mode...)
 }
 
-// StoreAs saves the file to the given directory with a specific name.
-func (f *UploadedFile) StoreAs(directory, name string, fs FileStore) (string, error) {
+// StoreAs saves the file to the given directory with a specific name and
+// returns the path written. The upload is streamed to the store rather than
+// read into memory first.
+func (f *UploadedFile) StoreAs(ctx context.Context, directory, name string, store FileStore, mode ...fs.FileMode) (string, error) {
 	rc, err := f.Open()
 
 	if err != nil {
@@ -116,23 +131,21 @@ func (f *UploadedFile) StoreAs(directory, name string, fs FileStore) (string, er
 
 	path := filepath.Join(directory, name)
 
-	if err := fs.Put(path, rc); err != nil {
+	if err := store.PutStream(ctx, path, rc, mode...); err != nil {
 		return "", err
 	}
 
 	return path, nil
 }
 
-// StorePublicly stores the file with public visibility. In Go the visibility
-// semantics depend on the FileStore implementation; this is a convenience alias
-// that matches the upstream API.
-func (f *UploadedFile) StorePublicly(directory string, fs FileStore) (string, error) {
-	return f.Store(directory, fs)
+// StorePublicly stores the file world-readable (0644) under a random hash name.
+func (f *UploadedFile) StorePublicly(ctx context.Context, directory string, store FileStore) (string, error) {
+	return f.Store(ctx, directory, store, publicFileMode)
 }
 
-// StorePubliclyAs stores the file with a specific name and public visibility.
-func (f *UploadedFile) StorePubliclyAs(directory, name string, fs FileStore) (string, error) {
-	return f.StoreAs(directory, name, fs)
+// StorePubliclyAs stores the file world-readable (0644) under a specific name.
+func (f *UploadedFile) StorePubliclyAs(ctx context.Context, directory, name string, store FileStore) (string, error) {
+	return f.StoreAs(ctx, directory, name, store, publicFileMode)
 }
 
 // HashName generates a random hex name preserving the client extension.
