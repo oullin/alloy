@@ -14,6 +14,41 @@
 - **Category**: bug
 - **Planned at**: commit `bfface5`, 2026-07-14
 
+## RESOLUTION 2026-07-16 (owner decision)
+
+The original plan STOPPED at Step 3: no `Current*` accessor could reach the
+request/context without a public signature change, because `MatchableRequest`
+exposed no context surface and `runRoute` invoked handlers as zero-arg funcs.
+
+The owner decided to **thread request context through dispatch**; breaking
+changes are acceptable pre-GA. Implemented API shape:
+
+1. `contracts.MatchableRequest` gains `Context() context.Context`
+   (implementations return their request's context; callers get a
+   `context.Background()` fallback when it is nil). In-repo implementers
+   updated: `foundation.Request`, the routing test `fakeRequest`.
+2. Dispatch derives `ctx = routing.WithCurrentRoute(request.Context(), route)`
+   after matching, stores it back on the request (optional `WithContext`
+   interface), and invokes handlers with it. `runRoute`'s type switch is
+   extended with context-accepting variants —`func(context.Context)`,
+   `func(context.Context) error`, `func(context.Context) any`,
+   `func(context.Context) (any, error)` — while the zero-arg variants keep
+   working unchanged.
+3. New package-level context accessors: `routing.CurrentRoute(ctx)`,
+   `CurrentRouteName(ctx)`, `CurrentRouteAction(ctx)`, `CurrentRouteIs(ctx, …)`,
+   `CurrentRouteNamed(ctx, …)`, `CurrentRouteUses(ctx, …)`. The existing no-arg
+   `Router.Current*`/`Is`/`Uses` methods stay but are documented as reading
+   process-wide last-matched state, unreliable under concurrent dispatch, and
+   **Deprecated** in favor of the ctx accessors.
+4. `foundation.RouteResolver` methods take `ctx context.Context` (breaking);
+   `foundation.Request` implements `Context()`/`WithContext()` and reads its own
+   context in `Fingerprint()`. `handlerx` binds a `routing.ContextRouteResolver`
+   (per-request, context-backed) instead of the shared router.
+
+Steps 4–5 of the original plan (removing the shared fields) are intentionally
+**not** done: the owner keeps the no-arg methods and their backing fields for
+backward compatibility, marked Deprecated.
+
 ## Why this matters
 
 The `Router` is a long-lived singleton serving all goroutines, but it stores the matched route for the in-flight request in shared fields `current`/`currentRequest` (`router.go:33-37`), overwritten on every `Dispatch` (`setCurrentRoute`, 738). `Current()`, `CurrentRouteName()`, `Is()`, `Uses()` (634-724) read those fields. The `currentMu` RWMutex prevents a data race but not the logical corruption: under concurrent requests, request B overwrites `current` between request A's dispatch and A's handler calling `Router.Current()`, so A observes B's route. Any middleware or handler that gates behavior on the current route name gets wrong answers under load. (Laravel's router is safe here only because PHP is share-nothing per request.)

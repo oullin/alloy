@@ -118,6 +118,22 @@ func runMoneyOp(t *testing.T, calc *calculator.Engine, manager *Manager, rates *
 		)
 
 		return strconv.FormatInt(got, 10), err
+	case "avg":
+		values := make([]*Value, 0, len(tc.Args)-1)
+
+		for _, raw := range tc.Args[1:] {
+			values = append(values, manager.Create(mustInt64(t, raw), tc.Args[0]))
+		}
+
+		got, err := NewAggregator(manager).Avg(values...)
+
+		if err != nil {
+			return "", err
+		}
+
+		amount, err := got.Amount()
+
+		return strconv.FormatInt(amount, 10), err
 	default:
 		t.Fatalf("unknown money conformance op: %s", tc.Op)
 
