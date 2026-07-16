@@ -1,6 +1,7 @@
 package contracts
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/oullin/alloy/pkg/hub/httpx/routing/contracts/compiler"
@@ -89,11 +90,17 @@ type MatchableRoute interface {
 }
 
 // MatchableRequest is the surface validators need from a request.
+//
+// Context returns the request's own context.Context, which the router uses to
+// carry the request-scoped current route through dispatch (see
+// routing.WithCurrentRoute). Implementations should return their underlying
+// request's context; callers must treat a nil return as context.Background().
 type MatchableRequest interface {
 	Method() string
 	Host() string
 	PathInfo() string
 	Secure() bool
+	Context() context.Context
 }
 
 // ValidatorInterface evaluates one matching dimension for a route/request pair.

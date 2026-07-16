@@ -1,6 +1,7 @@
 package foundation
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"net/url"
@@ -19,10 +20,12 @@ type SessionStore interface {
 	Remove(key string) any
 }
 
-// RouteResolver provides route information for the current request.
+// RouteResolver provides route information for the current request. It reads the
+// matched route from the request's context, so resolvers stay request-scoped and
+// concurrency-safe. routing.ContextRouteResolver is the standard implementation.
 type RouteResolver interface {
-	CurrentRouteName() string
-	CurrentRouteAction() string
+	CurrentRouteName(ctx context.Context) string
+	CurrentRouteAction(ctx context.Context) string
 }
 
 // Request wraps *http.Request with accessor methods for input,
@@ -32,6 +35,7 @@ type Request struct {
 	raw     *http.Request
 	session SessionStore
 	route   RouteResolver
+	ctx     context.Context
 
 	// parsedInput caches the merged query+body input after the first call to
 	// All(). It is lazily populated.
@@ -67,6 +71,30 @@ func (r *Request) RouteResolver() RouteResolver {
 // Raw returns the underlying *http.Request.
 func (r *Request) Raw() *http.Request {
 	return r.raw
+}
+
+// Context returns the request's context. The router derives a per-request
+// context carrying the matched route and stores it here via WithContext during
+// dispatch; before that (or when no raw request is present) it falls back to the
+// underlying *http.Request's context, then to context.Background().
+func (r *Request) Context() context.Context {
+	if r.ctx != nil {
+		return r.ctx
+	}
+
+	if r.raw != nil {
+		if ctx := r.raw.Context(); ctx != nil {
+			return ctx
+		}
+	}
+
+	return context.Background()
+}
+
+// WithContext stores the per-request context the router derives at dispatch
+// time, so later reads (RouteResolver, Fingerprint) observe the matched route.
+func (r *Request) WithContext(ctx context.Context) {
+	r.ctx = ctx
 }
 
 // Method returns the HTTP method (GET, POST, ...).
@@ -240,7 +268,7 @@ func (r *Request) Fingerprint() string {
 	parts := []string{r.Method(), r.raw.Host, r.Path(), r.IP(), r.UserAgent()}
 
 	if r.route != nil {
-		parts = append([]string{r.route.CurrentRouteName()}, parts...)
+		parts = append([]string{r.route.CurrentRouteName(r.Context())}, parts...)
 	}
 
 	return strings.Join(parts, "|")

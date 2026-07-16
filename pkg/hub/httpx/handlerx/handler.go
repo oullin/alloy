@@ -17,7 +17,7 @@ import (
 func New(router *routing.Router) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := foundation.NewRequest(r)
-		req.SetRouteResolver(router)
+		req.SetRouteResolver(routing.ContextRouteResolver{})
 
 		dispatch, err := router.Dispatch(req)
 
