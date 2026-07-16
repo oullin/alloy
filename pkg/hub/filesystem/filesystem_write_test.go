@@ -143,6 +143,7 @@ func TestReplaceWithMode(t *testing.T) {
 
 func TestReplaceSymlink(t *testing.T) {
 	t.Parallel()
+	requireSymlinks(t)
 
 	fs := newFilesystem()
 	dir := t.TempDir()

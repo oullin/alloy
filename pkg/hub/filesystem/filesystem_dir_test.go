@@ -232,6 +232,7 @@ func TestMakeDirectory(t *testing.T) {
 
 func TestMakeDirectoryWithMode(t *testing.T) {
 	t.Parallel()
+	requirePermissionBits(t)
 
 	fs := newFilesystem()
 	dir := t.TempDir()

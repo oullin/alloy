@@ -2,8 +2,10 @@ package foundation_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"io"
+	"io/fs"
 	"mime/multipart"
 	"strings"
 	"testing"
@@ -14,6 +16,14 @@ import (
 // memoryFileStore is a test double for foundation.FileStore.
 type memoryFileStore struct {
 	files map[string][]byte
+	modes map[string]fs.FileMode
+}
+
+func newMemoryFileStore() *memoryFileStore {
+	return &memoryFileStore{
+		files: make(map[string][]byte),
+		modes: make(map[string]fs.FileMode),
+	}
 }
 
 func createTestUploadedFile(t *testing.T, fieldName, fileName, content string) *foundation.UploadedFile {
@@ -147,9 +157,9 @@ func TestUploadedFileStore(t *testing.T) {
 
 	file := createTestUploadedFile(t, "doc", "test.txt", "store me")
 
-	store := &memoryFileStore{files: make(map[string][]byte)}
+	store := newMemoryFileStore()
 
-	path, err := file.Store("uploads", store)
+	path, err := file.Store(context.Background(), "uploads", store)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -169,9 +179,9 @@ func TestUploadedFileStoreAs(t *testing.T) {
 
 	file := createTestUploadedFile(t, "doc", "test.txt", "store me")
 
-	store := &memoryFileStore{files: make(map[string][]byte)}
+	store := newMemoryFileStore()
 
-	path, err := file.StoreAs("uploads", "custom.txt", store)
+	path, err := file.StoreAs(context.Background(), "uploads", "custom.txt", store)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -241,7 +251,11 @@ func TestCreateFromBase64Invalid(t *testing.T) {
 	}
 }
 
-func (s *memoryFileStore) Put(path string, contents io.Reader) error {
+func (s *memoryFileStore) PutStream(ctx context.Context, path string, contents io.Reader, mode ...fs.FileMode) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	data, err := io.ReadAll(contents)
 
 	if err != nil {
@@ -249,6 +263,10 @@ func (s *memoryFileStore) Put(path string, contents io.Reader) error {
 	}
 
 	s.files[path] = data
+
+	if len(mode) > 0 {
+		s.modes[path] = mode[0]
+	}
 
 	return nil
 }

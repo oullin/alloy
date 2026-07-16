@@ -2,6 +2,8 @@ package filesystem
 
 import (
 	"context"
+	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -26,6 +28,54 @@ func (f *Local) Put(ctx context.Context, path string, contents []byte, mode ...f
 	}
 
 	return os.WriteFile(path, contents, perm)
+}
+
+// PutStream writes everything readable from contents to a file, creating it if
+// necessary. An optional file mode can be provided; defaults to 0644. The file
+// is streamed in chunks rather than buffered whole, so it suits uploads and
+// other sources of unknown size, and the write stops early when ctx is
+// cancelled — leaving a partially written file behind.
+func (f *Local) PutStream(ctx context.Context, path string, contents io.Reader, mode ...fs.FileMode) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
+	if contents == nil {
+		return ErrNilReader
+	}
+
+	perm := fs.FileMode(0o644)
+
+	if len(mode) > 0 {
+		perm = mode[0]
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, perm)
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := copyContext(ctx, file, contents); err != nil {
+		_ = file.Close()
+
+		return err
+	}
+
+	return file.Close()
+}
+
+// MakeTempFile creates a new file with a name built from pattern inside dir and
+// returns the open file. When dir is empty the default directory for temporary
+// files is used. The caller is responsible for closing and removing it. The
+// open file is returned rather than its path so callers need not re-open by
+// name, which would reintroduce the race this avoids.
+func (f *Local) MakeTempFile(dir, pattern string) (*os.File, error) {
+	return os.CreateTemp(dir, pattern)
 }
 
 // Replace atomically writes content to a file using a temporary file
@@ -104,7 +154,7 @@ func (f *Local) Prepend(ctx context.Context, path string, data []byte) error {
 	existing, err := os.ReadFile(path)
 
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return f.Put(ctx, path, data)
 		}
 

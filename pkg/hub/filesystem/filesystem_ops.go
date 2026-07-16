@@ -2,16 +2,37 @@ package filesystem
 
 import (
 	"context"
+	"errors"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
 
-// Delete removes one or more files. Returns an error if any file cannot
-// be removed.
+// Delete removes one or more files or empty directories. Paths that do not
+// exist are ignored. A non-empty directory returns an error; use DeleteAll to
+// remove one along with its contents.
 func (f *Local) Delete(paths ...string) error {
 	for _, path := range paths {
-		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// DeleteAll removes one or more paths along with any children they contain.
+// Paths that do not exist are ignored. Unlike Delete, it removes directories
+// recursively. Cancelling ctx stops the loop between paths; the removal of an
+// individual path is not itself interruptible.
+func (f *Local) DeleteAll(ctx context.Context, paths ...string) error {
+	for _, path := range paths {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		if err := os.RemoveAll(path); err != nil {
 			return err
 		}
 	}
@@ -22,6 +43,11 @@ func (f *Local) Delete(paths ...string) error {
 // Move moves a file from path to target.
 func (f *Local) Move(path, target string) error {
 	return os.Rename(path, target)
+}
+
+// ReadLink returns the target of the symbolic link at the given path.
+func (f *Local) ReadLink(path string) (string, error) {
+	return os.Readlink(path)
 }
 
 // Copy copies a file from path to target. The copy stops early when ctx
