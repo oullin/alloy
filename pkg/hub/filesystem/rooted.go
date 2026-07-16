@@ -177,6 +177,10 @@ func (r *Rooted) PutStream(ctx context.Context, name string, contents io.Reader,
 		return err
 	}
 
+	if contents == nil {
+		return ErrNilReader
+	}
+
 	perm := fs.FileMode(0o644)
 
 	if len(mode) > 0 {

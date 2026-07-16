@@ -170,6 +170,20 @@ func TestRootedReadWrite(t *testing.T) {
 		}
 	})
 
+	t.Run("PutStream rejects a nil reader without creating a file", func(t *testing.T) {
+		name := filepath.Join("nested", "streamed.txt")
+
+		err := r.PutStream(ctx, name, nil)
+
+		if !errors.Is(err, filesystem.ErrNilReader) {
+			t.Errorf("PutStream with a nil reader = %v, want ErrNilReader", err)
+		}
+
+		if r.Exists(name) {
+			t.Error("PutStream with a nil reader created a file")
+		}
+	})
+
 	// The error model has to match Local's, or the uniformity fixed in the
 	// sibling change would not hold for rooted callers.
 	t.Run("missing name reports fs.ErrNotExist", func(t *testing.T) {

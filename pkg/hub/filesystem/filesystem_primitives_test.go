@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/oullin/alloy/pkg/hub/filesystem"
 )
 
 func TestIsLinkAndReadLink(t *testing.T) {
@@ -292,6 +294,20 @@ func TestPutStream(t *testing.T) {
 
 		if string(got) != content {
 			t.Errorf("PutStream wrote %q, want %q", got, content)
+		}
+	})
+
+	t.Run("rejects a nil reader without creating a file", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "nested", "out.txt")
+
+		err := f.PutStream(ctx, path, nil)
+
+		if !errors.Is(err, filesystem.ErrNilReader) {
+			t.Errorf("PutStream with a nil reader = %v, want ErrNilReader", err)
+		}
+
+		if f.Exists(path) {
+			t.Error("PutStream with a nil reader created a file")
 		}
 	})
 

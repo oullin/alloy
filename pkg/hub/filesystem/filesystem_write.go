@@ -40,6 +40,10 @@ func (f *Local) PutStream(ctx context.Context, path string, contents io.Reader, 
 		return err
 	}
 
+	if contents == nil {
+		return ErrNilReader
+	}
+
 	perm := fs.FileMode(0o644)
 
 	if len(mode) > 0 {
