@@ -1,9 +1,7 @@
 package seed
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"os"
 	"strings"
@@ -13,51 +11,31 @@ import (
 )
 
 // SeedPasswordEnvVar names the environment variable that supplies the password
-// for the seeded demo users. When unset, Run generates a random password per
-// invocation so a deployed demo never ships known credentials.
+// for the seeded demo users. When unset, Run falls back to
+// DefaultSeedPassword.
 const SeedPasswordEnvVar = "INERTIA_DEMO_SEED_PASSWORD"
 
+// DefaultSeedPassword is the well-known password assigned to the seeded demo
+// users when SeedPasswordEnvVar is unset. It is deliberately a known demo
+// credential (owner decision, for demo convenience); set the environment
+// variable to override it.
+const DefaultSeedPassword = "12345678"
+
 // Run seeds the database using a demo-user password resolved from the
-// environment, falling back to a freshly generated random password that is
-// printed to stdout. Use RunWithPassword when a deterministic password is
-// needed (e.g. tests).
+// environment, falling back to DefaultSeedPassword. Use RunWithPassword when a
+// deterministic per-test password is needed.
 func Run(db *sql.DB) error {
-	password, err := resolveSeedPassword()
-
-	if err != nil {
-		return fmt.Errorf("seed password: %w", err)
-	}
-
-	return RunWithPassword(db, password)
+	return RunWithPassword(db, resolveSeedPassword())
 }
 
-// resolveSeedPassword returns the configured seed password, or a random one
-// (printed to stdout) when SeedPasswordEnvVar is unset.
-func resolveSeedPassword() (string, error) {
+// resolveSeedPassword returns the configured seed password, or
+// DefaultSeedPassword when SeedPasswordEnvVar is unset.
+func resolveSeedPassword() string {
 	if p := strings.TrimSpace(os.Getenv(SeedPasswordEnvVar)); p != "" {
-		return p, nil
+		return p
 	}
 
-	password, err := randomPassword()
-
-	if err != nil {
-		return "", err
-	}
-
-	fmt.Printf("seed: %s is unset; generated a random demo-user password: %s\n", SeedPasswordEnvVar, password)
-
-	return password, nil
-}
-
-// randomPassword returns a URL-safe, base64-encoded 24-byte CSPRNG password.
-func randomPassword() (string, error) {
-	buf := make([]byte, 24)
-
-	if _, err := rand.Read(buf); err != nil {
-		return "", fmt.Errorf("generate random password: %w", err)
-	}
-
-	return base64.RawURLEncoding.EncodeToString(buf), nil
+	return DefaultSeedPassword
 }
 
 // RunWithPassword seeds the database, assigning password to every seeded user.

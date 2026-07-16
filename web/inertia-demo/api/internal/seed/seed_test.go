@@ -1,7 +1,6 @@
 package seed
 
 import (
-	"strings"
 	"testing"
 
 	"alloy.dev/inertia-demo/internal/database"
@@ -146,37 +145,22 @@ func TestRunTruncatesExistingData(t *testing.T) {
 func TestResolveSeedPasswordUsesEnv(t *testing.T) {
 	t.Setenv(SeedPasswordEnvVar, "from-env-password")
 
-	got, err := resolveSeedPassword()
-
-	if err != nil {
-		t.Fatalf("resolveSeedPassword() error = %v", err)
-	}
-
-	if got != "from-env-password" {
+	if got := resolveSeedPassword(); got != "from-env-password" {
 		t.Fatalf("resolveSeedPassword() = %q, want %q", got, "from-env-password")
 	}
 }
 
-func TestResolveSeedPasswordGeneratesRandomWhenUnset(t *testing.T) {
+func TestResolveSeedPasswordDefaultsWhenUnset(t *testing.T) {
 	t.Setenv(SeedPasswordEnvVar, "")
 
-	first, err := resolveSeedPassword()
-
-	if err != nil {
-		t.Fatalf("resolveSeedPassword() error = %v", err)
+	if got := resolveSeedPassword(); got != DefaultSeedPassword {
+		t.Fatalf("resolveSeedPassword() = %q, want DefaultSeedPassword %q", got, DefaultSeedPassword)
 	}
 
-	if strings.TrimSpace(first) == "" {
-		t.Fatal("resolveSeedPassword() returned empty password when env unset")
-	}
+	// Whitespace-only values are treated as unset too.
+	t.Setenv(SeedPasswordEnvVar, "   ")
 
-	second, err := resolveSeedPassword()
-
-	if err != nil {
-		t.Fatalf("resolveSeedPassword() error = %v", err)
-	}
-
-	if first == second {
-		t.Fatal("resolveSeedPassword() returned identical passwords across calls; want random")
+	if got := resolveSeedPassword(); got != DefaultSeedPassword {
+		t.Fatalf("resolveSeedPassword() with blank env = %q, want DefaultSeedPassword %q", got, DefaultSeedPassword)
 	}
 }
