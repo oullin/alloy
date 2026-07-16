@@ -42,19 +42,22 @@ while IFS= read -r -d '' gomod; do
 				exit 1
 			fi
 		done < <(go list -m)
+		# `go test` re-runs `go vet` by default. Keep one explicit vet pass so vet
+		# failures are attributable, and pass `-vet=off` to `go test` to drop the
+		# duplicate analysis pass.
 		go vet ./...
 		if [[ -n "${GO_COVERAGE_DIR:-}" ]]; then
 			mkdir -p "${GO_COVERAGE_DIR}"
 			module_name="${module_dir#"${ROOT_PATH}/"}"
 			profile="${GO_COVERAGE_DIR}/$(echo "${module_name}" | tr '/' '-').out"
-			go test -race -coverprofile="${profile}" ./...
+			go test -vet=off -race -coverprofile="${profile}" ./...
 			# go tool cover resolves sources through the current module, so it
 			# must run here (inside the module) — not later from the repo root.
 			total="$(go tool cover -func="${profile}" | tail -1 | awk '{print $NF}')"
 			echo "${total}"
 			printf '%s\t%s\n' "${module_name}" "${total}" >> "${GO_COVERAGE_DIR}/summary.tsv"
 		else
-			go test -race ./...
+			go test -vet=off -race ./...
 		fi
 	)
 done < <(
