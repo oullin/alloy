@@ -155,6 +155,7 @@ Cross-cutting topics that span multiple packages:
 | Guide                                        | What it covers                                          |
 | -------------------------------------------- | ------------------------------------------------------- |
 | [Request Lifecycle](/architecture/lifecycle) | How an HTTP request flows through a Alloy application |
+| [Cross-Runtime Parity](/architecture/parity) | Which primitives have Go/TS twins and what parity each guarantees |
 | [Testing](/concepts/testing)                 | Built-in test doubles and testing patterns              |
 | [Middleware](/basics/middleware)             | Global, per-route, and controller-scoped middleware     |
 | [Controllers](/basics/controllers)           | Grouping handlers into types with shared middleware     |
