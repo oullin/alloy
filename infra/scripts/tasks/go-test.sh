@@ -9,6 +9,15 @@ GO_PATH="${ROOT_PATH}/pkg/hub"
 GO_WORK_PATH="${GO_PATH}/go.work"
 GO_WORK_ENV="off"
 
+# run_module cd-s into each module, so a relative GO_COVERAGE_DIR would
+# scatter per-module profiles across module directories while the summary
+# aggregation below writes relative to the invocation directory. Pin it to an
+# absolute path once, up front.
+if [[ -n "${GO_COVERAGE_DIR:-}" ]]; then
+	mkdir -p "${GO_COVERAGE_DIR}"
+	GO_COVERAGE_DIR="$(cd "${GO_COVERAGE_DIR}" && pwd)"
+fi
+
 if [[ -f "${GO_WORK_PATH}" ]]; then
 	GO_WORK_ENV="${GO_WORK_PATH}"
 fi
@@ -67,9 +76,12 @@ run_module() {
 # Shared Go code lives under pkg/hub/. Web demo Go entrypoints live under web/*/api.
 # Modules are independent, so run them concurrently and aggregate results after.
 work_dir="$(mktemp -d)"
-trap 'rm -rf "${work_dir}"' EXIT
-
 pids=()
+
+# Kill still-running module jobs on interruption or early exit so a cancelled
+# run never leaves orphaned go-test processes behind; on a normal exit the
+# pids have already been waited on and kill is a suppressed no-op.
+trap 'if [[ ${#pids[@]} -gt 0 ]]; then kill "${pids[@]}" 2>/dev/null || true; fi; rm -rf "${work_dir}"' EXIT
 module_labels=()
 log_files=()
 summary_files=()
