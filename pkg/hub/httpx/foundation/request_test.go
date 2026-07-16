@@ -3,9 +3,11 @@ package foundation_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
+	"github.com/oullin/alloy/pkg/hub/httpx/routing"
 )
 
 func TestNewRequest(t *testing.T) {
@@ -234,6 +236,35 @@ func TestRequestFingerprint(t *testing.T) {
 
 	if fp == "" {
 		t.Fatal("fingerprint should not be empty")
+	}
+}
+
+// TestRequestFingerprintReadsRequestContext proves the RouteResolver path is
+// request-scoped: each request resolves its current route from its own context
+// via routing.ContextRouteResolver, never shared state.
+func TestRequestFingerprintReadsRequestContext(t *testing.T) {
+	t.Parallel()
+
+	routeA := routing.NewRoute(http.MethodGet, "/a", "HandlerA@show")
+	routeA.Name("route.a")
+
+	routeB := routing.NewRoute(http.MethodGet, "/b", "HandlerB@show")
+	routeB.Name("route.b")
+
+	newReq := func(route *routing.Route) *foundation.Request {
+		req := foundation.NewRequest(httptest.NewRequest(http.MethodGet, "/", nil))
+		req.SetRouteResolver(routing.ContextRouteResolver{})
+		req.WithContext(routing.WithCurrentRoute(req.Context(), route))
+
+		return req
+	}
+
+	if fp := newReq(routeA).Fingerprint(); !strings.HasPrefix(fp, "route.a|") {
+		t.Errorf("fingerprint %q should start with route.a", fp)
+	}
+
+	if fp := newReq(routeB).Fingerprint(); !strings.HasPrefix(fp, "route.b|") {
+		t.Errorf("fingerprint %q should start with route.b", fp)
 	}
 }
 

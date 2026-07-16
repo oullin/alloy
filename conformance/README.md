@@ -34,10 +34,14 @@ text.
 ```
 
 - `op`: `round` | `absolute` | `add` | `subtract` | `multiply` |
-  `createFromFloat` | `convertWithRate`.
+  `createFromFloat` | `convertWithRate` | `avg`.
 - `args`: operands as decimal strings. For `createFromFloat` and
   `convertWithRate`, float-valued args (a major-unit amount, a rate) are decimal
-  strings parsed to IEEE-754 doubles identically in both runtimes.
+  strings parsed to IEEE-754 doubles identically in both runtimes. For `avg`,
+  the first arg is the currency code and the rest are minor-unit amounts; the
+  loaders build currency-carrying values (Go `Manager.Create` /
+  TS `MoneyManager.create`) and run them through the aggregator
+  (Go `Aggregator.Avg` / TS `MoneyAggregator.avg`).
 - Exactly one of `expected` (decimal-string result) or `error` (error identity)
   is present.
 
@@ -83,12 +87,6 @@ capability gap, not an oversight; encoding a single expected value would just
 force one runtime to fail. They belong in the parity divergence register, not
 here, until resolved in both runtimes at once.
 
-- **`money` `avg`.** Go `Aggregator.Avg` uses truncating integer division
-  (`sum / n`, toward zero: `Avg(100, 101) = 100`,
-  `pkg/hub/money/money/aggregator.go`), while TS `MoneyAggregator.avg` rounds the
-  fractional minor unit **half away from zero** (`avg(100, 101) = 101`,
-  `sdk/money/src/money/aggregator.ts`). The two disagree on every non-integer
-  average. Excluded pending a convergence decision.
 - **`tempo` fractional-day / fractional-week additions.** TS `addDays`/`addWeeks`
   accept fractional amounts (e.g. `addDays(1.25)` = one calendar day + 6 elapsed
   hours). Go `AddDays`/`AddWeeks` take an `int` and cannot express a fraction.

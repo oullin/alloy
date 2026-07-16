@@ -108,12 +108,12 @@ func (a *Aggregator) Max(moneys ...*Value) (*Value, error) {
 // Avg returns the average of multiple Value objects.
 // All Value objects must have the same currency.
 //
-// The result is computed as sum.amount / len(moneys) using integer division,
-// which truncates any fractional cents toward zero rather than rounding.
-// For example, the average of $1.00 and $2.00 is $1.50, but the average
-// of $1.00, $2.00, and $3.00 is $2.00 (not $2.00 rounded from $2.00).
-// The average of $0.01, $0.01, and $0.01 remains $0.01.
-// The average of $0.02 and $0.01 is $0.01 (truncated from $0.015).
+// The result is sum.amount / len(moneys) with any fractional minor unit
+// rounded half away from zero — the same policy as Round and CreateFromFloat,
+// and the same semantics as the TS twin (sdk/money/src/money/aggregator.ts).
+// For example, the average of $1.00 and $1.01 is $1.01, the average of
+// -$1.00 and -$1.01 is -$1.01, and the average of $0.02 and $0.01 is $0.02
+// (rounded from $0.015).
 //
 // Preconditions:
 //   - All Value arguments must be non-nil (panics if nil)
@@ -136,8 +136,22 @@ func (a *Aggregator) Avg(moneys ...*Value) (*Value, error) {
 		return nil, err
 	}
 
-	// Divide by the count
-	avgAmount := sum.amount / int64(len(moneys))
+	count := int64(len(moneys))
+	avgAmount := sum.amount / count
+	remainder := sum.amount % count
+
+	if remainder < 0 {
+		remainder = -remainder
+	}
+
+	// A leftover of half a minor unit or more rounds away from zero.
+	if remainder*2 >= count {
+		if sum.amount < 0 {
+			avgAmount--
+		} else {
+			avgAmount++
+		}
+	}
 
 	return &Value{
 		amount:   avgAmount,
@@ -177,12 +191,8 @@ func (a *Aggregator) Avg(moneys ...*Value) (*Value, error) {
 //// Avg returns the average of multiple Value objects.
 //// All Value objects must have the same currency.
 ////
-//// The result is computed as sum.amount / len(moneys) using integer division,
-//// which truncates any fractional cents toward zero rather than rounding.
-//// For example, the average of $1.00 and $2.00 is $1.50, but the average
-//// of $1.00, $2.00, and $3.00 is $2.00 (not $2.00 rounded from $2.00).
-//// The average of $0.01, $0.01, and $0.01 remains $0.01.
-//// The average of $0.02 and $0.01 is $0.01 (truncated from $0.015).
+//// The result is sum.amount / len(moneys) with any fractional minor unit
+//// rounded half away from zero — the same policy as Round and CreateFromFloat.
 ////
 //// Preconditions:
 ////   - All Value arguments must be non-nil (panics if nil)

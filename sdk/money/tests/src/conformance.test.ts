@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { ExchangeRates, MoneyCalculator, MoneyManager } from '#money/index';
+import { ExchangeRates, MoneyAggregator, MoneyCalculator, MoneyManager } from '#money/index';
 
 // Shared Go<->TS golden vectors. This is the TS half of the cross-runtime drift
 // guard (plan 008); the Go half lives in
@@ -28,6 +28,7 @@ const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as MoneyConformanc
 const calculator = MoneyCalculator.create();
 const manager = MoneyManager.default();
 const rates = ExchangeRates.create();
+const aggregator = MoneyAggregator.create(manager);
 
 const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 	const { args, op } = testCase;
@@ -50,6 +51,14 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 				.toString();
 		case 'convertWithRate':
 			return rates.convertAmountWithRate(BigInt(args[0] as string), Number(args[1]), Number(args[2]), Number(args[3])).toString();
+		case 'avg': {
+			const values = args.slice(1).map((raw) => manager.create(BigInt(raw), args[0] as string));
+
+			return aggregator
+				.avg(...values)
+				.amount()
+				.toString();
+		}
 		default:
 			throw new Error(`unknown money conformance op: ${op}`);
 	}
