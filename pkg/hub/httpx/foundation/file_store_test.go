@@ -78,6 +78,29 @@ func TestStoreAsWritesThroughRooted(t *testing.T) {
 	}
 }
 
+func TestUploadsDocumentationExample(t *testing.T) {
+	t.Parallel()
+
+	uploads, err := filesystem.At(t.TempDir())
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer uploads.Close()
+
+	file := createTestUploadedFile(t, "avatar", "avatar.png", "avatar bytes")
+	path, err := file.StoreAs(context.Background(), "avatars", file.HashName(), uploads)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := uploads.Get(context.Background(), path); err != nil {
+		t.Fatalf("upload was not stored: %v", err)
+	}
+}
+
 // TestStoreAsThroughRootedRefusesTraversal is why Rooted is the recommended
 // upload backend: the name comes from the client, so it is hostile input.
 func TestStoreAsThroughRootedRefusesTraversal(t *testing.T) {

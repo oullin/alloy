@@ -126,9 +126,16 @@ refusal never looks like a missing file.
 
 ```go
 uploads, err := filesystem.At("/srv/app/uploads")
+if err != nil {
+    return err
+}
+
 defer uploads.Close()
 
 path, err := file.StoreAs(ctx, "avatars", file.HashName(), uploads)
+if err != nil {
+    return err
+}
 ```
 
 ## Extending
