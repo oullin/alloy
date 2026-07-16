@@ -1,0 +1,95 @@
+{
+  "$schema": "./tempo-fixtures",
+  "description": "Language-neutral golden vectors for the tempo twin (pkg/hub/tempo <-> @alloy/sdk/tempo). Each case builds an instant from calendar components in a named zone, applies one operation, and renders the result as a string ('iso' -> UTC ISO-8601 with milliseconds; 'date' -> YYYY-MM-DD). Covers DST-correct whole-unit calendar arithmetic (plan 007). Fractional-day additions and non-English-locale month parsing are deliberately EXCLUDED because they are TS-only capabilities the Go twin does not implement (see conformance/README.md). See conformance/README.md.",
+  "cases": [
+    {
+      "op": "addDays",
+      "base": { "year": 2024, "month": 3, "day": 10, "hour": 0, "timeZone": "America/New_York" },
+      "arg": 1,
+      "render": "iso",
+      "expected": "2024-03-11T04:00:00.000Z",
+      "note": "spring-forward: a calendar day keeps wall-clock midnight, so only 23 real hours elapse (plan 007)"
+    },
+    {
+      "op": "addHours",
+      "base": { "year": 2024, "month": 3, "day": 10, "hour": 0, "timeZone": "America/New_York" },
+      "arg": 24,
+      "render": "iso",
+      "expected": "2024-03-11T05:00:00.000Z",
+      "note": "spring-forward: +24h is fixed elapsed time, NOT the same instant as +1 calendar day (plan 007)"
+    },
+    {
+      "op": "addDays",
+      "base": { "year": 2024, "month": 11, "day": 3, "hour": 0, "timeZone": "America/New_York" },
+      "arg": 1,
+      "render": "iso",
+      "expected": "2024-11-04T05:00:00.000Z",
+      "note": "fall-back: a calendar day keeps wall-clock midnight, so 25 real hours elapse (plan 007)"
+    },
+    {
+      "op": "addHours",
+      "base": { "year": 2024, "month": 11, "day": 3, "hour": 0, "timeZone": "America/New_York" },
+      "arg": 24,
+      "render": "iso",
+      "expected": "2024-11-04T04:00:00.000Z",
+      "note": "fall-back: +24h fixed elapsed lands one wall-clock hour short of the next midnight (plan 007)"
+    },
+    {
+      "op": "addWeeks",
+      "base": { "year": 2024, "month": 3, "day": 9, "hour": 12, "timeZone": "America/New_York" },
+      "arg": 1,
+      "render": "iso",
+      "expected": "2024-03-16T16:00:00.000Z",
+      "note": "a week straddling spring-forward keeps the same wall-clock time (plan 007)"
+    },
+    {
+      "op": "addDays",
+      "base": { "year": 2024, "month": 2, "day": 29, "hour": 0, "timeZone": "UTC" },
+      "arg": 1,
+      "render": "iso",
+      "expected": "2024-03-01T00:00:00.000Z",
+      "note": "unzoned day arithmetic stays on fixed 24h boundaries across a leap-day"
+    },
+    {
+      "op": "addMonths",
+      "base": { "year": 2024, "month": 1, "day": 31, "hour": 0, "timeZone": "UTC" },
+      "arg": 1,
+      "render": "date",
+      "expected": "2024-03-02",
+      "note": "default month overflow: Jan 31 + 1 month rolls into March"
+    },
+    {
+      "op": "addMonthsNoOverflow",
+      "base": { "year": 2024, "month": 1, "day": 31, "hour": 0, "timeZone": "UTC" },
+      "arg": 1,
+      "render": "date",
+      "expected": "2024-02-29",
+      "note": "month-end clamping: Jan 31 + 1 month clamps to Feb 29 (leap year)"
+    },
+    {
+      "op": "diffInMonths",
+      "base": { "year": 2024, "month": 1, "day": 15, "hour": 0, "timeZone": "UTC" },
+      "other": { "year": 2026, "month": 4, "day": 20, "hour": 0, "timeZone": "UTC" },
+      "render": "int",
+      "expected": "-27",
+      "note": "receiver minus other; negative when other is later"
+    },
+    {
+      "op": "diffInYears",
+      "base": { "year": 2024, "month": 1, "day": 15, "hour": 0, "timeZone": "UTC" },
+      "other": { "year": 2026, "month": 4, "day": 20, "hour": 0, "timeZone": "UTC" },
+      "render": "int",
+      "expected": "-2",
+      "note": "receiver minus other; negative when other is later"
+    },
+    {
+      "op": "parseFromPattern",
+      "input": "14 July 2026",
+      "pattern": "D MMMM YYYY",
+      "timeZone": "UTC",
+      "render": "date",
+      "expected": "2026-07-14",
+      "note": "English month-name parsing round-trips in both runtimes; non-English locales are TS-only (excluded)"
+    }
+  ]
+}
