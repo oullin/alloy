@@ -47,8 +47,8 @@ func newFeatureHarness(t *testing.T) *featureHarness {
 		db.Close()
 	})
 
-	if err := seed.Run(db); err != nil {
-		t.Fatalf("seed.Run() error = %v", err)
+	if err := seed.RunWithPassword(db, "features-test-password"); err != nil {
+		t.Fatalf("seed.RunWithPassword() error = %v", err)
 	}
 
 	h := &featureHarness{
