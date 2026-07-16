@@ -108,6 +108,14 @@ surfaces. Two behaviors are actively being unified by in-flight PRs; **on
   convert through IEEE-754 doubles today, so both lose precision above `2^53`.
   **Pending PR merge (#90):** exact-integer conversion in both runtimes, with
   vector `(2^53 + 1) × 2.0`.
+- **Aggregator average rounding.** Go `Aggregator.Avg`
+  (`pkg/hub/money/money/aggregator.go`) truncated the fractional minor unit
+  toward zero (`Avg(100, 101) = 100`), while TS `MoneyAggregator.avg`
+  (`sdk/money/src/money/aggregator.ts`) rounds half away from zero
+  (`avg(100, 101) = 101`) — a disagreement on every non-integer average, found
+  while writing plan 008's fixtures. **Resolved:** Go now rounds half away from
+  zero, matching TS and the money rounding policy (`Round`/`CreateFromFloat`),
+  and `conformance/money.json` pins the agreement with `avg` vectors.
 
 Once #88/#90 land, `money` reaches **L1** cleanly and is eligible for **L2** as
 soon as plan 008's fixtures are added.
@@ -174,6 +182,7 @@ in both runtimes with matching vocabulary. One retry-policy field is a genuine,
 | — | `money` | Rounding tie-direction (half-toward-zero today; TS doc says away-from-zero) | Pending PR #88 → half-away-from-zero, both |
 | — | `money` | `Absolute(MinInt64)`: Go → `MinInt64`, TS → `2^63` | Pending PR #88 → `0`, both |
 | — | `money` | Exchange conversion via float64/Number (lossy > 2^53) | Pending PR #90 → exact-integer, both |
+| — | `money` | `Aggregator.Avg`: Go truncated toward zero; TS rounds half away from zero | **Resolved** → half-away-from-zero, both + `avg` fixture |
 | — | `tempo` | Day/week: Go calendar (`AddDate`), TS fixed-ms (DST-wrong) | Pending PR #87 → TS DST-correct |
 | **X13** | `workflow` | `RetryPolicy.MaxExceptions` declared in both, enforced in neither; docs disagree | **Open** — needs policy + dual implementation + fixture |
 
