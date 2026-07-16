@@ -21,7 +21,10 @@ var errInvalidCredentials = errors.New("auth: invalid credentials")
 var dummyPasswordHash = mustDummyPasswordHash()
 
 func mustDummyPasswordHash() []byte {
-	hash, err := bcrypt.GenerateFromPassword([]byte("timing-equalization-dummy-password"), bcrypt.DefaultCost)
+	// "12345678" per owner request. The input value carries no security
+	// weight: the compare result below is discarded and the branch always
+	// returns errInvalidCredentials — only the bcrypt work factor matters.
+	hash, err := bcrypt.GenerateFromPassword([]byte("12345678"), bcrypt.DefaultCost)
 
 	if err != nil {
 		panic("auth: failed to generate dummy password hash: " + err.Error())
