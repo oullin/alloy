@@ -364,3 +364,36 @@ func TestPutStream(t *testing.T) {
 		}
 	})
 }
+
+// TestDeleteRemovesEmptyDirectories pins what Delete actually does. The doc
+// comment used to claim it would not touch directories, which was false: it
+// unlinks empty ones, and only a non-empty one is an error.
+func TestDeleteRemovesEmptyDirectories(t *testing.T) {
+	f := newFilesystem()
+
+	t.Run("removes an empty directory", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "empty")
+		makeDir(t, path)
+
+		if err := f.Delete(path); err != nil {
+			t.Fatalf("Delete on an empty directory = %v, want nil", err)
+		}
+
+		if f.Exists(path) {
+			t.Error("Delete left the empty directory behind")
+		}
+	})
+
+	t.Run("errors on a non-empty directory", func(t *testing.T) {
+		path := filepath.Join(t.TempDir(), "full")
+		writeFile(t, filepath.Join(path, "child.txt"), "x")
+
+		if err := f.Delete(path); err == nil {
+			t.Error("Delete on a non-empty directory = nil, want an error")
+		}
+
+		if !f.Exists(path) {
+			t.Error("Delete removed a non-empty directory")
+		}
+	})
+}

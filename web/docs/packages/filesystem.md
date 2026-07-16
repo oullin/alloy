@@ -61,8 +61,8 @@ Two pairs are easy to mix up:
 | --- | --- |
 | `MakeDirectory` | creates parents, succeeds if it already exists |
 | `MakeExclusiveDirectory` | no parents, fails with `fs.ErrExist` if taken — an atomic claim on a name |
-| `Delete` | files only, ignores missing ones |
-| `DeleteAll` | files or trees, recursive, idempotent |
+| `Delete` | files and empty directories, ignores missing ones, errors on a non-empty directory |
+| `DeleteAll` | files or whole trees, recursive, idempotent |
 
 ## Untrusted Paths
 

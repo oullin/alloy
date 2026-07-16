@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 )
 
-// Delete removes one or more files. Returns an error if any file cannot
-// be removed.
+// Delete removes one or more files or empty directories. Paths that do not
+// exist are ignored. A non-empty directory returns an error; use DeleteAll to
+// remove one along with its contents.
 func (f *Local) Delete(paths ...string) error {
 	for _, path := range paths {
 		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {

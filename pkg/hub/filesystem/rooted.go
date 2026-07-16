@@ -202,8 +202,9 @@ func (r *Rooted) PutStream(ctx context.Context, name string, contents io.Reader,
 	return file.Close()
 }
 
-// Delete removes one or more files. Names that do not exist are ignored.
-// It does not remove directories; use DeleteAll for that.
+// Delete removes one or more files or empty directories. Names that do not
+// exist are ignored. A non-empty directory returns an error; use DeleteAll to
+// remove one along with its contents.
 func (r *Rooted) Delete(names ...string) error {
 	for _, name := range names {
 		if err := r.root.Remove(name); err != nil && !errors.Is(err, fs.ErrNotExist) {

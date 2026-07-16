@@ -333,3 +333,26 @@ func TestRootedPathAndFS(t *testing.T) {
 		t.Errorf("fs.Glob over FS() = %v, want [walk-me.txt]", matches)
 	}
 }
+
+// TestRootedDeleteRemovesEmptyDirectories mirrors the Local behaviour the doc
+// comment previously got wrong.
+func TestRootedDeleteRemovesEmptyDirectories(t *testing.T) {
+	root, _ := rootedFixture(t)
+	r := openRooted(t, root)
+
+	makeDir(t, filepath.Join(root, "empty"))
+
+	if err := r.Delete("empty"); err != nil {
+		t.Fatalf("Delete on an empty directory = %v, want nil", err)
+	}
+
+	if r.Exists("empty") {
+		t.Error("Delete left the empty directory behind")
+	}
+
+	writeFile(t, filepath.Join(root, "full", "child.txt"), "x")
+
+	if err := r.Delete("full"); err == nil {
+		t.Error("Delete on a non-empty directory = nil, want an error")
+	}
+}

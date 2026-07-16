@@ -110,16 +110,26 @@ func (f *UploadedFile) Get() ([]byte, error) {
 	return io.ReadAll(rc)
 }
 
-// Store saves the file to the given directory using a random hash name and
+// Store saves the file to the given directory under a random hash name and
 // returns the path written. An optional file mode can be provided; the store's
 // default applies otherwise.
+//
+// On failure it still returns the path, which may name a partially written
+// file — see StoreAs.
 func (f *UploadedFile) Store(ctx context.Context, directory string, store FileStore, mode ...fs.FileMode) (string, error) {
 	return f.StoreAs(ctx, directory, f.HashName(), store, mode...)
 }
 
-// StoreAs saves the file to the given directory with a specific name and
+// StoreAs saves the file to the given directory under a specific name and
 // returns the path written. The upload is streamed to the store rather than
 // read into memory first.
+//
+// The path is returned even when the error is non-nil, because a failed store
+// can leave a partial file behind: PutStream creates the file before copying,
+// and a cancelled request or a truncated upload aborts it mid-copy. Callers who
+// care must delete the returned path. It is returned rather than left to the
+// caller to reconstruct because Store generates the name itself, so on error
+// there would otherwise be no way to name the file that was created.
 func (f *UploadedFile) StoreAs(ctx context.Context, directory, name string, store FileStore, mode ...fs.FileMode) (string, error) {
 	rc, err := f.Open()
 
@@ -132,18 +142,25 @@ func (f *UploadedFile) StoreAs(ctx context.Context, directory, name string, stor
 	path := filepath.Join(directory, name)
 
 	if err := store.PutStream(ctx, path, rc, mode...); err != nil {
-		return "", err
+		return path, err
 	}
 
 	return path, nil
 }
 
-// StorePublicly stores the file world-readable (0644) under a random hash name.
+// StorePublicly stores the file under a random hash name, requesting mode 0644.
+//
+// The mode is a request, not a guarantee: the process umask masks it away (0644
+// under a 0077 umask lands 0600), and it is ignored entirely if the file
+// already exists. Under the usual 0022 umask this is world-readable. Where the
+// visibility genuinely matters, check or set it afterwards rather than trusting
+// this call.
 func (f *UploadedFile) StorePublicly(ctx context.Context, directory string, store FileStore) (string, error) {
 	return f.Store(ctx, directory, store, publicFileMode)
 }
 
-// StorePubliclyAs stores the file world-readable (0644) under a specific name.
+// StorePubliclyAs stores the file under a specific name, requesting mode 0644.
+// The same umask caveat as StorePublicly applies.
 func (f *UploadedFile) StorePubliclyAs(ctx context.Context, directory, name string, store FileStore) (string, error) {
 	return f.StoreAs(ctx, directory, name, store, publicFileMode)
 }

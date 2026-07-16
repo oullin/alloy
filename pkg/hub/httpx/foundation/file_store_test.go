@@ -2,6 +2,8 @@ package foundation_test
 
 import (
 	"context"
+	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -165,5 +167,59 @@ func TestStorePubliclyUsesPublicMode(t *testing.T) {
 
 	if store.modes[path] != 0o644 {
 		t.Fatalf("StorePublicly mode = %v, want 0644", store.modes[path])
+	}
+}
+
+// failingStore reports an error after the store has already created something,
+// standing in for a cancelled request or a truncated upload.
+type failingStore struct {
+	created string
+}
+
+func (s *failingStore) PutStream(ctx context.Context, path string, contents io.Reader, mode ...fs.FileMode) error {
+	s.created = path
+
+	return context.Canceled
+}
+
+// TestStoreReturnsPathOnFailure pins the contract that lets a caller clean up.
+// PutStream creates the file before copying and leaves a partial behind when
+// the copy aborts, so if Store returned only ("", err) the partial would be
+// unreachable — Store generates the name itself, so nothing else could name it.
+func TestStoreReturnsPathOnFailure(t *testing.T) {
+	t.Parallel()
+
+	file := createTestUploadedFile(t, "doc", "big.iso", "partial")
+	store := &failingStore{}
+
+	path, err := file.Store(context.Background(), "uploads", store)
+
+	if err == nil {
+		t.Fatal("expected the store to fail")
+	}
+
+	if path == "" {
+		t.Fatal("Store returned an empty path on failure, orphaning whatever it created")
+	}
+
+	if path != store.created {
+		t.Fatalf("Store returned %q but the store created %q; the caller cannot clean up", path, store.created)
+	}
+}
+
+func TestStoreAsReturnsPathOnFailure(t *testing.T) {
+	t.Parallel()
+
+	file := createTestUploadedFile(t, "doc", "big.iso", "partial")
+	store := &failingStore{}
+
+	path, err := file.StoreAs(context.Background(), "uploads", "named.iso", store)
+
+	if err == nil {
+		t.Fatal("expected the store to fail")
+	}
+
+	if path != filepath.Join("uploads", "named.iso") {
+		t.Fatalf("StoreAs returned %q on failure, want the attempted path", path)
 	}
 }
