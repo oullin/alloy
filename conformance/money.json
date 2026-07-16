@@ -1,0 +1,132 @@
+{
+  "$schema": "./money-fixtures",
+  "description": "Language-neutral golden vectors for the money twin (pkg/hub/money <-> @alloy/sdk/money). All numeric inputs and outputs are strings to avoid JSON float precision loss. Error cases are matched by error identity (Go exception sentinel / TS MoneyError.code), never message text. See conformance/README.md.",
+  "cases": [
+    {
+      "op": "round",
+      "args": ["1250", "2"],
+      "expected": "1300",
+      "note": "half away from zero: exact half rounds up (plan 005)"
+    },
+    {
+      "op": "round",
+      "args": ["-1250", "2"],
+      "expected": "-1300",
+      "note": "half away from zero: negative exact half rounds away (plan 005)"
+    },
+    {
+      "op": "round",
+      "args": ["250", "2"],
+      "expected": "300",
+      "note": "half away from zero: small exact half rounds up (plan 005)"
+    },
+    {
+      "op": "round",
+      "args": ["1234", "2"],
+      "expected": "1200",
+      "note": "below half rounds down"
+    },
+    {
+      "op": "round",
+      "args": ["-1251", "2"],
+      "expected": "-1300",
+      "note": "above half rounds away from zero"
+    },
+    {
+      "op": "absolute",
+      "args": ["-9223372036854775808"],
+      "expected": "0",
+      "note": "Absolute(MinInt64) is unrepresentable in int64; both runtimes return 0 (plan 005)"
+    },
+    {
+      "op": "absolute",
+      "args": ["-9223372036854775807"],
+      "expected": "9223372036854775807",
+      "note": "MinInt64+1 negates to MaxInt64"
+    },
+    {
+      "op": "absolute",
+      "args": ["-100"],
+      "expected": "100",
+      "note": "ordinary negative"
+    },
+    {
+      "op": "add",
+      "args": ["100", "50"],
+      "expected": "150",
+      "note": "ordinary sum"
+    },
+    {
+      "op": "add",
+      "args": ["9223372036854775807", "1"],
+      "error": "ERR_OVERFLOW",
+      "note": "Add(MaxInt64, 1) overflows; both runtimes raise the overflow error (plan 005)"
+    },
+    {
+      "op": "subtract",
+      "args": ["100", "50"],
+      "expected": "50",
+      "note": "ordinary difference"
+    },
+    {
+      "op": "subtract",
+      "args": ["-9223372036854775808", "1"],
+      "error": "ERR_OVERFLOW",
+      "note": "Subtract(MinInt64, 1) overflows; both runtimes raise the overflow error (plan 005)"
+    },
+    {
+      "op": "multiply",
+      "args": ["100", "-2"],
+      "expected": "-200",
+      "note": "ordinary product with negative factor"
+    },
+    {
+      "op": "multiply",
+      "args": ["9223372036854775807", "2"],
+      "error": "ERR_OVERFLOW",
+      "note": "Multiply(MaxInt64, 2) overflows; both runtimes raise the overflow error (plan 005)"
+    },
+    {
+      "op": "createFromFloat",
+      "args": ["12.345", "SGD"],
+      "expected": "1235",
+      "note": "major-unit float scaled by currency fraction, half away from zero (plan 005)"
+    },
+    {
+      "op": "createFromFloat",
+      "args": ["12.344", "SGD"],
+      "expected": "1234",
+      "note": "below half rounds down"
+    },
+    {
+      "op": "createFromFloat",
+      "args": ["-12.345", "SGD"],
+      "expected": "-1235",
+      "note": "negative half away from zero"
+    },
+    {
+      "op": "convertWithRate",
+      "args": ["9007199254740993", "0", "0", "2.0"],
+      "expected": "18014398509481986",
+      "note": "exact-integer conversion above the float-safe range (2^53 + 1) x 2.0 (plan 006)"
+    },
+    {
+      "op": "convertWithRate",
+      "args": ["9223372036854775807", "0", "0", "2.0"],
+      "error": "ERR_OVERFLOW",
+      "note": "MaxInt64 x 2.0 leaves the int64 range; both runtimes raise the overflow error (plan 006)"
+    },
+    {
+      "op": "convertWithRate",
+      "args": ["1999", "2", "0", "1.5"],
+      "expected": "30",
+      "note": "fraction reduction 2->0 with half-away rounding (plan 006)"
+    },
+    {
+      "op": "convertWithRate",
+      "args": ["-2999", "2", "0", "1.5"],
+      "expected": "-45",
+      "note": "negative fraction reduction with half-away rounding (plan 006)"
+    }
+  ]
+}
