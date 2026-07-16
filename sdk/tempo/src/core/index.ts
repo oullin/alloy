@@ -38,6 +38,9 @@ import {
 	daysInMonth,
 	defaultTimeZone,
 	fixedUnitMilliseconds,
+	getDateTimeFormatter,
+	getNumberFormatter,
+	getRelativeTimeFormatter,
 	getZonedParts,
 	isoWeekData,
 	millisecondsPerMinute,
@@ -567,7 +570,7 @@ export class TempoImmutable {
 	}
 
 	translateNumber(value: number, locale = this.currentLocale): string {
-		return new Intl.NumberFormat(locale).format(value);
+		return getNumberFormatter(locale).format(value);
 	}
 
 	translate(message: string, replacements: Record<string, string> = {}): string {
@@ -2021,7 +2024,7 @@ export class TempoImmutable {
 		const unit = resolvedOptions.unit ?? bestRelativeUnit(rawMilliseconds);
 		const value = Math.round(rawMilliseconds / unitDivisor(unit));
 
-		const formatter = new Intl.RelativeTimeFormat(resolvedOptions.locale ?? this.currentLocale ?? this.runtime.locale, {
+		const formatter = getRelativeTimeFormatter(resolvedOptions.locale ?? this.currentLocale ?? this.runtime.locale, {
 			numeric: resolvedOptions.numeric ?? 'always',
 			style: resolvedOptions.style ?? 'long',
 		});
@@ -2319,7 +2322,7 @@ export class TempoImmutable {
 	formatIntl(options?: Intl.DateTimeFormatOptions & { readonly locale?: string }): string {
 		const { locale, ...dateTimeOptions } = options ?? {};
 
-		return new Intl.DateTimeFormat(locale, {
+		return getDateTimeFormatter(locale, {
 			timeZone: this.zone,
 			...dateTimeOptions,
 		}).format(this.value);
