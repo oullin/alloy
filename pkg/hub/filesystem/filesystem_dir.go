@@ -2,15 +2,15 @@ package filesystem
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-// Files returns the files in the given directory (non-recursive by default).
-// When hidden is true (or omitted), hidden files (starting with ".") are included.
-// When hidden is explicitly set to false, hidden files are excluded.
+// Files returns the files in the given directory (non-recursive).
+// Hidden files (starting with ".") are excluded unless hidden is true.
 func (f *Local) Files(ctx context.Context, directory string, hidden ...bool) ([]string, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -50,7 +50,8 @@ func (f *Local) Files(ctx context.Context, directory string, hidden ...bool) ([]
 }
 
 // AllFiles returns all files in the directory tree recursively.
-// The walk stops early when ctx is cancelled.
+// Hidden files and directories (starting with ".") are excluded unless hidden
+// is true. The walk stops early when ctx is cancelled.
 func (f *Local) AllFiles(ctx context.Context, directory string, hidden ...bool) ([]string, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -160,8 +161,9 @@ func (f *Local) EnsureDirectoryExists(path string, mode ...fs.FileMode) error {
 	return os.MkdirAll(path, perm)
 }
 
-// MakeDirectory creates a directory. The default mode is 0755.
-// By default it creates parent directories recursively.
+// MakeDirectory creates a directory along with any missing parents. The
+// default mode is 0755. It succeeds when the directory already exists; use
+// MakeExclusiveDirectory when creation must be exclusive.
 func (f *Local) MakeDirectory(path string, mode ...fs.FileMode) error {
 	perm := fs.FileMode(0o755)
 
@@ -170,6 +172,27 @@ func (f *Local) MakeDirectory(path string, mode ...fs.FileMode) error {
 	}
 
 	return os.MkdirAll(path, perm)
+}
+
+// MakeExclusiveDirectory creates a single directory. The default mode is 0755.
+// Parent directories are not created, and an error wrapping fs.ErrExist is
+// returned when the path already exists — which makes it usable as an atomic
+// claim on a name.
+func (f *Local) MakeExclusiveDirectory(path string, mode ...fs.FileMode) error {
+	perm := fs.FileMode(0o755)
+
+	if len(mode) > 0 {
+		perm = mode[0]
+	}
+
+	return os.Mkdir(path, perm)
+}
+
+// MakeTempDirectory creates a new directory with a name built from pattern
+// inside dir and returns its path. When dir is empty the default directory for
+// temporary files is used. The caller is responsible for removing it.
+func (f *Local) MakeTempDirectory(dir, pattern string) (string, error) {
+	return os.MkdirTemp(dir, pattern)
 }
 
 // MoveDirectory moves a directory from one location to another.
@@ -193,7 +216,7 @@ func (f *Local) MoveDirectory(ctx context.Context, from, to string, overwrite ..
 		if err := os.RemoveAll(to); err != nil {
 			return err
 		}
-	} else if !os.IsNotExist(err) {
+	} else if !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 
@@ -262,7 +285,7 @@ func (f *Local) DeleteDirectory(ctx context.Context, directory string, preserve 
 	info, err := os.Stat(directory)
 
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
 

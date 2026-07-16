@@ -59,6 +59,32 @@ func (f *Local) IsDirectory(path string) bool {
 	return info.IsDir()
 }
 
+// IsLink determines if the given path is a symbolic link. Unlike IsFile and
+// IsDirectory, which follow links and so can never report one, this inspects
+// the link itself.
+func (f *Local) IsLink(path string) bool {
+	info, err := os.Lstat(path)
+
+	if err != nil {
+		return false
+	}
+
+	return info.Mode()&fs.ModeSymlink != 0
+}
+
+// Info returns the metadata for the file or directory at the given path,
+// following symbolic links.
+func (f *Local) Info(path string) (fs.FileInfo, error) {
+	return os.Stat(path)
+}
+
+// LinkInfo returns the metadata for the given path without following symbolic
+// links. When path is a symbolic link, the returned info describes the link
+// itself rather than its target.
+func (f *Local) LinkInfo(path string) (fs.FileInfo, error) {
+	return os.Lstat(path)
+}
+
 // IsEmptyDirectory determines if the given directory is empty.
 // When ignoreDotFiles is true, files starting with a dot are excluded.
 func (f *Local) IsEmptyDirectory(directory string, ignoreDotFiles bool) (bool, error) {

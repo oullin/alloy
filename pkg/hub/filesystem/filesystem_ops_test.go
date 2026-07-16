@@ -154,6 +154,7 @@ func TestCopyPreservesPermissions(t *testing.T) {
 
 func TestLink(t *testing.T) {
 	t.Parallel()
+	requireSymlinks(t)
 
 	fs := newFilesystem()
 	dir := t.TempDir()
@@ -189,6 +190,7 @@ func TestLink(t *testing.T) {
 
 func TestRelativeLink(t *testing.T) {
 	t.Parallel()
+	requireSymlinks(t)
 
 	fs := newFilesystem()
 	dir := t.TempDir()
