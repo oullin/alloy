@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"net/url"
 	"regexp"
@@ -274,7 +275,48 @@ var (
 	camelCache  sync.Map
 	studlyCache sync.Map
 	snakeCache  sync.Map
+
+	// regexCache memoizes compiled regexes for pattern-derived helpers
+	// (Is/glob, IsMatch, Match, MatchAll, ReplaceMatches, Replace, Deduplicate).
+	// Keys are caller-provided pattern strings; like snakeCache this cache is
+	// unbounded, so callers that supply an unbounded set of distinct patterns can
+	// grow it without bound (the same tradeoff snakeCache already accepts).
+	// FlushCache clears it.
+	regexCache sync.Map
 )
+
+// Constant-pattern regexes are compiled once at package init and reused, instead
+// of recompiling on every call inside the hot-path helpers below.
+var (
+	studlySplitRe       = regexp.MustCompile(`[-_\s]+`)
+	headlineCamelRe     = regexp.MustCompile(`([a-z])([A-Z])`)
+	headlineSepRe       = regexp.MustCompile(`[-_]+`)
+	ucsplitRe           = regexp.MustCompile(`(?m)[A-Z][^A-Z]*`)
+	uuidRe              = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
+	ulidRe              = regexp.MustCompile(`^[0-7][0-9A-HJKMNP-TV-Z]{25}$`)
+	whitespaceRe        = regexp.MustCompile(`\s+`)
+	leadingWhitespaceRe = regexp.MustCompile(`^\s*`)
+	slugNonAlnumRe      = regexp.MustCompile(`[^a-z0-9]+`)
+)
+
+// cachedRegex compiles pattern once and memoizes it in regexCache keyed by the
+// pattern string, so repeated calls with the same pattern reuse one *regexp.Regexp.
+// The error path is not cached: invalid patterns are cheap and rare.
+func cachedRegex(pattern string) (*regexp.Regexp, error) {
+	if cached, ok := regexCache.Load(pattern); ok {
+		return cached.(*regexp.Regexp), nil
+	}
+
+	re, err := regexp.Compile(pattern)
+
+	if err != nil {
+		return nil, err
+	}
+
+	regexCache.Store(pattern, re)
+
+	return re, nil
+}
 
 func After(subject, search string) string {
 	if search == "" {
@@ -384,7 +426,7 @@ func Studly(value string) string {
 
 func studlySplit(value string) []string {
 
-	value = regexp.MustCompile(`[-_\s]+`).ReplaceAllString(value, " ")
+	value = studlySplitRe.ReplaceAllString(value, " ")
 
 	return strings.Fields(value)
 }
@@ -400,7 +442,9 @@ func Snake(value string, delimiter ...string) string {
 		sep = delimiter[0]
 	}
 
-	key := value + sep
+	// Separate value and sep with a NUL so distinct (value, sep) pairs cannot
+	// collide on the cache key: e.g. Snake("a","_") and Snake("a_","").
+	key := value + "\x00" + sep
 
 	if cached, ok := snakeCache.Load(key); ok {
 		return cached.(string)
@@ -441,10 +485,9 @@ func Title(value string) string {
 
 func Headline(value string) string {
 
-	re := regexp.MustCompile(`([a-z])([A-Z])`)
-	value = re.ReplaceAllString(value, "$1 $2")
+	value = headlineCamelRe.ReplaceAllString(value, "$1 $2")
 
-	value = regexp.MustCompile(`[-_]+`).ReplaceAllString(value, " ")
+	value = headlineSepRe.ReplaceAllString(value, " ")
 
 	words := strings.Fields(value)
 
@@ -539,8 +582,7 @@ func Ucwords(value string, separators ...string) string {
 }
 
 func Ucsplit(value string) []string {
-	re := regexp.MustCompile(`(?m)[A-Z][^A-Z]*`)
-	matches := re.FindAllString(value, -1)
+	matches := ucsplitRe.FindAllString(value, -1)
 
 	if len(matches) == 0 {
 		return []string{value}
@@ -617,10 +659,13 @@ func Is(pattern, value string, ignoreCase ...bool) bool {
 		return true
 	}
 
-	re := globToRegex(pattern)
-	matched, err := regexp.MatchString(re, value)
+	re, err := cachedRegex(globToRegex(pattern))
 
-	return err == nil && matched
+	if err != nil {
+		return false
+	}
+
+	return re.MatchString(value)
 }
 
 func globToRegex(pattern string) string {
@@ -649,9 +694,9 @@ func globToRegex(pattern string) string {
 
 func IsMatch(patterns []string, value string) bool {
 	for _, pattern := range patterns {
-		matched, err := regexp.MatchString(pattern, value)
+		re, err := cachedRegex(pattern)
 
-		if err == nil && matched {
+		if err == nil && re.MatchString(value) {
 			return true
 		}
 	}
@@ -698,9 +743,7 @@ func IsUrl(value string, protocols ...string) bool {
 }
 
 func IsUuid(value string, version ...int) bool {
-	re := regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
-
-	if !re.MatchString(value) {
+	if !uuidRe.MatchString(value) {
 		return false
 	}
 
@@ -720,9 +763,7 @@ func IsUlid(value string) bool {
 		return false
 	}
 
-	re := regexp.MustCompile(`^[0-7][0-9A-HJKMNP-TV-Z]{25}$`)
-
-	return re.MatchString(strings.ToUpper(value))
+	return ulidRe.MatchString(strings.ToUpper(value))
 }
 
 func Length(value string) int {
@@ -762,13 +803,13 @@ func Words(value string, words int, end ...string) string {
 		return value
 	}
 
-	wordList := regexp.MustCompile(`\s+`).Split(trimmed, -1)
+	wordList := whitespaceRe.Split(trimmed, -1)
 
 	if len(wordList) <= words {
 		return value
 	}
 
-	leading := regexp.MustCompile(`^\s*`).FindString(value)
+	leading := leadingWhitespaceRe.FindString(value)
 
 	return leading + strings.Join(wordList[:words], " ") + suffix
 }
@@ -799,7 +840,11 @@ func Replace(search, replace any, subject string, caseSensitive ...bool) string 
 			return strings.ReplaceAll(subject, s, r)
 		}
 
-		re := regexp.MustCompile(`(?i)` + regexp.QuoteMeta(s))
+		re, err := cachedRegex(`(?i)` + regexp.QuoteMeta(s))
+
+		if err != nil {
+			return subject
+		}
 
 		return re.ReplaceAllString(subject, r)
 	}
@@ -898,7 +943,7 @@ func ReplaceEnd(search, replace, subject string) string {
 }
 
 func ReplaceMatches(pattern, replace, subject string, limit ...int) string {
-	re, err := regexp.Compile(pattern)
+	re, err := cachedRegex(pattern)
 
 	if err != nil {
 		return subject
@@ -936,9 +981,7 @@ func Repeat(str string, times int) string {
 }
 
 func Squish(value string) string {
-	re := regexp.MustCompile(`\s+`)
-
-	return strings.TrimSpace(re.ReplaceAllString(value, " "))
+	return strings.TrimSpace(whitespaceRe.ReplaceAllString(value, " "))
 }
 
 func Deduplicate(str string, characters ...string) string {
@@ -949,7 +992,12 @@ func Deduplicate(str string, characters ...string) string {
 	}
 
 	for _, ch := range chars {
-		re := regexp.MustCompile(regexp.QuoteMeta(string(ch)) + `+`)
+		re, err := cachedRegex(regexp.QuoteMeta(string(ch)) + `+`)
+
+		if err != nil {
+			continue
+		}
+
 		str = re.ReplaceAllString(str, string(ch))
 	}
 
@@ -1122,7 +1170,7 @@ func Excerpt(text, phrase string, radius int, omission ...string) string {
 }
 
 func Match(pattern, subject string) string {
-	re, err := regexp.Compile(pattern)
+	re, err := cachedRegex(pattern)
 
 	if err != nil {
 		return ""
@@ -1142,7 +1190,7 @@ func Match(pattern, subject string) string {
 }
 
 func MatchAll(pattern, subject string) []string {
-	re, err := regexp.Compile(pattern)
+	re, err := cachedRegex(pattern)
 
 	if err != nil {
 		return nil
@@ -1454,14 +1502,14 @@ func Slug(title string, separator ...string) string {
 
 	title = strings.ReplaceAll(title, "@", sep+"at"+sep)
 
-	re := regexp.MustCompile(`[^a-z0-9]+`)
-	title = re.ReplaceAllString(title, sep)
+	title = slugNonAlnumRe.ReplaceAllString(title, sep)
 
 	title = strings.Trim(title, sep)
 
 	if sep != "" {
-		re2 := regexp.MustCompile(regexp.QuoteMeta(sep) + `+`)
-		title = re2.ReplaceAllString(title, sep)
+		if re2, err := cachedRegex(regexp.QuoteMeta(sep) + `+`); err == nil {
+			title = re2.ReplaceAllString(title, sep)
+		}
 	}
 
 	return title
@@ -1597,9 +1645,15 @@ func Random(length ...int) string {
 func generateRandom(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
+	maxLimit := big.NewInt(int64(len(charset)))
 
 	for i := range result {
-		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		n, err := rand.Int(rand.Reader, maxLimit)
+
+		if err != nil {
+			panic(fmt.Errorf("str: generate random: %w", err))
+		}
+
 		result[i] = charset[n.Int64()]
 	}
 
@@ -1664,6 +1718,7 @@ func FlushCache() {
 	camelCache.Clear()
 	studlyCache.Clear()
 	snakeCache.Clear()
+	regexCache.Clear()
 }
 
 func ConvertCase(str string, mode int) string {
@@ -1798,9 +1853,9 @@ func (s *Builder) MatchAll(pattern string) []string {
 	return MatchAll(pattern, s.value)
 }
 func (s *Builder) Test(pattern string) bool {
-	matched, err := regexp.MatchString(pattern, s.value)
+	re, err := cachedRegex(pattern)
 
-	return err == nil && matched
+	return err == nil && re.MatchString(s.value)
 }
 func (s *Builder) Replace(search, replace any, caseSensitive ...bool) *Builder {
 	return &Builder{value: Replace(search, replace, s.value, caseSensitive...)}

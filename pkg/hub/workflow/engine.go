@@ -2,6 +2,7 @@ package workflow
 
 import (
 	"fmt"
+	"sync"
 
 	cworkflow "github.com/oullin/alloy/pkg/hub/contracts/workflow"
 	"github.com/oullin/alloy/pkg/hub/workflow/events"
@@ -31,6 +32,10 @@ type Machine[T any] struct {
 	dispatcher *events.Dispatcher[T]
 	metadata   *DefinitionMetadataStore
 	logger     Sink
+	// applyMu serializes the read-guard-write critical section of Apply so
+	// concurrent Applies on the same machine cannot both pass the guard
+	// against a stale marking and double-consume tokens (lost update).
+	applyMu sync.Mutex
 }
 
 // New constructs a Machine engine. A nil dispatcher yields an empty default.

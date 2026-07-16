@@ -2,6 +2,7 @@ package money
 
 import (
 	"errors"
+	"math"
 	"testing"
 
 	"github.com/oullin/alloy/pkg/hub/money/currency"
@@ -57,5 +58,23 @@ func TestAggregatorNilProviderErrors(t *testing.T) {
 
 	if _, err := a.Sum(NewManager().Create(1, "SGD")); !errors.Is(err, exception.ErrInvalidAggregatorProvider) {
 		t.Fatalf("Sum() error = %v, want ErrInvalidAggregatorProvider", err)
+	}
+}
+
+func TestAggregatorSumOverflow(t *testing.T) {
+	mm := NewManager()
+	aggregator := NewAggregator(mm)
+
+	result, err := aggregator.Sum(
+		mm.Create(math.MaxInt64, currency.SGD),
+		mm.Create(1, currency.SGD),
+	)
+
+	if !errors.Is(err, exception.ErrOverflow) {
+		t.Fatalf("Sum() error = %v, want ErrOverflow", err)
+	}
+
+	if result != nil {
+		t.Fatalf("Sum() result = %v, want nil", result)
 	}
 }

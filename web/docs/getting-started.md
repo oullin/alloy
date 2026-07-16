@@ -9,7 +9,7 @@ import only the packages you need.
 | Tool    | Version |
 | ------- | ------- |
 | Go      | ≥ 1.26  |
-| Node.js | ≥ 22    |
+| Node.js | ≥ 24    |
 | pnpm    | ≥ 10.33 |
 
 ## Installation
@@ -38,8 +38,8 @@ import (
 ## Project Layout
 
 ```
-pkg/hub/  Go library packages
-packages/             TypeScript packages and the foundation module
+pkg/hub/              Go library packages
+sdk/                  TypeScript packages
 web/                  Documentation, web demos, and runtime storage
 ```
 
@@ -121,7 +121,7 @@ The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
 | [collection](/packages/collection) | Fluent collection helpers for slices and maps  |
 | [str](/packages/str)               | String helpers, UUID/ULID generation           |
 | tempo                              | Date/time library with timezones and localization |
-| [money](/sdk/money)           | Money and currency primitives                  |
+| [money](/packages/money)           | Money and currency primitives                  |
 | [seo](/packages/seo)               | SEO utilities and i18n locale handling         |
 
 ## Roadmap

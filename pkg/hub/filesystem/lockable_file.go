@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -88,13 +89,25 @@ func (lf *LockableFile) Read(size ...int) ([]byte, error) {
 	return io.ReadAll(lf.file)
 }
 
-// Write writes contents to the file, starting from the beginning.
+// Write replaces the whole file with contents: it seeks to the start, writes,
+// and truncates to the written length so no stale trailing bytes survive a
+// shorter rewrite.
 func (lf *LockableFile) Write(contents []byte) (int, error) {
 	if _, err := lf.file.Seek(0, io.SeekStart); err != nil {
 		return 0, err
 	}
 
-	return lf.file.Write(contents)
+	n, err := lf.file.Write(contents)
+
+	if err != nil {
+		return n, err
+	}
+
+	if err := lf.file.Truncate(int64(n)); err != nil {
+		return n, fmt.Errorf("filesystem: truncate after write: %w", err)
+	}
+
+	return n, nil
 }
 
 // Truncate truncates the file to zero length.

@@ -1,8 +1,11 @@
 package calculator
 
 import (
+	"errors"
 	"math"
 	"testing"
+
+	"github.com/oullin/alloy/pkg/hub/money/exception"
 )
 
 func TestNew(t *testing.T) {
@@ -208,6 +211,8 @@ func TestAbsolute(t *testing.T) {
 		{"positive", 100, 100},
 		{"negative", -100, 100},
 		{"zero", 0, 0},
+		{"min int64 unrepresentable", math.MinInt64, 0},
+		{"min int64 + 1", math.MinInt64 + 1, math.MaxInt64},
 	}
 
 	for _, tt := range tests {
@@ -251,7 +256,9 @@ func TestRound(t *testing.T) {
 	}{
 		{"round down", c, 1234, 2, 1200},
 		{"round up", c, 1251, 2, 1300},
-		{"round down (half)", c, 1250, 2, 1200},
+		{"round up (half away from zero)", c, 1250, 2, 1300},
+		{"negative half away", c, -1250, 2, -1300},
+		{"small half away", c, 250, 2, 300},
 		{"negative round down", c, -1234, 2, -1200},
 		{"negative round up", c, -1251, 2, -1300},
 		{"nil calculator", nil, 100, 2, 0},
@@ -262,6 +269,9 @@ func TestRound(t *testing.T) {
 		{"exponent 18 boundary", c, 1234567890123456789, 18, 1000000000000000000},
 		{"exponent 19 overflow protection", c, 1234567890123456789, 19, 1234567890123456789},
 		{"exponent 20 overflow protection", c, 1234567890123456789, 20, 1234567890123456789},
+		{"round-up overflow guard near MaxInt64", c, 9223372036854775799, 2, 0},
+		{"round-up overflow guard near MinInt64", c, -9223372036854775799, 2, 0},
+		{"round up just below the overflow boundary", c, 9223372036854775650, 2, 9223372036854775700},
 	}
 
 	for _, tt := range tests {
@@ -308,5 +318,66 @@ func TestCalculatorSafeMultiplyMethodDelegates(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("SafeMultiply(MinInt64, -1) expected overflow error")
+	}
+}
+
+func TestSafeAdd(t *testing.T) {
+	c := NewCalculator()
+	tests := []struct {
+		name    string
+		calc    *Engine
+		a, b    Amount
+		want    Amount
+		wantErr error
+	}{
+		{"positive numbers", c, 100, 50, 150, nil},
+		{"negative numbers", c, -100, -50, -150, nil},
+		{"positive overflow", c, math.MaxInt64, 1, 0, exception.ErrOverflow},
+		{"max int64 plus zero", c, math.MaxInt64, 0, math.MaxInt64, nil},
+		{"nil calculator", nil, 100, 50, 0, nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.calc.SafeAdd(tt.a, tt.b)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Fatalf("SafeAdd(%d, %d) error = %v; want %v", tt.a, tt.b, err, tt.wantErr)
+			}
+
+			if got != tt.want {
+				t.Errorf("SafeAdd(%d, %d) = %d; want %d", tt.a, tt.b, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSafeSubtract(t *testing.T) {
+	c := NewCalculator()
+	tests := []struct {
+		name    string
+		calc    *Engine
+		a, b    Amount
+		want    Amount
+		wantErr error
+	}{
+		{"positive numbers", c, 100, 50, 50, nil},
+		{"negative numbers", c, -100, -50, -50, nil},
+		{"negative overflow", c, math.MinInt64, 1, 0, exception.ErrOverflow},
+		{"nil calculator", nil, 100, 50, 0, nil},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.calc.SafeSubtract(tt.a, tt.b)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Fatalf("SafeSubtract(%d, %d) error = %v; want %v", tt.a, tt.b, err, tt.wantErr)
+			}
+
+			if got != tt.want {
+				t.Errorf("SafeSubtract(%d, %d) = %d; want %d", tt.a, tt.b, got, tt.want)
+			}
+		})
 	}
 }

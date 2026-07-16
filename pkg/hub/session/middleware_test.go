@@ -1,14 +1,82 @@
 package session_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/oullin/alloy/pkg/hub/session"
 	"github.com/oullin/alloy/pkg/hub/session/handlers"
 )
+
+// writeCountingHandler wraps ArrayHandler and counts store writes so a
+// middleware-level test can assert a read-only request touches the backend
+// zero times.
+type writeCountingHandler struct {
+	*handlers.ArrayHandler
+	writes atomic.Int64
+}
+
+func (h *writeCountingHandler) Write(ctx context.Context, id, data string) error {
+	h.writes.Add(1)
+
+	return h.ArrayHandler.Write(ctx, id, data)
+}
+
+func TestStartSessionReadOnlyRequestIssuesNoStoreWrite(t *testing.T) {
+	h := &writeCountingHandler{ArrayHandler: handlers.NewArrayHandler()}
+	// A large ActivityRefresh keeps the sliding-expiry touch out of the way so
+	// the second, read-only request exercises the pure skip-when-clean path.
+	mw := session.StartSession(h, session.StartSessionConfig{
+		CookieName:      "sess",
+		GCProbability:   0,
+		ActivityRefresh: time.Hour,
+	})
+
+	readOnly := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if store, ok := session.FromContext(r.Context()); ok {
+			_ = store.Get("anything", nil) // read only
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	// First request establishes and persists a new session.
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	mw(readOnly).ServeHTTP(rr, req)
+
+	var id string
+
+	for _, c := range rr.Result().Cookies() {
+		if c.Name == "sess" {
+			id = c.Value
+		}
+	}
+
+	if id == "" {
+		t.Fatal("no session cookie on first request")
+	}
+
+	if got := h.writes.Load(); got != 1 {
+		t.Fatalf("expected one write for the initial session, got %d", got)
+	}
+
+	// Second request reads the existing session and mutates nothing.
+	h.writes.Store(0)
+
+	rr2 := httptest.NewRecorder()
+	req2 := httptest.NewRequest(http.MethodGet, "/", nil)
+	req2.AddCookie(&http.Cookie{Name: "sess", Value: id})
+	mw(readOnly).ServeHTTP(rr2, req2)
+
+	if got := h.writes.Load(); got != 0 {
+		t.Errorf("a read-only request must issue zero store writes, got %d", got)
+	}
+}
 
 func TestStartSessionWritesCookie(t *testing.T) {
 	h := handlers.NewArrayHandler()
@@ -114,6 +182,51 @@ func TestStartSessionMergesPartialConfigWithDefaults(t *testing.T) {
 
 	if cookies[0].MaxAge != 60 {
 		t.Fatalf("expected caller lifetime to be preserved as max-age 60, got %d", cookies[0].MaxAge)
+	}
+}
+
+func TestStartSessionSecureTriState(t *testing.T) {
+	cases := []struct {
+		name   string
+		secure *bool
+		want   bool
+	}{
+		{name: "nil defaults to secure", secure: nil, want: true},
+		{name: "explicit true honored", secure: session.BoolPtr(true), want: true},
+		{name: "explicit false honored (dev opt-out)", secure: session.BoolPtr(false), want: false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			h := handlers.NewArrayHandler()
+			mw := session.StartSession(h, session.StartSessionConfig{
+				CookieName:    "sess",
+				GCProbability: 0,
+				Secure:        tc.secure,
+			})
+
+			rr := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})).ServeHTTP(rr, req)
+
+			var found bool
+
+			for _, c := range rr.Result().Cookies() {
+				if c.Name == "sess" {
+					found = true
+
+					if c.Secure != tc.want {
+						t.Fatalf("cookie Secure = %v, want %v", c.Secure, tc.want)
+					}
+				}
+			}
+
+			if !found {
+				t.Fatal("expected session cookie to be set")
+			}
+		})
 	}
 }
 

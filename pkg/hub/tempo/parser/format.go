@@ -4,14 +4,30 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
-func ParseFromPattern(input string, pattern string, location *time.Location) (time.Time, error) {
-	return ParseFromPatternStrict(input, pattern, location, false)
+// compiledFormat pairs a compiled layout regex with the ordered capture tokens
+// derived from a tempo format pattern.
+type compiledFormat struct {
+	regex  *regexp.Regexp
+	groups []string
 }
 
-func ParseFromPatternStrict(input string, pattern string, location *time.Location, strict bool) (time.Time, error) {
+// formatCache memoizes compiledFormat values keyed by the format pattern string,
+// so repeatedly parsing the same layout compiles the regex only once. Keys are
+// caller-provided pattern strings; like str.snakeCache this cache is unbounded,
+// so callers supplying an unbounded set of distinct layouts can grow it without
+// bound. parserSettings is initialized once at package load, so the pattern
+// string fully determines the compiled result.
+var formatCache sync.Map
+
+func compileFormat(pattern string) *compiledFormat {
+	if cached, ok := formatCache.Load(pattern); ok {
+		return cached.(*compiledFormat)
+	}
+
 	groups := make([]string, 0)
 
 	var expression strings.Builder
@@ -74,7 +90,26 @@ func ParseFromPatternStrict(input string, pattern string, location *time.Locatio
 	}
 
 	expression.WriteString("$")
-	match := regexp.MustCompile(expression.String()).FindStringSubmatch(input)
+
+	compiled := &compiledFormat{
+		regex:  regexp.MustCompile(expression.String()),
+		groups: groups,
+	}
+
+	formatCache.Store(pattern, compiled)
+
+	return compiled
+}
+
+func ParseFromPattern(input string, pattern string, location *time.Location) (time.Time, error) {
+	return ParseFromPatternStrict(input, pattern, location, false)
+}
+
+func ParseFromPatternStrict(input string, pattern string, location *time.Location, strict bool) (time.Time, error) {
+	compiled := compileFormat(pattern)
+	groups := compiled.groups
+
+	match := compiled.regex.FindStringSubmatch(input)
 
 	if match == nil {
 		return time.Time{}, fmt.Errorf("input does not match tempo format: %s", input)

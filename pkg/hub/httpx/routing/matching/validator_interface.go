@@ -21,16 +21,36 @@ type MatchableRequest = crouting.MatchableRequest
 
 type ValidatorInterface = crouting.ValidatorInterface
 
-// All returns the four standard validators in the order the upstream Router
-// applies them: URI, Method, Scheme, Host. The order matters: cheaper checks
-// run first so the common case (a path mismatch) short-circuits quickly.
-func All() []ValidatorInterface {
-	return []ValidatorInterface{
+// The validators are stateless value types, so the two orderings are safe to
+// share as package-level singletons: the dispatch loop iterates them without
+// allocating a fresh slice per candidate route. Callers must treat the returned
+// slices as read-only.
+var (
+	allValidators = []ValidatorInterface{
 		UriValidator{},
 		MethodValidator{},
 		SchemeValidator{},
 		HostValidator{},
 	}
+
+	validatorsWithoutMethod = []ValidatorInterface{
+		UriValidator{},
+		SchemeValidator{},
+		HostValidator{},
+	}
+)
+
+// All returns the four standard validators in the order the upstream Router
+// applies them: URI, Method, Scheme, Host. The order matters: cheaper checks
+// run first so the common case (a path mismatch) short-circuits quickly.
+func All() []ValidatorInterface {
+	return allValidators
+}
+
+// AllExceptMethod returns the standard validators minus the method check, used
+// when gathering "method not allowed" candidates under other verbs.
+func AllExceptMethod() []ValidatorInterface {
+	return validatorsWithoutMethod
 }
 
 // hostRegexCache memoizes compiled host regexes the same way Symfony's

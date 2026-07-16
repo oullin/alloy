@@ -20,7 +20,23 @@ type Store struct {
 	attributes map[string]any
 	handler    Handler
 	started    bool
+	// dirty reports whether the session has unsaved mutations. It is set by
+	// every attribute-mutating method and reset after a successful Save so
+	// that a read-only request skips the store write entirely (see Save).
+	dirty bool
+	// stored reports whether a record for the current ID already exists in the
+	// backend. A session that was never persisted (or whose ID was
+	// regenerated) must always be written even when no attribute changed.
+	stored bool
+	// version counts mutations. Save snapshots it before the backend write
+	// (which runs outside the lock) and only clears dirty when no mutation
+	// landed in between, so a concurrent change is never silently dropped.
+	version uint64
 }
+
+// lastActivityKey is the attribute holding the sliding-expiry timestamp
+// refreshed by TouchActivity.
+const lastActivityKey = "_last_activity"
 
 // New creates a session store with a generated ID.
 func New(name string, handler Handler) *Store {
@@ -76,6 +92,11 @@ func (s *Store) Start(ctx context.Context) error {
 		s.attributes = attrs
 	}
 
+	// A non-empty read means the backend already holds a record for this ID; a
+	// brand-new session (or one whose stored record expired) must be written on
+	// Save even without an attribute mutation.
+	s.stored = data != ""
+
 	s.ageFlashData()
 	s.started = true
 
@@ -83,17 +104,90 @@ func (s *Store) Start(ctx context.Context) error {
 }
 
 // Save serializes the session attributes and writes them to the handler.
+//
+// The write is skipped when the session is clean: no attribute was mutated
+// since the last Save and a record already exists in the backend. This avoids
+// per-request write amplification for read-only requests. A brand-new session,
+// a regenerated ID, or any mutation forces the write. Sliding-expiry callers
+// that need to refresh the backend record on an interval even when nothing
+// changed should call TouchActivity before Save.
 func (s *Store) Save(ctx context.Context) error {
 	s.mu.RLock()
+	needsWrite := s.dirty || !s.stored
 	data, err := serialize(s.attributes)
 	id := s.id
+	snapshotVersion := s.version
 	s.mu.RUnlock()
 
 	if err != nil {
 		return fmt.Errorf("session: serialize: %w", err)
 	}
 
-	return s.handler.Write(ctx, id, data)
+	if !needsWrite {
+		return nil
+	}
+
+	if err := s.handler.Write(ctx, id, data); err != nil {
+		return err
+	}
+
+	s.mu.Lock()
+	// Only clear dirty when nothing mutated while the backend write ran
+	// outside the lock; otherwise the interleaved change must survive so the
+	// next Save persists it.
+	if s.version == snapshotVersion {
+		s.dirty = false
+	}
+
+	s.stored = true
+	s.mu.Unlock()
+
+	return nil
+}
+
+// markDirty flags the session as having unsaved changes and bumps the mutation
+// version consulted by Save. The caller must hold the write lock.
+func (s *Store) markDirty() {
+	s.dirty = true
+	s.version++
+}
+
+// IsDirty reports whether the session has unsaved mutations.
+func (s *Store) IsDirty() bool {
+	s.mu.RLock()
+
+	defer s.mu.RUnlock()
+
+	return s.dirty
+}
+
+// TouchActivity refreshes the sliding-expiry marker when at least interval has
+// elapsed since the last refresh, marking the session dirty so the next Save
+// persists it (which also refreshes the backend record's age). It is a no-op
+// when interval <= 0 or when the marker is still within the interval, so a
+// read-only request writes at most once per interval rather than once per
+// request. now is passed in so callers (and tests) control the clock.
+func (s *Store) TouchActivity(now time.Time, interval time.Duration) bool {
+	if interval <= 0 {
+		return false
+	}
+
+	s.mu.Lock()
+
+	defer s.mu.Unlock()
+
+	nowSec := now.Unix()
+
+	if v, ok := s.attributes[lastActivityKey]; ok {
+		if nowSec-toSessionInt64(v) < int64(interval.Seconds()) {
+			return false
+		}
+	}
+
+	s.attributes[lastActivityKey] = nowSec
+	s.markDirty()
+
+	return true
 }
 
 // IsStarted reports whether the session has been started.
@@ -167,6 +261,7 @@ func (s *Store) Put(key string, value any) {
 	defer s.mu.Unlock()
 
 	s.attributes[key] = value
+	s.markDirty()
 }
 
 // Has reports whether a non-nil value exists for the key.
@@ -209,6 +304,7 @@ func (s *Store) Pull(key string, fallback any) any {
 	}
 
 	delete(s.attributes, key)
+	s.markDirty()
 
 	return v
 }
@@ -223,12 +319,14 @@ func (s *Store) Push(key string, value any) {
 
 	if !ok {
 		s.attributes[key] = []any{value}
+		s.markDirty()
 
 		return
 	}
 
 	if sl, ok := existing.([]any); ok {
 		s.attributes[key] = append(sl, value)
+		s.markDirty()
 	}
 }
 
@@ -254,7 +352,10 @@ func (s *Store) Forget(keys ...string) {
 	defer s.mu.Unlock()
 
 	for _, key := range keys {
-		delete(s.attributes, key)
+		if _, ok := s.attributes[key]; ok {
+			delete(s.attributes, key)
+			s.markDirty()
+		}
 	}
 }
 
@@ -265,6 +366,7 @@ func (s *Store) Flush() {
 	defer s.mu.Unlock()
 
 	s.attributes = make(map[string]any)
+	s.markDirty()
 }
 
 // Only returns a map containing only the specified keys.
@@ -316,6 +418,10 @@ func (s *Store) Replace(values map[string]any) {
 	for k, v := range values {
 		s.attributes[k] = v
 	}
+
+	if len(values) > 0 {
+		s.markDirty()
+	}
 }
 
 // Remove retrieves and removes a value (nil fallback).
@@ -337,6 +443,7 @@ func (s *Store) Increment(key string, amount int64) int64 {
 
 	result := current + amount
 	s.attributes[key] = result
+	s.markDirty()
 
 	return result
 }
@@ -358,6 +465,7 @@ func (s *Store) Remember(key string, callback func() any) any {
 
 	value := callback()
 	s.attributes[key] = value
+	s.markDirty()
 
 	return value
 }
@@ -386,6 +494,7 @@ func (s *Store) Flash(key string, value any) {
 	s.attributes[key] = value
 	s.pushFlashKey(key)
 	s.removeFromOldFlash(key)
+	s.markDirty()
 }
 
 // Now stores a value for the current request only (expires this request).
@@ -397,6 +506,7 @@ func (s *Store) Now(key string, value any) {
 	s.attributes[key] = value
 	old := s.getFlashOld()
 	s.setFlashOld(append(old, key))
+	s.markDirty()
 }
 
 // FlashInput stores input data as "old input" for the next request.
@@ -469,6 +579,7 @@ func (s *Store) Reflash() {
 	old := s.getFlashOld()
 	s.setFlashNew(append(s.getFlashNew(), old...))
 	s.setFlashOld(nil)
+	s.markDirty()
 }
 
 // Keep keeps specific flash keys for an additional request.
@@ -480,6 +591,10 @@ func (s *Store) Keep(keys ...string) {
 	for _, key := range keys {
 		s.pushFlashKey(key)
 		s.removeFromOldFlash(key)
+	}
+
+	if len(keys) > 0 {
+		s.markDirty()
 	}
 }
 
@@ -495,6 +610,7 @@ func (s *Store) Token() string {
 
 	token := generateToken()
 	s.attributes["_token"] = token
+	s.markDirty()
 
 	return token
 }
@@ -506,6 +622,7 @@ func (s *Store) RegenerateToken() {
 	defer s.mu.Unlock()
 
 	s.attributes["_token"] = generateToken()
+	s.markDirty()
 }
 
 // Regenerate generates a new session ID, optionally destroying the old data.
@@ -522,6 +639,10 @@ func (s *Store) Regenerate(ctx context.Context, destroy bool) error {
 
 	s.mu.Lock()
 	s.id = generateID()
+	// The freshly generated ID has no record in the backend yet, so the
+	// session must be written on the next Save regardless of attribute state.
+	s.stored = false
+	s.markDirty()
 	s.mu.Unlock()
 
 	return nil
@@ -740,13 +861,21 @@ func (s *Store) removeFromOldFlash(key string) {
 // ageFlashData removes old flash keys and promotes new→old. Caller holds write lock.
 func (s *Store) ageFlashData() {
 	old := s.getFlashOld()
+	newKeys := s.getFlashNew()
 
 	for _, key := range old {
 		delete(s.attributes, key)
 	}
 
-	s.setFlashOld(s.getFlashNew())
+	s.setFlashOld(newKeys)
 	s.setFlashNew(nil)
+
+	// Aging is a real state change only when there was flash content to expire
+	// or promote; marking dirty here ensures the aged state is persisted even
+	// on an otherwise read-only request so flash values do not linger forever.
+	if len(old) > 0 || len(newKeys) > 0 {
+		s.markDirty()
+	}
 }
 
 // --- helpers ---

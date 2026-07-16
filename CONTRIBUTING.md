@@ -5,7 +5,7 @@ workflow; see [README.md](README.md) for the workspace layout.
 
 ## Requirements
 
-- Node.js 20 or newer, pnpm 10.33.0
+- Node.js 24 or newer, pnpm 10.33.0
 - Go 1.26.5 (for Go package checks)
 - Docker or Docker Compose (formatting and Go test tasks are Docker-backed
   so local output matches CI)
@@ -35,7 +35,7 @@ The `Makefile` forwards any target to `vp run` (e.g. `make go-test`).
 
 ## Conventions
 
-- TypeScript packages live directly under `packages/<name>` — no language
+- TypeScript packages live directly under `sdk/<name>` — no language
   suffixes in paths.
 - All `@alloy/*` packages are `"private": true` and are consumed as
   `workspace:*` dependencies or release tarballs — never published to a

@@ -347,7 +347,7 @@ func TestRound(t *testing.T) {
 		amount int64
 		want   int64
 	}{
-		{name: "rounds half to even at midpoint", amount: 150, want: 100},
+		{name: "rounds half away from zero at midpoint", amount: 150, want: 200},
 		{name: "rounds up above midpoint", amount: 155, want: 200},
 		{name: "negative rounds", amount: -155, want: -200},
 	}

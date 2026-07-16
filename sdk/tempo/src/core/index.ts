@@ -38,6 +38,9 @@ import {
 	daysInMonth,
 	defaultTimeZone,
 	fixedUnitMilliseconds,
+	getDateTimeFormatter,
+	getNumberFormatter,
+	getRelativeTimeFormatter,
 	getZonedParts,
 	isoWeekData,
 	millisecondsPerMinute,
@@ -567,7 +570,7 @@ export class TempoImmutable {
 	}
 
 	translateNumber(value: number, locale = this.currentLocale): string {
-		return new Intl.NumberFormat(locale).format(value);
+		return getNumberFormatter(locale).format(value);
 	}
 
 	translate(message: string, replacements: Record<string, string> = {}): string {
@@ -1059,13 +1062,19 @@ export class TempoImmutable {
 	add(value: number, unit: TimeUnit): this {
 		assertFiniteNumber(value, 'Amount');
 
-		const fixed = fixedUnitMilliseconds(unit);
-
-		if (fixed !== null) {
-			return this.make(new Date(this.value.getTime() + value * fixed));
-		}
-
+		// Calendar-aware units (day/week/month/quarter/year) are resolved by
+		// shifting wall-clock components in the active time zone so the result
+		// is DST-correct — a calendar day is 23h/24h/25h, not a fixed 86_400_000
+		// ms. This must run before the fixed-millisecond fast path below.
+		// `fixedUnitMilliseconds` still reports fixed sizes for day/week because
+		// elapsed-time consumers (diff/round/duration) need them.
 		switch (normalizeUnit(unit)) {
+			case 'day':
+				return this.addCalendarDays(value);
+
+			case 'week':
+				return this.addCalendarDays(value * 7);
+
 			case 'month':
 				return this.addMonths(value);
 
@@ -1074,10 +1083,41 @@ export class TempoImmutable {
 
 			case 'year':
 				return this.addYears(value);
-
-			default:
-				return this.make(this.value);
 		}
+
+		const fixed = fixedUnitMilliseconds(unit);
+
+		if (fixed !== null) {
+			return this.make(new Date(this.value.getTime() + value * fixed));
+		}
+
+		return this.make(this.value);
+	}
+
+	private addCalendarDays(days: number): this {
+		// Whole days shift the calendar day component (DST-correct); any
+		// fractional remainder is elapsed time by definition and is added as
+		// fixed milliseconds. Date.UTC truncates fractional components, so
+		// routing the fraction through dateFromZonedComponents would silently
+		// drop it.
+		const wholeDays = Math.trunc(days);
+		const fractionalMs = (days - wholeDays) * 86_400_000;
+
+		let baseMs = this.value.getTime();
+
+		if (wholeDays !== 0) {
+			const parts = this.toObject();
+
+			baseMs = dateFromZonedComponents(
+				{
+					...parts,
+					day: parts.day + wholeDays,
+				},
+				this.zone,
+			).getTime();
+		}
+
+		return this.make(new Date(baseMs + fractionalMs));
 	}
 
 	sub(value: number, unit: TimeUnit): this {
@@ -2021,7 +2061,7 @@ export class TempoImmutable {
 		const unit = resolvedOptions.unit ?? bestRelativeUnit(rawMilliseconds);
 		const value = Math.round(rawMilliseconds / unitDivisor(unit));
 
-		const formatter = new Intl.RelativeTimeFormat(resolvedOptions.locale ?? this.currentLocale ?? this.runtime.locale, {
+		const formatter = getRelativeTimeFormatter(resolvedOptions.locale ?? this.currentLocale ?? this.runtime.locale, {
 			numeric: resolvedOptions.numeric ?? 'always',
 			style: resolvedOptions.style ?? 'long',
 		});
@@ -2319,7 +2359,7 @@ export class TempoImmutable {
 	formatIntl(options?: Intl.DateTimeFormatOptions & { readonly locale?: string }): string {
 		const { locale, ...dateTimeOptions } = options ?? {};
 
-		return new Intl.DateTimeFormat(locale, {
+		return getDateTimeFormatter(locale, {
 			timeZone: this.zone,
 			...dateTimeOptions,
 		}).format(this.value);

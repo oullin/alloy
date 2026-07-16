@@ -19,6 +19,14 @@ type CompiledRouteCollection struct {
 	routes     []*Route
 	nameList   map[string]*Route
 	actionList map[string]*Route
+
+	// index maps each HTTP verb to a bucket holding that verb's routes in
+	// registration order plus the precomputed match plans (static exact map and
+	// dynamic prefix gates). It turns Get(method) into an O(1) map read and lets
+	// the matcher skip regex for static routes. Built once at construction and
+	// kept in sync by Add so routes registered after the first dispatch are
+	// still visible to the matcher.
+	index map[string]*methodBucket
 }
 
 // NewCompiledRouteCollection builds a compiled collection from the supplied
@@ -29,16 +37,44 @@ func NewCompiledRouteCollection(routes []*Route, _ map[string]any) *CompiledRout
 		routes:     append([]*Route(nil), routes...),
 		nameList:   map[string]*Route{},
 		actionList: map[string]*Route{},
+		index:      map[string]*methodBucket{},
 	}
 	c.RefreshNameLookups()
 	c.RefreshActionLookups()
+	c.rebuildMethodIndex()
 
 	return c
+}
+
+// rebuildMethodIndex rebuilds the per-verb match index from the current route
+// slice, preserving registration order within each verb.
+func (c *CompiledRouteCollection) rebuildMethodIndex() {
+	c.index = make(map[string]*methodBucket, len(c.index))
+
+	for _, r := range c.routes {
+		c.indexRouteByMethod(r)
+	}
+}
+
+// indexRouteByMethod appends a single route to each of its verb buckets and
+// refreshes the bucket's fast-path metadata.
+func (c *CompiledRouteCollection) indexRouteByMethod(route *Route) {
+	for _, m := range route.Methods() {
+		b := c.index[m]
+
+		if b == nil {
+			b = &methodBucket{}
+			c.index[m] = b
+		}
+
+		b.add(route)
+	}
 }
 
 // Add appends a route and updates the lookup tables.
 func (c *CompiledRouteCollection) Add(route *Route) *Route {
 	c.routes = append(c.routes, route)
+	c.indexRouteByMethod(route)
 
 	if name := route.GetName(); name != "" {
 		if _, ok := c.nameList[name]; !ok {
@@ -89,33 +125,41 @@ func (c *CompiledRouteCollection) RefreshActionLookups() {
 	}
 }
 
-// Match scans the compiled set in registration order, just like
-// RouteCollection.Match.
+// Match resolves the request against the compiled set. It consults the per-verb
+// index (static exact map + dynamic prefix gates) instead of running a regex per
+// route, but preserves the exact registration-order/first-match/fallback and
+// 405-vs-404 semantics of the linear scan.
 func (c *CompiledRouteCollection) Match(request matching.MatchableRequest) (*Route, error) {
-	matched := c.matchAgainstRoutes(c.Get(request.Method()), request, true)
+	path := normalizeMatchPath(request.PathInfo())
 
-	return c.handleMatchedRoute(c.Get, request, matched)
+	if matched := c.findInMethod(request.Method(), path, request); matched != nil {
+		return matched.cloneForRequest().Bind(toBoundRequest(request))
+	}
+
+	others := c.alternateVerbs(path, request)
+
+	if len(others) > 0 {
+		return getRouteForMethods(request, others)
+	}
+
+	return nil, ErrRouteNotFound
 }
 
 // Get returns routes filtered by method, or all routes when method is "".
+//
+// The method-specific lookup is an O(1) read of the pre-built index; callers
+// must treat the returned slice as read-only (same contract as the dev
+// [RouteCollection.Get]).
 func (c *CompiledRouteCollection) Get(method string) []*Route {
 	if method == "" {
 		return c.GetRoutes()
 	}
 
-	out := make([]*Route, 0, len(c.routes))
-
-	for _, r := range c.routes {
-		for _, m := range r.Methods() {
-			if m == method {
-				out = append(out, r)
-
-				break
-			}
-		}
+	if b := c.index[method]; b != nil {
+		return b.routes
 	}
 
-	return out
+	return nil
 }
 
 // HasNamedRoute reports whether name is registered.

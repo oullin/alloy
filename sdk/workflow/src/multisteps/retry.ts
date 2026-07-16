@@ -2,13 +2,19 @@ export class RetryPolicy {
 	public readonly maxTries: number;
 	public readonly backoff: number[];
 	public readonly timeout: number;
+	/**
+	 * maxExceptions, when > 0, caps the total number of exceptions the handler
+	 * may throw before the retry loop gives up — counting every thrown error,
+	 * not distinct error types. It binds independently of {@link maxTries}:
+	 * whichever limit is reached first stops the loop. Zero disables the cap.
+	 */
 	public readonly maxExceptions: number;
 
 	public constructor(input: { maxTries?: number; backoff?: number[]; timeout?: number; maxExceptions?: number } = {}) {
 		this.maxTries = input.maxTries !== undefined && input.maxTries > 0 ? input.maxTries : 1;
 		this.backoff = [...(input.backoff ?? [])];
 		this.timeout = input.timeout ?? 0;
-		this.maxExceptions = input.maxExceptions ?? 0;
+		this.maxExceptions = input.maxExceptions !== undefined && input.maxExceptions > 0 ? input.maxExceptions : 0;
 	}
 
 	public backoffFor(attempt: number): number {
@@ -28,33 +34,49 @@ export const runWithRetry = async (
 	const activePolicy = policy ?? new RetryPolicy();
 
 	let lastError: unknown;
+	let exceptions = 0;
+	let attempts = 0;
 
 	for (let attempt = 0; attempt < activePolicy.maxTries; attempt++) {
 		const attemptSignal = createAttemptSignal(signal, activePolicy.timeout);
+
+		attempts = attempt + 1;
 
 		try {
 			const value = await handler(attemptSignal.signal);
 
 			attemptSignal.cleanup();
 
-			return { value, attempts: attempt + 1 };
+			return { value, attempts };
 		} catch (error) {
 			attemptSignal.cleanup();
+			exceptions++;
 			lastError = signal.aborted ? signal.reason : error;
 
-			if (attempt + 1 >= activePolicy.maxTries || signal.aborted) {
+			const exhaustedExceptions = activePolicy.maxExceptions > 0 && exceptions >= activePolicy.maxExceptions;
+
+			if (attempt + 1 >= activePolicy.maxTries || signal.aborted || exhaustedExceptions) {
 				break;
 			}
 
 			const backoff = activePolicy.backoffFor(attempt);
 
 			if (backoff > 0) {
-				await sleep(backoff, signal);
+				try {
+					await sleep(backoff, signal);
+				} catch (sleepError) {
+					// The run signal aborted mid-backoff; surface it through the
+					// normal result contract instead of letting the rejection
+					// escape runWithRetry uncaught.
+					lastError = signal.aborted ? signal.reason : sleepError;
+
+					break;
+				}
 			}
 		}
 	}
 
-	return { value: undefined, attempts: activePolicy.maxTries, error: lastError };
+	return { value: undefined, attempts, error: lastError };
 };
 
 const createAttemptSignal = (parent: AbortSignal, timeout: number): { signal: AbortSignal; cleanup: () => void } => {

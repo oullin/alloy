@@ -282,8 +282,58 @@ func TestArgon2iMakeIgnoresZeroOptions(t *testing.T) {
 		t.Fatalf("Info: %v", err)
 	}
 
-	if info.Options["memory"] != uint32(1024) || info.Options["time"] != uint32(2) || info.Options["threads"] != uint8(2) {
+	if info.Options["memory"] != uint32(19*1024) || info.Options["time"] != uint32(2) || info.Options["threads"] != uint8(2) {
 		t.Fatalf("expected default options, got %#v", info.Options)
+	}
+}
+
+func TestArgon2iDefaultMemoryMeetsFloor(t *testing.T) {
+	t.Parallel()
+
+	const floor = uint32(19 * 1024) // RFC 9106 / OWASP minimum: 19 MiB.
+
+	if got := hashing.NewArgonHasher().Memory(); got < floor {
+		t.Fatalf("argon2i default memory %d below floor %d", got, floor)
+	}
+
+	if got := hashing.NewArgon2IdHasher().Memory(); got < floor {
+		t.Fatalf("argon2id default memory %d below floor %d", got, floor)
+	}
+}
+
+func TestArgon2iNeedsRehashUpgradesLegacyDefaults(t *testing.T) {
+	t.Parallel()
+
+	// A hash minted with the OLD shipped defaults (1 MiB memory) must be
+	// flagged for transparent rehash by a hasher using the new defaults.
+	legacy := hashing.NewArgonHasher(map[string]any{"memory": 1024, "time": 2, "threads": 2})
+	legacyHash, err := legacy.Make("password")
+
+	if err != nil {
+		t.Fatalf("Make: %v", err)
+	}
+
+	current := hashing.NewArgonHasher()
+
+	rehash, err := current.NeedsRehash(legacyHash)
+
+	if err != nil {
+		t.Fatalf("NeedsRehash: %v", err)
+	}
+
+	if !rehash {
+		t.Fatal("expected NeedsRehash true for hash minted with old defaults")
+	}
+
+	// The legacy hash must still verify against the current hasher.
+	ok, err := current.Check("password", legacyHash)
+
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+
+	if !ok {
+		t.Fatal("expected legacy hash to still verify after default upgrade")
 	}
 }
 
