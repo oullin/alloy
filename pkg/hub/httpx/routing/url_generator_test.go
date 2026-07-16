@@ -493,3 +493,136 @@ func parseQuery(s string) map[string]string {
 
 	return out
 }
+
+// reorderQuery reverses the "&"-separated pairs of a query string, simulating a
+// proxy that reorders parameters in transit while preserving their values.
+func reorderQuery(qs string) string {
+	pairs := strings.Split(qs, "&")
+
+	for i, j := 0, len(pairs)-1; i < j; i, j = i+1, j-1 {
+		pairs[i], pairs[j] = pairs[j], pairs[i]
+	}
+
+	return strings.Join(pairs, "&")
+}
+
+// dropPair removes the first pair whose key matches from a query string.
+func dropPair(qs, key string) string {
+	pairs := strings.Split(qs, "&")
+	out := make([]string, 0, len(pairs))
+
+	for _, p := range pairs {
+		if strings.HasPrefix(p, key+"=") {
+			continue
+		}
+
+		out = append(out, p)
+	}
+
+	return strings.Join(out, "&")
+}
+
+func TestUrlGenerator_SignatureCanonicalization(t *testing.T) {
+	// A signed URL that carries extra query params (with a space, to exercise
+	// +/%20 handling) plus the reserved signature/expires params.
+	newSigned := func(t *testing.T, expiration int64) (*UrlGenerator, string) {
+		t.Helper()
+
+		gen, router := newGen(t)
+		gen.SetKeyResolver("canon-key")
+		router.Get("/report/{id}", func() {}).Name("report")
+
+		got, err := gen.SignedRoute("report", map[string]any{
+			"id":   7,
+			"tab":  "a b",
+			"sort": "name",
+		}, expiration, true)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		return gen, got
+	}
+
+	reqFor := func(fullURL, qs string) fakeURLRequest {
+		idx := strings.Index(fullURL, "?")
+
+		return fakeURLRequest{
+			scheme: "http",
+			host:   "example.com",
+			url:    fullURL[:idx],
+			path:   "/report/7",
+			query:  parseQuery(qs),
+			qs:     qs,
+		}
+	}
+
+	t.Run("verifies_after_param_reorder", func(t *testing.T) {
+		gen, got := newSigned(t, 0)
+		qs := got[strings.Index(got, "?")+1:]
+		reordered := reorderQuery(qs)
+
+		if reordered == qs {
+			t.Fatalf("expected a different ordering to exercise the path; qs=%q", qs)
+		}
+
+		if !gen.HasValidSignature(reqFor(got, reordered), true) {
+			t.Errorf("reordered query should still verify; qs=%q reordered=%q", qs, reordered)
+		}
+	})
+
+	t.Run("verifies_after_space_reencoding", func(t *testing.T) {
+		gen, got := newSigned(t, 0)
+		qs := got[strings.Index(got, "?")+1:]
+
+		if !strings.Contains(qs, "+") {
+			t.Fatalf("expected a '+'-encoded space in the signed query; qs=%q", qs)
+		}
+
+		reencoded := strings.ReplaceAll(qs, "+", "%20")
+
+		if !gen.HasValidSignature(reqFor(got, reencoded), true) {
+			t.Errorf("'+'->%%20 re-encoded query should still verify; qs=%q reencoded=%q", qs, reencoded)
+		}
+	})
+
+	t.Run("tampered_param_fails", func(t *testing.T) {
+		gen, got := newSigned(t, 0)
+		qs := got[strings.Index(got, "?")+1:]
+		tampered := strings.Replace(qs, "sort=name", "sort=evil", 1)
+
+		if tampered == qs {
+			t.Fatalf("tamper did not change the query; qs=%q", qs)
+		}
+
+		if gen.HasValidSignature(reqFor(got, tampered), true) {
+			t.Error("tampered param must not verify")
+		}
+	})
+
+	t.Run("missing_signature_fails", func(t *testing.T) {
+		gen, got := newSigned(t, 0)
+		qs := got[strings.Index(got, "?")+1:]
+		stripped := dropPair(qs, "signature")
+
+		if gen.HasValidSignature(reqFor(got, stripped), true) {
+			t.Error("missing signature must not verify")
+		}
+	})
+
+	t.Run("temporary_signed_url_verifies_after_reorder", func(t *testing.T) {
+		gen, got := newSigned(t, 3600)
+		qs := got[strings.Index(got, "?")+1:]
+
+		if !strings.Contains(qs, "expires=") {
+			t.Fatalf("expected an expires param on a temporary signed URL; qs=%q", qs)
+		}
+
+		reordered := reorderQuery(qs)
+
+		if !gen.HasValidSignature(reqFor(got, reordered), true) {
+			t.Errorf("temporary signed URL should verify after reorder; qs=%q reordered=%q", qs, reordered)
+		}
+	})
+}

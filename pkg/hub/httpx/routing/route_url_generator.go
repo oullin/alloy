@@ -1,9 +1,10 @@
 package routing
 
 import (
+	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
+	"strconv"
 	"strings"
 
 	contracts "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
@@ -99,29 +100,29 @@ func substituteParameters(uri string, parameters map[string]any, consumed map[st
 // flat associative arrays (key=value joined by "&", values URL-encoded with
 // '+' for spaces, RFC 1738).
 func buildQuery(parameters map[string]any, consumed map[string]struct{}) string {
-	keys := make([]string, 0, len(parameters))
+	values := url.Values{}
 
-	for k := range parameters {
+	for k, v := range parameters {
 		if _, ok := consumed[k]; ok {
 			continue
 		}
 
-		keys = append(keys, k)
+		values.Set(k, stringify(v))
 	}
 
-	sort.Strings(keys)
-
-	parts := make([]string, 0, len(keys))
-
-	for _, k := range keys {
-		v := stringify(parameters[k])
-		parts = append(parts, url.QueryEscape(k)+"="+url.QueryEscape(v))
-	}
-
-	return strings.Join(parts, "&")
+	// Route through the shared canonical encoder so the signing side (here)
+	// and the verifying side (HasCorrectSignature -> canonicalizeQuery)
+	// produce byte-for-byte identical HMAC inputs.
+	return canonicalQueryEncode(values)
 }
 
 func stringify(v any) string {
+	// nil keeps its historical empty-string rendering; letting it reach the
+	// fmt.Sprint fallback would leak the literal "<nil>" into generated URLs.
+	if v == nil {
+		return ""
+	}
+
 	switch x := v.(type) {
 	case string:
 		return x
@@ -143,7 +144,10 @@ func stringify(v any) string {
 		return stringify(x.GetRouteKey())
 	}
 
-	return ""
+	// Best-effort fallback for unhandled types. Dropping the value (returning
+	// "") would silently omit a route/query parameter, which is worse than
+	// emitting a reasonable string representation the caller can inspect.
+	return fmt.Sprint(v)
 }
 
 func intToString(i int64) string {
@@ -177,6 +181,10 @@ func intToString(i int64) string {
 }
 
 func floatToString(f float64) string {
-	// Minimal float formatting; tests use integer parameters predominantly.
-	return intToString(int64(f))
+	// 'f' (decimal, no exponent) with precision -1 emits the shortest string
+	// that round-trips back to f: 3.14 -> "3.14", -0.5 -> "-0.5", and large
+	// magnitudes print in full ("100000000000000000000") rather than being
+	// truncated to an int64 (which overflowed and dropped the fraction). This
+	// keeps values friendly for URL route/query params and constraint regexes.
+	return strconv.FormatFloat(f, 'f', -1, 64)
 }
