@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"net/url"
 	"regexp"
@@ -400,7 +401,9 @@ func Snake(value string, delimiter ...string) string {
 		sep = delimiter[0]
 	}
 
-	key := value + sep
+	// Separate value and sep with a NUL so distinct (value, sep) pairs cannot
+	// collide on the cache key: e.g. Snake("a","_") and Snake("a_","").
+	key := value + "\x00" + sep
 
 	if cached, ok := snakeCache.Load(key); ok {
 		return cached.(string)
@@ -1597,9 +1600,15 @@ func Random(length ...int) string {
 func generateRandom(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
+	maxLimit := big.NewInt(int64(len(charset)))
 
 	for i := range result {
-		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		n, err := rand.Int(rand.Reader, maxLimit)
+
+		if err != nil {
+			panic(fmt.Errorf("str: generate random: %w", err))
+		}
+
 		result[i] = charset[n.Int64()]
 	}
 

@@ -75,13 +75,28 @@ func (lc *Collection[T]) Remember() *Collection[T] {
 			return
 		}
 
-		cache = make([]T, 0)
-		lc.source(func(item T) bool {
-			cache = append(cache, item)
+		buf := make([]T, 0)
+		stopped := false
 
-			return yield(item)
+		lc.source(func(item T) bool {
+			buf = append(buf, item)
+
+			if !yield(item) {
+				stopped = true
+
+				return false
+			}
+
+			return true
 		})
-		cached = true
+
+		// Only cache a fully-drained source. An early stop (consumer returned
+		// false) leaves buf partial, so recompute on the next pass instead of
+		// replaying a truncated collection.
+		if !stopped {
+			cache = buf
+			cached = true
+		}
 	})
 }
 

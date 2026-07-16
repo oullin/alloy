@@ -28,6 +28,46 @@ func TestEmpty(t *testing.T) {
 	}
 }
 
+// TestRememberEarlyStopThenFullIteration asserts that a Remember() collection
+// whose first iteration stopped early (First) is not cached as truncated: a
+// later full iteration must yield the complete collection, and only then is it
+// cached.
+func TestRememberEarlyStopThenFullIteration(t *testing.T) {
+	sourceRuns := 0
+	base := New(func(yield func(int) bool) {
+		sourceRuns++
+
+		for i := 1; i <= 5; i++ {
+			if !yield(i) {
+				return
+			}
+		}
+	})
+
+	remembered := base.Remember()
+
+	// First stops the source early after the first item.
+	if first, ok := remembered.First(); !ok || first != 1 {
+		t.Fatalf("First() = %d, %v; want 1, true", first, ok)
+	}
+
+	// A full iteration must see every item, not a truncated cache.
+	if got := remembered.All(); !reflect.DeepEqual(got, []int{1, 2, 3, 4, 5}) {
+		t.Fatalf("All() after early-stop First() = %v, want [1 2 3 4 5]", got)
+	}
+
+	// The fully-drained pass should now be cached: the source is not re-run.
+	runsAfterFull := sourceRuns
+
+	if got := remembered.All(); !reflect.DeepEqual(got, []int{1, 2, 3, 4, 5}) {
+		t.Fatalf("cached All() = %v, want [1 2 3 4 5]", got)
+	}
+
+	if sourceRuns != runsAfterFull {
+		t.Fatalf("source re-ran after a full pass (runs %d -> %d); expected cache hit", runsAfterFull, sourceRuns)
+	}
+}
+
 func TestRange(t *testing.T) {
 	lc := Range(1, 5)
 	items := lc.All()
