@@ -15,5 +15,4 @@ var (
 	ErrHashAlgorithm = errors.New("filesystem: unsupported hash algorithm")
 	ErrLockFailed    = errors.New("filesystem: failed to acquire lock")
 	ErrLocked        = errors.New("filesystem: lock is held elsewhere")
-	ErrEscapesRoot   = errors.New("filesystem: path escapes the root directory")
 )
