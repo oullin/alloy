@@ -4,7 +4,10 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
+	"io/fs"
 	"iter"
 	"os"
 	"strings"
@@ -19,8 +22,8 @@ func (f *Local) Get(ctx context.Context, path string) ([]byte, error) {
 	data, err := os.ReadFile(path)
 
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, ErrNotFound
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, fmt.Errorf("%w: %w", ErrNotFound, err)
 		}
 
 		return nil, err
@@ -49,8 +52,8 @@ func (f *Local) SharedGet(ctx context.Context, path string) ([]byte, error) {
 	file, err := os.Open(path)
 
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, ErrNotFound
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, fmt.Errorf("%w: %w", ErrNotFound, err)
 		}
 
 		return nil, err
@@ -77,8 +80,8 @@ func (f *Local) Lines(ctx context.Context, path string) (iter.Seq[string], error
 	}
 
 	if _, err := os.Stat(path); err != nil {
-		if os.IsNotExist(err) {
-			return nil, ErrNotFound
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, fmt.Errorf("%w: %w", ErrNotFound, err)
 		}
 
 		return nil, err
