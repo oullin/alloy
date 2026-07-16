@@ -34,6 +34,14 @@ func (m *ValidatePostSize) Wrap(next http.Handler) http.Handler {
 			}
 		}
 
+		// The header fast-paths above cannot catch Transfer-Encoding: chunked
+		// bodies (ContentLength == -1, header stripped). Wrap the body so an
+		// oversize undeclared/chunked stream fails on read: the handler sees a
+		// *http.MaxBytesError and the response is committed as 413.
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, m.maxBytes)
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

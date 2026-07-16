@@ -117,6 +117,51 @@ func TestStartSessionMergesPartialConfigWithDefaults(t *testing.T) {
 	}
 }
 
+func TestStartSessionSecureTriState(t *testing.T) {
+	cases := []struct {
+		name   string
+		secure *bool
+		want   bool
+	}{
+		{name: "nil defaults to secure", secure: nil, want: true},
+		{name: "explicit true honored", secure: session.BoolPtr(true), want: true},
+		{name: "explicit false honored (dev opt-out)", secure: session.BoolPtr(false), want: false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			h := handlers.NewArrayHandler()
+			mw := session.StartSession(h, session.StartSessionConfig{
+				CookieName:    "sess",
+				GCProbability: 0,
+				Secure:        tc.secure,
+			})
+
+			rr := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})).ServeHTTP(rr, req)
+
+			var found bool
+
+			for _, c := range rr.Result().Cookies() {
+				if c.Name == "sess" {
+					found = true
+
+					if c.Secure != tc.want {
+						t.Fatalf("cookie Secure = %v, want %v", c.Secure, tc.want)
+					}
+				}
+			}
+
+			if !found {
+				t.Fatal("expected session cookie to be set")
+			}
+		})
+	}
+}
+
 func TestStartSessionReusesID(t *testing.T) {
 	h := handlers.NewArrayHandler()
 	mw := session.StartSession(h, session.StartSessionConfig{
