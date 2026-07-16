@@ -1,7 +1,11 @@
 SHELL := /bin/bash
 
+# Keep GO_IMAGE's Go version in sync with the `go` directive in the go.mod
+# files (currently 1.26.5); that directive is the toolchain source of truth.
 GO_IMAGE ?= golang:1.26.5-alpine
-TASK_VERSION ?= latest
+# Pinned go-task release. Bump deliberately (check github.com/go-task/task
+# releases); overridable via `make TASK_VERSION=vX.Y.Z ...`.
+TASK_VERSION ?= v3.52.0
 
 export GO_IMAGE
 
