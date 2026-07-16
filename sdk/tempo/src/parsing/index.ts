@@ -288,12 +288,32 @@ export const parseFromPattern = (input: string, pattern: string, options?: Tempo
 		year = 1970;
 	}
 
+	const monthName = values.get('MMMM') ?? values.get('MMM');
+
+	let month: number;
+
+	if (monthName !== undefined && monthName !== '') {
+		// A month-name token matched input: resolve it in the active locale so
+		// localized round-trips (e.g. French "juillet") work. An unmatched name
+		// is a hard parse failure — mirror the "input does not match" RangeError
+		// above rather than silently falling back to January.
+		const matched = monthNumberFromName(monthName, policy.locale);
+
+		if (matched === null) {
+			throw new RangeError(`Input does not match Tempo format: ${input}`);
+		}
+
+		month = matched;
+	} else {
+		month = Number(values.get('MM') ?? values.get('M') ?? 1);
+	}
+
 	const components: TempoComponents = {
 		day: Number(values.get('DD') ?? values.get('Do') ?? values.get('D') ?? 1),
 		hour,
 		millisecond: Number((values.get('SSS') ?? '0').slice(0, 3).padEnd(3, '0')),
 		minute: Number(values.get('mm') ?? values.get('m') ?? 0),
-		month: monthNumberFromName(values.get('MMMM') ?? values.get('MMM') ?? '') ?? Number(values.get('MM') ?? values.get('M') ?? 1),
+		month,
 		second: Number(values.get('ss') ?? values.get('s') ?? 0),
 		timeZone: options?.timeZone,
 		year,

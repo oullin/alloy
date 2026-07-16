@@ -376,6 +376,33 @@ describe('Tempo TypeScript behavior', () => {
 		expect(() => Tempo.fromFormat('2024-05-15', 'YYYY/MM/DD')).toThrow('Input does not match Tempo format');
 	});
 
+	it('round-trips localized month names and rejects unmatched ones', () => {
+		const base = Tempo.create({ day: 14, month: 7, timeZone: 'UTC', year: 2026 });
+
+		// format(locale) -> fromFormat(locale) must round-trip for non-English locales.
+		const cases = [
+			{ locale: 'fr-FR', formatted: '14 juillet 2026' },
+			{ locale: 'de-DE', formatted: '14 Juli 2026' },
+			{ locale: 'es-ES', formatted: '14 julio 2026' },
+		] as const;
+
+		for (const { locale, formatted } of cases) {
+			expect(base.format('D MMMM YYYY', { locale })).toBe(formatted);
+
+			const parsed = Tempo.fromFormat(formatted, 'D MMMM YYYY', { locale, timeZone: 'UTC' });
+
+			expect(parsed.month).toBe(7);
+			expect(parsed.toDateString()).toBe('2026-07-14');
+		}
+
+		// en-US default is preserved when no locale is supplied.
+		expect(Tempo.fromFormat('14 July 2026', 'D MMMM YYYY', { timeZone: 'UTC' }).month).toBe(7);
+
+		// A present-but-unmatched month name is a hard failure, not a silent January.
+		expect(() => Tempo.fromFormat('14 juillet 2026', 'D MMMM YYYY', { locale: 'en-US', timeZone: 'UTC' })).toThrow('Input does not match Tempo format');
+		expect(() => Tempo.fromFormat('14 notamonth 2026', 'D MMMM YYYY', { locale: 'fr-FR', timeZone: 'UTC' })).toThrow('Input does not match Tempo format');
+	});
+
 	it('exposes calendar predicates and humanized diffs', () => {
 		const base = Tempo.parse('2024-02-29T00:00:00Z');
 		const saturday = Tempo.parse('2024-03-02T00:00:00Z');
@@ -554,6 +581,80 @@ describe('Tempo TypeScript behavior', () => {
 		expect(friday.setTime(0, 0, 42, 0).secondsSinceMidnight()).toBe(42);
 		expect(friday.setTime(23, 59, 17, 0).secondsUntilEndOfDay()).toBe(42);
 		expect(friday.midDay().toTimeString()).toBe('12:00:00');
+	});
+
+	it('adds days and weeks with DST-correct calendar arithmetic in a zoned context', () => {
+		// America/New_York spring-forward: 2024-03-10 skips 02:00->03:00 (23h day).
+		const springMidnight = Tempo.create({ day: 10, hour: 0, month: 3, timeZone: 'America/New_York', year: 2024 });
+
+		// A calendar day keeps the wall-clock midnight even though only 23 real hours elapse.
+		expect(springMidnight.addDays(1).hour).toBe(0);
+		expect(springMidnight.addDays(1).toDateTimeString()).toBe('2024-03-11 00:00:00');
+		expect(springMidnight.addDays(1).toISOString()).toBe('2024-03-11T04:00:00.000Z');
+
+		// Hour-based math stays fixed: +24h across spring-forward is NOT the same as +1 day.
+		expect(springMidnight.addHours(24).hour).toBe(1);
+		expect(springMidnight.addHours(24).toISOString()).toBe('2024-03-11T05:00:00.000Z');
+		expect(springMidnight.addDays(1).toISOString()).not.toBe(springMidnight.addHours(24).toISOString());
+
+		// startOfDay().addDays(1) lands on the next local midnight across the transition.
+		const springAfternoon = Tempo.create({ day: 10, hour: 15, minute: 30, month: 3, timeZone: 'America/New_York', year: 2024 });
+
+		expect(springAfternoon.startOfDay().addDays(1).toDateTimeString()).toBe('2024-03-11 00:00:00');
+
+		// America/New_York fall-back: 2024-11-03 repeats 01:00 (25h day).
+		const fallMidnight = Tempo.create({ day: 3, hour: 0, month: 11, timeZone: 'America/New_York', year: 2024 });
+
+		expect(fallMidnight.addDays(1).hour).toBe(0);
+		expect(fallMidnight.addDays(1).toDateTimeString()).toBe('2024-11-04 00:00:00');
+		expect(fallMidnight.addDays(1).toISOString()).toBe('2024-11-04T05:00:00.000Z');
+		expect(fallMidnight.addHours(24).hour).toBe(23);
+
+		// A week that straddles spring-forward keeps the same wall-clock time.
+		const weekBase = Tempo.create({ day: 9, hour: 12, month: 3, timeZone: 'America/New_York', year: 2024 });
+
+		expect(weekBase.addWeeks(1).toDateTimeString()).toBe('2024-03-16 12:00:00');
+		expect(weekBase.addWeeks(1).toISOString()).toBe('2024-03-16T16:00:00.000Z');
+
+		// today()/tomorrow()/isTomorrow() stay coherent in the zoned context.
+		const zoned = TempoFactory.create({ timeZone: 'America/New_York' });
+		const todayNy = zoned.parse('2024-03-10T12:00:00-04:00').startOfDay();
+
+		expect(todayNy.addDays(1).hour).toBe(0);
+		expect(todayNy.addDays(1).isTomorrow(todayNy)).toBe(true);
+	});
+
+	it('keeps fractional day additions as elapsed time on top of calendar day shifts', () => {
+		// Away from any DST transition: addDays(1.5) is one calendar day plus
+		// twelve elapsed hours, not a truncated single day.
+		const base = Tempo.create({ day: 15, hour: 6, month: 1, timeZone: 'America/New_York', year: 2024 });
+
+		expect(base.addDays(1.5).toDateTimeString()).toBe('2024-01-16 18:00:00');
+		expect(base.addDays(0.5).toDateTimeString()).toBe('2024-01-15 18:00:00');
+		expect(base.addDays(-0.5).toDateTimeString()).toBe('2024-01-14 18:00:00');
+
+		// Across spring-forward: the whole day keeps the wall clock, the
+		// fractional remainder stays fixed elapsed milliseconds.
+		const springEve = Tempo.create({ day: 9, hour: 18, month: 3, timeZone: 'America/New_York', year: 2024 });
+
+		expect(springEve.addDays(1).toDateTimeString()).toBe('2024-03-10 18:00:00');
+		expect(springEve.addDays(1.25).toISOString()).toBe(springEve.addDays(1).addHours(6).toISOString());
+	});
+
+	it('keeps unzoned (UTC/default) day and week arithmetic bit-identical to fixed math', () => {
+		const utc = Tempo.create({ day: 15, hour: 10, minute: 34, month: 1, second: 45, timeZone: 'UTC', year: 2024 });
+		const dayMs = 24 * 60 * 60 * 1000;
+
+		expect(utc.addDays(1).toISOString()).toBe(new Date(utc.toDate().getTime() + dayMs).toISOString());
+		expect(utc.addDays(-3).toISOString()).toBe(new Date(utc.toDate().getTime() - 3 * dayMs).toISOString());
+		expect(utc.addWeeks(2).toISOString()).toBe(new Date(utc.toDate().getTime() + 14 * dayMs).toISOString());
+		expect(utc.addWeeks(-1).toISOString()).toBe(new Date(utc.toDate().getTime() - 7 * dayMs).toISOString());
+
+		// Default-zone parsing (no timeZone) also stays on fixed 24h boundaries.
+		const parsed = Tempo.parse('2024-02-29T00:00:00Z');
+
+		expect(parsed.addDays(1).toISOString()).toBe('2024-03-01T00:00:00.000Z');
+		expect(parsed.addWeeks(1).toISOString()).toBe('2024-03-07T00:00:00.000Z');
 	});
 
 	it('exposes timezone names, offsets, UTC predicates, and DST state', () => {
