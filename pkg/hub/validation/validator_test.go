@@ -180,6 +180,109 @@ func TestValidator_Validated_ReturnsSubset(t *testing.T) {
 	}
 }
 
+func TestValidatedIncludesWildcardAttributes(t *testing.T) {
+	t.Parallel()
+
+	v := makeValidator(
+		map[string]any{
+			"items": []any{
+				map[string]any{"name": "a"},
+				map[string]any{"name": "b"},
+			},
+		},
+		map[string]any{"items.*.name": "required|string"},
+	)
+
+	validated, err := v.Validated()
+
+	if err != nil {
+		t.Fatalf("Validated: %v", err)
+	}
+
+	if got := validated["items.0.name"]; got != "a" {
+		t.Errorf("Validated()[%q] = %v, want %q", "items.0.name", got, "a")
+	}
+
+	if got := validated["items.1.name"]; got != "b" {
+		t.Errorf("Validated()[%q] = %v, want %q", "items.1.name", got, "b")
+	}
+}
+
+func TestValidatedNestedArraysAndEmpty(t *testing.T) {
+	t.Parallel()
+
+	t.Run("nested arrays", func(t *testing.T) {
+		v := makeValidator(
+			map[string]any{
+				"groups": []any{
+					map[string]any{"items": []any{
+						map[string]any{"name": "a"},
+						map[string]any{"name": "b"},
+					}},
+					map[string]any{"items": []any{
+						map[string]any{"name": "c"},
+					}},
+				},
+			},
+			map[string]any{"groups.*.items.*.name": "required|string"},
+		)
+
+		validated, err := v.Validated()
+
+		if err != nil {
+			t.Fatalf("Validated: %v", err)
+		}
+
+		for attribute, want := range map[string]string{
+			"groups.0.items.0.name": "a",
+			"groups.0.items.1.name": "b",
+			"groups.1.items.0.name": "c",
+		} {
+			if got := validated[attribute]; got != want {
+				t.Errorf("Validated()[%q] = %v, want %q", attribute, got, want)
+			}
+		}
+	})
+
+	t.Run("empty array", func(t *testing.T) {
+		v := makeValidator(
+			map[string]any{"items": []any{}},
+			map[string]any{"items.*.name": "string"},
+		)
+
+		validated, err := v.Validated()
+
+		if err != nil {
+			t.Fatalf("Validated: %v", err)
+		}
+
+		for attribute := range validated {
+			if len(attribute) >= len("items.") && attribute[:len("items.")] == "items." {
+				t.Errorf("Validated() unexpectedly contains wildcard attribute %q", attribute)
+			}
+		}
+	})
+}
+
+func TestValidatedNonWildcardUnchanged(t *testing.T) {
+	t.Parallel()
+
+	v := makeValidator(
+		map[string]any{"name": "Taylor"},
+		map[string]any{"name": "required|string"},
+	)
+
+	validated, err := v.Validated()
+
+	if err != nil {
+		t.Fatalf("Validated: %v", err)
+	}
+
+	if got := validated["name"]; got != "Taylor" {
+		t.Errorf("Validated()[%q] = %v, want %q", "name", got, "Taylor")
+	}
+}
+
 func TestValidator_Failed(t *testing.T) {
 	t.Parallel()
 
