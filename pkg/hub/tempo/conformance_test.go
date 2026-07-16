@@ -55,7 +55,7 @@ func TestTempoConformance(t *testing.T) {
 	for _, tc := range cases {
 		tc := tc
 
-		t.Run(tc.Op, func(t *testing.T) {
+		t.Run(tc.Op+"/"+tc.Note, func(t *testing.T) {
 			got := runTempoOp(t, tc)
 
 			if got != tc.Expected {

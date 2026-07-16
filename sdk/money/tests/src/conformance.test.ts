@@ -70,7 +70,7 @@ describe('money cross-runtime conformance', () => {
 				}
 
 				expect(thrown, `expected ${testCase.error}: ${testCase.note}`).toBeDefined();
-				expect((thrown as { code?: string }).code, testCase.note).toBe(testCase.error);
+				expect((thrown as { code?: string })?.code, testCase.note).toBe(testCase.error);
 
 				return;
 			}
