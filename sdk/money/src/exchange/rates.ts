@@ -1,6 +1,5 @@
-import type { Amount } from '#money/calculator';
-import { ERR_CURRENCY_CONVERSION_NOT_FOUND, ERR_INVALID_EXCHANGE_RATE } from '#money/errors';
-import { roundAwayFromZero } from '#money/internal/rounding';
+import { MAX_INT64, MIN_INT64, type Amount } from '#money/calculator';
+import { ERR_CURRENCY_CONVERSION_NOT_FOUND, ERR_INVALID_AMOUNT_FRACTION, ERR_INVALID_EXCHANGE_RATE, ERR_OVERFLOW } from '#money/errors';
 
 export class ExchangeRates {
 	private readonly rates = new Map<string, Map<string, number>>();
@@ -63,14 +62,58 @@ export class ExchangeRates {
 		return this.convertAmountWithRate(amount, fromFraction, toFraction, this.getRate(fromCurrencyCode, toCurrencyCode));
 	}
 
+	/**
+	 * Converts an amount using a scale-12 rate representation, preserving exact
+	 * precision across the full int64 amount range (including values above 2^53).
+	 * Rounds half away from zero and throws `ERR_OVERFLOW` when the result leaves
+	 * the int64 range.
+	 */
 	public convertAmountWithRate(amount: Amount, fromFraction: number, toFraction: number, rate: number): Amount {
 		if (rate <= 0 || !Number.isFinite(rate)) {
 			throw ERR_INVALID_EXCHANGE_RATE;
 		}
 
-		const majorUnits = Number(amount) / 10 ** fromFraction;
-		const convertedMajorUnits = majorUnits * rate;
+		// Negative fractions would make the 10n ** exponents below throw a raw
+		// RangeError; reject them with the package's own error instead.
+		if (fromFraction < 0 || toFraction < 0) {
+			throw ERR_INVALID_AMOUNT_FRACTION;
+		}
 
-		return roundAwayFromZero(convertedMajorUnits * 10 ** toFraction);
+		const RATE_SCALE = 12;
+		const scaledRate = Math.round(rate * 10 ** RATE_SCALE);
+
+		if (!Number.isFinite(scaledRate)) {
+			throw ERR_OVERFLOW;
+		}
+
+		// Compare as bigint: Number(MAX_INT64) rounds up to 2^63, so a float
+		// comparison lets a scaled rate of exactly 2^63 through even though it
+		// exceeds int64 — and Go rejects it, so parity requires we do too.
+		const rateScaled = BigInt(scaledRate);
+
+		if (rateScaled > MAX_INT64) {
+			throw ERR_OVERFLOW;
+		}
+
+		const numerator = amount * rateScaled * 10n ** BigInt(toFraction);
+		const denominator = 10n ** BigInt(RATE_SCALE + fromFraction);
+		const negative = numerator < 0n;
+		const absoluteNumerator = negative ? -numerator : numerator;
+
+		let quotient = absoluteNumerator / denominator;
+
+		const remainder = absoluteNumerator % denominator;
+
+		if (remainder * 2n >= denominator) {
+			quotient += 1n;
+		}
+
+		const result = negative ? -quotient : quotient;
+
+		if (result < MIN_INT64 || result > MAX_INT64) {
+			throw ERR_OVERFLOW;
+		}
+
+		return result;
 	}
 }
