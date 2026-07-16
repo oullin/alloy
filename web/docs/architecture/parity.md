@@ -182,7 +182,7 @@ in both runtimes with matching vocabulary. One retry-policy field is a genuine,
 | — | `money` | Rounding tie-direction (half-toward-zero today; TS doc says away-from-zero) | Pending PR #88 → half-away-from-zero, both |
 | — | `money` | `Absolute(MinInt64)`: Go → `MinInt64`, TS → `2^63` | Pending PR #88 → `0`, both |
 | — | `money` | Exchange conversion via float64/Number (lossy > 2^53) | Pending PR #90 → exact-integer, both |
-| — | `money` | `Aggregator.Avg`: Go truncated toward zero; TS rounds half away from zero | **Resolved** → half-away-from-zero, both + `avg` fixture |
+| — | `money` | `Aggregator.Avg`: Go truncated toward zero; TS rounds half away from zero | **Resolved** (PR #101) → half-away-from-zero, both + `avg` fixture |
 | — | `tempo` | Day/week: Go calendar (`AddDate`), TS fixed-ms (DST-wrong) | Pending PR #87 → TS DST-correct |
 | **X13** | `workflow` | `RetryPolicy.MaxExceptions` declared in both, enforced in neither; docs disagree | **Open** — needs policy + dual implementation + fixture |
 
