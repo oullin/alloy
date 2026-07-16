@@ -15,10 +15,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	contract "github.com/oullin/alloy/pkg/hub/contracts/filesystem"
 )
 
 // Local provides local filesystem operations.
 type Local struct{}
+
+// The contract had no compile-time binding to its implementation, so their
+// 40-method parity held only by luck. Note this direction alone proves Local
+// satisfies Filesystem, not that the two agree — see TestContractCoversLocal.
+var _ contract.Filesystem = (*Local)(nil)
 
 // New creates a Local instance.
 func New() *Local {

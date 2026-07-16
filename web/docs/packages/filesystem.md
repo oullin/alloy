@@ -12,81 +12,137 @@
 
 ## Introduction
 
-The filesystem package gives every Alloy app a single, type-safe API
-for files and directories. Today it ships a local-disk driver; the same
-interface accepts cloud-storage adapters when you bring them.
+The filesystem package gives every Alloy app one API for files and
+directories on local disk, so product code does not reach for `os`
+directly.
 
-For the cross-cutting picture, see [Drivers](/architecture/drivers).
+It exposes two types:
 
-## Configuration
+- **`Local`** — path-based operations, anywhere the process can reach.
+  Use it for paths your own code controls.
+- **`Rooted`** — the same operations confined to a root directory. Use
+  it for any path that came from outside the program.
 
-The filesystem service is bound by `FilesystemServiceProvider`. The
-constructor takes no config — the local driver derives its root from the
-caller, and you mount additional disks at runtime:
-
-```go
-// services/demo/api/bootstrap.go:140
-filesystem.NewFilesystemServiceProvider(application.Container),
-```
-
-See [`pkg/hub/filesystem/filesystem_service_provider.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/filesystem/filesystem_service_provider.go).
+There is no service provider and no container binding: construct what
+you need where you need it.
 
 ## Basic Usage
 
+`Local` is stateless — `New()` takes no arguments, and every method that
+touches the disk takes a `context.Context` first.
+
 ```go
-fs := container.Resolve[*filesystem.Filesystem]("filesystem")
+fs := filesystem.New()
+ctx := context.Background()
 
-// Write
-err := fs.Put("uploads/avatar-42.png", data)
+// Write, then read back.
+err := fs.Put(ctx, "uploads/avatar-42.png", data)
+raw, err := fs.Get(ctx, "uploads/avatar-42.png")
 
-// Read
-raw, err := fs.Get("uploads/avatar-42.png")
+// Stream, for sources of unknown size.
+err = fs.PutStream(ctx, "uploads/big.iso", reader)
 
-// Stream
-reader, err := fs.ReadStream("uploads/avatar-42.png")
-defer reader.Close()
+// Copy and delete. Put, PutStream and Copy create missing parents.
+err = fs.Copy(ctx, "uploads/avatar-42.png", "backup/avatar-42.png")
+err = fs.Delete("backup/avatar-42.png")
 
-// Move/Copy/Delete
+// Move does not create them, so make the destination first.
+err = fs.MakeDirectory("archive")
 err = fs.Move("uploads/avatar-42.png", "archive/avatar-42.png")
-err = fs.Delete("archive/avatar-42.png")
 ```
 
-For directory operations, use `MakeDirectory`, `Files`, `Directories`,
-and `DeleteDirectory`. See
-[`pkg/hub/filesystem/filesystem_dir.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/filesystem/filesystem_dir.go).
+Directory work uses `MakeDirectory`, `Files`, `Directories`, and
+`DeleteDirectory`; see
+[`filesystem_dir.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/filesystem/filesystem_dir.go).
 
-## Drivers
+Two pairs are easy to mix up:
 
-Today only the **`local`** driver ships; it covers POSIX-style file
-operations with optional advisory locking
-([`filesystem.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/filesystem/filesystem.go)).
+| Use | When |
+| --- | --- |
+| `MakeDirectory` | creates parents, succeeds if it already exists |
+| `MakeExclusiveDirectory` | no parents, fails with `fs.ErrExist` if taken — an atomic claim on a name |
+| `Delete` | files only, ignores missing ones |
+| `DeleteAll` | files or trees, recursive, idempotent |
 
-Cloud drivers (S3, GCS, Azure Blob) are not in the box; see _Writing
-Custom Drivers_ below.
+## Untrusted Paths
 
-## Writing Custom Drivers
+Never join a caller-supplied name onto a directory and pass it to
+`Local`. `"../../etc/passwd"` is a valid filename, and so is a symlink
+pointing anywhere. Checking the path first does not fix it: the check and
+the open are two steps, and the tree can change in between.
 
-Implement the `Filesystem` interface (see
-[`pkg/hub/filesystem/filesystem.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/filesystem/filesystem.go))
-and register your driver as a separate "disk" in your application's
-bootstrap:
+`At` returns a `Rooted` that the operating system confines to a
+directory, enforced against an open handle rather than by inspecting the
+path:
 
 ```go
-type s3Disk struct { /* ... */ }
+uploads, err := filesystem.At("/srv/app/uploads")
+if err != nil {
+    return err
+}
 
-func (d *s3Disk) Get(path string) ([]byte, error)              { /* ... */ }
-func (d *s3Disk) Put(path string, contents []byte) error       { /* ... */ }
-// ... rest of the Filesystem interface
+defer uploads.Close()
 
-application.Container.Instance("filesystem.s3", newS3Disk(cfg))
+// Refused: "..", absolute paths, and symlinks pointing outside the root.
+_, err = uploads.Get(ctx, userSuppliedName)
 ```
 
-Then resolve it under that name when handlers need cloud storage:
+A `Rooted` holds a file descriptor, so it must be closed.
+
+Symlinks that stay inside the root are followed normally — `Rooted`
+prevents escape, it does not ban links. If your policy is stricter than
+that, check `LinkInfo` on the final component.
+
+The guarantee stops at the filesystem: it does not prohibit crossing
+mount points below the root, nor reading `/proc` or device files that
+live inside it. Each of those needs an attacker who already controls the
+root.
+
+## Errors
+
+Every method that can be handed a missing path reports it the same way,
+whichever one you called:
 
 ```go
-disk := container.Resolve[filesystem.Filesystem]("filesystem.s3")
-disk.Put("backups/2026-01-01.tar.gz", data)
+if _, err := fs.Get(ctx, path); errors.Is(err, fs.ErrNotExist) {
+    // ...
+}
 ```
+
+`filesystem.ErrNotFound` wraps `fs.ErrNotExist`, so either matches, and
+the underlying `*fs.PathError` is preserved — the failing path stays in
+the message. Do not use `os.IsNotExist`: it predates `errors.Is` and does
+not unwrap.
+
+A `Rooted` escape attempt returns a `*fs.PathError` reading `path escapes
+from parent`. It is deliberately **not** an `fs.ErrNotExist`, so a
+refusal never looks like a missing file.
+
+## Uploads
+
+`filesystem.Local` and `filesystem.Rooted` both satisfy
+`httpx/foundation.FileStore`, so either can back an uploaded file. Prefer
+`Rooted` — the filename comes from the client:
+
+```go
+uploads, err := filesystem.At("/srv/app/uploads")
+defer uploads.Close()
+
+path, err := file.StoreAs(ctx, "avatars", file.HashName(), uploads)
+```
+
+## Extending
+
+Implement the `Filesystem` interface in
+[`contracts/filesystem`](https://github.com/oullin/alloy/blob/main/pkg/hub/contracts/filesystem/filesystem.go)
+to back these operations with something other than local disk. `*Local`
+is bound to it by a compile-time assertion, and a test keeps the two from
+drifting apart.
+
+Note the contract models **local disk**: it is context-aware and returns
+`*os.File` from `MakeTempFile`. A cloud backend will fit some of it
+awkwardly. If that is what you need, a narrower interface at your own
+call site is usually the better tool — `FileStore` above is an example.
 
 ## Events
 
@@ -95,7 +151,6 @@ your own event-emitting decorator if you need observability.
 
 ## See Also
 
-- [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 <!-- /ALLOY:HAND -->
 
@@ -135,9 +190,9 @@ The filesystem reference is organized around the exported Go surface for package
 
 | Surface                    | Exported API                                                                                                                                                                                                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Types                      | `Filesystem`, `FilesystemServiceProvider`, `LockableFile`                                                                                                                                                                                                                                 |
+| Types                      | `Local`, `Rooted`, `LockableFile`                                                                                                                                                                                                                                                         |
 | Constructors and functions | `AllDirectories`, `AllFiles`, `Append`, `Basename`, `Chmod`, `CleanDirectory`, `Close`, `Copy`, `CopyDirectory`, `Delete`, `DeleteDirectories`, `DeleteDirectory`, `Directories`, `Dirname`, `EnsureDirectoryExists`, `ExclusiveLock`, `Exists`, `Extension`, `Files`, `Get`, and 38 more |
-| Variables                  | `ErrHashAlgorithm`, `ErrLockFailed`, `ErrNotDirectory`, `ErrNotFile`, `ErrNotFound`                                                                                                                                                                                                       |
+| Variables                  | `ErrHashAlgorithm`, `ErrLockFailed`, `ErrLocked`, `ErrNotDirectory`, `ErrNotFound`                                                                                                                                                                                                        |
 | Constants                  | None exported from this package root.                                                                                                                                                                                                                                                     |
 
 ### Capability Matrix
@@ -215,8 +270,8 @@ Parity is tracked by these tests:
 
 | Type                        | Notes                                                                              |
 | --------------------------- | ---------------------------------------------------------------------------------- |
-| `Filesystem`                | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `FilesystemServiceProvider` | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Local`                     | Path-based local filesystem operations.                                            |
+| `Rooted`                    | The same operations, confined to a root directory. Holds an fd; must be closed.     |
 | `LockableFile`              | Source-backed public surface. See the Go package for exact signature and behavior. |
 
 ### Exported Functions
@@ -263,14 +318,12 @@ Parity is tracked by these tests:
 | `MoveDirectory`                | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Name`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `New`                          | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `NewFilesystemServiceProvider` | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `NewLockableFile`              | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `At`                           | Opens a directory as a Rooted sandbox.                                             |
 | `Path`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Prepend`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Provides`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Put`                          | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Read`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Register`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `RelativeLink`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Replace`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `ReplaceInFile`                | Source-backed public surface. See the Go package for exact signature and behavior. |
@@ -289,5 +342,4 @@ Parity is tracked by these tests:
 | `ErrHashAlgorithm` | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `ErrLockFailed`    | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `ErrNotDirectory`  | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `ErrNotFile`       | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `ErrNotFound`      | Source-backed public surface. See the Go package for exact signature and behavior. |
