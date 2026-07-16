@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -448,6 +449,12 @@ func (r *Router) Dispatch(request matching.MatchableRequest) (*DispatchResult, e
 }
 
 // DispatchToRoute matches the request against the routes and runs the result.
+//
+// After matching it derives a per-request context carrying the matched route
+// (see WithCurrentRoute), stores it back on the request when supported, and
+// runs the handler with it. Handlers and middleware should read the current
+// route from that context via CurrentRoute and friends rather than the
+// deprecated, process-wide Router.Current accessors.
 func (r *Router) DispatchToRoute(request matching.MatchableRequest) (*DispatchResult, error) {
 	route, err := r.findRoute(request)
 
@@ -455,13 +462,36 @@ func (r *Router) DispatchToRoute(request matching.MatchableRequest) (*DispatchRe
 		return nil, err
 	}
 
-	value, err := r.runRoute(request, route)
+	ctx := WithCurrentRoute(requestContext(request), route)
+	storeRouteContext(request, ctx)
+
+	value, err := r.runRoute(ctx, route)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &DispatchResult{Route: route, Value: value}, nil
+}
+
+// requestContext returns the request's own context, falling back to
+// context.Background() when the implementation returns nil.
+func requestContext(request matching.MatchableRequest) context.Context {
+	if ctx := request.Context(); ctx != nil {
+		return ctx
+	}
+
+	return context.Background()
+}
+
+// storeRouteContext pushes the derived per-request context back onto the
+// request when it exposes a WithContext hook, so post-dispatch reads (such as
+// foundation.Request.Fingerprint) observe the matched route without consulting
+// shared router state.
+func storeRouteContext(request matching.MatchableRequest, ctx context.Context) {
+	if setter, ok := request.(interface{ WithContext(context.Context) }); ok {
+		setter.WithContext(ctx)
+	}
 }
 
 func (r *Router) findRoute(request matching.MatchableRequest) (*Route, error) {
@@ -480,7 +510,11 @@ func (r *Router) findRoute(request matching.MatchableRequest) (*Route, error) {
 // runRoute is the simplified Go form: middleware-less direct invocation. Full
 // pipeline support arrives in M5 once HandlerDispatcher/CallableDispatcher
 // land. For now we call the route's "uses" handler if it's a Go function.
-func (r *Router) runRoute(request matching.MatchableRequest, route *Route) (any, error) {
+//
+// Both zero-arg handler variants and context-accepting variants are supported.
+// Context-accepting handlers receive the per-request context derived in
+// DispatchToRoute, from which they can read the matched route via CurrentRoute.
+func (r *Router) runRoute(ctx context.Context, route *Route) (any, error) {
 	uses, ok := route.ActionMap["uses"]
 
 	if !ok || uses == nil {
@@ -498,6 +532,16 @@ func (r *Router) runRoute(request matching.MatchableRequest, route *Route) (any,
 		return fn(), nil
 	case func() (any, error):
 		return fn()
+	case func(context.Context):
+		fn(ctx)
+
+		return nil, nil
+	case func(context.Context) error:
+		return nil, fn(ctx)
+	case func(context.Context) any:
+		return fn(ctx), nil
+	case func(context.Context) (any, error):
+		return fn(ctx)
 	}
 
 	return uses, nil
@@ -631,6 +675,12 @@ func (r *Router) FlushMiddlewareGroups() *Router {
 // =====================================================================
 
 // Current returns the most recently dispatched route, or nil.
+//
+// It reads process-wide, last-matched state shared across all goroutines, so
+// under concurrent dispatch it can return another in-flight request's route.
+//
+// Deprecated: read the request-scoped route from the request's context with
+// routing.CurrentRoute(ctx) instead.
 func (r *Router) Current() *Route {
 	r.currentMu.RLock()
 
@@ -640,9 +690,14 @@ func (r *Router) Current() *Route {
 }
 
 // GetCurrentRoute is a parity alias for [Router.Current].
+//
+// Deprecated: reads process-wide state; use routing.CurrentRoute(ctx).
 func (r *Router) GetCurrentRoute() *Route { return r.Current() }
 
 // GetCurrentRequest returns the most recently dispatched request.
+//
+// Deprecated: reads process-wide state shared across goroutines and is
+// unreliable under concurrent dispatch.
 func (r *Router) GetCurrentRequest() matching.MatchableRequest {
 	r.currentMu.RLock()
 
@@ -652,6 +707,8 @@ func (r *Router) GetCurrentRequest() matching.MatchableRequest {
 }
 
 // CurrentRouteName returns the name of the current route, or "".
+//
+// Deprecated: reads process-wide state; use routing.CurrentRouteName(ctx).
 func (r *Router) CurrentRouteName() string {
 	route := r.Current()
 
@@ -663,6 +720,8 @@ func (r *Router) CurrentRouteName() string {
 }
 
 // CurrentRouteAction returns the handler action of the current route.
+//
+// Deprecated: reads process-wide state; use routing.CurrentRouteAction(ctx).
 func (r *Router) CurrentRouteAction() string {
 	route := r.Current()
 
@@ -686,6 +745,8 @@ func (r *Router) Has(names ...string) bool {
 
 // Is reports whether the current route name matches any of the given glob
 // patterns.
+//
+// Deprecated: reads process-wide state; use routing.CurrentRouteIs(ctx, ...).
 func (r *Router) Is(patterns ...string) bool {
 	route := r.Current()
 
@@ -697,11 +758,15 @@ func (r *Router) Is(patterns ...string) bool {
 }
 
 // CurrentRouteNamed is an alias for [Router.Is] kept for parity.
+//
+// Deprecated: reads process-wide state; use routing.CurrentRouteNamed(ctx, ...).
 func (r *Router) CurrentRouteNamed(patterns ...string) bool { return r.Is(patterns...) }
 
 // Uses reports whether the current route's action matches any of the given
 // glob patterns. Useful in middleware that wants to scope behavior to a
 // handler namespace.
+//
+// Deprecated: reads process-wide state; use routing.CurrentRouteUses(ctx, ...).
 func (r *Router) Uses(patterns ...string) bool {
 	route := r.Current()
 
@@ -721,6 +786,8 @@ func (r *Router) Uses(patterns ...string) bool {
 }
 
 // CurrentRouteUses reports whether the current route's action equals action.
+//
+// Deprecated: reads process-wide state; use routing.CurrentRouteUses(ctx, ...).
 func (r *Router) CurrentRouteUses(action string) bool {
 	route := r.Current()
 

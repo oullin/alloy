@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"context"
 	"testing"
 )
 
@@ -13,6 +14,7 @@ type fakeRequest struct {
 	host   string
 	path   string
 	secure bool
+	ctx    context.Context
 }
 
 func (r fakeRequest) Method() string      { return r.method }
@@ -20,6 +22,14 @@ func (r fakeRequest) Host() string        { return r.host }
 func (r fakeRequest) PathInfo() string    { return r.path }
 func (r fakeRequest) Secure() bool        { return r.secure }
 func (r fakeRequest) DecodedPath() string { return r.path }
+
+func (r fakeRequest) Context() context.Context {
+	if r.ctx != nil {
+		return r.ctx
+	}
+
+	return context.Background()
+}
 
 func TestRoute_Construction(t *testing.T) {
 	t.Run("test_basic_route_construction", func(t *testing.T) {
