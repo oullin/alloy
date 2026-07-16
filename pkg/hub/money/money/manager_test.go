@@ -430,6 +430,21 @@ func TestManagerAdd(t *testing.T) {
 			t.Fatal("Add() expected error for different currencies, got nil")
 		}
 	})
+
+	t.Run("returns overflow error", func(t *testing.T) {
+		m1 := mm.Create(math.MaxInt64, currency.SGD)
+		m2 := mm.Create(1, currency.SGD)
+
+		result, err := mm.Add(m1, m2)
+
+		if !errors.Is(err, exception.ErrOverflow) {
+			t.Fatalf("Add() error = %v, want ErrOverflow", err)
+		}
+
+		if result != nil {
+			t.Fatalf("Add() result = %v, want nil", result)
+		}
+	})
 }
 
 func TestManagerSubtract(t *testing.T) {
@@ -472,6 +487,21 @@ func TestManagerSubtract(t *testing.T) {
 
 		if err == nil {
 			t.Fatal("Subtract() expected error for different currencies, got nil")
+		}
+	})
+
+	t.Run("returns overflow error", func(t *testing.T) {
+		m1 := mm.Create(math.MinInt64, currency.SGD)
+		m2 := mm.Create(1, currency.SGD)
+
+		result, err := mm.Subtract(m1, m2)
+
+		if !errors.Is(err, exception.ErrOverflow) {
+			t.Fatalf("Subtract() error = %v, want ErrOverflow", err)
+		}
+
+		if result != nil {
+			t.Fatalf("Subtract() result = %v, want nil", result)
 		}
 	})
 }

@@ -1,6 +1,10 @@
 package calculator
 
-import "math"
+import (
+	"math"
+
+	"github.com/oullin/alloy/pkg/hub/money/exception"
+)
 
 // Amount represents the integer value of a monetary amount.
 type Amount = int64
@@ -37,6 +41,32 @@ func (c *Engine) SafeMultiply(initial int64, multipliers ...int64) (int64, error
 	return SafeMultiply(initial, multipliers...)
 }
 
+// SafeAdd adds two amounts, returning exception.ErrOverflow if the result overflows int64.
+func (c *Engine) SafeAdd(a, b Amount) (Amount, error) {
+	if c == nil {
+		return 0, nil
+	}
+
+	if (b > 0 && a > math.MaxInt64-b) || (b < 0 && a < math.MinInt64-b) {
+		return 0, exception.ErrOverflow
+	}
+
+	return a + b, nil
+}
+
+// SafeSubtract subtracts b from a, returning exception.ErrOverflow if the result overflows int64.
+func (c *Engine) SafeSubtract(a, b Amount) (Amount, error) {
+	if c == nil {
+		return 0, nil
+	}
+
+	if (b > 0 && a < math.MinInt64+b) || (b < 0 && a > math.MaxInt64+b) {
+		return 0, exception.ErrOverflow
+	}
+
+	return a - b, nil
+}
+
 // Divide divides an amount by a seed. Returns 0 if the seed is 0.
 func (c *Engine) Divide(amount Amount, seed int64) Amount {
 	if c == nil || seed == 0 {
@@ -64,9 +94,10 @@ func (c *Engine) Allocate(amount Amount, ration, scale int64) Amount {
 	return Ration(amount, ration) / scale
 }
 
-// Absolute returns the absolute value of an amount.
+// Absolute returns the absolute value of an amount. It returns 0 for math.MinInt64,
+// whose absolute value is not representable in int64, matching the package's silent-0 overflow convention.
 func (c *Engine) Absolute(amount Amount) Amount {
-	if c == nil || amount < math.MinInt64 {
+	if c == nil || amount == math.MinInt64 {
 		return 0
 	}
 
@@ -90,7 +121,8 @@ func (c *Engine) Negative(amount Amount) Amount {
 	return amount
 }
 
-// Round rounds an amount to a specified exponent (precision).
+// Round rounds an amount to a specified exponent (precision), half away from zero,
+// matching CreateFromFloat.
 func (c *Engine) Round(amount Amount, exponent int) Amount {
 	// Guard against nil calculator to prevent panics
 	if c == nil {
@@ -115,9 +147,16 @@ func (c *Engine) Round(amount Amount, exponent int) Amount {
 	// Get the remainder to determine if we need to round up or down
 	module := absolute % reminder
 
-	// Implement round-to-nearest with ties rounded down (toward zero):
-	// only remainders strictly greater than half the unit trigger a round up
-	if module > (reminder / 2) {
+	// Implement round-to-nearest with ties rounded away from zero:
+	// remainders at least half the unit trigger a round up
+	if module >= (reminder / 2) {
+		// Rounding up an amount this close to MaxInt64 would wrap around and
+		// produce a garbage negative result; return 0 to match the package's
+		// silent-zero overflow convention (see Absolute for MinInt64).
+		if absolute > math.MaxInt64-reminder {
+			return 0
+		}
+
 		absolute += reminder
 	}
 

@@ -24,13 +24,25 @@ describe('money calculator', () => {
 		expect(() => calculator.safeMultiply(3037000500n, 3037000500n)).toThrow(ERR_OVERFLOW.message);
 	});
 
+	it('returns int64-safe absolute values', () => {
+		const calculator = MoneyCalculator.create();
+
+		expect(calculator.absolute(MIN_INT64)).toBe(0n);
+		expect(calculator.absolute(MIN_INT64 + 1n)).toBe(MAX_INT64);
+		expect(calculator.absolute(-5n)).toBe(5n);
+		expect(calculator.absolute(5n)).toBe(5n);
+	});
+
 	it('rounds positive and negative amounts to decimal exponents', () => {
 		const calculator = MoneyCalculator.create();
 
 		expect(calculator.round(1549n, 2)).toBe(1500n);
 		expect(calculator.round(1551n, 2)).toBe(1600n);
 		expect(calculator.round(-1551n, 2)).toBe(-1600n);
-		expect(calculator.round(1550n, 2)).toBe(1500n);
+		expect(calculator.round(1550n, 2)).toBe(1600n);
+		expect(calculator.round(1250n, 2)).toBe(1300n);
+		expect(calculator.round(-1250n, 2)).toBe(-1300n);
+		expect(calculator.round(250n, 2)).toBe(300n);
 		expect(calculator.round(123n, 0)).toBe(123n);
 		expect(calculator.round(123n, 19)).toBe(123n);
 	});
