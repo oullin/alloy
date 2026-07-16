@@ -90,6 +90,37 @@ func TestNewHandlerBindsRouteParametersFromRequestScopedRoute(t *testing.T) {
 	}
 }
 
+func TestNewHandlerExposesCurrentRouteOnRawRequestContext(t *testing.T) {
+	t.Parallel()
+
+	router := routing.NewRouter(nil, nil)
+	router.Get("/ctx-route", func() any {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Standard net/http consumers must observe the matched route via
+			// the plain request context, not only through foundation.Request.
+			route := routing.CurrentRoute(r.Context())
+
+			if route == nil {
+				http.Error(w, "no current route in raw request context", http.StatusInternalServerError)
+
+				return
+			}
+
+			_, _ = w.Write([]byte(route.Path()))
+		})
+	})
+
+	rec := perform(router, http.MethodGet, "/ctx-route")
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d (body %q)", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	if rec.Body.String() != "/ctx-route" {
+		t.Fatalf("body = %q, want %q", rec.Body.String(), "/ctx-route")
+	}
+}
+
 func TestNewHandlerReturnsNotFound(t *testing.T) {
 	t.Parallel()
 

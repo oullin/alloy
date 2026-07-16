@@ -27,9 +27,14 @@ func New(router *routing.Router) http.Handler {
 			return
 		}
 
-		applyRouteParameters(r, dispatch.Route)
+		// Dispatch threaded the matched-route context onto the request; use
+		// its raw form downstream so http.Handler results and parameter
+		// binding observe that context, not the pre-dispatch one.
+		raw := req.Raw()
 
-		if err := writeResult(w, r, dispatch.Value); err != nil {
+		applyRouteParameters(raw, dispatch.Route)
+
+		if err := writeResult(w, raw, dispatch.Value); err != nil {
 			writeError(w, err)
 		}
 	})

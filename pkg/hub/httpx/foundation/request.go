@@ -93,8 +93,14 @@ func (r *Request) Context() context.Context {
 
 // WithContext stores the per-request context the router derives at dispatch
 // time, so later reads (RouteResolver, Fingerprint) observe the matched route.
+// The underlying *http.Request is re-derived with the same context so standard
+// net/http consumers reading Raw().Context() observe it too.
 func (r *Request) WithContext(ctx context.Context) {
 	r.ctx = ctx
+
+	if r.raw != nil {
+		r.raw = r.raw.WithContext(ctx)
+	}
 }
 
 // Method returns the HTTP method (GET, POST, ...).
