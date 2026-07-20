@@ -75,8 +75,7 @@ router.prefetch(url, {
   onError() {
     console.log('Prefetch failed!')
   },
-})</pre
-					>
+})</pre>
 					<p class="text-muted-foreground mt-3 text-sm">
 						Manual prefetching is useful when you want to prefetch based on user behavior patterns, timer events, or other application logic that does not involve link hover/click.
 					</p>

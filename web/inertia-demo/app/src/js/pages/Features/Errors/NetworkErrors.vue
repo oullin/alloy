@@ -48,8 +48,7 @@ const breadcrumbs = [{ title: 'Features' }, { title: 'Errors' }, { title: 'Netwo
 router.on('error', (event) => {
   // Show a notification
   alert('A network error occurred.')
-})</pre
-							>
+})</pre>
 						</div>
 						<div class="space-y-2">
 							<p class="font-medium">Per-visit callback</p>
@@ -58,8 +57,7 @@ router.visit(url, {
   onError(errors) {
     // Handle the error
   },
-})</pre
-							>
+})</pre>
 						</div>
 					</div>
 				</FeatureCard>

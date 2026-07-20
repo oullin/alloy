@@ -132,8 +132,7 @@ function submit() {
 { "address": { "street": "123 Main St" } }
 
 // After ParseForm (flat dotted keys)
-r.FormValue("address.street") // "123 Main St"</pre
-								>
+r.FormValue("address.street") // "123 Main St"</pre>
 							</div>
 							<div class="rounded-md border p-3">
 								<p class="mb-1 font-medium">Error Mapping</p>

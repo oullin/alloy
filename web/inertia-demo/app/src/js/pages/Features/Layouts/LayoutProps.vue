@@ -54,8 +54,7 @@ const currentLayoutProps = {
   &gt;
     &lt;!-- page content --&gt;
   &lt;/AppLayout&gt;
-&lt;/template&gt;</pre
-							>
+&lt;/template&gt;</pre>
 						</div>
 						<p class="text-muted-foreground">
 							Each page wraps its content in the layout component and passes page-specific data as props. The layout uses these props to render the header, breadcrumbs, and other shared UI.
@@ -74,8 +73,7 @@ const currentLayoutProps = {
 const page = usePage()
 const title = computed(
   () => page.props.title
-)</pre
-						>
+)</pre>
 					</div>
 				</FeatureCard>
 

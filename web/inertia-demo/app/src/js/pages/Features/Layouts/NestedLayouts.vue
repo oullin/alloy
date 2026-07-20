@@ -51,8 +51,7 @@ import SectionLayout from '@/layouts/SectionLayout.vue'
 
 defineOptions({
   layout: [AppLayout, SectionLayout],
-})</pre
-					>
+})</pre>
 					<p class="text-muted-foreground">
 						When you pass an array of layouts to
 						<code class="bg-muted rounded px-1.5 py-0.5 text-xs">defineOptions</code>, Inertia nests them from left to right. The first layout is the outermost wrapper.
