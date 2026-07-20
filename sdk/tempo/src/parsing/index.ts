@@ -217,7 +217,7 @@ export const parseFromPattern = (input: string, pattern: string, options?: Tempo
 
 	let expression = '^';
 
-	for (let index = 0; index < pattern.length; ) {
+	for (let index = 0; index < pattern.length;) {
 		if (pattern[index] === '[') {
 			const end = pattern.indexOf(']', index);
 

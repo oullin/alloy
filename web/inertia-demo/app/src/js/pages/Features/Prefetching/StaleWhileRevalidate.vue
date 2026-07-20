@@ -47,8 +47,7 @@ const cacheManagementRoute = featureRoute('features.prefetching.cache-management
   :href="url"
   prefetch="hover"
   :cache-for="[5000, 30000]"
-&gt;</pre
-						>
+&gt;</pre>
 						<p class="text-muted-foreground">The first value (5s) is how long the data is considered fresh. The second value (30s) is how long stale data can be shown while revalidating.</p>
 					</div>
 				</FeatureCard>

@@ -50,8 +50,7 @@ createInertiaApp({
     // Show spinner icon
     showSpinner: false,
   },
-})</pre
-						>
+})</pre>
 						<p class="text-muted-foreground">The progress bar only appears after a short delay to avoid flickering on fast navigations.</p>
 					</div>
 				</FeatureCard>
@@ -91,8 +90,7 @@ createInertiaApp({
 // Disable per-visit
 router.visit(url, {
   showProgress: false,
-})</pre
-						>
+})</pre>
 					</div>
 				</FeatureCard>
 			</div>

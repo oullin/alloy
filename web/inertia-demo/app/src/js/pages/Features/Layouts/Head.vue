@@ -66,8 +66,7 @@ const breadcrumbs = [{ title: 'Features' }, { title: 'Layouts' }, { title: 'Head
     content="Page description" /&gt;
   &lt;meta property="og:title"
     content="Social title" /&gt;
-&lt;/Head&gt;</pre
-							>
+&lt;/Head&gt;</pre>
 						</div>
 						<p class="text-muted-foreground text-sm">The Head component manages document head tags across page navigations. Tags from the previous page are automatically cleaned up.</p>
 					</div>
@@ -80,8 +79,7 @@ const breadcrumbs = [{ title: 'Features' }, { title: 'Layouts' }, { title: 'Head
 createInertiaApp({
   title: (title) =>
     `${title} - My App`,
-})</pre
-						>
+})</pre>
 						<p class="text-muted-foreground">This appends " - My App" to every page title automatically.</p>
 					</div>
 				</FeatureCard>

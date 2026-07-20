@@ -92,8 +92,7 @@ router.on('invalid', (event) => {
   const status = event.detail.response.status
   // Handle the error
   event.preventDefault()
-})</pre
-						>
+})</pre>
 					</div>
 					<div class="rounded-md border p-3">
 						<p class="text-sm font-medium">Per-Visit Error Handling</p>
@@ -102,8 +101,7 @@ router.post(url, data, {
   onError(errors) {
     // Handle validation errors
   },
-})</pre
-						>
+})</pre>
 						<p class="text-muted-foreground mt-1 text-xs">Note: onError handles validation errors (422), not HTTP exceptions.</p>
 					</div>
 				</div>
