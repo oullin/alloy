@@ -15,7 +15,6 @@ interface CallbackLogEntry {
 }
 
 const page = usePage<SharedPageProps>();
-
 const breadcrumbs = [{ title: 'Features' }, { title: 'Events' }, { title: 'Visit Callbacks' }];
 
 const callbackLog = ref<CallbackLogEntry[]>([]);

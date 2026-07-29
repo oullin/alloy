@@ -53,8 +53,8 @@ contract type and get any driver.
 
 Built-in drivers:
 
-| Name       | Source                                                                                     | Notes                                       |
-| ---------- | ------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| Name       | Source                                                                                 | Notes                                       |
+| ---------- | -------------------------------------------------------------------------------------- | ------------------------------------------- |
 | `bcrypt`   | [`bcrypt.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/bcrypt.go)     | Sane production default; tunable cost       |
 | `argon2i`  | [`argon.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/argon.go)       | Memory-hard, side-channel resistant         |
 | `argon2id` | [`argon2id.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/hashing/argon2id.go) | Argon2 hybrid; current OWASP recommendation |
@@ -93,7 +93,8 @@ own manager.
 - [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 - [Auth](/packages/auth) — depends on this package for password
-verification.
+  verification.
+
 <!-- /ALLOY:HAND -->
 
 Package hashing provides driver-based password hashing with support for bcrypt, argon2i, and argon2id algorithms. It mirrors the upstream Hashing component, offering a unified API through the HashManager and individual hashers for each algorithm.
@@ -166,7 +167,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

@@ -63,17 +63,17 @@ const guarded = new StateMachine('subscription', definition, store, dispatcher);
 
 ## API overview
 
-| Entry point | Main exports | Purpose |
-| --- | --- | --- |
-| `@hara/sdk-workflow` | `Machine`, `StateMachine`, `Definition`, `DefinitionBuilder`, `Marking`, `Transition` | core engine, definitions, markings |
-| `@hara/sdk-workflow` | `Dispatcher`, `EventNames`, `TransitionError`, `TransitionNotFoundError` | lifecycle events and coded failures |
-| `@hara/sdk-workflow/stores` | `SingleStateStore`, `MultiStateStore`, `MarkingStore` | persisting markings on subjects |
-| `@hara/sdk-workflow/events` | `GuardEvent`, `TransitionEvent`, `EnteredEvent`, ... | typed lifecycle event classes |
-| `@hara/sdk-workflow/audit` | `AuditTrail`, `AuditEntry` | recording applied transitions |
-| `@hara/sdk-workflow/registry` | `WorkflowRegistry`, `WorkflowRegistryEntry` | resolving machines per subject |
-| `@hara/sdk-workflow/config` | `WorkflowConfigLoader` | building definitions from config sources |
-| `@hara/sdk-workflow/validator` | `WorkflowValidator` | definition validation rules |
-| `@hara/sdk-workflow/multisteps` | `MultiStepWorkflow`, job/engine helpers | dependency-graph job execution |
+| Entry point                     | Main exports                                                                          | Purpose                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `@hara/sdk-workflow`            | `Machine`, `StateMachine`, `Definition`, `DefinitionBuilder`, `Marking`, `Transition` | core engine, definitions, markings       |
+| `@hara/sdk-workflow`            | `Dispatcher`, `EventNames`, `TransitionError`, `TransitionNotFoundError`              | lifecycle events and coded failures      |
+| `@hara/sdk-workflow/stores`     | `SingleStateStore`, `MultiStateStore`, `MarkingStore`                                 | persisting markings on subjects          |
+| `@hara/sdk-workflow/events`     | `GuardEvent`, `TransitionEvent`, `EnteredEvent`, ...                                  | typed lifecycle event classes            |
+| `@hara/sdk-workflow/audit`      | `AuditTrail`, `AuditEntry`                                                            | recording applied transitions            |
+| `@hara/sdk-workflow/registry`   | `WorkflowRegistry`, `WorkflowRegistryEntry`                                           | resolving machines per subject           |
+| `@hara/sdk-workflow/config`     | `WorkflowConfigLoader`                                                                | building definitions from config sources |
+| `@hara/sdk-workflow/validator`  | `WorkflowValidator`                                                                   | definition validation rules              |
+| `@hara/sdk-workflow/multisteps` | `MultiStepWorkflow`, job/engine helpers                                               | dependency-graph job execution           |
 
 Acceptance tests live in `sdk/workflow/tests` and run with
 `pnpm --filter @hara/sdk-workflow test`.

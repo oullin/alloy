@@ -81,13 +81,13 @@ The packages below ship today from `hara.sh/alloy`.
 
 ### The Basics
 
-| Package                            | Purpose                                           |
-| ---------------------------------- | ------------------------------------------------- |
+| Package                            | Purpose                                                  |
+| ---------------------------------- | -------------------------------------------------------- |
 | [httpx](/packages/httpx)           | HTTP utilities, routing, middleware, and testing helpers |
-| [session](/packages/session)       | Session management with multiple storage handlers |
-| [cookie](/packages/cookie)         | HTTP cookie handling                              |
-| [validation](/packages/validation) | Rule-based input validation (80+ built-in rules)  |
-| [inertia](/packages/inertia)       | Server-side Inertia.js protocol adapter           |
+| [session](/packages/session)       | Session management with multiple storage handlers        |
+| [cookie](/packages/cookie)         | HTTP cookie handling                                     |
+| [validation](/packages/validation) | Rule-based input validation (80+ built-in rules)         |
+| [inertia](/packages/inertia)       | Server-side Inertia.js protocol adapter                  |
 
 ### Security
 
@@ -99,30 +99,30 @@ The packages below ship today from `hara.sh/alloy`.
 
 ### Data & Storage
 
-| Package                            | Purpose                                        |
-| ---------------------------------- | ---------------------------------------------- |
-| [cache](/packages/cache)           | Caching layer with multiple driver support     |
-| [database](/packages/database)     | Shared database errors and support utilities   |
-| [filesystem](/packages/filesystem) | Local filesystem operations                    |
+| Package                            | Purpose                                      |
+| ---------------------------------- | -------------------------------------------- |
+| [cache](/packages/cache)           | Caching layer with multiple driver support   |
+| [database](/packages/database)     | Shared database errors and support utilities |
+| [filesystem](/packages/filesystem) | Local filesystem operations                  |
 
 ### Events & Jobs
 
-| Package                        | Purpose                                          |
-| ------------------------------ | ------------------------------------------------ |
-| [events](/packages/events)     | Event dispatching and listener management        |
-| [bus](/packages/bus)           | Command and event bus with pipeline support      |
-| [queue](/packages/queue)       | Background job processing with pluggable drivers |
-| workflow                       | Petri-net based workflow and state-machine engine |
+| Package                    | Purpose                                           |
+| -------------------------- | ------------------------------------------------- |
+| [events](/packages/events) | Event dispatching and listener management         |
+| [bus](/packages/bus)       | Command and event bus with pipeline support       |
+| [queue](/packages/queue)   | Background job processing with pluggable drivers  |
+| workflow                   | Petri-net based workflow and state-machine engine |
 
 ### Support & Utilities
 
-| Package                            | Purpose                                        |
-| ---------------------------------- | ---------------------------------------------- |
-| [collection](/packages/collection) | Fluent collection helpers for slices and maps  |
-| [str](/packages/str)               | String helpers, UUID/ULID generation           |
+| Package                            | Purpose                                           |
+| ---------------------------------- | ------------------------------------------------- |
+| [collection](/packages/collection) | Fluent collection helpers for slices and maps     |
+| [str](/packages/str)               | String helpers, UUID/ULID generation              |
 | tempo                              | Date/time library with timezones and localization |
-| [money](/packages/money)           | Money and currency primitives                  |
-| [seo](/packages/seo)               | SEO utilities and i18n locale handling         |
+| [money](/packages/money)           | Money and currency primitives                     |
+| [seo](/packages/seo)               | SEO utilities and i18n locale handling            |
 
 ## Roadmap
 
@@ -152,15 +152,15 @@ easy for AI agents to understand and contribute to your codebase.
 
 Cross-cutting topics that span multiple packages:
 
-| Guide                                        | What it covers                                          |
-| -------------------------------------------- | ------------------------------------------------------- |
-| [Request Lifecycle](/architecture/lifecycle) | How an HTTP request flows through a Alloy application |
+| Guide                                        | What it covers                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| [Request Lifecycle](/architecture/lifecycle) | How an HTTP request flows through a Alloy application             |
 | [Cross-Runtime Parity](/architecture/parity) | Which primitives have Go/TS twins and what parity each guarantees |
-| [Testing](/concepts/testing)                 | Built-in test doubles and testing patterns              |
-| [Middleware](/basics/middleware)             | Global, per-route, and controller-scoped middleware     |
-| [Controllers](/basics/controllers)           | Grouping handlers into types with shared middleware     |
-| [URL Generation](/basics/url-generation)     | Named-route URLs, signed URLs, redirects                |
-| [CSRF Protection](/basics/csrf)              | Tokens, headers, excluding routes                       |
+| [Testing](/concepts/testing)                 | Built-in test doubles and testing patterns                        |
+| [Middleware](/basics/middleware)             | Global, per-route, and controller-scoped middleware               |
+| [Controllers](/basics/controllers)           | Grouping handlers into types with shared middleware               |
+| [URL Generation](/basics/url-generation)     | Named-route URLs, signed URLs, redirects                          |
+| [CSRF Protection](/basics/csrf)              | Tokens, headers, excluding routes                                 |
 
 ## Next Steps
 

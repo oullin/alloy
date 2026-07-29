@@ -16,6 +16,7 @@ export const renderSuggestions = (
 	placeholder = '',
 ): string => {
 	const text = resolveInfo(info, highlighted === null ? null : (matches[highlighted] ?? null));
+
 	const frame = `${renderBox({ body: renderSuggestBody(value, cursor, placeholder, matches, highlighted, scroll), borderStyle: cyan, info: text, title: cyan(message) })}\n`;
 
 	promptEnvironment().output.write(frame);

@@ -89,7 +89,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |
@@ -321,7 +321,7 @@ Parity is tracked by these tests:
 | `Input`                               | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Integer`                             | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `Is`                                  | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `IsAttemptingHTTPPreview`            | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IsAttemptingHTTPPreview`             | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `IsEmpty`                             | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `IsJSON`                              | Source-backed public surface. See the Go package for exact signature and behavior. |
 | `IsMethod`                            | Source-backed public surface. See the Go package for exact signature and behavior. |

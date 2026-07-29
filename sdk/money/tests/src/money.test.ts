@@ -150,6 +150,7 @@ describe('@hara/sdk-money OOP port', () => {
 
 	it('converts amounts with direct rates, inverse rates, explicit rates, and fraction changes', () => {
 		const rates = ExchangeRates.create().addRate('USD', 'EUR', 0.85).addRate('USD', 'JPY', 150);
+
 		const converter = MoneyConverter.create(CurrencyManager.default(), rates);
 		const usd = MoneyManager.default().create(500n, 'USD');
 

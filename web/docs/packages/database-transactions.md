@@ -77,4 +77,3 @@ if errors.Is(err, errRejected) {
     // The transaction was rolled back.
 }
 ```
-

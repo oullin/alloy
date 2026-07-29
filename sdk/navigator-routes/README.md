@@ -16,12 +16,17 @@ Build a resolver once from a route manifest and call it by name:
 ```ts
 import { createRouteResolver } from '@hara/sdk-navigator-routes';
 
-const route = createRouteResolver({
-	'posts.show': '/posts/{post}',
-	'docs.page': '/docs/{page?}',
-});
+const route = createRouteResolver(
+	{
+		'posts.show': '/posts/{post}',
+		'docs.page': '/docs/{page?}',
+	},
+);
 
-route('posts.show', { post: 42 }).url; // "/posts/42"
+route(
+	'posts.show',
+	{ post: 42 },
+).url; // "/posts/42"
 route('docs.page').url; // "/docs"
 route('missing').url; // "#!expose:unknown-route" (and warns via console)
 ```
@@ -32,10 +37,13 @@ example from a server-rendered page) are re-read on every call:
 ```ts
 import { createRouteResolver } from '@hara/sdk-navigator-routes';
 
-const route = createRouteResolver(() => window.__routes, {
-	fallback: '/',
-	onMissingRoute: (name) => reportMissingRoute(name),
-});
+const route = createRouteResolver(
+	() => window.__routes,
+	{
+		fallback: '/',
+		onMissingRoute: (name) => reportMissingRoute(name),
+	},
+);
 ```
 
 The lower-level helpers are exported for one-off use:
@@ -43,21 +51,32 @@ The lower-level helpers are exported for one-off use:
 ```ts
 import { fillPattern, resolveRoute, resolveRouteUrl } from '@hara/sdk-navigator-routes';
 
-fillPattern('/users/{user}/posts/{post?}', { user: 7 }); // "/users/7/posts"
-resolveRouteUrl(manifest, 'posts.show', { post: 42 }); // "/posts/42"
-resolveRoute(manifest, 'posts.show', { post: 42 }); // { url: "/posts/42" }
+fillPattern(
+	'/users/{user}/posts/{post?}',
+	{ user: 7 },
+); // "/users/7/posts"
+resolveRouteUrl(
+	manifest,
+	'posts.show',
+	{ post: 42 },
+); // "/posts/42"
+resolveRoute(
+	manifest,
+	'posts.show',
+	{ post: 42 },
+); // { url: "/posts/42" }
 ```
 
 ## API overview
 
-| Export | Purpose |
-| --- | --- |
-| `createRouteResolver(manifest, options?)` | builds a `RouteResolver` bound to a manifest (object or lazy function) |
-| `resolveRoute(manifest, name, params?, options?)` | resolves a named route to a `RouteResult` (`{ url }`) |
-| `resolveRouteUrl(manifest, name, params?, options?)` | same as `resolveRoute`, returning the URL string directly |
-| `fillPattern(pattern, params?, options?)` | substitutes params into a single route pattern |
-| `RouteManifest`, `RouteParams`, `RouteResult`, `RouteResolver` | manifest and resolver types |
-| `NavigatorOptions`, `MissingRouteReporter` | fallback URL and missing-route reporting hooks |
+| Export                                                         | Purpose                                                                |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `createRouteResolver(manifest, options?)`                      | builds a `RouteResolver` bound to a manifest (object or lazy function) |
+| `resolveRoute(manifest, name, params?, options?)`              | resolves a named route to a `RouteResult` (`{ url }`)                  |
+| `resolveRouteUrl(manifest, name, params?, options?)`           | same as `resolveRoute`, returning the URL string directly              |
+| `fillPattern(pattern, params?, options?)`                      | substitutes params into a single route pattern                         |
+| `RouteManifest`, `RouteParams`, `RouteResult`, `RouteResolver` | manifest and resolver types                                            |
+| `NavigatorOptions`, `MissingRouteReporter`                     | fallback URL and missing-route reporting hooks                         |
 
 Unresolved required parameters are left as-is in the URL (e.g.
 `/posts/{post}`), while unresolved optional segments are dropped. Tests run

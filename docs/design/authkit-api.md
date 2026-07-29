@@ -46,24 +46,24 @@ questions for the owner.
 
 Every entry below is a real, constructable surface on `main`.
 
-| Concern | Primitive | Constructor / key surface | File |
-| --- | --- | --- | --- |
-| Registry / DI | `auth.ServiceProvider`, `manager.Registry` | `NewServiceProvider(app, defaultGuard).WithBoot(...)`; `Registry.Extend/Provider/ViaRequest/SetConfig/Guard` | `pkg/hub/auth/provider.go`, `pkg/hub/auth/manager/manager.go` |
-| Session guard | `sessionx.SessionGuard` (implements `StatefulGuard`) | `NewSessionGuard(name, provider, session, cookies, hasher)`; `Attempt/Login/Logout`, remember-me, event dispatch | `pkg/hub/auth/sessionx/session_guard.go` |
-| Headless handlers | `fortify.*` | `NewLoginHandler(guard, LoginConfig)`, `NewRegisterHandler(create, guard, cfg)`, `NewCreate/List/RevokeAPITokenHandler`, verification, passkeys, 2FA, browser sessions, teams; `Actions` struct + `Routes(actions)` | `pkg/hub/auth/fortify/*.go` |
-| Callback contracts | `fortify` interfaces/func types | `RegisterUser`, `VerifyEmail`, `PasswordResetter`, `LoginLimiter`, `PasskeyService`, `ProfileUpdater`, `PasswordUpdater`, … | `pkg/hub/auth/fortify/contracts.go` |
-| Login throttle | `fortify.MemoryLoginLimiter` | `NewMemoryLoginLimiter(max, decay, lockout)` | `pkg/hub/auth/fortify/login_limiter.go` |
-| Password reset | `passwords.Broker` | `NewBroker(users, tokens, expiry).WithThrottle(...).WithEventDispatcher(...)` | `pkg/hub/auth/passwords/broker.go` |
-| API tokens | `tokens.Issuer` | `NewIssuer(repo)`; `CreateToken(ctx, user, name, abilities, expiresAt)` | `pkg/hub/auth/tokens/issuer.go` |
-| Passkeys (WebAuthn) | `passkeys.Service` | `NewService(webauthn.Config, repo, sessions)`; begin/finish registration + discoverable login | `pkg/hub/auth/passkeys/service.go` |
-| Browser sessions | `browserx.Service` | `NewService(repo)`; `List/Revoke/RevokeOther` | `pkg/hub/auth/browserx/repository.go` |
-| Teams | `teams.Service` | `NewService(repo, roles)`; `Create/AddMember/UpdateRole/RemoveMember/SwitchCurrent` | `pkg/hub/auth/teams/service.go` |
-| Two-factor | `twofactor` funcs | `GenerateSecret`, `Code`, `Verify`, `OTPAuthURL` + `recovery` codes | `pkg/hub/auth/twofactor/totp.go` |
-| Authorization | `access.Gate` + middleware | `AuthorizeMiddleware(gate, ability, model)` | `pkg/hub/auth/access/gate.go`, `.../middleware.go` |
-| HTTP glue | `httpx` | `EnsureAuthenticated(guard)`, `WithUser`, `UserFromContext`, `RedirectIfAuthenticated` | `pkg/hub/auth/httpx/middleware.go` |
-| Session-guard migration | `sessionx` `Migrate` on login/privilege change | `SessionGuard.Login` calls `session.Migrate(ctx, true)` | `pkg/hub/auth/sessionx/session_guard.go:337` |
-| Contracts | `cauth.Guard`, `StatefulGuard`, `HTTPGuard`, `User`, `UserProvider` | interface set every layer already speaks | `pkg/hub/contracts/auth/guard.go`, `.../provider.go`, `.../authenticatable.go` |
-| Workflow engine | `workflow.Machine[T]`, `DefinitionBuilder` | Petri-net engine + `store`, `registry`, `events`, `multisteps` | `pkg/hub/workflow/doc.go` |
+| Concern                 | Primitive                                                           | Constructor / key surface                                                                                                                                                                                           | File                                                                           |
+| ----------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Registry / DI           | `auth.ServiceProvider`, `manager.Registry`                          | `NewServiceProvider(app, defaultGuard).WithBoot(...)`; `Registry.Extend/Provider/ViaRequest/SetConfig/Guard`                                                                                                        | `pkg/hub/auth/provider.go`, `pkg/hub/auth/manager/manager.go`                  |
+| Session guard           | `sessionx.SessionGuard` (implements `StatefulGuard`)                | `NewSessionGuard(name, provider, session, cookies, hasher)`; `Attempt/Login/Logout`, remember-me, event dispatch                                                                                                    | `pkg/hub/auth/sessionx/session_guard.go`                                       |
+| Headless handlers       | `fortify.*`                                                         | `NewLoginHandler(guard, LoginConfig)`, `NewRegisterHandler(create, guard, cfg)`, `NewCreate/List/RevokeAPITokenHandler`, verification, passkeys, 2FA, browser sessions, teams; `Actions` struct + `Routes(actions)` | `pkg/hub/auth/fortify/*.go`                                                    |
+| Callback contracts      | `fortify` interfaces/func types                                     | `RegisterUser`, `VerifyEmail`, `PasswordResetter`, `LoginLimiter`, `PasskeyService`, `ProfileUpdater`, `PasswordUpdater`, …                                                                                         | `pkg/hub/auth/fortify/contracts.go`                                            |
+| Login throttle          | `fortify.MemoryLoginLimiter`                                        | `NewMemoryLoginLimiter(max, decay, lockout)`                                                                                                                                                                        | `pkg/hub/auth/fortify/login_limiter.go`                                        |
+| Password reset          | `passwords.Broker`                                                  | `NewBroker(users, tokens, expiry).WithThrottle(...).WithEventDispatcher(...)`                                                                                                                                       | `pkg/hub/auth/passwords/broker.go`                                             |
+| API tokens              | `tokens.Issuer`                                                     | `NewIssuer(repo)`; `CreateToken(ctx, user, name, abilities, expiresAt)`                                                                                                                                             | `pkg/hub/auth/tokens/issuer.go`                                                |
+| Passkeys (WebAuthn)     | `passkeys.Service`                                                  | `NewService(webauthn.Config, repo, sessions)`; begin/finish registration + discoverable login                                                                                                                       | `pkg/hub/auth/passkeys/service.go`                                             |
+| Browser sessions        | `browserx.Service`                                                  | `NewService(repo)`; `List/Revoke/RevokeOther`                                                                                                                                                                       | `pkg/hub/auth/browserx/repository.go`                                          |
+| Teams                   | `teams.Service`                                                     | `NewService(repo, roles)`; `Create/AddMember/UpdateRole/RemoveMember/SwitchCurrent`                                                                                                                                 | `pkg/hub/auth/teams/service.go`                                                |
+| Two-factor              | `twofactor` funcs                                                   | `GenerateSecret`, `Code`, `Verify`, `OTPAuthURL` + `recovery` codes                                                                                                                                                 | `pkg/hub/auth/twofactor/totp.go`                                               |
+| Authorization           | `access.Gate` + middleware                                          | `AuthorizeMiddleware(gate, ability, model)`                                                                                                                                                                         | `pkg/hub/auth/access/gate.go`, `.../middleware.go`                             |
+| HTTP glue               | `httpx`                                                             | `EnsureAuthenticated(guard)`, `WithUser`, `UserFromContext`, `RedirectIfAuthenticated`                                                                                                                              | `pkg/hub/auth/httpx/middleware.go`                                             |
+| Session-guard migration | `sessionx` `Migrate` on login/privilege change                      | `SessionGuard.Login` calls `session.Migrate(ctx, true)`                                                                                                                                                             | `pkg/hub/auth/sessionx/session_guard.go:337`                                   |
+| Contracts               | `cauth.Guard`, `StatefulGuard`, `HTTPGuard`, `User`, `UserProvider` | interface set every layer already speaks                                                                                                                                                                            | `pkg/hub/contracts/auth/guard.go`, `.../provider.go`, `.../authenticatable.go` |
+| Workflow engine         | `workflow.Machine[T]`, `DefinitionBuilder`                          | Petri-net engine + `store`, `registry`, `events`, `multisteps`                                                                                                                                                      | `pkg/hub/workflow/doc.go`                                                      |
 
 Two things stand out:
 
@@ -302,12 +302,12 @@ without new machinery.
 
 ### 5.1 The flows in scope for v1
 
-| Flow | Places (states) | Transitions | Backing primitive |
-| --- | --- | --- | --- |
-| `Onboarding` | `registered → email_pending → verified → active` | `register`, `send_verification`, `verify`, `first_login` | `fortify.RegisterUser`, `VerifyEmail`, `SessionGuard.Login` |
-| `PasskeyEnrollment` | `guest → challenged → enrolled` | `begin`, `finish` | `passkeys.Service` begin/finish registration |
-| `PasswordReset` | `requested → link_sent → reset` | `request_link`, `reset` | `passwords.Broker.SendResetLinkUsing/Reset` |
-| `PasswordlessLogin` | `guest → asserted → authenticated` | `begin_login`, `finish_login` | `passkeys.Service` discoverable login + `guard.Login` |
+| Flow                | Places (states)                                  | Transitions                                              | Backing primitive                                           |
+| ------------------- | ------------------------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------- |
+| `Onboarding`        | `registered → email_pending → verified → active` | `register`, `send_verification`, `verify`, `first_login` | `fortify.RegisterUser`, `VerifyEmail`, `SessionGuard.Login` |
+| `PasskeyEnrollment` | `guest → challenged → enrolled`                  | `begin`, `finish`                                        | `passkeys.Service` begin/finish registration                |
+| `PasswordReset`     | `requested → link_sent → reset`                  | `request_link`, `reset`                                  | `passwords.Broker.SendResetLinkUsing/Reset`                 |
+| `PasswordlessLogin` | `guest → asserted → authenticated`               | `begin_login`, `finish_login`                            | `passkeys.Service` discoverable login + `guard.Login`       |
 
 ### 5.2 Flow contracts
 
@@ -373,10 +373,10 @@ Rationale:
 
 Concretely, the TS twin scope is:
 
-| TS surface | Purpose | Backs onto |
-| --- | --- | --- |
-| `@hara/sdk-authkit` (passkeys client) | `beginRegistration()/finishRegistration()`, `beginLogin()/finishLogin()`; WebAuthn (de)serialization | `passkeys.Service` HTTP endpoints |
-| `@hara/sdk-authflows` (flow-state client) | typed step-state + "can submit next" mirror | `authflows` HTTP + `sdk/workflow` |
+| TS surface                                | Purpose                                                                                              | Backs onto                        |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `@hara/sdk-authkit` (passkeys client)     | `beginRegistration()/finishRegistration()`, `beginLogin()/finishLogin()`; WebAuthn (de)serialization | `passkeys.Service` HTTP endpoints |
+| `@hara/sdk-authflows` (flow-state client) | typed step-state + "can submit next" mirror                                                          | `authflows` HTTP + `sdk/workflow` |
 
 Coordinate the final policy with plan 026 (parity policy) — flagged as an open
 question (Section 8).
@@ -447,16 +447,16 @@ The extensions are additive constructors and centralized configuration.
 Per the commercial pre-GA posture, breaking changes are acceptable; this is the
 honest accounting of what building `authkit` would touch.
 
-| Change | Breaking? | Who is affected | Notes |
-| --- | --- | --- | --- |
-| New `authkit` package | No | New surface | Purely additive. |
-| New `authflows` package | No | New surface | Additive; depends on `workflow`. |
-| Additive `fortify` feature-scoped `Actions` builder | No | None | New constructor; `Actions`/`Routes` unchanged. |
-| Additive `NewSessionGuardWith(cfg)` options constructor | No | None | Existing `NewSessionGuard` retained. |
-| Rewrite `web/inertia-demo/api/auth` to use `authkit` | **Yes** (demo only) | The demo | Intended — the demo is the reference and should model best practice. Cookie name/session format would change. |
-| Centralize passkey session-key/user-resolver on `Config` | No | None (new API) | Old per-handler callbacks stay available. |
-| `Deps` validation upgrading throttle-repo mismatch from runtime to build/validation error | No | None | Stricter validation in new API only. |
-| New TS twins `@hara/sdk-authkit`, `@hara/sdk-authflows` | No | New surface | Additive; follows existing twin pattern. |
+| Change                                                                                    | Breaking?           | Who is affected | Notes                                                                                                         |
+| ----------------------------------------------------------------------------------------- | ------------------- | --------------- | ------------------------------------------------------------------------------------------------------------- |
+| New `authkit` package                                                                     | No                  | New surface     | Purely additive.                                                                                              |
+| New `authflows` package                                                                   | No                  | New surface     | Additive; depends on `workflow`.                                                                              |
+| Additive `fortify` feature-scoped `Actions` builder                                       | No                  | None            | New constructor; `Actions`/`Routes` unchanged.                                                                |
+| Additive `NewSessionGuardWith(cfg)` options constructor                                   | No                  | None            | Existing `NewSessionGuard` retained.                                                                          |
+| Rewrite `web/inertia-demo/api/auth` to use `authkit`                                      | **Yes** (demo only) | The demo        | Intended — the demo is the reference and should model best practice. Cookie name/session format would change. |
+| Centralize passkey session-key/user-resolver on `Config`                                  | No                  | None (new API)  | Old per-handler callbacks stay available.                                                                     |
+| `Deps` validation upgrading throttle-repo mismatch from runtime to build/validation error | No                  | None            | Stricter validation in new API only.                                                                          |
+| New TS twins `@hara/sdk-authkit`, `@hara/sdk-authflows`                                   | No                  | New surface     | Additive; follows existing twin pattern.                                                                      |
 
 **Net:** the only real breaking change is intentional — migrating the demo off
 its hand-rolled auth onto `authkit`. No existing `pkg/hub/auth` public API needs

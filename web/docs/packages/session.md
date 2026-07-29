@@ -59,8 +59,8 @@ in front of the router and exposed on `httpx.Request`. See
 
 Built-in handlers (each is a `Handler` under `pkg/hub/session/handlers/`):
 
-| Name       | Source                                                                                                       | When to use                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| Name       | Source                                                                                                   | When to use                            |
+| ---------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `array`    | [`handlers/array.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/session/handlers/array.go)       | Tests; per-process state               |
 | `cookie`   | [`handlers/cookie.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/session/handlers/cookie.go)     | Stateless deployments                  |
 | `file`     | [`handlers/file.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/session/handlers/file.go)         | Single-server deployments              |
@@ -100,6 +100,7 @@ mgr.Extend("redis-direct", func(cfg map[string]any) (session.Handler, error) {
 - [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 - [Cookie](/packages/cookie) and [CSRF Protection](/basics/csrf).
+
 <!-- /ALLOY:HAND -->
 
 Package session provides HTTP session management. It defines a Store with flash data, CSRF tokens, and lifecycle management, backed by swappable Handler implementations (array, file, database, cache, cookie, null, and encrypting).
@@ -177,7 +178,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

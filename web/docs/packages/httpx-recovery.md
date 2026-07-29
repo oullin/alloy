@@ -38,7 +38,7 @@ func main() {
 Requesting `/` logs the recovered panic and returns:
 
 ```json
-{"error":"internal server error"}
+{ "error": "internal server error" }
 ```
 
 ## Semantics
@@ -64,4 +64,3 @@ handler := middleware.NewHandleRecovery().Wrap(http.HandlerFunc(func(w http.Resp
 rec := httptest.NewRecorder()
 handler.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
 ```
-

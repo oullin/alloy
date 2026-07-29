@@ -18,7 +18,11 @@ import { confirm, intro, outro, select, spin, task, text } from '@hara/sdk-conso
 intro('Project setup');
 
 const name = await text('Project name', 'my-app');
-const framework = await select('Pick a framework', ['vue', 'react', 'svelte']);
+
+const framework = await select(
+	'Pick a framework',
+	['vue', 'react', 'svelte'],
+);
 
 if (await confirm('Install dependencies?')) {
 	await spin('Installing...', async () => installDependencies(name, framework));
@@ -41,25 +45,28 @@ import { createMemoryOutput, createScriptedInput, text, withPromptEnvironment } 
 
 const output = createMemoryOutput();
 
-await withPromptEnvironment({ input: createScriptedInput(['my-app']), output, interactive: true }, async () => {
-	const name = await text('Project name');
-});
+await withPromptEnvironment(
+	{ input: createScriptedInput(['my-app']), output, interactive: true },
+	async () => {
+		const name = await text('Project name');
+	},
+);
 ```
 
 ## API overview
 
-| Entry point | Main exports | Purpose |
-| --- | --- | --- |
-| `@hara/sdk-console` | everything below | root export |
-| `@hara/sdk-console/prompts` | `text`, `textarea`, `password`, `number`, `select`, `multiselect`, `confirm`, `suggest`, `autocomplete`, `search`, `multisearch`, `pause` | interactive prompts |
-| `@hara/sdk-console/prompt` | `validateUsing`, `fallbackUsing`, `fallbackWhen`, `cancelUsing` | global validation, non-interactive fallbacks, cancel handling |
-| `@hara/sdk-console/output` | `intro`, `outro`, `info`, `error`, `warning`, `note`, `table`, `dataTable`, `grid`, `notify` | formatted output and desktop notifications |
-| `@hara/sdk-console/status` | `spin`, `task`, `progress`, `stream`, `Logger`, `Progress`, `Stream` | spinners, tasks, progress bars, live streams |
-| `@hara/sdk-console/strings` | `visibleWidth`, `truncate`, `wrap`, `parseAnsiText`, `parseAnsiSegments` | ANSI-aware string measurement and slicing |
-| `@hara/sdk-console/environment` | `configurePrompts`, `withPromptEnvironment`, `createScriptedInput`, `createMemoryOutput` | environment swapping for tests and embedding |
-| `@hara/sdk-console/key` | `Key`, `keyFromEvent`, `oneOf` | key constants and matching |
-| `@hara/sdk-console/terminal` | `terminalSize`, `clearTerminal`, `hideCursor`, `showCursor`, ... | low-level terminal control |
-| `@hara/sdk-console/form` | `form`, `FormBuilder` | multi-step prompt flows |
+| Entry point                     | Main exports                                                                                                                              | Purpose                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `@hara/sdk-console`             | everything below                                                                                                                          | root export                                                   |
+| `@hara/sdk-console/prompts`     | `text`, `textarea`, `password`, `number`, `select`, `multiselect`, `confirm`, `suggest`, `autocomplete`, `search`, `multisearch`, `pause` | interactive prompts                                           |
+| `@hara/sdk-console/prompt`      | `validateUsing`, `fallbackUsing`, `fallbackWhen`, `cancelUsing`                                                                           | global validation, non-interactive fallbacks, cancel handling |
+| `@hara/sdk-console/output`      | `intro`, `outro`, `info`, `error`, `warning`, `note`, `table`, `dataTable`, `grid`, `notify`                                              | formatted output and desktop notifications                    |
+| `@hara/sdk-console/status`      | `spin`, `task`, `progress`, `stream`, `Logger`, `Progress`, `Stream`                                                                      | spinners, tasks, progress bars, live streams                  |
+| `@hara/sdk-console/strings`     | `visibleWidth`, `truncate`, `wrap`, `parseAnsiText`, `parseAnsiSegments`                                                                  | ANSI-aware string measurement and slicing                     |
+| `@hara/sdk-console/environment` | `configurePrompts`, `withPromptEnvironment`, `createScriptedInput`, `createMemoryOutput`                                                  | environment swapping for tests and embedding                  |
+| `@hara/sdk-console/key`         | `Key`, `keyFromEvent`, `oneOf`                                                                                                            | key constants and matching                                    |
+| `@hara/sdk-console/terminal`    | `terminalSize`, `clearTerminal`, `hideCursor`, `showCursor`, ...                                                                          | low-level terminal control                                    |
+| `@hara/sdk-console/form`        | `form`, `FormBuilder`                                                                                                                     | multi-step prompt flows                                       |
 
 Individual prompts are also exposed as subpaths (e.g.
 `@hara/sdk-console/prompts/select`). Tests live in `sdk/console/tests`

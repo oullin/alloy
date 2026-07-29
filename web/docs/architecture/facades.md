@@ -152,8 +152,8 @@ instance: route handlers, console commands, view helpers.
 
 The current facade set:
 
-| Facade                                                                                   | Resolves            | Common helpers                                |
-| ---------------------------------------------------------------------------------------- | ------------------- | --------------------------------------------- |
+| Facade                                                                               | Resolves            | Common helpers                                |
+| ------------------------------------------------------------------------------------ | ------------------- | --------------------------------------------- |
 | [`facades/cache`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/cache)   | `*cache.Manager`    | `Driver()`, `Store(name)`, `Repository(name)` |
 | [`facades/queue`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/queue)   | `*queue.Manager`    | `Connection(name)`                            |
 | [`facades/log`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/log)       | `*log.LogManager`   | `Channel(name)`, `Stack(...)`                 |

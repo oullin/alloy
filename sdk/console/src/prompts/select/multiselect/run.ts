@@ -15,6 +15,7 @@ export const runMultiSelectPrompt = async <T>(promptOptions: NormalizedMultiSele
 
 	const choices = normalizeChoices(promptOptions.options);
 	const activeFrame = activePromptFrame();
+
 	const submission = createPromptSubmissionState<string[]>([]);
 
 	return promptWithFallback('multiselect', promptOptions, () =>

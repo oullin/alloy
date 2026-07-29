@@ -8,7 +8,9 @@ import type { TypedValueState } from '#console/typed-value/types';
 
 export const renderAutocomplete = (message: string, state: TypedValueState, matches: string[], highlighted: number, hint = '', placeholder = '', info?: SuggestOptions['info']): string => {
 	const value = state.value.length === 0 ? dim(placeholder) : autocompleteDisplayValue(state, matches[highlighted], placeholder);
+
 	const details = joinedInfoDetails(hint, resolveInfo(info, matches[highlighted] ?? null));
+
 	const frame = `${renderBox({ body: value, borderStyle: cyan, info: details, title: cyan(message) })}\n`;
 
 	promptEnvironment().output.write(frame);

@@ -54,16 +54,16 @@ MoneyParser.create().parseAmount('$12.34'); // { amount: 12.34, currency: 'USD' 
 
 ## API overview
 
-| Entry point | Main exports | Purpose |
-| --- | --- | --- |
-| `@hara/sdk-money` | everything below | root export |
-| `@hara/sdk-money` | `MoneyValue`, `MoneyManager`, `MoneyAggregator`, `MoneyConverter`, `MoneyJson` | value type, arithmetic, aggregation, conversion, JSON codecs |
-| `@hara/sdk-money/calculator` | `MoneyCalculator`, `MAX_INT64`, `MIN_INT64` | overflow-safe bigint arithmetic |
-| `@hara/sdk-money/currency` | `CurrencyManager`, `CurrencyDefinition`, `CurrencyMap`, `DefaultCurrencyProvider`, `ISOCodePattern` | currency registry and definitions |
-| `@hara/sdk-money/errors` | `MoneyError`, `MoneyErrors`, `ERR_*` constants | coded error values |
-| `@hara/sdk-money/exchange` | `ExchangeRates`, `ExchangeConverter` | exchange-rate tables and guarded access |
-| `@hara/sdk-money/format` | `MoneyFormatter` | display formatting and major-unit conversion |
-| `@hara/sdk-money/parser` | `MoneyParser` | parsing money strings into amount + currency |
+| Entry point                  | Main exports                                                                                        | Purpose                                                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `@hara/sdk-money`            | everything below                                                                                    | root export                                                  |
+| `@hara/sdk-money`            | `MoneyValue`, `MoneyManager`, `MoneyAggregator`, `MoneyConverter`, `MoneyJson`                      | value type, arithmetic, aggregation, conversion, JSON codecs |
+| `@hara/sdk-money/calculator` | `MoneyCalculator`, `MAX_INT64`, `MIN_INT64`                                                         | overflow-safe bigint arithmetic                              |
+| `@hara/sdk-money/currency`   | `CurrencyManager`, `CurrencyDefinition`, `CurrencyMap`, `DefaultCurrencyProvider`, `ISOCodePattern` | currency registry and definitions                            |
+| `@hara/sdk-money/errors`     | `MoneyError`, `MoneyErrors`, `ERR_*` constants                                                      | coded error values                                           |
+| `@hara/sdk-money/exchange`   | `ExchangeRates`, `ExchangeConverter`                                                                | exchange-rate tables and guarded access                      |
+| `@hara/sdk-money/format`     | `MoneyFormatter`                                                                                    | display formatting and major-unit conversion                 |
+| `@hara/sdk-money/parser`     | `MoneyParser`                                                                                       | parsing money strings into amount + currency                 |
 
 Acceptance tests live in `sdk/money/tests` and run with
 `pnpm --filter @hara/sdk-money test`.

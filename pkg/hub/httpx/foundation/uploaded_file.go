@@ -15,10 +15,6 @@ import (
 	"strings"
 )
 
-// publicFileMode is the mode used by the StorePublicly helpers: readable by
-// anyone, writable only by the owner.
-const publicFileMode = fs.FileMode(0o644)
-
 // FileStore abstracts file storage for uploaded files. Implementations may
 // write to local disk, S3, GCS, or any other backend.
 //
@@ -39,6 +35,10 @@ type UploadedFile struct {
 	// testContent holds fake file content for test files.
 	testContent []byte
 }
+
+// publicFileMode is the mode used by the StorePublicly helpers: readable by
+// anyone, writable only by the owner.
+const publicFileMode = fs.FileMode(0o644)
 
 // NewUploadedFile wraps a multipart.FileHeader.
 func NewUploadedFile(header *multipart.FileHeader) *UploadedFile {

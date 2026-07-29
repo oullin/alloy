@@ -31,8 +31,8 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/authkit/...
 
 ## Source Coverage
 
-| Package   | Purpose                                                                                                                           |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Package   | Purpose                                                                                                                         |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `authkit` | Package authkit holds AuthKit parity tests for Alloy's Inception-backed team, profile, browser-session, and API-token behavior. |
 
 ## Core Concepts
@@ -77,7 +77,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

@@ -600,6 +600,7 @@ describe('data table prompt', () => {
 		);
 
 		const activeFrame = output.text().split('Pick row\n').at(-2) ?? '';
+
 		const tableLines = activeFrame.split('\n').filter((line) => line.startsWith('|'));
 
 		expect(result).toBe(0);
@@ -627,6 +628,7 @@ describe('data table prompt', () => {
 		);
 
 		const activeFrame = output.text().split('Pick row\n').at(-2) ?? '';
+
 		const widestLine = Math.max(...activeFrame.split('\n').map(visibleWidth));
 
 		expect(result).toBe(0);
@@ -660,6 +662,7 @@ describe('data table prompt', () => {
 		);
 
 		const activeFrame = output.text().split('Pick row\n').at(-2) ?? '';
+
 		const widestLine = Math.max(...activeFrame.split('\n').map(visibleWidth));
 
 		expect(result).toBe(5);

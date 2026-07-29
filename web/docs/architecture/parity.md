@@ -1,6 +1,6 @@
 # Cross-Runtime Parity Matrix & Twin Policy
 
-Alloy's value proposition is *cross-runtime primitives*: a small set of packages
+Alloy's value proposition is _cross-runtime primitives_: a small set of packages
 whose logic must produce identical results whether it runs on the Go backend or
 in a TypeScript frontend. Most packages are server-only and have no frontend
 meaning; a deliberate few are **twins** — a Go package and a `@hara/sdk-*`
@@ -23,33 +23,33 @@ Every Go package under `pkg/hub` and every TypeScript package under `sdk` is
 listed and classified **Go-only**, **TS-only**, or **Both (twin)**. Nested Go
 modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 
-| Package | Go (`pkg/hub`) | TS (`sdk`) | Classification | Conformance coverage |
-| --- | :---: | :---: | --- | --- |
-| `money` | ✅ | ✅ `@hara/sdk-money` | **Both (twin)** | None yet — see [plan 008](#conformance-the-guard-that-keeps-both-honest) |
-| `tempo` | ✅ | ✅ `@hara/sdk-tempo` | **Both (twin)** | None yet — plan 008 |
-| `workflow` | ✅ | ✅ `@hara/sdk-workflow` | **Both (twin)** | None yet — plan 008 |
-| `console` | — | ✅ `@hara/sdk-console` | **TS-only** | n/a (no backend meaning) |
-| `navigator-routes` | — | ✅ `@hara/sdk-navigator-routes` | **TS-only** | n/a (consumes a route manifest) |
-| `auth` (+ `auth/passkeys`) | ✅ | — | **Go-only** | n/a |
-| `bus` | ✅ | — | **Go-only** | n/a |
-| `cache` | ✅ | — | **Go-only** | n/a |
-| `collection` | ✅ | — | **Go-only** | n/a |
-| `config` | ✅ | — | **Go-only** | n/a |
-| `container` | ✅ | — | **Go-only** | n/a |
-| `contracts` | ✅ | — | **Go-only** | n/a |
-| `cookie` | ✅ | — | **Go-only** | n/a |
-| `database` | ✅ | — | **Go-only** | n/a |
-| `encryption` | ✅ | — | **Go-only** | n/a |
-| `events` | ✅ | — | **Go-only** | n/a |
-| `filesystem` | ✅ | — | **Go-only** | n/a |
-| `hashing` | ✅ | — | **Go-only** | n/a |
-| `httpx` | ✅ | — | **Go-only** | n/a |
-| `inertia` | ✅ | — | **Go-only** | n/a |
-| `queue` (+ `queue/drivers/sqs`) | ✅ | — | **Go-only** | n/a |
-| `seo` | ✅ | — | **Go-only** | n/a |
-| `session` | ✅ | — | **Go-only** | n/a |
-| `str` | ✅ | — | **Go-only** | n/a |
-| `validation` | ✅ | — | **Go-only** | n/a |
+| Package                         | Go (`pkg/hub`) |           TS (`sdk`)            | Classification  | Conformance coverage                                                     |
+| ------------------------------- | :------------: | :-----------------------------: | --------------- | ------------------------------------------------------------------------ |
+| `money`                         |       ✅       |      ✅ `@hara/sdk-money`       | **Both (twin)** | None yet — see [plan 008](#conformance-the-guard-that-keeps-both-honest) |
+| `tempo`                         |       ✅       |      ✅ `@hara/sdk-tempo`       | **Both (twin)** | None yet — plan 008                                                      |
+| `workflow`                      |       ✅       |     ✅ `@hara/sdk-workflow`     | **Both (twin)** | None yet — plan 008                                                      |
+| `console`                       |       —        |     ✅ `@hara/sdk-console`      | **TS-only**     | n/a (no backend meaning)                                                 |
+| `navigator-routes`              |       —        | ✅ `@hara/sdk-navigator-routes` | **TS-only**     | n/a (consumes a route manifest)                                          |
+| `auth` (+ `auth/passkeys`)      |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `bus`                           |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `cache`                         |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `collection`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `config`                        |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `container`                     |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `contracts`                     |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `cookie`                        |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `database`                      |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `encryption`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `events`                        |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `filesystem`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `hashing`                       |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `httpx`                         |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `inertia`                       |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `queue` (+ `queue/drivers/sqs`) |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `seo`                           |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `session`                       |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `str`                           |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `validation`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 
 **Summary:** 3 twins (`money`, `tempo`, `workflow`), 20 Go-only packages (plus 2
 nested Go modules), 2 TS-only packages. No twin currently has mechanical
@@ -64,14 +64,14 @@ register and policy below for why that matters).
   Go twin would be meaningless.
 - **`navigator-routes`** resolves named routes to URLs from a manifest of
   Laravel-style patterns (`sdk/navigator-routes/README.md`). It is the frontend
-  *consumer* of route definitions the Go side produces (e.g. `httpx`/`inertia`
+  _consumer_ of route definitions the Go side produces (e.g. `httpx`/`inertia`
   route descriptors); the manifest is the contract, not a shared algorithm. It
   is TS-only by design, not by omission.
 
 ## Twin parity detail
 
-Classification says a twin *exists*; it does not say the two implementations
-*agree*. This section records, per twin, the guaranteed parity level and the
+Classification says a twin _exists_; it does not say the two implementations
+_agree_. This section records, per twin, the guaranteed parity level and the
 concrete divergences found on `origin/main`.
 
 Parity levels are defined in the [policy](#parity-levels). In short: **L2** =
@@ -90,7 +90,7 @@ surfaces. Two behaviors are actively being unified by in-flight PRs; **on
   (`pkg/hub/money/calculator/calculator.go:120`) and `Calculator.round`
   (`sdk/money/src/calculator.ts:106`) currently round with `module > reminder/2`,
   i.e. **half toward zero** — the Go comment says so explicitly ("ties rounded
-  down (toward zero)", `calculator.go:118`). The two runtimes therefore *agree*
+  down (toward zero)", `calculator.go:118`). The two runtimes therefore _agree_
   numerically today, but the TS docstring already claims "half away from zero"
   (`calculator.ts:95`), so the TS doc is ahead of its own implementation.
   **Pending PR merge (#88):** unify to **half-away-from-zero** with shared
@@ -99,7 +99,7 @@ surfaces. Two behaviors are actively being unified by in-flight PRs; **on
   (`calculator.go:69`) is dead code — an `int64` can never be below `MinInt64` —
   so `Absolute(MinInt64)` overflows to `MinInt64` (still negative). TS
   `absolute` (`sdk/money/src/calculator.ts:79`) returns `2^63` via `bigint`,
-  which is *outside* the int64 range. The runtimes **diverge here today.**
+  which is _outside_ the int64 range. The runtimes **diverge here today.**
   **Pending PR merge (#88):** both return `0` for `Absolute(MinInt64)`.
 - **Exchange conversion.** Both `Rates.ConvertAmount`
   (`pkg/hub/money/exchange/exchange.go:113`, `float64(amount)/pow … math.Round`)
@@ -169,22 +169,22 @@ in both runtimes with matching vocabulary. One retry-policy field is a genuine,
   either runtime wires it up, so both converge on one definition and a shared
   fixture lands with the implementation.
 
-> **Note for reviewers:** the campaign brief characterized TS as *enforcing*
+> **Note for reviewers:** the campaign brief characterized TS as _enforcing_
 > `maxExceptions` total-per-job while Go left it unenforced. On `origin/main`
 > that is not the case — **neither** runtime enforces it. The divergence is
-> therefore about the *contract* (declared-but-unimplemented, with mismatched
+> therefore about the _contract_ (declared-but-unimplemented, with mismatched
 > docs), and the fix must land in both runtimes plus a conformance case at once.
 
 ## Divergence register
 
-| ID | Twin | Divergence | Status |
-| --- | --- | --- | --- |
-| — | `money` | Rounding tie-direction (half-toward-zero today; TS doc says away-from-zero) | Pending PR #88 → half-away-from-zero, both |
-| — | `money` | `Absolute(MinInt64)`: Go → `MinInt64`, TS → `2^63` | Pending PR #88 → `0`, both |
-| — | `money` | Exchange conversion via float64/Number (lossy > 2^53) | Pending PR #90 → exact-integer, both |
-| — | `money` | `Aggregator.Avg`: Go truncated toward zero; TS rounds half away from zero | **Resolved** (PR #101) → half-away-from-zero, both + `avg` fixture |
-| — | `tempo` | Day/week: Go calendar (`AddDate`), TS fixed-ms (DST-wrong) | Pending PR #87 → TS DST-correct |
-| **X13** | `workflow` | `RetryPolicy.MaxExceptions` declared in both, enforced in neither; docs disagree | **Open** — needs policy + dual implementation + fixture |
+| ID      | Twin       | Divergence                                                                       | Status                                                             |
+| ------- | ---------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| —       | `money`    | Rounding tie-direction (half-toward-zero today; TS doc says away-from-zero)      | Pending PR #88 → half-away-from-zero, both                         |
+| —       | `money`    | `Absolute(MinInt64)`: Go → `MinInt64`, TS → `2^63`                               | Pending PR #88 → `0`, both                                         |
+| —       | `money`    | Exchange conversion via float64/Number (lossy > 2^53)                            | Pending PR #90 → exact-integer, both                               |
+| —       | `money`    | `Aggregator.Avg`: Go truncated toward zero; TS rounds half away from zero        | **Resolved** (PR #101) → half-away-from-zero, both + `avg` fixture |
+| —       | `tempo`    | Day/week: Go calendar (`AddDate`), TS fixed-ms (DST-wrong)                       | Pending PR #87 → TS DST-correct                                    |
+| **X13** | `workflow` | `RetryPolicy.MaxExceptions` declared in both, enforced in neither; docs disagree | **Open** — needs policy + dual implementation + fixture            |
 
 ## Policy: what earns a twin, and what a twin guarantees
 
@@ -192,7 +192,7 @@ in both runtimes with matching vocabulary. One retry-policy field is a genuine,
 
 A package gets a `@hara/sdk-*` twin only when **both** of these hold:
 
-1. **Shared-result logic.** The package computes a value that must be *identical*
+1. **Shared-result logic.** The package computes a value that must be _identical_
    on backend and frontend for the product to be correct — money math, date/time
    arithmetic, workflow state transitions. If a frontend that reimplemented the
    logic could disagree with the backend and cause a user-visible bug, the logic
@@ -211,11 +211,11 @@ manifest-consumers (`navigator-routes`) are the mirror case: TS-only by the same
 test.
 
 **Default to no twin.** Twins double the maintenance surface and, without
-conformance coverage, double the *divergence* surface (see every row of the
+conformance coverage, double the _divergence_ surface (see every row of the
 register above). Add one only when rule 1 is clearly met, and prefer a **narrow
 twin** — the minimum surface that carries the shared logic — over a full port.
 This matches the `authkit` design spike (`docs/design/authkit-api.md`, plan
-025), which recommends shipping auth **Go-first** with only a *narrow* `sdk/*`
+025), which recommends shipping auth **Go-first** with only a _narrow_ `sdk/*`
 twin limited to browser-side ceremony helpers (passkeys, flow-step client),
 never a full port of the server composition layer. When a package's shared logic
 is a thin slice of a mostly-server-only concern, twin **only that slice.**
@@ -246,7 +246,7 @@ and re-evaluated whenever the twin or its fixtures change.
    (`X##`) if it is not covered by an in-flight PR. The twin drops to **L0**
    until resolved.
 2. **Resolve in both runtimes plus a fixture, atomically.** A divergence is
-   closed only when (a) both runtimes implement the *same* agreed behavior and
+   closed only when (a) both runtimes implement the _same_ agreed behavior and
    (b) a conformance case (plan 008) encodes it so it cannot silently reopen.
    Fixing one runtime without the fixture just moves the divergence; fixing the
    doc without the code (as happened with money rounding) is worse — it hides it.
@@ -256,7 +256,7 @@ and re-evaluated whenever the twin or its fixtures change.
 
 ## Conformance: the guard that keeps "both" honest
 
-Parity that is only *asserted* drifts — every row of the divergence register is a
+Parity that is only _asserted_ drifts — every row of the divergence register is a
 case that shipped precisely because no cross-runtime guard existed. **Plan 008**
 adds that guard: language-neutral JSON golden fixtures, executed by both a Go
 loader test and a TS loader test, so any future divergence fails CI instead of
@@ -287,7 +287,7 @@ comparison.
 ## Recommendation: the next twin (grounded)
 
 **The current three twins are the intended scope for now. Do not add a fourth
-speculatively.** The one grounded near-term candidate is a *narrow* auth twin,
+speculatively.** The one grounded near-term candidate is a _narrow_ auth twin,
 and only as a consequence of plan 025 — not as new scope this doc schedules.
 
 Evidence:
@@ -295,15 +295,15 @@ Evidence:
 - The only in-repo consumer, `web/inertia-demo/api/auth/*`, hand-rolls its
   auth/session logic instead of using `pkg/hub/auth`
   (`docs/design/authkit-api.md` §3.1). That is a demand signal for **`authkit`**
-  (a Go composition facade), *not* for a TS port — the assembly burden is
+  (a Go composition facade), _not_ for a TS port — the assembly burden is
   server-side.
 - Where the frontend genuinely shares logic with the backend in auth, it is the
   **browser-side ceremony** only: WebAuthn passkey enrollment and flow-step
-  progression. The plan 025 spike therefore recommends a *narrow* `sdk/*` twin
+  progression. The plan 025 spike therefore recommends a _narrow_ `sdk/*` twin
   limited to those helpers. That is the sole next-twin recommendation, and it is
   **gated on `authkit`/`authflows` shipping first** (plan 025), with tradeoffs
   owned there — this doc does not schedule the build.
-- `billing` (on `@hara/sdk-money`) is the obvious composition target *after*
+- `billing` (on `@hara/sdk-money`) is the obvious composition target _after_
   that, but it is out of scope here and not a twin recommendation.
 
 No other package clears the bar: the remaining Go-only packages are server-only

@@ -7,6 +7,12 @@ import "context"
 // collision with other packages' context values.
 type currentRouteKey struct{}
 
+// ContextRouteResolver resolves the current route from a context.Context. It
+// structurally satisfies foundation.RouteResolver without depending on shared
+// router state, so each request reads only its own matched route. Bind it once
+// (it is stateless) with foundation.Request.SetRouteResolver.
+type ContextRouteResolver struct{}
+
 // WithCurrentRoute returns a copy of ctx carrying route as the request-scoped
 // current route. The router calls this after matching so that handlers and
 // middleware can read the matched route back with the package-level accessors
@@ -75,12 +81,6 @@ func CurrentRouteIs(ctx context.Context, patterns ...string) bool {
 func CurrentRouteNamed(ctx context.Context, patterns ...string) bool {
 	return CurrentRouteIs(ctx, patterns...)
 }
-
-// ContextRouteResolver resolves the current route from a context.Context. It
-// structurally satisfies foundation.RouteResolver without depending on shared
-// router state, so each request reads only its own matched route. Bind it once
-// (it is stateless) with foundation.Request.SetRouteResolver.
-type ContextRouteResolver struct{}
 
 // CurrentRouteName returns the name of the route stored in ctx, or "".
 func (ContextRouteResolver) CurrentRouteName(ctx context.Context) string {

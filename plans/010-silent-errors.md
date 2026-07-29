@@ -17,6 +17,7 @@
 ## Why this matters
 
 The panic-removal refactor left several paths that now swallow errors and silently return zero values or drop data. Each is a place where a failure produces wrong behavior with no signal:
+
 - **C10** `EncryptedStore.Put` drops the value entirely on encrypt failure (neither encrypted nor plain stored) — silent session-data loss (CSRF tokens, auth flags).
 - **C11** session ID / CSRF token generators ignore `crypto/rand` errors → all-zero predictable token on RNG failure.
 - **C12** `str.generateRandom` ignores the RNG error → `nil.Int64()` panic (while `Password` correctly checks it).
@@ -30,18 +31,18 @@ These are grouped because each is a small, independent, well-scoped fix in the s
 ## Current state (per finding)
 
 - **C10** `pkg/hub/session/encrypted_store.go:18-32`:
-  ```go
-  func (s *EncryptedStore) Put(key string, value any) {
-      if str, ok := value.(string); ok {
-          encrypted, err := s.enc.Encrypt(str)
-          if err != nil { return }   // <- value silently dropped
-          s.Store.Put(key, encrypted)
-          return
-      }
-      s.Store.Put(key, value)
-  }
-  ```
-  `Put` has no error return — surfacing the error needs an API decision (see step 1).
+    ```go
+    func (s *EncryptedStore) Put(key string, value any) {
+        if str, ok := value.(string); ok {
+            encrypted, err := s.enc.Encrypt(str)
+            if err != nil { return }   // <- value silently dropped
+            s.Store.Put(key, encrypted)
+            return
+        }
+        s.Store.Put(key, value)
+    }
+    ```
+    `Put` has no error return — surfacing the error needs an API decision (see step 1).
 - **C11** `pkg/hub/session/store.go:754-766`: `generateID`/`generateToken` do `_, _ = rand.Read(b)` then hex-encode regardless of error.
 - **C12** `pkg/hub/str/str.go:1602-1603`: `n, _ := rand.Int(rand.Reader, ...)` then `charset[n.Int64()]` (nil deref on error). `Password` (~1651) checks the error — mirror it.
 - **C13** `pkg/hub/str/str.go:403-405`: `key := value + sep` — `Snake("a","_")` and `Snake("a_","")` collide.
@@ -53,12 +54,12 @@ Convention: prefer returning an error where the signature allows; where it doesn
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go tests (touched pkgs) | `cd pkg/hub && go test ./session/... ./str/... ./filesystem/... ./collection/...` | exit 0 |
-| Demo API tests | `cd web/inertia-demo/api && go test ./...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose                 | Command                                                                           | Expected |
+| ----------------------- | --------------------------------------------------------------------------------- | -------- |
+| Go tests (touched pkgs) | `cd pkg/hub && go test ./session/... ./str/... ./filesystem/... ./collection/...` | exit 0   |
+| Demo API tests          | `cd web/inertia-demo/api && go test ./...`                                        | exit 0   |
+| Full Go suite           | `pnpm exec vp run go:test`                                                        | exit 0   |
+| Format                  | `pnpm exec vp run format`                                                         | exit 0   |
 
 ## Scope
 

@@ -44,17 +44,17 @@ BEDROCK_INERTIA_SOURCE=/path/to/bedrock/services/demo/inertia pnpm --filter @all
 
 ## Environment variables
 
-| Variable | Applies to | Default | Purpose |
-|----------|-----------|---------|---------|
-| `CODEX_BROWSER_ARTIFACTS_DIR` | both runners | `$TMPDIR/alloy-inertia-e2e/browser-artifacts` | Base directory for run artifacts. CI points this at the runner temp dir. |
-| `PLAYWRIGHT_HEADED` | Playwright | `true` locally, `false` in CI | `true` runs headed Chromium; anything else runs headless. |
-| `PLAYWRIGHT_EXECUTABLE_PATH` / `CHROME_EXECUTABLE_PATH` / `GOOGLE_CHROME_BIN` / `CHROMIUM_BIN` | Playwright | unset (use the Playwright-managed Chromium) | Absolute path to an alternative Chromium/Chrome binary. First set wins. |
-| `PLAYWRIGHT_BROWSER_ARGS` (or `AGENT_BROWSER_ARGS`) | Playwright | none | Comma-separated extra Chromium launch args (CI uses `--no-sandbox,--disable-dev-shm-usage`). |
-| `PLAYWRIGHT_BROWSERS_PATH` | Playwright | Playwright default | Where Playwright stores/looks up its browser builds. |
-| `HELIUM_EXECUTABLE_PATH` (or `AGENT_BROWSER_EXECUTABLE_PATH`) | Agent Browser | a Helium install under `~/Applications`, if present | Path to the Helium binary. Required when Helium lives elsewhere; the runner fails fast naming this variable when it cannot find Helium. |
-| `AGENT_BROWSER_BIN` | Agent Browser | `agent-browser` (on `PATH`) | Path to the `agent-browser` CLI. |
-| `AGENT_BROWSER_HEADED` | Agent Browser | `true` | `true` runs headed Helium; anything else runs headless. |
-| `BEDROCK_INERTIA_SOURCE` | `--target bedrock` | unset (required for bedrock) | Path to a local Bedrock inertia demo checkout (e.g. `<bedrock>/services/demo/inertia`). The runner fails fast when unset. |
+| Variable                                                                                       | Applies to         | Default                                             | Purpose                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------- | ------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `CODEX_BROWSER_ARTIFACTS_DIR`                                                                  | both runners       | `$TMPDIR/alloy-inertia-e2e/browser-artifacts`       | Base directory for run artifacts. CI points this at the runner temp dir.                                                                |
+| `PLAYWRIGHT_HEADED`                                                                            | Playwright         | `true` locally, `false` in CI                       | `true` runs headed Chromium; anything else runs headless.                                                                               |
+| `PLAYWRIGHT_EXECUTABLE_PATH` / `CHROME_EXECUTABLE_PATH` / `GOOGLE_CHROME_BIN` / `CHROMIUM_BIN` | Playwright         | unset (use the Playwright-managed Chromium)         | Absolute path to an alternative Chromium/Chrome binary. First set wins.                                                                 |
+| `PLAYWRIGHT_BROWSER_ARGS` (or `AGENT_BROWSER_ARGS`)                                            | Playwright         | none                                                | Comma-separated extra Chromium launch args (CI uses `--no-sandbox,--disable-dev-shm-usage`).                                            |
+| `PLAYWRIGHT_BROWSERS_PATH`                                                                     | Playwright         | Playwright default                                  | Where Playwright stores/looks up its browser builds.                                                                                    |
+| `HELIUM_EXECUTABLE_PATH` (or `AGENT_BROWSER_EXECUTABLE_PATH`)                                  | Agent Browser      | a Helium install under `~/Applications`, if present | Path to the Helium binary. Required when Helium lives elsewhere; the runner fails fast naming this variable when it cannot find Helium. |
+| `AGENT_BROWSER_BIN`                                                                            | Agent Browser      | `agent-browser` (on `PATH`)                         | Path to the `agent-browser` CLI.                                                                                                        |
+| `AGENT_BROWSER_HEADED`                                                                         | Agent Browser      | `true`                                              | `true` runs headed Helium; anything else runs headless.                                                                                 |
+| `BEDROCK_INERTIA_SOURCE`                                                                       | `--target bedrock` | unset (required for bedrock)                        | Path to a local Bedrock inertia demo checkout (e.g. `<bedrock>/services/demo/inertia`). The runner fails fast when unset.               |
 
 In CI, `.github/workflows/ci-inertia-app-tests.yml` installs Chromium with
 `playwright install --with-deps chromium` and stores artifacts under the runner

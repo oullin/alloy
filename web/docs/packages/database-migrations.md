@@ -81,4 +81,3 @@ func main() {
 The wrapper intentionally imports only `golang-migrate` core packages. Keep
 database-specific imports in the application or service package that owns the
 actual connection.
-

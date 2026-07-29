@@ -24,7 +24,6 @@ interface MoneyConformanceFile {
 
 const fixturePath = new URL('../../../../conformance/money.json', import.meta.url);
 const fixture = JSON.parse(readFileSync(fixturePath, 'utf8')) as MoneyConformanceFile;
-
 const calculator = MoneyCalculator.create();
 const manager = MoneyManager.default();
 const rates = ExchangeRates.create();
@@ -36,21 +35,28 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 	switch (op) {
 		case 'round':
 			return calculator.round(BigInt(args[0] as string), Number(args[1])).toString();
+
 		case 'absolute':
 			return calculator.absolute(BigInt(args[0] as string)).toString();
+
 		case 'add':
 			return calculator.add(BigInt(args[0] as string), BigInt(args[1] as string)).toString();
+
 		case 'subtract':
 			return calculator.subtract(BigInt(args[0] as string), BigInt(args[1] as string)).toString();
+
 		case 'multiply':
 			return calculator.multiply(BigInt(args[0] as string), BigInt(args[1] as string)).toString();
+
 		case 'createFromFloat':
 			return manager
 				.createFromFloat(Number(args[0]), args[1] as string)
 				.amount()
 				.toString();
+
 		case 'convertWithRate':
 			return rates.convertAmountWithRate(BigInt(args[0] as string), Number(args[1]), Number(args[2]), Number(args[3])).toString();
+
 		case 'avg': {
 			const values = args.slice(1).map((raw) => manager.create(BigInt(raw), args[0] as string));
 
@@ -59,6 +65,7 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 				.amount()
 				.toString();
 		}
+
 		default:
 			throw new Error(`unknown money conformance op: ${op}`);
 	}

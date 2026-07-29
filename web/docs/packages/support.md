@@ -31,8 +31,8 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/support/...
 
 ## Source Coverage
 
-| Package   | Purpose                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package   | Purpose                                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `support` | Package support provides Go ports of alloy support utilities. It includes array and dot-notation helpers (Arr*, Dot* internals), a dynamic key-value object (Fluent), a safe nullable wrapper (Optional[T]), an error message collection (MessageBag), global helpers (Blank, Filled, Tap, Value, With, Transform, E, Env, Retry), flexible sleeping (Sleep), and time-constrained execution (Timebox). |
 
 ## Core Concepts
@@ -78,7 +78,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

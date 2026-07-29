@@ -79,17 +79,17 @@ The two ends of the manager:
 
 - **Producer side** (the framework or your code) — call `Extend` to
   register a factory:
-  ```go
-  manager.Extend("redis", func(cfg map[string]any) (cache.Store, error) {
-      return cache.NewRedisStore(cfg["client"].(*redis.Client), cfg["prefix"].(string)), nil
-  })
-  ```
+    ```go
+    manager.Extend("redis", func(cfg map[string]any) (cache.Store, error) {
+        return cache.NewRedisStore(cfg["client"].(*redis.Client), cfg["prefix"].(string)), nil
+    })
+    ```
 - **Consumer side** (handler or service code) — pull a store:
-  ```go
-  store, _ := manager.Store("redis")
-  // or for the default:
-  store, _ := manager.Driver()
-  ```
+    ```go
+    store, _ := manager.Store("redis")
+    // or for the default:
+    store, _ := manager.Driver()
+    ```
 
 ## Queue: The Same Shape, With a Twist
 
@@ -207,8 +207,8 @@ Every driver-based manager keeps the same shape. When you need to know
 what drivers a package ships and where to extend, the per-package "Drivers"
 section on each page is the source of truth. Quick index:
 
-| Manager                                    | Manager source                                                                                                        | Built-ins (read alongside the source)                            |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Manager                                    | Manager source                                                                                                   | Built-ins (read alongside the source)                            |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | [`cache`](/packages/cache)                 | [`pkg/hub/cache/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/manager.go)                 | array, file, redis, dynamodb, database, null, memoized, failover |
 | [`queue`](/packages/queue)                 | [`pkg/hub/queue/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/queue/manager.go)                 | sync, redis, sqs, null                                           |
 | [`log`](/packages/log)                     | [`pkg/hub/log/manager.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/manager.go)                     | single, stack, stderr, syslog, rotating, null                    |

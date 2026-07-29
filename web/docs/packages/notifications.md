@@ -71,8 +71,8 @@ _ = mgr.Send(ctx, ad, alert)
 
 Built-in channels:
 
-| Name        | Source                                                                                                             | Maps to                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| Name        | Source                                                                                                         | Maps to                                |
+| ----------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `mail`      | [`mail_channel.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/mail_channel.go)           | the [mailx](/packages/mailx) manager   |
 | `database`  | [`database_channel.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/database_channel.go)   | the database manager                   |
 | `broadcast` | [`broadcast_channel.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/notifications/broadcast_channel.go) | [broadcasting](/packages/broadcasting) |
@@ -108,7 +108,8 @@ the events package for tracing or interception.
 - [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 - [Mailx](/packages/mailx) and [Broadcasting](/packages/broadcasting) —
-built-in delivery channels.
+  built-in delivery channels.
+
 <!-- /ALLOY:HAND -->
 
 Package notifications provides a notification system for sending messages across multiple channels (mail, database, broadcast, and custom drivers). Notifications are dispatched through a channel manager that lazily resolves drivers, supports queued delivery via the bus package, and fires lifecycle events (sending, sent, failed) through the event dispatcher.
@@ -181,7 +182,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

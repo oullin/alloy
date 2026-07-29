@@ -14,6 +14,7 @@ export const runMultiSearchPrompt = async <T>(options: NormalizedMultiSearchProm
 	};
 
 	const activeFrame = activePromptFrame();
+
 	const submission = createPromptSubmissionState<string[]>([]);
 
 	return promptWithFallback('multisearch', options, () =>

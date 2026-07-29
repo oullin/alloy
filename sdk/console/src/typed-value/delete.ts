@@ -27,6 +27,7 @@ export const deletePreviousCharacter = (value: string[], cursor: number): number
 
 export const deletePreviousWord = (value: string[], cursor: number): number => {
 	const before = fromCharacters(value.slice(0, cursor));
+
 	const match = before.match(/(?:[\p{L}\p{M}\p{N}]+|[^\p{L}\p{M}\p{N}\s]+)\s*$/u);
 	const start = match?.index === undefined ? 0 : stringIndexToCharacterIndex(before, match.index);
 

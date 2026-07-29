@@ -3,7 +3,9 @@ import { parseTerminalColor } from '#console/terminal/validators/color';
 import type { TerminalColor } from '#console/terminal/capabilities';
 
 const streamFadeStepsSchema = z.number().finite().positive();
+
 const streamFrameWidthSchema = z.number().finite().positive();
+
 const streamFadeTrueColorSchema = z.boolean();
 
 export const parseStreamFadeSteps = (steps: unknown, defaultValue: number): number => {

@@ -17,6 +17,7 @@
 ## Why this matters
 
 Hot-path primitives recompile regexes (Go) and rebuild `Intl` formatters (TS) on every call:
+
 - **P3**: `str` helpers compile regexes per call — constant patterns (`IsUuid`, `IsUlid`, `Slug`, `Headline`, `Ucsplit`, `Squish`, `Words`, `studlySplit`) and pattern-derived ones (`Is`/glob, `IsMatch`, `Match`/`MatchAll`/`ReplaceMatches`, `Replace`, `Deduplicate`). Consumers call these in loops (slugging lists, validating IDs per record, glob-matching permission names).
 - **P4**: `tempo.ParseWithFormat` does `regexp.MustCompile(expression.String())` on every parse, so bulk-parsing a repeated layout pays a full compile per row.
 - **P9**: TS tempo builds `Intl.DateTimeFormat`/`NumberFormat`/`RelativeTimeFormat` per call on the `formatIntl`, number, and relative-time paths (the primary `format()` path already caches via `getFormatter`). `Intl.*` constructors are among the most expensive JS date operations.
@@ -31,14 +32,14 @@ Convention: Go — hoist constant-pattern regexes to package-level `var` (compil
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go tests (str, tempo) | `cd pkg/hub && go test ./str/... ./tempo/...` | exit 0 |
-| Go bench | `cd pkg/hub && go test ./str/... -bench . -benchmem` | records improvement |
-| Go race (cache concurrency) | `cd pkg/hub && go test -race ./str/...` | exit 0 |
-| TS tests | `pnpm exec vp test` (tempo) | pass |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose                     | Command                                              | Expected            |
+| --------------------------- | ---------------------------------------------------- | ------------------- |
+| Go tests (str, tempo)       | `cd pkg/hub && go test ./str/... ./tempo/...`        | exit 0              |
+| Go bench                    | `cd pkg/hub && go test ./str/... -bench . -benchmem` | records improvement |
+| Go race (cache concurrency) | `cd pkg/hub && go test -race ./str/...`              | exit 0              |
+| TS tests                    | `pnpm exec vp test` (tempo)                          | pass                |
+| Full Go suite               | `pnpm exec vp run go:test`                           | exit 0              |
+| Format                      | `pnpm exec vp run format`                            | exit 0              |
 
 ## Scope
 
@@ -54,7 +55,7 @@ Convention: Go — hoist constant-pattern regexes to package-level `var` (compil
 
 ### Step 1: Hoist constant-pattern regexes (Go str)
 
-Move every regex compiled from a *literal* pattern (`IsUuid`, `IsUlid`, `Slug`, `Headline`, `Ucsplit`, `Squish`, `Words`, `studlySplit`, etc.) to package-level `var xRe = regexp.MustCompile(...)`. Replace in-body compilation with the package var.
+Move every regex compiled from a _literal_ pattern (`IsUuid`, `IsUlid`, `Slug`, `Headline`, `Ucsplit`, `Squish`, `Words`, `studlySplit`, etc.) to package-level `var xRe = regexp.MustCompile(...)`. Replace in-body compilation with the package var.
 
 **Verify**: `cd pkg/hub && go test ./str -run 'Uuid|Ulid|Slug|Squish|Words'` → identical results; bench shows the compile gone.
 

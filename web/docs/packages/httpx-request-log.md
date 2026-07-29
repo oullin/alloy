@@ -72,4 +72,3 @@ handler := middleware.NewHandleRequestLog(middleware.RequestLogOptions{}).Wrap(
 
 handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/items", nil))
 ```
-

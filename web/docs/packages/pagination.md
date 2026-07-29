@@ -31,8 +31,8 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/pagination/...
 
 ## Source Coverage
 
-| Package      | Purpose                                                                                                                                                                                                                                                                              |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Package      | Purpose                                                                                                                                                                                                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pagination` | Package pagination provides offset-based and cursor-based paginators for alloy callers. It includes simple paginators, length-aware paginators with total counts, cursor-based paginators for efficient keyset pagination, and URL window helpers for generating page link ranges. |
 
 ## Core Concepts
@@ -77,7 +77,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

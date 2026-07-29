@@ -53,6 +53,7 @@ describe('money parser, formatter, and exchange', () => {
 
 	it('converts direct, inverse, identity, and explicit rates', () => {
 		const rates = ExchangeRates.create().addRate('USD', 'EUR', 0.8).addRate('USD', 'JPY', 150);
+
 		const converter = MoneyConverter.create(CurrencyManager.default(), rates);
 		const manager = MoneyManager.default();
 		const usd = manager.create(12345n, 'USD');

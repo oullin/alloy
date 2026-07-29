@@ -29,14 +29,14 @@ import (
 	"golang.org/x/mod/zip"
 )
 
-// rootModule is the module whose version the nested modules are pinned to.
-const rootModule = "hara.sh/alloy"
-
 // target is one publishable module: where it lives and what it is called.
 type target struct {
 	dir  string
 	path string
 }
+
+// rootModule is the module whose version the nested modules are pinned to.
+const rootModule = "hara.sh/alloy"
 
 var targets = []target{
 	{dir: "pkg/hub", path: rootModule},
@@ -73,6 +73,7 @@ func run() error {
 
 	if *stamp != "" {
 		parsed, err := time.Parse(time.RFC3339, *stamp)
+
 		if err != nil {
 			return fmt.Errorf("parsing -time: %w", err)
 		}
@@ -81,6 +82,7 @@ func run() error {
 	}
 
 	root, err := filepath.Abs(*repoRoot)
+
 	if err != nil {
 		return err
 	}
@@ -104,6 +106,7 @@ func build(root string, item target, version string, published time.Time, outDir
 	// Stage a copy so the published go.mod can differ from the working tree's
 	// without ever mutating the checkout.
 	staging, err := os.MkdirTemp("", "modzip-")
+
 	if err != nil {
 		return err
 	}
@@ -117,6 +120,7 @@ func build(root string, item target, version string, published time.Time, outDir
 	}
 
 	goMod, err := publishableGoMod(filepath.Join(staged, "go.mod"), version)
+
 	if err != nil {
 		return err
 	}
@@ -126,11 +130,13 @@ func build(root string, item target, version string, published time.Time, outDir
 	}
 
 	escaped, err := module.EscapePath(item.path)
+
 	if err != nil {
 		return err
 	}
 
 	escapedVersion, err := module.EscapeVersion(version)
+
 	if err != nil {
 		return err
 	}
@@ -190,6 +196,7 @@ func build(root string, item target, version string, published time.Time, outDir
 	}
 
 	zipHash, err := dirhash.HashZip(zipPath, dirhash.DefaultHash)
+
 	if err != nil {
 		return err
 	}
@@ -200,6 +207,7 @@ func build(root string, item target, version string, published time.Time, outDir
 	modHash, err := dirhash.Hash1([]string{"go.mod"}, func(string) (io.ReadCloser, error) {
 		return io.NopCloser(bytes.NewReader(goMod)), nil
 	})
+
 	if err != nil {
 		return err
 	}
@@ -214,11 +222,13 @@ func build(root string, item target, version string, published time.Time, outDir
 // pins any dependency on the root module to the version being released.
 func publishableGoMod(path, version string) ([]byte, error) {
 	raw, err := os.ReadFile(path)
+
 	if err != nil {
 		return nil, err
 	}
 
 	parsed, err := modfile.Parse(path, raw, nil)
+
 	if err != nil {
 		return nil, err
 	}
@@ -246,6 +256,7 @@ func publishableGoMod(path, version string) ([]byte, error) {
 // same version can be rebuilt without corrupting the listing.
 func appendVersion(path, version string) error {
 	existing, err := os.ReadFile(path)
+
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -268,6 +279,7 @@ func copyTree(source, destination string) error {
 		}
 
 		relative, err := filepath.Rel(source, path)
+
 		if err != nil {
 			return err
 		}
@@ -292,6 +304,7 @@ func copyTree(source, destination string) error {
 		}
 
 		data, err := os.ReadFile(path)
+
 		if err != nil {
 			return err
 		}

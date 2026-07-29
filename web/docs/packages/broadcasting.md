@@ -56,12 +56,12 @@ listener turns it into the call above.
 
 Built-in broadcasters:
 
-| Name     | Source                                                                                      | When to use                             |
-| -------- | ------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Name     | Source                                                                                  | When to use                             |
+| -------- | --------------------------------------------------------------------------------------- | --------------------------------------- |
 | `pusher` | [`pusher.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/pusher.go) | Pusher Channels                         |
 | `ably`   | [`ably.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/ably.go)     | Ably Realtime                           |
 | `redis`  | [`redis.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/broadcasting/redis.go)   | Self-hosted Redis pub/sub fanout        |
-| `log`    | base `LogBroadcaster` (`base.go`)                                                           | Local development; prints what would go |
+| `log`    | base `LogBroadcaster` (`base.go`)                                                       | Local development; prints what would go |
 
 ## Writing Custom Drivers
 
@@ -86,7 +86,8 @@ constructor.
 - [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 - [BroadcastClient](/packages/broadcastclient) and [WebSockets](/packages/websockets) — client-side
-and self-hosted-server companion packages.
+  and self-hosted-server companion packages.
+
 <!-- /ALLOY:HAND -->
 
 Package broadcasting provides server-side broadcasting for channel authorization, broadcast events, and broadcaster backends.
@@ -162,7 +163,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

@@ -74,8 +74,8 @@ combined.Warn("disk-pressure", "available_pct", 8)
 
 Built-in drivers (each has a handler under `pkg/hub/log/`):
 
-| Name       | Source                                                                                                 | When to use                       |
-| ---------- | ------------------------------------------------------------------------------------------------------ | --------------------------------- |
+| Name       | Source                                                                                             | When to use                       |
+| ---------- | -------------------------------------------------------------------------------------------------- | --------------------------------- |
 | `single`   | [`stream_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/stream_handler.go)     | One file/stream                   |
 | `stack`    | [`stack_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/stack_handler.go)       | Fan out to several channels       |
 | `stderr`   | [`stderr_handler.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/log/stderr_handler.go)     | Local development, container logs |
@@ -118,7 +118,8 @@ event dispatcher is wired in (`WithEventDispatcher`). See
 - [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 - [Configuration](/architecture/configuration) — how
-`LogProviderConfig` is the typed bridge to the underlying repository.
+  `LogProviderConfig` is the typed bridge to the underlying repository.
+
 <!-- /ALLOY:HAND -->
 
 Package log provides driver-based logging with support for multiple channels, stack aggregation, shared context, event dispatching, and daily file rotation. It mirrors the upstream Log component, offering a unified API through the LogManager and individual handlers for each channel type.
@@ -193,7 +194,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

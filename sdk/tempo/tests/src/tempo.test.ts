@@ -379,7 +379,6 @@ describe('Tempo TypeScript behavior', () => {
 	it('round-trips localized month names and rejects unmatched ones', () => {
 		const base = Tempo.create({ day: 14, month: 7, timeZone: 'UTC', year: 2026 });
 
-		// format(locale) -> fromFormat(locale) must round-trip for non-English locales.
 		const cases = [
 			{ locale: 'fr-FR', formatted: '14 juillet 2026' },
 			{ locale: 'de-DE', formatted: '14 Juli 2026' },

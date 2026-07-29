@@ -7,38 +7,38 @@ This document is the frontend/backend contract for the headless auth layer.
 Routes are emitted by `fortify.Routes(actions)`. Only non-nil handlers are
 registered, so applications can enable modules incrementally.
 
-| Method | Path | Name | Middleware |
-| --- | --- | --- | --- |
-| POST | `/register` | `register` | `guest` |
-| POST | `/login` | `login` | `guest` |
-| POST | `/logout` | `logout` | `auth` |
-| POST | `/forgot-password` | `password.email` | `guest` |
-| POST | `/reset-password` | `password.update` | `guest` |
-| POST | `/email/verification-notification` | `verification.send` | `auth`, `throttle` |
-| POST | `/email/verify` | `verification.verify` | `auth`, `signed` |
-| POST | `/user/confirm-password` | `password.confirm` | `auth` |
-| PUT | `/user/profile-information` | `user-profile-information.update` | `auth` |
-| PUT | `/user/password` | `user-password.update` | `auth` |
-| GET | `/user/api-tokens` | `api-tokens.index` | `auth` |
-| POST | `/user/api-tokens` | `api-tokens.store` | `auth` |
-| DELETE | `/user/api-tokens/{token}` | `api-tokens.destroy` | `auth` |
-| POST | `/user/two-factor-authentication` | `two-factor.enable` | `auth`, `password.confirm` |
-| POST | `/user/confirmed-two-factor-authentication` | `two-factor.confirm` | `auth`, `password.confirm` |
-| DELETE | `/user/two-factor-authentication` | `two-factor.disable` | `auth`, `password.confirm` |
-| POST | `/user/two-factor-recovery-codes` | `two-factor.recovery-codes` | `auth`, `password.confirm` |
-| GET | `/user/browser-sessions` | `browser-sessions.index` | `auth` |
-| DELETE | `/user/browser-sessions/{session}` | `browser-sessions.destroy` | `auth`, `password.confirm` |
-| DELETE | `/user/other-browser-sessions` | `browser-sessions.destroy-other` | `auth`, `password.confirm` |
-| POST | `/user/passkeys/options` | `passkeys.register-options` | `auth`, `password.confirm` |
-| POST | `/user/passkeys` | `passkeys.store` | `auth`, `password.confirm` |
-| POST | `/passkeys/login/options` | `passkeys.login-options` | `guest` |
-| POST | `/passkeys/login` | `passkeys.login` | `guest` |
-| GET | `/teams` | `teams.index` | `auth` |
-| POST | `/teams` | `teams.store` | `auth` |
-| PUT | `/current-team` | `current-team.update` | `auth` |
-| POST | `/teams/{team}/members` | `team-members.store` | `auth` |
-| PUT | `/teams/{team}/members/{user}` | `team-members.update` | `auth` |
-| DELETE | `/teams/{team}/members/{user}` | `team-members.destroy` | `auth` |
+| Method | Path                                        | Name                              | Middleware                 |
+| ------ | ------------------------------------------- | --------------------------------- | -------------------------- |
+| POST   | `/register`                                 | `register`                        | `guest`                    |
+| POST   | `/login`                                    | `login`                           | `guest`                    |
+| POST   | `/logout`                                   | `logout`                          | `auth`                     |
+| POST   | `/forgot-password`                          | `password.email`                  | `guest`                    |
+| POST   | `/reset-password`                           | `password.update`                 | `guest`                    |
+| POST   | `/email/verification-notification`          | `verification.send`               | `auth`, `throttle`         |
+| POST   | `/email/verify`                             | `verification.verify`             | `auth`, `signed`           |
+| POST   | `/user/confirm-password`                    | `password.confirm`                | `auth`                     |
+| PUT    | `/user/profile-information`                 | `user-profile-information.update` | `auth`                     |
+| PUT    | `/user/password`                            | `user-password.update`            | `auth`                     |
+| GET    | `/user/api-tokens`                          | `api-tokens.index`                | `auth`                     |
+| POST   | `/user/api-tokens`                          | `api-tokens.store`                | `auth`                     |
+| DELETE | `/user/api-tokens/{token}`                  | `api-tokens.destroy`              | `auth`                     |
+| POST   | `/user/two-factor-authentication`           | `two-factor.enable`               | `auth`, `password.confirm` |
+| POST   | `/user/confirmed-two-factor-authentication` | `two-factor.confirm`              | `auth`, `password.confirm` |
+| DELETE | `/user/two-factor-authentication`           | `two-factor.disable`              | `auth`, `password.confirm` |
+| POST   | `/user/two-factor-recovery-codes`           | `two-factor.recovery-codes`       | `auth`, `password.confirm` |
+| GET    | `/user/browser-sessions`                    | `browser-sessions.index`          | `auth`                     |
+| DELETE | `/user/browser-sessions/{session}`          | `browser-sessions.destroy`        | `auth`, `password.confirm` |
+| DELETE | `/user/other-browser-sessions`              | `browser-sessions.destroy-other`  | `auth`, `password.confirm` |
+| POST   | `/user/passkeys/options`                    | `passkeys.register-options`       | `auth`, `password.confirm` |
+| POST   | `/user/passkeys`                            | `passkeys.store`                  | `auth`, `password.confirm` |
+| POST   | `/passkeys/login/options`                   | `passkeys.login-options`          | `guest`                    |
+| POST   | `/passkeys/login`                           | `passkeys.login`                  | `guest`                    |
+| GET    | `/teams`                                    | `teams.index`                     | `auth`                     |
+| POST   | `/teams`                                    | `teams.store`                     | `auth`                     |
+| PUT    | `/current-team`                             | `current-team.update`             | `auth`                     |
+| POST   | `/teams/{team}/members`                     | `team-members.store`              | `auth`                     |
+| PUT    | `/teams/{team}/members/{user}`              | `team-members.update`             | `auth`                     |
+| DELETE | `/teams/{team}/members/{user}`              | `team-members.destroy`            | `auth`                     |
 
 ## JSON Errors
 
@@ -47,11 +47,11 @@ or return the same shape:
 
 ```json
 {
-  "message": "validation failed",
-  "status": 422,
-  "errors": {
-    "email": ["required"]
-  }
+	"message": "validation failed",
+	"status": 422,
+	"errors": {
+		"email": ["required"]
+	}
 }
 ```
 
@@ -145,13 +145,13 @@ Create response:
 
 ```json
 {
-  "token": {
-    "id": "1",
-    "name": "CLI",
-    "abilities": ["deploy"],
-    "created_at": "2026-06-25T00:00:00Z"
-  },
-  "plain_text": "1|secret"
+	"token": {
+		"id": "1",
+		"name": "CLI",
+		"abilities": ["deploy"],
+		"created_at": "2026-06-25T00:00:00Z"
+	},
+	"plain_text": "1|secret"
 }
 ```
 

@@ -17,19 +17,21 @@
 ## Why this matters
 
 Two URL-generation defects:
+
 1. **C15**: `floatToString` returns `intToString(int64(f))`, so a `float64` route/query parameter (`3.14`, a price, a lat/long) is silently rendered as its integer truncation (`"3"`); large floats overflow int64 with undefined output. `stringify` also returns `""` for unhandled types, silently dropping values.
 2. **C21**: Signed-URL verification (`HasCorrectSignature`) builds the HMAC input from the raw query string (only stripping `signature=`), while signing (`buildQuery`) sorts keys and `url.QueryEscape`s them. Because verify does not sort/re-encode, a valid signed URL whose params are reordered or re-encoded in transit (proxy, `+` vs `%20`) fails verification. Laravel canonicalizes on both sides.
 
 ## Current state
 
 - `pkg/hub/httpx/routing/route_url_generator.go`:
-  - `floatToString` (179-182): `return intToString(int64(f))`.
-  - `stringify` (~124): dispatches by type; returns `""` for unknown.
-  - `buildQuery` (101-122): sorts keys, `url.QueryEscape`.
+    - `floatToString` (179-182): `return intToString(int64(f))`.
+    - `stringify` (~124): dispatches by type; returns `""` for unknown.
+    - `buildQuery` (101-122): sorts keys, `url.QueryEscape`.
 - `pkg/hub/httpx/routing/url_generator.go`:
-  - `HasCorrectSignature` (281-305): builds HMAC input from `request.QueryString()` minus `signature`, no sort/re-encode; uses `hmac.Equal` (constant-time — keep that).
+    - `HasCorrectSignature` (281-305): builds HMAC input from `request.QueryString()` minus `signature`, no sort/re-encode; uses `hmac.Equal` (constant-time — keep that).
 
 Excerpt (`route_url_generator.go:179-182`):
+
 ```go
 func floatToString(f float64) string {
 	// Minimal float formatting; tests use integer parameters predominantly.
@@ -41,11 +43,11 @@ Convention: use `strconv` for numeric formatting; canonicalize query strings by 
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go routing tests | `cd pkg/hub && go test ./httpx/routing/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose          | Command                                     | Expected |
+| ---------------- | ------------------------------------------- | -------- |
+| Go routing tests | `cd pkg/hub && go test ./httpx/routing/...` | exit 0   |
+| Full Go suite    | `pnpm exec vp run go:test`                  | exit 0   |
+| Format           | `pnpm exec vp run format`                   | exit 0   |
 
 ## Scope
 

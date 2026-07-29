@@ -57,12 +57,12 @@ Directory work uses `MakeDirectory`, `Files`, `Directories`, and
 
 Two pairs are easy to mix up:
 
-| Use | When |
-| --- | --- |
-| `MakeDirectory` | creates parents, succeeds if it already exists |
-| `MakeExclusiveDirectory` | no parents, fails with `fs.ErrExist` if taken — an atomic claim on a name |
-| `Delete` | files and empty directories, ignores missing ones, errors on a non-empty directory |
-| `DeleteAll` | files or whole trees, recursive, idempotent |
+| Use                      | When                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| `MakeDirectory`          | creates parents, succeeds if it already exists                                     |
+| `MakeExclusiveDirectory` | no parents, fails with `fs.ErrExist` if taken — an atomic claim on a name          |
+| `Delete`                 | files and empty directories, ignores missing ones, errors on a non-empty directory |
+| `DeleteAll`              | files or whole trees, recursive, idempotent                                        |
 
 ## Untrusted Paths
 
@@ -159,6 +159,7 @@ your own event-emitting decorator if you need observability.
 ## See Also
 
 - [Service Providers](/architecture/service-providers).
+
 <!-- /ALLOY:HAND -->
 
 Package filesystem provides local filesystem operations including reading, writing, copying, moving, and deleting files and directories. It also supports file locking, MIME type detection, hashing, and permission management.
@@ -232,7 +233,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |
@@ -275,72 +276,72 @@ Parity is tracked by these tests:
 
 ### Exported Types
 
-| Type                        | Notes                                                                              |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| `Local`                     | Path-based local filesystem operations.                                            |
-| `Rooted`                    | The same operations, confined to a root directory. Holds an fd; must be closed.     |
-| `LockableFile`              | Source-backed public surface. See the Go package for exact signature and behavior. |
+| Type           | Notes                                                                              |
+| -------------- | ---------------------------------------------------------------------------------- |
+| `Local`        | Path-based local filesystem operations.                                            |
+| `Rooted`       | The same operations, confined to a root directory. Holds an fd; must be closed.    |
+| `LockableFile` | Source-backed public surface. See the Go package for exact signature and behavior. |
 
 ### Exported Functions
 
-| Function                       | Notes                                                                              |
-| ------------------------------ | ---------------------------------------------------------------------------------- |
-| `AllDirectories`               | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `AllFiles`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Append`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Basename`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Chmod`                        | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `CleanDirectory`               | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Close`                        | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Copy`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `CopyDirectory`                | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Delete`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `DeleteDirectories`            | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `DeleteDirectory`              | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Directories`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Dirname`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `EnsureDirectoryExists`        | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `ExclusiveLock`                | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Exists`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Extension`                    | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Files`                        | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Get`                          | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Glob`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `GuessExtension`               | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `HasSameHash`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Hash`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `IsDirectory`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `IsEmptyDirectory`             | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `IsFile`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `IsReadable`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `IsWritable`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `JSON`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `LastModified`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Lines`                        | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Link`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `MakeDirectory`                | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `MimeType`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Missing`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Move`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `MoveDirectory`                | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Name`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `New`                          | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `NewLockableFile`              | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `At`                           | Opens a directory as a Rooted sandbox.                                             |
-| `Path`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Prepend`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Put`                          | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Read`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `RelativeLink`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Replace`                      | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `ReplaceInFile`                | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `SharedGet`                    | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `SharedLock`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Size`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Truncate`                     | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Type`                         | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Unlock`                       | Source-backed public surface. See the Go package for exact signature and behavior. |
-| `Write`                        | Source-backed public surface. See the Go package for exact signature and behavior. |
+| Function                | Notes                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `AllDirectories`        | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `AllFiles`              | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Append`                | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Basename`              | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Chmod`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `CleanDirectory`        | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Close`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Copy`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `CopyDirectory`         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Delete`                | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `DeleteDirectories`     | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `DeleteDirectory`       | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Directories`           | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Dirname`               | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `EnsureDirectoryExists` | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `ExclusiveLock`         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Exists`                | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Extension`             | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Files`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Get`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Glob`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `GuessExtension`        | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `HasSameHash`           | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Hash`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IsDirectory`           | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IsEmptyDirectory`      | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IsFile`                | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IsReadable`            | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `IsWritable`            | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `JSON`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `LastModified`          | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Lines`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Link`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `MakeDirectory`         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `MimeType`              | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Missing`               | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Move`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `MoveDirectory`         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Name`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `New`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `NewLockableFile`       | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `At`                    | Opens a directory as a Rooted sandbox.                                             |
+| `Path`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Prepend`               | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Put`                   | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Read`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `RelativeLink`          | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Replace`               | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `ReplaceInFile`         | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `SharedGet`             | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `SharedLock`            | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Size`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Truncate`              | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Type`                  | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Unlock`                | Source-backed public surface. See the Go package for exact signature and behavior. |
+| `Write`                 | Source-backed public surface. See the Go package for exact signature and behavior. |
 
 ### Exported Errors, Variables, and Constants
 
