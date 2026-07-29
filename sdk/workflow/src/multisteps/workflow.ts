@@ -4,7 +4,7 @@ import type { JobSpec } from '#workflow/multisteps/jobs';
 
 /**
  * A named collection of job specs that compiles into a dependency graph for
- * multi-step execution (see `@alloy/sdk/workflow/multisteps`).
+ * multi-step execution (see `@hara/sdk-workflow/multisteps`).
  */
 export class MultiStepWorkflow {
 	readonly #name: string;

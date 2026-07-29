@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { Tempo } from '@alloy/sdk/tempo';
+import { Tempo } from '@hara/sdk-tempo';
 import { describe, expect, it } from 'vite-plus/test';
 
 // Shared Go<->TS golden vectors. This is the TS half of the cross-runtime drift

@@ -3,7 +3,7 @@
 Alloy's value proposition is *cross-runtime primitives*: a small set of packages
 whose logic must produce identical results whether it runs on the Go backend or
 in a TypeScript frontend. Most packages are server-only and have no frontend
-meaning; a deliberate few are **twins** — a Go package and a `@alloy/sdk/*`
+meaning; a deliberate few are **twins** — a Go package and a `@hara/sdk-*`
 package that are maintained as behavioral mirrors of one another.
 
 This page is the authoritative map of which primitive exists in which runtime,
@@ -25,11 +25,11 @@ modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 
 | Package | Go (`pkg/hub`) | TS (`sdk`) | Classification | Conformance coverage |
 | --- | :---: | :---: | --- | --- |
-| `money` | ✅ | ✅ `@alloy/sdk/money` | **Both (twin)** | None yet — see [plan 008](#conformance-the-guard-that-keeps-both-honest) |
-| `tempo` | ✅ | ✅ `@alloy/sdk/tempo` | **Both (twin)** | None yet — plan 008 |
-| `workflow` | ✅ | ✅ `@alloy/sdk/workflow` | **Both (twin)** | None yet — plan 008 |
-| `console` | — | ✅ `@alloy/sdk/console` | **TS-only** | n/a (no backend meaning) |
-| `navigator-routes` | — | ✅ `@alloy/sdk/navigator-routes` | **TS-only** | n/a (consumes a route manifest) |
+| `money` | ✅ | ✅ `@hara/sdk-money` | **Both (twin)** | None yet — see [plan 008](#conformance-the-guard-that-keeps-both-honest) |
+| `tempo` | ✅ | ✅ `@hara/sdk-tempo` | **Both (twin)** | None yet — plan 008 |
+| `workflow` | ✅ | ✅ `@hara/sdk-workflow` | **Both (twin)** | None yet — plan 008 |
+| `console` | — | ✅ `@hara/sdk-console` | **TS-only** | n/a (no backend meaning) |
+| `navigator-routes` | — | ✅ `@hara/sdk-navigator-routes` | **TS-only** | n/a (consumes a route manifest) |
 | `auth` (+ `auth/passkeys`) | ✅ | — | **Go-only** | n/a |
 | `bus` | ✅ | — | **Go-only** | n/a |
 | `cache` | ✅ | — | **Go-only** | n/a |
@@ -79,7 +79,7 @@ mechanically enforced by shared fixtures; **L1** = asserted parity with matching
 tests but no shared oracle; **L0** = a shared surface with known, unresolved
 divergence.
 
-### `money` ↔ `@alloy/sdk/money` — currently **L1**, divergences in flight
+### `money` ↔ `@hara/sdk-money` — currently **L1**, divergences in flight
 
 Both runtimes model amounts as 64-bit minor units (Go `int64`; TS `bigint`
 range-checked to int64) and expose matching calculator/currency/exchange/parser
@@ -120,7 +120,7 @@ surfaces. Two behaviors are actively being unified by in-flight PRs; **on
 Once #88/#90 land, `money` reaches **L1** cleanly and is eligible for **L2** as
 soon as plan 008's fixtures are added.
 
-### `tempo` ↔ `@alloy/sdk/tempo` — currently **L0** for day/week, fix in flight
+### `tempo` ↔ `@hara/sdk-tempo` — currently **L0** for day/week, fix in flight
 
 Tempo is described in the README as "the most complete cross-runtime package",
 but calendar arithmetic diverges on `origin/main`:
@@ -143,7 +143,7 @@ but calendar arithmetic diverges on `origin/main`:
 
 Once #87 lands, `tempo` day/week reaches **L1**; **L2** follows with plan 008.
 
-### `workflow` ↔ `@alloy/sdk/workflow` — **L0**, unresolved divergence (X13)
+### `workflow` ↔ `@hara/sdk-workflow` — **L0**, unresolved divergence (X13)
 
 The Petri-net engine, definition builder, marking, and multi-step runner exist
 in both runtimes with matching vocabulary. One retry-policy field is a genuine,
@@ -190,7 +190,7 @@ in both runtimes with matching vocabulary. One retry-policy field is a genuine,
 
 ### What earns a TS twin
 
-A package gets a `@alloy/sdk/*` twin only when **both** of these hold:
+A package gets a `@hara/sdk-*` twin only when **both** of these hold:
 
 1. **Shared-result logic.** The package computes a value that must be *identical*
    on backend and frontend for the product to be correct — money math, date/time
@@ -303,7 +303,7 @@ Evidence:
   limited to those helpers. That is the sole next-twin recommendation, and it is
   **gated on `authkit`/`authflows` shipping first** (plan 025), with tradeoffs
   owned there — this doc does not schedule the build.
-- `billing` (on `@alloy/sdk/money`) is the obvious composition target *after*
+- `billing` (on `@hara/sdk-money`) is the obvious composition target *after*
   that, but it is out of scope here and not a twin recommendation.
 
 No other package clears the bar: the remaining Go-only packages are server-only

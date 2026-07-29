@@ -33,7 +33,7 @@ the layer that makes the primitives the path of least resistance.
    engine.
 3. Ship `authkit`/`authflows` **Go-first**. Add a **narrow** `sdk/*` TypeScript
    twin limited to the browser-side ceremony helpers (passkeys, flow-step
-   client), following the existing `@alloy/sdk/*` twin pattern — not a full
+   client), following the existing `@hara/sdk-*` twin pattern — not a full
    port (Section 6).
 4. Note `billing` (on `sdk/money`) as the obvious next composition target, but
    do not design it here (out of scope per the plan).
@@ -345,7 +345,7 @@ avoid double-dispatch.
 - Resumable onboarding (email verification can complete hours later) maps
   naturally to a persisted marking via `workflow/store`.
 - The audit trail is a compliance asset for a commercial product.
-- The `sdk/workflow` TS twin already exists (`@alloy/sdk/workflow`), which makes
+- The `sdk/workflow` TS twin already exists (`@hara/sdk-workflow`), which makes
   the client-side flow-state mirror in Section 6 cheap.
 
 ## 6. Cross-runtime recommendation (Go-only vs. TS twin)
@@ -354,17 +354,17 @@ avoid double-dispatch.
 
 Rationale:
 
-- The `sdk/*` twin pattern is established: `@alloy/sdk/workflow`,
-  `@alloy/sdk/money`, plus `console`, `tempo`, `navigator-routes`
+- The `sdk/*` twin pattern is established: `@hara/sdk-workflow`,
+  `@hara/sdk-money`, plus `console`, `tempo`, `navigator-routes`
   (`sdk/*/package.json`). A twin is idiomatic here, not novel.
 - **Passkeys genuinely need a browser client.** WebAuthn ceremonies run
   `navigator.credentials.create/get()` in the browser; the server
   (`passkeys.Service`) only issues/validates options. A thin
-  `@alloy/sdk/authkit` that wraps the begin/finish round-trips and the
+  `@hara/sdk-authkit` that wraps the begin/finish round-trips and the
   `PublicKeyCredential` (de)serialization removes real friction and is the
   highest-value twin surface.
 - **Flow state benefits from a client mirror.** Because `sdk/workflow` already
-  exists, a small `@alloy/sdk/authflows` that mirrors flow step-state (which
+  exists, a small `@hara/sdk-authflows` that mirrors flow step-state (which
   step am I on, what can I submit next) is cheap and improves the SPA/Inertia
   UX that the demo targets.
 - **Do not** port the composition/guard/session logic to TS. Session
@@ -375,8 +375,8 @@ Concretely, the TS twin scope is:
 
 | TS surface | Purpose | Backs onto |
 | --- | --- | --- |
-| `@alloy/sdk/authkit` (passkeys client) | `beginRegistration()/finishRegistration()`, `beginLogin()/finishLogin()`; WebAuthn (de)serialization | `passkeys.Service` HTTP endpoints |
-| `@alloy/sdk/authflows` (flow-state client) | typed step-state + "can submit next" mirror | `authflows` HTTP + `sdk/workflow` |
+| `@hara/sdk-authkit` (passkeys client) | `beginRegistration()/finishRegistration()`, `beginLogin()/finishLogin()`; WebAuthn (de)serialization | `passkeys.Service` HTTP endpoints |
+| `@hara/sdk-authflows` (flow-state client) | typed step-state + "can submit next" mirror | `authflows` HTTP + `sdk/workflow` |
 
 Coordinate the final policy with plan 026 (parity policy) — flagged as an open
 question (Section 8).
@@ -427,7 +427,7 @@ The extensions are additive constructors and centralized configuration.
 2. **v1 feature cut.** Is v1 the "core four" (register, login+throttle, logout,
    password reset), deferring passkeys/2FA/teams/API-tokens to v1.1? Recommend
    yes — ship the highest-reuse surface first, matching the demo's actual needs.
-3. **TS twin timing.** Build the `@alloy/sdk/authkit` passkey client with the Go
+3. **TS twin timing.** Build the `@hara/sdk-authkit` passkey client with the Go
    v1, or fast-follow? Depends on plan 026's parity policy — must be reconciled
    before committing.
 4. **Teams in `authkit` vs. separate.** Teams is arguably an authorization/org
@@ -456,7 +456,7 @@ honest accounting of what building `authkit` would touch.
 | Rewrite `web/inertia-demo/api/auth` to use `authkit` | **Yes** (demo only) | The demo | Intended — the demo is the reference and should model best practice. Cookie name/session format would change. |
 | Centralize passkey session-key/user-resolver on `Config` | No | None (new API) | Old per-handler callbacks stay available. |
 | `Deps` validation upgrading throttle-repo mismatch from runtime to build/validation error | No | None | Stricter validation in new API only. |
-| New TS twins `@alloy/sdk/authkit`, `@alloy/sdk/authflows` | No | New surface | Additive; follows existing twin pattern. |
+| New TS twins `@hara/sdk-authkit`, `@hara/sdk-authflows` | No | New surface | Additive; follows existing twin pattern. |
 
 **Net:** the only real breaking change is intentional — migrating the demo off
 its hand-rolled auth onto `authkit`. No existing `pkg/hub/auth` public API needs
@@ -510,7 +510,7 @@ composition facade, not new behavior.
    browser sessions, teams wired through `Config.Features`.
 3. **Plan C — `authflows`.** The four flows on `pkg/hub/workflow`, with events
    and audit trail.
-4. **Plan D — TS twins.** `@alloy/sdk/authkit` passkey client, then
-   `@alloy/sdk/authflows` state mirror — gated on plan 026.
+4. **Plan D — TS twins.** `@hara/sdk-authkit` passkey client, then
+   `@hara/sdk-authflows` state mirror — gated on plan 026.
 5. **Later — `billing`.** Compose `sdk/money` + `authkit` identity. Separate
    spike/design; not covered here.

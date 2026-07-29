@@ -1,8 +1,8 @@
 # Cross-runtime conformance fixtures
 
 This directory is the **single source of cross-runtime truth** for the money and
-tempo twins. `pkg/hub/money` (Go) and `@alloy/sdk/money` (TS), and
-`pkg/hub/tempo` (Go) and `@alloy/sdk/tempo` (TS), are behavioral mirrors. The
+tempo twins. `pkg/hub/money` (Go) and `@hara/sdk-money` (TS), and
+`pkg/hub/tempo` (Go) and `@hara/sdk-tempo` (TS), are behavioral mirrors. The
 JSON files here encode language-neutral golden vectors that **both** runtimes
 execute, so any divergence fails CI instead of surfacing as a production
 discrepancy between backend and frontend. This is the guard that raises the twins

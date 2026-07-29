@@ -1,7 +1,11 @@
 {
-  "name": "@alloy/sdk/tempo",
+  "name": "@hara/sdk-tempo",
   "version": "0.1.0",
   "private": true,
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://hara.sh/npm/"
+  },
   "license": "SEE LICENSE IN LICENSE.md",
   "repository": {
     "type": "git",
@@ -29,7 +33,7 @@
     "build": "rm -rf dist ../../infra/.cache/tsbuild/tempo-build.tsbuildinfo && tsc -p tsconfig.build.json",
     "lint": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'",
     "prepack": "pnpm build",
-    "test": "pnpm --filter @alloy/sdk/tempo-tests test:tempo",
+    "test": "pnpm --filter @hara/sdk-tempo-tests test:tempo",
     "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
   },
   "devDependencies": {

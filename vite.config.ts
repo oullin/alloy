@@ -12,11 +12,11 @@ export default defineConfig({
 				replacement: repoPath('./infra/src'),
 			},
 			{
-				find: '@alloy/sdk/tempo',
+				find: '@hara/sdk-tempo',
 				replacement: repoPath('./sdk/tempo/src'),
 			},
 			{
-				find: '@alloy/sdk/money',
+				find: '@hara/sdk-money',
 				replacement: repoPath('./sdk/money/src'),
 			},
 			{
@@ -24,19 +24,19 @@ export default defineConfig({
 				replacement: repoPath('./sdk/money/src/$1'),
 			},
 			{
-				find: '@alloy/sdk/tempo-tests',
+				find: '@hara/sdk-tempo-tests',
 				replacement: repoPath('./sdk/tempo/tests/src'),
 			},
 			{
-				find: '@alloy/sdk/console',
+				find: '@hara/sdk-console',
 				replacement: repoPath('./sdk/console/src'),
 			},
 			{
-				find: '@alloy/sdk/workflow',
+				find: '@hara/sdk-workflow',
 				replacement: repoPath('./sdk/workflow/src'),
 			},
 			{
-				find: /^@alloy\/sdk\/workflow\/(.+)$/u,
+				find: /^@hara\/sdk-workflow\/(.+)$/u,
 				replacement: repoPath('./sdk/workflow/src/$1'),
 			},
 			{
@@ -66,6 +66,10 @@ export default defineConfig({
 	},
 	test: {
 		passWithNoTests: true,
+		// Stale agent worktrees live inside the repo and are git-excluded, but the
+		// test glob still walks into them and reports hundreds of failures for code
+		// that is not the working tree.
+		exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/worktrees/**', '**/.agents/**'],
 		environment: 'node',
 		globals: false,
 		coverage: {

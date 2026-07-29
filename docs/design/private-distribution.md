@@ -1,5 +1,19 @@
 # Private-package distribution for the subscription model
 
+> **SUPERSEDED (2026-07-29).** Alloy now distributes through a self-hosted,
+> API-key-gated service on `hara.sh` that speaks both the npm registry and Go
+> module proxy protocols. Go modules are published as `hara.sh/alloy` and the
+> TypeScript packages as `@hara/sdk-<name>`; a licence grants one year of
+> upgrades with perpetual access to everything released in that window.
+>
+> This document is retained for the current-state survey in §2 and the option
+> analysis in §3–§4. Its recommendation (§7), migration steps (§8), and the
+> `.npmrc` snippet in §3 are **no longer accurate** — the GitHub Packages route
+> requires every customer to hold a GitHub account and cannot express a version
+> ceiling, and pnpm removed `${ENV}` expansion in repository `.npmrc` files in
+> 10.34.2/11.5.3 (GHSA-3qhv-2rgh-x77r). Package names shown as
+> `@alloy/sdk/<name>` describe the pre-rename state on purpose.
+
 This spike defines a delivery path for Alloy's paid subscription packages. It decides how a paying customer can resolve TypeScript and Go dependencies with standard package tooling, how access follows an entitlement, and what must change from today's release artifacts and clone-based workflow. It does not design billing, a customer portal, or the entitlement service.
 
 **Status: spike / draft for owner review**

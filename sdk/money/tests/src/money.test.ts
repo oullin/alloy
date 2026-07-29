@@ -31,7 +31,7 @@ type MoneyValueFactories = {
 	[Code in CurrencyCode as `from${Code}`]: (amount: Amount) => MoneyValueInstance;
 };
 
-describe('@alloy/sdk/money OOP port', () => {
+describe('@hara/sdk-money OOP port', () => {
 	it('keeps the root package class-first without top-level DB helper functions', async () => {
 		const api = await import('#money/index');
 

@@ -4,8 +4,8 @@
 		"tsBuildInfoFile": "../../infra/.cache/tsbuild/workflow.tsbuildinfo",
 		"types": ["node"],
 		"paths": {
-			"@alloy/sdk/workflow": ["./src/index.ts"],
-			"@alloy/sdk/workflow/*": ["./src/*"],
+			"@hara/sdk-workflow": ["./src/index.ts"],
+			"@hara/sdk-workflow/*": ["./src/*"],
 			"#workflow/*": ["./src/*"]
 		}
 	},

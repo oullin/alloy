@@ -18,7 +18,7 @@ import {
 	today,
 	tomorrow,
 	yesterday,
-} from '@alloy/sdk/tempo';
+} from '@hara/sdk-tempo';
 
 const dateCases = [
 	{

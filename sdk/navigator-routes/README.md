@@ -1,7 +1,7 @@
 # Navigator Routes TypeScript
 
 The TypeScript package lives in `sdk/navigator-routes` and exposes
-`@alloy/sdk/navigator-routes`. It is a tiny, dependency-free resolver that turns
+`@hara/sdk-navigator-routes`. It is a tiny, dependency-free resolver that turns
 named routes into URLs from a manifest of Laravel-style patterns. Patterns
 support required (`{id}`) and optional (`{page?}`) parameters with optional
 constraints (`{id:\d+}`); parameter values are URL-encoded, duplicate
@@ -14,7 +14,7 @@ This is a private workspace package: it is consumed by sibling packages via
 Build a resolver once from a route manifest and call it by name:
 
 ```ts
-import { createRouteResolver } from '@alloy/sdk/navigator-routes';
+import { createRouteResolver } from '@hara/sdk-navigator-routes';
 
 const route = createRouteResolver({
 	'posts.show': '/posts/{post}',
@@ -30,7 +30,7 @@ The manifest can also be a function, so routes injected at runtime (for
 example from a server-rendered page) are re-read on every call:
 
 ```ts
-import { createRouteResolver } from '@alloy/sdk/navigator-routes';
+import { createRouteResolver } from '@hara/sdk-navigator-routes';
 
 const route = createRouteResolver(() => window.__routes, {
 	fallback: '/',
@@ -41,7 +41,7 @@ const route = createRouteResolver(() => window.__routes, {
 The lower-level helpers are exported for one-off use:
 
 ```ts
-import { fillPattern, resolveRoute, resolveRouteUrl } from '@alloy/sdk/navigator-routes';
+import { fillPattern, resolveRoute, resolveRouteUrl } from '@hara/sdk-navigator-routes';
 
 fillPattern('/users/{user}/posts/{post?}', { user: 7 }); // "/users/7/posts"
 resolveRouteUrl(manifest, 'posts.show', { post: 42 }); // "/posts/42"
@@ -61,4 +61,4 @@ resolveRoute(manifest, 'posts.show', { post: 42 }); // { url: "/posts/42" }
 
 Unresolved required parameters are left as-is in the URL (e.g.
 `/posts/{post}`), while unresolved optional segments are dropped. Tests run
-with `pnpm --filter @alloy/sdk/navigator-routes test`.
+with `pnpm --filter @hara/sdk-navigator-routes test`.

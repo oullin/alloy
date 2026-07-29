@@ -1,7 +1,11 @@
 {
-  "name": "@alloy/sdk/navigator-routes",
+  "name": "@hara/sdk-navigator-routes",
   "version": "0.1.0",
   "private": true,
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://hara.sh/npm/"
+  },
   "license": "SEE LICENSE IN LICENSE.md",
   "repository": {
     "type": "git",

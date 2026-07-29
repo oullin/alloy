@@ -78,7 +78,7 @@ importers:
 
   sdk/tempo/tests:
     dependencies:
-      '@alloy/sdk/tempo':
+      '@hara/sdk-tempo':
         specifier: workspace:*
         version: link:..
     devDependencies:

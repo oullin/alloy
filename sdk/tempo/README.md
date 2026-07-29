@@ -1,14 +1,14 @@
 # Tempo TypeScript
 
 The TypeScript package lives in `sdk/tempo` and publishes as
-`@alloy/sdk/tempo`. Acceptance tests for this package live in
+`@hara/sdk-tempo`. Acceptance tests for this package live in
 `sdk/tempo/tests` and expose the `test:tempo` script.
 
 Tempo extension points are plain composables. Keep reusable behavior in normal
 functions that accept and return Tempo values:
 
 ```ts
-import { Tempo, type TempoImmutable } from "@alloy/sdk/tempo";
+import { Tempo, type TempoImmutable } from "@hara/sdk-tempo";
 
 export const dateOnly = (value: TempoImmutable): string => value.toDateString();
 
@@ -35,7 +35,7 @@ Tempo.createNormalized({ year: 2024, month: 2, day: 31 });
 Locale and translation behavior is composed with runtimes and factories:
 
 ```ts
-import { TempoFactory, createTempoRuntime } from "@alloy/sdk/tempo";
+import { TempoFactory, createTempoRuntime } from "@hara/sdk-tempo";
 
 const runtime = createTempoRuntime({
   locale: "en-US",

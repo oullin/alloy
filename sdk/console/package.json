@@ -1,7 +1,11 @@
 {
-  "name": "@alloy/sdk/console",
+  "name": "@hara/sdk-console",
   "version": "0.1.0",
   "private": true,
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://hara.sh/npm/"
+  },
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",

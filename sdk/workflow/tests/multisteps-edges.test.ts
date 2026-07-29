@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { AsyncJob, CompileError, LiteralArg, MultiStepEngine, MultiStepResult, MultiStepWorkflow, ResponseArg, SyncJob, WorkflowError } from '@alloy/sdk/workflow/multisteps';
+import { AsyncJob, CompileError, LiteralArg, MultiStepEngine, MultiStepResult, MultiStepWorkflow, ResponseArg, SyncJob, WorkflowError } from '@hara/sdk-workflow/multisteps';
 
 describe('multisteps edge cases', () => {
 	it('marks skipped dependencies complete enough for downstream jobs', async () => {

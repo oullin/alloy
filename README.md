@@ -7,7 +7,7 @@ automation under `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
 available as both a Go package (`github.com/oullin/alloy/pkg/hub/tempo`) and a
-TypeScript package (`@alloy/sdk/tempo`). Only a deliberate few packages are
+TypeScript package (`@hara/sdk-tempo`). Only a deliberate few packages are
 cross-runtime twins; the [Cross-Runtime Parity Matrix](web/docs/architecture/parity.md)
 maps which primitives exist in which runtime, how much parity each twin
 guarantees, and the policy for what earns a twin.
@@ -62,7 +62,7 @@ pnpm exec vp run format-all
 Tempo-specific acceptance coverage can also be run directly:
 
 ```sh
-pnpm --filter @alloy/sdk/tempo-tests test:tempo
+pnpm --filter @hara/sdk-tempo-tests test:tempo
 ```
 
 The root package scripts are aliases for the main TypeScript checks:
