@@ -7,8 +7,9 @@ workflow; see [README.md](README.md) for the workspace layout.
 
 - Node.js 24 or newer, pnpm 10.33.0
 - Go 1.26.5 (for Go package checks)
-- Docker or Docker Compose (formatting and Go test tasks are Docker-backed
-  so local output matches CI)
+- [fmtkit](https://github.com/oullin/fmtkit) for formatting (`brew install --cask fmtkit`)
+- Docker or Docker Compose (the Go test task is container-backed so local
+  output matches CI)
 
 ## Setup
 
@@ -27,7 +28,7 @@ pnpm exec vp test             # TypeScript tests (Vitest)
 pnpm -r --filter './sdk/*' build   # build publishable packages
 pnpm lint                     # oxlint + workspace import checks
 pnpm exec vp run go:test      # Go vet + tests with -race (Docker-backed)
-pnpm exec vp run format       # format changed files (Docker-backed)
+pnpm exec vp run format       # format changed files (fmtkit)
 pnpm exec vp run format-all   # format everything + vp check --fix
 ```
 

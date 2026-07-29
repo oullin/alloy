@@ -96,7 +96,7 @@ export default defineConfig({
 		tasks: {
 			'cache:setup': { command: 'bash infra/scripts/tasks/cache-setup.sh', cache: false },
 			format: { command: 'bash infra/scripts/tasks/format-files.sh changed', cache: false },
-			'format-all': { command: "bash infra/scripts/tasks/docker-compose-run.sh fmt format-all && bash -lc 'source infra/scripts/tasks/cache-env.sh && vp check --fix'", cache: false },
+			'format-all': { command: "bash infra/scripts/tasks/format-files.sh all && bash -lc 'source infra/scripts/tasks/cache-env.sh && vp check --fix'", cache: false },
 			'go:test': { command: 'bash infra/scripts/tasks/go-test.sh', cache: false },
 			'go:artifacts': { command: 'bash infra/scripts/tasks/check-go-artifacts.sh', cache: false },
 			'check:imports': { command: 'vp exec node infra/scripts/tasks/check-package-imports.mjs', cache: false },

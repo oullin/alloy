@@ -36,7 +36,8 @@ Do not add language suffixes such as `*-ts` to package paths.
 - Node.js 24 or newer.
 - pnpm 10.33.0.
 - Go 1.26.5 for Go package checks.
-- Docker or Docker Compose for the formatter tasks.
+- [fmtkit](https://github.com/oullin/fmtkit) for the formatter tasks
+  (`brew install --cask fmtkit`).
 
 ## Setup
 
@@ -76,8 +77,9 @@ pnpm typecheck
 
 ## Formatting
 
-Formatting is intentionally Docker-backed so local output matches CI and the
-shared formatter image. Use one of the stable entrypoints:
+Formatting runs through [fmtkit](https://github.com/oullin/fmtkit), a single
+binary that formats both Go and TS/Vue with no image pull and no daemon. Use
+one of the stable entrypoints:
 
 ```sh
 pnpm exec vp run format
@@ -96,8 +98,8 @@ Vite+ owns orchestration in this repository. Custom task definitions live in
 `infra/scripts/tasks`.
 
 The root `Makefile` is a compatibility delegate for existing `make <target>`
-commands. It forwards targets to Vite+ while preserving the Docker-backed
-formatter commands.
+commands. It forwards targets to Vite+ while preserving the formatter
+commands.
 
 ## More Documentation
 
