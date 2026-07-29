@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/config"
 	"github.com/spf13/viper"
+	"hara.sh/alloy/config"
 )
 
 func newRepository() *config.Repository {

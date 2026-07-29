@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func TestCSRFToken_ContextRoundTrip(t *testing.T) {

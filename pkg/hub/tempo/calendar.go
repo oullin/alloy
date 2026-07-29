@@ -1,6 +1,6 @@
 package tempo
 
-import "github.com/oullin/alloy/pkg/hub/tempo/calendar"
+import "hara.sh/alloy/tempo/calendar"
 
 func calendarDays() []string {
 	return calendar.Days()

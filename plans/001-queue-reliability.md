@@ -23,6 +23,7 @@ This plan makes attempt tracking uniform across drivers, adds panic recovery aro
 ## Current state
 
 Files and roles:
+
 - `pkg/hub/queue/worker.go` — the worker Run loop; `processJob` (line 526) calls `handler.Handle` (line 552) inline with no recover; `markIfExhausted` (579) and `shouldFail` (591) gate on `job.Attempts()`.
 - `pkg/hub/queue/drivers/base_job.go` — `BaseJob` struct (line 9) with `attempts int` and the `releaseFunc`/`failFunc`/`deleteFunc` closures.
 - `pkg/hub/queue/drivers/database.go` — the only driver that increments attempts (in the Pop `UPDATE ... attempts=attempts+1`); its `failFunc` is buggy.
@@ -33,6 +34,7 @@ Files and roles:
 Key excerpts (as they exist today):
 
 `worker.go:526-556` — no recover around the handler:
+
 ```go
 func (w *Worker) processJob(ctx context.Context, job Job) {
 	if job.IsDeleted() { ... return }
@@ -50,6 +52,7 @@ func (w *Worker) processJob(ctx context.Context, job Job) {
 ```
 
 `worker.go:579-604` — attempt gating:
+
 ```go
 func (w *Worker) markIfExhausted(job Job) error {
 	if max := w.effectiveMaxTries(job); max > 0 && job.Attempts() > max {
@@ -67,6 +70,7 @@ func (w *Worker) shouldFail(job Job) bool {
 ```
 
 `drivers/redis.go:199-227` — Pop builds a job with `attempts` defaulting to 0 and re-pushes the identical raw payload on release:
+
 ```go
 job := &redisJob{ BaseJob: BaseJob{ payload: []byte(raw), queue: queueName, connection: d.connection } }
 job.deleteFunc = func() error { return nil }
@@ -79,6 +83,7 @@ job.releaseFunc = func(delay time.Duration) error {
 `drivers/beanstalkd.go:127-150` — `attempts` never set; beanstalkd exposes a per-job `reserves` stat. `drivers/sqs.go:197-211` — `attempts` never set; SQS exposes `ApproximateReceiveCount` on the received message.
 
 `drivers/database.go:208-222` — the buggy fail path (uuid always empty, insert error discarded, delete unconditional):
+
 ```go
 job.failFunc = func(err error) error {
 	var errMsg string
@@ -91,9 +96,11 @@ job.failFunc = func(err error) error {
 	return job.deleteFunc()
 }
 ```
+
 The `dbJob` built at `database.go:187-194` sets only `id/payload/queue/attempts` — `uuid` is empty. The `failed_jobs.uuid` column is `TEXT NOT NULL UNIQUE` (schema comment at `database.go:29-37`).
 
 `drivers/failover.go:116-126` — Pop swallows all backend errors:
+
 ```go
 func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
 	for _, drv := range d.drivers {
@@ -105,22 +112,24 @@ func (d *FailoverDriver) Pop(ctx context.Context, queueName string) (queue.Job, 
 ```
 
 Repo conventions to match:
+
 - Errors: wrap with `fmt.Errorf("...: %w", err)` when carrying an underlying error (this is the convention the typed-errors work converged on). Sentinel errors live in `pkg/hub/queue/errors.go` (e.g. `queue.ErrNoJob`).
 - The `attempts` field is a plain `int`; the payload envelope is JSON (`pkg/hub/queue/payload.go`). Check whether the JSON envelope already carries a `tries`/`attempts` field before inventing one — read `payload.go` and `payload_builder.go`.
 - Tests are table-driven; driver tests use fakes. See `pkg/hub/queue/drivers/database_integration_test.go` and `pkg/hub/queue/worker_test.go` for the established patterns. UUIDs use `github.com/google/uuid` or `github.com/oklog/ulid/v2` (both already in go.mod — check which the codebase uses for job identity via `grep -rn "uuid.New\|ulid.Make" pkg/hub/queue`).
 
 ## Commands you will need
 
-| Purpose | Command | Expected on success |
-|---------|---------|---------------------|
-| Go tests (all modules) | `pnpm exec vp run go:test` | exit 0, all pass |
-| Go tests (queue only, faster loop) | `cd pkg/hub && go test ./queue/...` | exit 0 |
-| Typecheck/build | `cd pkg/hub && go build ./...` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose                            | Command                             | Expected on success |
+| ---------------------------------- | ----------------------------------- | ------------------- |
+| Go tests (all modules)             | `pnpm exec vp run go:test`          | exit 0, all pass    |
+| Go tests (queue only, faster loop) | `cd pkg/hub && go test ./queue/...` | exit 0              |
+| Typecheck/build                    | `cd pkg/hub && go build ./...`      | exit 0              |
+| Format                             | `pnpm exec vp run format`           | exit 0              |
 
 ## Scope
 
 **In scope** (modify only these):
+
 - `pkg/hub/queue/worker.go` (panic recovery)
 - `pkg/hub/queue/drivers/sync.go` (panic recovery in executeJob)
 - `pkg/hub/queue/drivers/redis.go`, `beanstalkd.go`, `sqs.go` (attempt tracking)
@@ -130,6 +139,7 @@ Repo conventions to match:
 - Corresponding `_test.go` files in the same directories (create where missing)
 
 **Out of scope** (do NOT touch):
+
 - Redis reservation/visibility-timeout redesign — that is **plan 002**. Here, redis gets attempt tracking only, on the existing RPop envelope.
 - The `queue.Job` interface shape / `payload.go` envelope format beyond adding an attempt count if one isn't already present.
 - `worker.go` sleep/backoff behavior (that is plan 017/P11 territory).
@@ -156,6 +166,7 @@ func (w *Worker) runHandler(ctx context.Context, job Job) (err error) {
 	return w.handler.Handle(ctx, job)
 }
 ```
+
 Call `w.runHandler(jobCtx, job)` in `processJob`. Apply the same recover wrapper around the handler/`Fire` call in `SyncDriver.executeJob` (`drivers/sync.go`, line ~85, `job.Fire(ctx)`).
 
 **Verify**: add a test in `worker_test.go` with a handler that panics; assert the worker does not crash and the job is failed/released via `handleJobException`. `cd pkg/hub && go test ./queue/ -run Panic` → pass.
@@ -163,6 +174,7 @@ Call `w.runHandler(jobCtx, job)` in `processJob`. Apply the same recover wrapper
 ### Step 2: Determine the attempt-count source of truth
 
 Read `pkg/hub/queue/payload.go` and `payload_builder.go`. Decide: does the JSON envelope already carry an attempt/`tries` count?
+
 - **If yes**: parse it into `BaseJob.attempts` on each driver's Pop and increment-and-persist it on release.
 - **If no**: add a `tries` field to the envelope (default 0), and have every driver read it on Pop and write the incremented value back on release.
 
@@ -181,6 +193,7 @@ Record the decision in a one-line comment in `payload.go`. **If the envelope for
 ### Step 4: Fix the database driver fail path
 
 In `database.go`'s `failFunc` (208-222):
+
 1. Populate a real `uuid` for the job at Pop time (generate with the same library the codebase uses for job identity — see conventions). Set it on the `dbJob.BaseJob` at `database.go:187-194`.
 2. Propagate the `INSERT INTO failed_jobs` error instead of discarding it (`_ =`).
 3. Only call `job.deleteFunc()` after the failed-store insert succeeds. Prefer wrapping both statements in a transaction if the `DBExecer` interface supports one; otherwise order them insert-then-delete and return early on insert error.
@@ -200,6 +213,7 @@ In `failover.go`, `Pop` (116-126): distinguish `queue.ErrNoJob` from real backen
 ## Test plan
 
 New/updated tests (table-driven, matching `worker_test.go` and `database_integration_test.go` style):
+
 - `worker_test.go`: panicking handler does not crash the worker; job routed to exception handling. Handler returning error still respects max-tries once attempts are tracked.
 - `drivers/redis_test.go` (create if absent), `beanstalkd_test.go`, `sqs_test.go`: `Attempts()` increments across release/redelivery.
 - `drivers/database_test.go` (or extend the integration test): fail path does not delete when failed_jobs insert errors; uuid is non-empty; a poison job is moved to failed_jobs after max-tries instead of looping.
@@ -208,6 +222,7 @@ New/updated tests (table-driven, matching `worker_test.go` and `database_integra
 ## Done criteria
 
 ALL must hold:
+
 - [ ] `pnpm exec vp run go:test` exits 0; new tests above exist and pass.
 - [ ] `grep -n "_ = d.db.Exec" pkg/hub/queue/drivers/database.go` returns nothing in the failFunc (error is handled).
 - [ ] `grep -n "attempts:" pkg/hub/queue/drivers/redis.go pkg/hub/queue/drivers/beanstalkd.go pkg/hub/queue/drivers/sqs.go` shows attempts sourced on Pop (or the envelope-parse equivalent).
@@ -218,6 +233,7 @@ ALL must hold:
 ## STOP conditions
 
 Stop and report (do not improvise) if:
+
 - The payload envelope has an external schema/version marker (step 2) — wire-format changes need owner sign-off.
 - The beanstalkd or SQS client interface exposes no way to read the redelivery count and no envelope count exists to fall back on.
 - The `DBExecer` interface cannot express a transaction and you cannot make insert-then-delete safe without one.
@@ -227,5 +243,5 @@ Stop and report (do not improvise) if:
 ## Maintenance notes
 
 - Plan 002 (redis visibility) builds directly on the attempt envelope from step 2 — keep the envelope field name stable.
-- Reviewer should scrutinize: the redelivery-count semantics per backend (SQS `ApproximateReceiveCount` counts *receives*, which includes visibility-timeout expiries — confirm that matches the intended "attempts" meaning), and that the database fail path is genuinely atomic.
+- Reviewer should scrutinize: the redelivery-count semantics per backend (SQS `ApproximateReceiveCount` counts _receives_, which includes visibility-timeout expiries — confirm that matches the intended "attempts" meaning), and that the database fail path is genuinely atomic.
 - Deferred out of this plan: adaptive worker poll backoff (P11) and redis reservation/visibility (plan 002).

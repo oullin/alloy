@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/middleware"
+	"hara.sh/alloy/httpx/middleware"
 )
 
 type slogCapture struct {

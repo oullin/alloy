@@ -12,11 +12,11 @@ import (
 
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/seed"
-	routegen "github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
-	"github.com/oullin/alloy/pkg/hub/inertia"
-	"github.com/oullin/alloy/pkg/hub/inertia/flash"
-	"github.com/oullin/alloy/pkg/hub/inertia/middleware"
-	corei18n "github.com/oullin/alloy/pkg/hub/seo/i18n"
+	routegen "hara.sh/alloy/httpx/routing/navigator"
+	"hara.sh/alloy/inertia"
+	"hara.sh/alloy/inertia/flash"
+	"hara.sh/alloy/inertia/middleware"
+	corei18n "hara.sh/alloy/seo/i18n"
 )
 
 //go:embed resources/views/app.html

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	cmiddleware "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts/middleware"
+	cmiddleware "hara.sh/alloy/httpx/routing/contracts/middleware"
 )
 
 // RateLimiter is the surface ThrottleRequests needs from a rate limiter.

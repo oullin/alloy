@@ -3,7 +3,7 @@ package alias_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container/internal/alias"
+	"hara.sh/alloy/container/internal/alias"
 )
 
 func TestResolveReturnsUnknownNameUnchanged(t *testing.T) {

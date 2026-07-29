@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
-	"github.com/oullin/alloy/pkg/hub/httpx/routing"
+	"hara.sh/alloy/httpx/foundation"
+	"hara.sh/alloy/httpx/routing"
 )
 
 func TestNewRequest(t *testing.T) {

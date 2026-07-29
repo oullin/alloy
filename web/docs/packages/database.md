@@ -22,7 +22,7 @@ Package database provides a database abstraction layer with query builder, schem
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/database@latest
+go get hara.sh/alloy/database@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -33,23 +33,23 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/database/...
 
 ## Source Coverage
 
-| Package              | Purpose                                                                                                                                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `database`           | Package database provides a database abstraction layer with query builder, schema management, Orm-style ORM, and migration support.                                                                                                                                              |
-| `drivers/mariadb`    | Public drivers/mariadb API surface for this module.                                                                                                                                                                                                                                   |
-| `drivers/mysql`      | Public drivers/mysql API surface for this module.                                                                                                                                                                                                                                     |
-| `drivers/postgres`   | Public drivers/postgres API surface for this module.                                                                                                                                                                                                                                  |
-| `drivers/sqlite`     | Public drivers/sqlite API surface for this module.                                                                                                                                                                                                                                    |
-| `orm`           | Package orm provides an Active Record ORM with generic model types, relationships, scopes, events, soft deletes, and attribute casting.                                                                                                                                          |
-| `orm/relations` | Package relations defines the Orm relationship types: HasOne, HasMany, BelongsTo, BelongsToMany, HasOneThrough, HasManyThrough, and their polymorphic variants. Each relationship type knows how to constrain queries, eager-load results, and match them back to parent models. |
-| `events`             | Package events defines the event structs dispatched by the database package. These events are fired through the Alloy event dispatcher and can be used for query logging, performance monitoring, and debugging.                                                                    |
-| `migrations`         | Package migrations provides a database migration system for managing schema changes over time. Migrations run in order and track which migrations have been applied.                                                                                                                  |
-| `query`              | Package query provides a fluent SQL query builder that compiles queries through driver-specific grammars.                                                                                                                                                                             |
-| `query/grammars`     | Public query/grammars API surface for this module.                                                                                                                                                                                                                                    |
-| `query/processors`   | Public query/processors API surface for this module.                                                                                                                                                                                                                                  |
-| `schema`             | Package schema provides a database-agnostic schema builder for creating, modifying, and dropping database tables.                                                                                                                                                                     |
-| `schema/grammars`    | Public schema/grammars API surface for this module.                                                                                                                                                                                                                                   |
-| `seeding`            | Package seeding provides a database seeding interface for populating tables with test or default data.                                                                                                                                                                                |
+| Package            | Purpose                                                                                                                                                                                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `database`         | Package database provides a database abstraction layer with query builder, schema management, Orm-style ORM, and migration support.                                                                                                                                              |
+| `drivers/mariadb`  | Public drivers/mariadb API surface for this module.                                                                                                                                                                                                                              |
+| `drivers/mysql`    | Public drivers/mysql API surface for this module.                                                                                                                                                                                                                                |
+| `drivers/postgres` | Public drivers/postgres API surface for this module.                                                                                                                                                                                                                             |
+| `drivers/sqlite`   | Public drivers/sqlite API surface for this module.                                                                                                                                                                                                                               |
+| `orm`              | Package orm provides an Active Record ORM with generic model types, relationships, scopes, events, soft deletes, and attribute casting.                                                                                                                                          |
+| `orm/relations`    | Package relations defines the Orm relationship types: HasOne, HasMany, BelongsTo, BelongsToMany, HasOneThrough, HasManyThrough, and their polymorphic variants. Each relationship type knows how to constrain queries, eager-load results, and match them back to parent models. |
+| `events`           | Package events defines the event structs dispatched by the database package. These events are fired through the Alloy event dispatcher and can be used for query logging, performance monitoring, and debugging.                                                                 |
+| `migrations`       | Package migrations provides a database migration system for managing schema changes over time. Migrations run in order and track which migrations have been applied.                                                                                                             |
+| `query`            | Package query provides a fluent SQL query builder that compiles queries through driver-specific grammars.                                                                                                                                                                        |
+| `query/grammars`   | Public query/grammars API surface for this module.                                                                                                                                                                                                                               |
+| `query/processors` | Public query/processors API surface for this module.                                                                                                                                                                                                                             |
+| `schema`           | Package schema provides a database-agnostic schema builder for creating, modifying, and dropping database tables.                                                                                                                                                                |
+| `schema/grammars`  | Public schema/grammars API surface for this module.                                                                                                                                                                                                                              |
+| `seeding`          | Package seeding provides a database seeding interface for populating tables with test or default data.                                                                                                                                                                           |
 
 ## Core Concepts
 
@@ -81,7 +81,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/database"
+    _ "hara.sh/alloy/database"
 )
 
 func main() {
@@ -96,7 +96,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

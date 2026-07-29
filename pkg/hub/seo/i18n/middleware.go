@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/seo"
+	"hara.sh/alloy/seo"
 )
 
 // Middleware returns an HTTP middleware that detects the locale from the

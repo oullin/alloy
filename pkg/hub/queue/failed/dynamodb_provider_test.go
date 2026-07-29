@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue/failed"
+	"hara.sh/alloy/queue/failed"
 )
 
 // fakeDynamoClient records the last arguments to each call and returns

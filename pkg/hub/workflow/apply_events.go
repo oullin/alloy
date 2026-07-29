@@ -1,6 +1,6 @@
 package workflow
 
-import "github.com/oullin/alloy/pkg/hub/workflow/events"
+import "hara.sh/alloy/workflow/events"
 
 func (w *Machine[T]) dispatchLeaveEvents(subject T, transition Transition, next Marking, context map[string]any) {
 	current := markingBeforeEnter(next, transition)

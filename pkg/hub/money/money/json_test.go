@@ -7,9 +7,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/money/currency"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
-	testutil "github.com/oullin/alloy/pkg/hub/money/tests"
+	"hara.sh/alloy/money/currency"
+	"hara.sh/alloy/money/exception"
+	testutil "hara.sh/alloy/money/tests"
 )
 
 func TestJSONSetMarshal(t *testing.T) {

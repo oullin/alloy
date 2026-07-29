@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/flash"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/flash"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func (a app) rememberHandler(w http.ResponseWriter, r *http.Request) {

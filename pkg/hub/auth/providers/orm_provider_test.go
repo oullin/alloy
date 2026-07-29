@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 type ormQuery struct {

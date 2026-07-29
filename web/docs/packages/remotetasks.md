@@ -20,7 +20,7 @@ Package remotetasks provides task planning and execution primitives inspired by 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/remotetasks@latest
+go get hara.sh/alloy/remotetasks@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/remotetasks"
+    _ "hara.sh/alloy/remotetasks"
 )
 
 func main() {
@@ -77,7 +77,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

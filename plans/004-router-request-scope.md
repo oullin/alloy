@@ -56,12 +56,13 @@ The `Router` is a long-lived singleton serving all goroutines, but it stores the
 ## Current state
 
 - `pkg/hub/httpx/routing/router.go`:
-  - Fields (33-37): `current *Route`, `currentRequest matching.MatchableRequest`, `currentMu sync.RWMutex`.
-  - `DispatchToRoute` (451) calls `r.setCurrentRoute(route)` at line 474.
-  - `setCurrentRoute` (738-744): `r.currentMu.Lock(); r.current = route`.
-  - Readers: `Current()` (634), `CurrentRouteName()` (655), `CurrentRouteAction()` (666), `Is()` (689), `CurrentRouteNamed` (700), `Uses()` (705), `CurrentRouteUses` (724).
+    - Fields (33-37): `current *Route`, `currentRequest matching.MatchableRequest`, `currentMu sync.RWMutex`.
+    - `DispatchToRoute` (451) calls `r.setCurrentRoute(route)` at line 474.
+    - `setCurrentRoute` (738-744): `r.currentMu.Lock(); r.current = route`.
+    - Readers: `Current()` (634), `CurrentRouteName()` (655), `CurrentRouteAction()` (666), `Is()` (689), `CurrentRouteNamed` (700), `Uses()` (705), `CurrentRouteUses` (724).
 
 Excerpt:
+
 ```go
 func (r *Router) setCurrentRoute(route *Route) {
 	r.currentMu.Lock()
@@ -74,12 +75,12 @@ Convention: requests flow through `matching.MatchableRequest`, which wraps `*htt
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go tests (routing) | `cd pkg/hub && go test ./httpx/routing/...` | exit 0 |
-| Race detector | `cd pkg/hub && go test -race ./httpx/routing/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose            | Command                                           | Expected |
+| ------------------ | ------------------------------------------------- | -------- |
+| Go tests (routing) | `cd pkg/hub && go test ./httpx/routing/...`       | exit 0   |
+| Race detector      | `cd pkg/hub && go test -race ./httpx/routing/...` | exit 0   |
+| Full Go suite      | `pnpm exec vp run go:test`                        | exit 0   |
+| Format             | `pnpm exec vp run format`                         | exit 0   |
 
 ## Scope
 
@@ -97,6 +98,7 @@ Convention: requests flow through `matching.MatchableRequest`, which wraps `*htt
 ### Step 1: Add a request-scoped current-route context value
 
 Introduce an unexported context key type and helpers:
+
 ```go
 type currentRouteKey struct{}
 func withCurrentRoute(ctx context.Context, route *Route) context.Context { return context.WithValue(ctx, currentRouteKey{}, route) }

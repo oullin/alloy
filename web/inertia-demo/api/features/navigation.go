@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"alloy.dev/inertia-demo/internal/httputil"
-	"github.com/oullin/alloy/pkg/hub/inertia/flash"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/flash"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func (a app) linksHandler(w http.ResponseWriter, r *http.Request) {

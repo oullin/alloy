@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
+	"hara.sh/alloy/workflow"
 )
 
 // SupportStrategy reports whether a workflow applies to a subject.

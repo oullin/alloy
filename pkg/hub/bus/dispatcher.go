@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/bus/pipeline"
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/bus/pipeline"
+	"hara.sh/alloy/queue"
 )
 
 // DispatcherImpl is the concrete implementation of QueueingDispatcher.

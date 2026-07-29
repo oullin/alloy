@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/collection/kv"
+	"hara.sh/alloy/collection/kv"
 )
 
 func TestGet(t *testing.T) {

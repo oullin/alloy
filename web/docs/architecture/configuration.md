@@ -135,7 +135,7 @@ The repository gives you:
 Build one from a plain map and pass it to whatever provider needs it:
 
 ```go
-import "github.com/oullin/alloy/pkg/hub/config"
+import "hara.sh/alloy/config"
 
 repo := config.New(map[string]any{
     "logging": map[string]any{

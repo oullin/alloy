@@ -3,7 +3,7 @@ package interval
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/internal/kernel"
+	"hara.sh/alloy/tempo/internal/kernel"
 )
 
 type Span struct {

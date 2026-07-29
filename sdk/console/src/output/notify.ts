@@ -18,6 +18,7 @@ export const notificationCommand = (targetPlatform: NotificationPlatform, title:
 
 export const notifyForPlatform = (targetPlatform: NotificationPlatform, title: string, body = '', subtitle = '', sound = '', icon = '', runtime: NotificationRuntime = {}): boolean => {
 	const commands = notificationCommands(targetPlatform, { body, icon, sound, subtitle, title });
+
 	const availableCommands = availableNotificationCommands(targetPlatform, commands, runtime.commandExists ?? commandExists);
 	const execute = runtime.execute ?? executeNotificationCommand;
 

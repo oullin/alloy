@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // BackgroundDriver dispatches jobs by spawning OS subprocesses.

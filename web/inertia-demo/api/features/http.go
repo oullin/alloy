@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func (a app) useHttpHandler(w http.ResponseWriter, r *http.Request) {

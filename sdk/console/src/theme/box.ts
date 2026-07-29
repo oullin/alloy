@@ -19,7 +19,9 @@ const defaultBoxWidth = (): number => Math.min(DEFAULT_BOX_WIDTH, Math.max(0, te
 
 export const renderBox = ({ body, borderStyle = (value) => value, info = '', title = '', width }: BoxOptions): string => {
 	const bodyLines = body.split('\n');
+
 	const requestedWidth = parseBoxWidth(width, defaultBoxWidth());
+
 	const contentWidth = Math.max(requestedWidth, visibleWidth(title), ...bodyLines.map(visibleWidth));
 	const titleWidth = visibleWidth(title);
 	const titleLabel = titleWidth > 0 ? ` ${title} ` : '';

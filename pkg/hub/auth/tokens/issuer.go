@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // Issuer creates personal access tokens for authenticated users.

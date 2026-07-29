@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/tempo"
+	"hara.sh/alloy/tempo"
 )
 
 type mapTranslator map[string]string

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/seo"
-	"github.com/oullin/alloy/pkg/hub/seo/i18n"
+	"hara.sh/alloy/seo"
+	"hara.sh/alloy/seo/i18n"
 )
 
 func newTestConfig() *i18n.I18nConfig {

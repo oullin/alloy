@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/config"
-	"github.com/oullin/alloy/pkg/hub/seo"
-	"github.com/oullin/alloy/pkg/hub/seo/i18n"
+	"hara.sh/alloy/config"
+	"hara.sh/alloy/seo"
+	"hara.sh/alloy/seo/i18n"
 )
 
 // LoadI18n reads a YAML i18n config file and returns a populated I18nConfig.

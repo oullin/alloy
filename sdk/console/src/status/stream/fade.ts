@@ -28,7 +28,9 @@ export const streamFadeStyles = (options: StreamFadeOptions = {}): StreamFadeSty
 	}
 
 	const steps = parseStreamFadeSteps(options.steps, 10);
+
 	const foreground = parseStreamFadeColor(options.foreground, foregroundColor());
+
 	const background = parseStreamFadeColor(options.background, backgroundColor());
 
 	return Array.from({ length: steps }, (_, step) => {

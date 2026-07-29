@@ -5,7 +5,7 @@
     "noEmit": true,
     "types": ["node"],
     "paths": {
-      "@alloy/sdk/tempo": ["../src"],
+      "@hara/sdk-tempo": ["../src"],
       "#*": ["../src/*"]
     }
   },

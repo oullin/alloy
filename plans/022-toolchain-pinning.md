@@ -17,6 +17,7 @@
 ## Why this matters
 
 The repo SHA-pins every GitHub Action but floats its core toolchain on `latest`:
+
 - **package.json**: `"vite": "npm:@voidzero-dev/vite-plus-core@latest"` and `"vite-plus": "latest"` (and the `pnpm.overrides.vite` alias) — both resolve to a **0.x** release (`@0.2.1` in the lockfile). Vite+ (`vp`) is the entire orchestration layer (every build/lint/test/typecheck/pack routes through it); on a 0.x package, `latest` means the next lockfile-regenerating install can jump to `0.3.x` where SemVer permits breaking changes, silently breaking the whole toolchain with no manifest change.
 - **`.github/workflows/govulncheck.yml:35`**: `go install golang.org/x/vuln/cmd/govulncheck@latest`.
 - **`Makefile:4,11`**: `TASK_VERSION ?= latest` feeding `go install github.com/go-task/task/v3/cmd/task@$(TASK_VERSION)`.
@@ -26,23 +27,23 @@ This is inconsistent with the otherwise strict supply-chain posture and makes CI
 ## Current state
 
 - `package.json:37-38`:
-  ```json
-  "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-  "vite-plus": "latest"
-  ```
-  plus `pnpm.overrides.vite` = `npm:@voidzero-dev/vite-plus-core@latest`.
+    ```json
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vite-plus": "latest"
+    ```
+    plus `pnpm.overrides.vite` = `npm:@voidzero-dev/vite-plus-core@latest`.
 - Lockfile resolves both to `@voidzero-dev/vite-plus-core@0.2.1` / `vite-plus@0.2.1`.
 - `.github/workflows/govulncheck.yml:35` — `govulncheck@latest`.
 - `Makefile:4` — `TASK_VERSION ?= latest`; `Makefile:11` uses it in `go install ...@$(TASK_VERSION)`.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
+| Purpose                   | Command                                                       | Expected    |
+| ------------------------- | ------------------------------------------------------------- | ----------- |
 | Current resolved versions | `grep -A2 "vite-plus\|vite-plus-core" pnpm-lock.yaml \| head` | shows 0.2.1 |
-| Install with frozen lock | `pnpm install --frozen-lockfile` | exit 0 |
-| Toolchain smoke test | `pnpm exec vp check` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Install with frozen lock  | `pnpm install --frozen-lockfile`                              | exit 0      |
+| Toolchain smoke test      | `pnpm exec vp check`                                          | exit 0      |
+| Format                    | `pnpm exec vp run format`                                     | exit 0      |
 
 ## Scope
 

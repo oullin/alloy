@@ -7,12 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/auth/events"
-	"github.com/oullin/alloy/pkg/hub/auth/internal/authtest"
-	"github.com/oullin/alloy/pkg/hub/auth/security"
-	"github.com/oullin/alloy/pkg/hub/auth/sessionx"
-	"github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/events"
+	"hara.sh/alloy/auth/internal/authtest"
+	"hara.sh/alloy/auth/security"
+	"hara.sh/alloy/auth/sessionx"
+	"hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // --- SessionGuard: User resolution ---

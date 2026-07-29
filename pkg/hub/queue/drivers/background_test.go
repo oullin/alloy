@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/drivers"
 )
 
 // Use a non-existent command so spawn is a harmless no-op.

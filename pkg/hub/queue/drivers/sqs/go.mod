@@ -1,4 +1,4 @@
-module github.com/oullin/alloy/pkg/hub/queue/drivers/sqs
+module hara.sh/alloy/queue/drivers/sqs
 
 go 1.26.5
 

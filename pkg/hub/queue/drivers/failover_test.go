@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
-	"github.com/oullin/alloy/pkg/hub/queue/events"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/drivers"
+	"hara.sh/alloy/queue/events"
 )
 
 // First-seen order preserved across drivers.

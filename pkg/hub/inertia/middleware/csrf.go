@@ -13,8 +13,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/encryption"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/encryption"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // statusPageExpired is the 419 "Page Expired" status code used when

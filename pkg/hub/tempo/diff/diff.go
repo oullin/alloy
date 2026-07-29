@@ -21,12 +21,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/arithmetic"
-	"github.com/oullin/alloy/pkg/hub/tempo/boundaries"
-	"github.com/oullin/alloy/pkg/hub/tempo/calendar"
-	"github.com/oullin/alloy/pkg/hub/tempo/comparison"
-	"github.com/oullin/alloy/pkg/hub/tempo/core"
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
+	"hara.sh/alloy/tempo/arithmetic"
+	"hara.sh/alloy/tempo/boundaries"
+	"hara.sh/alloy/tempo/calendar"
+	"hara.sh/alloy/tempo/comparison"
+	"hara.sh/alloy/tempo/core"
+	"hara.sh/alloy/tempo/duration"
 )
 
 type Options struct {

@@ -6,10 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/auth/observability"
-	"github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
-	clog "github.com/oullin/alloy/pkg/hub/contracts/auth/log"
+	"hara.sh/alloy/auth/observability"
+	"hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
+	clog "hara.sh/alloy/contracts/auth/log"
 )
 
 type staticGuard struct {

@@ -1,6 +1,6 @@
 {
   "$schema": "./tempo-fixtures",
-  "description": "Language-neutral golden vectors for the tempo twin (pkg/hub/tempo <-> @alloy/sdk/tempo). Each case builds an instant from calendar components in a named zone, applies one operation, and renders the result as a string ('iso' -> UTC ISO-8601 with milliseconds; 'date' -> YYYY-MM-DD). Covers DST-correct whole-unit calendar arithmetic (plan 007). Fractional-day additions and non-English-locale month parsing are deliberately EXCLUDED because they are TS-only capabilities the Go twin does not implement (see conformance/README.md). See conformance/README.md.",
+  "description": "Language-neutral golden vectors for the tempo twin (pkg/hub/tempo <-> @hara/sdk-tempo). Each case builds an instant from calendar components in a named zone, applies one operation, and renders the result as a string ('iso' -> UTC ISO-8601 with milliseconds; 'date' -> YYYY-MM-DD). Covers DST-correct whole-unit calendar arithmetic (plan 007). Fractional-day additions and non-English-locale month parsing are deliberately EXCLUDED because they are TS-only capabilities the Go twin does not implement (see conformance/README.md). See conformance/README.md.",
   "cases": [
     {
       "op": "addDays",

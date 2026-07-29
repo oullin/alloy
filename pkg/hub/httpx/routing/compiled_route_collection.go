@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/matching"
+	"hara.sh/alloy/httpx/routing/matching"
 )
 
 // CompiledRouteCollection is the production-mode counterpart to

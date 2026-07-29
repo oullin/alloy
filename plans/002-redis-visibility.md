@@ -26,6 +26,7 @@ This is a design decision as much as a fix: either implement a reserved sorted-s
 - Contrast `pkg/hub/queue/drivers/database.go` — reserves via `reserved_at` and (after plan 001) reclaims via `retry_after`.
 
 Excerpt (`redis.go:199-217`):
+
 ```go
 func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, error) {
 	d.migrateDue(ctx, queueName)
@@ -36,18 +37,19 @@ func (d *RedisDriver) Pop(ctx context.Context, queueName string) (queue.Job, err
 	...
 }
 ```
+
 Note `d.migrateDue` already exists (for delayed jobs) — a `migrateExpired` for reservations would mirror it.
 
 Conventions: redis access is via the `d.client` abstraction (read its interface in `redis.go` / the redis client wrapper). Keys are namespaced via `d.queueKey`/`d.failedKey` helpers — add a `d.reservedKey` in the same style. Sorted sets: use the client's ZADD/ZRANGEBYSCORE equivalents; if the client interface lacks them, that is a STOP (interface extension is a bigger change to scope explicitly).
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go tests (queue) | `cd pkg/hub && go test ./queue/...` | exit 0 |
-| Build | `cd pkg/hub && go build ./...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose          | Command                             | Expected |
+| ---------------- | ----------------------------------- | -------- |
+| Go tests (queue) | `cd pkg/hub && go test ./queue/...` | exit 0   |
+| Build            | `cd pkg/hub && go build ./...`      | exit 0   |
+| Full Go suite    | `pnpm exec vp run go:test`          | exit 0   |
+| Format           | `pnpm exec vp run format`           | exit 0   |
 
 ## Scope
 
@@ -84,7 +86,7 @@ The release/fail/delete closures should not fail solely because the Pop ctx was 
 
 **Verify**: `go test ./queue/drivers -run RedisShutdown` → pass.
 
-### Step 3b (only if the decision was "document"): 
+### Step 3b (only if the decision was "document"):
 
 Skip steps 1–2. Add a doc comment on `RedisDriver` and a note in `pkg/hub/queue/doc.go` stating the redis driver is at-most-once (jobs may be lost on worker crash) and pointing consumers needing at-least-once to the database or SQS drivers. Make `ReservedSize`/`ReservedJobs` documented no-ops.
 

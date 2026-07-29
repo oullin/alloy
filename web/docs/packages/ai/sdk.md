@@ -23,8 +23,8 @@ package main
 import (
     "context"
 
-    ai "github.com/oullin/alloy/pkg/hub/ai/sdk"
-    contractsai "github.com/oullin/alloy/pkg/hub/contracts/ai"
+    ai "hara.sh/alloy/ai/sdk"
+    contractsai "hara.sh/alloy/contracts/ai"
 )
 
 func main() {
@@ -105,7 +105,7 @@ Package ai provides a unified, expressive API for interacting with AI providers 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/ai/sdk@latest
+go get hara.sh/alloy/ai/sdk@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -175,7 +175,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/ai/sdk"
+    _ "hara.sh/alloy/ai/sdk"
 )
 
 func main() {
@@ -190,7 +190,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

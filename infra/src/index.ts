@@ -17,10 +17,10 @@ const sdkRoot = resolve(repoRoot, 'sdk');
 
 export const workspaceAliases = (): Record<string, string> => ({
 	'@alloy/infra': resolve(infraRoot, 'src'),
-	'@alloy/sdk/tempo': resolve(sdkRoot, 'tempo', 'src'),
-	'@alloy/sdk/tempo-tests': resolve(sdkRoot, 'tempo', 'tests', 'src'),
-	'@alloy/sdk/money': resolve(sdkRoot, 'money', 'src'),
-	'@alloy/sdk/console': resolve(sdkRoot, 'console', 'src'),
-	'@alloy/sdk/navigator-routes': resolve(sdkRoot, 'navigator-routes', 'src'),
-	'@alloy/sdk/workflow': resolve(sdkRoot, 'workflow', 'src'),
+	'@hara/sdk-tempo': resolve(sdkRoot, 'tempo', 'src'),
+	'@hara/sdk-tempo-tests': resolve(sdkRoot, 'tempo', 'tests', 'src'),
+	'@hara/sdk-money': resolve(sdkRoot, 'money', 'src'),
+	'@hara/sdk-console': resolve(sdkRoot, 'console', 'src'),
+	'@hara/sdk-navigator-routes': resolve(sdkRoot, 'navigator-routes', 'src'),
+	'@hara/sdk-workflow': resolve(sdkRoot, 'workflow', 'src'),
 });

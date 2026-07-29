@@ -1,7 +1,7 @@
 package i18n
 
 import (
-	"github.com/oullin/alloy/pkg/hub/seo"
+	"hara.sh/alloy/seo"
 )
 
 // I18nConfig holds the multilanguage configuration consumed by Middleware.

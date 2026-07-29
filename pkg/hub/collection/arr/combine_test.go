@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
+	"hara.sh/alloy/collection/arr"
 )
 
 func TestFlatten(t *testing.T) {

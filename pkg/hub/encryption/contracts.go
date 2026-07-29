@@ -1,6 +1,6 @@
 package encryption
 
-import cencryption "github.com/oullin/alloy/pkg/hub/contracts/encryption"
+import cencryption "hara.sh/alloy/contracts/encryption"
 
 // EncrypterContract encrypts and decrypts values.
 type EncrypterContract = cencryption.EncrypterContract

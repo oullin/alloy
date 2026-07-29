@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
+	"hara.sh/alloy/filesystem"
 )
 
 func TestExists(t *testing.T) {

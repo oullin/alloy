@@ -17,6 +17,7 @@
 ## Why this matters
 
 Three validation defects:
+
 1. **Fail-open (C7)**: `validateNotRegex` returns `!validateRegex(...)`. When the pattern fails to compile, `validateRegex` returns `false`, so `not_regex` returns `true` — a malformed `not_regex` rule silently accepts all input instead of failing closed. That is a validation bypass for whatever the rule was meant to block.
 2. **Delimiter parsing (C8)**: `regex:`/`not_regex:` only strips surrounding `/.../` when both ends are `/`. A Laravel-style `regex:/^\d+$/i` (trailing flag) is not stripped, so compilation fails and the rule always fails — a silent incompatibility for a Laravel-parity primitive.
 3. **Wildcard omission (C9)**: `Validator.Validated()`/`Safe()` iterate `parsedRules` keys and `getValue(attr)`; for a wildcard key like `items.*.name`, `getValue` finds no literal key so the attribute is excluded — validated array/nested data is silently dropped from `validated`.
@@ -24,30 +25,30 @@ Three validation defects:
 ## Current state
 
 - `pkg/hub/validation/rules/regex.go`:
-  - `validateRegex` (20-34): strips `/.../` only when `pattern[0]=='/' && pattern[len-1]=='/'`; `regexp.Compile` failure → `return false`.
-  - `validateNotRegex` (37-39): `return !validateRegex("", value, params, ctx)`.
-  ```go
-  re, err := regexp.Compile(pattern)
-  if err != nil { return false }
-  return re.MatchString(s)
-  ...
-  func validateNotRegex(_ string, value any, params []string, ctx RuleContext) bool {
-      return !validateRegex("", value, params, ctx)
-  }
-  ```
+    - `validateRegex` (20-34): strips `/.../` only when `pattern[0]=='/' && pattern[len-1]=='/'`; `regexp.Compile` failure → `return false`.
+    - `validateNotRegex` (37-39): `return !validateRegex("", value, params, ctx)`.
+    ```go
+    re, err := regexp.Compile(pattern)
+    if err != nil { return false }
+    return re.MatchString(s)
+    ...
+    func validateNotRegex(_ string, value any, params []string, ctx RuleContext) bool {
+        return !validateRegex("", value, params, ctx)
+    }
+    ```
 - `pkg/hub/validation/validator.go`:
-  - `buildValidated` (648-664): iterates `v.parsedRules`, skips excluded, `val := v.getValue(attr)`, includes only when `val != nil || v.flatDataHas(attr)`.
-  - `validateAll` elsewhere expands wildcards via `ExpandWildcards` (find it: `grep -n ExpandWildcards pkg/hub/validation`) — reuse that expansion in `buildValidated`.
+    - `buildValidated` (648-664): iterates `v.parsedRules`, skips excluded, `val := v.getValue(attr)`, includes only when `val != nil || v.flatDataHas(attr)`.
+    - `validateAll` elsewhere expands wildcards via `ExpandWildcards` (find it: `grep -n ExpandWildcards pkg/hub/validation`) — reuse that expansion in `buildValidated`.
 
-Convention: rules return `bool`; a compile error is a *rule configuration* problem, distinct from "value didn't match". To fail `not_regex` closed, `validateRegex` needs to signal "couldn't evaluate" separately from "no match" — either an internal tri-state/error helper or a shared `compilePattern` returning `(*regexp.Regexp, error)` that both rules consult.
+Convention: rules return `bool`; a compile error is a _rule configuration_ problem, distinct from "value didn't match". To fail `not_regex` closed, `validateRegex` needs to signal "couldn't evaluate" separately from "no match" — either an internal tri-state/error helper or a shared `compilePattern` returning `(*regexp.Regexp, error)` that both rules consult.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go validation tests | `cd pkg/hub && go test ./validation/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose             | Command                                  | Expected |
+| ------------------- | ---------------------------------------- | -------- |
+| Go validation tests | `cd pkg/hub && go test ./validation/...` | exit 0   |
+| Full Go suite       | `pnpm exec vp run go:test`               | exit 0   |
+| Format              | `pnpm exec vp run format`                | exit 0   |
 
 ## Scope
 

@@ -1,6 +1,6 @@
 package workflow
 
-import cworkflow "github.com/oullin/alloy/pkg/hub/contracts/workflow"
+import cworkflow "hara.sh/alloy/contracts/workflow"
 
 // Marking tracks active places and token counts.
 type Marking = cworkflow.Marking

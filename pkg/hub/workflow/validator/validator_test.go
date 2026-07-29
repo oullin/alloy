@@ -3,8 +3,8 @@ package validator_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/validator"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/validator"
 )
 
 func stateMachineDef(t *testing.T) *workflow.Definition {

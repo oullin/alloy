@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/bus/pipeline"
+	"hara.sh/alloy/bus/pipeline"
 )
 
 func TestPipelineExecution(t *testing.T) {

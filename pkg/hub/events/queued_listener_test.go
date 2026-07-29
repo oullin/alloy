@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/events"
+	"hara.sh/alloy/events"
 )
 
 func TestCallQueuedListener_New(t *testing.T) {

@@ -11,8 +11,8 @@ import (
 
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/httputil"
-	"github.com/oullin/alloy/pkg/hub/inertia/props"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/props"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 const contactsPerPage = 15

@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	authevents "github.com/oullin/alloy/pkg/hub/auth/events"
-	"github.com/oullin/alloy/pkg/hub/auth/passwords"
-	"github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
-	cevents "github.com/oullin/alloy/pkg/hub/contracts/auth/events"
-	clog "github.com/oullin/alloy/pkg/hub/contracts/auth/log"
+	authevents "hara.sh/alloy/auth/events"
+	"hara.sh/alloy/auth/passwords"
+	"hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
+	cevents "hara.sh/alloy/contracts/auth/events"
+	clog "hara.sh/alloy/contracts/auth/log"
 )
 
 type resetUser struct {

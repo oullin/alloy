@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/session"
-	"github.com/oullin/alloy/pkg/hub/session/handlers"
+	"hara.sh/alloy/session"
+	"hara.sh/alloy/session/handlers"
 )
 
 // countingHandler wraps ArrayHandler and counts Write calls so tests can assert
@@ -15,6 +15,14 @@ import (
 type countingHandler struct {
 	*handlers.ArrayHandler
 	writes atomic.Int64
+}
+
+// hookedWriteHandler wraps ArrayHandler and runs a callback at the start of
+// every backend Write, letting tests interleave store mutations with the
+// out-of-lock write that Save performs.
+type hookedWriteHandler struct {
+	*handlers.ArrayHandler
+	onWrite func()
 }
 
 func newCountingHandler() *countingHandler {
@@ -294,14 +302,6 @@ func TestStoreSaveTouchActivityRefreshesOnInterval(t *testing.T) {
 	if !fresh.TouchActivity(now, time.Hour) {
 		t.Error("a session with no marker must touch on first activity")
 	}
-}
-
-// hookedWriteHandler wraps ArrayHandler and runs a callback at the start of
-// every backend Write, letting tests interleave store mutations with the
-// out-of-lock write that Save performs.
-type hookedWriteHandler struct {
-	*handlers.ArrayHandler
-	onWrite func()
 }
 
 func (h *hookedWriteHandler) Write(ctx context.Context, id, data string) error {

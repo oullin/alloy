@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/flash"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/flash"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // Container contains the host application integrations required by the features package.

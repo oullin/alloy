@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo"
-	"github.com/oullin/alloy/pkg/hub/tempo/core"
+	"hara.sh/alloy/tempo"
+	"hara.sh/alloy/tempo/core"
 )
 
 // Compile-time guarantees that Time and *MutableTime continue to satisfy

@@ -1,6 +1,6 @@
 package tempo
 
-import factorypkg "github.com/oullin/alloy/pkg/hub/tempo/factory"
+import factorypkg "hara.sh/alloy/tempo/factory"
 
 func FromTimestamp(timestamp int64, options ...Option) (Time, error) {
 	cfg, err := applyOptions(options...)

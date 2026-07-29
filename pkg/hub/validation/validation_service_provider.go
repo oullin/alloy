@@ -1,6 +1,6 @@
 package validation
 
-import "github.com/oullin/alloy/pkg/hub/container"
+import "hara.sh/alloy/container"
 
 // ValidationServiceProvider registers the validator factory into the container.
 // Ref: @alloy/code-0390

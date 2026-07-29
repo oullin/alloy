@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 
 	"alloy.dev/inertia-demo/internal/database"
-	"github.com/oullin/alloy/pkg/hub/encryption"
+	"hara.sh/alloy/encryption"
 )
 
 // SessionCookieName is the cookie used by the demo auth flow.

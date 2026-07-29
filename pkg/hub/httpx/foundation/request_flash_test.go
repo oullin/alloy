@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
+	"hara.sh/alloy/httpx/foundation"
 )
 
 // stubSession implements foundation.SessionStore for testing.

@@ -4,7 +4,7 @@ import (
 	"iter"
 	"maps"
 
-	"github.com/oullin/alloy/pkg/hub/collection/support"
+	"hara.sh/alloy/collection/support"
 )
 
 // Collection wraps a map and provides a fluent API for working with

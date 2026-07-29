@@ -1,14 +1,15 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM"],
-    "strict": true,
     "declaration": true,
-    "skipLibCheck": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "noEmit": false,
+    "outDir": "dist",
     "rootDir": "src",
-    "outDir": "dist"
+    "sourceMap": false,
+    "tsBuildInfoFile": "../../infra/.cache/tsbuild/navigator-routes-build.tsbuildinfo"
   },
+  "exclude": ["dist", "tests"],
   "include": ["src/**/*.ts"]
 }

@@ -16,8 +16,8 @@ import (
     "context"
     "fmt"
 
-    "github.com/oullin/alloy/pkg/hub/session"
-    "github.com/oullin/alloy/pkg/hub/session/handlers"
+    "hara.sh/alloy/session"
+    "hara.sh/alloy/session/handlers"
 )
 
 func main() {
@@ -67,4 +67,3 @@ store.Put("user_id", 123)
   from other packages.
 - These helpers only expose the store. Starting, saving, regenerating, and
   closing the store remain the middleware or caller's responsibility.
-

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/hashing"
+	"hara.sh/alloy/hashing"
 )
 
 func newTestManager() *hashing.HashManager {

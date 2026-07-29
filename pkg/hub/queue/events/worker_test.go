@@ -3,8 +3,8 @@ package events_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/events"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/events"
 )
 
 func TestWorkerLifecycleEventFields(t *testing.T) {

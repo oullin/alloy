@@ -16,7 +16,7 @@ import (
     "fmt"
     "net/http"
 
-    "github.com/oullin/alloy/pkg/hub/httpx/middleware"
+    "hara.sh/alloy/httpx/middleware"
 )
 
 func main() {
@@ -72,4 +72,3 @@ handler := middleware.NewHandleRequestLog(middleware.RequestLogOptions{}).Wrap(
 
 handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/items", nil))
 ```
-

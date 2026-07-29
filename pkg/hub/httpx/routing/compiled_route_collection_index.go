@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/matching"
+	"hara.sh/alloy/httpx/routing/matching"
 )
 
 // methodBucket holds every route registered for one HTTP verb, in registration

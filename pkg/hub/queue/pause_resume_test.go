@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/events"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/events"
 )
 
 // the upstream test constructs a QueueManager against a Carbon test clock

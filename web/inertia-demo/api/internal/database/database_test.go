@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	frameworkdb "github.com/oullin/alloy/pkg/hub/database"
+	frameworkdb "hara.sh/alloy/database"
 )
 
 type fakeResult struct {

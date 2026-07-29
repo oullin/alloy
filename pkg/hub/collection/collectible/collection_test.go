@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/collection/support"
+	"hara.sh/alloy/collection/support"
 )
 
 func TestNew(t *testing.T) {

@@ -1,8 +1,8 @@
 package money
 
 import (
-	"github.com/oullin/alloy/pkg/hub/money/calculator"
-	"github.com/oullin/alloy/pkg/hub/money/currency"
+	"hara.sh/alloy/money/calculator"
+	"hara.sh/alloy/money/currency"
 )
 
 // Amount is a data structure that stores the amount being used for calculations.

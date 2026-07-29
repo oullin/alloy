@@ -32,12 +32,12 @@ Convention: config is loaded via viper with env overrides; secrets belong in the
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Demo API build | `cd web/inertia-demo/api && go build ./...` | exit 0 |
-| Demo API tests | `cd web/inertia-demo/api && go test ./...` | exit 0 |
+| Purpose                       | Command                                                      | Expected        |
+| ----------------------------- | ------------------------------------------------------------ | --------------- |
+| Demo API build                | `cd web/inertia-demo/api && go build ./...`                  | exit 0          |
+| Demo API tests                | `cd web/inertia-demo/api && go test ./...`                   | exit 0          |
 | Confirm key no longer tracked | `git ls-files web/inertia-demo/api/cmd/resources/crypto.yml` | empty (removed) |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Format                        | `pnpm exec vp run format`                                    | exit 0          |
 
 ## Scope
 

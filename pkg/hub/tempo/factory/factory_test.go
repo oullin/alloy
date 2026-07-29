@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
-	"github.com/oullin/alloy/pkg/hub/tempo/factory"
+	"hara.sh/alloy/tempo/duration"
+	"hara.sh/alloy/tempo/factory"
 )
 
 func TestFromTimestampAndMs(t *testing.T) {

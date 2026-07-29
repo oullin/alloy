@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/config"
+	"hara.sh/alloy/config"
 )
 
 // CSRFConfig holds configuration for the CSRF middleware.

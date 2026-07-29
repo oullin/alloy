@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
+	"hara.sh/alloy/httpx/foundation"
 )
 
 func TestHttpResponseErrorMessage(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/session/handlers"
+	"hara.sh/alloy/session/handlers"
 )
 
 // identityEncrypter passes payloads through unchanged for cookie flag tests.

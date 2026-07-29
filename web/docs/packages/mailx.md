@@ -71,8 +71,8 @@ require.Len(t, arr.Messages(), 1)
 
 Built-in transports (each lives in `pkg/hub/mailx/`):
 
-| Name        | Source                                                                                                         | When to use               |
-| ----------- | -------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| Name        | Source                                                                                                     | When to use               |
+| ----------- | ---------------------------------------------------------------------------------------------------------- | ------------------------- |
 | `smtp`      | [`smtp_transport.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/mailx/smtp_transport.go)           | Production                |
 | `log`       | [`log_transport.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/mailx/log_transport.go)             | Local development         |
 | `array`     | [`array_transport.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/mailx/array_transport.go)         | Tests                     |
@@ -107,7 +107,8 @@ Subscribe through the events package for tracing or interception.
 - [Drivers](/architecture/drivers).
 - [Service Providers](/architecture/service-providers).
 - [Notifications](/packages/notifications) — built on top of mailx for
-the mail channel.
+  the mail channel.
+
 <!-- /ALLOY:HAND -->
 
 Package mailx provides driver-based email sending with support for SMTP, log, and array (testing) transports. It mirrors the upstream Mail component, offering a unified API through the MailManager and individual mailers for each transport type. The package supports rich message construction including HTML and plain-text bodies, file attachments, inline embeds, custom headers, metadata, and tags. Events are dispatched before and after sending for observability and interception.
@@ -123,7 +124,7 @@ Package mailx provides driver-based email sending with support for SMTP, log, an
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/mailx@latest
+go get hara.sh/alloy/mailx@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -166,7 +167,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/mailx"
+    _ "hara.sh/alloy/mailx"
 )
 
 func main() {
@@ -181,7 +182,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

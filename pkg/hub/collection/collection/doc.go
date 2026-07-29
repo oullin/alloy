@@ -7,9 +7,9 @@
 //
 // # Related packages
 //
-//   - [github.com/oullin/alloy/pkg/hub/collection/lazy] — lazily evaluated sequences backed by iter.Seq
-//   - [github.com/oullin/alloy/pkg/hub/collection/collectible] — ordered map with fluent key-value API
-//   - [github.com/oullin/alloy/pkg/hub/collection/support] — shared types (Pair, Numeric) and errors
-//   - [github.com/oullin/alloy/pkg/hub/collection/arr] — generic slice helpers
-//   - [github.com/oullin/alloy/pkg/hub/collection/kv] — map helpers with dot-notation support
+//   - [hara.sh/alloy/collection/lazy] — lazily evaluated sequences backed by iter.Seq
+//   - [hara.sh/alloy/collection/collectible] — ordered map with fluent key-value API
+//   - [hara.sh/alloy/collection/support] — shared types (Pair, Numeric) and errors
+//   - [hara.sh/alloy/collection/arr] — generic slice helpers
+//   - [hara.sh/alloy/collection/kv] — map helpers with dot-notation support
 package collection

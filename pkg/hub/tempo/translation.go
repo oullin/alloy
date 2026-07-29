@@ -1,6 +1,6 @@
 package tempo
 
-import "github.com/oullin/alloy/pkg/hub/tempo/runtime"
+import "hara.sh/alloy/tempo/runtime"
 
 func replaceTranslationTokens(message string, replacements map[string]string) string {
 	return runtime.ReplaceTokens(message, replacements)

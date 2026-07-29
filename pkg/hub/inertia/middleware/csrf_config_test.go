@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/middleware"
+	"hara.sh/alloy/inertia/middleware"
 )
 
 func TestDefaultCSRF(t *testing.T) {

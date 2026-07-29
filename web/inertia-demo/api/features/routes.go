@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	routegen "github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
+	routegen "hara.sh/alloy/httpx/routing/navigator"
 )
 
 // DefineRoutes registers all feature showcase route metadata (name, method,

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"sync"
 
-	crouting "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/matching"
+	crouting "hara.sh/alloy/httpx/routing/contracts"
+	"hara.sh/alloy/httpx/routing/matching"
 )
 
 // EventDispatcher is the minimal event surface the router needs.

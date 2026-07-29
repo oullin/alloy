@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing"
-	"github.com/oullin/alloy/pkg/hub/httpx/server"
+	"hara.sh/alloy/httpx/routing"
+	"hara.sh/alloy/httpx/server"
 )
 
 type contextKey struct{}

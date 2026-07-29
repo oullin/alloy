@@ -17,17 +17,18 @@
 ## Why this matters
 
 Two TS tempo bugs diverge from the Go engine (the reference implementation) and produce wrong times:
+
 1. `add()` treats `day` and `week` as fixed-millisecond units (24h/168h), so adding a day across a DST transition yields the wrong wall-clock time (a real calendar day is 23h or 25h). `startOfDay().addDays(1)` no longer lands on midnight, breaking `today()`/`tomorrow()`/`isTomorrow()` for zoned usage. Go's `internal/kernel/arithmetic.go` correctly uses calendar-aware `AddDate` for day/week; `addMonths` on the TS side is already zone-aware — day/week are the outliers.
 2. `parseFromPattern` looks up month names with no locale (defaults to `en-US`), so parsing a localized formatted date (e.g. French `"14 juillet 2026"`) fails the name match and silently falls back to **January** via `Number(values.get('MM') ?? ... ?? 1)`. Round-tripping `format(locale)` → `parseFromPattern` is broken for any non-English locale.
 
 ## Current state
 
 - `sdk/tempo/src/core/index.ts`:
-  - `add()` (1058-1066): `const fixed = fixedUnitMilliseconds(unit); if (fixed !== null) { return this.make(new Date(this.value.getTime() + value * fixed)); }` then a switch handling `month` via the zone-aware `addMonths`.
-  - `addDays` (~1144), `addWeeks` (~1179) delegate to `add`.
+    - `add()` (1058-1066): `const fixed = fixedUnitMilliseconds(unit); if (fixed !== null) { return this.make(new Date(this.value.getTime() + value * fixed)); }` then a switch handling `month` via the zone-aware `addMonths`.
+    - `addDays` (~1144), `addWeeks` (~1179) delegate to `add`.
 - `sdk/tempo/src/calendar/index.ts`:
-  - `fixedUnitMilliseconds` (300-322): returns constants for `millisecond/second/minute/hour/day/week` — `day` and `week` should not be here.
-  - `monthNumberFromName` (~365): defaults locale to `en-US`.
+    - `fixedUnitMilliseconds` (300-322): returns constants for `millisecond/second/minute/hour/day/week` — `day` and `week` should not be here.
+    - `monthNumberFromName` (~365): defaults locale to `en-US`.
 - `sdk/tempo/src/parsing/index.ts:296`: `month: monthNumberFromName(values.get('MMMM') ?? values.get('MMM') ?? '') ?? Number(values.get('MM') ?? values.get('M') ?? 1)` — no locale passed, silent January fallback.
 - Go reference: `pkg/hub/tempo/internal/kernel/arithmetic.go` handles `duration.Day`/`Week` via calendar `AddDate` (DST-aware). Confirm `addMonths` in `sdk/tempo/src/core/index.ts` (~1187-1205) uses `dateFromZonedComponents` — that is the pattern to reuse for day/week.
 
@@ -35,11 +36,11 @@ Convention: zoned arithmetic goes through the existing zoned-component helpers (
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| TS tempo tests | `pnpm exec vp test` (tempo) or `pnpm --filter @alloy/sdk/tempo-tests test:tempo` | pass |
-| Typecheck | `pnpm exec vp check` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose        | Command                                                                          | Expected |
+| -------------- | -------------------------------------------------------------------------------- | -------- |
+| TS tempo tests | `pnpm exec vp test` (tempo) or `pnpm --filter @alloy/sdk/tempo-tests test:tempo` | pass     |
+| Typecheck      | `pnpm exec vp check`                                                             | exit 0   |
+| Format         | `pnpm exec vp run format`                                                        | exit 0   |
 
 ## Scope
 
@@ -77,10 +78,10 @@ In `parsing/index.ts:296`, pass the parse `options?.locale` (or the policy local
 
 ## Test plan
 
-- `sdk/tempo/tests/…`: 
-  - DST: in a DST-observing zone, `addDays(1)` across spring-forward and fall-back lands on the correct local wall-clock time; `startOfDay().addDays(1)` is next local midnight; `today()/tomorrow()/isTomorrow()` correct in that zone.
-  - UTC unchanged: `addDays`/`addWeeks` in UTC produce identical results to before (no regression).
-  - Locale parse: non-English month name round-trips `format(locale)` → `parseFromPattern`; unmatched name is not silently January.
+- `sdk/tempo/tests/…`:
+    - DST: in a DST-observing zone, `addDays(1)` across spring-forward and fall-back lands on the correct local wall-clock time; `startOfDay().addDays(1)` is next local midnight; `today()/tomorrow()/isTomorrow()` correct in that zone.
+    - UTC unchanged: `addDays`/`addWeeks` in UTC produce identical results to before (no regression).
+    - Locale parse: non-English month name round-trips `format(locale)` → `parseFromPattern`; unmatched name is not silently January.
 - Where practical, choose inputs matching the Go engine's tests so plan 008 fixtures can reuse them.
 
 ## Done criteria

@@ -3,7 +3,7 @@ package cache
 import (
 	"errors"
 
-	ccache "github.com/oullin/alloy/pkg/hub/contracts/cache"
+	ccache "hara.sh/alloy/contracts/cache"
 )
 
 // Store is a TTL-aware cache contract.

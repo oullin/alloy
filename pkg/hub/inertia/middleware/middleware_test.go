@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/middleware"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/middleware"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func TestMiddleware_SetsVaryHeader(t *testing.T) {

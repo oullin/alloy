@@ -8,8 +8,8 @@ package kernel
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/calendar"
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
+	"hara.sh/alloy/tempo/calendar"
+	"hara.sh/alloy/tempo/duration"
 )
 
 func Add(value time.Time, location *time.Location, amount int, unit duration.Unit, monthsOverflow bool, yearsOverflow bool) time.Time {

@@ -6,7 +6,7 @@ package matching
 import (
 	"regexp"
 
-	crouting "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
+	crouting "hara.sh/alloy/httpx/routing/contracts"
 )
 
 // MatchableRoute is the surface a Route must expose so matching/* validators

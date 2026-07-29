@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/oullin/alloy/pkg/hub/auth/passwords"
+	"hara.sh/alloy/auth/passwords"
 )
 
 // NewForgotPasswordHandler sends a reset link with an enumeration-safe response.

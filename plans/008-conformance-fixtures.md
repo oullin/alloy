@@ -26,11 +26,11 @@
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go suite | `pnpm exec vp run go:test` | exit 0 |
-| TS suite | `pnpm exec vp test` | pass |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose  | Command                    | Expected |
+| -------- | -------------------------- | -------- |
+| Go suite | `pnpm exec vp run go:test` | exit 0   |
+| TS suite | `pnpm exec vp test`        | pass     |
+| Format   | `pnpm exec vp run format`  | exit 0   |
 
 ## Scope
 
@@ -47,6 +47,7 @@
 ### Step 1: Define the fixture format
 
 Author language-neutral JSON cases: inputs and expected outputs as **strings** (to avoid float/precision ambiguity in JSON). Cover:
+
 - money: `add`/`subtract`/`multiply` (incl. overflow → error marker), `round` at exact halves under the chosen policy, `createFromFloat`, `convert`/`convertWithRate` (incl. a large amount and an overflow marker), `avg`.
 - tempo: `addDays`/`addWeeks` across a DST boundary in a named zone, `addMonths` month-end clamping, `diffInMonths`/`Years`, `parseFromPattern` with a non-English locale.
 

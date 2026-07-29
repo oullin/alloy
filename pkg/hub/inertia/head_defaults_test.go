@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia"
+	"hara.sh/alloy/inertia"
 )
 
 func TestDefaultHead(t *testing.T) {

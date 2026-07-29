@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // Callback resolves the authenticated user from a request.

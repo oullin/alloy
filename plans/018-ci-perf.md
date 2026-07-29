@@ -17,6 +17,7 @@
 ## Why this matters
 
 The Go test job is on the CI critical path and is slower than it needs to be:
+
 - `infra/scripts/tasks/go-test.sh` iterates each `go.mod` **sequentially** in a `while` loop (lines 28-63), running `go vet ./...` then `go test -race ./...` per module.
 - `go test` re-runs vet by default, so the explicit `go vet` is a duplicate analysis pass.
 - `-race` adds 2–10× runtime and is applied to every module unconditionally.
@@ -26,15 +27,15 @@ The Go test job is on the CI critical path and is slower than it needs to be:
 ## Current state
 
 - `infra/scripts/tasks/go-test.sh:28-63`:
-  ```sh
-  while IFS= read -r -d '' gomod; do
-      module_dir="$(dirname "${gomod}")"
-      ( cd "${module_dir}"; ...
-        go vet ./...
-        ... go test -race ./...  # (or -coverprofile variant)
-      )
-  done < <( find "${GO_PATH}" -name go.mod -print0; find "${ROOT_PATH}/web" -path '*/api/go.mod' -print0 ... )
-  ```
+    ```sh
+    while IFS= read -r -d '' gomod; do
+        module_dir="$(dirname "${gomod}")"
+        ( cd "${module_dir}"; ...
+          go vet ./...
+          ... go test -race ./...  # (or -coverprofile variant)
+        )
+    done < <( find "${GO_PATH}" -name go.mod -print0; find "${ROOT_PATH}/web" -path '*/api/go.mod' -print0 ... )
+    ```
 - `vite.config.ts:83-104`: `run.task` entries with `cache: false`.
 - `.github/actions/setup/action.yml`: `setup-go@v6` without `cache-dependency-path`.
 
@@ -42,11 +43,11 @@ Convention: the script already validates module paths and computes per-module `G
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Run the go-test task locally | `pnpm exec vp run go:test` | exit 0, all modules pass |
-| Shell lint (if available) | `shellcheck infra/scripts/tasks/go-test.sh` | no new errors |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose                      | Command                                     | Expected                 |
+| ---------------------------- | ------------------------------------------- | ------------------------ |
+| Run the go-test task locally | `pnpm exec vp run go:test`                  | exit 0, all modules pass |
+| Shell lint (if available)    | `shellcheck infra/scripts/tasks/go-test.sh` | no new errors            |
+| Format                       | `pnpm exec vp run format`                   | exit 0                   |
 
 ## Scope
 

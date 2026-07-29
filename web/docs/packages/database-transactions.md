@@ -16,7 +16,7 @@ import (
     "database/sql"
     "fmt"
 
-    "github.com/oullin/alloy/pkg/hub/database"
+    "hara.sh/alloy/database"
     _ "modernc.org/sqlite"
 )
 
@@ -77,4 +77,3 @@ if errors.Is(err, errRejected) {
     // The transaction was rolled back.
 }
 ```
-

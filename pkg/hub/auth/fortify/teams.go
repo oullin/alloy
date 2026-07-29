@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/teams"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/teams"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 type teamResponse struct {

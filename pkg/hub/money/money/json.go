@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/money/currency"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/currency"
+	"hara.sh/alloy/money/exception"
 )
 
 // JSONRawData represents the raw JSON structure for money unmarshalling.

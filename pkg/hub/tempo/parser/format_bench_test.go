@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/parser"
+	"hara.sh/alloy/tempo/parser"
 )
 
 // BenchmarkParseFromPatternBulk parses many inputs against a single repeated

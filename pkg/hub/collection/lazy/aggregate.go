@@ -3,7 +3,7 @@ package lazy
 import (
 	"cmp"
 
-	"github.com/oullin/alloy/pkg/hub/collection/support"
+	"hara.sh/alloy/collection/support"
 )
 
 // Reduce reduces the lazy collection to a single value by applying the callback

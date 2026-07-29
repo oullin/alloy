@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/middleware"
+	"hara.sh/alloy/httpx/middleware"
 )
 
 func TestRecoveryPanicWritesInternalServerError(t *testing.T) {

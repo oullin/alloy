@@ -1,8 +1,8 @@
 # Cross-runtime conformance fixtures
 
 This directory is the **single source of cross-runtime truth** for the money and
-tempo twins. `pkg/hub/money` (Go) and `@alloy/sdk/money` (TS), and
-`pkg/hub/tempo` (Go) and `@alloy/sdk/tempo` (TS), are behavioral mirrors. The
+tempo twins. `pkg/hub/money` (Go) and `@hara/sdk-money` (TS), and
+`pkg/hub/tempo` (Go) and `@hara/sdk-tempo` (TS), are behavioral mirrors. The
 JSON files here encode language-neutral golden vectors that **both** runtimes
 execute, so any divergence fails CI instead of surfacing as a production
 discrepancy between backend and frontend. This is the guard that raises the twins
@@ -11,10 +11,10 @@ from parity level **L1 (asserted)** to **L2 (enforced)** — see
 
 ## Files
 
-| Fixture | Go loader | TS loader |
-| --- | --- | --- |
+| Fixture      | Go loader                                 | TS loader                                 |
+| ------------ | ----------------------------------------- | ----------------------------------------- |
 | `money.json` | `pkg/hub/money/money/conformance_test.go` | `sdk/money/tests/src/conformance.test.ts` |
-| `tempo.json` | `pkg/hub/tempo/conformance_test.go` | `sdk/tempo/tests/src/conformance.test.ts` |
+| `tempo.json` | `pkg/hub/tempo/conformance_test.go`       | `sdk/tempo/tests/src/conformance.test.ts` |
 
 Both loaders read the JSON here by a path relative to their own source file, so
 the fixtures live outside every package and neither runtime owns them.
@@ -53,8 +53,7 @@ runtime (Go `Engine.SafeAdd`/`SafeSubtract`/`SafeMultiply`; TS
 ### `tempo.json`
 
 ```json
-{ "op": "addDays", "base": { "year": 2024, "month": 3, "day": 10, "hour": 0, "timeZone": "America/New_York" },
-  "arg": 1, "render": "iso", "expected": "2024-03-11T04:00:00.000Z", "note": "..." }
+{ "op": "addDays", "base": { "year": 2024, "month": 3, "day": 10, "hour": 0, "timeZone": "America/New_York" }, "arg": 1, "render": "iso", "expected": "2024-03-11T04:00:00.000Z", "note": "..." }
 ```
 
 - `op`: `addDays` | `addWeeks` | `addHours` | `addMonths` |

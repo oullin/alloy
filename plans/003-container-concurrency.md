@@ -24,6 +24,7 @@
 - `pkg/hub/container/application.go` — `flushDeferredFor` (97-124) reads/deletes `deferredByKey`, writes `registered[p]`, reads `booted`; called on every `Application.Make`/`MakeWith`/`Get` (129-148). None of the `Application`-level maps are mutex-guarded (only the embedded `*App` has `mu`).
 
 Excerpt (`container.go:265-291`) — shared state mutated across the unlock:
+
 ```go
 c.buildStack = append(c.buildStack, abstract)
 c.with = append(c.with, parameters)
@@ -40,12 +41,12 @@ Convention: the container mirrors Laravel's container semantics. The correct fix
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go tests (container) | `cd pkg/hub && go test ./container/...` | exit 0 |
-| Race detector | `cd pkg/hub && go test -race ./container/...` | exit 0, no races |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose              | Command                                       | Expected         |
+| -------------------- | --------------------------------------------- | ---------------- |
+| Go tests (container) | `cd pkg/hub && go test ./container/...`       | exit 0           |
+| Race detector        | `cd pkg/hub && go test -race ./container/...` | exit 0, no races |
+| Full Go suite        | `pnpm exec vp run go:test`                    | exit 0           |
+| Format               | `pnpm exec vp run format`                     | exit 0           |
 
 ## Scope
 
@@ -63,6 +64,7 @@ Convention: the container mirrors Laravel's container semantics. The correct fix
 ### Step 1: Make per-resolution state goroutine-local
 
 Replace the container-global `buildStack`/`with` with a resolution context threaded through the resolve call chain. Two acceptable shapes — pick the one that fits the existing code with the least signature churn:
+
 - **(a) Context struct passed down**: introduce an internal `resolution` struct carrying `buildStack []string` and `parameters []map[string]any`, created per top-level `Make`/`resolve` and passed to `getContextualConcrete`, `Parameters()`, and the circular check. Public methods stay unchanged; they construct a fresh `resolution` and pass it inward.
 - **(b) Hold the lock for the whole resolution**: keep the state on the container but never unlock during the factory. Simpler, but serializes all resolution (a throughput cost) and risks deadlock if factories re-enter `Make` on the same container — verify re-entrancy before choosing this.
 
@@ -72,7 +74,7 @@ Prefer (a). Whichever you choose, the circular-dependency check, contextual-bind
 
 ### Step 2: Guard singleton building with single-flight
 
-For shared/singleton bindings, ensure concurrent `Make` of the same abstract runs the factory once. Add per-abstract single-flight (e.g. `golang.org/x/sync/singleflight` if already available, or a per-key building lock map). Keep the cached-instance fast path. Guard against deadlock when a factory resolves a *different* abstract (single-flight must be keyed per abstract, not global).
+For shared/singleton bindings, ensure concurrent `Make` of the same abstract runs the factory once. Add per-abstract single-flight (e.g. `golang.org/x/sync/singleflight` if already available, or a per-key building lock map). Keep the cached-instance fast path. Guard against deadlock when a factory resolves a _different_ abstract (single-flight must be keyed per abstract, not global).
 
 **Verify**: a test where two goroutines `Make` the same singleton whose factory increments a counter asserts the counter is 1 and both receive the same instance. `go test -race ./container -run Singleton` → pass, no races.
 
@@ -89,11 +91,12 @@ In `application.go`, add an `Application`-level `sync.Mutex` (separate from the 
 ## Test plan
 
 New tests in `container/container_test.go` and `application_test.go` (model after existing container tests):
+
 - Concurrent resolution of independent graphs → no false circular errors.
 - Concurrent contextual-binding resolution → each goroutine gets its own binding.
 - Concurrent singleton resolution → factory runs once.
 - Concurrent `Application.Make` on deferred keys → no map-write panic.
-All new concurrency tests must pass under `-race`.
+  All new concurrency tests must pass under `-race`.
 
 ## Done criteria
 

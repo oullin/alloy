@@ -26,6 +26,7 @@ export function progress<T, R>(
 	}
 
 	const values = progressValues(progressStepsArgument(stepsOrMessage));
+
 	const bar = new Progress(values.length, labelOrTotal, hint);
 
 	if (!callback) {

@@ -21,7 +21,7 @@ import (
     "syscall"
     "time"
 
-    "github.com/oullin/alloy/pkg/hub/httpx/server"
+    "hara.sh/alloy/httpx/server"
 )
 
 func main() {
@@ -92,4 +92,3 @@ go func() {
 
 cancel()
 ```
-

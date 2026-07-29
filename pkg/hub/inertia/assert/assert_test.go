@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia"
-	"github.com/oullin/alloy/pkg/hub/inertia/assert"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia"
+	"hara.sh/alloy/inertia/assert"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // --- Failure paths ---

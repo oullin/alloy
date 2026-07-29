@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"alloy.dev/inertia-demo/internal/database"
-	"github.com/oullin/alloy/pkg/hub/inertia"
-	"github.com/oullin/alloy/pkg/hub/inertia/flash"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia"
+	"hara.sh/alloy/inertia/flash"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func (a app) useFormHandler(w http.ResponseWriter, r *http.Request) {

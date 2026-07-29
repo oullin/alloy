@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // the upstream test uses Mockery to partial-mock Symfony's Process and

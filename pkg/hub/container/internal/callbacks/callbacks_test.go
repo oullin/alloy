@@ -3,7 +3,7 @@ package callbacks_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container/internal/callbacks"
+	"hara.sh/alloy/container/internal/callbacks"
 )
 
 func TestSnapshotEmptyRegistryReturnsNil(t *testing.T) {

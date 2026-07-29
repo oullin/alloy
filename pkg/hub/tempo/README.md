@@ -1,6 +1,6 @@
 # Time Go
 
-Time exposes a root package (`github.com/oullin/alloy/pkg/hub/tempo`) that wires
+Time exposes a root package (`hara.sh/alloy/tempo`) that wires
 methods onto `Time` / `*MutableTime` and a set of feature packages
 that hold reusable mechanics behind a generic `core.Bearer[T]` contract.
 Every feature package — `arithmetic`, `boundaries`, `comparison`,
@@ -13,10 +13,10 @@ package examples
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/arithmetic"
-	"github.com/oullin/alloy/pkg/hub/tempo/boundaries"
-	"github.com/oullin/alloy/pkg/hub/tempo/formatting"
-	tempo "github.com/oullin/alloy/pkg/hub/tempo"
+	"hara.sh/alloy/tempo/arithmetic"
+	"hara.sh/alloy/tempo/boundaries"
+	"hara.sh/alloy/tempo/formatting"
+	tempo "hara.sh/alloy/tempo"
 )
 
 func DateOnly(value tempo.Time) string {
@@ -36,8 +36,8 @@ Locale and translation behavior is composed with runtimes and factories:
 
 ```go
 import (
-	"github.com/oullin/alloy/pkg/hub/tempo/runtime"
-	tempo "github.com/oullin/alloy/pkg/hub/tempo"
+	"hara.sh/alloy/tempo/runtime"
+	tempo "hara.sh/alloy/tempo"
 )
 
 rt := runtime.New(

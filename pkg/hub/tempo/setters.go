@@ -3,8 +3,8 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
-	"github.com/oullin/alloy/pkg/hub/tempo/setters"
+	"hara.sh/alloy/tempo/duration"
+	"hara.sh/alloy/tempo/setters"
 )
 
 func (tempo Time) SetTimezone(name string) (Time, error) {

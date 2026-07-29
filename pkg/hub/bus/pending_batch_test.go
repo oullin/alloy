@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/bus"
+	"hara.sh/alloy/bus"
 )
 
 type batchableTestJob struct {

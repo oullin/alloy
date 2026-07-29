@@ -1,6 +1,6 @@
 package props
 
-import "github.com/oullin/alloy/pkg/hub/inertia/protocol"
+import "hara.sh/alloy/inertia/protocol"
 
 // MergeAll combines multiple prop maps in order. Later sources
 // override earlier ones, giving a natural precedence chain:

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	dbpkg "github.com/oullin/alloy/pkg/hub/database"
+	dbpkg "hara.sh/alloy/database"
 )
 
 func TestWithTxCommitsOnSuccess(t *testing.T) {

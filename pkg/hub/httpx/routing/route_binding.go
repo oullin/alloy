@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	crouting "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
+	crouting "hara.sh/alloy/httpx/routing/contracts"
 )
 
 // BindingContainer is the minimum container surface RouteBinding needs to

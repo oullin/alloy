@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // and returns the same display name the PHP fixture returns.

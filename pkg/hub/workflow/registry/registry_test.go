@@ -3,9 +3,9 @@ package registry_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/registry"
-	"github.com/oullin/alloy/pkg/hub/workflow/store"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/registry"
+	"hara.sh/alloy/workflow/store"
 )
 
 type subject struct {

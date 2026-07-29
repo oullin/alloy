@@ -22,18 +22,18 @@
 ## Current state
 
 - `pkg/hub/cache/rate_limiter.go` — defines `cache.RateLimiter`; grep confirms the only non-test reference is `pkg/hub/cache/memory_store_test.go:58`.
-- `auth/fortify/login_limiter.go` (`MemoryLoginLimiter`, used at `login.go:60`) and `httpx/routing/middleware/throttle_requests.go:16` (`= cmiddleware.RateLimiter`) are the two *live* limiter contracts.
+- `auth/fortify/login_limiter.go` (`MemoryLoginLimiter`, used at `login.go:60`) and `httpx/routing/middleware/throttle_requests.go:16` (`= cmiddleware.RateLimiter`) are the two _live_ limiter contracts.
 - `packages/` — empty (`ls -la packages` shows only `.`/`..`); no source/config/doc references `packages/foundation` (grep across `.go`/`.ts`/`.json`/`.md`/`.yml` returns nothing). Note: `pnpm-workspace.yaml` lists `sdk/*` etc., not `packages/*` — but double-check it doesn't glob `packages/` before deleting.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Confirm no consumer | `grep -rn "cache.RateLimiter\|RateLimiter" pkg/hub/cache && grep -rln "cache\"" pkg/hub \| xargs grep -l RateLimiter` | only test refs |
-| Cache tests | `cd pkg/hub && go test ./cache/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Workspace still resolves | `pnpm install --frozen-lockfile` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose                  | Command                                                                                                               | Expected       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Confirm no consumer      | `grep -rn "cache.RateLimiter\|RateLimiter" pkg/hub/cache && grep -rln "cache\"" pkg/hub \| xargs grep -l RateLimiter` | only test refs |
+| Cache tests              | `cd pkg/hub && go test ./cache/...`                                                                                   | exit 0         |
+| Full Go suite            | `pnpm exec vp run go:test`                                                                                            | exit 0         |
+| Workspace still resolves | `pnpm install --frozen-lockfile`                                                                                      | exit 0         |
+| Format                   | `pnpm exec vp run format`                                                                                             | exit 0         |
 
 ## Scope
 

@@ -3,9 +3,9 @@ package comparison_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/tempo"
-	"github.com/oullin/alloy/pkg/hub/tempo/comparison"
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
+	"hara.sh/alloy/tempo"
+	"hara.sh/alloy/tempo/comparison"
+	"hara.sh/alloy/tempo/duration"
 )
 
 const (

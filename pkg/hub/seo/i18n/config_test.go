@@ -3,7 +3,7 @@ package i18n_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/seo/i18n"
+	"hara.sh/alloy/seo/i18n"
 )
 
 func TestDefaultI18n(t *testing.T) {

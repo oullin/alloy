@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
+	"hara.sh/alloy/filesystem"
 )
 
 // rootedFixture builds a root directory with a secret sitting outside it, so

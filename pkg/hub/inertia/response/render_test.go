@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
-	"github.com/oullin/alloy/pkg/hub/inertia/response"
+	"hara.sh/alloy/inertia/protocol"
+	"hara.sh/alloy/inertia/response"
 )
 
 type testMarshaler struct{}

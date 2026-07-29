@@ -1,7 +1,7 @@
 # Workflow TypeScript
 
 The TypeScript package lives in `sdk/workflow` and exposes
-`@alloy/sdk/workflow`. It implements workflow-net and state-machine engines in
+`@hara/sdk-workflow`. It implements workflow-net and state-machine engines in
 the style of Symfony Workflow: a `Definition` describes places and
 transitions, a `Machine` (or single-state `StateMachine`) applies
 transitions to your own subjects, and a `MarkingStore` maps the current
@@ -15,7 +15,7 @@ This is a private workspace package: it is consumed by sibling packages via
 Definitions are assembled with the builder and driven by a machine:
 
 ```ts
-import { DefinitionBuilder, SingleStateStore, StateMachine } from '@alloy/sdk/workflow';
+import { DefinitionBuilder, SingleStateStore, StateMachine } from '@hara/sdk-workflow';
 
 interface Subscription {
 	id: string;
@@ -50,7 +50,7 @@ machine.enabledTransitions(subscription).map((transition) => transition.name); /
 Guards and lifecycle hooks attach through the event dispatcher:
 
 ```ts
-import { Dispatcher, EventNames } from '@alloy/sdk/workflow';
+import { Dispatcher, EventNames } from '@hara/sdk-workflow';
 
 const dispatcher = new Dispatcher<Subscription>();
 
@@ -63,17 +63,17 @@ const guarded = new StateMachine('subscription', definition, store, dispatcher);
 
 ## API overview
 
-| Entry point | Main exports | Purpose |
-| --- | --- | --- |
-| `@alloy/sdk/workflow` | `Machine`, `StateMachine`, `Definition`, `DefinitionBuilder`, `Marking`, `Transition` | core engine, definitions, markings |
-| `@alloy/sdk/workflow` | `Dispatcher`, `EventNames`, `TransitionError`, `TransitionNotFoundError` | lifecycle events and coded failures |
-| `@alloy/sdk/workflow/stores` | `SingleStateStore`, `MultiStateStore`, `MarkingStore` | persisting markings on subjects |
-| `@alloy/sdk/workflow/events` | `GuardEvent`, `TransitionEvent`, `EnteredEvent`, ... | typed lifecycle event classes |
-| `@alloy/sdk/workflow/audit` | `AuditTrail`, `AuditEntry` | recording applied transitions |
-| `@alloy/sdk/workflow/registry` | `WorkflowRegistry`, `WorkflowRegistryEntry` | resolving machines per subject |
-| `@alloy/sdk/workflow/config` | `WorkflowConfigLoader` | building definitions from config sources |
-| `@alloy/sdk/workflow/validator` | `WorkflowValidator` | definition validation rules |
-| `@alloy/sdk/workflow/multisteps` | `MultiStepWorkflow`, job/engine helpers | dependency-graph job execution |
+| Entry point                     | Main exports                                                                          | Purpose                                  |
+| ------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `@hara/sdk-workflow`            | `Machine`, `StateMachine`, `Definition`, `DefinitionBuilder`, `Marking`, `Transition` | core engine, definitions, markings       |
+| `@hara/sdk-workflow`            | `Dispatcher`, `EventNames`, `TransitionError`, `TransitionNotFoundError`              | lifecycle events and coded failures      |
+| `@hara/sdk-workflow/stores`     | `SingleStateStore`, `MultiStateStore`, `MarkingStore`                                 | persisting markings on subjects          |
+| `@hara/sdk-workflow/events`     | `GuardEvent`, `TransitionEvent`, `EnteredEvent`, ...                                  | typed lifecycle event classes            |
+| `@hara/sdk-workflow/audit`      | `AuditTrail`, `AuditEntry`                                                            | recording applied transitions            |
+| `@hara/sdk-workflow/registry`   | `WorkflowRegistry`, `WorkflowRegistryEntry`                                           | resolving machines per subject           |
+| `@hara/sdk-workflow/config`     | `WorkflowConfigLoader`                                                                | building definitions from config sources |
+| `@hara/sdk-workflow/validator`  | `WorkflowValidator`                                                                   | definition validation rules              |
+| `@hara/sdk-workflow/multisteps` | `MultiStepWorkflow`, job/engine helpers                                               | dependency-graph job execution           |
 
 Acceptance tests live in `sdk/workflow/tests` and run with
-`pnpm --filter @alloy/sdk/workflow test`.
+`pnpm --filter @hara/sdk-workflow test`.

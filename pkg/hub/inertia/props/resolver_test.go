@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/props"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/props"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // No X-Inertia-Partial-Data header — onlySet is empty.

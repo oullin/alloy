@@ -29,8 +29,8 @@ package config
 import (
 	"fmt"
 
-	bconfig "github.com/oullin/alloy/pkg/hub/config"
-	"github.com/oullin/alloy/pkg/hub/workflow"
+	bconfig "hara.sh/alloy/config"
+	"hara.sh/alloy/workflow"
 )
 
 // Load builds a workflow Definition from the repository under root key "workflow".

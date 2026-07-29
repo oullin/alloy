@@ -21,13 +21,14 @@ Currency conversion routes exact int64 minor-unit amounts through `float64` and 
 ## Current state
 
 - `pkg/hub/money/exchange/exchange.go`:
-  - `ConvertAmount` (~105-120): `majorUnits := float64(amount) / fromFractionPow; converted := int64(math.Round(majorUnits * rate * toFractionPow))`.
-  - `ConvertAmountWithRate` (123-140): same pattern; guards `rate <= 0` → `ErrInvalidExchangeRate`.
+    - `ConvertAmount` (~105-120): `majorUnits := float64(amount) / fromFractionPow; converted := int64(math.Round(majorUnits * rate * toFractionPow))`.
+    - `ConvertAmountWithRate` (123-140): same pattern; guards `rate <= 0` → `ErrInvalidExchangeRate`.
 - `sdk/money/src/exchange/rates.ts`:
-  - `convertAmountWithRate` (68-74): `const majorUnits = Number(amount) / 10 ** fromFraction; ... return roundAwayFromZero(convertedMajorUnits * 10 ** toFraction)`.
-  - Inverse rates derived as `1 / inverse` (float reciprocal) around line 52.
+    - `convertAmountWithRate` (68-74): `const majorUnits = Number(amount) / 10 ** fromFraction; ... return roundAwayFromZero(convertedMajorUnits * 10 ** toFraction)`.
+    - Inverse rates derived as `1 / inverse` (float reciprocal) around line 52.
 
 Excerpt (`exchange.go` conversion core):
+
 ```go
 majorUnits := float64(amount) / fromFractionPow
 convertedMajorUnits := majorUnits * rate
@@ -39,12 +40,12 @@ Convention: money is int64 minor units; the calculator (`pkg/hub/money/calculato
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go exchange tests | `cd pkg/hub && go test ./money/exchange/...` | exit 0 |
-| TS money tests | `pnpm exec vp test` (money package) | pass |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose           | Command                                      | Expected |
+| ----------------- | -------------------------------------------- | -------- |
+| Go exchange tests | `cd pkg/hub && go test ./money/exchange/...` | exit 0   |
+| TS money tests    | `pnpm exec vp test` (money package)          | pass     |
+| Full Go suite     | `pnpm exec vp run go:test`                   | exit 0   |
+| Format            | `pnpm exec vp run format`                    | exit 0   |
 
 ## Scope
 

@@ -7,11 +7,3 @@ services:
       - ./infra/.cache/go/mod:/go/pkg/mod
       - ./infra/.cache/go/build:/root/.cache/go-build
     working_dir: /workspace
-
-  fmt:
-    image: ${FMT_IMAGE:-ghcr.io/oullin/go-fmt:v0.4.1-full}
-    volumes:
-      - .:/work
-    environment:
-      - HOST_PROJECT_PATH=${PWD}
-    working_dir: /work

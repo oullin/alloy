@@ -25,6 +25,7 @@ const optionalSegmentRe = /\/\{([A-Za-z0-9_-]+)(?::[^}?]+)?\?\}/g;
 const parameterRe = /\{([A-Za-z0-9_-]+)(?::[^}?]+)?\??\}/g;
 const hasOwn = <T extends object>(value: T, key: PropertyKey): key is keyof T => Object.prototype.hasOwnProperty.call(value, key);
 const routeFallback = (options?: NavigatorOptions): string => options?.fallback ?? defaultFallback;
+
 const encodeRouteParam = (value: RouteParamValue): string => encodeURIComponent(String(value));
 
 const defaultReporter: MissingRouteReporter = (name) => {

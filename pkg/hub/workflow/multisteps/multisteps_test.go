@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/workflow/multisteps"
+	"hara.sh/alloy/workflow/multisteps"
 )
 
 // Wait briefly so both async siblings overlap, confirming parallelism.

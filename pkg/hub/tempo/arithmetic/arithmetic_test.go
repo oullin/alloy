@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo"
+	"hara.sh/alloy/tempo"
 )
 
 func mustTempo(t *testing.T, value tempo.Time, err error) tempo.Time {

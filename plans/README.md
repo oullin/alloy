@@ -7,34 +7,34 @@ Verification commands are the same repo-wide (each plan repeats the subset it ne
 
 ## Execution order & status
 
-| Plan | Title | Priority | Effort | Depends on | Status |
-|------|-------|----------|--------|------------|--------|
-| 001 | Queue reliability: attempt tracking, panic recovery, fail-job integrity | P1 | L | — | DONE |
-| 002 | Redis driver job visibility (reservation / at-most-once decision) | P1 | L | 001 | DONE |
-| 003 | Container concurrency safety | P1 | L | — | DONE |
-| 004 | Router per-request route scope | P1 | M | — | TODO |
-| 005 | Money arithmetic overflow safety & rounding policy (Go+TS) | P1 | M | — | TODO |
-| 006 | Money exchange integer conversion (Go+TS) | P2 | M | — | TODO |
-| 007 | Tempo TS DST-correct day/week + locale-aware parse | P2 | M | — | TODO |
-| 008 | Go↔TS money/tempo conformance fixtures | P2 | M | 005,006,007 | TODO |
-| 009 | Validation fixes (not_regex fail-open, delimiters, wildcard Validated) | P1 | M | — | TODO |
-| 010 | Silent-error / swallowed-error correctness sweep | P1 | M | — | TODO |
-| 011 | httpx URL-generation correctness (float params, signed-URL query) | P2 | M | — | TODO |
-| 012 | Workflow concurrency & retry correctness (Go+TS) | P2 | M | — | TODO |
-| 013 | Demo auth security (key rotation, seed passwords, login timing) | P1 | S | — | TODO |
-| 014 | Framework hardening defaults (argon2, Secure cookies, post-size) | P1 | S | — | TODO |
-| 015 | Routing performance (static-path index, method map, singleton validators) | P2 | L | — | TODO |
-| 016 | Regex / Intl compilation caching (Go+TS) | P2 | M | — | TODO |
-| 017 | Session performance (dirty tracking, background GC) | P2 | M | — | TODO |
-| 018 | CI Go-test performance | P3 | M | — | TODO |
-| 019 | Auth SQL repository tests (browserx, passwords) | P1 | S | — | TODO |
-| 020 | e2e harness portability & runner de-duplication | P2 | M | — | TODO |
-| 021 | Dead-code cleanup (cache.RateLimiter, empty packages/) | P2 | S | — | TODO |
-| 022 | Toolchain version pinning | P2 | S | — | TODO |
-| 023 | Docs & DX sweep (stale paths, AGENTS.md, Node baseline) | P2 | M | — | TODO |
-| 024 | SPIKE: private-package distribution | P3 | L | — | TODO |
-| 025 | SPIKE: authkit/authflows public API | P3 | L | — | TODO |
-| 026 | Cross-runtime parity matrix & policy doc | P3 | M | — | TODO |
+| Plan | Title                                                                     | Priority | Effort | Depends on  | Status |
+| ---- | ------------------------------------------------------------------------- | -------- | ------ | ----------- | ------ |
+| 001  | Queue reliability: attempt tracking, panic recovery, fail-job integrity   | P1       | L      | —           | DONE   |
+| 002  | Redis driver job visibility (reservation / at-most-once decision)         | P1       | L      | 001         | DONE   |
+| 003  | Container concurrency safety                                              | P1       | L      | —           | DONE   |
+| 004  | Router per-request route scope                                            | P1       | M      | —           | TODO   |
+| 005  | Money arithmetic overflow safety & rounding policy (Go+TS)                | P1       | M      | —           | TODO   |
+| 006  | Money exchange integer conversion (Go+TS)                                 | P2       | M      | —           | TODO   |
+| 007  | Tempo TS DST-correct day/week + locale-aware parse                        | P2       | M      | —           | TODO   |
+| 008  | Go↔TS money/tempo conformance fixtures                                    | P2       | M      | 005,006,007 | TODO   |
+| 009  | Validation fixes (not_regex fail-open, delimiters, wildcard Validated)    | P1       | M      | —           | TODO   |
+| 010  | Silent-error / swallowed-error correctness sweep                          | P1       | M      | —           | TODO   |
+| 011  | httpx URL-generation correctness (float params, signed-URL query)         | P2       | M      | —           | TODO   |
+| 012  | Workflow concurrency & retry correctness (Go+TS)                          | P2       | M      | —           | TODO   |
+| 013  | Demo auth security (key rotation, seed passwords, login timing)           | P1       | S      | —           | TODO   |
+| 014  | Framework hardening defaults (argon2, Secure cookies, post-size)          | P1       | S      | —           | TODO   |
+| 015  | Routing performance (static-path index, method map, singleton validators) | P2       | L      | —           | TODO   |
+| 016  | Regex / Intl compilation caching (Go+TS)                                  | P2       | M      | —           | TODO   |
+| 017  | Session performance (dirty tracking, background GC)                       | P2       | M      | —           | TODO   |
+| 018  | CI Go-test performance                                                    | P3       | M      | —           | TODO   |
+| 019  | Auth SQL repository tests (browserx, passwords)                           | P1       | S      | —           | TODO   |
+| 020  | e2e harness portability & runner de-duplication                           | P2       | M      | —           | TODO   |
+| 021  | Dead-code cleanup (cache.RateLimiter, empty packages/)                    | P2       | S      | —           | TODO   |
+| 022  | Toolchain version pinning                                                 | P2       | S      | —           | TODO   |
+| 023  | Docs & DX sweep (stale paths, AGENTS.md, Node baseline)                   | P2       | M      | —           | TODO   |
+| 024  | SPIKE: private-package distribution                                       | P3       | L      | —           | TODO   |
+| 025  | SPIKE: authkit/authflows public API                                       | P3       | L      | —           | TODO   |
+| 026  | Cross-runtime parity matrix & policy doc                                  | P3       | M      | —           | TODO   |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale).
 
@@ -47,7 +47,7 @@ Execution record — CONSOLIDATED: plans 001+002+003 now ship together as PR htt
 ## Dependency notes
 
 - **002 → 001**: 001 introduces attempt-tracking into `BaseJob` on the driver Pop path; 002 builds the redis reservation set on top of that same envelope. Land 001 first to avoid rewriting the redis Pop twice.
-- **008 → 005, 006, 007**: the conformance fixtures encode the *corrected* money/tempo behavior. If written before the fixes land, they fail immediately on the known Go↔TS divergences (rounding tie-direction, DST day math, float conversion). Land the fixes, then add the shared fixtures as a drift guard.
+- **008 → 005, 006, 007**: the conformance fixtures encode the _corrected_ money/tempo behavior. If written before the fixes land, they fail immediately on the known Go↔TS divergences (rounding tie-direction, DST day math, float conversion). Land the fixes, then add the shared fixtures as a drift guard.
 - **023** picks the single canonical Node baseline; its AGENTS.md must state whatever version 023 sets across README/CONTRIBUTING/CI/`engines`.
 
 All Tier-1 plans (001–004) are independent of each other and are the highest priority — they are production-impacting concurrency/data-loss defects.

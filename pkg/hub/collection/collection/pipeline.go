@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
+	"hara.sh/alloy/collection/arr"
 )
 
 // Each iterates over the items, passing each item and its index to the callback.

@@ -4,10 +4,10 @@ import (
 	"math"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/money/calculator"
-	"github.com/oullin/alloy/pkg/hub/money/currency"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
-	"github.com/oullin/alloy/pkg/hub/money/parser"
+	"hara.sh/alloy/money/calculator"
+	"hara.sh/alloy/money/currency"
+	"hara.sh/alloy/money/exception"
+	"hara.sh/alloy/money/parser"
 )
 
 // Manager handles Value creation and operations with a dependency-injected currency manager and calculator.

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/validation"
+	"hara.sh/alloy/validation"
 )
 
 // ValidationValidatorTest::testValidateUrlWithProtocols
