@@ -19,7 +19,7 @@ Vite+ owns orchestration; task definitions live in `vite.config.ts`. Do not call
 ```sh
 pnpm exec vp check          # typecheck
 pnpm exec vp test           # TypeScript tests (Vitest)
-pnpm exec vp pack           # bundle packages
+pnpm -r --filter './sdk/*' build  # build publishable packages
 pnpm lint                   # oxlint + workspace import checks
 pnpm exec vp run go:test    # Go vet + tests with -race (Docker-backed)
 pnpm exec vp run format     # format changed files (Docker-backed)

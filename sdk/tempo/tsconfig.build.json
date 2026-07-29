@@ -8,7 +8,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "sourceMap": false,
-    "tsBuildInfoFile": "../../infra/.cache/tsbuild/console-build.tsbuildinfo"
+    "tsBuildInfoFile": "../../infra/.cache/tsbuild/tempo-build.tsbuildinfo"
   },
   "exclude": ["dist", "tests"],
   "include": ["src/**/*.ts"]

@@ -47,6 +47,21 @@ export default defineConfig({
 				find: /^#console\/(.+)$/u,
 				replacement: repoPath('./sdk/console/src/$1'),
 			},
+			{
+				find: /^#navigator-routes\/(.+)$/u,
+				replacement: repoPath('./sdk/navigator-routes/src/$1'),
+			},
+			// Tempo's internal specifiers are bare (`#core`, not `#tempo/core`).
+			// The package `imports` map resolves them to `dist` for consumers; these
+			// aliases keep the test run on `src` so it never depends on a prior build.
+			{
+				find: /^#types$/u,
+				replacement: repoPath('./sdk/tempo/src/types.ts'),
+			},
+			{
+				find: /^#(calendar|config|core|duration|factory|formatting|parsing|ranges|runtime)$/u,
+				replacement: repoPath('./sdk/tempo/src/$1/index.ts'),
+			},
 		],
 	},
 	test: {
@@ -57,14 +72,6 @@ export default defineConfig({
 			reportsDirectory: repoPath('./infra/.cache/vitest/coverage'),
 			reporter: ['text-summary', 'html', 'json-summary'],
 		},
-	},
-	pack: {
-		entry: [repoPath('./sdk/tempo/src/index.ts')],
-		tsconfig: './sdk/tempo/tsconfig.json',
-		outDir: './sdk/tempo/dist',
-		dts: true,
-		format: ['esm'],
-		clean: true,
 	},
 	lint: {
 		jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],

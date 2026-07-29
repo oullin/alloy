@@ -52,7 +52,7 @@ pnpm exec vp run monorepo:initialise
 ```sh
 pnpm exec vp check
 pnpm exec vp test
-pnpm exec vp pack
+pnpm -r --filter './sdk/*' build
 pnpm exec vp run go:test
 pnpm docs:build
 pnpm inertia-demo:build

@@ -197,7 +197,7 @@
     }
   },
   "scripts": {
-    "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.build.json'",
+    "build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && rm -rf dist \"${ALLOY_CACHE_PATH}/tsbuild/console-build.tsbuildinfo\" && tsc -p tsconfig.build.json'",
     "prepack": "pnpm build",
     "test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && vp test run'",
     "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
@@ -209,7 +209,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@alloy/infra": "workspace:*",
     "@types/node": "^26.1.1",
     "typescript": "^6.0.3"
   }

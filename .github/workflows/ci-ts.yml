@@ -55,5 +55,5 @@ jobs:
           path: infra/.cache/vitest/coverage
           if-no-files-found: ignore
 
-      - name: Pack
-        run: pnpm exec vp pack
+      - name: Build packages
+        run: pnpm -r --filter './sdk/*' build
