@@ -7,7 +7,7 @@ coverage/
 .idea
 /go.work
 /go.work.sum
-/packages/foundation/go.work
+/pkg/hub/go.work
 infra/.cache/
 infra/.logs/
 infra/dist/
