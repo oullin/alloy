@@ -3,8 +3,8 @@ package inertia
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/pkg/hub/config"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/config"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // DefaultHead returns a Head with sensible defaults: lang "en", robots

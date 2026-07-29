@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/validation"
+	"hara.sh/alloy/validation"
 )
 
 type presenceCountCall struct {

@@ -92,7 +92,7 @@ For the most common services, the `facades/*` packages cache a typed
 manager on first use and forward common calls:
 
 ```go
-import "github.com/oullin/alloy/pkg/hub/facades/cache"
+import "hara.sh/alloy/facades/cache"
 
 store, _ := cache.Driver()             // default store
 named, _ := cache.Store("redis")       // specific store

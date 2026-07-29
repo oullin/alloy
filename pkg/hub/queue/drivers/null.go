@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // NullDriver discards all jobs silently.

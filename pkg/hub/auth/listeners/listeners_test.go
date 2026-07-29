@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/events"
-	"github.com/oullin/alloy/pkg/hub/auth/listeners"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/events"
+	"hara.sh/alloy/auth/listeners"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // stubUser implements User but not MustVerifyEmail.

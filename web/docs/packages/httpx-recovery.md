@@ -17,7 +17,7 @@ import (
     "fmt"
     "net/http"
 
-    "github.com/oullin/alloy/pkg/hub/httpx/middleware"
+    "hara.sh/alloy/httpx/middleware"
 )
 
 func main() {

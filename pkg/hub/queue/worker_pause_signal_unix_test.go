@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // signalingQueue is a minimal Backend that returns ErrNoJob from every

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
-	collectible "github.com/oullin/alloy/pkg/hub/collection/collectible"
-	"github.com/oullin/alloy/pkg/hub/collection/kv"
-	csupport "github.com/oullin/alloy/pkg/hub/collection/support"
+	"hara.sh/alloy/collection/arr"
+	collectible "hara.sh/alloy/collection/collectible"
+	"hara.sh/alloy/collection/kv"
+	csupport "hara.sh/alloy/collection/support"
 )
 
 type inventoryUser struct {

@@ -10,10 +10,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/middleware"
-	"github.com/oullin/alloy/pkg/hub/inertia/props"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
-	"github.com/oullin/alloy/pkg/hub/inertia/response"
+	"hara.sh/alloy/inertia/middleware"
+	"hara.sh/alloy/inertia/props"
+	"hara.sh/alloy/inertia/protocol"
+	"hara.sh/alloy/inertia/response"
 )
 
 // Inertia is the central server-side adapter for the Inertia.js

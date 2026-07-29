@@ -3,7 +3,7 @@ package protocol
 import (
 	"context"
 
-	"github.com/oullin/alloy/pkg/hub/seo"
+	"hara.sh/alloy/seo"
 )
 
 type ctxKey struct{ name string }

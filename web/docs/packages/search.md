@@ -19,7 +19,7 @@ Package search provides full-text search with pluggable engine backends. It is t
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/search@latest
+go get hara.sh/alloy/search@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -69,7 +69,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/search"
+    _ "hara.sh/alloy/search"
 )
 
 func main() {

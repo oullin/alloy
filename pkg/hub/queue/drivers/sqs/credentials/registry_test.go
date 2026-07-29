@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
 
-	"github.com/oullin/alloy/pkg/hub/queue/drivers/sqs/credentials"
+	"hara.sh/alloy/queue/drivers/sqs/credentials"
 )
 
 // stubFactory returns a Factory that yields the given provider/error

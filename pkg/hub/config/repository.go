@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	collection "github.com/oullin/alloy/pkg/hub/collection/collection"
 	"github.com/spf13/viper"
+	collection "hara.sh/alloy/collection/collection"
 )
 
 // Repository is a configuration store backed by Viper. It

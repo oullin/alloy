@@ -3,9 +3,9 @@ package audit_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/audit"
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/audit"
+	"hara.sh/alloy/workflow/events"
 )
 
 func completedEvent(subject string, transition string) *events.CompletedEvent[string] {

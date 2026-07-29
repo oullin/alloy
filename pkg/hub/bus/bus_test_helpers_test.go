@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/bus"
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/bus"
+	"hara.sh/alloy/queue"
 )
 
 // mockQueue implements queue.Backend for testing.

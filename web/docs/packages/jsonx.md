@@ -18,7 +18,7 @@ Package jsonx provides a fluent builder API for constructing JSON Schema objects
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/jsonx@latest
+go get hara.sh/alloy/jsonx@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -60,7 +60,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/jsonx"
+    _ "hara.sh/alloy/jsonx"
 )
 
 func main() {

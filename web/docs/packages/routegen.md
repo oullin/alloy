@@ -20,7 +20,7 @@ Package routegen generates fully-typed, importable TypeScript functions for your
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/routegen@latest
+go get hara.sh/alloy/routegen@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ routegen "github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
+    _ routegen "hara.sh/alloy/httpx/routing/navigator"
 )
 
 func main() {

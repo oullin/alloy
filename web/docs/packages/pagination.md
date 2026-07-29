@@ -20,7 +20,7 @@ Package pagination provides offset-based and cursor-based paginators for alloy c
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/pagination@latest
+go get hara.sh/alloy/pagination@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/pagination"
+    _ "hara.sh/alloy/pagination"
 )
 
 func main() {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	cworkflow "github.com/oullin/alloy/pkg/hub/contracts/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
+	cworkflow "hara.sh/alloy/contracts/workflow"
+	"hara.sh/alloy/workflow/events"
 )
 
 // Sink is the optional structured logger interface the engine writes to.

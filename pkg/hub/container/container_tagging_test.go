@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container"
+	"hara.sh/alloy/container"
 )
 
 func TestTagAndTaggedResolvesAll(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/events"
+	"hara.sh/alloy/events"
 )
 
 // Push via null should not store anything.

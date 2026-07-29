@@ -20,7 +20,7 @@ Package websockets implements a Go port of the upstream WebSockets WebSocket ser
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/websockets@latest
+go get hara.sh/alloy/websockets@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/websockets"
+    _ "hara.sh/alloy/websockets"
 )
 
 func main() {

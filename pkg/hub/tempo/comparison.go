@@ -1,8 +1,8 @@
 package tempo
 
 import (
-	"github.com/oullin/alloy/pkg/hub/tempo/comparison"
-	"github.com/oullin/alloy/pkg/hub/tempo/core"
+	"hara.sh/alloy/tempo/comparison"
+	"hara.sh/alloy/tempo/core"
 )
 
 func states(values []Time) []core.State {

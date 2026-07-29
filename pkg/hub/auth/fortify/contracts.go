@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/passwords"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/passwords"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // RegisterUser creates a user from a headless registration request.

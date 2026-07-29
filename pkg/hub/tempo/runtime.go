@@ -1,6 +1,6 @@
 package tempo
 
-import "github.com/oullin/alloy/pkg/hub/tempo/runtime"
+import "hara.sh/alloy/tempo/runtime"
 
 type Context = runtime.Context
 

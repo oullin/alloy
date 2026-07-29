@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/events"
+	"hara.sh/alloy/events"
 )
 
 func TestQueueable(t *testing.T) {

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container/internal/provsort"
+	"hara.sh/alloy/container/internal/provsort"
 
-	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
+	"hara.sh/alloy/container/contracts/provider"
 )
 
 // stub declares whatever combination of Provides/DependsOn a case needs.

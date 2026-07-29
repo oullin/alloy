@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // These tests cover Go-specific helpers (DisplayName, NewUUIDv4,

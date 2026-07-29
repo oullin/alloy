@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue/drivers"
 )
 
 // --- Mock Redis Client ---

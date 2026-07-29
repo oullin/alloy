@@ -3,7 +3,7 @@ package drivers_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue/drivers"
 )
 
 func TestRedisQueueKey(t *testing.T) {

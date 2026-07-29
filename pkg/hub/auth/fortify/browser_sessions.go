@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/browserx"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/browserx"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 type browserSessionResponse struct {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/session"
+	"hara.sh/alloy/session"
 )
 
 type csrfStore struct{ token string }

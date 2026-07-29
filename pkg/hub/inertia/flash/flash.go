@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/oullin/alloy/pkg/hub/encryption"
+	"hara.sh/alloy/encryption"
 )
 
 // Message carries a flash notification across requests.

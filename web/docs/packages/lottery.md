@@ -18,7 +18,7 @@ Package lottery provides probabilistic execution helpers modeled after the upstr
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/lottery@latest
+go get hara.sh/alloy/lottery@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -60,7 +60,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/lottery"
+    _ "hara.sh/alloy/lottery"
 )
 
 func main() {

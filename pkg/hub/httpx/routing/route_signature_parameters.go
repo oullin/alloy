@@ -3,7 +3,7 @@ package routing
 import (
 	"reflect"
 
-	crouting "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
+	crouting "hara.sh/alloy/httpx/routing/contracts"
 )
 
 // RouteSignatureParameters extracts the parameter list of a route action's

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue/failed"
+	"hara.sh/alloy/queue/failed"
 )
 
 func newIntProvider() *failed.DatabaseFailedJobProvider {

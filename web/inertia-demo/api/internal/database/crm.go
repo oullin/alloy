@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	frameworkdb "github.com/oullin/alloy/pkg/hub/database"
 	"golang.org/x/crypto/bcrypt"
+	frameworkdb "hara.sh/alloy/database"
 )
 
 // ErrNotFound is returned when an UPDATE or DELETE affects zero rows.

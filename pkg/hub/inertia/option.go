@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"os"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // Option configures an Inertia instance during construction.

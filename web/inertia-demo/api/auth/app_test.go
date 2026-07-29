@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"alloy.dev/inertia-demo/internal/database"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func TestLoginValidationAndLogoutMethodGuard(t *testing.T) {

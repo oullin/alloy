@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/container"
+	"hara.sh/alloy/container"
 )
 
 // ---------- Binding & Resolution ----------

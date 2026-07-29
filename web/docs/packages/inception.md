@@ -20,7 +20,7 @@ Package inception provides unified authentication scaffolding, team management, 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/inception@latest
+go get hara.sh/alloy/inception@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -69,7 +69,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/inception"
+    _ "hara.sh/alloy/inception"
 )
 
 func main() {

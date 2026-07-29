@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia"
+	"hara.sh/alloy/inertia"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // AssertableInertia holds a decoded Inertia page object for test

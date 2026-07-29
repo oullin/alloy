@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/events"
+	"hara.sh/alloy/events"
 )
 
 // Register listener.

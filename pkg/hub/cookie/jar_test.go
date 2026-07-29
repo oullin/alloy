@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/cookie"
+	"hara.sh/alloy/cookie"
 )
 
 func defaultOpts() cookie.Options {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	contracts "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
+	contracts "hara.sh/alloy/httpx/routing/contracts"
 )
 
 // RouteUrlGenerator builds a URL for a single named route by substituting

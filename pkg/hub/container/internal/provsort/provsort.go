@@ -8,7 +8,7 @@ package provsort
 import (
 	"errors"
 
-	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
+	"hara.sh/alloy/container/contracts/provider"
 )
 
 // ErrCycle is returned when the providers' DependsOn declarations form a cycle,

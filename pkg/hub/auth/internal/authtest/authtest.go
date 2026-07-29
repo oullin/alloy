@@ -8,10 +8,10 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/auth/sessionx"
-	"github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
-	"github.com/oullin/alloy/pkg/hub/contracts/auth/events"
+	"hara.sh/alloy/auth/sessionx"
+	"hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
+	"hara.sh/alloy/contracts/auth/events"
 )
 
 // ErrProvider is a reusable provider error for auth tests.

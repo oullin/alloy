@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/contracts/compiler"
+	"hara.sh/alloy/httpx/routing/contracts/compiler"
 )
 
 // CallableDispatcher dispatches callable route actions.

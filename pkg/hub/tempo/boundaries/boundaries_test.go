@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo"
-	"github.com/oullin/alloy/pkg/hub/tempo/boundaries"
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
-	"github.com/oullin/alloy/pkg/hub/tempo/internal/kernel"
+	"hara.sh/alloy/tempo"
+	"hara.sh/alloy/tempo/boundaries"
+	"hara.sh/alloy/tempo/duration"
+	"hara.sh/alloy/tempo/internal/kernel"
 )
 
 func mustParse(t *testing.T, value string) tempo.Time {

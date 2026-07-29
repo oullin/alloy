@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/bus"
+	"hara.sh/alloy/bus"
 )
 
 type testCommand struct{ Value string }

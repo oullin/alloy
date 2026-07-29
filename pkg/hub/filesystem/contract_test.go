@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	contract "github.com/oullin/alloy/pkg/hub/contracts/filesystem"
-	"github.com/oullin/alloy/pkg/hub/filesystem"
+	contract "hara.sh/alloy/contracts/filesystem"
+	"hara.sh/alloy/filesystem"
 )
 
 // TestContractCoversLocal catches the drift the compile-time assertion in

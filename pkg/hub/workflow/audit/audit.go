@@ -3,8 +3,8 @@
 package audit
 
 import (
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/events"
 )
 
 // Entry is one recorded transition.

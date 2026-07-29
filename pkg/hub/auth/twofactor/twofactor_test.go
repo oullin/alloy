@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/twofactor"
+	"hara.sh/alloy/auth/twofactor"
 )
 
 func TestCodeAndVerifyTOTP(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/auth/security"
+	"hara.sh/alloy/auth/security"
 )
 
 func TestProductionDefaultsValidateWhenRequiredSecretsAreSet(t *testing.T) {

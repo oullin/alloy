@@ -11,8 +11,9 @@
 > `.npmrc` snippet in §3 are **no longer accurate** — the GitHub Packages route
 > requires every customer to hold a GitHub account and cannot express a version
 > ceiling, and pnpm removed `${ENV}` expansion in repository `.npmrc` files in
-> 10.34.2/11.5.3 (GHSA-3qhv-2rgh-x77r). Package names shown as
-> `@alloy/sdk/<name>` describe the pre-rename state on purpose.
+> 10.34.2/11.5.3 (GHSA-3qhv-2rgh-x77r). Identifiers shown as
+> `@alloy/sdk/<name>` and `github.com/oullin/alloy/pkg/hub` describe the
+> pre-migration state on purpose and are left unrenamed.
 
 This spike defines a delivery path for Alloy's paid subscription packages. It decides how a paying customer can resolve TypeScript and Go dependencies with standard package tooling, how access follows an entitlement, and what must change from today's release artifacts and clone-based workflow. It does not design billing, a customer portal, or the entitlement service.
 

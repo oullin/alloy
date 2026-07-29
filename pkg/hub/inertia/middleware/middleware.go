@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 // Config holds the configuration for the Inertia middleware.

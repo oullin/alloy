@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/bus"
+	"hara.sh/alloy/bus"
 )
 
 type chainJob struct {

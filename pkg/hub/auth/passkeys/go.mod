@@ -1,10 +1,10 @@
-module github.com/oullin/alloy/pkg/hub/auth/passkeys
+module hara.sh/alloy/auth/passkeys
 
 go 1.26.5
 
 require (
 	github.com/go-webauthn/webauthn v0.17.4
-	github.com/oullin/alloy/pkg/hub v0.0.0
+	hara.sh/alloy v0.0.0
 )
 
 require (
@@ -23,4 +23,4 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 )
 
-replace github.com/oullin/alloy/pkg/hub => ../..
+replace hara.sh/alloy => ../..

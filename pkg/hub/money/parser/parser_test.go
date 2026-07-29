@@ -8,8 +8,8 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/oullin/alloy/pkg/hub/money/currency"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/currency"
+	"hara.sh/alloy/money/exception"
 )
 
 func TestParser_ParseAmount(t *testing.T) {

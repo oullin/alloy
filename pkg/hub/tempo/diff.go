@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/diff"
+	"hara.sh/alloy/tempo/diff"
 )
 
 func (tempo Time) Diff(other Time, unit Unit, options ...DiffOptions) float64 {

@@ -43,7 +43,7 @@ Pull a store from the manager and use it. The simplest path goes through
 the facade:
 
 ```go
-import facadecache "github.com/oullin/alloy/pkg/hub/facades/cache"
+import facadecache "hara.sh/alloy/facades/cache"
 
 store, err := facadecache.Driver()
 if err != nil {
@@ -171,7 +171,7 @@ Package cache provides caching primitives. It defines a two-level abstraction: S
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/cache@latest
+go get hara.sh/alloy/cache@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -215,7 +215,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/cache"
+    _ "hara.sh/alloy/cache"
 )
 
 func main() {

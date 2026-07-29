@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/exception"
 )
 
 func TestNew(t *testing.T) {

@@ -5,8 +5,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container"
-	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
+	"hara.sh/alloy/container"
+	"hara.sh/alloy/container/contracts/provider"
 )
 
 // fakeProvider records lifecycle calls for assertions.

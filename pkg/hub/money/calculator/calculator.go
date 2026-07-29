@@ -3,7 +3,7 @@ package calculator
 import (
 	"math"
 
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/exception"
 )
 
 // Amount represents the integer value of a monetary amount.

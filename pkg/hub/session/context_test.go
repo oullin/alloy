@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/session"
-	"github.com/oullin/alloy/pkg/hub/session/handlers"
+	"hara.sh/alloy/session"
+	"hara.sh/alloy/session/handlers"
 )
 
 func TestFromContextRoundTrip(t *testing.T) {

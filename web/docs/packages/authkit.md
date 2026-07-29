@@ -20,7 +20,7 @@ Package authkit holds AuthKit parity tests for Alloy's Inception-backed team, pr
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/authkit@latest
+go get hara.sh/alloy/authkit@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -62,7 +62,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/authkit"
+    _ "hara.sh/alloy/authkit"
 )
 
 func main() {

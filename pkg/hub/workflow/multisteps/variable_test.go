@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow/multisteps"
+	"hara.sh/alloy/workflow/multisteps"
 )
 
 type fixture struct {

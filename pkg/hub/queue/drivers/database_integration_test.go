@@ -34,8 +34,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/drivers"
 )
 
 func TestAvailableAndUnReservedJobsArePopped(t *testing.T) {

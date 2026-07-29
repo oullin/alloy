@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
 	"github.com/spf13/viper"
+	"hara.sh/alloy/tempo/duration"
 )
 
 type HumanDiffOptions struct {

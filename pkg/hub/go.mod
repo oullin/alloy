@@ -1,4 +1,4 @@
-module github.com/oullin/alloy/pkg/hub
+module hara.sh/alloy
 
 go 1.26.5
 

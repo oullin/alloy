@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	contract "github.com/oullin/alloy/pkg/hub/contracts/validation"
+	contract "hara.sh/alloy/contracts/validation"
 )
 
 // ParsedRule represents a single rule with its name and parameters.

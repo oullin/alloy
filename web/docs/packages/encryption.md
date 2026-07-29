@@ -19,7 +19,7 @@ Package encryption provides AES encryption with CBC and GCM modes. It implements
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/encryption@latest
+go get hara.sh/alloy/encryption@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/encryption"
+    _ "hara.sh/alloy/encryption"
 )
 
 func main() {

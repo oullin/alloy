@@ -3,7 +3,7 @@ package validation_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/validation"
+	"hara.sh/alloy/validation"
 )
 
 // ─── helpers ──────────────────────────────────────────────────────────────────

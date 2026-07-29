@@ -3,7 +3,7 @@ package arr_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
+	"hara.sh/alloy/collection/arr"
 )
 
 func TestEvery(t *testing.T) {

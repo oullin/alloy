@@ -3,7 +3,7 @@ package routing
 import (
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/matching"
+	"hara.sh/alloy/httpx/routing/matching"
 )
 
 // RouteCollection is the in-memory route store used by [Router] during

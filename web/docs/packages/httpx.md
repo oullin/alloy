@@ -21,7 +21,7 @@ Package httpx provides HTTP request and response primitives built on Go's net/ht
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/httpx@latest
+go get hara.sh/alloy/httpx@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -74,7 +74,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/httpx"
+    _ "hara.sh/alloy/httpx"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package container
 import (
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
+	"hara.sh/alloy/container/contracts/provider"
 )
 
 // Application wraps App and manages service provider lifecycle,

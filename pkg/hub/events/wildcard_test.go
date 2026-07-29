@@ -3,7 +3,7 @@ package events_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/events"
+	"hara.sh/alloy/events"
 )
 
 func TestMatchesWildcard(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/server"
+	"hara.sh/alloy/httpx/server"
 )
 
 type clientResult struct {

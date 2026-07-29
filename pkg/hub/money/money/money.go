@@ -1,8 +1,8 @@
 package money
 
 import (
-	"github.com/oullin/alloy/pkg/hub/money/currency"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/currency"
+	"hara.sh/alloy/money/exception"
 )
 
 // Currency returns the currency of the money object.

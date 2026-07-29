@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
-	"github.com/oullin/alloy/pkg/hub/collection/support"
+	"hara.sh/alloy/collection/arr"
+	"hara.sh/alloy/collection/support"
 )
 
 // Each iterates over items in insertion order, calling the callback for each

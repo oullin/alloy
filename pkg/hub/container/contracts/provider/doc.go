@@ -31,7 +31,7 @@
 //
 //	package cache
 //
-//	import "github.com/oullin/alloy/pkg/hub/container"
+//	import "hara.sh/alloy/container"
 //
 //	type CacheServiceProvider struct {
 //	    app           *container.App

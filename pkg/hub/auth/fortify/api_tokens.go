@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	patokens "github.com/oullin/alloy/pkg/hub/auth/tokens"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	patokens "hara.sh/alloy/auth/tokens"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 type apiTokenResponse struct {

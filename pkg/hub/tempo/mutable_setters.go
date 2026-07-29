@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/setters"
+	"hara.sh/alloy/tempo/setters"
 )
 
 func (mutable *MutableTime) SetTimezone(name string) (*MutableTime, error) {

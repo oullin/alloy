@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/calendar"
-	"github.com/oullin/alloy/pkg/hub/tempo/core"
+	"hara.sh/alloy/tempo/calendar"
+	"hara.sh/alloy/tempo/core"
 )
 
 type Object struct {

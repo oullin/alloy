@@ -3,8 +3,8 @@ package container
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
-	"github.com/oullin/alloy/pkg/hub/container/internal/provsort"
+	"hara.sh/alloy/container/contracts/provider"
+	"hara.sh/alloy/container/internal/provsort"
 )
 
 // Register calls p.Register() and records the provider so Boot can

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // fakeInspectableQueue is a minimal Backend that also satisfies the two

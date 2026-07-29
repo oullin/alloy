@@ -1,6 +1,6 @@
 package queue
 
-import cqueue "github.com/oullin/alloy/pkg/hub/contracts/queue"
+import cqueue "hara.sh/alloy/contracts/queue"
 
 // Backend defines the interface for a queue backend.
 type Backend = cqueue.Backend

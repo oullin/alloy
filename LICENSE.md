@@ -2,7 +2,7 @@
 
 Copyright (c) 2026 Gustavo Ocanto. All rights reserved.
 
-Alloy — including the Go module (`github.com/oullin/alloy/pkg/hub`), the
+Alloy — including the Go module (`hara.sh/alloy`), the
 `@hara/sdk-*` TypeScript packages, the documentation, and all related assets in this
 repository — is proprietary software.
 

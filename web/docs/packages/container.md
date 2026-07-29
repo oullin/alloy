@@ -21,7 +21,7 @@ Package container is alloy's IoC container and application kernel.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/container@latest
+go get hara.sh/alloy/container@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -63,7 +63,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/container"
+    _ "hara.sh/alloy/container"
 )
 
 func main() {

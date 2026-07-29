@@ -3,7 +3,7 @@ package cookie_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/contracts/cookie"
+	"hara.sh/alloy/contracts/cookie"
 )
 
 func TestDefaultOptionsSecureByDefault(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/twofactor"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/twofactor"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // TwoFactorConfig controls two-factor endpoint output.

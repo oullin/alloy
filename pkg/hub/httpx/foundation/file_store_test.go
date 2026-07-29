@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
+	"hara.sh/alloy/filesystem"
+	"hara.sh/alloy/httpx/foundation"
 )
 
 // FileStore previously declared Put(path, io.Reader), which neither filesystem

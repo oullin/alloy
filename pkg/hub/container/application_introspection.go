@@ -1,6 +1,6 @@
 package container
 
-import "github.com/oullin/alloy/pkg/hub/container/contracts/provider"
+import "hara.sh/alloy/container/contracts/provider"
 
 // Providers returns every service provider that has been recorded with the
 // application, including deferred providers that have not yet been flushed.

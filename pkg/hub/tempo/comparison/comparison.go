@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/core"
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
-	"github.com/oullin/alloy/pkg/hub/tempo/internal/kernel"
+	"hara.sh/alloy/tempo/core"
+	"hara.sh/alloy/tempo/duration"
+	"hara.sh/alloy/tempo/internal/kernel"
 )
 
 func Before[T core.Bearer[T]](bearer T, other core.State, units ...duration.Unit) bool {

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/hashing"
 	"golang.org/x/crypto/bcrypt"
+	"hara.sh/alloy/hashing"
 )
 
 func TestBcryptMakeAndCheck(t *testing.T) {

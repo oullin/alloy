@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing"
+	"hara.sh/alloy/httpx/routing"
 )
 
 // AdapterOptions configures how Alloy routes are converted to RouteInfo.

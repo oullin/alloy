@@ -3,8 +3,8 @@ package validation
 import (
 	"strings"
 
-	contract "github.com/oullin/alloy/pkg/hub/contracts/validation"
-	"github.com/oullin/alloy/pkg/hub/validation/rules"
+	contract "hara.sh/alloy/contracts/validation"
+	"hara.sh/alloy/validation/rules"
 )
 
 // RuleFunc is a validation function.  It receives the attribute name, the

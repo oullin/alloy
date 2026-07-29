@@ -21,7 +21,7 @@ Package validation provides a rule-based input validator that accepts map[string
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/validation@latest
+go get hara.sh/alloy/validation@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -66,7 +66,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/validation"
+    _ "hara.sh/alloy/validation"
 )
 
 func main() {

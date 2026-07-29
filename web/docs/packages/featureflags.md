@@ -21,7 +21,7 @@ Package featureflags provides feature flags. It defines a two-level abstraction:
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/featureflags@latest
+go get hara.sh/alloy/featureflags@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -65,7 +65,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/featureflags"
+    _ "hara.sh/alloy/featureflags"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/validation"
-	"github.com/oullin/alloy/pkg/hub/validation/rules"
+	"hara.sh/alloy/validation"
+	"hara.sh/alloy/validation/rules"
 )
 
 // ValidationRuleParserTest::testEmptyConditionalRulesArePreserved

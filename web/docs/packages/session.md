@@ -115,7 +115,7 @@ Package session provides HTTP session management. It defines a Store with flash 
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/session@latest
+go get hara.sh/alloy/session@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -162,7 +162,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/session"
+    _ "hara.sh/alloy/session"
 )
 
 func main() {

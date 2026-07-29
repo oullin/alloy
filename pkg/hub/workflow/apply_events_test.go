@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/events"
 )
 
 // failingSetStore reads the marking from the subject's state but always fails

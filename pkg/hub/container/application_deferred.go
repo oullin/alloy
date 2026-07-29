@@ -3,7 +3,7 @@ package container
 import (
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/container/contracts/provider"
+	"hara.sh/alloy/container/contracts/provider"
 )
 
 // flushDeferredFor runs the deferred provider that owns abstract, if any,

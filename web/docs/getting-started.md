@@ -1,7 +1,7 @@
 # Getting Started
 
 Alloy is a collection of foundational Go packages for building web applications.
-The Go packages are published from the `github.com/oullin/alloy/pkg/hub` module, so you
+The Go packages are published from the `hara.sh/alloy` module, so you
 import only the packages you need.
 
 ## Requirements
@@ -14,7 +14,7 @@ import only the packages you need.
 
 ## Installation
 
-Alloy is developed and consumed privately. The `github.com/oullin/alloy/pkg/hub` module
+Alloy is developed and consumed privately. The `hara.sh/alloy` module
 path is not served publicly, so the Go packages are consumed through a Go
 workspace instead of `go get`:
 
@@ -30,8 +30,8 @@ Then import the packages you need as usual:
 
 ```go
 import (
-	"github.com/oullin/alloy/pkg/hub/cache"
-	"github.com/oullin/alloy/pkg/hub/container"
+	"hara.sh/alloy/cache"
+	"hara.sh/alloy/container"
 )
 ```
 
@@ -69,7 +69,7 @@ pnpm run build --filter=@alloy/docs
 
 ## Package Index
 
-The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
+The packages below ship today from `hara.sh/alloy`.
 
 ### Architecture
 
@@ -127,7 +127,7 @@ The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
 ## Roadmap
 
 The following packages are documented as design targets but are **not yet
-available** in `github.com/oullin/alloy/pkg/hub`:
+available** in `hara.sh/alloy`:
 
 [routing](/packages/routing), [redis](/packages/redis),
 [pagination](/packages/pagination), [jobqueue](/packages/jobqueue),

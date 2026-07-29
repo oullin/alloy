@@ -48,7 +48,7 @@ run_module() {
 		return 1
 	fi
 	while IFS= read -r module_path; do
-		if [[ "${module_path}" != "github.com/oullin/alloy/pkg/hub" && "${module_path}" != github.com/oullin/alloy/pkg/hub/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
+		if [[ "${module_path}" != "hara.sh/alloy" && "${module_path}" != hara.sh/alloy/* && "${module_path}" != alloy.dev/inertia-demo ]]; then
 			echo "unexpected Go module path: ${module_path}" >&2
 			return 1
 		fi

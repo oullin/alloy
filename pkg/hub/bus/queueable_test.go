@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/bus"
+	"hara.sh/alloy/bus"
 )
 
 type chainableJob struct {

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/session"
-	"github.com/oullin/alloy/pkg/hub/session/handlers"
+	"hara.sh/alloy/session"
+	"hara.sh/alloy/session/handlers"
 )
 
 // countingHandler wraps ArrayHandler and counts Write calls so tests can assert

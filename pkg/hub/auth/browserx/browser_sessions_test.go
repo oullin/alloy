@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/browserx"
+	"hara.sh/alloy/auth/browserx"
 )
 
 type sessionSQLDB struct {

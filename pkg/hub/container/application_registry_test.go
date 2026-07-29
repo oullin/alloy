@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container"
+	"hara.sh/alloy/container"
 )
 
 type sample struct{ Value string }
