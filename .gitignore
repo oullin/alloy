@@ -15,3 +15,6 @@ ts/docs/src/.vitepress/
 web/docs/.vuepress/.temp/
 web/storage/
 .pnpm-store/
+
+# Compiled Go helper binaries
+/infra/modzip/modzip
