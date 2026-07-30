@@ -33,7 +33,7 @@ import (
     "fmt"
 
     "github.com/golang-migrate/migrate/v4/database/sqlite"
-    "github.com/oullin/alloy/pkg/hub/database"
+    "hara.sh/alloy/database"
     _ "modernc.org/sqlite"
 )
 
@@ -81,4 +81,3 @@ func main() {
 The wrapper intentionally imports only `golang-migrate` core packages. Keep
 database-specific imports in the application or service package that owns the
 actual connection.
-

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/session/handlers"
+	"hara.sh/alloy/session/handlers"
 )
 
 type mockDBConn struct {

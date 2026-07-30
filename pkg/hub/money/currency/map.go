@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/exception"
 )
 
 // Map holds a reference to the active currency configuration.

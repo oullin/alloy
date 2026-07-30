@@ -19,7 +19,7 @@ The contracts package provides Alloy's Go implementation for this surface.
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/contracts@latest
+go get hara.sh/alloy/contracts@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -30,31 +30,31 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/contracts/...
 
 ## Source Coverage
 
-| Package         | Purpose                                                                                                                                                                                                              |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `contracts`     | Public contracts API surface for this module.                                                                                                                                                                        |
-| `ai`            | Public ai API surface for this module.                                                                                                                                                                               |
-| `ai/gateway`    | Public ai/gateway API surface for this module.                                                                                                                                                                       |
-| `ai/provider`   | Public ai/provider API surface for this module.                                                                                                                                                                      |
-| `auth`          | Public auth API surface for this module.                                                                                                                                                                             |
-| `concurrency`   | Public concurrency API surface for this module.                                                                                                                                                                      |
-| `database`      | Public database API surface for this module.                                                                                                                                                                         |
-| `encryption`    | Public encryption API surface for this module.                                                                                                                                                                       |
-| `events`        | Public events API surface for this module.                                                                                                                                                                           |
-| `filesystem`    | Public filesystem API surface for this module.                                                                                                                                                                       |
-| `hashing`       | Public hashing API surface for this module.                                                                                                                                                                          |
-| `log`           | Public log API surface for this module.                                                                                                                                                                              |
-| `mail`          | Public mail API surface for this module.                                                                                                                                                                             |
-| `notifications` | Public notifications API surface for this module.                                                                                                                                                                    |
-| `pagination`    | Public pagination API surface for this module.                                                                                                                                                                       |
-| `pipeline`      | Public pipeline API surface for this module.                                                                                                                                                                         |
-| `process`       | Public process API surface for this module.                                                                                                                                                                          |
+| Package         | Purpose                                                                                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `contracts`     | Public contracts API surface for this module.                                                                                                                                                                      |
+| `ai`            | Public ai API surface for this module.                                                                                                                                                                             |
+| `ai/gateway`    | Public ai/gateway API surface for this module.                                                                                                                                                                     |
+| `ai/provider`   | Public ai/provider API surface for this module.                                                                                                                                                                    |
+| `auth`          | Public auth API surface for this module.                                                                                                                                                                           |
+| `concurrency`   | Public concurrency API surface for this module.                                                                                                                                                                    |
+| `database`      | Public database API surface for this module.                                                                                                                                                                       |
+| `encryption`    | Public encryption API surface for this module.                                                                                                                                                                     |
+| `events`        | Public events API surface for this module.                                                                                                                                                                         |
+| `filesystem`    | Public filesystem API surface for this module.                                                                                                                                                                     |
+| `hashing`       | Public hashing API surface for this module.                                                                                                                                                                        |
+| `log`           | Public log API surface for this module.                                                                                                                                                                            |
+| `mail`          | Public mail API surface for this module.                                                                                                                                                                           |
+| `notifications` | Public notifications API surface for this module.                                                                                                                                                                  |
+| `pagination`    | Public pagination API surface for this module.                                                                                                                                                                     |
+| `pipeline`      | Public pipeline API surface for this module.                                                                                                                                                                       |
+| `process`       | Public process API surface for this module.                                                                                                                                                                        |
 | `provider`      | Package provider defines the contracts that a alloy service provider must satisfy. It is intentionally tiny — three interfaces and no helpers — so that any package can opt in without pulling a heavy dependency. |
-| `websockets`    | Public websockets API surface for this module.                                                                                                                                                                       |
-| `search`        | Public search API surface for this module.                                                                                                                                                                           |
-| `socialauth`    | Public socialauth API surface for this module.                                                                                                                                                                       |
-| `debugbar`     | Public debugbar API surface for this module.                                                                                                                                                                        |
-| `validation`    | Public validation API surface for this module.                                                                                                                                                                       |
+| `websockets`    | Public websockets API surface for this module.                                                                                                                                                                     |
+| `search`        | Public search API surface for this module.                                                                                                                                                                         |
+| `socialauth`    | Public socialauth API surface for this module.                                                                                                                                                                     |
+| `debugbar`      | Public debugbar API surface for this module.                                                                                                                                                                       |
+| `validation`    | Public validation API surface for this module.                                                                                                                                                                     |
 
 ## Core Concepts
 
@@ -86,7 +86,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/contracts"
+    _ "hara.sh/alloy/contracts"
 )
 
 func main() {
@@ -101,7 +101,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

@@ -3,8 +3,8 @@ package workflow_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/store"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/store"
 )
 
 func TestQuery_CanAndCanNot(t *testing.T) {

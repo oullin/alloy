@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/drivers"
 )
 
 func TestSyncDriverPushExecutesImmediately(t *testing.T) {

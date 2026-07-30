@@ -6,8 +6,8 @@ packages under `sdk/`, the web workspace under `web/`, and the shared
 automation under `infra/`.
 
 Tempo is the most complete cross-runtime package in the workspace. It is
-available as both a Go package (`github.com/oullin/alloy/pkg/hub/tempo`) and a
-TypeScript package (`@alloy/sdk/tempo`). Only a deliberate few packages are
+available as both a Go package (`hara.sh/alloy/tempo`) and a
+TypeScript package (`@hara/sdk-tempo`). Only a deliberate few packages are
 cross-runtime twins; the [Cross-Runtime Parity Matrix](web/docs/architecture/parity.md)
 maps which primitives exist in which runtime, how much parity each twin
 guarantees, and the policy for what earns a twin.
@@ -36,7 +36,8 @@ Do not add language suffixes such as `*-ts` to package paths.
 - Node.js 24 or newer.
 - pnpm 10.33.0.
 - Go 1.26.5 for Go package checks.
-- Docker or Docker Compose for the formatter tasks.
+- [fmtkit](https://github.com/oullin/fmtkit) for the formatter tasks
+  (`brew install --cask fmtkit`).
 
 ## Setup
 
@@ -52,7 +53,7 @@ pnpm exec vp run monorepo:initialise
 ```sh
 pnpm exec vp check
 pnpm exec vp test
-pnpm exec vp pack
+pnpm -r --filter './sdk/*' build
 pnpm exec vp run go:test
 pnpm docs:build
 pnpm inertia-demo:build
@@ -62,7 +63,7 @@ pnpm exec vp run format-all
 Tempo-specific acceptance coverage can also be run directly:
 
 ```sh
-pnpm --filter @alloy/sdk/tempo-tests test:tempo
+pnpm --filter @hara/sdk-tempo-tests test:tempo
 ```
 
 The root package scripts are aliases for the main TypeScript checks:
@@ -76,8 +77,9 @@ pnpm typecheck
 
 ## Formatting
 
-Formatting is intentionally Docker-backed so local output matches CI and the
-shared formatter image. Use one of the stable entrypoints:
+Formatting runs through [fmtkit](https://github.com/oullin/fmtkit), a single
+binary that formats both Go and TS/Vue with no image pull and no daemon. Use
+one of the stable entrypoints:
 
 ```sh
 pnpm exec vp run format
@@ -96,8 +98,8 @@ Vite+ owns orchestration in this repository. Custom task definitions live in
 `infra/scripts/tasks`.
 
 The root `Makefile` is a compatibility delegate for existing `make <target>`
-commands. It forwards targets to Vite+ while preserving the Docker-backed
-formatter commands.
+commands. It forwards targets to Vite+ while preserving the formatter
+commands.
 
 ## More Documentation
 

@@ -31,7 +31,7 @@ type MoneyValueFactories = {
 	[Code in CurrencyCode as `from${Code}`]: (amount: Amount) => MoneyValueInstance;
 };
 
-describe('@alloy/sdk/money OOP port', () => {
+describe('@hara/sdk-money OOP port', () => {
 	it('keeps the root package class-first without top-level DB helper functions', async () => {
 		const api = await import('#money/index');
 
@@ -150,6 +150,7 @@ describe('@alloy/sdk/money OOP port', () => {
 
 	it('converts amounts with direct rates, inverse rates, explicit rates, and fraction changes', () => {
 		const rates = ExchangeRates.create().addRate('USD', 'EUR', 0.85).addRate('USD', 'JPY', 150);
+
 		const converter = MoneyConverter.create(CurrencyManager.default(), rates);
 		const usd = MoneyManager.default().create(500n, 'USD');
 

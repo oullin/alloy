@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 type registerableJob struct {

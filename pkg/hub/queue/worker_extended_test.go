@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/drivers"
 )
 
 // mockQueue wraps a real queue to control behavior in tests.

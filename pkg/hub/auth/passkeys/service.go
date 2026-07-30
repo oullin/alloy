@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // Service coordinates WebAuthn ceremonies.

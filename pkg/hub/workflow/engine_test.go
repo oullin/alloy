@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
-	"github.com/oullin/alloy/pkg/hub/workflow/store"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/events"
+	"hara.sh/alloy/workflow/store"
 )
 
 type captureSink struct {

@@ -15,7 +15,7 @@ import {
 	WorkflowRegistry,
 	WorkflowRegistryEntry,
 	WorkflowValidator,
-} from '@alloy/sdk/workflow';
+} from '@hara/sdk-workflow';
 
 interface Subscription {
 	id: string;
@@ -137,7 +137,7 @@ describe('workflow core', () => {
 	});
 
 	it('validates definitions through the validator subpath class', async () => {
-		const { WorkflowValidator: SubpathValidator } = await import('@alloy/sdk/workflow/validator');
+		const { WorkflowValidator: SubpathValidator } = await import('@hara/sdk-workflow/validator');
 
 		const validator = new WorkflowValidator();
 		const subpathValidator = new SubpathValidator();

@@ -43,7 +43,7 @@ Pull a store from the manager and use it. The simplest path goes through
 the facade:
 
 ```go
-import facadecache "github.com/oullin/alloy/pkg/hub/facades/cache"
+import facadecache "hara.sh/alloy/facades/cache"
 
 store, err := facadecache.Driver()
 if err != nil {
@@ -79,8 +79,8 @@ redis, _ := mgr.Store("redis")
 
 Built-in drivers (each lives in its own file under `pkg/hub/cache/`):
 
-| Name       | Source                                                                                               | When to use                                              |
-| ---------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Name       | Source                                                                                           | When to use                                              |
+| ---------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
 | `array`    | [`array_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/array_store.go)       | Tests, single-process scratch cache                      |
 | `file`     | [`file_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/file_store.go)         | Single-server deployments without an external cache      |
 | `redis`    | [`redis_store.go`](https://github.com/oullin/alloy/blob/main/pkg/hub/cache/redis_store.go)       | Production, shared cache, distributed locks              |
@@ -155,7 +155,8 @@ events.Listen(cache.CacheMissed{}, func(ctx context.Context, e any) error {
   `CacheServiceProvider` does and how to add custom drivers from a
   provider's `Boot()`.
 - [`pkg/hub/facades/cache`](/architecture/facades) — the ergonomic
-shortcut.
+  shortcut.
+
 <!-- /ALLOY:HAND -->
 
 Package cache provides caching primitives. It defines a two-level abstraction: Store (low-level backend operations) and Repository (high-level helpers including remember, tags, and distributed locks). Multiple concrete store implementations are provided under stores/.
@@ -171,7 +172,7 @@ Package cache provides caching primitives. It defines a two-level abstraction: S
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/cache@latest
+go get hara.sh/alloy/cache@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -215,7 +216,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/cache"
+    _ "hara.sh/alloy/cache"
 )
 
 func main() {
@@ -230,7 +231,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

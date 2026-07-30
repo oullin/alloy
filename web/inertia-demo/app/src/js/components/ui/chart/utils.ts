@@ -39,6 +39,7 @@ export function componentToString<P>(config: ChartConfig, component: Constructor
 		}
 
 		const vnode = h<unknown>(component, { ...props, payload: data, config, x });
+
 		const div = document.createElement('div');
 
 		render(vnode, div);

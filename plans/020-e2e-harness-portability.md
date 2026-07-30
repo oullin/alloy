@@ -17,6 +17,7 @@
 ## Why this matters
 
 The e2e suite covers the demo's critical paths (auth, CRM CRUD, a 50+ route crawl) but is reproducible only on the original author's machine:
+
 - **X4**: `runner.mjs`/`runner.playwright.mjs` default artifacts to `/Users/gocanto/.cache/codex/browser-artifacts`, default the parity source to a local `/Users/gocanto/Sites/bedrock/...` checkout, and resolve a **Helium** browser at `/Applications/Helium.app/...` plus an `agent-browser` binary. A clean CI runner or any other contributor can't run the primary path without reverse-engineering env overrides.
 - **X5**: Two ~690-line runners (`runner.mjs` agent-browser, `runner.playwright.mjs`) duplicate 23 of 34 top-level functions (`startServer`, `runAuthFlow`, `runCrmFlow`, `routeMatrix`, …); adding a route or flow means editing both or letting them drift. The README already calls the Playwright runner "legacy".
 
@@ -31,11 +32,11 @@ Convention: `package.json` scripts drive the suites (`test:alloy:agent-browser`,
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| List e2e scripts | `cat web/inertia-demo/tests/e2e/package.json` (or root) | shows the test:* scripts |
-| Run playwright e2e | `pnpm test:e2e:inertia` (confirm the exact script) | runs (may need a browser) |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose            | Command                                                 | Expected                  |
+| ------------------ | ------------------------------------------------------- | ------------------------- |
+| List e2e scripts   | `cat web/inertia-demo/tests/e2e/package.json` (or root) | shows the test:* scripts  |
+| Run playwright e2e | `pnpm test:e2e:inertia` (confirm the exact script)      | runs (may need a browser) |
+| Format             | `pnpm exec vp run format`                               | exit 0                    |
 
 ## Scope
 

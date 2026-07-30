@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"alloy.dev/inertia-demo/internal/testutil"
-	routegen "github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
-	"github.com/oullin/alloy/pkg/hub/inertia"
-	"github.com/oullin/alloy/pkg/hub/inertia/assert"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	routegen "hara.sh/alloy/httpx/routing/navigator"
+	"hara.sh/alloy/inertia"
+	"hara.sh/alloy/inertia/assert"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func newErrorContainer(t *testing.T) Container {

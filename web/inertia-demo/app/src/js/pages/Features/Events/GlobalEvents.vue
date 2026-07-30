@@ -22,6 +22,7 @@ const breadcrumbs = [{ title: 'Features' }, { title: 'Events' }, { title: 'Globa
 let idCounter = 0;
 
 const eventLog = ref<LogEntry[]>([]);
+
 const removers: Array<() => void> = [];
 
 function logEvent(name: string, detail: string | object) {

@@ -1,4 +1,4 @@
-module github.com/oullin/alloy/pkg/hub
+module hara.sh/alloy
 
 go 1.26.5
 
@@ -6,7 +6,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/inflection v1.0.0
-	github.com/oklog/ulid/v2 v2.1.1
+	github.com/oklog/ulid/v2 v2.1.2
 	github.com/spf13/viper v1.21.0
 	github.com/yuin/goldmark v1.8.4
 	golang.org/x/crypto v0.54.0

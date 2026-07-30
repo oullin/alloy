@@ -17,6 +17,7 @@
 ## Why this matters
 
 First-contact documentation is actively wrong after the `packages/foundation → pkg/hub` rename, and there's no in-repo agent brief despite the project explicitly marketing AI-assisted contribution:
+
 - **X8**: `README.md` links `[Development workflow](docs/development.md)` but no root `docs/` dir exists; README/CONTRIBUTING say TypeScript packages live under `packages/` but they live under `sdk/`; `web/docs/architecture/drivers.md` presents `log`/`mailx`/`concurrency`/`notifications` packages (with GitHub source links) that don't exist; the empty `packages/` dir remains (removal handled in plan 021).
 - **X9**: No root `CLAUDE.md`/`AGENTS.md` though `web/docs/getting-started.md:144` pitches "easy for AI agents to understand and contribute", and the repo has non-obvious conventions (Vite+ owns orchestration, Docker-backed formatting, `pkg/hub` Go / `sdk/*` TS layout, `doc.go`/`errors.go` per package). Plus three conflicting Node baselines: README says 22, CONTRIBUTING says 20, CI (`.github/actions/setup/action.yml`) uses 24, with `engine-strict=true` set.
 
@@ -30,12 +31,12 @@ First-contact documentation is actively wrong after the `packages/foundation →
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Find stale path refs | `grep -rn "packages/foundation\|under \`packages\`\|/packages/" README.md CONTRIBUTING.md web/docs` | enumerate hits to fix |
-| Build docs site | `pnpm docs:build` | exit 0 (links resolve) |
-| Node baseline refs | `grep -rn "Node.js\|node-version\|engines" README.md CONTRIBUTING.md .github package.json` | shows the three values |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose              | Command                                                                                             | Expected               |
+| -------------------- | --------------------------------------------------------------------------------------------------- | ---------------------- |
+| Find stale path refs | `grep -rn "packages/foundation\|under \`packages\`\|/packages/" README.md CONTRIBUTING.md web/docs` | enumerate hits to fix  |
+| Build docs site      | `pnpm docs:build`                                                                                   | exit 0 (links resolve) |
+| Node baseline refs   | `grep -rn "Node.js\|node-version\|engines" README.md CONTRIBUTING.md .github package.json`          | shows the three values |
+| Format               | `pnpm exec vp run format`                                                                           | exit 0                 |
 
 ## Scope
 

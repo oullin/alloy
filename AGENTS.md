@@ -8,8 +8,9 @@ for the full workflow; this file only captures the non-obvious parts.
 
 - Node.js 24 or newer, pnpm 10.33.0 (`engine-strict=true`, so the version is enforced).
 - Go 1.26.5 for Go package checks.
-- Docker or Docker Compose — formatting and Go test tasks are container-backed
-  so local output matches CI.
+- [fmtkit](https://github.com/oullin/fmtkit) for formatting: `brew install --cask fmtkit`.
+- Docker or Docker Compose — the Go test task is container-backed so local
+  output matches CI.
 
 ## Run everything through Vite+ (`vp`)
 
@@ -19,16 +20,16 @@ Vite+ owns orchestration; task definitions live in `vite.config.ts`. Do not call
 ```sh
 pnpm exec vp check          # typecheck
 pnpm exec vp test           # TypeScript tests (Vitest)
-pnpm exec vp pack           # bundle packages
+pnpm -r --filter './sdk/*' build  # build publishable packages
 pnpm lint                   # oxlint + workspace import checks
 pnpm exec vp run go:test    # Go vet + tests with -race (Docker-backed)
-pnpm exec vp run format     # format changed files (Docker-backed)
+pnpm exec vp run format     # format changed files (fmtkit)
 pnpm exec vp run format-all # format everything + vp check --fix
 pnpm docs:build             # build the VuePress docs site
 ```
 
-Formatting is intentionally Docker-backed. Run `pnpm exec vp run format` before
-pushing — formatting diffs fail CI.
+Formatting runs through fmtkit, a single binary that covers both Go and
+TS/Vue. Run `pnpm exec vp run format` before pushing — formatting diffs fail CI.
 
 ## Layout
 

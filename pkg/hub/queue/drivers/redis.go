@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // RedisDriver stores jobs in Redis lists and sorted sets.

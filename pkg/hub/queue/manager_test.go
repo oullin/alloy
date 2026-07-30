@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/drivers"
 )
 
 // inspectorQueue is a queue.Backend that satisfies the optional

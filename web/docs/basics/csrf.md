@@ -14,9 +14,9 @@ stored in the session and verified on state-changing requests.
    as `_token` inside the session.
 2. For every non-GET request, the CSRF middleware compares the `_token` from
    the session against either:
-   - The `_token` form field, **or**
-   - The `X-CSRF-TOKEN` header, **or**
-   - The `X-XSRF-TOKEN` header (Base64-decoded)
+    - The `_token` form field, **or**
+    - The `X-CSRF-TOKEN` header, **or**
+    - The `X-XSRF-TOKEN` header (Base64-decoded)
 3. On mismatch, the middleware responds with `419 Page Expired`.
 
 ## Accessing the Token
@@ -47,20 +47,23 @@ tmpl.Execute(w, map[string]string{"Token": store.Token()})
 Send the token in the `X-CSRF-TOKEN` header:
 
 ```javascript
-fetch('/api/users', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-    },
-    body: JSON.stringify({ email: 'a@b.com' }),
-})
+fetch(
+	'/api/users',
+	{
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+		},
+		body: JSON.stringify({ email: 'a@b.com' }),
+	},
+);
 ```
 
 Make the token available in a `<meta>` tag in your layout:
 
 ```html
-<meta name="csrf-token" content="{{.Token}}">
+<meta name="csrf-token" content="{{.Token}}" />
 ```
 
 ## Excluding Routes

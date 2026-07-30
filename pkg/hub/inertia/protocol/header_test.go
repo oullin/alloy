@@ -3,7 +3,7 @@ package protocol_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func TestHeaderConstants(t *testing.T) {

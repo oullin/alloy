@@ -48,6 +48,7 @@ describe('navigator manifest routing', () => {
 
 	it('creates reusable resolvers from dynamic route manifests', () => {
 		const routes = { dashboard: '/dashboard' };
+
 		const route = createRouteResolver(() => routes, { onMissingRoute: false });
 
 		expect(route('dashboard')).toEqual({ url: '/dashboard' });

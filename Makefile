@@ -14,13 +14,12 @@ DOCKER_COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then pri
 DOCKER_RUN := $(DOCKER_COMPOSE) run --rm -T app
 TASK := sh -lc 'apk add --no-cache bash git >/dev/null && git config --global --add safe.directory /workspace && export PATH=/go/bin:/usr/local/go/bin:$$PATH; go install github.com/go-task/task/v3/cmd/task@$(TASK_VERSION) && task "$$@"' task
 
-export FMT_IMAGE ?= ghcr.io/oullin/go-fmt:v0.4.1-full
 export PWD := $(shell pwd)
 
 .DEFAULT_GOAL := help
 
 # Vite+ owns orchestration. Make keeps existing commands working, including the
-# Docker-backed formatter task defined in vite.config.ts.
+# fmtkit-backed formatter task defined in vite.config.ts.
 .PHONY: help format format-all go-test go\:test FORCE
 help:
 	@$(VP) --help

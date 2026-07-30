@@ -3,8 +3,8 @@ package container
 import (
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/container/internal/alias"
-	"github.com/oullin/alloy/pkg/hub/container/internal/callbacks"
+	"hara.sh/alloy/container/internal/alias"
+	"hara.sh/alloy/container/internal/callbacks"
 )
 
 // Factory creates a value from the container.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // VerificationURLBuilder builds a signed verification URL for a user.

@@ -1,7 +1,11 @@
 {
-  "name": "@alloy/sdk/money",
+  "name": "@hara/sdk-money",
   "version": "0.1.0",
   "private": true,
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://hara.sh/npm/"
+  },
   "type": "module",
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
@@ -69,6 +73,6 @@
     "typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }

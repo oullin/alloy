@@ -1,6 +1,6 @@
 package collection
 
-import "github.com/oullin/alloy/pkg/hub/collection/support"
+import "hara.sh/alloy/collection/support"
 
 // Diff returns the items in the collection that are not present in the given slice.
 func Diff[T comparable](c *List[T], items []T) *List[T] {

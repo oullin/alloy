@@ -131,8 +131,8 @@ provider is the right shape.
 package userprovider
 
 import (
-    "github.com/oullin/alloy/pkg/hub/container"
-    "github.com/oullin/alloy/pkg/hub/contracts/provider"
+    "hara.sh/alloy/container"
+    "hara.sh/alloy/contracts/provider"
     "myapp/services/users"
 )
 

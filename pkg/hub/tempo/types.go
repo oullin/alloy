@@ -3,10 +3,10 @@ package tempo
 import (
 	"time"
 
-	configpkg "github.com/oullin/alloy/pkg/hub/tempo/config"
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
-	"github.com/oullin/alloy/pkg/hub/tempo/factory"
-	"github.com/oullin/alloy/pkg/hub/tempo/runtime"
+	configpkg "hara.sh/alloy/tempo/config"
+	"hara.sh/alloy/tempo/duration"
+	"hara.sh/alloy/tempo/factory"
+	"hara.sh/alloy/tempo/runtime"
 )
 
 type Unit = duration.Unit

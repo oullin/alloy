@@ -1,6 +1,6 @@
 {
   "$schema": "./money-fixtures",
-  "description": "Language-neutral golden vectors for the money twin (pkg/hub/money <-> @alloy/sdk/money). All numeric inputs and outputs are strings to avoid JSON float precision loss. Error cases are matched by error identity (Go exception sentinel / TS MoneyError.code), never message text. See conformance/README.md.",
+  "description": "Language-neutral golden vectors for the money twin (pkg/hub/money <-> @hara/sdk-money). All numeric inputs and outputs are strings to avoid JSON float precision loss. Error cases are matched by error identity (Go exception sentinel / TS MoneyError.code), never message text. See conformance/README.md.",
   "cases": [
     {
       "op": "round",

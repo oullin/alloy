@@ -109,6 +109,7 @@ func TestConcurrentDispatchIsRequestScoped(t *testing.T) {
 				defer wg.Done()
 
 				dispatch, err := r.Dispatch(fakeRequest{method: "GET", path: path})
+
 				if err != nil {
 					t.Errorf("Dispatch(%q): %v", path, err)
 
@@ -144,6 +145,7 @@ func TestZeroArgHandlersStillDispatch(t *testing.T) {
 	}
 
 	dispatch, err := r.Dispatch(fakeRequest{method: "GET", path: "/value"})
+
 	if err != nil {
 		t.Fatalf("func() any: %v", err)
 	}

@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/money/currency"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
-	"github.com/oullin/alloy/pkg/hub/money/exchange"
-	testutil "github.com/oullin/alloy/pkg/hub/money/tests"
+	"hara.sh/alloy/money/currency"
+	"hara.sh/alloy/money/exception"
+	"hara.sh/alloy/money/exchange"
+	testutil "hara.sh/alloy/money/tests"
 )
 
 func TestConvert(t *testing.T) {

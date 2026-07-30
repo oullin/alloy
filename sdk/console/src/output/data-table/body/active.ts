@@ -16,8 +16,11 @@ export const renderDataTableBody = <T>(options: DataTableBodyOptions<T>): string
 	const window = dataTableRowWindow(options.rows.length, options.selected, options.scroll);
 	const visibleCells = options.rows.slice(window.start, window.end).map(({ row }) => dataTableRowCells(options.headers, row));
 	const allCells = options.allRows.map((row) => dataTableRowCells(options.headers, row));
+
 	const fitted = fitDataTableColumns({ allRows: allCells, headers: options.headers, rows: visibleCells });
+
 	const visualRows = fixedVisualDataTableRows(expandMultilineDataTableRows(renderSelectedDataTableRows(fitted.rows, window.start, options.selected)), options.scroll);
+
 	const lines = [renderScrollableDataTable(renderDataTableHeaders(fitted.headers), visualRows, window.start, window.end - window.start, options.rows.length)];
 
 	if (window.end - window.start < options.rows.length) {

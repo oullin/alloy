@@ -17,6 +17,7 @@
 ## Why this matters
 
 Three framework defaults lean insecure, so a consumer who trusts the defaults gets a weak posture:
+
 1. **S2**: Argon2 default memory is 1 MiB (`argonDefaultMemory = 1024`), ~19× below the RFC 9106/OWASP minimum (≥19 MiB; Laravel uses 64 MiB). Password hashes computed with the shipped defaults are cheap to crack on GPU/ASIC.
 2. **S3**: Cookie/session `Secure` defaults to false framework-wide; an operator who deploys without explicitly enabling it emits session/auth cookies that can travel over plaintext HTTP.
 3. **S4**: The post-size middleware only checks the `Content-Length` header; for `Transfer-Encoding: chunked` (where `ContentLength == -1` and the header is stripped) it never wraps `r.Body`, so an unbounded chunked body streams straight past the cap.
@@ -27,21 +28,21 @@ Three framework defaults lean insecure, so a consumer who trusts the defaults ge
 - `pkg/hub/contracts/cookie/cookie.go`: `Secure *bool` (13); `DefaultOptions()` sets HTTPOnly/SameSite=Lax but leaves `Secure` nil→false; merge only turns it on (49).
 - `pkg/hub/session/middleware.go`: `Secure bool` (15-16) defaults false; `mergeConfig` can only enable (55-56); cookie emitted with `Secure: w.cfg.Secure` (98).
 - `pkg/hub/httpx/middleware/validate_post_size.go:21-35`: checks `r.ContentLength > maxBytes` and the `Content-Length` header string; never wraps `r.Body`.
-  ```go
-  if r.ContentLength > m.maxBytes { http.Error(...); return }
-  if cl := r.Header.Get("Content-Length"); cl != "" { if size, err := ...; size > m.maxBytes { http.Error(...); return } }
-  next.ServeHTTP(w, r)
-  ```
+    ```go
+    if r.ContentLength > m.maxBytes { http.Error(...); return }
+    if cl := r.Header.Get("Content-Length"); cl != "" { if size, err := ...; size > m.maxBytes { http.Error(...); return } }
+    next.ServeHTTP(w, r)
+    ```
 
 Convention: `http.MaxBytesReader(w, r.Body, n)` is the standard stream cap. Secure-by-default with a documented local-dev opt-out is the target posture.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go tests (touched) | `cd pkg/hub && go test ./hashing/... ./session/... ./httpx/... ./contracts/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose            | Command                                                                         | Expected |
+| ------------------ | ------------------------------------------------------------------------------- | -------- |
+| Go tests (touched) | `cd pkg/hub && go test ./hashing/... ./session/... ./httpx/... ./contracts/...` | exit 0   |
+| Full Go suite      | `pnpm exec vp run go:test`                                                      | exit 0   |
+| Format             | `pnpm exec vp run format`                                                       | exit 0   |
 
 ## Scope
 

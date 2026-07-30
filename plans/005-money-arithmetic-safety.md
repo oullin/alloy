@@ -26,6 +26,7 @@
 ## Why this matters
 
 This library exists to make money math safe, yet three defects silently produce wrong amounts:
+
 1. `Manager.Add`/`Subtract` use raw `+=`/`-=`, so summing large values wraps int64 with no error — while `Multiply` correctly routes through `SafeMultiply` and returns `ErrOverflow`. `Aggregator.Sum`/`Avg` build on the unsafe path.
 2. `calculator.Absolute`'s overflow guard `amount < math.MinInt64` is always false, so `Absolute(math.MinInt64)` returns a negative number, poisoning `Round` and `Split`.
 3. Rounding is inconsistent: `calculator.Round` (Go and TS) rounds exact halves toward zero, but the TS doc says "half away from zero" and `CreateFromFloat` uses `math.Round` (half away). The same library rounds exact halves two different ways depending on entry point.
@@ -33,22 +34,23 @@ This library exists to make money math safe, yet three defects silently produce 
 ## Current state
 
 - `pkg/hub/money/money/manager.go`:
-  - `Add` (110-131): `result.amount += m2.amount` at line 127.
-  - `Subtract` (133-154): `result.amount -= m2.amount` at line 150.
-  - `Multiply` (156-173): correctly uses `mm.calculator.SafeMultiply` (166) and returns its error.
-  - `CreateFromFloat` (57-64): `mm.Create(int64(math.Round(scaled)), code)`.
+    - `Add` (110-131): `result.amount += m2.amount` at line 127.
+    - `Subtract` (133-154): `result.amount -= m2.amount` at line 150.
+    - `Multiply` (156-173): correctly uses `mm.calculator.SafeMultiply` (166) and returns its error.
+    - `CreateFromFloat` (57-64): `mm.Create(int64(math.Round(scaled)), code)`.
 - `pkg/hub/money/calculator/calculator.go`:
-  - `Add(a, b Amount) Amount` exists (line 17) but there is **no `SafeAdd`/`SafeSubtract`** returning an error (only `SafeMultiply`, line 32).
-  - `Absolute` (67-78): guard `if c == nil || amount < math.MinInt64` (line 69, always false); returns `-amount` for `math.MinInt64` (still negative).
-  - `Round` (93-131): tie rule `if module > (reminder / 2)` (line 120) → ties toward zero.
+    - `Add(a, b Amount) Amount` exists (line 17) but there is **no `SafeAdd`/`SafeSubtract`** returning an error (only `SafeMultiply`, line 32).
+    - `Absolute` (67-78): guard `if c == nil || amount < math.MinInt64` (line 69, always false); returns `-amount` for `math.MinInt64` (still negative).
+    - `Round` (93-131): tie rule `if module > (reminder / 2)` (line 120) → ties toward zero.
 - `pkg/hub/money/exception/exception.go`: `ErrOverflow` (42), `ErrNoMultipliersProvided` (27) — reuse `ErrOverflow`.
 - TS twin `sdk/money/src/calculator.ts`:
-  - `safeAdd`/`safeSubtract` (115-133) already exist and `throw ERR_OVERFLOW` when `!inInt64Range(result)`.
-  - `round` (95-113): doc says "half away from zero" (line 95) but code is `if (module > reminder / 2n)` (106) → ties toward zero (**doc/impl mismatch**).
-  - `absolute`: verify the same `MinInt64` guard bug exists and fix to match Go.
+    - `safeAdd`/`safeSubtract` (115-133) already exist and `throw ERR_OVERFLOW` when `!inInt64Range(result)`.
+    - `round` (95-113): doc says "half away from zero" (line 95) but code is `if (module > reminder / 2n)` (106) → ties toward zero (**doc/impl mismatch**).
+    - `absolute`: verify the same `MinInt64` guard bug exists and fix to match Go.
 - TS `sdk/money/src/money/manager.ts` / `aggregator.ts`: confirm `add`/`subtract` route through `safeAdd`/`safeSubtract`; `MoneyAggregator.avg` truncates (handled in this plan's step 4, shared with finding C19).
 
 Excerpt (`calculator.go:67-78`):
+
 ```go
 func (c *Engine) Absolute(amount Amount) Amount {
 	if c == nil || amount < math.MinInt64 { return 0 }
@@ -61,17 +63,18 @@ Convention: safe arithmetic returns `(int64, error)` with `exception.ErrOverflow
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Go money tests | `cd pkg/hub && go test ./money/...` | exit 0 |
-| TS money tests | `pnpm --filter @alloy/sdk/money test` (confirm exact filter via `pnpm -r ls`) or `pnpm exec vp test` | pass |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Typecheck TS | `pnpm exec vp check` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose        | Command                                                                                              | Expected |
+| -------------- | ---------------------------------------------------------------------------------------------------- | -------- |
+| Go money tests | `cd pkg/hub && go test ./money/...`                                                                  | exit 0   |
+| TS money tests | `pnpm --filter @alloy/sdk/money test` (confirm exact filter via `pnpm -r ls`) or `pnpm exec vp test` | pass     |
+| Full Go suite  | `pnpm exec vp run go:test`                                                                           | exit 0   |
+| Typecheck TS   | `pnpm exec vp check`                                                                                 | exit 0   |
+| Format         | `pnpm exec vp run format`                                                                            | exit 0   |
 
 ## Scope
 
 **In scope**:
+
 - `pkg/hub/money/calculator/calculator.go` (add `SafeAdd`/`SafeSubtract`, fix `Absolute`, set the tie rule)
 - `pkg/hub/money/money/manager.go` (route `Add`/`Subtract` through safe ops)
 - `sdk/money/src/calculator.ts` (fix `round` doc/impl to the chosen policy, fix `absolute` guard)

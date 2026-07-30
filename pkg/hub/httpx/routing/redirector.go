@@ -3,7 +3,7 @@ package routing
 import (
 	"fmt"
 
-	crouting "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
+	crouting "hara.sh/alloy/httpx/routing/contracts"
 )
 
 // RedirectResponse is a minimal redirect-response value type used by the

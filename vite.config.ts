@@ -12,11 +12,11 @@ export default defineConfig({
 				replacement: repoPath('./infra/src'),
 			},
 			{
-				find: '@alloy/sdk/tempo',
+				find: '@hara/sdk-tempo',
 				replacement: repoPath('./sdk/tempo/src'),
 			},
 			{
-				find: '@alloy/sdk/money',
+				find: '@hara/sdk-money',
 				replacement: repoPath('./sdk/money/src'),
 			},
 			{
@@ -24,19 +24,19 @@ export default defineConfig({
 				replacement: repoPath('./sdk/money/src/$1'),
 			},
 			{
-				find: '@alloy/sdk/tempo-tests',
+				find: '@hara/sdk-tempo-tests',
 				replacement: repoPath('./sdk/tempo/tests/src'),
 			},
 			{
-				find: '@alloy/sdk/console',
+				find: '@hara/sdk-console',
 				replacement: repoPath('./sdk/console/src'),
 			},
 			{
-				find: '@alloy/sdk/workflow',
+				find: '@hara/sdk-workflow',
 				replacement: repoPath('./sdk/workflow/src'),
 			},
 			{
-				find: /^@alloy\/sdk\/workflow\/(.+)$/u,
+				find: /^@hara\/sdk-workflow\/(.+)$/u,
 				replacement: repoPath('./sdk/workflow/src/$1'),
 			},
 			{
@@ -47,24 +47,35 @@ export default defineConfig({
 				find: /^#console\/(.+)$/u,
 				replacement: repoPath('./sdk/console/src/$1'),
 			},
+			{
+				find: /^#navigator-routes\/(.+)$/u,
+				replacement: repoPath('./sdk/navigator-routes/src/$1'),
+			},
+			// Tempo's internal specifiers are bare (`#core`, not `#tempo/core`).
+			// The package `imports` map resolves them to `dist` for consumers; these
+			// aliases keep the test run on `src` so it never depends on a prior build.
+			{
+				find: /^#types$/u,
+				replacement: repoPath('./sdk/tempo/src/types.ts'),
+			},
+			{
+				find: /^#(calendar|config|core|duration|factory|formatting|parsing|ranges|runtime)$/u,
+				replacement: repoPath('./sdk/tempo/src/$1/index.ts'),
+			},
 		],
 	},
 	test: {
 		passWithNoTests: true,
+		// Stale agent worktrees live inside the repo and are git-excluded, but the
+		// test glob still walks into them and reports hundreds of failures for code
+		// that is not the working tree.
+		exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/worktrees/**', '**/.agents/**'],
 		environment: 'node',
 		globals: false,
 		coverage: {
 			reportsDirectory: repoPath('./infra/.cache/vitest/coverage'),
 			reporter: ['text-summary', 'html', 'json-summary'],
 		},
-	},
-	pack: {
-		entry: [repoPath('./sdk/tempo/src/index.ts')],
-		tsconfig: './sdk/tempo/tsconfig.json',
-		outDir: './sdk/tempo/dist',
-		dts: true,
-		format: ['esm'],
-		clean: true,
 	},
 	lint: {
 		jsPlugins: [{ name: 'vite-plus', specifier: 'vite-plus/oxlint-plugin' }],
@@ -85,8 +96,9 @@ export default defineConfig({
 		tasks: {
 			'cache:setup': { command: 'bash infra/scripts/tasks/cache-setup.sh', cache: false },
 			format: { command: 'bash infra/scripts/tasks/format-files.sh changed', cache: false },
-			'format-all': { command: "bash infra/scripts/tasks/docker-compose-run.sh fmt format-all && bash -lc 'source infra/scripts/tasks/cache-env.sh && vp check --fix'", cache: false },
+			'format-all': { command: "bash infra/scripts/tasks/format-files.sh all && bash -lc 'source infra/scripts/tasks/cache-env.sh && vp check --fix'", cache: false },
 			'go:test': { command: 'bash infra/scripts/tasks/go-test.sh', cache: false },
+			'go:artifacts': { command: 'bash infra/scripts/tasks/check-go-artifacts.sh', cache: false },
 			'check:imports': { command: 'vp exec node infra/scripts/tasks/check-package-imports.mjs', cache: false },
 			'inertia-demo-app:build': { command: 'vp build --config web/inertia-demo/app/vite.config.js', cache: false },
 			'inertia-demo-app:dev': { command: 'vp dev --config web/inertia-demo/app/vite.config.js', cache: false },

@@ -3,8 +3,8 @@ package listeners
 import (
 	"context"
 
-	"github.com/oullin/alloy/pkg/hub/auth/events"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/events"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // EmailVerificationSender is kept for backward compatibility. New code should

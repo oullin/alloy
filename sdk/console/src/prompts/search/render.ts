@@ -21,7 +21,13 @@ export const renderSearchChoices = <T>(
 	const text = resolveInfo(info, highlighted === null ? null : (choices[highlighted]?.value ?? null));
 	const summary = showSelectedSummary ? selectedSummary(selectedLabels.length, selectedLabels.length - marked.size) : '';
 	const details = joinedInfoDetails(text, summary);
-	const frame = `${renderBox({ body: renderSearchBody(query, cursor, placeholder, choices, highlighted, marked, scroll, showSelectedSummary), borderStyle: cyan, info: details, title: cyan(message) })}\n`;
+
+	const frame = `${renderBox({
+		body: renderSearchBody(query, cursor, placeholder, choices, highlighted, marked, scroll, showSelectedSummary),
+		borderStyle: cyan,
+		info: details,
+		title: cyan(message),
+	})}\n`;
 
 	promptEnvironment().output.write(frame);
 

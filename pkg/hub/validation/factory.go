@@ -1,6 +1,6 @@
 package validation
 
-import "github.com/oullin/alloy/pkg/hub/validation/rules"
+import "hara.sh/alloy/validation/rules"
 
 // Factory creates Validator instances.  It holds shared extensions and
 // replacers that are propagated to every validator it creates.

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { Tempo } from '@alloy/sdk/tempo';
+import { Tempo } from '@hara/sdk-tempo';
 import { describe, expect, it } from 'vite-plus/test';
 
 // Shared Go<->TS golden vectors. This is the TS half of the cross-runtime drift
@@ -53,8 +53,10 @@ const render = (value: Tempo, mode: string | undefined): string => {
 	switch (mode) {
 		case 'iso':
 			return value.toISOString();
+
 		case 'date':
 			return value.toDateString();
+
 		default:
 			throw new Error(`unknown tempo render mode: ${mode}`);
 	}
@@ -66,20 +68,28 @@ const runTempoOp = (testCase: TempoConformanceCase): string => {
 	switch (op) {
 		case 'addDays':
 			return render(buildTempo(base as TempoConformanceComponents).addDays(arg as number), testCase.render);
+
 		case 'addWeeks':
 			return render(buildTempo(base as TempoConformanceComponents).addWeeks(arg as number), testCase.render);
+
 		case 'addHours':
 			return render(buildTempo(base as TempoConformanceComponents).addHours(arg as number), testCase.render);
+
 		case 'addMonths':
 			return render(buildTempo(base as TempoConformanceComponents).addMonths(arg as number), testCase.render);
+
 		case 'addMonthsNoOverflow':
 			return render(buildTempo(base as TempoConformanceComponents).addMonthsNoOverflow(arg as number), testCase.render);
+
 		case 'diffInMonths':
 			return String(buildTempo(base as TempoConformanceComponents).diffInMonths(buildTempo(other as TempoConformanceComponents)));
+
 		case 'diffInYears':
 			return String(buildTempo(base as TempoConformanceComponents).diffInYears(buildTempo(other as TempoConformanceComponents)));
+
 		case 'parseFromPattern':
 			return render(Tempo.fromFormat(testCase.input as string, testCase.pattern as string, { timeZone: testCase.timeZone }), testCase.render);
+
 		default:
 			throw new Error(`unknown tempo conformance op: ${op}`);
 	}

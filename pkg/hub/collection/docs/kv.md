@@ -1,6 +1,6 @@
 # 🧩 Key-Value Utilities (`kv`)
 
-`import "github.com/oullin/alloy/pkg/hub/collection/kv"`
+`import "hara.sh/alloy/collection/kv"`
 
 The `kv` package provides standalone utility functions for working with Go maps. Its headline feature is **dot-notation access** for nested structures, along with general-purpose filtering, sorting, and transformation helpers.
 

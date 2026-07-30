@@ -1,6 +1,6 @@
 package protocol
 
-import "github.com/oullin/alloy/pkg/hub/seo"
+import "hara.sh/alloy/seo"
 
 // MetaTag is an alias for seo.MetaTag.
 type MetaTag = seo.MetaTag

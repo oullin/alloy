@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
+	"hara.sh/alloy/collection/arr"
 )
 
 // Each iterates over items, calling the callback for each one.

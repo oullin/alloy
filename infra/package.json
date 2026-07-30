@@ -17,6 +17,7 @@
     "typecheck": "bash -lc 'source scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2",
+    "typescript-legacy": "npm:typescript@^6.0.3"
   }
 }

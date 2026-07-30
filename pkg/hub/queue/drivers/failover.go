@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
-	"github.com/oullin/alloy/pkg/hub/queue/events"
+	"hara.sh/alloy/queue"
+	"hara.sh/alloy/queue/events"
 )
 
 // FailoverDriver tries each driver in order; reads from the first that succeeds,

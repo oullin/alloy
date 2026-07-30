@@ -7,6 +7,7 @@ import type { Choice, MultiSelectPromptOptions, SelectPromptOptions } from '#con
 
 export const renderSelectedChoice = <T>(message: string, choices: Array<Choice<T>>, selected: number, scroll: number | undefined, info: SelectPromptOptions<T>['info']): string => {
 	const text = resolveInfo(info, choices[selected]?.value ?? null);
+
 	const frame = `${renderBox({ body: renderActiveChoiceRows(choices, selected, scroll), borderStyle: cyan, info: text, title: cyan(message) })}\n`;
 
 	promptEnvironment().output.write(frame);
@@ -43,6 +44,7 @@ export const renderMultipleChoices = <T>(
 	const text = resolveInfo(info, choices[selected]?.value ?? null);
 	const summary = scroll !== undefined && choices.length > scroll ? `${marked.size} selected` : '';
 	const details = joinedInfoDetails(text, summary);
+
 	const frame = `${renderBox({ body: renderActiveChecklistRows(choices, selected, marked, scroll), borderStyle: cyan, info: details, title: cyan(message) })}\n`;
 
 	promptEnvironment().output.write(frame);

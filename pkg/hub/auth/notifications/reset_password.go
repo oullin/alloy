@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // ResetURLBuilder builds a reset-password URL for a user and token.

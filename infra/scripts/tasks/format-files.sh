@@ -1,59 +1,64 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Thin wrapper over fmtkit (https://github.com/oullin/fmtkit), which formats both
+# Go and TS/Vue from a single binary. It replaces the previous Docker-backed
+# formatter: no image to pull, no daemon, and nothing for CI runners to install
+# beyond the binary itself.
+#
+# fmtkit does its own changed-file discovery (vs HEAD, plus untracked) and
+# honours .gitignore/.prettierignore, so this script only maps the repo's
+# changed|all + all|go|ts interface onto its subcommands.
+#
+# The ${arr[@]+"${arr[@]}"} expansions below are deliberate: macOS ships bash
+# 3.2, where "${empty[@]}" under `set -u` is an unbound-variable error.
+
 MODE="${1:-}"
 SCOPE="${2:-all}"
-ROOT_PATH="$(git rev-parse --show-toplevel)"
 
-case "${MODE}" in
-	changed)
-		GIT_FLAGS=(--others --modified)
-		;;
-	all)
-		GIT_FLAGS=(--cached --others)
-		;;
-	*)
-		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all [all|go|ts]" >&2
-		exit 2
-		;;
-esac
+usage() {
+	echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all [all|go|ts]" >&2
+}
+
+if ! command -v fmtkit >/dev/null 2>&1; then
+	cat >&2 <<-'MSG'
+		fmtkit is not installed.
+
+		  brew install --cask fmtkit
+
+		Or download a release binary from https://github.com/oullin/fmtkit.
+	MSG
+
+	exit 127
+fi
 
 case "${SCOPE}" in
 	all)
-		FORMAT_GLOBS=('*.go' '*.ts' '*.tsx' '*.vue' '*.mts' '*.cts')
-		FORMAT_LABEL='Go and TypeScript'
+		scope_flags=()
 		;;
 	go)
-		FORMAT_GLOBS=('*.go')
-		FORMAT_LABEL='Go'
+		scope_flags=(--go)
 		;;
 	ts)
-		FORMAT_GLOBS=('*.ts' '*.tsx' '*.vue' '*.mts' '*.cts')
-		FORMAT_LABEL='TypeScript'
+		scope_flags=(--ts)
 		;;
 	*)
-		echo "Usage: bash infra/scripts/tasks/format-files.sh changed|all [all|go|ts]" >&2
+		usage
 		exit 2
 		;;
 esac
 
-cd "${ROOT_PATH}"
+cd "$(git rev-parse --show-toplevel)"
 
-tmp="$(mktemp)"
-trap 'rm -f "${tmp}"' EXIT
-
-git ls-files -z "${GIT_FLAGS[@]}" --exclude-standard -- "${FORMAT_GLOBS[@]}" |
-	while IFS= read -r -d '' file; do
-		if [ -f "${file}" ]; then
-			printf '%s\0' "${file}"
-		fi
-	done > "${tmp}"
-
-if [ ! -s "${tmp}" ]; then
-	echo "No ${FORMAT_LABEL} files to format."
-	exit 0
-fi
-
-xargs -0 bash infra/scripts/tasks/docker-compose-run.sh \
-	--user "$(id -u):$(id -g)" \
-	fmt format < "${tmp}"
+case "${MODE}" in
+	changed)
+		exec fmtkit format ${scope_flags[@]+"${scope_flags[@]}"} .
+		;;
+	all)
+		exec fmtkit format-all ${scope_flags[@]+"${scope_flags[@]}"}
+		;;
+	*)
+		usage
+		exit 2
+		;;
+esac

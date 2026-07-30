@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/auth/browserx"
-	"github.com/oullin/alloy/pkg/hub/auth/fortify"
-	"github.com/oullin/alloy/pkg/hub/auth/passwords"
-	"github.com/oullin/alloy/pkg/hub/auth/teams"
-	patokens "github.com/oullin/alloy/pkg/hub/auth/tokens"
-	"github.com/oullin/alloy/pkg/hub/auth/twofactor"
-	"github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/browserx"
+	"hara.sh/alloy/auth/fortify"
+	"hara.sh/alloy/auth/passwords"
+	"hara.sh/alloy/auth/teams"
+	patokens "hara.sh/alloy/auth/tokens"
+	"hara.sh/alloy/auth/twofactor"
+	"hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 type stubStatefulGuard struct {

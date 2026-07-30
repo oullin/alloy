@@ -22,8 +22,8 @@
 ## Current state
 
 - `pkg/hub/session/middleware.go`:
-  - `store.Save(r.Context())` on every request (line 142).
-  - Probabilistic GC inline (151-153): `if cfg.GCProbability > 0 && rand.IntN(100) < cfg.GCProbability { _ = handler.GC(r.Context(), cfg.GCMaxLifetime) }`.
+    - `store.Save(r.Context())` on every request (line 142).
+    - Probabilistic GC inline (151-153): `if cfg.GCProbability > 0 && rand.IntN(100) < cfg.GCProbability { _ = handler.GC(r.Context(), cfg.GCMaxLifetime) }`.
 - `pkg/hub/session/store.go:86-97` — `Save` unconditionally `serialize(s.attributes)` + `handler.Write(...)` with no modified/dirty check.
 - Handlers: `handlers/file.go:97-129` (ReadDir + per-file Info), `handlers/database.go:108-112` (bulk DELETE), `handlers/array.go:85` (whole-map sweep under Lock).
 
@@ -31,12 +31,12 @@ Convention: track mutation on the attribute bag; a sliding-expiry `last_activity
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Session tests | `cd pkg/hub && go test ./session/...` | exit 0 |
-| Race | `cd pkg/hub && go test -race ./session/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose       | Command                                     | Expected |
+| ------------- | ------------------------------------------- | -------- |
+| Session tests | `cd pkg/hub && go test ./session/...`       | exit 0   |
+| Race          | `cd pkg/hub && go test -race ./session/...` | exit 0   |
+| Full Go suite | `pnpm exec vp run go:test`                  | exit 0   |
+| Format        | `pnpm exec vp run format`                   | exit 0   |
 
 ## Scope
 
@@ -64,7 +64,7 @@ In `Save` (or the middleware call at line 142), skip `handler.Write` when not di
 
 ### Step 3: Move GC to a background goroutine
 
-Replace the inline `handler.GC(...)` with a background sweep: a single-flight/ticker-driven goroutine (only one sweep at a time), decoupled from the request path. The middleware may *trigger* a sweep probabilistically but must not block the request on it. Ensure the goroutine is tied to a lifecycle context so it stops cleanly (no leak).
+Replace the inline `handler.GC(...)` with a background sweep: a single-flight/ticker-driven goroutine (only one sweep at a time), decoupled from the request path. The middleware may _trigger_ a sweep probabilistically but must not block the request on it. Ensure the goroutine is tied to a lifecycle context so it stops cleanly (no leak).
 
 **Verify**: `go test -race ./session -run GC` → GC runs off the request goroutine, only one concurrent sweep, and stops on context cancel (no leaked goroutine — use `goleak` if available, else a deterministic shutdown assertion).
 

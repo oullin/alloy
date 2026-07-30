@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/inertia"
-	"github.com/oullin/alloy/pkg/hub/inertia/props"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
-	"github.com/oullin/alloy/pkg/hub/inertia/response"
+	"hara.sh/alloy/inertia"
+	"hara.sh/alloy/inertia/props"
+	"hara.sh/alloy/inertia/protocol"
+	"hara.sh/alloy/inertia/response"
 )
 
 // --- Constructor variants ---

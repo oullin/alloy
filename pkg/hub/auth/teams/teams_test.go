@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/auth/teams"
+	"hara.sh/alloy/auth/teams"
 )
 
 func TestServiceCreatesListsAndSwitchesTeams(t *testing.T) {

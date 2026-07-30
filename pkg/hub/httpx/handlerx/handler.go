@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
-	"github.com/oullin/alloy/pkg/hub/httpx/routing"
+	"hara.sh/alloy/httpx/foundation"
+	"hara.sh/alloy/httpx/routing"
 )
 
 // New returns an http.Handler that dispatches requests through router.

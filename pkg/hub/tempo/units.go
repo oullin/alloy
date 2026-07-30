@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/duration"
+	"hara.sh/alloy/tempo/duration"
 )
 
 func normalizeUnit(unit Unit) Unit {

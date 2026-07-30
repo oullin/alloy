@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue"
+	"hara.sh/alloy/queue"
 )
 
 // BeanstalkdClient is the interface for a Beanstalkd client.

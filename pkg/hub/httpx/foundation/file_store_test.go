@@ -9,9 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
+	"hara.sh/alloy/filesystem"
+	"hara.sh/alloy/httpx/foundation"
 )
+
+// failingStore reports an error after the store has already created something,
+// standing in for a cancelled request or a truncated upload.
+type failingStore struct {
+	created string
+}
 
 // FileStore previously declared Put(path, io.Reader), which neither filesystem
 // type could satisfy — its only implementation was the test double in this
@@ -191,12 +197,6 @@ func TestStorePubliclyUsesPublicMode(t *testing.T) {
 	if store.modes[path] != 0o644 {
 		t.Fatalf("StorePublicly mode = %v, want 0644", store.modes[path])
 	}
-}
-
-// failingStore reports an error after the store has already created something,
-// standing in for a cancelled request or a truncated upload.
-type failingStore struct {
-	created string
 }
 
 func (s *failingStore) PutStream(ctx context.Context, path string, contents io.Reader, mode ...fs.FileMode) error {

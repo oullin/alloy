@@ -4,8 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 
-	"github.com/oullin/alloy/pkg/hub/money/exception"
-	"github.com/oullin/alloy/pkg/hub/money/format"
+	"hara.sh/alloy/money/exception"
+	"hara.sh/alloy/money/format"
 )
 
 // Definition represents the formatting rules for a specific currency.

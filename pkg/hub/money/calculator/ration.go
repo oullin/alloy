@@ -3,7 +3,7 @@ package calculator
 import (
 	"math"
 
-	"github.com/oullin/alloy/pkg/hub/money/exception"
+	"hara.sh/alloy/money/exception"
 )
 
 // SafeAdd safely adds two int64 amounts, returning 0 on overflow.

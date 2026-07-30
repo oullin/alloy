@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	cmiddleware "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts/middleware"
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/exceptions"
+	cmiddleware "hara.sh/alloy/httpx/routing/contracts/middleware"
+	"hara.sh/alloy/httpx/routing/exceptions"
 )
 
 // SignatureValidator is the surface ValidateSignature needs from a request.

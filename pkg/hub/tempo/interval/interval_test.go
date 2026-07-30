@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/tempo/interval"
+	"hara.sh/alloy/tempo/interval"
 )
 
 const (

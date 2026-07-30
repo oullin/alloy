@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/collection/arr"
+	"hara.sh/alloy/collection/arr"
 )
 
 func TestPrepend(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
+	"hara.sh/alloy/filesystem"
 )
 
 func TestIsLinkAndReadLink(t *testing.T) {

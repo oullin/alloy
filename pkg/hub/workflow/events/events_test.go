@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
+	"hara.sh/alloy/workflow/events"
 )
 
 func baseEvent() events.Base[string] {

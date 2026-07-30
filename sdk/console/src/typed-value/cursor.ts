@@ -5,7 +5,9 @@ import { parseTypedValueCursor } from '#console/typed-value/validators/cursor';
 export const valueWithCursor = (value: string, cursor: number): string => {
 	const chars = characters(value);
 	const position = parseTypedValueCursor(cursor, chars.length);
+
 	const before = fromCharacters(chars.slice(0, position));
+
 	const current = chars[position];
 
 	if (current === '\n') {

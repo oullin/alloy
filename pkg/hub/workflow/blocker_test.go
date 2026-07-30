@@ -3,7 +3,7 @@ package workflow_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
+	"hara.sh/alloy/workflow"
 )
 
 func TestTransitionBlockerList(t *testing.T) {

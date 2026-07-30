@@ -5,7 +5,7 @@
 // declaration out-of-band (e.g. when porting a handler mechanically).
 package attributes
 
-import handlermiddleware "github.com/oullin/alloy/pkg/hub/httpx/handlerx/middleware"
+import handlermiddleware "hara.sh/alloy/httpx/handlerx/middleware"
 
 // Middleware is a value object describing a handler-attached middleware.
 // It is the parity counterpart of #[Middleware] in PHP.

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
+	"hara.sh/alloy/filesystem"
 )
 
 // TestMissingPathErrorsAreErrNotExist pins the invariant that every method

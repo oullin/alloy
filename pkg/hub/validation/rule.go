@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	contract "github.com/oullin/alloy/pkg/hub/contracts/validation"
-	"github.com/oullin/alloy/pkg/hub/validation/rules"
+	contract "hara.sh/alloy/contracts/validation"
+	"hara.sh/alloy/validation/rules"
 )
 
 // Ref: @alloy/code-0389

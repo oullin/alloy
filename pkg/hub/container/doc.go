@@ -23,7 +23,7 @@
 //
 // # Service providers
 //
-// See package github.com/oullin/alloy/pkg/hub/container/contracts/provider for the
+// See package hara.sh/alloy/container/contracts/provider for the
 // provider contract. The Application supports five lifecycle hooks:
 //
 //   - Register:  called once per provider when it is added.

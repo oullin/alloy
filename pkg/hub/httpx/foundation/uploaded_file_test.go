@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/foundation"
+	"hara.sh/alloy/httpx/foundation"
 )
 
 // memoryFileStore is a test double for foundation.FileStore.

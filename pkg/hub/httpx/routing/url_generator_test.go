@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	contracts "github.com/oullin/alloy/pkg/hub/httpx/routing/contracts"
+	contracts "hara.sh/alloy/httpx/routing/contracts"
 )
 
 // Byte-level signed URL parity with upstream cannot be asserted here without a

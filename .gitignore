@@ -7,7 +7,7 @@ coverage/
 .idea
 /go.work
 /go.work.sum
-/packages/foundation/go.work
+/pkg/hub/go.work
 infra/.cache/
 infra/.logs/
 infra/dist/
@@ -15,3 +15,6 @@ ts/docs/src/.vitepress/
 web/docs/.vuepress/.temp/
 web/storage/
 .pnpm-store/
+
+# Compiled Go helper binaries
+/infra/modzip/modzip

@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/money/calculator"
-	"github.com/oullin/alloy/pkg/hub/money/exception"
-	"github.com/oullin/alloy/pkg/hub/money/exchange"
+	"hara.sh/alloy/money/calculator"
+	"hara.sh/alloy/money/exception"
+	"hara.sh/alloy/money/exchange"
 )
 
 // moneyConformanceCase mirrors one entry in conformance/money.json. Numeric

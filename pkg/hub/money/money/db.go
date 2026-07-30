@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/oullin/alloy/pkg/hub/money/currency"
+	"hara.sh/alloy/money/currency"
 )
 
 var (

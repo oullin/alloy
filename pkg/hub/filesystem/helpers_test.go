@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/filesystem"
+	"hara.sh/alloy/filesystem"
 )
 
 func newFilesystem() *filesystem.Local {

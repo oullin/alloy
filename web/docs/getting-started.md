@@ -1,7 +1,7 @@
 # Getting Started
 
 Alloy is a collection of foundational Go packages for building web applications.
-The Go packages are published from the `github.com/oullin/alloy/pkg/hub` module, so you
+The Go packages are published from the `hara.sh/alloy` module, so you
 import only the packages you need.
 
 ## Requirements
@@ -14,7 +14,7 @@ import only the packages you need.
 
 ## Installation
 
-Alloy is developed and consumed privately. The `github.com/oullin/alloy/pkg/hub` module
+Alloy is developed and consumed privately. The `hara.sh/alloy` module
 path is not served publicly, so the Go packages are consumed through a Go
 workspace instead of `go get`:
 
@@ -30,8 +30,8 @@ Then import the packages you need as usual:
 
 ```go
 import (
-	"github.com/oullin/alloy/pkg/hub/cache"
-	"github.com/oullin/alloy/pkg/hub/container"
+	"hara.sh/alloy/cache"
+	"hara.sh/alloy/container"
 )
 ```
 
@@ -69,7 +69,7 @@ pnpm run build --filter=@alloy/docs
 
 ## Package Index
 
-The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
+The packages below ship today from `hara.sh/alloy`.
 
 ### Architecture
 
@@ -81,13 +81,13 @@ The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
 
 ### The Basics
 
-| Package                            | Purpose                                           |
-| ---------------------------------- | ------------------------------------------------- |
+| Package                            | Purpose                                                  |
+| ---------------------------------- | -------------------------------------------------------- |
 | [httpx](/packages/httpx)           | HTTP utilities, routing, middleware, and testing helpers |
-| [session](/packages/session)       | Session management with multiple storage handlers |
-| [cookie](/packages/cookie)         | HTTP cookie handling                              |
-| [validation](/packages/validation) | Rule-based input validation (80+ built-in rules)  |
-| [inertia](/packages/inertia)       | Server-side Inertia.js protocol adapter           |
+| [session](/packages/session)       | Session management with multiple storage handlers        |
+| [cookie](/packages/cookie)         | HTTP cookie handling                                     |
+| [validation](/packages/validation) | Rule-based input validation (80+ built-in rules)         |
+| [inertia](/packages/inertia)       | Server-side Inertia.js protocol adapter                  |
 
 ### Security
 
@@ -99,35 +99,35 @@ The packages below ship today from `github.com/oullin/alloy/pkg/hub`.
 
 ### Data & Storage
 
-| Package                            | Purpose                                        |
-| ---------------------------------- | ---------------------------------------------- |
-| [cache](/packages/cache)           | Caching layer with multiple driver support     |
-| [database](/packages/database)     | Shared database errors and support utilities   |
-| [filesystem](/packages/filesystem) | Local filesystem operations                    |
+| Package                            | Purpose                                      |
+| ---------------------------------- | -------------------------------------------- |
+| [cache](/packages/cache)           | Caching layer with multiple driver support   |
+| [database](/packages/database)     | Shared database errors and support utilities |
+| [filesystem](/packages/filesystem) | Local filesystem operations                  |
 
 ### Events & Jobs
 
-| Package                        | Purpose                                          |
-| ------------------------------ | ------------------------------------------------ |
-| [events](/packages/events)     | Event dispatching and listener management        |
-| [bus](/packages/bus)           | Command and event bus with pipeline support      |
-| [queue](/packages/queue)       | Background job processing with pluggable drivers |
-| workflow                       | Petri-net based workflow and state-machine engine |
+| Package                    | Purpose                                           |
+| -------------------------- | ------------------------------------------------- |
+| [events](/packages/events) | Event dispatching and listener management         |
+| [bus](/packages/bus)       | Command and event bus with pipeline support       |
+| [queue](/packages/queue)   | Background job processing with pluggable drivers  |
+| workflow                   | Petri-net based workflow and state-machine engine |
 
 ### Support & Utilities
 
-| Package                            | Purpose                                        |
-| ---------------------------------- | ---------------------------------------------- |
-| [collection](/packages/collection) | Fluent collection helpers for slices and maps  |
-| [str](/packages/str)               | String helpers, UUID/ULID generation           |
+| Package                            | Purpose                                           |
+| ---------------------------------- | ------------------------------------------------- |
+| [collection](/packages/collection) | Fluent collection helpers for slices and maps     |
+| [str](/packages/str)               | String helpers, UUID/ULID generation              |
 | tempo                              | Date/time library with timezones and localization |
-| [money](/packages/money)           | Money and currency primitives                  |
-| [seo](/packages/seo)               | SEO utilities and i18n locale handling         |
+| [money](/packages/money)           | Money and currency primitives                     |
+| [seo](/packages/seo)               | SEO utilities and i18n locale handling            |
 
 ## Roadmap
 
 The following packages are documented as design targets but are **not yet
-available** in `github.com/oullin/alloy/pkg/hub`:
+available** in `hara.sh/alloy`:
 
 [routing](/packages/routing), [redis](/packages/redis),
 [pagination](/packages/pagination), [jobqueue](/packages/jobqueue),
@@ -152,15 +152,15 @@ easy for AI agents to understand and contribute to your codebase.
 
 Cross-cutting topics that span multiple packages:
 
-| Guide                                        | What it covers                                          |
-| -------------------------------------------- | ------------------------------------------------------- |
-| [Request Lifecycle](/architecture/lifecycle) | How an HTTP request flows through a Alloy application |
+| Guide                                        | What it covers                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| [Request Lifecycle](/architecture/lifecycle) | How an HTTP request flows through a Alloy application             |
 | [Cross-Runtime Parity](/architecture/parity) | Which primitives have Go/TS twins and what parity each guarantees |
-| [Testing](/concepts/testing)                 | Built-in test doubles and testing patterns              |
-| [Middleware](/basics/middleware)             | Global, per-route, and controller-scoped middleware     |
-| [Controllers](/basics/controllers)           | Grouping handlers into types with shared middleware     |
-| [URL Generation](/basics/url-generation)     | Named-route URLs, signed URLs, redirects                |
-| [CSRF Protection](/basics/csrf)              | Tokens, headers, excluding routes                       |
+| [Testing](/concepts/testing)                 | Built-in test doubles and testing patterns                        |
+| [Middleware](/basics/middleware)             | Global, per-route, and controller-scoped middleware               |
+| [Controllers](/basics/controllers)           | Grouping handlers into types with shared middleware               |
+| [URL Generation](/basics/url-generation)     | Named-route URLs, signed URLs, redirects                          |
+| [CSRF Protection](/basics/csrf)              | Tokens, headers, excluding routes                                 |
 
 ## Next Steps
 

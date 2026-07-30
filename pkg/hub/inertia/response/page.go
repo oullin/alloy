@@ -1,6 +1,6 @@
 package response
 
-import "github.com/oullin/alloy/pkg/hub/inertia/protocol"
+import "hara.sh/alloy/inertia/protocol"
 
 // Page is the Inertia.js page object sent to the client. On XHR visits
 // it is the JSON body; on initial visits it is embedded in a

@@ -3,7 +3,7 @@ package features
 import (
 	"net/http"
 
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
+	"hara.sh/alloy/inertia/protocol"
 )
 
 func (a app) persistentLayoutsHandler(w http.ResponseWriter, r *http.Request) {

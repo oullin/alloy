@@ -9,5 +9,5 @@ Boost is an IDE coding-assistant integration layer for Alloy.
 ## Installation
 
 ```bash
-go run github.com/oullin/alloy/pkg/hub/ai/boost/cmd/boost@latest install
+go run hara.sh/alloy/ai/boost/cmd/boost@latest install
 ```

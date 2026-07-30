@@ -4,7 +4,7 @@ package validator
 import (
 	"fmt"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
+	"hara.sh/alloy/workflow"
 )
 
 // ValidateDefinition delegates to Definition.Validate (reachability + structural).

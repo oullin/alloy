@@ -1,16 +1,16 @@
 # Collection
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/oullin/alloy/pkg/hub/collection.svg)](https://pkg.go.dev/github.com/oullin/alloy/pkg/hub/collection)
+[![Go Reference](https://pkg.go.dev/badge/hara.sh/alloy/collection.svg)](https://pkg.go.dev/hara.sh/alloy/collection)
 [![Go Version](https://img.shields.io/badge/go-1.26-blue.svg)](https://golang.org/doc/devel/release.html#go1.26)
 [![CI](https://github.com/oullin/alloy/actions/workflows/ci.yml/badge.svg)](https://github.com/oullin/alloy/actions)
 [![codecov](https://codecov.io/gh/oullin/alloy/branch/main/graph/badge.svg)](https://codecov.io/gh/oullin/alloy)
-[![Go Report Card](https://goreportcard.com/badge/github.com/oullin/alloy/pkg/hub/collection)](https://goreportcard.com/report/github.com/oullin/alloy/pkg/hub/collection)
+[![Go Report Card](https://goreportcard.com/badge/hara.sh/alloy/collection)](https://goreportcard.com/report/hara.sh/alloy/collection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A powerful Go port of Collections (upstream) — fluent, type-safe, and powered by Go generics and `iter.Seq` lazy evaluation.
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/collection
+go get hara.sh/alloy/collection
 ```
 
 ---
@@ -34,7 +34,7 @@ package main
 
 import (
     "fmt"
-    "github.com/oullin/alloy/pkg/hub/collection/collection"
+    "hara.sh/alloy/collection/collection"
 )
 
 func main() {

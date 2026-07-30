@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/queue/drivers"
+	"hara.sh/alloy/queue/drivers"
 )
 
 // covers Bulk + PendingJobs + DelayedJobs + ReservedJobs.

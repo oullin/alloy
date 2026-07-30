@@ -11,13 +11,13 @@ import (
 	"alloy.dev/inertia-demo/internal/database"
 	"alloy.dev/inertia-demo/internal/seed"
 	"alloy.dev/inertia-demo/internal/testutil"
-	"github.com/oullin/alloy/pkg/hub/encryption"
-	"github.com/oullin/alloy/pkg/hub/inertia"
-	"github.com/oullin/alloy/pkg/hub/inertia/assert"
-	coreflash "github.com/oullin/alloy/pkg/hub/inertia/flash"
-	"github.com/oullin/alloy/pkg/hub/inertia/middleware"
-	"github.com/oullin/alloy/pkg/hub/inertia/protocol"
-	corei18n "github.com/oullin/alloy/pkg/hub/seo/i18n"
+	"hara.sh/alloy/encryption"
+	"hara.sh/alloy/inertia"
+	"hara.sh/alloy/inertia/assert"
+	coreflash "hara.sh/alloy/inertia/flash"
+	"hara.sh/alloy/inertia/middleware"
+	"hara.sh/alloy/inertia/protocol"
+	corei18n "hara.sh/alloy/seo/i18n"
 )
 
 // testCryptoKey is a zero-filled 32-byte key used only in tests.

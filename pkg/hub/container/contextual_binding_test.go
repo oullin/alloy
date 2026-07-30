@@ -3,7 +3,7 @@ package container_test
 import (
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/container"
+	"hara.sh/alloy/container"
 )
 
 // Direct resolution (not through service-a) should get the default.

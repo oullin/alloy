@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	setterspkg "github.com/oullin/alloy/pkg/hub/tempo/setters"
+	setterspkg "hara.sh/alloy/tempo/setters"
 )
 
 func (tempo Time) Clone() Time {

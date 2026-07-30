@@ -16,7 +16,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	contract "github.com/oullin/alloy/pkg/hub/contracts/filesystem"
+	contract "hara.sh/alloy/contracts/filesystem"
 )
 
 // Local provides local filesystem operations.

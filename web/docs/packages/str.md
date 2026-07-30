@@ -19,7 +19,7 @@ Package str provides the string-oriented portion of Alloy's support port. It inc
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/str@latest
+go get hara.sh/alloy/str@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -30,8 +30,8 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/str/...
 
 ## Source Coverage
 
-| Package | Purpose                                                                                                                                                                                                            |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Package | Purpose                                                                                                                                                                                                          |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `str`   | Package str provides the string-oriented portion of Alloy's support port. It includes the Str\* helpers, StringBuilder, pluralization, UUID and ULID helpers, transliteration, and Markdown rendering utilities. |
 
 ## Core Concepts
@@ -61,7 +61,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/str"
+    _ "hara.sh/alloy/str"
 )
 
 func main() {
@@ -76,7 +76,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

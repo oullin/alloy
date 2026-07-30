@@ -46,7 +46,7 @@ when the connection is first resolved
 Push a job onto the default connection:
 
 ```go
-import facadequeue "github.com/oullin/alloy/pkg/hub/facades/queue"
+import facadequeue "hara.sh/alloy/facades/queue"
 
 q, err := facadequeue.Connection(nil) // default
 if err != nil { return err }
@@ -126,6 +126,7 @@ See [`pkg/hub/queue/manager.go:333`](https://github.com/oullin/alloy/blob/main/p
 - [Drivers](/architecture/drivers) — the meta-pattern this package follows.
 - [Service Providers](/architecture/service-providers).
 - [Bus](/packages/bus) — for command dispatch on top of this queue.
+
 <!-- /ALLOY:HAND -->
 
 Package queue provides job queue management. It defines Queue, Job, and Connector interfaces with multiple driver implementations (sync, database, redis, beanstalkd, sqs, null, background, deferred, failover) and a Worker for processing jobs.
@@ -141,7 +142,7 @@ Package queue provides job queue management. It defines Queue, Job, and Connecto
 Install this module directly in applications that consume packages independently:
 
 ```bash
-go get github.com/oullin/alloy/pkg/hub/queue@latest
+go get hara.sh/alloy/queue@latest
 ```
 
 When working inside this monorepo, use the repository workspace:
@@ -156,8 +157,8 @@ GOWORK=./pkg/hub/go.work go test -count=1 ./pkg/hub/queue/...
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `queue`   | Package queue provides job queue management. It defines Queue, Job, and Connector interfaces with multiple driver implementations (sync, database, redis, beanstalkd, sqs, null, background, deferred, failover) and a Worker for processing jobs. |
 | `drivers` | Public drivers API surface for this module.                                                                                                                                                                                                        |
-| `events`  | Package events contains the alloy Queue\Events\* event surface. Each upstream event is a plain Go struct; the worker, manager, and drivers emit them via the queue package's EventEmitter interface.                                             |
-| `failed`  | Package failed contains the alloy Queue\Failed\* surface. It defines the FailedJobProvider contract plus the optional Countable and Prunable extensions, and ships five implementations that ship as alloy providers:                          |
+| `events`  | Package events contains the alloy Queue\Events\* event surface. Each upstream event is a plain Go struct; the worker, manager, and drivers emit them via the queue package's EventEmitter interface.                                               |
+| `failed`  | Package failed contains the alloy Queue\Failed\* surface. It defines the FailedJobProvider contract plus the optional Countable and Prunable extensions, and ships five implementations that ship as alloy providers:                              |
 
 ## Core Concepts
 
@@ -193,7 +194,7 @@ Start with the package constructor or manager type when one is exported. Alloy k
 package main
 
 import (
-    _ "github.com/oullin/alloy/pkg/hub/queue"
+    _ "hara.sh/alloy/queue"
 )
 
 func main() {
@@ -208,7 +209,7 @@ Use package tests as executable examples when the exact constructor requires col
 
 Alloy documents behavior through Go options and constructor arguments:
 
-| Upstream shape    | Alloy shape                                            |
+| Upstream shape    | Alloy shape                                              |
 | ----------------- | -------------------------------------------------------- |
 | Config file keys  | Typed config structs, options, or constructor parameters |
 | Facade defaults   | Explicit manager/default-driver setup                    |

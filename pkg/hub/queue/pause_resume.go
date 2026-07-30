@@ -3,7 +3,7 @@ package queue
 import (
 	"time"
 
-	"github.com/oullin/alloy/pkg/hub/queue/events"
+	"hara.sh/alloy/queue/events"
 )
 
 // PauseResumer coordinates the pause/resume lifecycle across a

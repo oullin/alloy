@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/httpx/routing"
-	"github.com/oullin/alloy/pkg/hub/httpx/routing/navigator"
+	"hara.sh/alloy/httpx/routing"
+	"hara.sh/alloy/httpx/routing/navigator"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────

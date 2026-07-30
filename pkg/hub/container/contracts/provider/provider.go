@@ -1,6 +1,6 @@
 package provider
 
-import cprovider "github.com/oullin/alloy/pkg/hub/contracts/provider"
+import cprovider "hara.sh/alloy/contracts/provider"
 
 // ServiceProvider is implemented by packages that register their services
 type ServiceProvider = cprovider.ServiceProvider

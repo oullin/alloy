@@ -15,7 +15,7 @@ import {
 	TransitionError,
 	TransitionNotFoundError,
 	WorkflowConfigLoader,
-} from '@alloy/sdk/workflow';
+} from '@hara/sdk-workflow';
 
 interface Ticket {
 	state: string;

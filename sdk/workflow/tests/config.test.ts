@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { SingleStateStore, StateMachine, WorkflowConfigLoader } from '@alloy/sdk/workflow';
+import { SingleStateStore, StateMachine, WorkflowConfigLoader } from '@hara/sdk-workflow';
 
 interface Subscription {
 	state: string;

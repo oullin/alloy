@@ -23,26 +23,26 @@ Two security-critical SQL repositories have no `sql_repository_test.go`, while e
 - `pkg/hub/auth/browserx/sql_repository.go`: `NewSQLRepository(db SQLQuerier, table string)` (30); methods `FindForUser` (38), `Revoke` (72), `RevokeOther` (76); `isSafeSQLIdentifier` (80). No `sql_repository_test.go` in the dir (only `browser_sessions_test.go`).
 - `pkg/hub/auth/passwords/sql_repository.go`: `NewSQLRepository(db SQLQuerier, table string, expiry time.Duration)` (34); methods `Create` (42), `Exists` (66), `RecentlyCreated` (87), `Delete` (102), `DeleteExpired` (106); `isSafeSQLIdentifier` (112). No `sql_repository_test.go` (dir has `broker_test.go`, `token_repository_test.go`).
 - Established harness pattern — `pkg/hub/auth/tokens/sql_repository_test.go`:
-  ```go
-  type tokenSQLDB struct { lastQuery string; lastExec string; created Token; rows []Token }
-  type tokenSQLRow struct { ... }
-  type tokenSQLRows struct { rows []Token; pos int }
-  func TestSQLRepositoryCreatesHashedTokenWithSafeTable(t *testing.T) {
-      db := &tokenSQLDB{}
-      repo := NewSQLRepository(db, "personal_access_tokens; DROP TABLE users")
-      ... assert db.lastQuery prefix, hash stored not plaintext, table-name safety ...
-  }
-  ```
+    ```go
+    type tokenSQLDB struct { lastQuery string; lastExec string; created Token; rows []Token }
+    type tokenSQLRow struct { ... }
+    type tokenSQLRows struct { rows []Token; pos int }
+    func TestSQLRepositoryCreatesHashedTokenWithSafeTable(t *testing.T) {
+        db := &tokenSQLDB{}
+        repo := NewSQLRepository(db, "personal_access_tokens; DROP TABLE users")
+        ... assert db.lastQuery prefix, hash stored not plaintext, table-name safety ...
+    }
+    ```
 
 Convention: fake the `SQLQuerier`/DB interface (as `tokenSQLDB` does), assert the generated query string, the exec/args, hash comparison, and that an unsafe table name is rejected/sanitized by `isSafeSQLIdentifier`. Read the exact `SQLQuerier` interface each repo expects and mirror the tokens fake.
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Auth tests | `cd pkg/hub && go test ./auth/browserx/... ./auth/passwords/...` | exit 0 |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose       | Command                                                          | Expected |
+| ------------- | ---------------------------------------------------------------- | -------- |
+| Auth tests    | `cd pkg/hub && go test ./auth/browserx/... ./auth/passwords/...` | exit 0   |
+| Full Go suite | `pnpm exec vp run go:test`                                       | exit 0   |
+| Format        | `pnpm exec vp run format`                                        | exit 0   |
 
 ## Scope
 
@@ -59,6 +59,7 @@ Convention: fake the `SQLQuerier`/DB interface (as `tokenSQLDB` does), assert th
 ### Step 1: browserx SQL repository tests
 
 Create `browserx/sql_repository_test.go` mirroring the tokens harness. Fake the DB, then assert for each method:
+
 - `FindForUser`: query targets the configured table with the user-id bound as a parameter; rows map to `Session`.
 - `Revoke`/`RevokeOther`: correct `WHERE` clause (user + session id / user + not-current-session), values bound as parameters.
 - Table-name safety: constructing with an unsafe table name (`"sessions; DROP TABLE users"`) is rejected or sanitized by `isSafeSQLIdentifier` (assert the default/safe behavior).
@@ -68,6 +69,7 @@ Create `browserx/sql_repository_test.go` mirroring the tokens harness. Fake the 
 ### Step 2: passwords SQL repository tests
 
 Create `passwords/sql_repository_test.go` mirroring the harness. Assert for each method:
+
 - `Create`: INSERT into the configured table; the token is stored **hashed**, not plaintext (mirror the tokens test's plaintext-leak assertion); expiry applied.
 - `Exists`: token compared via hash (constant-time if the repo does so — assert the compare path); correct email/token binding.
 - `RecentlyCreated`: time-window predicate uses bound args.
@@ -82,7 +84,7 @@ Create `passwords/sql_repository_test.go` mirroring the harness. Assert for each
 
 ## Test plan
 
-The plan *is* the test plan: table-driven tests per method, following `tokens/sql_repository_test.go`, covering query construction, parameter binding, hash comparison, and unsafe-table-name handling. Include the negative case (unsafe identifier) explicitly.
+The plan _is_ the test plan: table-driven tests per method, following `tokens/sql_repository_test.go`, covering query construction, parameter binding, hash comparison, and unsafe-table-name handling. Include the negative case (unsafe identifier) explicitly.
 
 ## Done criteria
 

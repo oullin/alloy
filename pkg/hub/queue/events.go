@@ -1,6 +1,6 @@
 package queue
 
-import "github.com/oullin/alloy/pkg/hub/queue/events"
+import "hara.sh/alloy/queue/events"
 
 // This file re-exports the event types defined in the events subpackage at
 // the root of the queue package. The aliases exist for two reasons:

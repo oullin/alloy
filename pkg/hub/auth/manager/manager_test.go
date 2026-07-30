@@ -9,13 +9,13 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/oullin/alloy/pkg/hub/auth/errorsx"
-	. "github.com/oullin/alloy/pkg/hub/auth/manager"
-	. "github.com/oullin/alloy/pkg/hub/auth/security"
-	. "github.com/oullin/alloy/pkg/hub/auth/sessionx"
-	. "github.com/oullin/alloy/pkg/hub/auth/user"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
-	"github.com/oullin/alloy/pkg/hub/contracts/auth/events"
+	. "hara.sh/alloy/auth/errorsx"
+	. "hara.sh/alloy/auth/manager"
+	. "hara.sh/alloy/auth/security"
+	. "hara.sh/alloy/auth/sessionx"
+	. "hara.sh/alloy/auth/user"
+	cauth "hara.sh/alloy/contracts/auth"
+	"hara.sh/alloy/contracts/auth/events"
 )
 
 // --- Test helpers ---

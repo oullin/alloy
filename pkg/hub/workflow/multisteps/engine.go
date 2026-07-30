@@ -5,7 +5,7 @@ import (
 	"maps"
 	"sync"
 
-	cmultisteps "github.com/oullin/alloy/pkg/hub/contracts/workflow/multisteps"
+	cmultisteps "hara.sh/alloy/contracts/workflow/multisteps"
 )
 
 // Task is a unit of concurrent work.

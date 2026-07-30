@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/oullin/alloy/pkg/hub/auth/fortify"
-	cauth "github.com/oullin/alloy/pkg/hub/contracts/auth"
+	"hara.sh/alloy/auth/fortify"
+	cauth "hara.sh/alloy/contracts/auth"
 )
 
 // FortifyService adapts Service to fortify.PasskeyService without making the

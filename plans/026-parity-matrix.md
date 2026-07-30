@@ -19,7 +19,7 @@ The value proposition is "cross-runtime primitives", but only 3 of ~22 Go packag
 
 - Go packages (`pkg/hub`): auth, bus, cache, collection, config, container, contracts, cookie, database, encryption, events, filesystem, hashing, httpx, inertia, money, queue, seo, session, str, tempo, validation, workflow (+ nested modules `queue/drivers/sqs`, `auth/passkeys`).
 - TS packages (`sdk/*`): `tempo`, `money`, `workflow` (Go twins), `console`, `navigator-routes` (TS-only).
-- Plan 008 (if landed) adds conformance fixtures for the money/tempo twins — reference it as the mechanism that *enforces* parity where it's claimed.
+- Plan 008 (if landed) adds conformance fixtures for the money/tempo twins — reference it as the mechanism that _enforces_ parity where it's claimed.
 
 ## Scope
 
@@ -51,11 +51,11 @@ If cheap, add a check that fails when a package exists in both `pkg/hub` and `sd
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| List packages | `ls pkg/hub; ls sdk` | full package lists |
-| Build docs | `pnpm docs:build` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Purpose       | Command                   | Expected           |
+| ------------- | ------------------------- | ------------------ |
+| List packages | `ls pkg/hub; ls sdk`      | full package lists |
+| Build docs    | `pnpm docs:build`         | exit 0             |
+| Format        | `pnpm exec vp run format` | exit 0             |
 
 ## Deliverable / done criteria
 

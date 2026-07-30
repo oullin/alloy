@@ -19,7 +19,7 @@ The commercial model is subscription access to private packages, but there is **
 
 - TS packages under `sdk/*`, all `"private": true`, internal deps via `workspace:*`.
 - `release-ts.yml` — packs tarballs, attaches to a GitHub release (read it to confirm the exact current flow).
-- `release-go.yml` — read it for the current Go release/tag flow; the Go module is `github.com/oullin/alloy/pkg/hub` with nested modules (`queue/drivers/sqs`, `auth/passkeys`).
+- `release-go.yml` — read it for the current Go release/tag flow; the Go module is `hara.sh/alloy` with nested modules (`queue/drivers/sqs`, `auth/passkeys`).
 - Memory/context: commercial goal is private packages behind a subscription; breaking changes acceptable pre-1.0; there is intentionally no public `alloy.dev` registry domain.
 
 ## Scope

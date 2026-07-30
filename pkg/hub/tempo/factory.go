@@ -3,7 +3,7 @@ package tempo
 import (
 	"time"
 
-	factorypkg "github.com/oullin/alloy/pkg/hub/tempo/factory"
+	factorypkg "hara.sh/alloy/tempo/factory"
 )
 
 func NewFactory(options ...Option) (Factory, error) {

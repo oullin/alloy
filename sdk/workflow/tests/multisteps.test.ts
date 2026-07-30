@@ -15,7 +15,7 @@ import {
 	UnresolvedResponseError,
 	VariableArg,
 	WorkflowError,
-} from '@alloy/sdk/workflow/multisteps';
+} from '@hara/sdk-workflow/multisteps';
 
 class ParallelDriver implements Driver {
 	public async run(_signal: AbortSignal, tasks: Task[]): Promise<unknown[]> {

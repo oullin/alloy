@@ -16,7 +16,7 @@ You can always reach for the underlying manager directly when you need to.
 ## Calling a Facade
 
 ```go
-import "github.com/oullin/alloy/pkg/hub/facades/cache"
+import "hara.sh/alloy/facades/cache"
 
 func ShowProduct(id int) Response {
     cached, _ := cache.Driver()                 // *cache.Store
@@ -152,8 +152,8 @@ instance: route handlers, console commands, view helpers.
 
 The current facade set:
 
-| Facade                                                                                   | Resolves            | Common helpers                                |
-| ---------------------------------------------------------------------------------------- | ------------------- | --------------------------------------------- |
+| Facade                                                                               | Resolves            | Common helpers                                |
+| ------------------------------------------------------------------------------------ | ------------------- | --------------------------------------------- |
 | [`facades/cache`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/cache)   | `*cache.Manager`    | `Driver()`, `Store(name)`, `Repository(name)` |
 | [`facades/queue`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/queue)   | `*queue.Manager`    | `Connection(name)`                            |
 | [`facades/log`](https://github.com/oullin/alloy/tree/main/pkg/hub/facades/log)       | `*log.LogManager`   | `Channel(name)`, `Stack(...)`                 |

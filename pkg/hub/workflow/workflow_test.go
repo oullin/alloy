@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/oullin/alloy/pkg/hub/workflow"
-	"github.com/oullin/alloy/pkg/hub/workflow/audit"
-	"github.com/oullin/alloy/pkg/hub/workflow/events"
-	"github.com/oullin/alloy/pkg/hub/workflow/registry"
-	"github.com/oullin/alloy/pkg/hub/workflow/store"
+	"hara.sh/alloy/workflow"
+	"hara.sh/alloy/workflow/audit"
+	"hara.sh/alloy/workflow/events"
+	"hara.sh/alloy/workflow/registry"
+	"hara.sh/alloy/workflow/store"
 )
 
 // Subscription is the canonical state-machine test subject: trial -> active -> cancelled.

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/oullin/alloy/pkg/hub/inertia"
+	"hara.sh/alloy/inertia"
 )
 
 type middlewareConfig struct {

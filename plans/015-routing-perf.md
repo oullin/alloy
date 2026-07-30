@@ -31,12 +31,12 @@ Convention: preserve exact matching semantics — matching order, first-match wi
 
 ## Commands you will need
 
-| Purpose | Command | Expected |
-|---------|---------|----------|
-| Routing tests | `cd pkg/hub && go test ./httpx/routing/...` | exit 0 |
+| Purpose                  | Command                                                            | Expected                 |
+| ------------------------ | ------------------------------------------------------------------ | ------------------------ |
+| Routing tests            | `cd pkg/hub && go test ./httpx/routing/...`                        | exit 0                   |
 | Benchmark (before/after) | `cd pkg/hub && go test ./httpx/routing/... -bench Match -benchmem` | records ns/op, allocs/op |
-| Full Go suite | `pnpm exec vp run go:test` | exit 0 |
-| Format | `pnpm exec vp run format` | exit 0 |
+| Full Go suite            | `pnpm exec vp run go:test`                                         | exit 0                   |
+| Format                   | `pnpm exec vp run format`                                          | exit 0                   |
 
 ## Scope
 

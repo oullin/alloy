@@ -27,6 +27,7 @@ export const renderProgressFrame = ({ current, hint, label, state = 'active', to
 	const fillWidth = progressFrameWidth(width);
 	const filled = Math.ceil(fillWidth * progressPercentage(current, total));
 	const body = '█'.repeat(filled);
+
 	const lines = [renderBox({ body, info: formatProgressFraction(current, total), title: label, width: fillWidth })];
 
 	if (state === 'active') {
