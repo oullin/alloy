@@ -9,6 +9,7 @@
 // Adding or changing a route or flow is a one-file edit here.
 
 import { spawn, spawnSync } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { createWriteStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import http from 'node:http';
 import net from 'node:net';
@@ -16,6 +17,8 @@ import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
+
+const e2eSeedPassword = 'alloy-e2e-password';
 
 // Portable default: artifacts land in an OS temp directory so a clean CI runner
 // or any contributor can run the suite without machine-specific setup. Override
@@ -180,6 +183,8 @@ export function resolveTargetConfig({ target, port, repoRoot, databasePath, runI
 			GOWORK: 'off',
 			ALLOY_INERTIA_DIST_PATH: distPath,
 			ALLOY_INERTIA_DB_PATH: path.join(databasePath, 'alloy-beacon.db'),
+			INERTIA_CRYPTO_KEY: randomBytes(32).toString('base64'),
+			INERTIA_DEMO_SEED_PASSWORD: e2eSeedPassword,
 			APP_VERSION: `e2e-${runId}`,
 		},
 	};
@@ -313,7 +318,7 @@ export async function runAuthFlow(driver, baseUrl) {
 	await driver.screenshot('auth-invalid-login');
 
 	await driver.fill('#email', 'test@example.com');
-	await driver.fill('#password', 'password');
+	await driver.fill('#password', e2eSeedPassword);
 	await driver.submitForm('#email');
 	await driver.waitForPath('/dashboard');
 	await driver.waitForText('Recent Activity');

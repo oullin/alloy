@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import ts from 'typescript';
+import ts from 'typescript-legacy';
 
 const rootPath = process.cwd();
 const packagePath = path.join(rootPath, 'sdk');
