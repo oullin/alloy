@@ -34,7 +34,7 @@ try {
 	await driver.launch();
 	await driver.open(`${app.baseUrl}/login`);
 
-	await runAllFlows(driver, app.baseUrl);
+	await runAllFlows(driver, app.baseUrl, app.seedPassword);
 
 	await driver.stopTrace('complete');
 	await driver.close();
