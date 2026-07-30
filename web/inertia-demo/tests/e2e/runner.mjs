@@ -36,7 +36,7 @@ try {
 
 	server = await startServer(app, { target, logsPath, onReady: () => driver.startTrace() });
 
-	await runAllFlows(driver, app.baseUrl);
+	await runAllFlows(driver, app.baseUrl, app.seedPassword);
 
 	await driver.stopTrace('complete');
 	await driver.close();

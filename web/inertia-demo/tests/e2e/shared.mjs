@@ -18,8 +18,6 @@ import path from 'node:path';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
-const e2eSeedPassword = 'alloy-e2e-password';
-
 // Portable default: artifacts land in an OS temp directory so a clean CI runner
 // or any contributor can run the suite without machine-specific setup. Override
 // with CODEX_BROWSER_ARTIFACTS_DIR (CI points this at the runner temp dir).
@@ -149,6 +147,7 @@ export function resolveTargetConfig({ target, port, repoRoot, databasePath, runI
 			throw new Error('Set BEDROCK_INERTIA_SOURCE to your local Bedrock inertia demo checkout (e.g. <bedrock>/services/demo/inertia) to run the bedrock parity target.');
 		}
 
+		const seedPassword = 'password';
 		const sourceRoot = path.resolve(source);
 		const appPath = path.join(sourceRoot, 'app');
 		const apiPath = path.join(sourceRoot, 'api');
@@ -160,6 +159,7 @@ export function resolveTargetConfig({ target, port, repoRoot, databasePath, runI
 		return {
 			apiPath,
 			baseUrl: `http://127.0.0.1:${port}`,
+			seedPassword,
 			env: {
 				...process.env,
 				PORT: String(port),
@@ -169,6 +169,7 @@ export function resolveTargetConfig({ target, port, repoRoot, databasePath, runI
 		};
 	}
 
+	const seedPassword = 'alloy-e2e-password';
 	const distPath = path.join(repoRoot, 'web/storage/inertia-demo/dist/app');
 	if (!existsSync(distPath) || !statSync(distPath).isDirectory()) {
 		throw new Error(`Missing Alloy Inertia dist at ${distPath}. Run pnpm inertia-demo:build first.`);
@@ -177,6 +178,7 @@ export function resolveTargetConfig({ target, port, repoRoot, databasePath, runI
 	return {
 		apiPath: path.join(repoRoot, 'web/inertia-demo/api'),
 		baseUrl: `http://127.0.0.1:${port}`,
+		seedPassword,
 		env: {
 			...process.env,
 			PORT: String(port),
@@ -184,7 +186,7 @@ export function resolveTargetConfig({ target, port, repoRoot, databasePath, runI
 			ALLOY_INERTIA_DIST_PATH: distPath,
 			ALLOY_INERTIA_DB_PATH: path.join(databasePath, 'alloy-beacon.db'),
 			INERTIA_CRYPTO_KEY: randomBytes(32).toString('base64'),
-			INERTIA_DEMO_SEED_PASSWORD: e2eSeedPassword,
+			INERTIA_DEMO_SEED_PASSWORD: seedPassword,
 			APP_VERSION: `e2e-${runId}`,
 		},
 	};
@@ -297,15 +299,15 @@ export async function step(driver, label, fn) {
 // same sequence of steps regardless of which browser backend is in use.
 // ---------------------------------------------------------------------------
 
-export async function runAllFlows(driver, baseUrl) {
-	await step(driver, 'auth flow', () => runAuthFlow(driver, baseUrl));
+export async function runAllFlows(driver, baseUrl, seedPassword) {
+	await step(driver, 'auth flow', () => runAuthFlow(driver, baseUrl, seedPassword));
 	await step(driver, 'crm flow', () => runCrmFlow(driver, baseUrl));
 	await step(driver, 'organization flow', () => runOrganizationFlow(driver, baseUrl));
 	await step(driver, 'feature interactions', () => runFeatureInteractions(driver, baseUrl));
 	await step(driver, 'route crawl', () => runRouteCrawl(driver, baseUrl));
 }
 
-export async function runAuthFlow(driver, baseUrl) {
+export async function runAuthFlow(driver, baseUrl, seedPassword) {
 	driver.clearIssues();
 	await driver.open(`${baseUrl}/dashboard`);
 	await driver.waitForSelector('#email');
@@ -318,7 +320,7 @@ export async function runAuthFlow(driver, baseUrl) {
 	await driver.screenshot('auth-invalid-login');
 
 	await driver.fill('#email', 'test@example.com');
-	await driver.fill('#password', e2eSeedPassword);
+	await driver.fill('#password', seedPassword);
 	await driver.submitForm('#email');
 	await driver.waitForPath('/dashboard');
 	await driver.waitForText('Recent Activity');
