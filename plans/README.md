@@ -12,29 +12,29 @@ Verification commands are the same repo-wide (each plan repeats the subset it ne
 | 001  | Queue reliability: attempt tracking, panic recovery, fail-job integrity   | P1       | L      | —           | DONE   |
 | 002  | Redis driver job visibility (reservation / at-most-once decision)         | P1       | L      | 001         | DONE   |
 | 003  | Container concurrency safety                                              | P1       | L      | —           | DONE   |
-| 004  | Router per-request route scope                                            | P1       | M      | —           | TODO   |
-| 005  | Money arithmetic overflow safety & rounding policy (Go+TS)                | P1       | M      | —           | TODO   |
-| 006  | Money exchange integer conversion (Go+TS)                                 | P2       | M      | —           | TODO   |
-| 007  | Tempo TS DST-correct day/week + locale-aware parse                        | P2       | M      | —           | TODO   |
-| 008  | Go↔TS money/tempo conformance fixtures                                    | P2       | M      | 005,006,007 | TODO   |
-| 009  | Validation fixes (not_regex fail-open, delimiters, wildcard Validated)    | P1       | M      | —           | TODO   |
-| 010  | Silent-error / swallowed-error correctness sweep                          | P1       | M      | —           | TODO   |
-| 011  | httpx URL-generation correctness (float params, signed-URL query)         | P2       | M      | —           | TODO   |
-| 012  | Workflow concurrency & retry correctness (Go+TS)                          | P2       | M      | —           | TODO   |
-| 013  | Demo auth security (key rotation, seed passwords, login timing)           | P1       | S      | —           | TODO   |
-| 014  | Framework hardening defaults (argon2, Secure cookies, post-size)          | P1       | S      | —           | TODO   |
-| 015  | Routing performance (static-path index, method map, singleton validators) | P2       | L      | —           | TODO   |
-| 016  | Regex / Intl compilation caching (Go+TS)                                  | P2       | M      | —           | TODO   |
-| 017  | Session performance (dirty tracking, background GC)                       | P2       | M      | —           | TODO   |
-| 018  | CI Go-test performance                                                    | P3       | M      | —           | TODO   |
-| 019  | Auth SQL repository tests (browserx, passwords)                           | P1       | S      | —           | TODO   |
-| 020  | e2e harness portability & runner de-duplication                           | P2       | M      | —           | TODO   |
-| 021  | Dead-code cleanup (cache.RateLimiter, empty packages/)                    | P2       | S      | —           | TODO   |
-| 022  | Toolchain version pinning                                                 | P2       | S      | —           | TODO   |
-| 023  | Docs & DX sweep (stale paths, AGENTS.md, Node baseline)                   | P2       | M      | —           | TODO   |
-| 024  | SPIKE: private-package distribution                                       | P3       | L      | —           | TODO   |
-| 025  | SPIKE: authkit/authflows public API                                       | P3       | L      | —           | TODO   |
-| 026  | Cross-runtime parity matrix & policy doc                                  | P3       | M      | —           | TODO   |
+| 004  | Router per-request route scope                                            | P1       | M      | —           | DONE   |
+| 005  | Money arithmetic overflow safety & rounding policy (Go+TS)                | P1       | M      | —           | DONE   |
+| 006  | Money exchange integer conversion (Go+TS)                                 | P2       | M      | —           | DONE   |
+| 007  | Tempo TS DST-correct day/week + locale-aware parse                        | P2       | M      | —           | DONE   |
+| 008  | Go↔TS money/tempo conformance fixtures                                    | P2       | M      | 005,006,007 | DONE   |
+| 009  | Validation fixes (not_regex fail-open, delimiters, wildcard Validated)    | P1       | M      | —           | DONE   |
+| 010  | Silent-error / swallowed-error correctness sweep                          | P1       | M      | —           | DONE   |
+| 011  | httpx URL-generation correctness (float params, signed-URL query)         | P2       | M      | —           | DONE   |
+| 012  | Workflow concurrency & retry correctness (Go+TS)                          | P2       | M      | —           | DONE   |
+| 013  | Demo auth security (key rotation, seed passwords, login timing)           | P1       | S      | —           | DONE   |
+| 014  | Framework hardening defaults (argon2, Secure cookies, post-size)          | P1       | S      | —           | DONE   |
+| 015  | Routing performance (static-path index, method map, singleton validators) | P2       | L      | —           | DONE   |
+| 016  | Regex / Intl compilation caching (Go+TS)                                  | P2       | M      | —           | DONE   |
+| 017  | Session performance (dirty tracking, background GC)                       | P2       | M      | —           | DONE   |
+| 018  | CI Go-test performance                                                    | P3       | M      | —           | DONE   |
+| 019  | Auth SQL repository tests (browserx, passwords)                           | P1       | S      | —           | DONE   |
+| 020  | e2e harness portability & runner de-duplication                           | P2       | M      | —           | DONE   |
+| 021  | Dead-code cleanup (cache.RateLimiter, empty packages/)                    | P2       | S      | —           | DONE   |
+| 022  | Toolchain version pinning                                                 | P2       | S      | —           | DONE   |
+| 023  | Docs & DX sweep (stale paths, AGENTS.md, Node baseline)                   | P2       | M      | —           | DONE   |
+| 024  | SPIKE: private-package distribution                                       | P3       | L      | —           | DONE   |
+| 025  | SPIKE: authkit/authflows public API                                       | P3       | L      | —           | DONE   |
+| 026  | Cross-runtime parity matrix & policy doc                                  | P3       | M      | —           | DONE   |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED (one-line rationale).
 
@@ -43,6 +43,8 @@ Execution record — CONSOLIDATED: plans 001+002+003 now ship together as PR htt
 001 executed 2026-07-14 by an Antigravity (Gemini 3.5 Flash High) executor on branch `advisor/001-queue-reliability` (based on `396e371`, 10 commits incl. repo-formatter pass `d28124d`) — reviewed, approved, and published as draft PR https://github.com/oullin/alloy/pull/72 (base `main`); merge is the owner's call. 002 executed 2026-07-14 by the same Antigravity executor on branch `advisor/002-redis-visibility` (rebased onto `d28124d`, commits `d2f1131`+`c4942cb`) — reservation path chosen: Lua pop+reserve, migrateExpired reclaim, 60s configurable visibility timeout, at-least-once semantics documented. Reviewed and approved; published as draft PR https://github.com/oullin/alloy/pull/73 (stacked on #72, plus formatter commit `8548765`). Post-publication: a PR-babysitter pass addressed gemini bot reviews on both PRs (001: `f4add63` — failover Pop now surfaces a real backend error even when another backend returns ErrNoJob (accepted deviation from plan 001 step 5's "every backend" wording; aligns with the plan-010 no-swallowed-errors direction, and FailedOver events already fire either way), sync panic recovery gained debug.Stack(), redis release preserves unknown payload fields via generic-map tries bump; 002: `0c29d80` — Pop surfaces context.Canceled/DeadlineExceeded instead of falling back, Eval contract documented on RedisClient). Both PRs ready-for-review; after the Go 1.26.5 toolchain bump merged (#74, fixing GO-2026-5856) both were rebased onto main (heads `03cf6cc` / `5d6dabe`) and CI is fully green including govulncheck. OPEN DECISION for the owner: reclaimed-after-crash jobs keep their `tries` count, so a hard-crashing (non-panicking) handler redelivers forever on redis; fixing it means incrementing tries at reserve time (Laravel-style cjson in the Lua script), which is also the 0-based/1-based attempt harmonization across drivers. Needs a small follow-up plan if wanted.
 
 003 executed 2026-07-14 by the Antigravity executor on branch `advisor/003-container-concurrency` (based on `c85dd42`): goroutine-local resolution contexts (cloned-App + done-flag), panic-safe per-abstract single-flight (unparameterized shared bindings only), Application locks that never hold across provider hooks (in-flight waiters), Make∥Flush race fixed. One REVISE round caught: stored-clone escape, unlocked clone race, two provider-hook deadlock vectors, single-flight panic-stranding and parameter-coalescing. Accepted documented tradeoff: cross-goroutine mutually-dependent singleton cycles block instead of erroring (invalid configs; noted on App doc). Full -race suite + repo gate green; published as PR https://github.com/oullin/alloy/pull/75 — ready-for-review, CI fully green (govulncheck included). Post-publication bot round added `5ee5855` (reviewer-audited and accepted): singleflight releases waiters on runtime.Goexit (completion-flag cleanup, x/sync semantics) and Application.Register dedupes re-registration of deferred providers. Known follow-up for plan 002: redis reports 0-based attempts on first pop while database/SQS/beanstalkd-stats report 1-based; harmonize when reworking redis visibility.
+
+Reconcile 2026-07-30 (against `e1669e3`): plans 004–026 were all executed on `advisor/*` branches and squash-merged to `main` — 004→#102, 005→#88, 006→#90, 007→#87, 008→#100, 009→#80, 010→#82, 011→#84, 012→#85, 013→#81, 014→#83, 015→#92, 016→#86, 017→#91, 018→#103, 019→#89, 020→#93, 021→#94, 022→#98, 023→#95, 024→#97, 025→#96, 026→#99. Local branch tips match the merged PR heads (or are behind them) except two workflow-scope leftovers the push token cannot deliver (`.github/**` needs a maintainer push): `851ee9e` on `advisor/022-toolchain-pins` (pin govulncheck v1.6.0, read Go version from `go-version-file` instead of four hardcoded copies) and `93b4446` on `worktree-agent-a2aee98ba25cdbd8f` (setup-go `cache-dependency-path: "**/go.sum"`). Both predate the #116/#117 restructure and need a rebase before pushing. The ~25 executor worktrees under `.claude/worktrees/` are clean (no uncommitted work) and can be pruned at the owner's discretion.
 
 ## Dependency notes
 
