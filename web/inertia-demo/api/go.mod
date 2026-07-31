@@ -3,9 +3,9 @@ module alloy.dev/inertia-demo
 go 1.26.5
 
 require (
-	hara.sh/alloy v0.0.0
 	golang.org/x/crypto v0.54.0
-	modernc.org/sqlite v1.54.0
+	hara.sh/alloy v0.0.0
+	modernc.org/sqlite v1.55.0
 )
 
 require (
