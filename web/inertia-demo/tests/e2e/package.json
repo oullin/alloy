@@ -11,6 +11,6 @@
 	},
 	"devDependencies": {
 		"agent-browser": "^0.33.0",
-		"playwright": "^1.61.1"
+		"playwright": "^1.62.0"
 	}
 }
