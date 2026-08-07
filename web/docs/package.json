@@ -13,7 +13,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@vuepress/bundler-vite": "next",
     "@vuepress/plugin-prismjs": "next",
-    "@vueuse/core": "^14.2.1",
+    "@vueuse/core": "^14.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^1.0.0",
