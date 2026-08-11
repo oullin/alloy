@@ -66,10 +66,9 @@ export default defineConfig({
 	},
 	test: {
 		passWithNoTests: true,
-		// Stale agent worktrees live inside the repo and are git-excluded, but the
-		// test glob still walks into them and reports hundreds of failures for code
-		// that is not the working tree.
-		exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/worktrees/**', '**/.agents/**'],
+		// Agent worktrees and pnpm's project-store symlinks can mirror test files
+		// under git-excluded paths that do not belong to the working tree.
+		exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/worktrees/**', '**/.agents/**', '**/infra/.cache/**'],
 		environment: 'node',
 		globals: false,
 		coverage: {
