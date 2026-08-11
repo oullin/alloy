@@ -7,8 +7,16 @@ overflow-checked against the signed int64 range, and splitting/allocation
 distributes remainders deterministically. Failures throw coded `MoneyError`
 instances (e.g. `ERR_CURRENCY_MISMATCH`, `ERR_OVERFLOW`).
 
-This is a private workspace package: it is consumed by sibling packages via
-`workspace:*` and is never published to npm.
+This is a private workspace package. Sibling packages consume it via
+`workspace:*`; everyone else consumes the tarball attached to a `ts/v*` GitHub
+release. That is the only external channel — it is never published to a public
+registry. Pin it by URL:
+
+```jsonc
+"dependencies": {
+  "@hara/sdk-money": "https://github.com/oullin/alloy/releases/download/ts/v0.2.0/hara-sdk-money-0.2.0.tgz"
+}
+```
 
 Money values are created through a `MoneyManager`, which also owns all
 arithmetic:

@@ -66,6 +66,23 @@ if [[ "${#tarballs[@]}" -ne "${#packages[@]}" ]]; then
 	exit 1
 fi
 
+# Consumers pin the release artifact by URL, so the filename is part of the
+# contract and a 404 is how they find out it moved. The count check above only
+# proves five files exist, not that each package produced the name its URL
+# implies -- so assert the name derived from the package name and version.
+#
+# This catches a change in how pnpm names artifacts, and a package that packed
+# under an unexpected name. It cannot catch a deliberate rename, since that
+# moves both sides together; that remains a coordinated change with consumers.
+for package in "${packages[@]}"; do
+	expected="$(printf '%s' "${package}" | sed 's|^@||; s|/|-|g')-${version}.tgz"
+
+	if [[ ! -f "${artifact_dir}/${expected}" ]]; then
+		echo "${package} did not produce ${expected}; downstream URLs pin that name" >&2
+		exit 1
+	fi
+done
+
 for tarball in "${tarballs[@]}"; do
 	node infra/scripts/tasks/check-packed-manifest.mjs "${tarball}" "${version}"
 done
