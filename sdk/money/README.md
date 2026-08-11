@@ -14,7 +14,7 @@ registry. Pin it by URL:
 
 ```jsonc
 "dependencies": {
-  "@hara/sdk-money": "https://github.com/oullin/alloy/releases/download/ts/v0.2.0/hara-sdk-money-0.2.0.tgz"
+  "@hara/sdk-money": "https://github.com/oullin/alloy/releases/download/ts/v0.2.1/hara-sdk-money-0.2.1.tgz"
 }
 ```
 
