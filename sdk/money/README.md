@@ -35,6 +35,7 @@ const total = manager.add(fromString, fromFactory);
 total.display(); // "$17.34"
 total.amount(); // 1734n
 total.asMajorUnits(); // 17.34
+total.displayCompact(); // "$17.34" — abbreviates to $1.3M / 750K / 4B at scale
 
 manager.split(price, 3).map((part) => part.amount()); // [500n, 500n, 500n]
 manager.allocate(price, 70, 30).map((part) => part.amount()); // [1050n, 450n]

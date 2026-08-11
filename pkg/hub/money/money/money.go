@@ -173,6 +173,22 @@ func (m *Value) Display() (string, error) {
 	return c.Formatter().Format(m.amount), nil
 }
 
+// DisplayCompact returns the value abbreviated to a scale suffix (e.g. "$1.3M"),
+// using the currency's own formatting rules.
+func (m *Value) DisplayCompact() (string, error) {
+	if err := ensureMoneyProvided(m); err != nil {
+		return "", err
+	}
+
+	c, err := m.currency.Get()
+
+	if err != nil {
+		return "", err
+	}
+
+	return c.Formatter().FormatCompact(m.amount), nil
+}
+
 // AsMajorUnits lets represent Value struct as subunits (float64) in a given Currency value
 func (m *Value) AsMajorUnits() (float64, error) {
 	if err := ensureMoneyProvided(m); err != nil {

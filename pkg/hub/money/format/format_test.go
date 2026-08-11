@@ -186,3 +186,33 @@ func TestFormatter_ToMajorUnits(t *testing.T) {
 		}
 	}
 }
+
+func TestFormatCompact(t *testing.T) {
+	usd := NewFormatter(2, ".", ",", "$", "$1")
+
+	cases := []struct {
+		name     string
+		renderer *Renderer
+		amount   int64
+		want     string
+	}{
+		{"one decimal when it informs", usd, 125_000_000, "$1.3M"},
+		{"no decimal when whole", usd, 100_000_000, "$1M"},
+		{"largest scale", usd, 400_000_000_000, "$4B"},
+		{"thousands", usd, 75_000_000, "$750K"},
+		{"below the floor keeps full precision", usd, 95_000, "$950.00"},
+		{"zero", usd, 0, "$0.00"},
+		{"sign stays outside", usd, -125_000_000, "-$1.3M"},
+		{"rounds half away, rolling into the next scale", usd, 99_999_900, "$1M"},
+		{"zero-fraction currency scales on major units", NewFormatter(0, ".", ",", "¥", "$1"), 1_000_000, "¥1M"},
+		{"trailing grapheme keeps the suffix on the digits", NewFormatter(2, ".", ",", ".د.إ", "1 $"), 125_000_000, "1.3M .د.إ"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.renderer.FormatCompact(tc.amount); got != tc.want {
+				t.Fatalf("FormatCompact(%d) = %q, want %q", tc.amount, got, tc.want)
+			}
+		})
+	}
+}
