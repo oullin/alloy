@@ -52,6 +52,28 @@ import { MoneyParser } from '@hara/sdk-money';
 MoneyParser.create().parseAmount('$12.34'); // { amount: 12.34, currency: 'USD' }
 ```
 
+## The default currency
+
+A code that cannot be resolved falls back to the manager's default currency —
+**SGD** as shipped. Change it per manager:
+
+```ts
+import { CurrencyManager } from '@hara/sdk-money/currency';
+
+const currencies = CurrencyManager.default();
+
+currencies.setDefault('AED'); // trimmed and upper-cased; throws ERR_CURRENCY_NOT_FOUND if unknown
+currencies.resolve('NOPE').code; // "AED"
+```
+
+The default belongs to the manager, not the module, so this takes effect on that
+instance immediately — including one built before the call — and leaves every
+other manager alone. The Go twin's `(*currency.Manager).SetDefault` behaves
+identically, and `conformance/money.json` pins that.
+
+To change the currency `MoneyJson` assumes for a payload carrying no `currency`,
+pass a handler to `MoneyJson.setCurrency` rather than changing a manager.
+
 ## API overview
 
 | Entry point                  | Main exports                                                                                        | Purpose                                                      |

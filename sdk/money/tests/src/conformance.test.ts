@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vite-plus/test';
 
-import { ExchangeRates, MoneyAggregator, MoneyCalculator, MoneyJson, MoneyManager } from '#money/index';
+import { CurrencyManager, ExchangeRates, MoneyAggregator, MoneyCalculator, MoneyJson, MoneyManager } from '#money/index';
 
 // Shared Go<->TS golden vectors. This is the TS half of the cross-runtime drift
 // guard (plan 008); the Go half lives in
@@ -72,6 +72,18 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 				.unmarshal(args[0] as string)
 				.amount()
 				.toString();
+
+		case 'unmarshalCurrency':
+			return json.unmarshal(args[0] as string).currency().code;
+
+		case 'resolveWithDefault': {
+			// Per manager, so nothing leaks between cases.
+			const currencies = CurrencyManager.default();
+
+			currencies.setDefault(args[0] as string);
+
+			return currencies.resolve(args[1] as string).code;
+		}
 
 		default:
 			throw new Error(`unknown money conformance op: ${op}`);

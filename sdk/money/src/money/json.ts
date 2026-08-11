@@ -116,7 +116,15 @@ export class MoneyJson {
 	}
 
 	private defaultJsonCurrency(): CurrencyDefinition {
-		return (this.currencyHandler ?? (() => CurrencyManager.default().resolve('SGD')))();
+		if (this.currencyHandler !== null) {
+			return this.currencyHandler();
+		}
+
+		// Ask the manager for its provider-supplied default rather than naming a
+		// code here. Hardcoding one meant this runtime ignored a custom provider
+		// and could not follow the Go twin, whose defaultJSONCurrency() has always
+		// gone through Manager.GetDefault().
+		return CurrencyManager.default().getDefault();
 	}
 
 	private extractJsonAmount(payload: string): bigint {

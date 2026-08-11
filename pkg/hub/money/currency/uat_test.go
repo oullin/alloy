@@ -427,6 +427,84 @@ func TestGetDefault(t *testing.T) {
 	}
 }
 
+// TestDefaultProviderMatchesDataset asserts the provider hands back the dataset
+// entry itself, so the default can never describe a currency the dataset does
+// not agree with.
+func TestDefaultProviderMatchesDataset(t *testing.T) {
+	provider := DefaultProvider{}
+	provided := provider.Get()
+	dataset := NewCurrenciesMap().FindByCode(provider.GetCode())
+
+	if dataset == nil {
+		t.Fatalf("default currency %s is absent from the dataset", provider.GetCode())
+	}
+
+	if provided != *dataset {
+		t.Fatalf("DefaultProvider.Get() = %#v, want the dataset entry %#v", provided, *dataset)
+	}
+}
+
+func TestManagerSetDefault(t *testing.T) {
+	manager := NewManager()
+
+	if got := manager.GetDefault(); got.Code != SGD {
+		t.Fatalf("GetDefault() before SetDefault = %s, want %s", got.Code, SGD)
+	}
+
+	// The manager exists before the call: this is the case a package-level
+	// setter could not serve, because NewManager copies the provider default.
+	if err := manager.SetDefault("aed"); err != nil {
+		t.Fatalf("SetDefault(\"aed\") unexpected error: %v", err)
+	}
+
+	if got := manager.GetDefault(); got.Code != AED {
+		t.Fatalf("GetDefault() after SetDefault = %s, want %s", got.Code, AED)
+	}
+
+	if got := manager.Resolve("NOPE"); got.Code != AED {
+		t.Fatalf("Resolve() fallback = %s, want %s", got.Code, AED)
+	}
+
+	// An explicit, known code still resolves to itself.
+	if got := manager.Resolve("JPY"); got.Code != JPY {
+		t.Fatalf("Resolve(JPY) = %s, want %s", got.Code, JPY)
+	}
+
+	// Trimmed and upper-cased, matching the TypeScript twin.
+	for _, input := range []string{" eur ", "EuR"} {
+		if err := manager.SetDefault(input); err != nil {
+			t.Fatalf("SetDefault(%q) unexpected error: %v", input, err)
+		}
+
+		if got := manager.GetDefault(); got.Code != EUR {
+			t.Fatalf("after SetDefault(%q), GetDefault() = %s, want %s", input, got.Code, EUR)
+		}
+	}
+
+	// One manager's default does not leak into another's.
+	if got := NewManager().GetDefault(); got.Code != SGD {
+		t.Fatalf("a separate manager's default = %s, want %s", got.Code, SGD)
+	}
+}
+
+func TestManagerSetDefaultRejectsUnknownCurrency(t *testing.T) {
+	manager := NewManager()
+
+	if err := manager.SetDefault("ZZZ"); !errors.Is(err, exception.ErrCurrencyNotFound) {
+		t.Fatalf("SetDefault(\"ZZZ\") error = %v, want %v", err, exception.ErrCurrencyNotFound)
+	}
+
+	if got := manager.GetDefault(); got.Code != SGD {
+		t.Fatalf("GetDefault() after a rejected SetDefault = %s, want %s", got.Code, SGD)
+	}
+
+	var nilManager *Manager
+
+	if err := nilManager.SetDefault(USD); !errors.Is(err, exception.ErrNoCurrencyInstance) {
+		t.Fatalf("nil manager SetDefault() error = %v, want %v", err, exception.ErrNoCurrencyInstance)
+	}
+}
+
 func TestGet(t *testing.T) {
 	// Valid currency
 	c := &Definition{Code: SGD, NumericCode: "702", Fraction: 2}
