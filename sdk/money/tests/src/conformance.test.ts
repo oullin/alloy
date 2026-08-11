@@ -76,6 +76,9 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 		case 'unmarshalCurrency':
 			return json.unmarshal(args[0] as string).currency().code;
 
+		case 'displayCompact':
+			return manager.create(BigInt(args[1] as string), args[0] as string).displayCompact();
+
 		case 'resolveWithDefault': {
 			// Per manager, so nothing leaks between cases.
 			const currencies = CurrencyManager.default();

@@ -35,7 +35,7 @@ text.
 
 - `op`: `round` | `absolute` | `add` | `subtract` | `multiply` |
   `createFromFloat` | `convertWithRate` | `avg` | `unmarshalAmount` |
-  `unmarshalCurrency` | `resolveWithDefault`.
+  `unmarshalCurrency` | `resolveWithDefault` | `displayCompact`.
 - `args`: operands as decimal strings. The two `unmarshal*` ops are the
   exception: each takes a whole JSON payload as its single arg, decoded by each
   runtime's money unmarshaller (Go `json.Unmarshal` into `Value` / TS
@@ -51,6 +51,11 @@ text.
     `currency.DefaultProvider` / TS `DefaultCurrencyProvider`, both **SGD**),
     while an unknown code is an error rather than a silent fallback.
 
+- `displayCompact` takes a currency code and a minor-unit amount, and expects
+  the abbreviated display string. It pins the scale choice, the half-away
+  rounding that can roll a value into the next scale, whether a decimal is kept,
+  and where the suffix lands relative to a leading or trailing grapheme — all of
+  which are currency-driven and easy to drift between runtimes.
 - `resolveWithDefault` takes **two** args — a currency code and a code to look
   up — and expects the resulting ISO code. Each loader builds a fresh manager,
   changes its default (Go `(*currency.Manager).SetDefault` / TS
