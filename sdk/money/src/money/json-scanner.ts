@@ -55,8 +55,6 @@ export const findTopLevelJsonNumber = (payload: string, property: string): strin
 };
 
 const JSON_NUMBER = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u;
-
-/** The same grammar, anchored, so a quoted amount must be a number and nothing else. */
 const QUOTED_JSON_NUMBER = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/u;
 
 const skipJsonWhitespace = (payload: string, start: number): number => {
