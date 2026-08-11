@@ -8,6 +8,7 @@ import {
 	CurrencyManager,
 	ERR_CURRENCY_CONVERSION_NOT_FOUND,
 	ERR_CURRENCY_MISMATCH,
+	ERR_CURRENCY_NOT_FOUND,
 	ERR_INVALID_AMOUNT_FRACTION,
 	ERR_INVALID_EXCHANGE_RATE,
 	ERR_INVALID_JSON_UNMARSHAL,
@@ -135,7 +136,38 @@ describe('@hara/sdk-money OOP port', () => {
 		expect(manager.findByCode('sgd')?.code).toBe('SGD');
 		expect(manager.findByNumericCode('840')?.code).toBe('USD');
 		expect(manager.resolve('UNKNOWN').code).toBe('SGD');
+		expect(manager.getDefault().code).toBe('SGD');
 		expect(CurrencyDefinition.fromDbValue('eur').code).toBe('EUR');
+	});
+
+	it('changes the default currency of one manager without touching another', () => {
+		const manager = CurrencyManager.default();
+
+		expect(manager.getDefault().code).toBe('SGD');
+
+		// The manager exists before the call: this is the case a module-wide
+		// setter could not serve, because the constructor copies the provider default.
+		manager.setDefault('aed');
+
+		expect(manager.getDefault().code).toBe('AED');
+		expect(manager.resolve('NOPE').code).toBe('AED');
+
+		// An explicit, known code still resolves to itself.
+		expect(manager.resolve('JPY').code).toBe('JPY');
+
+		// Trimmed and upper-cased, matching the Go twin.
+		for (const input of [' eur ', 'EuR']) {
+			manager.setDefault(input);
+
+			expect(manager.getDefault().code).toBe('EUR');
+		}
+
+		// A rejected code leaves the existing default in place.
+		expect(() => manager.setDefault('ZZZ')).toThrow(ERR_CURRENCY_NOT_FOUND.message);
+		expect(manager.getDefault().code).toBe('EUR');
+
+		// The default of one manager does not leak into another.
+		expect(CurrencyManager.default().getDefault().code).toBe('SGD');
 	});
 
 	it('returns independent default currency maps from cached definitions', () => {

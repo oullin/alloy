@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"hara.sh/alloy/money/calculator"
+	"hara.sh/alloy/money/currency"
 	"hara.sh/alloy/money/exception"
 	"hara.sh/alloy/money/exchange"
 )
@@ -34,6 +35,7 @@ type moneyConformanceFile struct {
 var moneyConformanceErrors = map[string]error{
 	"ERR_OVERFLOW":               exception.ErrOverflow,
 	"ERR_INVALID_JSON_UNMARSHAL": exception.ErrInvalidJSONUnmarshal,
+	"ERR_CURRENCY_NOT_FOUND":     exception.ErrCurrencyNotFound,
 }
 
 // TestMoneyConformance executes the shared Go<->TS money fixtures against the
@@ -145,6 +147,29 @@ func runMoneyOp(t *testing.T, calc *calculator.Engine, manager *Manager, rates *
 		amount, err := value.Amount()
 
 		return strconv.FormatInt(amount, 10), err
+	case "unmarshalCurrency":
+		var value Value
+
+		if err := json.Unmarshal([]byte(tc.Args[0]), &value); err != nil {
+			return "", err
+		}
+
+		curr, err := value.Currency()
+
+		if err != nil {
+			return "", err
+		}
+
+		return curr.Code, nil
+	case "resolveWithDefault":
+		// Per manager, so nothing leaks between cases.
+		currencies := currency.NewManager()
+
+		if err := currencies.SetDefault(tc.Args[0]); err != nil {
+			return "", err
+		}
+
+		return currencies.Resolve(tc.Args[1]).Code, nil
 	default:
 		t.Fatalf("unknown money conformance op: %s", tc.Op)
 

@@ -2,6 +2,7 @@ import type { CurrencyCode, CurrencySymbolData } from '#money/currency-data';
 import { CurrencyDefinition } from '#money/currency/definition';
 import { CurrencyMap } from '#money/currency/map';
 import { DefaultCurrencyProvider, type CurrencyProvider } from '#money/currency/provider';
+import { ERR_CURRENCY_NOT_FOUND } from '#money/errors';
 
 /**
  * Registry of {@link CurrencyDefinition} entries keyed by ISO code, with a
@@ -10,7 +11,7 @@ import { DefaultCurrencyProvider, type CurrencyProvider } from '#money/currency/
 export class CurrencyManager {
 	private readonly currencies: CurrencyMap;
 	private readonly symbols: CurrencySymbolData[];
-	private readonly defaultCurrency: CurrencyDefinition;
+	private defaultCurrency: CurrencyDefinition;
 
 	public constructor(currencies: CurrencyMap = CurrencyMap.default(), provider: CurrencyProvider = new DefaultCurrencyProvider()) {
 		this.currencies = currencies;
@@ -74,5 +75,28 @@ export class CurrencyManager {
 	/** Resolves a code to its definition, falling back to the default currency. */
 	public resolve(code: string): CurrencyDefinition {
 		return this.findByCode(code) ?? this.defaultCurrency;
+	}
+
+	/**
+	 * Changes the currency this manager falls back to when {@link resolve} cannot
+	 * match a code. The code is trimmed and upper-cased before lookup, so `'usd'`
+	 * and `' USD '` both select USD.
+	 *
+	 * The default belongs to the manager, not the module. The constructor takes
+	 * its starting value from the provider and copies it, so this takes effect
+	 * immediately on this instance — including one built before the call — and
+	 * leaves every other manager alone.
+	 *
+	 * @throws MoneyError `ERR_CURRENCY_NOT_FOUND` when this manager does not know
+	 *   the code, leaving the existing default in place.
+	 */
+	public setDefault(code: string): void {
+		const definition = this.findByCode(code);
+
+		if (definition === null) {
+			throw ERR_CURRENCY_NOT_FOUND;
+		}
+
+		this.defaultCurrency = definition;
 	}
 }

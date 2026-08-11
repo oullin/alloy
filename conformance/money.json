@@ -235,6 +235,60 @@
       "args": ["{\"amount\":true,\"currency\":\"AED\"}"],
       "error": "ERR_INVALID_JSON_UNMARSHAL",
       "note": "a non-numeric, non-string amount is rejected"
+    },
+    {
+      "op": "unmarshalCurrency",
+      "args": ["{\"amount\":100,\"currency\":\"USD\"}"],
+      "expected": "USD",
+      "note": "an explicit currency is used verbatim"
+    },
+    {
+      "op": "unmarshalCurrency",
+      "args": ["{\"amount\":100,\"currency\":\"usd\"}"],
+      "expected": "USD",
+      "note": "currency lookup is case-insensitive in both runtimes"
+    },
+    {
+      "op": "unmarshalCurrency",
+      "args": ["{\"amount\":100}"],
+      "expected": "SGD",
+      "note": "an absent currency falls back to the provider default, which both runtimes ship as SGD"
+    },
+    {
+      "op": "unmarshalCurrency",
+      "args": ["{\"amount\":100,\"currency\":\"\"}"],
+      "expected": "SGD",
+      "note": "an empty currency falls back to the same default as an absent one"
+    },
+    {
+      "op": "unmarshalCurrency",
+      "args": ["{\"amount\":100,\"currency\":\"ZZZ\"}"],
+      "error": "ERR_CURRENCY_NOT_FOUND",
+      "note": "an unknown currency is an error, never a silent fallback to the default"
+    },
+    {
+      "op": "resolveWithDefault",
+      "args": ["usd", "NOPE"],
+      "expected": "USD",
+      "note": "after SetDefault on an existing manager, an unresolvable code falls back to the new default"
+    },
+    {
+      "op": "resolveWithDefault",
+      "args": [" eur ", "NOPE"],
+      "expected": "EUR",
+      "note": "the setter trims and upper-cases identically in both runtimes"
+    },
+    {
+      "op": "resolveWithDefault",
+      "args": ["usd", "JPY"],
+      "expected": "JPY",
+      "note": "a known code still resolves to itself, never to the default"
+    },
+    {
+      "op": "resolveWithDefault",
+      "args": ["ZZZ", "NOPE"],
+      "error": "ERR_CURRENCY_NOT_FOUND",
+      "note": "the setter rejects an unknown code rather than adopting it as the default"
     }
   ]
 }

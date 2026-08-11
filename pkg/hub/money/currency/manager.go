@@ -3,6 +3,8 @@ package currency
 import (
 	"fmt"
 	"strings"
+
+	"hara.sh/alloy/money/exception"
 )
 
 // Manager manages a collection of currencies and provides methods to access them.
@@ -157,4 +159,32 @@ func (cm *Manager) Resolve(code string) *Definition {
 	}
 
 	return cm.defaultCurrency
+}
+
+// SetDefault changes the currency this manager falls back to when Resolve cannot
+// match a code. The code is trimmed and upper-cased before lookup, so "usd" and
+// " USD " both select USD.
+//
+// It returns exception.ErrCurrencyNotFound for a code this manager does not
+// know, leaving the existing default in place, and exception.ErrNoCurrencyInstance
+// for a nil manager.
+//
+// The default belongs to the manager, not the process. NewManager takes its
+// starting value from DefaultProvider and copies it, so this takes effect
+// immediately on the receiver — including a manager built before the call — and
+// leaves every other manager alone.
+func (cm *Manager) SetDefault(code string) error {
+	if cm == nil {
+		return exception.ErrNoCurrencyInstance
+	}
+
+	definition := cm.FindByCode(strings.TrimSpace(code))
+
+	if definition == nil {
+		return exception.ErrCurrencyNotFound
+	}
+
+	cm.defaultCurrency = definition
+
+	return nil
 }

@@ -34,14 +34,31 @@ text.
 ```
 
 - `op`: `round` | `absolute` | `add` | `subtract` | `multiply` |
-  `createFromFloat` | `convertWithRate` | `avg` | `unmarshalAmount`.
-- `args`: operands as decimal strings. `unmarshalAmount` is the one exception:
-  its single arg is a whole JSON payload, decoded by each runtime's money
-  unmarshaller (Go `json.Unmarshal` into `Value` / TS `MoneyJson.unmarshal`),
-  with `expected` the resulting minor-unit amount as a decimal string. It pins
-  that both runtimes accept a **quoted** amount as readily as a bare one, which
-  matters because Go types the field as `json.Number` and TS `toJSON()` emits
-  the quoted form so an int64 survives a JavaScript consumer's `JSON.parse`.
+  `createFromFloat` | `convertWithRate` | `avg` | `unmarshalAmount` |
+  `unmarshalCurrency` | `resolveWithDefault`.
+- `args`: operands as decimal strings. The two `unmarshal*` ops are the
+  exception: each takes a whole JSON payload as its single arg, decoded by each
+  runtime's money unmarshaller (Go `json.Unmarshal` into `Value` / TS
+  `MoneyJson.unmarshal`).
+  - `unmarshalAmount` expects the resulting minor-unit amount as a decimal
+    string. It pins that both runtimes accept a **quoted** amount as readily as
+    a bare one, which matters because Go types the field as `json.Number` and TS
+    `toJSON()` emits the quoted form so an int64 survives a JavaScript
+    consumer's `JSON.parse`.
+  - `unmarshalCurrency` expects the resulting ISO code. It pins the **default
+    currency**, which is shared state neither runtime can change alone: an
+    absent or empty `currency` falls back to the provider default (Go
+    `currency.DefaultProvider` / TS `DefaultCurrencyProvider`, both **SGD**),
+    while an unknown code is an error rather than a silent fallback.
+
+- `resolveWithDefault` takes **two** args — a currency code and a code to look
+  up — and expects the resulting ISO code. Each loader builds a fresh manager,
+  changes its default (Go `(*currency.Manager).SetDefault` / TS
+  `CurrencyManager.setDefault`), and resolves the second code. It pins that the
+  setter normalises identically, that a known code still resolves to itself, and
+  that an unknown code is rejected rather than adopted. The default is per
+  manager, so nothing leaks between cases.
+
   For `createFromFloat` and
   `convertWithRate`, float-valued args (a major-unit amount, a rate) are decimal
   strings parsed to IEEE-754 doubles identically in both runtimes. For `avg`,
