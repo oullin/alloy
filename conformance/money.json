@@ -163,6 +163,78 @@
       "args": ["USD", "-100", "-200", "-302"],
       "expected": "-201",
       "note": "aggregator average: negative above-half fraction rounds away from zero"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":125000000,\"currency\":\"AED\"}"],
+      "expected": "125000000",
+      "note": "bare integer amount: the form both marshallers emit"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"125000000\",\"currency\":\"AED\"}"],
+      "expected": "125000000",
+      "note": "quoted integer amount: the form TS toJSON() emits, so unmarshal must read back its own output"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"9007199254740993\",\"currency\":\"AED\"}"],
+      "expected": "9007199254740993",
+      "note": "quoted amount past 2^53: the reason toJSON() quotes at all, exact in both runtimes"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":12.5,\"currency\":\"AED\"}"],
+      "expected": "13",
+      "note": "bare fractional amount rounds half away from zero"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"12.5\",\"currency\":\"AED\"}"],
+      "expected": "13",
+      "note": "quoted fractional amount rounds identically to the bare form"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"-12.5\",\"currency\":\"AED\"}"],
+      "expected": "-13",
+      "note": "quoted negative half rounds away from zero"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"1e3\",\"currency\":\"AED\"}"],
+      "expected": "1000",
+      "note": "quoted exponent form is a JSON number literal and decodes as one"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"currency\":\"AED\"}"],
+      "expected": "0",
+      "note": "absent amount is zero, not an error"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"abc\",\"currency\":\"AED\"}"],
+      "error": "ERR_INVALID_JSON_UNMARSHAL",
+      "note": "a quoted amount must still be a number"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\"\",\"currency\":\"AED\"}"],
+      "error": "ERR_INVALID_JSON_UNMARSHAL",
+      "note": "empty string is not a number; distinct from an absent amount"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":\" 125 \",\"currency\":\"AED\"}"],
+      "error": "ERR_INVALID_JSON_UNMARSHAL",
+      "note": "no whitespace tolerance inside the quotes, so the quoted grammar is anchored not prefix-matched"
+    },
+    {
+      "op": "unmarshalAmount",
+      "args": ["{\"amount\":true,\"currency\":\"AED\"}"],
+      "error": "ERR_INVALID_JSON_UNMARSHAL",
+      "note": "a non-numeric, non-string amount is rejected"
     }
   ]
 }

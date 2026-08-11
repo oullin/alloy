@@ -54,6 +54,11 @@ export const findTopLevelJsonNumber = (payload: string, property: string): strin
 	throw ERR_INVALID_JSON_UNMARSHAL;
 };
 
+const JSON_NUMBER = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u;
+
+/** The same grammar, anchored, so a quoted amount must be a number and nothing else. */
+const QUOTED_JSON_NUMBER = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/u;
+
 const skipJsonWhitespace = (payload: string, start: number): number => {
 	let index = start;
 
@@ -95,7 +100,27 @@ const readJsonString = (payload: string, start: number): { value: string; end: n
 };
 
 const readJsonNumber = (payload: string, start: number): string => {
-	const match = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u.exec(payload.slice(start));
+	// A quoted amount is as valid as a bare one. Go types the field as
+	// json.Number, which encoding/json fills from a JSON string as readily as
+	// from a JSON number, and `MoneyValue.toJSON()` emits the quoted form so an
+	// int64 survives a JavaScript consumer's `JSON.parse`. Reading only the bare
+	// form left this runtime stricter than its twin and made
+	// `unmarshal(JSON.stringify(value))` throw on its own output.
+	//
+	// The grammar is anchored rather than merely prefix-matched: Go rejects
+	// `" 125 "` and `"12abc"`, so accepting a numeric prefix here would trade one
+	// divergence for another.
+	if (payload[start] === '"') {
+		const quoted = readJsonString(payload, start);
+
+		if (!QUOTED_JSON_NUMBER.test(quoted.value)) {
+			throw ERR_INVALID_JSON_UNMARSHAL;
+		}
+
+		return quoted.value;
+	}
+
+	const match = JSON_NUMBER.exec(payload.slice(start));
 
 	if (match?.index !== 0) {
 		throw ERR_INVALID_JSON_UNMARSHAL;
@@ -119,7 +144,7 @@ const skipJsonValue = (payload: string, start: number): number => {
 		return skipJsonComposite(payload, start, '[', ']');
 	}
 
-	const number = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u.exec(payload.slice(start));
+	const number = JSON_NUMBER.exec(payload.slice(start));
 
 	if (number?.index === 0) {
 		return start + number[0].length;

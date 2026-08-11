@@ -171,7 +171,19 @@ describe('@hara/sdk-money OOP port', () => {
 		expect(json.unmarshal('{"amount":12.5,"currency":"USD"}').amount()).toBe(13n);
 		expect(json.unmarshal('{"description":"The amount is 50","amount":100,"currency":"USD"}').amount()).toBe(100n);
 		expect(json.unmarshal('{"metadata":{"amount":50},"amount":100,"currency":"USD"}').amount()).toBe(100n);
-		expect(() => json.unmarshal('{"amount":"100","currency":"USD"}')).toThrow(ERR_INVALID_JSON_UNMARSHAL.message);
+
+		// A quoted amount decodes exactly as a bare one, matching Go's json.Number
+		// field. This assertion previously required a throw, which pinned a
+		// divergence: Go accepted the quoted form, and `toJSON()` emits it, so
+		// unmarshalling this runtime's own stringified output failed.
+		expect(json.unmarshal('{"amount":"100","currency":"USD"}').amount()).toBe(100n);
+		expect(json.unmarshal(JSON.stringify(money)).amount()).toBe(9_223_372_036_854_775_807n);
+
+		// Quoted still means a number, and the grammar is anchored, so no whitespace
+		// padding and no numeric prefix of a longer string.
+		expect(() => json.unmarshal('{"amount":"abc","currency":"USD"}')).toThrow(ERR_INVALID_JSON_UNMARSHAL.message);
+		expect(() => json.unmarshal('{"amount":" 100 ","currency":"USD"}')).toThrow(ERR_INVALID_JSON_UNMARSHAL.message);
+		expect(() => json.unmarshal('{"amount":"100abc","currency":"USD"}')).toThrow(ERR_INVALID_JSON_UNMARSHAL.message);
 		expect(money.dbValue()).toBe('9223372036854775807|USD');
 		expect(MoneyValue.fromDbValue('1234|SGD').display()).toBe('S$12.34');
 

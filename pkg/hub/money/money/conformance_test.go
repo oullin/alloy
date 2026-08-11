@@ -32,7 +32,8 @@ type moneyConformanceFile struct {
 // moneyConformanceErrors maps the language-neutral error identity used in the
 // fixtures to the Go sentinel it must resolve to.
 var moneyConformanceErrors = map[string]error{
-	"ERR_OVERFLOW": exception.ErrOverflow,
+	"ERR_OVERFLOW":               exception.ErrOverflow,
+	"ERR_INVALID_JSON_UNMARSHAL": exception.ErrInvalidJSONUnmarshal,
 }
 
 // TestMoneyConformance executes the shared Go<->TS money fixtures against the
@@ -132,6 +133,16 @@ func runMoneyOp(t *testing.T, calc *calculator.Engine, manager *Manager, rates *
 		}
 
 		amount, err := got.Amount()
+
+		return strconv.FormatInt(amount, 10), err
+	case "unmarshalAmount":
+		var value Value
+
+		if err := json.Unmarshal([]byte(tc.Args[0]), &value); err != nil {
+			return "", err
+		}
+
+		amount, err := value.Amount()
 
 		return strconv.FormatInt(amount, 10), err
 	default:

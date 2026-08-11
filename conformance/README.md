@@ -34,8 +34,15 @@ text.
 ```
 
 - `op`: `round` | `absolute` | `add` | `subtract` | `multiply` |
-  `createFromFloat` | `convertWithRate` | `avg`.
-- `args`: operands as decimal strings. For `createFromFloat` and
+  `createFromFloat` | `convertWithRate` | `avg` | `unmarshalAmount`.
+- `args`: operands as decimal strings. `unmarshalAmount` is the one exception:
+  its single arg is a whole JSON payload, decoded by each runtime's money
+  unmarshaller (Go `json.Unmarshal` into `Value` / TS `MoneyJson.unmarshal`),
+  with `expected` the resulting minor-unit amount as a decimal string. It pins
+  that both runtimes accept a **quoted** amount as readily as a bare one, which
+  matters because Go types the field as `json.Number` and TS `toJSON()` emits
+  the quoted form so an int64 survives a JavaScript consumer's `JSON.parse`.
+  For `createFromFloat` and
   `convertWithRate`, float-valued args (a major-unit amount, a rate) are decimal
   strings parsed to IEEE-754 doubles identically in both runtimes. For `avg`,
   the first arg is the currency code and the rest are minor-unit amounts; the
@@ -95,6 +102,13 @@ here, until resolved in both runtimes at once.
   `parser.ParseFromPattern` has no locale parameter and a hard-coded English
   month map (`pkg/hub/tempo/parser/month.go`). Only English month-name parsing is
   shared; the fixture covers that.
+- **JSON amounts beyond the int64 range.** Go's unmarshaller rejects
+  `{"amount":"9223372036854775808"}` with `ErrInvalidJSONUnmarshal`, because the
+  decoded value must fit an `int64`. TS decodes it to a `bigint`, which has no
+  such ceiling, so it succeeds and yields a value the calculator's own
+  `MAX_INT64` guard would later reject. This is a genuine divergence: encoding a
+  single expectation would just force one runtime to fail. It belongs in the
+  parity register until TS bounds the decoded amount to int64.
 - **`workflow` `RetryPolicy.MaxExceptions` (X13).** Declared in both runtimes,
   enforced in neither, documented differently. It is an unresolved L0 divergence
   (parity register X13); no conformance case exists until it is defined and
