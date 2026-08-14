@@ -15,7 +15,7 @@
     "@tabler/icons-vue": "^3.46.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.3",
-    "@tanstack/vue-table": "^8.21.3",
+    "@tanstack/vue-table": "^9.1.2",
     "@unovis/ts": "^1.6.4",
     "@unovis/vue": "^1.6.4",
     "@vueuse/core": "^14.4.0",
