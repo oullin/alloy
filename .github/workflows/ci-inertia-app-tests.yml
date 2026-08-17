@@ -23,7 +23,7 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
         with:
-          go-version: "1.26.5"
+          go-version: "1.26.6"
 
       - name: Configure Playwright paths
         run: |
