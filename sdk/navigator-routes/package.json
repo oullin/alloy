@@ -6,7 +6,7 @@
     "access": "restricted",
     "registry": "https://hara.sh/npm/"
   },
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oullin/alloy.git",
