@@ -93,6 +93,16 @@ func runMoneyOp(t *testing.T, calc *calculator.Engine, manager *Manager, rates *
 		exponent := mustInt(t, tc.Args[1])
 
 		return strconv.FormatInt(calc.Round(amount, exponent), 10), nil
+	case "isSafeAsNumber":
+		value := manager.Create(mustInt64(t, tc.Args[0]), "USD")
+
+		safe, err := value.IsSafeAsNumber()
+
+		if err != nil {
+			return "", err
+		}
+
+		return strconv.FormatBool(safe), nil
 	case "absolute":
 		return strconv.FormatInt(calc.Absolute(mustInt64(t, tc.Args[0])), 10), nil
 	case "add":

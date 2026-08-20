@@ -34,8 +34,11 @@ text.
 ```
 
 - `op`: `round` | `absolute` | `add` | `subtract` | `multiply` |
-  `createFromFloat` | `convertWithRate` | `avg` | `unmarshalAmount` |
-  `unmarshalCurrency` | `resolveWithDefault`.
+  `createFromFloat` | `convertWithRate` | `avg` | `isSafeAsNumber` |
+  `unmarshalAmount` | `unmarshalCurrency` | `resolveWithDefault`.
+  `isSafeAsNumber` answers `"true"` or `"false"` rather than an amount: it asks
+  whether the minor-unit figure survives conversion to an IEEE-754 double, which
+  is the one place the twins' number types meet.
 - `args`: operands as decimal strings. The two `unmarshal*` ops are the
   exception: each takes a whole JSON payload as its single arg, decoded by each
   runtime's money unmarshaller (Go `json.Unmarshal` into `Value` / TS

@@ -289,6 +289,36 @@
       "args": ["ZZZ", "NOPE"],
       "error": "ERR_CURRENCY_NOT_FOUND",
       "note": "the setter rejects an unknown code rather than adopting it as the default"
+    },
+    {
+      "op": "isSafeAsNumber",
+      "args": ["1500"],
+      "expected": "true",
+      "note": "an ordinary price converts to a double exactly"
+    },
+    {
+      "op": "isSafeAsNumber",
+      "args": ["9007199254740991"],
+      "expected": "true",
+      "note": "2^53-1 is the largest integer a double represents exactly"
+    },
+    {
+      "op": "isSafeAsNumber",
+      "args": ["9007199254740992"],
+      "expected": "false",
+      "note": "2^53 collides with 2^53+1 as a double; an aggregate can reach here"
+    },
+    {
+      "op": "isSafeAsNumber",
+      "args": ["-9007199254740991"],
+      "expected": "true",
+      "note": "the negative boundary is symmetric"
+    },
+    {
+      "op": "isSafeAsNumber",
+      "args": ["-9007199254740992"],
+      "expected": "false",
+      "note": "and so is the first unsafe negative"
     }
   ]
 }

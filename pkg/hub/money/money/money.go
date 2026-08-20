@@ -188,6 +188,27 @@ func (m *Value) AsMajorUnits() (float64, error) {
 	return c.Formatter().ToMajorUnits(m.amount), nil
 }
 
+// IsSafeAsNumber reports whether the minor-unit amount survives conversion to a
+// float64 exactly.
+//
+// It is the twin of the TypeScript `isSafeAsNumber`, and it guards AsMajorUnits
+// in the same way: an int64 above 2^53 cannot be represented exactly as a
+// float64, and the conversion returns an ordinary, plausible-looking number
+// rather than reporting the loss. A caller holding a sum rather than a single
+// price has to ask before converting.
+//
+// The name says "number" because that is the type both runtimes convert to —
+// JavaScript's Number and Go's float64 are the same IEEE-754 double.
+func (m *Value) IsSafeAsNumber() (bool, error) {
+	if err := ensureMoneyProvided(m); err != nil {
+		return false, err
+	}
+
+	const maxSafeInteger = int64(1)<<53 - 1
+
+	return m.amount <= maxSafeInteger && m.amount >= -maxSafeInteger, nil
+}
+
 // Compare function compares two money of the same type
 //
 //	if m.amount > om.amount returns (1, nil)
