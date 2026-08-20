@@ -367,6 +367,60 @@
       "args": ["-9007199254740992"],
       "expected": "false",
       "note": "and so is the first unsafe negative"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["4720000000", "USD"],
+      "expected": "$47,200,000",
+      "note": "a headline figure drops the cents it would otherwise read as noise"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["95050", "USD"],
+      "expected": "$951",
+      "note": "rounds half away from zero rather than truncating"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["-95050", "USD"],
+      "expected": "-$951",
+      "note": "and does so symmetrically about zero"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["900719925474099300", "USD"],
+      "expected": "$9,007,199,254,740,993",
+      "note": "stated exactly past the float-safe range"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["4720000000", "USD", "3"],
+      "expected": "$47.2M",
+      "note": "two integer digits leave one decimal"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["426000000", "USD", "3"],
+      "expected": "$4.26M",
+      "note": "one integer digit leaves two, so the row stays as precise as the one above"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["400000000000", "USD", "3"],
+      "expected": "$4B",
+      "note": "trailing zeros drop: the digit count is a ceiling, not padding"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["95000", "USD", "3"],
+      "expected": "$950.00",
+      "note": "below one thousand major units it defers to Format rather than overstating"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["-4720000000", "USD", "3"],
+      "expected": "-$47.2M",
+      "note": "the sign survives the scaling"
     }
   ]
 }

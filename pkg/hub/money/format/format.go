@@ -56,6 +56,118 @@ func (f *Renderer) Format(amount int64) string {
 	return sa
 }
 
+// FormatWhole returns the amount as whole major units, with no decimal part.
+//
+// A per-instalment line needs its cents; a headline figure -- a reference
+// price, a due amount stated once on its own line -- reads them as noise.
+// Rounding is half away from zero, so this states a figure rather than quietly
+// truncating it.
+//
+// The TypeScript twin's MoneyFormatter.formatWhole must agree, and
+// conformance/money.json pins that.
+func (f *Renderer) FormatWhole(amount int64) string {
+	minorPerMajor := int64(1)
+
+	for range f.Fraction {
+		minorPerMajor *= 10
+	}
+
+	absolute := f.abs(amount)
+	major := divideRounding(absolute, minorPerMajor)
+
+	if amount < 0 {
+		major = -major
+	}
+
+	return NewFormatter(0, f.Decimal, f.Thousand, f.Grapheme, f.Template).Format(major)
+}
+
+// FormatCompactSignificant returns the amount abbreviated to a fixed number of
+// significant digits, such as "$47.2M" or "$4.26M" at three.
+//
+// FormatCompact keeps one decimal, which reads well for a single figure but not
+// for a column: "47.2M" beside "4.2M" gives the second figure a digit less of
+// information than the first. Fixing the significant digits instead keeps every
+// row equally precise, which is what a table of totals wants.
+//
+// Trailing zeros are dropped -- "4B", never "4.00B" -- so the digit count is a
+// ceiling rather than padding.
+//
+// The TypeScript twin's MoneyFormatter.formatCompactSignificant must agree, and
+// conformance/money.json pins that.
+func (f *Renderer) FormatCompactSignificant(amount int64, significantDigits int) string {
+	absolute := f.abs(amount)
+	minorPerMajor := int64(1)
+
+	for range f.Fraction {
+		minorPerMajor *= 10
+	}
+
+	if absolute < compactFloorMajorUnits*minorPerMajor {
+		return f.Format(amount)
+	}
+
+	for _, scale := range compactScales {
+		unit := scale.divisor * minorPerMajor
+
+		if absolute < unit {
+			continue
+		}
+
+		return f.renderSignificant(absolute, unit, significantDigits, amount < 0, scale.suffix)
+	}
+
+	return f.Format(amount)
+}
+
+// renderSignificant renders absolute scaled to unit at a fixed significant-digit
+// count.
+//
+// The decimal count falls out of how many digits the integer part already
+// spends: "47" spends two of three, leaving one decimal; "4" spends one, leaving
+// two. Trailing zeros are then dropped so the count is a ceiling.
+func (f *Renderer) renderSignificant(absolute, unit int64, significantDigits int, negative bool, suffix string) string {
+	integerDigits := len(strconv.FormatInt(absolute/unit, 10))
+
+	decimals := significantDigits - integerDigits
+
+	if decimals < 0 {
+		decimals = 0
+	}
+
+	factor := int64(1)
+
+	for range decimals {
+		factor *= 10
+	}
+
+	scaled := divideRounding(absolute*factor, unit)
+
+	for decimals > 0 && scaled%10 == 0 {
+		scaled /= 10
+		decimals--
+	}
+
+	if negative {
+		scaled = -scaled
+	}
+
+	rendered := NewFormatter(decimals, f.Decimal, f.Thousand, f.Grapheme, f.Template).Format(scaled)
+
+	return appendSuffix(rendered, suffix)
+}
+
+// divideRounding divides half away from zero, on non-negative operands.
+func divideRounding(value, unit int64) int64 {
+	quotient := value / unit
+
+	if (value%unit)*2 < unit {
+		return quotient
+	}
+
+	return quotient + 1
+}
+
 // ToMajorUnits converts the integer amount to a float representing the major currency units.
 // e.g., 100 cents becomes 1.00 dollars if fraction is 2.
 func (f *Renderer) ToMajorUnits(amount int64) float64 {

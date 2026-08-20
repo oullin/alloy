@@ -92,6 +92,60 @@ export class MoneyFormatter {
 		return this.format(amount);
 	}
 
+	/**
+	 * Formats a minor-unit amount as whole major units, with no decimal part.
+	 *
+	 * A per-instalment line needs its cents; a headline figure — a reference
+	 * price, a due amount stated once on its own line — reads them as noise.
+	 * Rounding is half away from zero, so this states a figure rather than
+	 * quietly truncating it.
+	 *
+	 * Computed on the amount's own integer type, so a total past the
+	 * float-safe range is stated exactly rather than rounded on the way.
+	 */
+	public formatWhole(amount: Amount): string {
+		const minorPerMajor = 10n ** BigInt(this.fraction);
+		const absolute = this.abs(amount);
+		const major = MoneyFormatter.divideRounding(absolute, minorPerMajor);
+		const whole = new MoneyFormatter(0, this.decimal, this.thousand, this.grapheme, this.template);
+
+		return whole.format(amount < 0n ? -major : major);
+	}
+
+	/**
+	 * Formats a minor-unit amount abbreviated to a fixed number of significant
+	 * digits, such as `$47.2M` or `$4.26M` at three.
+	 *
+	 * {@link formatCompact} keeps one decimal, which reads well for a single
+	 * figure but not for a column: `47.2M` beside `4.2M` gives the second
+	 * figure a digit less of information than the first. Fixing the
+	 * significant digits instead keeps every row equally precise, which is what
+	 * a table of totals wants.
+	 *
+	 * Trailing zeros are dropped — `4B`, never `4.00B` — so the digit count is
+	 * a ceiling rather than padding.
+	 */
+	public formatCompactSignificant(amount: Amount, significantDigits: number): string {
+		const minorPerMajor = 10n ** BigInt(this.fraction);
+		const absolute = this.abs(amount);
+
+		if (absolute < MoneyFormatter.COMPACT_FLOOR_MAJOR_UNITS * minorPerMajor) {
+			return this.format(amount);
+		}
+
+		for (const [divisor, suffix] of MoneyFormatter.SCALES) {
+			const unit = divisor * minorPerMajor;
+
+			if (absolute < unit) {
+				continue;
+			}
+
+			return this.renderSignificant(absolute, unit, significantDigits, amount < 0n, suffix);
+		}
+
+		return this.format(amount);
+	}
+
 	/** Converts a minor-unit amount to a floating-point major-unit number. */
 	public toMajorUnits(amount: Amount): number {
 		if (this.fraction === 0) {
@@ -117,6 +171,36 @@ export class MoneyFormatter {
 		const scaled = new MoneyFormatter(isWhole ? 0 : 1, this.decimal, this.thousand, this.grapheme, this.template);
 
 		return MoneyFormatter.appendSuffix(scaled.format(isWhole ? tenths / 10n : tenths), suffix);
+	}
+
+	/**
+	 * Renders `absolute` scaled to `unit` at a fixed significant-digit count.
+	 *
+	 * The decimal count falls out of how many digits the integer part already
+	 * spends: `47` spends two of three, leaving one decimal; `4` spends one,
+	 * leaving two. Trailing zeros are then dropped so the count is a ceiling.
+	 */
+	private renderSignificant(absolute: Amount, unit: Amount, significantDigits: number, negative: boolean, suffix: string): string {
+		const integerDigits = Math.max((absolute / unit).toString().length, 1);
+
+		let decimals = Math.max(significantDigits - integerDigits, 0);
+		let scaled = MoneyFormatter.divideRounding(absolute * 10n ** BigInt(decimals), unit);
+
+		while (decimals > 0 && scaled % 10n === 0n) {
+			scaled /= 10n;
+			decimals -= 1;
+		}
+
+		const formatter = new MoneyFormatter(decimals, this.decimal, this.thousand, this.grapheme, this.template);
+
+		return MoneyFormatter.appendSuffix(formatter.format(negative ? -scaled : scaled), suffix);
+	}
+
+	/** Integer division rounded half away from zero, on non-negative operands. */
+	private static divideRounding(value: Amount, unit: Amount): Amount {
+		const quotient = value / unit;
+
+		return (value % unit) * 2n < unit ? quotient : quotient + 1n;
 	}
 
 	/** How many tenths of `unit` the amount is, rounded half away from zero. */
