@@ -39,7 +39,8 @@ text.
   `displayCompact` | `formatWhole` | `formatCompactSignificant`.
   The two `format*` ops answer a display string and take the currency code as
   their second arg, since layout is per-currency; `formatCompactSignificant`
-  takes the significant-digit count as its third.
+  takes the significant-digit count as its third, clamped to `[1, 6]` — the
+  upper bound is what keeps the Go twin's int64 arithmetic provably safe.
   `isSafeAsNumber` answers `"true"` or `"false"` rather than an amount: it asks
   whether the minor-unit figure survives conversion to an IEEE-754 double, which
   is the one place the twins' number types meet.

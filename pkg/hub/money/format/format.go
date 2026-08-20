@@ -107,17 +107,51 @@ func (f *Renderer) FormatCompactSignificant(amount int64, significantDigits int)
 		return f.Format(amount)
 	}
 
-	for _, scale := range compactScales {
+	digits := clampSignificantDigits(significantDigits)
+
+	for index, scale := range compactScales {
 		unit := scale.divisor * minorPerMajor
 
 		if absolute < unit {
 			continue
 		}
 
-		return f.renderSignificant(absolute, unit, significantDigits, amount < 0, scale.suffix)
+		rendered, promoted := f.renderSignificant(absolute, unit, digits, amount < 0, scale.suffix)
+
+		// Rounding can carry across the scale boundary: 999.95M at three digits
+		// rounds to 1,000M, which is 1B mis-shelved -- and a fourth digit the
+		// caller did not ask for. FormatCompact promotes because it selects its
+		// scale from the rounded tenths; this path re-renders one scale up when
+		// the rounded integer part reaches the next scale. The top scale has
+		// nowhere to promote to, which is the behavior the sibling method
+		// already has.
+		if promoted && index > 0 {
+			over := compactScales[index-1]
+
+			rendered, _ = f.renderSignificant(absolute, over.divisor*minorPerMajor, digits, amount < 0, over.suffix)
+		}
+
+		return rendered
 	}
 
 	return f.Format(amount)
+}
+
+// clampSignificantDigits bounds the digit count actually rendered to [1, 6].
+//
+// The upper bound is maxSignificantDigits' int64 proof. Note the integer part
+// always renders in full: at one digit, "47.2M" is "47M", not "50M" -- the
+// count is a ceiling on decimals, never a rounding of the figure itself.
+func clampSignificantDigits(significantDigits int) int {
+	if significantDigits < 1 {
+		return 1
+	}
+
+	if significantDigits > maxSignificantDigits {
+		return maxSignificantDigits
+	}
+
+	return significantDigits
 }
 
 // renderSignificant renders absolute scaled to unit at a fixed significant-digit
@@ -126,7 +160,7 @@ func (f *Renderer) FormatCompactSignificant(amount int64, significantDigits int)
 // The decimal count falls out of how many digits the integer part already
 // spends: "47" spends two of three, leaving one decimal; "4" spends one, leaving
 // two. Trailing zeros are then dropped so the count is a ceiling.
-func (f *Renderer) renderSignificant(absolute, unit int64, significantDigits int, negative bool, suffix string) string {
+func (f *Renderer) renderSignificant(absolute, unit int64, significantDigits int, negative bool, suffix string) (string, bool) {
 	integerDigits := len(strconv.FormatInt(absolute/unit, 10))
 
 	decimals := significantDigits - integerDigits
@@ -148,13 +182,23 @@ func (f *Renderer) renderSignificant(absolute, unit int64, significantDigits int
 		decimals--
 	}
 
+	intFactor := int64(1)
+
+	for range decimals {
+		intFactor *= 10
+	}
+
+	// A rounded integer part of 1,000 belongs one scale up; the caller decides
+	// whether a scale up exists.
+	promoted := scaled/intFactor >= 1_000
+
 	if negative {
 		scaled = -scaled
 	}
 
 	rendered := NewFormatter(decimals, f.Decimal, f.Thousand, f.Grapheme, f.Template).Format(scaled)
 
-	return appendSuffix(rendered, suffix)
+	return appendSuffix(rendered, suffix), promoted
 }
 
 // divideRounding divides half away from zero, on non-negative operands.
@@ -198,6 +242,15 @@ var compactScales = []struct {
 
 // compactFloorMajorUnits is the threshold below which FormatCompact defers to Format.
 const compactFloorMajorUnits = 1_000
+
+// maxSignificantDigits caps FormatCompactSignificant's digit count.
+//
+// Six is a display ceiling, not an arithmetic one -- no column of totals wants
+// more -- and it is what makes this implementation provably safe in int64: with
+// the dataset's largest fraction (3) the intermediate product stays below
+// unit * 10^6 <= 10^18, inside int64. Raising this cap means redoing that proof
+// first. The TypeScript twin clamps identically so the pair stays mirrored.
+const maxSignificantDigits = 6
 
 // FormatCompact returns the amount abbreviated to a scale suffix, such as
 // "$1.3M" or "750K".
@@ -263,14 +316,7 @@ func (f *Renderer) renderCompact(tenths int64, suffix string) string {
 
 // tenthsOf returns how many tenths of unit the amount is, rounded half away from zero.
 func tenthsOf(absolute, unit int64) int64 {
-	scaled := absolute * 10
-	quotient := scaled / unit
-
-	if scaled%unit*2 < unit {
-		return quotient
-	}
-
-	return quotient + 1
+	return divideRounding(absolute*10, unit)
 }
 
 // appendSuffix places the suffix after the last digit.

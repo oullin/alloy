@@ -421,6 +421,60 @@
       "args": ["-4720000000", "USD", "3"],
       "expected": "-$47.2M",
       "note": "the sign survives the scaling"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["999999999999", "USD", "8"],
+      "expected": "$10B",
+      "note": "clamped to six digits; unclamped, the Go twin overflowed int64 here and answered -$8.446744B"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["9999999999999999", "BHD", "7"],
+      "expected": "10,000B .د.ب",
+      "note": "a three-fraction currency with a trailing grapheme, at the lowest formerly-unsafe digit count"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["99995000000", "USD", "3"],
+      "expected": "$1B",
+      "note": "999.95M promotes across the scale boundary rather than rendering the four-digit $1,000M"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["999950000", "JPY", "3"],
+      "expected": "¥1B",
+      "note": "the promotion again on a zero-fraction currency"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["4720000000", "USD", "1"],
+      "expected": "$47M",
+      "note": "the integer part always renders in full: one digit is a ceiling on decimals, not a rounding to 50M"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["4720000000", "USD", "0"],
+      "expected": "$47M",
+      "note": "a degenerate count clamps to one rather than misbehaving"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["9223372036854775807", "USD", "3"],
+      "expected": "$92,233,720B",
+      "note": "the largest int64 stays exact through the compact path"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["1234567", "JPY"],
+      "expected": "¥1,234,567",
+      "note": "a zero-fraction currency has no cents to drop; the figure passes through grouped"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["-49", "USD"],
+      "expected": "$0",
+      "note": "a figure rounding to zero drops its sign: there is no negative nothing"
     }
   ]
 }
