@@ -171,6 +171,10 @@ func runMoneyOp(t *testing.T, calc *calculator.Engine, manager *Manager, rates *
 		}
 
 		return curr.Code, nil
+	case "displayCompact":
+		value := manager.Create(mustInt64(t, tc.Args[1]), tc.Args[0])
+
+		return value.DisplayCompact()
 	case "resolveWithDefault":
 		// Per manager, so nothing leaks between cases.
 		currencies := currency.NewManager()

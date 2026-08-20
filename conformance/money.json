@@ -267,6 +267,54 @@
       "note": "an unknown currency is an error, never a silent fallback to the default"
     },
     {
+      "op": "displayCompact",
+      "args": ["AED", "125000000"],
+      "expected": "1.3M .\u062f.\u0625",
+      "note": "one decimal is kept when it carries information; AED puts the grapheme after the number"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["AED", "75000000"],
+      "expected": "750K .\u062f.\u0625",
+      "note": "a whole scale renders with no decimal at all"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["AED", "400000000000"],
+      "expected": "4B .\u062f.\u0625",
+      "note": "largest scale, whole"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["AED", "95000"],
+      "expected": "950.00 .\u062f.\u0625",
+      "note": "below one thousand major units, full precision is returned instead"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["AED", "-125000000"],
+      "expected": "-1.3M .\u062f.\u0625",
+      "note": "the sign stays outside the abbreviated figure"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["USD", "125000000"],
+      "expected": "$1.3M",
+      "note": "a leading grapheme still puts the suffix after the digits"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["JPY", "1000000"],
+      "expected": "\u00a51M",
+      "note": "a zero-fraction currency scales on major units directly"
+    },
+    {
+      "op": "displayCompact",
+      "args": ["USD", "99999900"],
+      "expected": "$1M",
+      "note": "rounding half away from zero rolls 999,999 up into the next scale"
+    },
+    {
       "op": "resolveWithDefault",
       "args": ["usd", "NOPE"],
       "expected": "USD",

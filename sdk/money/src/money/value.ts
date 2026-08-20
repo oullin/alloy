@@ -157,6 +157,11 @@ export class MoneyValueBase {
 		return this.currency().formatter().format(this.valueAmount);
 	}
 
+	/** Formats the value abbreviated to a scale suffix (e.g. `$1.3M`), using the currency's own rules. */
+	public displayCompact(): string {
+		return this.currency().formatter().formatCompact(this.valueAmount);
+	}
+
 	/** Converts the minor-unit amount to a floating-point major-unit number (e.g. 1500n -> 15). */
 	public asMajorUnits(): number {
 		return this.currency().formatter().toMajorUnits(this.valueAmount);

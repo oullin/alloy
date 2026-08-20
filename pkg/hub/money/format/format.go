@@ -73,3 +73,106 @@ func (f *Renderer) abs(amount int64) int64 {
 
 	return amount
 }
+
+// compactScales are the abbreviation steps in major units, ordered largest first.
+var compactScales = []struct {
+	divisor int64
+	suffix  string
+}{
+	{1_000_000_000, "B"},
+	{1_000_000, "M"},
+	{1_000, "K"},
+}
+
+// compactFloorMajorUnits is the threshold below which FormatCompact defers to Format.
+const compactFloorMajorUnits = 1_000
+
+// FormatCompact returns the amount abbreviated to a scale suffix, such as
+// "$1.3M" or "750K".
+//
+// Amounts below one thousand major units are returned at full precision by
+// Format: rounding 950.00 to 1K overstates it, and a figure that short does not
+// need shortening.
+//
+// A scale is chosen only when the amount fills at least one of it, largest
+// first, so a value never renders in a smaller scale than it belongs to. One
+// decimal is kept only when it carries information -- "4B", not "4.0B" -- and
+// the suffix lands directly after the last digit so it sits inside the number
+// rather than after a trailing grapheme.
+//
+// Everything is computed in int64, so no precision is lost on the way to the
+// rounded display string. The TypeScript twin's MoneyFormatter.formatCompact
+// must agree, and conformance/money.json pins that.
+func (f *Renderer) FormatCompact(amount int64) string {
+	absolute := f.abs(amount)
+	minorPerMajor := int64(1)
+
+	for range f.Fraction {
+		minorPerMajor *= 10
+	}
+
+	if absolute < compactFloorMajorUnits*minorPerMajor {
+		return f.Format(amount)
+	}
+
+	for _, scale := range compactScales {
+		tenths := tenthsOf(absolute, scale.divisor*minorPerMajor)
+
+		if tenths < 10 {
+			continue
+		}
+
+		if amount < 0 {
+			tenths = -tenths
+		}
+
+		return f.renderCompact(tenths, scale.suffix)
+	}
+
+	return f.Format(amount)
+}
+
+// renderCompact renders a tenths count at this currency's separators and
+// template. The fraction is chosen per value rather than fixed, so a whole
+// number of tenths asks for no decimals at all -- which is what keeps "4B" from
+// becoming "4.0B" without a second rounding pass.
+func (f *Renderer) renderCompact(tenths int64, suffix string) string {
+	fraction := 1
+
+	if tenths%10 == 0 {
+		fraction = 0
+		tenths /= 10
+	}
+
+	scaled := NewFormatter(fraction, f.Decimal, f.Thousand, f.Grapheme, f.Template)
+
+	return appendSuffix(scaled.Format(tenths), suffix)
+}
+
+// tenthsOf returns how many tenths of unit the amount is, rounded half away from zero.
+func tenthsOf(absolute, unit int64) int64 {
+	scaled := absolute * 10
+	quotient := scaled / unit
+
+	if scaled%unit*2 < unit {
+		return quotient
+	}
+
+	return quotient + 1
+}
+
+// appendSuffix places the suffix after the last digit.
+//
+// Currencies differ on whether the grapheme leads or trails, so appending to the
+// end would land the suffix after the trailing grapheme for AED while working
+// for USD. Scanning for an ASCII digit is sufficient: the separators are ASCII
+// and no grapheme in the dataset contains an ASCII digit.
+func appendSuffix(formatted, suffix string) string {
+	for index := len(formatted) - 1; index >= 0; index-- {
+		if formatted[index] >= '0' && formatted[index] <= '9' {
+			return formatted[:index+1] + suffix + formatted[index+1:]
+		}
+	}
+
+	return formatted + suffix
+}

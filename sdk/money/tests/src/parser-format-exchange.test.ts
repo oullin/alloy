@@ -85,3 +85,30 @@ describe('money parser, formatter, and exchange', () => {
 		expect(() => rates.convertAmountWithRate(100n, 2, -1, 1.5)).toThrow(ERR_INVALID_AMOUNT_FRACTION.message);
 	});
 });
+
+describe('compact formatting', () => {
+	const usd = MoneyFormatter.create(2, '.', ',', '$', '$1');
+
+	it('keeps a decimal only when it carries information', () => {
+		expect(usd.formatCompact(125_000_000n)).toBe('$1.3M');
+		expect(usd.formatCompact(100_000_000n)).toBe('$1M');
+		expect(usd.formatCompact(400_000_000_000n)).toBe('$4B');
+	});
+
+	it('returns full precision below one thousand major units', () => {
+		expect(usd.formatCompact(95_000n)).toBe(usd.format(95_000n));
+		expect(usd.formatCompact(0n)).toBe('$0.00');
+	});
+
+	it('keeps the sign outside the figure', () => {
+		expect(usd.formatCompact(-125_000_000n)).toBe('-$1.3M');
+	});
+
+	it('scales on major units, so a zero-fraction currency differs', () => {
+		expect(MoneyFormatter.create(0, '.', ',', '¥', '$1').formatCompact(1_000_000n)).toBe('¥1M');
+	});
+
+	it('places the suffix after the digits when the grapheme trails', () => {
+		expect(MoneyFormatter.create(2, '.', ',', '.د.إ', '1 $').formatCompact(125_000_000n)).toBe('1.3M .د.إ');
+	});
+});
