@@ -37,6 +37,9 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 		case 'round':
 			return calculator.round(BigInt(args[0] as string), Number(args[1])).toString();
 
+		case 'isSafeAsNumber':
+			return manager.create(BigInt(args[0] as string), 'USD').isSafeAsNumber() ? 'true' : 'false';
+
 		case 'absolute':
 			return calculator.absolute(BigInt(args[0] as string)).toString();
 
