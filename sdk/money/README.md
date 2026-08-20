@@ -14,7 +14,7 @@ registry. Pin it by URL:
 
 ```jsonc
 "dependencies": {
-  "@hara/sdk-money": "https://github.com/oullin/alloy/releases/download/ts/v0.2.0/hara-sdk-money-0.2.0.tgz"
+  "@hara/sdk-money": "https://github.com/oullin/alloy/releases/download/ts/v0.2.1/hara-sdk-money-0.2.1.tgz"
 }
 ```
 
@@ -35,6 +35,7 @@ const total = manager.add(fromString, fromFactory);
 total.display(); // "$17.34"
 total.amount(); // 1734n
 total.asMajorUnits(); // 17.34
+total.displayCompact(); // "$17.34" — abbreviates to $1.3M / 750K / 4B at scale
 
 manager.split(price, 3).map((part) => part.amount()); // [500n, 500n, 500n]
 manager.allocate(price, 70, 30).map((part) => part.amount()); // [1050n, 450n]
