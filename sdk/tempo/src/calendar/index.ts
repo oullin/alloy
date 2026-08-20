@@ -153,6 +153,42 @@ export const readPart = (parts: readonly DateTimePart[], type: string): string =
 	return part?.value ?? '';
 };
 
+/**
+ * Read the hour as h23, whatever hour cycle the runtime actually produced.
+ *
+ * {@link getFormatter} asks for `hourCycle: 'h23'`, but a partial `Intl`
+ * ignores an option it does not implement rather than throwing — React
+ * Native's Hermes is the engine that bites here. The formatter then answers in
+ * the locale's own cycle, so midnight arrives as `12` with a `PM`/`AM` marker
+ * (h11/h12) or as `24` (h24). Every convergence step in
+ * {@link dateFromZonedComponents} then lands on the wrong instant and
+ * {@link assertSafeZonedComponents} rejects components that were perfectly
+ * valid, which makes the whole package unusable on that runtime.
+ *
+ * Normalising here rather than trusting the option keeps one code path for
+ * every engine: a compliant `Intl` already answers h23 and passes through
+ * untouched.
+ */
+export const normalizeHourToH23 = (hour: string, dayPeriod: string): number => {
+	const value = Number(hour);
+
+	if (!Number.isFinite(value)) {
+		return 0;
+	}
+
+	// h24 renders midnight as 24; h23 renders it as 0. Everything else agrees.
+	if (dayPeriod === '') {
+		return value % 24;
+	}
+
+	// h11/h12 pair a 0-11 or 1-12 hour with a day period. Noon and midnight are
+	// the two the arithmetic below has to get right: 12 AM is 0, 12 PM is 12.
+	const afternoon = /p/iu.test(dayPeriod);
+	const base = value % 12;
+
+	return afternoon ? base + 12 : base;
+};
+
 export const weekdayIndex = (weekday: string): number => {
 	switch (weekday) {
 		case 'Sun':
@@ -188,7 +224,7 @@ export const getZonedParts = (date: Date, timeZone: string): ZonedParts => {
 		year: Number(readPart(parts, 'year')),
 		month: Number(readPart(parts, 'month')),
 		day: Number(readPart(parts, 'day')),
-		hour: Number(readPart(parts, 'hour')),
+		hour: normalizeHourToH23(readPart(parts, 'hour'), readPart(parts, 'dayPeriod')),
 		minute: Number(readPart(parts, 'minute')),
 		second: Number(readPart(parts, 'second')),
 		millisecond: Number(readPart(parts, 'fractionalSecond') || '0'),
