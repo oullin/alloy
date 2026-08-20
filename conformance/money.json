@@ -367,6 +367,114 @@
       "args": ["-9007199254740992"],
       "expected": "false",
       "note": "and so is the first unsafe negative"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["4720000000", "USD"],
+      "expected": "$47,200,000",
+      "note": "a headline figure drops the cents it would otherwise read as noise"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["95050", "USD"],
+      "expected": "$951",
+      "note": "rounds half away from zero rather than truncating"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["-95050", "USD"],
+      "expected": "-$951",
+      "note": "and does so symmetrically about zero"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["900719925474099300", "USD"],
+      "expected": "$9,007,199,254,740,993",
+      "note": "stated exactly past the float-safe range"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["4720000000", "USD", "3"],
+      "expected": "$47.2M",
+      "note": "two integer digits leave one decimal"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["426000000", "USD", "3"],
+      "expected": "$4.26M",
+      "note": "one integer digit leaves two, so the row stays as precise as the one above"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["400000000000", "USD", "3"],
+      "expected": "$4B",
+      "note": "trailing zeros drop: the digit count is a ceiling, not padding"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["95000", "USD", "3"],
+      "expected": "$950.00",
+      "note": "below one thousand major units it defers to Format rather than overstating"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["-4720000000", "USD", "3"],
+      "expected": "-$47.2M",
+      "note": "the sign survives the scaling"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["999999999999", "USD", "8"],
+      "expected": "$10B",
+      "note": "clamped to six digits; unclamped, the Go twin overflowed int64 here and answered -$8.446744B"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["9999999999999999", "BHD", "7"],
+      "expected": "10,000B .د.ب",
+      "note": "a three-fraction currency with a trailing grapheme, at the lowest formerly-unsafe digit count"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["99995000000", "USD", "3"],
+      "expected": "$1B",
+      "note": "999.95M promotes across the scale boundary rather than rendering the four-digit $1,000M"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["999950000", "JPY", "3"],
+      "expected": "¥1B",
+      "note": "the promotion again on a zero-fraction currency"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["4720000000", "USD", "1"],
+      "expected": "$47M",
+      "note": "the integer part always renders in full: one digit is a ceiling on decimals, not a rounding to 50M"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["4720000000", "USD", "0"],
+      "expected": "$47M",
+      "note": "a degenerate count clamps to one rather than misbehaving"
+    },
+    {
+      "op": "formatCompactSignificant",
+      "args": ["9223372036854775807", "USD", "3"],
+      "expected": "$92,233,720B",
+      "note": "the largest int64 stays exact through the compact path"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["1234567", "JPY"],
+      "expected": "¥1,234,567",
+      "note": "a zero-fraction currency has no cents to drop; the figure passes through grouped"
+    },
+    {
+      "op": "formatWhole",
+      "args": ["-49", "USD"],
+      "expected": "$0",
+      "note": "a figure rounding to zero drops its sign: there is no negative nothing"
     }
   ]
 }

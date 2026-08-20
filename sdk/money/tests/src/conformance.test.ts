@@ -37,6 +37,20 @@ const runMoneyOp = (testCase: MoneyConformanceCase): string => {
 		case 'round':
 			return calculator.round(BigInt(args[0] as string), Number(args[1])).toString();
 
+		case 'formatWhole':
+			return manager
+				.create(BigInt(args[0] as string), args[1] as string)
+				.currency()
+				.formatter()
+				.formatWhole(BigInt(args[0] as string));
+
+		case 'formatCompactSignificant':
+			return manager
+				.create(BigInt(args[0] as string), args[1] as string)
+				.currency()
+				.formatter()
+				.formatCompactSignificant(BigInt(args[0] as string), Number(args[2]));
+
 		case 'isSafeAsNumber':
 			return manager.create(BigInt(args[0] as string), 'USD').isSafeAsNumber() ? 'true' : 'false';
 

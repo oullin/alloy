@@ -93,6 +93,26 @@ func runMoneyOp(t *testing.T, calc *calculator.Engine, manager *Manager, rates *
 		exponent := mustInt(t, tc.Args[1])
 
 		return strconv.FormatInt(calc.Round(amount, exponent), 10), nil
+	case "formatWhole":
+		amount := mustInt64(t, tc.Args[0])
+
+		definition, err := manager.Create(amount, tc.Args[1]).Currency()
+
+		if err != nil {
+			return "", err
+		}
+
+		return definition.Formatter().FormatWhole(amount), nil
+	case "formatCompactSignificant":
+		amount := mustInt64(t, tc.Args[0])
+
+		definition, err := manager.Create(amount, tc.Args[1]).Currency()
+
+		if err != nil {
+			return "", err
+		}
+
+		return definition.Formatter().FormatCompactSignificant(amount, mustInt(t, tc.Args[2])), nil
 	case "isSafeAsNumber":
 		value := manager.Create(mustInt64(t, tc.Args[0]), "USD")
 

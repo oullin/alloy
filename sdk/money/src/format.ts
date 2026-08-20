@@ -15,6 +15,17 @@ export class MoneyFormatter {
 	/** Below this many major units, {@link formatCompact} defers to {@link format}. */
 	private static readonly COMPACT_FLOOR_MAJOR_UNITS = 1_000n;
 
+	/**
+	 * The most significant digits {@link formatCompactSignificant} renders.
+	 *
+	 * Six is a display ceiling, not an arithmetic one — no column of totals
+	 * wants more — and it is what makes the Go twin provably safe: with the
+	 * dataset's largest fraction (3) the intermediate product stays below
+	 * `unit * 10^6 <= 10^18`, inside int64. Raising this cap means redoing that
+	 * proof on the Go side first.
+	 */
+	private static readonly MAX_SIGNIFICANT_DIGITS = 6;
+
 	public constructor(
 		public readonly fraction: number,
 		public readonly decimal: string,
@@ -92,6 +103,80 @@ export class MoneyFormatter {
 		return this.format(amount);
 	}
 
+	/**
+	 * Formats a minor-unit amount as whole major units, with no decimal part.
+	 *
+	 * A per-instalment line needs its cents; a headline figure — a reference
+	 * price, a due amount stated once on its own line — reads them as noise.
+	 * Rounding is half away from zero, so this states a figure rather than
+	 * quietly truncating it.
+	 *
+	 * Computed on the amount's own integer type, so a total past the
+	 * float-safe range is stated exactly rather than rounded on the way.
+	 */
+	public formatWhole(amount: Amount): string {
+		const minorPerMajor = 10n ** BigInt(this.fraction);
+		const absolute = this.abs(amount);
+		const major = MoneyFormatter.divideRounding(absolute, minorPerMajor);
+		const whole = new MoneyFormatter(0, this.decimal, this.thousand, this.grapheme, this.template);
+
+		return whole.format(amount < 0n ? -major : major);
+	}
+
+	/**
+	 * Formats a minor-unit amount abbreviated to a fixed number of significant
+	 * digits, such as `$47.2M` or `$4.26M` at three.
+	 *
+	 * {@link formatCompact} keeps one decimal, which reads well for a single
+	 * figure but not for a column: `47.2M` beside `4.2M` gives the second
+	 * figure a digit less of information than the first. Fixing the
+	 * significant digits instead keeps every row equally precise, which is what
+	 * a table of totals wants.
+	 *
+	 * Trailing zeros are dropped — `4B`, never `4.00B` — so the digit count is
+	 * a ceiling rather than padding. The count is clamped to `[1, 6]` (see
+	 * {@link clampSignificantDigits}), and the integer part always renders in
+	 * full, so a count smaller than the integer digits changes nothing.
+	 */
+	public formatCompactSignificant(amount: Amount, significantDigits: number): string {
+		const minorPerMajor = 10n ** BigInt(this.fraction);
+		const absolute = this.abs(amount);
+
+		if (absolute < MoneyFormatter.COMPACT_FLOOR_MAJOR_UNITS * minorPerMajor) {
+			return this.format(amount);
+		}
+
+		const digits = MoneyFormatter.clampSignificantDigits(significantDigits);
+
+		for (let index = 0; index < MoneyFormatter.SCALES.length; index += 1) {
+			const [divisor, suffix] = MoneyFormatter.SCALES[index] as readonly [bigint, string];
+			const unit = divisor * minorPerMajor;
+
+			if (absolute < unit) {
+				continue;
+			}
+
+			const rendered = this.renderSignificant(absolute, unit, digits, amount < 0n, suffix);
+
+			// Rounding can carry across the scale boundary: 999.95M at three
+			// digits rounds to 1,000M, which is 1B mis-shelved — and a fourth
+			// digit the caller did not ask for. {@link formatCompact} promotes
+			// because it selects its scale from the rounded tenths; this path
+			// re-renders one scale up when the rounded integer part reaches the
+			// next scale. The top scale has nowhere to promote to, which is the
+			// behaviour the sibling method already has.
+			if (rendered.promoted && index > 0) {
+				const [overDivisor, overSuffix] = MoneyFormatter.SCALES[index - 1] as readonly [bigint, string];
+
+				return this.renderSignificant(absolute, overDivisor * minorPerMajor, digits, amount < 0n, overSuffix).text;
+			}
+
+			return rendered.text;
+		}
+
+		return this.format(amount);
+	}
+
 	/** Converts a minor-unit amount to a floating-point major-unit number. */
 	public toMajorUnits(amount: Amount): number {
 		if (this.fraction === 0) {
@@ -119,12 +204,62 @@ export class MoneyFormatter {
 		return MoneyFormatter.appendSuffix(scaled.format(isWhole ? tenths / 10n : tenths), suffix);
 	}
 
+	/**
+	 * Renders `absolute` scaled to `unit` at a fixed significant-digit count.
+	 *
+	 * The decimal count falls out of how many digits the integer part already
+	 * spends: `47` spends two of three, leaving one decimal; `4` spends one,
+	 * leaving two. Trailing zeros are then dropped so the count is a ceiling.
+	 */
+	private renderSignificant(absolute: Amount, unit: Amount, significantDigits: number, negative: boolean, suffix: string): { readonly text: string; readonly promoted: boolean } {
+		const integerDigits = (absolute / unit).toString().length;
+
+		let decimals = Math.max(significantDigits - integerDigits, 0);
+		let scaled = MoneyFormatter.divideRounding(absolute * 10n ** BigInt(decimals), unit);
+
+		while (decimals > 0 && scaled % 10n === 0n) {
+			scaled /= 10n;
+			decimals -= 1;
+		}
+
+		// A rounded integer part of 1,000 belongs one scale up; the caller
+		// decides whether a scale up exists.
+		const promoted = scaled / 10n ** BigInt(decimals) >= 1_000n;
+		const formatter = new MoneyFormatter(decimals, this.decimal, this.thousand, this.grapheme, this.template);
+
+		return { promoted, text: MoneyFormatter.appendSuffix(formatter.format(negative ? -scaled : scaled), suffix) };
+	}
+
+	/**
+	 * The digit count actually rendered: whole, and within `[1, 6]`.
+	 *
+	 * A fraction is truncated rather than thrown on — the parameter arrives
+	 * from display code, where a crash is worse than a coarser figure — and
+	 * the upper bound is {@link MAX_SIGNIFICANT_DIGITS}'s int64 proof. Note the
+	 * integer part always renders in full: at one digit, `47.2M` is `47M`, not
+	 * `50M` — the count is a ceiling on decimals, never a rounding of the
+	 * figure itself.
+	 */
+	private static clampSignificantDigits(significantDigits: number): number {
+		const whole = Math.trunc(significantDigits);
+
+		if (!Number.isFinite(whole) || whole < 1) {
+			return 1;
+		}
+
+		return Math.min(whole, MoneyFormatter.MAX_SIGNIFICANT_DIGITS);
+	}
+
+	/** Integer division rounded half away from zero, on non-negative operands. */
+	private static divideRounding(value: Amount, unit: Amount): Amount {
+		const quotient = value / unit;
+
+		return (value % unit) * 2n < unit ? quotient : quotient + 1n;
+	}
+
 	/** How many tenths of `unit` the amount is, rounded half away from zero. */
 	private static tenthsOf(absolute: Amount, unit: Amount): Amount {
-		const scaled = absolute * 10n;
-		const quotient = scaled / unit;
-
-		return (scaled % unit) * 2n < unit ? quotient : quotient + 1n;
+		return MoneyFormatter.divideRounding(absolute * 10n, unit);
 	}
 
 	/**
