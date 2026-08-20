@@ -3,6 +3,30 @@ import { describe, expect, it } from 'vite-plus/test';
 import { ERR_CURRENCY_MISMATCH, ERR_NO_MONEY_PROVIDED, MoneyAggregator, MoneyJson, MoneyManager, MoneyValue } from '#money/index';
 
 describe('money value behavior', () => {
+	it('reads the minor-unit amount as a number for APIs that take minor units', () => {
+		expect(MoneyValue.fromUSD(1500n).asMinorUnits()).toBe(1500);
+		expect(MoneyValue.fromUSD(-4200n).asMinorUnits()).toBe(-4200);
+		expect(MoneyValue.fromUSD(0n).asMinorUnits()).toBe(0);
+	});
+
+	it('reports whether an amount survives conversion to a number', () => {
+		// The amount is a bigint because a portfolio total can exceed the
+		// float-safe range. An inexact conversion returns an ordinary-looking
+		// number, so the only way to know is to ask before converting.
+		expect(MoneyValue.fromUSD(1500n).isSafeAsNumber()).toBe(true);
+		expect(MoneyValue.fromUSD(BigInt(Number.MAX_SAFE_INTEGER)).isSafeAsNumber()).toBe(true);
+		expect(MoneyValue.fromUSD(BigInt(Number.MIN_SAFE_INTEGER)).isSafeAsNumber()).toBe(true);
+		expect(MoneyValue.fromUSD(BigInt(Number.MAX_SAFE_INTEGER) + 1n).isSafeAsNumber()).toBe(false);
+		expect(MoneyValue.fromUSD(BigInt(Number.MIN_SAFE_INTEGER) - 1n).isSafeAsNumber()).toBe(false);
+	});
+
+	it('keeps an amount past the float-safe range exact on the value itself', () => {
+		const beyond = BigInt(Number.MAX_SAFE_INTEGER) + 1n;
+
+		expect(MoneyValue.fromUSD(beyond).amount()).toBe(beyond);
+		expect(MoneyValue.fromUSD(beyond).isSafeAsNumber()).toBe(false);
+	});
+
 	it('performs immutable arithmetic and comparisons on MoneyValue instances', () => {
 		const manager = MoneyManager.default();
 		const base = MoneyValue.fromUSD(1000n);

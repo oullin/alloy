@@ -162,6 +162,33 @@ export class MoneyValueBase {
 		return this.currency().formatter().toMajorUnits(this.valueAmount);
 	}
 
+	/**
+	 * Converts the minor-unit amount to a `number`, for an API that takes minor
+	 * units (e.g. 1500n -> 1500).
+	 *
+	 * Callers reach for `Number(value.amount())` when a formatter or a chart
+	 * wants minor units, which is right for a single figure and wrong for an
+	 * aggregate — and the call site never says which. Naming it here puts the
+	 * caveat next to the conversion: an amount is held as a bigint because a
+	 * portfolio total can exceed `Number.MAX_SAFE_INTEGER`, and this loses
+	 * precision above it. Ask {@link isSafeAsNumber} first when the figure could
+	 * be a sum rather than a single price.
+	 */
+	public asMinorUnits(): number {
+		return Number(this.valueAmount);
+	}
+
+	/**
+	 * Whether the minor-unit amount survives conversion to a `number` exactly.
+	 *
+	 * Guards both {@link asMinorUnits} and {@link asMajorUnits}: neither can
+	 * report the loss itself, because the result of an inexact conversion is an
+	 * ordinary, plausible-looking number.
+	 */
+	public isSafeAsNumber(): boolean {
+		return this.valueAmount <= BigInt(Number.MAX_SAFE_INTEGER) && this.valueAmount >= BigInt(Number.MIN_SAFE_INTEGER);
+	}
+
 	public compare(other: MoneyValue): number {
 		return this.compareAmount(other);
 	}
