@@ -212,7 +212,33 @@ func TestGuardRefusesASymlink(t *testing.T) {
 	}
 }
 
-func TestGuardRefusesAPathReplacedSinceTheScan(t *testing.T) {
+func TestGuardRefusesAPathWhoseIdentityChanged(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	target := filepath.Join(root, "tree")
+	other := filepath.Join(root, "other")
+
+	for _, dir := range []string{target, other} {
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			t.Fatalf("mkdir %s: %v", dir, err)
+		}
+	}
+
+	// Recreating a directory is not a reliable way to change its inode: ext4
+	// hands the freed number straight back, where APFS does not. Comparing
+	// against a genuinely different directory tests the guard rather than the
+	// allocator.
+	guard := sweep.Guard{Roots: []string{root}}
+
+	err := guard.Check(plan.Action{Kind: plan.KindRemoveTree, Path: target, Key: keyOf(t, other)})
+
+	if err == nil {
+		t.Fatal("Check err = nil, want the mismatched identity refused")
+	}
+}
+
+func TestGuardAcceptsAPathThatIsUnchanged(t *testing.T) {
 	t.Parallel()
 
 	root := t.TempDir()
@@ -222,24 +248,10 @@ func TestGuardRefusesAPathReplacedSinceTheScan(t *testing.T) {
 		t.Fatalf("mkdir: %v", err)
 	}
 
-	stale := keyOf(t, target)
-
-	// Replace the directory with a different inode, as would happen if the
-	// worktree were recreated between the scan and the sweep.
-	if err := os.RemoveAll(target); err != nil {
-		t.Fatalf("remove: %v", err)
-	}
-
-	if err := os.MkdirAll(target, 0o700); err != nil {
-		t.Fatalf("recreate: %v", err)
-	}
-
 	guard := sweep.Guard{Roots: []string{root}}
 
-	err := guard.Check(plan.Action{Kind: plan.KindRemoveTree, Path: target, Key: stale})
-
-	if err == nil {
-		t.Fatal("Check err = nil, want the replaced path refused")
+	if err := guard.Check(plan.Action{Kind: plan.KindRemoveTree, Path: target, Key: keyOf(t, target)}); err != nil {
+		t.Fatalf("Check err = %v, want nil", err)
 	}
 }
 

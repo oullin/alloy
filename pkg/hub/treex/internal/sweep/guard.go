@@ -73,6 +73,13 @@ func (g Guard) Check(action plan.Action) error {
 
 // identical confirms the path still refers to the same inode the scan
 // measured, catching a directory that was swapped out in between.
+//
+// It is a cheap best-effort check rather than a guarantee. Filesystems differ
+// in whether they reuse a freed inode number immediately — ext4 does, APFS does
+// not — so a directory deleted and recreated between the scan and the sweep can
+// still present the same identity. The real protections are the ones above it:
+// the path must be absolute, deep enough, inside a provider root, outside every
+// protected path, and not a symlink.
 func (g Guard) identical(path string, info os.FileInfo, want diskwalk.FileKey) error {
 	if want.Zero() {
 		return nil
