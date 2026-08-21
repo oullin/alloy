@@ -98,6 +98,8 @@ export default defineConfig({
 			'format-all': { command: "bash infra/scripts/tasks/format-files.sh all && bash -lc 'source infra/scripts/tasks/cache-env.sh && vp check --fix'", cache: false },
 			'go:test': { command: 'bash infra/scripts/tasks/go-test.sh', cache: false },
 			'go:artifacts': { command: 'bash infra/scripts/tasks/check-go-artifacts.sh', cache: false },
+			'treex:build': { command: 'go -C pkg/hub/treex build -o treex ./cmd/treex', cache: false },
+			'treex:run': { command: 'go -C pkg/hub/treex run ./cmd/treex', cache: false },
 			'check:imports': { command: 'vp exec node infra/scripts/tasks/check-package-imports.mjs', cache: false },
 			'inertia-demo-app:build': { command: 'vp build --config web/inertia-demo/app/vite.config.js', cache: false },
 			'inertia-demo-app:dev': { command: 'vp dev --config web/inertia-demo/app/vite.config.js', cache: false },

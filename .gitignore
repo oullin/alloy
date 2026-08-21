@@ -18,3 +18,5 @@ web/storage/
 
 # Compiled Go helper binaries
 /infra/modzip/modzip
+/pkg/hub/treex/treex
+/storage/

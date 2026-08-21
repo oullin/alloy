@@ -1,0 +1,32 @@
+version: '2'
+
+# treex is the one module in this repository distributed as a binary, so it
+# carries a linter the library modules do not. The list is an explicit allowlist
+# rather than a default set minus exclusions, so enabling a new check is always a
+# deliberate act.
+linters:
+    default: none
+    enable:
+        - errcheck
+        - govet
+        - ineffassign
+        - misspell
+        - revive
+        - staticcheck
+        - unused
+    settings:
+        revive:
+            rules:
+                # doc.go carries the package comment; revive cannot see it from
+                # the other files in the package.
+                - name: package-comments
+                  disabled: true
+    exclusions:
+        rules:
+            - path: _test\.go
+              linters:
+                  - errcheck
+
+issues:
+    max-issues-per-linter: 0
+    max-same-issues: 0

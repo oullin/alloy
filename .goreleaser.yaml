@@ -1,0 +1,92 @@
+version: 2
+
+project_name: treex
+
+# Every build artifact this repository produces lives under storage/, which is
+# already gitignored.
+dist: storage/dist
+
+builds:
+    - id: treex
+      dir: pkg/hub/treex
+      main: ./cmd/treex
+      binary: treex
+      env:
+          - CGO_ENABLED=0
+      goos:
+          - darwin
+          - linux
+      goarch:
+          - amd64
+          - arm64
+      flags:
+          - -trimpath
+      ldflags:
+          - -s -w -X main.version={{ .Tag }}
+
+archives:
+    - formats:
+          - tar.gz
+      name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+      files:
+          - LICENSE.md
+          - pkg/hub/treex/README.md
+
+checksum:
+    name_template: checksums.txt
+
+changelog:
+    disable: true
+
+release:
+    # release-treex.yml creates the GitHub Release with generated notes before
+    # this runs; goreleaser only attaches the binary assets to it.
+    mode: keep-existing
+
+    # keep-existing preserves the release but still re-uploads every asset, so a
+    # retry after a partially failed publish would otherwise die on an
+    # already_exists conflict. Replacing same-named assets makes a retry work.
+    replace_existing_artifacts: true
+
+# dockers_v2 builds one multi-platform image rather than a per-architecture
+# image plus a manifest to stitch them together.
+dockers_v2:
+    - id: treex
+      dockerfile: pkg/hub/treex/Dockerfile
+      images:
+          - ghcr.io/oullin/treex
+      tags:
+          - '{{ .Version }}'
+          - latest
+      platforms:
+          - linux/amd64
+          - linux/arm64
+      labels:
+          org.opencontainers.image.source: https://github.com/oullin/alloy
+          org.opencontainers.image.description: Reclaim the disk space AI coding agents leave behind
+          org.opencontainers.image.version: '{{ .Version }}'
+          org.opencontainers.image.licenses: MIT
+
+homebrew_casks:
+    - name: treex
+      repository:
+          owner: oullin
+          name: homebrew-treex
+          branch: main
+          token: '{{ .Env.HOMEBREW_TAP_TOKEN }}'
+      directory: Casks
+      homepage: https://github.com/oullin/alloy
+      description: Reclaim the disk space AI coding agents leave behind
+      caveats: |
+          treex never deletes without being asked twice: `treex clean` only
+          reports, and `treex clean --apply` prompts before acting.
+
+          Start with `treex scan` to see what is there.
+      # The release binaries are not notarized, so strip the quarantine flag
+      # rather than leaving Gatekeeper to block them.
+      hooks:
+          post:
+              install: |
+                  if system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+                    system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/treex"]
+                  end
