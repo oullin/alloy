@@ -16,6 +16,11 @@ updates:
       interval: weekly
 
   - package-ecosystem: gomod
+    directory: /pkg/hub/treex
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: gomod
     directory: /pkg/hub/queue/drivers/sqs
     schedule:
       interval: weekly

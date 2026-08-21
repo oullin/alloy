@@ -5,10 +5,10 @@ namespace="${RELEASE_NAMESPACE:-}"
 version_pattern='^[0-9]+\.[0-9]+\.[0-9]+$'
 
 case "${namespace}" in
-	go | ts)
+	go | ts | treex)
 		;;
 	*)
-		echo "RELEASE_NAMESPACE must be go or ts, got: ${namespace}" >&2
+		echo "RELEASE_NAMESPACE must be go, ts, or treex, got: ${namespace}" >&2
 		exit 2
 		;;
 esac

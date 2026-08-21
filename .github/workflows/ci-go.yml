@@ -27,6 +27,20 @@ jobs:
           GO_COVERAGE_DIR: ${{ runner.temp }}/go-coverage
         run: pnpm exec vp run go:test
 
+      # treex is the one module distributed as a binary, so it carries a linter
+      # the library modules do not. Scoped to that directory deliberately.
+      - name: Lint treex
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.12.2
+          working-directory: pkg/hub/treex
+
+      - name: Validate the release configuration
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: '~> v2'
+          args: check
+
       - name: Coverage summary
         if: always()
         shell: bash

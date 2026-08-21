@@ -1,10 +1,11 @@
-go 1.26.5
+go 1.26.6
 
-toolchain go1.26.5
+toolchain go1.26.6
 
 use (
 	.
 	./auth/passkeys
+	./treex
 	./queue/drivers/sqs
 	../../web/inertia-demo/api
 )
