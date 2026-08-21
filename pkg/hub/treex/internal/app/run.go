@@ -57,11 +57,9 @@ func (d *deps) session(opts options, categories []config.Category) (*session, er
 
 	resolved := config.ResolveAll(selected, d.home, mount)
 	roots := make(map[string]string, len(resolved))
-	rootPaths := make([]string, 0, len(resolved))
 
 	for _, provider := range resolved {
 		roots[provider.Name] = provider.Root
-		rootPaths = append(rootPaths, provider.Root)
 	}
 
 	policy := gitwork.Policy{
@@ -99,8 +97,6 @@ func (d *deps) session(opts options, categories []config.Category) (*session, er
 			session.warn(fmt.Sprintf("%s: %v", path, err))
 		},
 	}
-
-	_ = rootPaths
 
 	return session, nil
 }

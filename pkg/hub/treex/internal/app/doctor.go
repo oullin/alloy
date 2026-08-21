@@ -102,7 +102,7 @@ func (d *deps) reportBlocked(printer *console.Printer, candidates []inventory.Ca
 
 		blocked++
 
-		printer.Warning(fmt.Sprintf("%s", candidate.Label))
+		printer.Warning(candidate.Label)
 
 		for _, reason := range candidate.Reasons {
 			printer.Dim(fmt.Sprintf("    %s", reason))
