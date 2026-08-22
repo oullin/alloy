@@ -23,4 +23,8 @@ var (
 
 	// ErrMethodNotBound is returned when a method binding does not exist.
 	ErrMethodNotBound = errors.New("container: method binding not found")
+
+	// ErrProviderCycle is returned (via panic from RegisterMany) when provider
+	// DependsOn declarations form a cycle with no valid registration order.
+	ErrProviderCycle = errors.New("container: provider dependency cycle")
 )

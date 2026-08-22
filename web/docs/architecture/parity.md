@@ -28,6 +28,7 @@ modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 | `money`                         |       ✅       |      ✅ `@hara/sdk-money`       | **Both (twin)** | None yet — see [plan 008](#conformance-the-guard-that-keeps-both-honest) |
 | `tempo`                         |       ✅       |      ✅ `@hara/sdk-tempo`       | **Both (twin)** | None yet — plan 008                                                      |
 | `workflow`                      |       ✅       |     ✅ `@hara/sdk-workflow`     | **Both (twin)** | None yet — plan 008                                                      |
+| `container`                     |       ✅       |    ✅ `@hara/sdk-container`     | **Both (twin)** | **L2** synchronous server-runtime fixture                                |
 | `console`                       |       —        |     ✅ `@hara/sdk-console`      | **TS-only**     | n/a (no backend meaning)                                                 |
 | `navigator-routes`              |       —        | ✅ `@hara/sdk-navigator-routes` | **TS-only**     | n/a (consumes a route manifest)                                          |
 | `auth` (+ `auth/passkeys`)      |       ✅       |                —                | **Go-only**     | n/a                                                                      |
@@ -35,7 +36,6 @@ modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 | `cache`                         |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `collection`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `config`                        |       ✅       |                —                | **Go-only**     | n/a                                                                      |
-| `container`                     |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `contracts`                     |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `cookie`                        |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `database`                      |       ✅       |                —                | **Go-only**     | n/a                                                                      |
@@ -51,10 +51,16 @@ modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 | `str`                           |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `validation`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 
-**Summary:** 3 twins (`money`, `tempo`, `workflow`), 20 Go-only packages (plus 2
-nested Go modules), 2 TS-only packages. No twin currently has mechanical
-conformance coverage; parity is asserted, not enforced (see the divergence
-register and policy below for why that matters).
+**Summary:** 4 twins (`money`, `tempo`, `workflow`, `container`), 19 Go-only
+packages (plus 2 nested Go modules), and 2 TS-only packages. The declarative
+operations and observations in `conformance/container.json` are mechanically
+enforced at L2 for the synchronous common core (lifetimes, parameters, aliases,
+contextual/tagged bindings, callbacks, methods, Call/Wrap/FactoryFunc,
+conditional bindings, introspection, flush reset, provider ordering/deferred/
+cycle identities). TypeScript async APIs, `childScope()` isolation, raw App
+deferred bypass, and GiveConfig's typed-token boundary are explicit exclusions,
+not shared container behavior; the common scoped operation is the Go-style cache
+reset through `ForgetScopedInstances()`.
 
 ### Why the TS-only packages have no Go twin
 
@@ -196,19 +202,22 @@ A package gets a `@hara/sdk-*` twin only when **both** of these hold:
    on backend and frontend for the product to be correct — money math, date/time
    arithmetic, workflow state transitions. If a frontend that reimplemented the
    logic could disagree with the backend and cause a user-visible bug, the logic
-   belongs in a twin. This is why `money`, `tempo`, and `workflow` are twins.
+   belongs in a twin. This is why `money`, `tempo`, `workflow`, and synchronous
+   server composition are twins.
 2. **No runtime-specific dependency.** The logic must be expressible against
    pure language primitives in both runtimes (integers, strings, the platform
    date object) without a server-only dependency (a database handle, a socket, a
    filesystem, an OS signal).
 
 A package is **explicitly not** a twin candidate when it is a server-only
-concern with no frontend meaning — `queue`, `container`, `httpx`, `session`,
-`database`, `cache`, `bus`, `auth`, etc. These have no "identical result on both
-runtimes" to guarantee; a twin would be dead weight and a second surface to keep
-in sync for no benefit. Frontend-only tooling (`console`) and
-manifest-consumers (`navigator-routes`) are the mirror case: TS-only by the same
-test.
+concern with no frontend meaning — `queue`, `httpx`, `session`, `database`,
+`cache`, `bus`, `auth`, etc. These have no "identical result on both runtimes"
+to guarantee; a twin would be dead weight and a second surface to keep sync for
+no benefit. `container` is the deliberate server-runtime exception: its
+synchronous composition semantics are reusable in TypeScript server products,
+while its async APIs remain TypeScript-only. Frontend-only tooling (`console`)
+and manifest-consumers (`navigator-routes`) are the mirror case: TS-only by the
+same test.
 
 **Default to no twin.** Twins double the maintenance surface and, without
 conformance coverage, double the _divergence_ surface (see every row of the
@@ -286,7 +295,7 @@ comparison.
 
 ## Recommendation: the next twin (grounded)
 
-**The current three twins are the intended scope for now. Do not add a fourth
+**The current four twins are the intended scope for now. Do not add another
 speculatively.** The one grounded near-term candidate is a _narrow_ auth twin,
 and only as a consequence of plan 025 — not as new scope this doc schedules.
 

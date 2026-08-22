@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"declaration": true,
+		"declarationMap": false,
+		"emitDeclarationOnly": false,
+		"isolatedModules": true,
+		"lib": ["ES2023"],
+		"module": "ESNext",
+		"moduleDetection": "force",
+		"moduleResolution": "Bundler",
+		"noEmit": false,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"outDir": "dist",
+		"paths": {
+			"@hara/sdk-container": ["./src/index.ts"],
+			"@hara/sdk-container/*": ["./src/*"],
+			"#container/*": ["./src/*"]
+		},
+		"rootDir": "src",
+		"skipLibCheck": true,
+		"sourceMap": false,
+		"strict": true,
+		"target": "ES2022",
+		"types": ["node"],
+		"useDefineForClassFields": true
+	},
+	"exclude": ["dist", "tests"],
+	"include": ["src/**/*.ts"]
+}

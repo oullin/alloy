@@ -65,6 +65,12 @@ type resolution struct {
 	done       bool
 }
 
+// Shared reports whether the binding caches a single shared instance.
+func (b Binding) Shared() bool { return b.shared }
+
+// Scoped reports whether the binding is scoped (shared until ForgetScopedInstances).
+func (b Binding) Scoped() bool { return b.scoped }
+
 // New creates an empty, fully initialized App.
 func New() *App {
 	return &App{

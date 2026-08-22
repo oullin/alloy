@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "description": "Restricted language-neutral DSL for synchronous container conformance. Primitive names select documented deterministic harness functions; no language expression is embedded.",
+  "cases": [
+    {
+      "id": "lifetimes-and-scoped-reset",
+      "note": "Transient values rebuild, singleton values cache, and scoped values reset with the Go-style scoped cache reset.",
+      "tokens": [{"id":"transient"},{"id":"singleton"},{"id":"scoped"}],
+      "operations": [
+        {"kind":"bind","token":"transient","lifetime":"transient","primitive":"increment-counter","counter":"transient"},
+        {"kind":"bind","token":"singleton","lifetime":"singleton","primitive":"increment-counter","counter":"singleton"},
+        {"kind":"bind","token":"scoped","lifetime":"scoped","primitive":"increment-counter","counter":"scoped"},
+        {"kind":"resolve","token":"transient"},{"kind":"resolve","token":"transient"},
+        {"kind":"resolve","token":"singleton"},{"kind":"resolve","token":"singleton"},
+        {"kind":"resolve","token":"scoped"},{"kind":"forget-scoped"},{"kind":"resolve","token":"scoped"},
+        {"kind":"observe-counter","counter":"transient"},{"kind":"observe-counter","counter":"singleton"},{"kind":"observe-counter","counter":"scoped"}
+      ],
+      "expected": ["transient=2","singleton=1","scoped=2"]
+    },
+    {
+      "id": "resolution-parameters-reset-nested",
+      "note": "Parameters are visible to their direct factory and nested resolution begins with an empty parameter map.",
+      "tokens": [{"id":"outer"},{"id":"inner"}],
+      "operations": [
+        {"kind":"bind","token":"inner","primitive":"read-parameter","parameter":"color"},
+        {"kind":"bind","token":"outer","primitive":"resolve-token","target":"inner"},
+        {"kind":"resolve-with-parameters","token":"outer","parameters":{"color":"blue"},"observe":"nested"},
+        {"kind":"resolve-with-parameters","token":"inner","parameters":{"color":"blue"},"observe":"direct"}
+      ],
+      "expected": ["nested=<nil>","direct=blue"]
+    },
+    {
+      "id": "scalar-value-union",
+      "note": "Shared scalar values preserve JSON null, boolean, number, and string renderings.",
+      "tokens": [{"id":"n"},{"id":"b"},{"id":"s"},{"id":"z"}],
+      "operations": [
+        {"kind":"instance","token":"n","value":42},
+        {"kind":"instance","token":"b","value":true},
+        {"kind":"instance","token":"s","value":"text"},
+        {"kind":"instance","token":"z","value":null},
+        {"kind":"resolve","token":"n","observe":"n"},
+        {"kind":"resolve","token":"b","observe":"b"},
+        {"kind":"resolve","token":"s","observe":"s"},
+        {"kind":"resolve","token":"z","observe":"z"}
+      ],
+      "expected": ["n=42","b=true","s=text","z=<nil>"]
+    },
+    {
+      "id": "aliases-and-contextual-fallback",
+      "note": "Alias chains resolve canonically and contextual lookup falls back to the alias requested by the consumer.",
+      "tokens": [{"id":"consumer"},{"id":"dependency"},{"id":"alias-a"},{"id":"alias-b"}],
+      "operations": [
+        {"kind":"instance","token":"dependency","value":"default"},
+        {"kind":"alias","target":"dependency","alias":"alias-a"},{"kind":"alias","target":"alias-a","alias":"alias-b"},
+        {"kind":"contextual-value","consumer":"consumer","needs":"alias-b","value":"context"},
+        {"kind":"bind","token":"consumer","primitive":"resolve-token","target":"alias-b"},
+        {"kind":"resolve","token":"alias-b","observe":"chain"},{"kind":"resolve","token":"consumer","observe":"context"}
+      ],
+      "expected": ["chain=default","context=context"]
+    },
+    {
+      "id": "alias-cycle",
+      "note": "A cycle in an alias declaration is rejected with the shared alias-cycle identity.",
+      "tokens": [{"id":"a"},{"id":"b"}],
+      "operations": [{"kind":"alias","target":"a","alias":"b"},{"kind":"alias","target":"b","alias":"a"}],
+      "error": "ALIAS_CYCLE"
+    },
+    {
+      "id": "self-alias",
+      "note": "An alias that points to itself has the shared self-alias identity.",
+      "tokens": [{"id":"same"}],
+      "operations": [{"kind":"alias","target":"same","alias":"same"}],
+      "error": "SELF_ALIAS"
+    },
+    {
+      "id": "contextual-factory",
+      "note": "A contextual factory is selected for a consumer dependency without embedding executable source in the fixture.",
+      "tokens": [{"id":"consumer"},{"id":"dependency"}],
+      "operations": [
+        {"kind":"instance","token":"dependency","value":"default"},
+        {"kind":"contextual-factory","consumer":"consumer","needs":"dependency","primitive":"constant","value":"factory"},
+        {"kind":"bind","token":"consumer","primitive":"resolve-token","target":"dependency"},
+        {"kind":"resolve","token":"consumer","observe":"value"}
+      ],
+      "expected": ["value=factory"]
+    },
+    {
+      "id": "contextual-multi-concrete",
+      "note": "A single contextual value installs for every declared concrete consumer.",
+      "tokens": [{"id":"left"},{"id":"right"},{"id":"dependency"}],
+      "operations": [
+        {"kind":"instance","token":"dependency","value":"default"},
+        {"kind":"contextual-value","consumers":["left","right"],"needs":"dependency","value":"shared"},
+        {"kind":"bind","token":"left","primitive":"resolve-token","target":"dependency"},
+        {"kind":"bind","token":"right","primitive":"resolve-token","target":"dependency"},
+        {"kind":"resolve","token":"left","observe":"left"},
+        {"kind":"resolve","token":"right","observe":"right"}
+      ],
+      "expected": ["left=shared","right=shared"]
+    },
+    {
+      "id": "contextual-tagged",
+      "note": "GiveTagged supplies the tagged slice to a consumer dependency.",
+      "tokens": [{"id":"aggregator"},{"id":"reports"},{"id":"one"},{"id":"two"}],
+      "operations": [
+        {"kind":"instance","token":"one","value":"one"},
+        {"kind":"instance","token":"two","value":"two"},
+        {"kind":"tag","tag":"reports","tokens":["one","two"]},
+        {"kind":"contextual-tagged","consumer":"aggregator","needs":"reports","tag":"reports"},
+        {"kind":"bind","token":"aggregator","primitive":"resolve-token","target":"reports"},
+        {"kind":"resolve","token":"aggregator","observe":"reports"}
+      ],
+      "expected": ["reports=one,two"]
+    },
+    {
+      "id": "tags-skip-missing",
+      "note": "Tagged resolution keeps tag registration order and skips entries without bindings.",
+      "tokens": [{"id":"one"},{"id":"missing"},{"id":"two"}],
+      "operations": [
+        {"kind":"instance","token":"one","value":"one"},{"kind":"instance","token":"two","value":"two"},
+        {"kind":"tag","tag":"services","tokens":["one","missing","two"]},{"kind":"tagged","tag":"services","observe":"services"}
+      ],
+      "expected": ["services=one,two"]
+    },
+    {
+      "id": "extenders-cached-value",
+      "note": "Extenders compose in registration order and an extender added after a singleton is cached is applied once to that cache.",
+      "tokens": [{"id":"value"}],
+      "operations": [
+        {"kind":"bind","token":"value","lifetime":"singleton","primitive":"constant","value":"a"},
+        {"kind":"extend","token":"value","primitive":"append-suffix","suffix":"b"},{"kind":"resolve","token":"value"},
+        {"kind":"extend","token":"value","primitive":"append-suffix","suffix":"c"},{"kind":"resolve","token":"value","observe":"value"}
+      ],
+      "expected": ["value=abc"]
+    },
+    {
+      "id": "extend-cached-fires-rebinding",
+      "note": "Extending an already-cached instance applies once, fires rebinding with the extended value, and does not double-extend on the next resolve.",
+      "tokens": [{"id":"name"}],
+      "operations": [
+        {"kind":"instance","token":"name","value":"Taylor"},
+        {"kind":"rebinding","token":"name","event":"name"},
+        {"kind":"extend","token":"name","primitive":"append-suffix","suffix":" Otwell"},
+        {"kind":"resolve","token":"name","observe":"name"},
+        {"kind":"observe-events","observe":"events"}
+      ],
+      "expected": ["name=Taylor Otwell","events=name:Taylor,name:Taylor Otwell"]
+    },
+    {
+      "id": "forget-instance-literal-alias-key",
+      "note": "ForgetInstance deletes only the supplied literal key; forgetting an alias name must not invalidate the canonical target cache.",
+      "tokens": [{"id":"target"},{"id":"alias"}],
+      "operations": [
+        {"kind":"bind","token":"target","lifetime":"singleton","primitive":"increment-counter","counter":"target"},
+        {"kind":"resolve","token":"target"},
+        {"kind":"alias","target":"target","alias":"alias"},
+        {"kind":"forget-instance","token":"alias"},
+        {"kind":"resolve","token":"target"},
+        {"kind":"observe-counter","counter":"target"}
+      ],
+      "expected": ["target=1"]
+    },
+    {
+      "id": "callback-order-and-cache-hit",
+      "note": "Global callbacks run before token callbacks and cache hits run only before-resolution callbacks.",
+      "tokens": [{"id":"value"}],
+      "operations": [
+        {"kind":"bind","token":"value","lifetime":"singleton","primitive":"constant","value":"v"},
+        {"kind":"callback","phase":"before","event":"before-global"},{"kind":"callback","phase":"before","token":"value","event":"before-token"},
+        {"kind":"callback","phase":"resolving","event":"resolving-global"},{"kind":"callback","phase":"resolving","token":"value","event":"resolving-token"},
+        {"kind":"callback","phase":"after","event":"after-global"},{"kind":"callback","phase":"after","token":"value","event":"after-token"},
+        {"kind":"resolve","token":"value"},{"kind":"resolve","token":"value"},{"kind":"observe-events","observe":"events"}
+      ],
+      "expected": ["events=before-global,before-token,resolving-global,resolving-token,after-global,after-token,before-global,before-token"]
+    },
+    {
+      "id": "rebinding-transient-and-singleton",
+      "note": "Rebinding callbacks receive the current value immediately and the replacement for both transient and singleton bindings.",
+      "tokens": [{"id":"transient"},{"id":"singleton"}],
+      "operations": [
+        {"kind":"bind","token":"transient","primitive":"constant","value":"one"},{"kind":"resolve","token":"transient"},{"kind":"rebinding","token":"transient","event":"transient"},{"kind":"bind","token":"transient","primitive":"constant","value":"two"},
+        {"kind":"bind","token":"singleton","lifetime":"singleton","primitive":"constant","value":"one"},{"kind":"resolve","token":"singleton"},{"kind":"rebinding","token":"singleton","event":"singleton"},{"kind":"bind","token":"singleton","lifetime":"singleton","primitive":"constant","value":"two"},
+        {"kind":"observe-events","observe":"events"}
+      ],
+      "expected": ["events=transient:one,transient:two,singleton:one,singleton:two"]
+    },
+    {
+      "id": "method-binding",
+      "note": "Method bindings receive their supplied instance.",
+      "tokens": [],
+      "operations": [
+        {"kind":"method-bind","method":"identity","primitive":"return-instance"},{"kind":"method-call","method":"identity","instance":"called","observe":"method"}
+      ],
+      "expected": ["method=called"]
+    },
+    {
+      "id": "missing-method-binding",
+      "note": "Calling an unbound method has the shared missing-method-binding identity.",
+      "tokens": [],
+      "operations": [{"kind":"method-call","method":"missing","instance":"x"}],
+      "error": "MISSING_METHOD_BINDING"
+    },
+    {
+      "id": "call-wrap-factory-func",
+      "note": "Call, Wrap, and FactoryFunc invoke deterministic primitives without embedding language expressions.",
+      "tokens": [{"id":"service"}],
+      "operations": [
+        {"kind":"instance","token":"service","value":"ready"},
+        {"kind":"call","primitive":"read-parameter","parameter":"name","parameters":{"name":"Ada"},"observe":"call"},
+        {"kind":"wrap","primitive":"constant","value":"wrapped","observe":"wrap"},
+        {"kind":"factory-func","token":"service","observe":"factory"}
+      ],
+      "expected": ["call=Ada","wrap=wrapped","factory=ready"]
+    },
+    {
+      "id": "conditional-bindings",
+      "note": "BindIf, SingletonIf, and ScopedIf keep the first registration and install only when unbound.",
+      "tokens": [{"id":"bound"},{"id":"fresh"},{"id":"scoped"}],
+      "operations": [
+        {"kind":"bind","token":"bound","primitive":"constant","value":"first"},
+        {"kind":"bind-if","token":"bound","primitive":"constant","value":"second"},
+        {"kind":"singleton-if","token":"fresh","primitive":"constant","value":"only"},
+        {"kind":"scoped-if","token":"scoped","primitive":"increment-counter","counter":"scoped"},
+        {"kind":"scoped-if","token":"scoped","primitive":"increment-counter","counter":"ignored"},
+        {"kind":"resolve","token":"bound","observe":"bound"},
+        {"kind":"resolve","token":"fresh","observe":"fresh"},
+        {"kind":"resolve","token":"scoped"},{"kind":"resolve","token":"scoped"},
+        {"kind":"observe-counter","counter":"scoped"}
+      ],
+      "expected": ["bound=first","fresh=only","scoped=1"]
+    },
+    {
+      "id": "introspection-queries",
+      "note": "Bound, Has, Resolved, IsShared, and Bindings report shared introspection state.",
+      "tokens": [{"id":"transient"},{"id":"singleton"},{"id":"scoped"},{"id":"missing"}],
+      "operations": [
+        {"kind":"bind","token":"transient","lifetime":"transient","primitive":"constant","value":"t"},
+        {"kind":"bind","token":"singleton","lifetime":"singleton","primitive":"constant","value":"s"},
+        {"kind":"bind","token":"scoped","lifetime":"scoped","primitive":"constant","value":"c"},
+        {"kind":"resolve","token":"singleton"},
+        {"kind":"observe-bound","token":"transient","observe":"bound-t"},
+        {"kind":"observe-has","token":"transient","observe":"has-t"},
+        {"kind":"observe-bound","token":"missing","observe":"bound-m"},
+        {"kind":"observe-resolved","token":"singleton","observe":"resolved-s"},
+        {"kind":"observe-resolved","token":"transient","observe":"resolved-t"},
+        {"kind":"observe-is-shared","token":"singleton","observe":"shared-s"},
+        {"kind":"observe-is-shared","token":"transient","observe":"shared-t"},
+        {"kind":"observe-is-shared","token":"scoped","observe":"shared-c"},
+        {"kind":"observe-bindings","observe":"bindings"}
+      ],
+      "expected": ["bound-t=true","has-t=true","bound-m=false","resolved-s=true","resolved-t=false","shared-s=true","shared-t=false","shared-c=true","bindings=scoped:scoped,singleton:singleton,transient:transient"]
+    },
+    {
+      "id": "forget-instance-invalidation",
+      "note": "Forgetting a singleton cache forces its deterministic factory to rebuild.",
+      "tokens": [{"id":"counter"}],
+      "operations": [
+        {"kind":"bind","token":"counter","lifetime":"singleton","primitive":"increment-counter","counter":"counter"},{"kind":"resolve","token":"counter"},{"kind":"forget-instance","token":"counter"},{"kind":"resolve","token":"counter"},{"kind":"observe-counter","counter":"counter"}
+      ],
+      "expected": ["counter=2"]
+    },
+    {
+      "id": "flush-invalidation",
+      "note": "Flush removes bindings and cached values, so a subsequent resolution is missing.",
+      "tokens": [{"id":"value"}],
+      "operations": [{"kind":"instance","token":"value","value":"value"},{"kind":"flush"},{"kind":"resolve","token":"value"}],
+      "error": "MISSING_BINDING"
+    },
+    {
+      "id": "flush-clears-aliases",
+      "note": "Flush removes aliases so a former alias resolves as missing.",
+      "tokens": [{"id":"target"},{"id":"alias"}],
+      "operations": [
+        {"kind":"instance","token":"target","value":"target"},
+        {"kind":"alias","target":"target","alias":"alias"},
+        {"kind":"flush"},
+        {"kind":"resolve","token":"alias"}
+      ],
+      "error": "MISSING_BINDING"
+    },
+    {
+      "id": "flush-clears-tags",
+      "note": "Flush clears tag registrations so tagged resolution returns an empty list.",
+      "tokens": [{"id":"one"}],
+      "operations": [
+        {"kind":"instance","token":"one","value":"one"},
+        {"kind":"tag","tag":"services","tokens":["one"]},
+        {"kind":"flush"},
+        {"kind":"tagged","tag":"services","observe":"services"}
+      ],
+      "expected": ["services="]
+    },
+    {
+      "id": "flush-clears-extenders",
+      "note": "Flush clears extenders so a rebound token no longer receives prior suffixes.",
+      "tokens": [{"id":"value"}],
+      "operations": [
+        {"kind":"bind","token":"value","primitive":"constant","value":"a"},
+        {"kind":"extend","token":"value","primitive":"append-suffix","suffix":"b"},
+        {"kind":"flush"},
+        {"kind":"bind","token":"value","primitive":"constant","value":"a"},
+        {"kind":"resolve","token":"value","observe":"value"}
+      ],
+      "expected": ["value=a"]
+    },
+    {
+      "id": "flush-clears-callbacks",
+      "note": "Flush clears lifecycle callbacks so later resolutions emit no prior events.",
+      "tokens": [{"id":"value"}],
+      "operations": [
+        {"kind":"bind","token":"value","primitive":"constant","value":"v"},
+        {"kind":"callback","phase":"before","event":"before"},
+        {"kind":"flush"},
+        {"kind":"bind","token":"value","primitive":"constant","value":"v"},
+        {"kind":"resolve","token":"value"},
+        {"kind":"observe-events","observe":"events"}
+      ],
+      "expected": ["events="]
+    },
+    {
+      "id": "flush-clears-methods",
+      "note": "Flush clears method bindings.",
+      "tokens": [],
+      "operations": [
+        {"kind":"method-bind","method":"identity","primitive":"return-instance"},
+        {"kind":"observe-has-method","method":"identity","observe":"before"},
+        {"kind":"flush"},
+        {"kind":"observe-has-method","method":"identity","observe":"after"}
+      ],
+      "expected": ["before=true","after=false"]
+    },
+    {
+      "id": "flush-clears-resolved",
+      "note": "Flush clears resolved tracking for previously constructed tokens.",
+      "tokens": [{"id":"value"}],
+      "operations": [
+        {"kind":"bind","token":"value","lifetime":"singleton","primitive":"constant","value":"v"},
+        {"kind":"resolve","token":"value"},
+        {"kind":"observe-resolved","token":"value","observe":"before"},
+        {"kind":"flush"},
+        {"kind":"bind","token":"value","lifetime":"singleton","primitive":"constant","value":"v"},
+        {"kind":"observe-resolved","token":"value","observe":"after"}
+      ],
+      "expected": ["before=true","after=false"]
+    },
+    {
+      "id": "missing-binding",
+      "note": "Unbound tokens have the shared missing-binding identity.",
+      "tokens": [{"id":"missing"}],
+      "operations": [{"kind":"resolve","token":"missing"}],
+      "error": "MISSING_BINDING"
+    },
+    {
+      "id": "circular-resolution",
+      "note": "A factory that resolves itself has the shared circular-resolution identity.",
+      "tokens": [{"id":"cycle"}],
+      "operations": [{"kind":"bind","token":"cycle","primitive":"resolve-token","target":"cycle"},{"kind":"resolve","token":"cycle"}],
+      "error": "CIRCULAR_RESOLUTION"
+    },
+    {
+      "id": "indirect-circular-resolution",
+      "note": "An indirect A→B→A factory cycle has the shared circular-resolution identity.",
+      "tokens": [{"id":"a"},{"id":"b"}],
+      "operations": [
+        {"kind":"bind","token":"a","primitive":"resolve-token","target":"b"},
+        {"kind":"bind","token":"b","primitive":"resolve-token","target":"a"},
+        {"kind":"resolve","token":"a"}
+      ],
+      "error": "CIRCULAR_RESOLUTION"
+    },
+    {
+      "id": "provider-order-self-dependency-duplicates",
+      "note": "Provider registration uses Go's stable Kahn queue: A depends on B, B and C retain input order, self dependencies are ignored, and duplicate provider identity is registered once.",
+      "tokens": [{"id":"a"},{"id":"b"},{"id":"c"}],
+      "providers": [
+        {"id":"a","provides":["a"],"dependsOn":["b"],"registerEvent":"A"},
+        {"id":"b","provides":["b"],"dependsOn":["b"],"registerEvent":"B"},
+        {"id":"c","provides":["c"],"registerEvent":"C"}
+      ],
+      "operations": [{"kind":"provider-register-many","providers":["a","b","c","a"]},{"kind":"observe-events","observe":"events"}],
+      "expected": ["events=B,C,A"]
+    },
+    {
+      "id": "provider-cycle",
+      "note": "A provider dependency cycle has the shared provider-cycle identity.",
+      "tokens": [{"id":"a"},{"id":"b"}],
+      "providers": [
+        {"id":"a","provides":["a"],"dependsOn":["b"]},
+        {"id":"b","provides":["b"],"dependsOn":["a"]}
+      ],
+      "operations": [{"kind":"provider-register-many","providers":["a","b"]}],
+      "error": "PROVIDER_CYCLE"
+    },
+    {
+      "id": "provider-introspection",
+      "note": "Providers preserve registration order, HasProvider reports declared abstracts, and ProviderFor returns the first match.",
+      "tokens": [{"id":"shared"},{"id":"only"},{"id":"missing"}],
+      "providers": [
+        {"id":"first","provides":["shared","only"],"registerEvent":"first"},
+        {"id":"second","provides":["shared"],"registerEvent":"second"}
+      ],
+      "operations": [
+        {"kind":"provider-register","provider":"first"},
+        {"kind":"provider-register","provider":"second"},
+        {"kind":"observe-providers","observe":"providers"},
+        {"kind":"observe-has-provider","token":"shared","observe":"has-shared"},
+        {"kind":"observe-has-provider","token":"missing","observe":"has-missing"},
+        {"kind":"observe-provider-for","token":"shared","observe":"for-shared"},
+        {"kind":"observe-provider-for","token":"only","observe":"for-only"},
+        {"kind":"observe-provider-for","token":"missing","observe":"for-missing"},
+        {"kind":"observe-booted","observe":"booted-before"},
+        {"kind":"provider-boot"},
+        {"kind":"observe-booted","observe":"booted-after"}
+      ],
+      "expected": ["providers=first,second","has-shared=true","has-missing=false","for-shared=first","for-only=first","for-missing=<nil>","booted-before=false","booted-after=true"]
+    },
+    {
+      "id": "deferred-make-get-boot-late",
+      "note": "Deferred providers flush through make and get, boot once after resolution, and a late provider registers and boots exactly once.",
+      "tokens": [{"id":"made"},{"id":"got"}],
+      "providers": [
+        {"id":"made-provider","provides":["made"],"deferred":true,"registerValue":{"token":"made","value":"made"},"registerEvent":"register-made","bootEvent":"boot-made"},
+        {"id":"got-provider","provides":["got"],"deferred":true,"registerValue":{"token":"got","value":"got"},"registerEvent":"register-got","bootEvent":"boot-got"},
+        {"id":"late","registerEvent":"register-late","bootEvent":"boot-late"}
+      ],
+      "operations": [{"kind":"provider-register","provider":"made-provider"},{"kind":"provider-register","provider":"got-provider"},{"kind":"provider-boot"},{"kind":"resolve","token":"made","observe":"made"},{"kind":"get","token":"got","observe":"got"},{"kind":"provider-register","provider":"late"},{"kind":"provider-register","provider":"late"},{"kind":"provider-boot"},{"kind":"observe-events","observe":"events"}],
+      "expected": ["made=made","got=got","events=register-made,boot-made,register-got,boot-got,register-late,boot-late"]
+    },
+    {
+      "id": "deferred-reentrancy",
+      "note": "A deferred provider may resolve another deferred abstract during Register without language-specific code.",
+      "tokens": [{"id":"outer"},{"id":"inner"}],
+      "providers": [
+        {"id":"outer","provides":["outer"],"deferred":true,"registerEvent":"outer-reg","registerResolve":"inner","registerValue":{"token":"outer","value":"outer"},"bootEvent":"outer-boot"},
+        {"id":"inner","provides":["inner"],"deferred":true,"registerEvent":"inner-reg","registerValue":{"token":"inner","value":"inner"},"bootEvent":"inner-boot"}
+      ],
+      "operations": [
+        {"kind":"provider-register","provider":"outer"},
+        {"kind":"provider-register","provider":"inner"},
+        {"kind":"provider-boot"},
+        {"kind":"resolve","token":"outer","observe":"outer"},
+        {"kind":"resolve","token":"inner","observe":"inner"},
+        {"kind":"observe-events","observe":"events"}
+      ],
+      "expected": ["outer=outer","inner=inner","events=outer-reg,inner-reg,inner-boot,outer-boot"]
+    },
+    {
+      "id": "instance-overlay-reveals-binding",
+      "note": "An explicit instance overlays a factory cache only; forgetting it reveals the original singleton factory.",
+      "tokens": [{"id":"service"}],
+      "operations": [
+        {"kind":"bind","token":"service","lifetime":"singleton","primitive":"constant","value":"factory"},
+        {"kind":"instance","token":"service","value":"instance"},
+        {"kind":"forget-instance","token":"service"},
+        {"kind":"resolve","token":"service","observe":"service"}
+      ],
+      "expected": ["service=factory"]
+    },
+    {
+      "id": "instance-alias-does-not-overwrite-target",
+      "note": "Instancing an alias removes that alias and leaves its canonical target binding unchanged.",
+      "tokens": [{"id":"target"},{"id":"alias"}],
+      "operations": [
+        {"kind":"bind","token":"target","primitive":"constant","value":"target"},
+        {"kind":"alias","target":"target","alias":"alias"},
+        {"kind":"instance","token":"alias","value":"alias-instance"},
+        {"kind":"resolve","token":"target","observe":"target"},
+        {"kind":"resolve","token":"alias","observe":"alias"}
+      ],
+      "expected": ["target=target","alias=alias-instance"]
+    },
+    {
+      "id": "provider-boot-without-declarations",
+      "note": "Application boots idempotently even when the case declares no providers.",
+      "tokens": [],
+      "operations": [
+        {"kind":"observe-booted","observe":"before"},
+        {"kind":"provider-boot"},
+        {"kind":"observe-booted","observe":"after"},
+        {"kind":"provider-boot"},
+        {"kind":"observe-booted","observe":"again"}
+      ],
+      "expected": ["before=false","after=true","again=true"]
+    }
+  ]
+}

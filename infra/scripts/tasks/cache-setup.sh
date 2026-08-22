@@ -9,6 +9,7 @@ VITE_TEMP_PATHS=(
 	"${NODE_MODULES_PATH}/.vite-temp"
 	"${ALLOY_ROOT_PATH}/infra/node_modules/.vite-temp"
 	"${ALLOY_ROOT_PATH}/sdk/console/node_modules/.vite-temp"
+	"${ALLOY_ROOT_PATH}/sdk/container/node_modules/.vite-temp"
 	"${ALLOY_ROOT_PATH}/sdk/money/node_modules/.vite-temp"
 	"${ALLOY_ROOT_PATH}/sdk/navigator-routes/node_modules/.vite-temp"
 	"${ALLOY_ROOT_PATH}/sdk/tempo/node_modules/.vite-temp"

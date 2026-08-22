@@ -1,0 +1,13 @@
+{
+	"extends": "../../infra/tsconfig/base.json",
+	"compilerOptions": {
+		"tsBuildInfoFile": "../../infra/.cache/tsbuild/container.tsbuildinfo",
+		"types": ["node"],
+		"paths": {
+			"@hara/sdk-container": ["./src/index.ts"],
+			"@hara/sdk-container/*": ["./src/*"],
+			"#container/*": ["./src/*"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"]
+}

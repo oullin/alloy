@@ -5,6 +5,7 @@
     { "path": "./sdk/tempo" },
     { "path": "./sdk/tempo/tests" },
     { "path": "./sdk/console" },
+    { "path": "./sdk/container" },
     { "path": "./sdk/navigator-routes" },
     { "path": "./sdk/money" },
     { "path": "./sdk/workflow" }

@@ -8,6 +8,14 @@ export default defineConfig({
 	resolve: {
 		alias: [
 			{
+				find: '@hara/sdk-container',
+				replacement: repoPath('./sdk/container/src'),
+			},
+			{
+				find: /^#container\/(.+)$/u,
+				replacement: repoPath('./sdk/container/src/$1'),
+			},
+			{
 				find: '@alloy/infra',
 				replacement: repoPath('./infra/src'),
 			},

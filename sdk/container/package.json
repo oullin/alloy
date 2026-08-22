@@ -1,0 +1,26 @@
+{
+	"name": "@hara/sdk-container",
+  "version": "0.4.0",
+	"private": true,
+	"publishConfig": { "access": "restricted", "registry": "https://hara.sh/npm/" },
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"license": "MIT",
+	"repository": { "type": "git", "url": "git+https://github.com/oullin/alloy.git", "directory": "sdk/container" },
+	"sideEffects": false,
+	"files": ["dist"],
+	"exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" } },
+	"imports": { "#container/*": { "types": "./dist/*.d.ts", "default": "./dist/*.js" } },
+	"engines": { "node": ">=22" },
+	"scripts": {
+		"build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && rm -rf dist \"${ALLOY_CACHE_PATH}/tsbuild/container-build.tsbuildinfo\" && tsc -b tsconfig.build.json --force'",
+		"build:package": "rm -rf dist && tsc -p tsconfig.package.json",
+		"prepare": "pnpm build:package",
+		"prepack": "pnpm build",
+		"test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && if [ \"${1:-}\" = \"--\" ]; then shift; fi && vp test run \"$@\" tests' --",
+		"typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
+	},
+	"devDependencies": { "@types/node": "^26.2.0", "typescript": "^7.0.2" }
+}

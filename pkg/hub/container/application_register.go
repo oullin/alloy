@@ -78,7 +78,7 @@ func (a *Application) RegisterMany(providers []provider.ServiceProvider) {
 	sorted, err := provsort.Sort(providers)
 
 	if err != nil {
-		panic(fmt.Sprintf("container: RegisterMany: %v", err))
+		panic(fmt.Errorf("%w: %v", ErrProviderCycle, err))
 	}
 
 	for _, p := range sorted {
