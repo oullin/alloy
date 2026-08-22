@@ -21,6 +21,8 @@ guarantees, and the policy for what earns a twin.
 - `sdk/tempo/tests`: TypeScript Tempo acceptance tests.
 - `sdk/money`: TypeScript Money package.
 - `sdk/console`: TypeScript terminal UI helpers.
+- `sdk/container`: TypeScript service container and application lifecycle.
+- `sdk/httpx`: TypeScript HTTP router, Fetch adapters, middleware, and request/response foundation.
 - `web/docs`: VuePress documentation site package.
 - `web/inertia-demo`: Inertia demo app, Go API, and browser E2E suite.
 - `web/storage`: local runtime and cache data for web demos.

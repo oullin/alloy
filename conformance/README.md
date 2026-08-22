@@ -1,9 +1,10 @@
 # Cross-runtime conformance fixtures
 
-This directory is the **single source of cross-runtime truth** for the money and
-tempo twins. `pkg/hub/money` (Go) and `@hara/sdk-money` (TS), and
-`pkg/hub/tempo` (Go) and `@hara/sdk-tempo` (TS), are behavioral mirrors. The
-JSON files here encode language-neutral golden vectors that **both** runtimes
+This directory is the **single source of cross-runtime truth** for the money,
+tempo, and synchronous container twins. `pkg/hub/money` (Go) and
+`@hara/sdk-money` (TS), `pkg/hub/tempo` (Go) and `@hara/sdk-tempo` (TS), and
+`pkg/hub/container` (Go) and `@hara/sdk-container` (TS) are behavioral mirrors.
+The JSON files here encode language-neutral golden vectors that **both** runtimes
 execute, so any divergence fails CI instead of surfacing as a production
 discrepancy between backend and frontend. This is the guard that raises the twins
 from parity level **L1 (asserted)** to **L2 (enforced)** — see
@@ -11,10 +12,11 @@ from parity level **L1 (asserted)** to **L2 (enforced)** — see
 
 ## Files
 
-| Fixture      | Go loader                                 | TS loader                                 |
-| ------------ | ----------------------------------------- | ----------------------------------------- |
-| `money.json` | `pkg/hub/money/money/conformance_test.go` | `sdk/money/tests/src/conformance.test.ts` |
-| `tempo.json` | `pkg/hub/tempo/conformance_test.go`       | `sdk/tempo/tests/src/conformance.test.ts` |
+| Fixture          | Go loader                                 | TS loader                                 |
+| ---------------- | ----------------------------------------- | ----------------------------------------- |
+| `money.json`     | `pkg/hub/money/money/conformance_test.go` | `sdk/money/tests/src/conformance.test.ts` |
+| `tempo.json`     | `pkg/hub/tempo/conformance_test.go`       | `sdk/tempo/tests/src/conformance.test.ts` |
+| `container.json` | `pkg/hub/container/conformance_test.go`   | `sdk/container/tests/conformance.test.ts` |
 
 Both loaders read the JSON here by a path relative to their own source file, so
 the fixtures live outside every package and neither runtime owns them.
@@ -48,16 +50,16 @@ text.
   exception: each takes a whole JSON payload as its single arg, decoded by each
   runtime's money unmarshaller (Go `json.Unmarshal` into `Value` / TS
   `MoneyJson.unmarshal`).
-  - `unmarshalAmount` expects the resulting minor-unit amount as a decimal
-    string. It pins that both runtimes accept a **quoted** amount as readily as
-    a bare one, which matters because Go types the field as `json.Number` and TS
-    `toJSON()` emits the quoted form so an int64 survives a JavaScript
-    consumer's `JSON.parse`.
-  - `unmarshalCurrency` expects the resulting ISO code. It pins the **default
-    currency**, which is shared state neither runtime can change alone: an
-    absent or empty `currency` falls back to the provider default (Go
-    `currency.DefaultProvider` / TS `DefaultCurrencyProvider`, both **SGD**),
-    while an unknown code is an error rather than a silent fallback.
+    - `unmarshalAmount` expects the resulting minor-unit amount as a decimal
+      string. It pins that both runtimes accept a **quoted** amount as readily as
+      a bare one, which matters because Go types the field as `json.Number` and TS
+      `toJSON()` emits the quoted form so an int64 survives a JavaScript
+      consumer's `JSON.parse`.
+    - `unmarshalCurrency` expects the resulting ISO code. It pins the **default
+      currency**, which is shared state neither runtime can change alone: an
+      absent or empty `currency` falls back to the provider default (Go
+      `currency.DefaultProvider` / TS `DefaultCurrencyProvider`, both **SGD**),
+      while an unknown code is an error rather than a silent fallback.
 
 - `displayCompact` takes a currency code and a minor-unit amount, and expects
   the abbreviated display string. It pins the scale choice, the half-away
@@ -72,13 +74,14 @@ text.
   that an unknown code is rejected rather than adopted. The default is per
   manager, so nothing leaks between cases.
 
-  For `createFromFloat` and
-  `convertWithRate`, float-valued args (a major-unit amount, a rate) are decimal
-  strings parsed to IEEE-754 doubles identically in both runtimes. For `avg`,
-  the first arg is the currency code and the rest are minor-unit amounts; the
-  loaders build currency-carrying values (Go `Manager.Create` /
-  TS `MoneyManager.create`) and run them through the aggregator
-  (Go `Aggregator.Avg` / TS `MoneyAggregator.avg`).
+    For `createFromFloat` and
+    `convertWithRate`, float-valued args (a major-unit amount, a rate) are decimal
+    strings parsed to IEEE-754 doubles identically in both runtimes. For `avg`,
+    the first arg is the currency code and the rest are minor-unit amounts; the
+    loaders build currency-carrying values (Go `Manager.Create` /
+    TS `MoneyManager.create`) and run them through the aggregator
+    (Go `Aggregator.Avg` / TS `MoneyAggregator.avg`).
+
 - Exactly one of `expected` (decimal-string result) or `error` (error identity)
   is present.
 
@@ -101,6 +104,73 @@ runtime (Go `Engine.SafeAdd`/`SafeSubtract`/`SafeMultiply`; TS
 - `input` / `pattern` / `timeZone`: inputs for `parseFromPattern`.
 - `render`: how the result is stringified — `iso` (UTC ISO-8601 with
   milliseconds), `date` (`YYYY-MM-DD`). Diff ops render their integer directly.
+
+### `container.json`
+
+```json
+{
+	"schemaVersion": 1,
+	"cases": [
+		{
+			"id": "lifetimes-and-scoped-reset",
+			"note": "...",
+			"tokens": [{ "id": "service" }],
+			"operations": [
+				{ "kind": "bind", "token": "service", "lifetime": "singleton", "primitive": "constant", "value": "v" },
+				{ "kind": "resolve", "token": "service", "observe": "value" }
+			],
+			"expected": ["value=v"]
+		}
+	]
+}
+```
+
+- This is a restricted declarative DSL, not a scenario-name selector. Every
+  case declares its tokens, optional providers, ordered operations, and ordered
+  observations. `tokens[].kind` is optional runtime metadata; `string` is the
+  only currently shared enforceable kind.
+- Operations cover bind/`bind-if`/`singleton-if`/`scoped-if`, instance, resolve,
+  resolve-with-parameters, get, forget-scoped/instance, flush, alias, contextual
+  value/factory/tagged bindings (including multi-concrete `consumers`),
+  tag/tagged, extend, callbacks, rebinding, method bind/call, call/wrap/
+  factory-func, provider register/register-many/boot, and introspection
+  observations (`bound`/`has`/`resolved`/`isShared`/`bindings`, providers/
+  hasProvider/providerFor/booted, counters/events). Observations compare in
+  execution order.
+- Factories, method callables, and extenders select a documented finite
+  primitive registry: `constant`, `increment-counter`, `resolve-token`,
+  `read-parameter`, `append-suffix`, and `return-instance`. Shared values use
+  the JSON scalar union `string | number | boolean | null` with matching
+  renderings (`null` → `<nil>`). JSON never embeds language expressions,
+  constructors, or executable source.
+- Exactly one of `expected` (ordered observations) or `error` is present.
+  Conformance error identities map to the Go sentinel and the TypeScript typed
+  error code respectively: `ALIAS_CYCLE` → `ErrAliasCycle` / `AliasCycleError`,
+  `SELF_ALIAS` → `ErrSelfAlias` / `SelfAliasError`, `MISSING_BINDING` →
+  `ErrNotBound` / `MissingBindingError`, `MISSING_METHOD_BINDING` →
+  `ErrMethodNotBound` / `MissingMethodBindingError`, `CIRCULAR_RESOLUTION` →
+  `ErrCircularDependency` / `CircularResolutionError`, and `PROVIDER_CYCLE` →
+  `ErrProviderCycle` / `ProviderCycleError`. Consumers must compare these
+  stable identities (`ContainerError.code` in TypeScript), never error message
+  text.
+- Both loaders validate the version, IDs, note, required `tokens`/`operations`
+  arrays, lifetime (`transient`/`singleton`/`scoped` or absent), providers/
+  primitives, operation fields and references, error identity, and
+  expected/error exclusivity before executing a case. Contextual operations
+  reject ambiguous value/factory and consumer/consumers declarations.
+
+The shared vectors cover the synchronous common core: transient/singleton and
+Go-style scoped-cache reset; parameter reset; scalar values; aliases including
+self-alias and cycles; contextual resolution including multi-concrete and
+GiveTagged; tag ordering; extenders; lifecycle and rebinding callbacks; method
+bindings; Call/Wrap/FactoryFunc; conditional bindings; introspection queries;
+missing/circular/method/provider-cycle errors; flush reset of aliases, tags,
+extenders, callbacks, methods, and resolved state; provider ordering,
+deduplication, introspection (including ProviderFor first-match), deferred
+make/get, deferred register reentrancy, and boot idempotency. TypeScript
+`childScope`, async resolution/hooks, promise singleflight, raw
+`App.Make` bypass of deferred providers, and GiveConfig (typed config token +
+getter in TS vs magic `"config"` string in Go) are intentional exclusions.
 
 ## Adding a case
 
@@ -143,3 +213,20 @@ here, until resolved in both runtimes at once.
   enforced in neither, documented differently. It is an unresolved L0 divergence
   (parity register X13); no conformance case exists until it is defined and
   implemented in both runtimes together.
+- **Container asynchronous APIs.** `@hara/sdk-container` adds `makeAsync`,
+  async hooks, and promise singleflight. Go is the synchronous parity source
+  and has no equivalent API, so async behavior stays in TypeScript tests rather
+  than `container.json`.
+- **Container child scopes.** `@hara/sdk-container` adds `childScope()` with
+  isolated scoped values. The shared `scoped` vector instead pins the Go common
+  behavior: `ForgetScopedInstances()` clears the scoped cache in the same
+  container. Child scopes remain a documented TypeScript-only extension.
+- **Container raw App deferred bypass.** Go `Application` embeds `*App`, so
+  callers can invoke `App.Make` and skip deferred provider flush. TypeScript
+  `Application` overrides `make`/`get` with no public raw-container escape
+  hatch, so that boundary is not encoded as a shared vector.
+- **Container GiveConfig.** Go resolves a magic `"config"` abstract with a
+  `Get(key, fallback...)` duck type. TypeScript requires an explicit typed
+  config token plus getter (`giveConfig(config, getter, fallback?)`) because
+  token identity is structural/branded rather than a shared string key. No
+  language-neutral GiveConfig vector exists until that boundary converges.

@@ -17,6 +17,8 @@ const sdkRoot = resolve(repoRoot, 'sdk');
 
 export const workspaceAliases = (): Record<string, string> => ({
 	'@alloy/infra': resolve(infraRoot, 'src'),
+	'@hara/sdk-container': resolve(sdkRoot, 'container', 'src'),
+	'@hara/sdk-httpx': resolve(sdkRoot, 'httpx', 'src'),
 	'@hara/sdk-tempo': resolve(sdkRoot, 'tempo', 'src'),
 	'@hara/sdk-tempo-tests': resolve(sdkRoot, 'tempo', 'tests', 'src'),
 	'@hara/sdk-money': resolve(sdkRoot, 'money', 'src'),

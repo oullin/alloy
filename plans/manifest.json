@@ -1,0 +1,91 @@
+{
+	"schemaVersion": 1,
+	"nextNumber": 3,
+	"plans": [
+		{
+			"id": "001-typescript-container-parity",
+			"number": 1,
+			"title": "Ship the TypeScript container and application lifecycle at synchronous Go parity",
+			"path": "plans/active/001-typescript-container-parity.md",
+			"status": "COMPLETE",
+			"dependsOn": [],
+			"worktree": "/Users/gocanto/.codex/worktrees/codex/alloy-typescript-container",
+			"branch": "chore/alloy-typescript-container",
+			"routing": {
+				"profile": [
+					{
+						"model": "gpt-5.6-sol",
+						"level": "high",
+						"ratio": 20
+					},
+					{
+						"model": "gpt-5.6-terra",
+						"level": "high",
+						"ratio": 60
+					},
+					{
+						"model": "claude-opus-5",
+						"level": "high",
+						"ratio": 20
+					},
+					{
+						"model": "cursor-grok-4.5-high",
+						"level": "high",
+						"ratio": 20
+					}
+				],
+				"effective": [
+					{
+						"model": "gpt-5.6-sol",
+						"level": "high",
+						"percentage": 20
+					},
+					{
+						"model": "gpt-5.6-terra",
+						"level": "high",
+						"percentage": 60
+					},
+					{
+						"model": "cursor-grok-4.5-high",
+						"level": "high",
+						"percentage": 20
+					}
+				],
+				"assignment": {
+					"model": "gpt-5.6-terra",
+					"level": "high",
+					"harness": "codex"
+				}
+			}
+		},
+		{
+			"id": "002-typescript-http-stack",
+			"number": 2,
+			"title": "Port the Go HTTP stack (router, foundation, middleware, Fetch adapter) to TypeScript",
+			"path": "plans/active/002-typescript-http-stack.md",
+			"status": "COMPLETE",
+			"worktree": "/Users/gocanto/.claude/worktrees/plan-002-typescript-http-stack",
+			"branch": "chore/plan-002-typescript-http-stack",
+			"dependsOn": ["001-typescript-container-parity"],
+			"routing": {
+				"profile": [
+					{
+						"model": "gpt-5.6-sol",
+						"level": "high",
+						"ratio": 20
+					},
+					{
+						"model": "gpt-5.6-terra",
+						"level": "high",
+						"ratio": 60
+					},
+					{
+						"model": "claude-opus-5",
+						"level": "high",
+						"ratio": 20
+					}
+				]
+			}
+		}
+	]
+}
