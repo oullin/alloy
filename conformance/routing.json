@@ -1,0 +1,126 @@
+{
+	"schemaVersion": 1,
+	"cases": [
+		{
+			"id": "compile-static-path",
+			"note": "Static route path compiles without variables",
+			"type": "compile",
+			"route": {
+				"path": "/api/v1/health"
+			},
+			"expected": {
+				"staticPrefix": "/api/v1/health",
+				"variables": []
+			}
+		},
+		{
+			"id": "compile-single-variable",
+			"note": "Path with a single dynamic segment captures variable",
+			"type": "compile",
+			"route": {
+				"path": "/users/{id}"
+			},
+			"expected": {
+				"staticPrefix": "/users",
+				"variables": ["id"]
+			}
+		},
+		{
+			"id": "compile-multi-variable-and-host",
+			"note": "Path with multiple segments and host pattern captures variables in order",
+			"type": "compile",
+			"route": {
+				"path": "/orgs/{org}/repos/{repo}",
+				"host": "{subdomain}.alloy.sh"
+			},
+			"expected": {
+				"staticPrefix": "/orgs",
+				"variables": ["subdomain", "org", "repo"]
+			}
+		},
+		{
+			"id": "match-exact-route",
+			"note": "Matches registered GET route by exact path",
+			"type": "match",
+			"routes": [
+				{ "method": "GET", "path": "/hello", "name": "hello.get" },
+				{ "method": "POST", "path": "/hello", "name": "hello.post" }
+			],
+			"request": {
+				"method": "GET",
+				"path": "/hello"
+			},
+			"expected": {
+				"name": "hello.get",
+				"params": {}
+			}
+		},
+		{
+			"id": "match-dynamic-parameters",
+			"note": "Matches dynamic route and extracts path parameters",
+			"type": "match",
+			"routes": [
+				{ "method": "GET", "path": "/users/{id}/comments/{comment}", "name": "users.comments.show" }
+			],
+			"request": {
+				"method": "GET",
+				"path": "/users/99/comments/123"
+			},
+			"expected": {
+				"name": "users.comments.show",
+				"params": {
+					"id": "99",
+					"comment": "123"
+				}
+			}
+		},
+		{
+			"id": "match-method-not-allowed",
+			"note": "Returns METHOD_NOT_ALLOWED when path exists under other verbs",
+			"type": "match",
+			"routes": [
+				{ "method": "GET", "path": "/products", "name": "products.index" },
+				{ "method": "POST", "path": "/products", "name": "products.store" }
+			],
+			"request": {
+				"method": "DELETE",
+				"path": "/products"
+			},
+			"error": {
+				"code": "METHOD_NOT_ALLOWED",
+				"allowed": ["GET", "HEAD", "POST"]
+			}
+		},
+		{
+			"id": "match-route-not-found",
+			"note": "Returns ROUTE_NOT_FOUND when path does not exist under any verb",
+			"type": "match",
+			"routes": [
+				{ "method": "GET", "path": "/existing", "name": "existing" }
+			],
+			"request": {
+				"method": "GET",
+				"path": "/missing"
+			},
+			"error": {
+				"code": "ROUTE_NOT_FOUND"
+			}
+		},
+		{
+			"id": "generate-named-url-with-params",
+			"note": "Generates relative URL substituting parameters and appending remaining as query",
+			"type": "generate",
+			"route": {
+				"name": "posts.show",
+				"path": "/posts/{slug}"
+			},
+			"params": {
+				"slug": "announcing-alloy",
+				"tab": "comments"
+			},
+			"expected": {
+				"url": "/posts/announcing-alloy?tab=comments"
+			}
+		}
+	]
+}

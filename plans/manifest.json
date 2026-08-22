@@ -7,7 +7,7 @@
 			"number": 1,
 			"title": "Ship the TypeScript container and application lifecycle at synchronous Go parity",
 			"path": "plans/active/001-typescript-container-parity.md",
-			"status": "IN PROGRESS",
+			"status": "COMPLETE",
 			"dependsOn": [],
 			"worktree": "/Users/gocanto/.codex/worktrees/codex/alloy-typescript-container",
 			"branch": "chore/alloy-typescript-container",
@@ -63,7 +63,9 @@
 			"number": 2,
 			"title": "Port the Go HTTP stack (router, foundation, middleware, Fetch adapter) to TypeScript",
 			"path": "plans/active/002-typescript-http-stack.md",
-			"status": "PENDING",
+			"status": "COMPLETE",
+			"worktree": "/Users/gocanto/.claude/worktrees/plan-002-typescript-http-stack",
+			"branch": "chore/plan-002-typescript-http-stack",
 			"dependsOn": ["001-typescript-container-parity"],
 			"routing": {
 				"profile": [

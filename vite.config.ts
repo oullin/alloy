@@ -16,6 +16,14 @@ export default defineConfig({
 				replacement: repoPath('./sdk/container/src/$1'),
 			},
 			{
+				find: '@hara/sdk-httpx',
+				replacement: repoPath('./sdk/httpx/src'),
+			},
+			{
+				find: /^#httpx\/(.+)$/u,
+				replacement: repoPath('./sdk/httpx/src/$1'),
+			},
+			{
 				find: '@alloy/infra',
 				replacement: repoPath('./infra/src'),
 			},

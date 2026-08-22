@@ -4,6 +4,7 @@ packages:
   - "web/inertia-demo/tests/e2e"
   - "sdk/console"
   - "sdk/container"
+  - "sdk/httpx"
   - "sdk/money"
   - "sdk/tempo"
   - "sdk/tempo/tests"

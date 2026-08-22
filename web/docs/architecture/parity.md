@@ -43,7 +43,7 @@ modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 | `events`                        |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `filesystem`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `hashing`                       |       ✅       |                —                | **Go-only**     | n/a                                                                      |
-| `httpx`                         |       ✅       |                —                | **Go-only**     | n/a                                                                      |
+| `httpx`                         |       ✅       |      ✅ `@hara/sdk-httpx`       | **Both (twin)** | **L2** routing fixture, **L1** request/response wrappers                 |
 | `inertia`                       |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `queue` (+ `queue/drivers/sqs`) |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `seo`                           |       ✅       |                —                | **Go-only**     | n/a                                                                      |
@@ -51,7 +51,7 @@ modules (`auth/passkeys`, `queue/drivers/sqs`) are listed under their parents.
 | `str`                           |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 | `validation`                    |       ✅       |                —                | **Go-only**     | n/a                                                                      |
 
-**Summary:** 4 twins (`money`, `tempo`, `workflow`, `container`), 19 Go-only
+**Summary:** 5 twins (`money`, `tempo`, `workflow`, `container`, `httpx`), 18 Go-only
 packages (plus 2 nested Go modules), and 2 TS-only packages. The declarative
 operations and observations in `conformance/container.json` are mechanically
 enforced at L2 for the synchronous common core (lifetimes, parameters, aliases,

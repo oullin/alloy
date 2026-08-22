@@ -1,0 +1,72 @@
+{
+	"name": "@hara/sdk-httpx",
+	"version": "0.4.0",
+	"private": true,
+	"publishConfig": {
+		"access": "restricted",
+		"registry": "https://hara.sh/npm/"
+	},
+	"type": "module",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oullin/alloy.git",
+		"directory": "sdk/httpx"
+	},
+	"sideEffects": false,
+	"files": ["dist"],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./routing": {
+			"types": "./dist/routing/index.d.ts",
+			"import": "./dist/routing/index.js",
+			"default": "./dist/routing/index.js"
+		},
+		"./foundation": {
+			"types": "./dist/foundation/index.d.ts",
+			"import": "./dist/foundation/index.js",
+			"default": "./dist/foundation/index.js"
+		},
+		"./middleware": {
+			"types": "./dist/middleware/index.d.ts",
+			"import": "./dist/middleware/index.js",
+			"default": "./dist/middleware/index.js"
+		},
+		"./handler": {
+			"types": "./dist/handler/index.d.ts",
+			"import": "./dist/handler/index.js",
+			"default": "./dist/handler/index.js"
+		}
+	},
+	"imports": {
+		"#httpx/*": {
+			"types": "./dist/*.d.ts",
+			"default": "./dist/*.js"
+		}
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {
+		"build": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && rm -rf dist \"${ALLOY_CACHE_PATH}/tsbuild/httpx-build.tsbuildinfo\" && tsc -b tsconfig.build.json --force'",
+		"build:package": "rm -rf dist && tsc -p tsconfig.package.json",
+		"prepare": "pnpm build:package",
+		"prepack": "pnpm build",
+		"test": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && vp test run tests'",
+		"typecheck": "bash -lc 'source ../../infra/scripts/tasks/cache-env.sh && tsc -p tsconfig.json --noEmit'"
+	},
+	"dependencies": {
+		"@hara/sdk-container": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/node": "^26.2.0",
+		"typescript": "^7.0.2"
+	}
+}
